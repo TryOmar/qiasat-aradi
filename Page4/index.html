@@ -27,6 +27,11 @@
       padding: 0px 10px !important;
       border: none !important;
     }
+
+
+    ::placeholder {
+      opacity: 0.2;
+    }
   </style>
 </head>
 
@@ -53,12 +58,14 @@
           </tr>
           <tr>
             <td></td>
-            <td class="width1_result"><input type="number" id="input-shares" placeholder="مثال 9.5"
-                oninput="calculateValues()"></td>
-            <td class="width1_result"><input type="number" id="input-carat" placeholder="مثال 2"
-                oninput="calculateValues()"></td>
-            <td class="width1_result"><input type="number" id="input-acre" placeholder="مثال 6"
-                oninput="calculateValues()"></td>
+            <td class="width1_result"><input type="number" id="input-shares" placeholder="6.25"
+                oninput="calculateValues()">
+            </td>
+            <td class="width1_result"><input type="number" id="input-carat" placeholder="12"
+                oninput="calculateValues()">
+            </td>
+            <td class="width1_result"><input type="number" id="input-acre" placeholder="1" oninput="calculateValues()">
+            </td>
           </tr>
         </table>
       </div>
@@ -79,7 +86,7 @@
           </tr>
           <tr>
             <td></td>
-            <td class="width1_result"><input type="number" id="shares-subtract-each-carat" placeholder="مثال 6"
+            <td class="width1_result"><input type="number" id="shares-subtract-each-carat" placeholder="17"
                 oninput="calculateValues()"></td>
             </td>
 
@@ -139,11 +146,11 @@
           </tr>
           <tr>
             <td></td>
-            <td class="width1_result"><input type="number" id="input-shares-sold" placeholder="مثال 17.5"
+            <td class="width1_result"><input type="number" id="input-shares-sold" placeholder="6.25"
                 oninput="calculateValues()"></td>
-            <td class="width1_result"><input type="number" id="input-carat-sold" placeholder="مثال 5"
+            <td class="width1_result"><input type="number" id="input-carat-sold" placeholder="12"
                 oninput="calculateValues()"></td>
-            <td class="width1_result"><input type="number" id="input-acre-sold" placeholder="مثال 23"
+            <td class="width1_result"><input type="number" id="input-acre-sold" placeholder="1"
                 oninput="calculateValues()"></td>
           </tr>
         </table>
