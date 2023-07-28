@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../nav.css">
+    <style>
+        /* ... Your CSS styles ... */
+        * {
+            padding: 0px;
+            margin: 5px;
+            box-sizing: border-box;
+        }
+
+        .greenHeader {
+            width: 80%;
+            font-size: 14px;
+            font-size: 14px;
+            background-color: #17A20f;
+            color: white;
+            width: 100%;
+            text-align: center;
+            font-weight: normal;
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+
+        /* h3 {
+            font-size: 14px;
+            background-color: #17a201;
+            color: white;
+            width: 100%;
+            text-align: center;
+            font-weight: normal;
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold;
+        } */
+
+        div {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-evenly;
+            width: 100%;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .buttons2 {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .buttons2 button {
+            line-height: 30px;
+            width: 70px;
+            border-radius: 10px;
+            outline: none;
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .buttons2 button:first-child {
+            margin-left: 10px;
+        }
+
+        .but1 {
+            background-color: rgb(149, 11, 63);
+        }
+
+        .but2 {
+            background-color: #DF8714;
+            margin-right: 200px;
+        }
+
+        table {
+            width: 50%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 5px;
+            /* Adjust the padding as needed */
+            text-align: center;
+        }
+
+        input {
+            text-align: center;
+        }
+
+        label {
+            font-size: 27px;
+        }
+    </style>
+</head>
+
+<body>
+    <div></div>
+    <div>
+        <h2>تحويل من متر طولي الى قصبة طولي</h2>
+    </div>
+    <h3 class="greenHeader">ادخل العرض الذي تريد تحويله</h3>
+    <div>
+        <div>
+            <!-- Updated input fields to receive the centimeters -->
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <label for="input_meters">متر</label>
+                <input type="number" id="input_meters" oninput="convertToCentimeters(this.value)"
+                    style="width: 200px; margin-bottom: 10px;">
+                <label for="input_centimeters">سنتيمتر</label>
+                <input type="number" id="input_centimeters" oninput="convertToMeters(this.value)" style="width: 200px;">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="buttons2">
+        <!-- Updated buttons to trigger the reverse calculation -->
+        <button class="but2" onclick="calculateCMToFistReed()">أحسب</button>
+        <button class="but1" onclick="clearInputFields()">أحذف</button>
+    </div>
+    <h3 class="greenHeader">الناتج بالقبضة والقصبة</h3>
+    <div style="margin-bottom: 200px;">
+        <table>
+            <tr>
+                <th>قصبة</th>
+                <th>قبضة</th>
+                <th>اقل من قبضة</th>
+            </tr>
+            <tr>
+                <td id="resultReed">Result</td>
+                <td id="resultFist">Result</td>
+                <td id="resultLessThanFist">Result</td>
+            </tr>
+        </table>
+    </div>
+
+
+    <script>
+        // Function to convert meters to centimeters
+        function convertToCentimeters(metersValue) {
+            const meters = parseFloat(metersValue) || 0;
+            const centimeters = meters * 100;
+            document.getElementById("input_centimeters").value = centimeters.toFixed(2);
+            calculateCMToFistReed();
+        }
+
+        // Function to convert centimeters to meters
+        function convertToMeters(centimetersValue) {
+            const centimeters = parseFloat(centimetersValue) || 0;
+            const meters = centimeters / 100;
+            document.getElementById("input_meters").value = meters.toFixed(2);
+            calculateCMToFistReed();
+        }
+
+
+        function decimalToApproximateFraction(decimal) {
+            // Function to find the greatest common divisor (GCD) of two numbers
+            function gcd(a, b) {
+                if (b === 0) return a;
+                return gcd(b, a % b);
+            }
+
+            // Convert the decimal part to a fraction
+            let numerator = Math.round(decimal * 100);
+            let denominator = 100;
+            const commonDivisor = gcd(numerator, denominator);
+
+            // Simplify the fraction
+            numerator /= commonDivisor;
+            denominator /= commonDivisor;
+
+            return `${numerator}/${denominator}`;
+        }
+
+
+
+        // Function to convert centimeters to fist, reed, and less than fist
+        function calculateCMToFistReed() {
+            const centimetersInput = document.getElementById("input_centimeters") || 0;
+            const metersInput = document.getElementById("input_meters") || 0;
+
+            // (centimetersInput ? convertToMeters(centimetersInput.value) : convertToMeters(metersInput.value));
+
+            const resultDivReed = document.getElementById("resultReed");
+            const resultDivFist = document.getElementById("resultFist");
+            const resultDivLessThanFist = document.getElementById("resultLessThanFist");
+
+            const centimeters = parseFloat(centimetersInput.value) || 0;
+
+            if (!isNaN(centimeters)) {
+                // Reverse calculation to get the values of input_reed, input_fist, and input_lessThanFist
+                const reed = Math.floor(centimeters / 355);
+                const remainingCentimetersAfterReed = centimeters % 355;
+                const fist = Math.floor(remainingCentimetersAfterReed / 14.7916666667);
+                const remainingInFist = (remainingCentimetersAfterReed % 14.7916666667);
+                const remainingInFistConverted = (remainingInFist * (1 / 14.7916666667)).toFixed(2);
+
+                // Update the resultDivs with the calculated values
+                resultDivReed.innerText = reed.toFixed(0);
+                resultDivFist.innerText = fist.toFixed(0);
+                resultDivLessThanFist.innerText = remainingInFistConverted + " قبضة \n= " + decimalToApproximateFraction(remainingInFistConverted);
+            } else {
+                // Handle invalid input
+                resultDivReed.innerText = "Result";
+                resultDivFist.innerText = "Result";
+                resultDivLessThanFist.innerText = "Result";
+            }
+        }
+
+        // Function to clear all input fields and result fields
+        function clearInputFields() {
+            document.getElementById("input_meters").value = "";
+            document.getElementById("input_centimeters").value = "";
+            document.getElementById("resultReed").innerText = "Result";
+            document.getElementById("resultFist").innerText = "Result";
+            document.getElementById("resultLessThanFist").innerText = "Result";
+        }
+    </script>
+    <div class="nav" dir="rtl">
+      <a href="help2/index.html" class="nav-box">
+        <img src="../../imgs/nav1.png" alt="nav1" />
+        <p>كسور</p>
+      </a>
+      <a class="nav-box" onclick="history.back()">
+        <img src="../../imgs/nav2.png" alt="nav1" />
+        <p>رجوع</p>
+      </a>
+      <a href="help/index.html" class="nav-box">
+        <img src="../../imgs/nav3.png" alt="nav1" />
+        <p>مساعدة</p>
+      </a>
+      <a href="../../index.html" class="nav-box">
+        <img src="../../imgs/nav4.png" alt="nav1" />
+        <p>الرئسية</p>
+      </a>
+    </div>
+    <script src="../../nav.js"></script>
+</body>
+
+</html>

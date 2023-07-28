@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #page_title {
+      font-weight: bold;
+      color: maroon;
+    }
+
+    #body {
+      width: 80%;
+    }
+
+    #div_landEnters {
+      width: 100%;
+      background-color: green;
+    }
+
+    #p_landtitle {
+      color: white;
+      font-weight: bold;
+    }
+
+    #tbl_landEnters {
+      width: 70%;
+    }
+
+    #txt_carat {
+      width: 70%;
+      font-weight: bold;
+    }
+
+    #txt_share {
+      width: 70%;
+      font-weight: bold;
+    }
+
+    #txt_acre {
+      width: 70%;
+      font-weight: bold;
+
+    }
+
+    #tbl_landEnters tr {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    #tbl_landEnters td {
+      display: flex;
+      justify-content: center;
+    }
+
+
+    #btn_Calculate {
+      background-color: darkgoldenrod;
+      color: white;
+      float: left;
+      /* margin-left: 90px; */
+      width: 15%;
+      border-style: none;
+    }
+
+    #btn_Delete {
+      background-color: maroon;
+      color: white;
+      float: right;
+      /* margin-right: 90px; */
+      width: 15%;
+      border-style: none;
+    }
+
+    #txt_numwives {
+
+      width: 30%;
+      text-align: center;
+    }
+
+    #txt_numFemales {
+
+      width: 30%;
+      text-align: center;
+    }
+
+    #txt_numMales {
+
+      width: 30%;
+      text-align: center;
+    }
+
+    #div_Results {
+      width: 100%;
+      background-color: green;
+      text-align: center;
+    }
+
+    #p_Resultstitle {
+      color: white;
+      font-weight: bold;
+    }
+
+    #tbl_Results td,
+    #tbl_Results th {
+      border: 1px solid #ddd;
+      padding: 9px;
+    }
+
+    #tbl_Results th {
+      padding-top: 3px;
+      padding-bottom: 3px;
+      text-align: center;
+      background-color: rgb(0, 0, 0);
+      color: white;
+    }
+
+    /* .tableFooterTotal td,
+  .tableFooterTotal input {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: rgb(0, 0, 0);
+    color: white;
+  } */
+
+    input[type="input"] {
+      text-align: center;
+    }
+
+    input[type="number"] {
+      text-align: center;
+    }
+
+    ::placeholder {
+      opacity: 0.2;
+      /* Change this value to your desired opacity (0.0 to 1.0) */
+    }
+  </style>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+</head>
+
+<body>
+
+  <center>
+    <h1 id="page_title">تقسيم مراث اراضى زراعية
+    </h1>
+  </center>
+  <!-- ---------------------------------------------------------- -->
+  <!-- ---------------------------------------------------------- -->
+  <center>
+    <div id="body">
+      <div id="div_landEnters">
+        <p id="p_landtitle"> ادخل عدد القراريط التى تريد تقسيمها
+        </p>
+      </div>
+      <table id="tbl_landEnters">
+        <tr>
+          <td>
+            <label>فدان</label>
+          </td>
+          <td>
+            <label>قيراط</label>
+          </td>
+          <td>
+            <label> سهم</label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="number" id="txt_acre" step="1" placeholder="2" oninput="calculateShares()">
+          </td>
+          <td>
+            <input type="number" id="txt_carat" step="1" placeholder="12" oninput="calculateShares()">
+          </td>
+          <td>
+            <input type="number" id="txt_share" placeholder="23.75" oninput="calculateShares()">
+          </td>
+        </tr>
+      </table>
+      <!-- ---------------------------------------------------------- -->
+      <br>
+      <div>
+
+        <span>
+          <input type="button" id="btn_Calculate" name="احسب" value="احسب" onclick="calculateShares()">
+        </span>
+        <span>
+          <input type="button" id="btn_Delete" name="حذف" value="حذف" onclick="clearInputFields()">
+        </span>
+
+
+      </div>
+      <br>
+      <div id="div_Totalshare">
+        <p id="p_Totalshare" style="background-color:green;color:white;font-weight:bold">اجمالى عدد الاسهم
+        </p>
+        <input type="input" id="txt_TotalAllshare" placeholder="23.75" readonly>
+      </div>
+
+      <div>
+        <p style="font-weight:bold;float:right"> هذه المسالة لرجل متوفى لديه ابناء او بنات او زوجات و اى مسألة اخرى
+          يمكنك
+          الرجوع الى برنامج اخر</p>
+      </div>
+
+      <br><br><br>
+      <div style="float:right">
+        <input type="number" id="txt_numwives" step="1" placeholder="1" oninput="calculateShares()" min="0">
+        <label style="font-weight:bold;float: right;">ادخل عدد الزوجات</label>
+        <br><br>
+        <input type="number" id="txt_numFemales" step="1" placeholder="2" oninput="calculateShares()" min="0"
+          style="margin-right: 15px;">
+        <label style="font-weight:bold;float: right;">ادخل عدد البنات</label>
+        <br><br>
+        <input type="number" id="txt_numMales" step="1" placeholder="1" oninput="calculateShares()" min="0"
+          style="margin-right: 15px;">
+        <label style="font-weight:bold;float: right;">ادخل عدد الذكور</label>
+      </div>
+      <br><br><br><br><br><br>
+      <br><br>
+      <div id="div_Results">
+        <p id="p_Resultstitle" style="margin-top: 30px;"> جدول توزيع الميراث علي الورثة
+        </p>
+      </div>
+
+      <br>
+
+      <table id="tbl_Results">
+
+        <tr>
+          <th>
+            <label>النسبة</label>
+          </th>
+          <th>
+            <label>فدان</label>
+          </th>
+          <th>
+            <label>قيراط</label>
+          </th>
+          <th>
+            <label>سهم</label>
+          </th>
+          <th>
+            <label>القرابة</label>
+          </th>
+        </tr>
+        <tr class="wife">
+          <td>
+            <center>
+              <input type="input" id="txt_PercentWives" style="width:100%" placeholder="0%" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Wivesacre" style="width:100%" placeholder="0" min="0" max="4" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Wivescarat" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Wivesshare" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <label style="font-weight:bold"> نصيب الزوجات</label>
+            </center>
+          </td>
+        </tr>
+
+        <tr class="females">
+          <td>
+            <center>
+              <input type="input" id="txt_FemalesPercent" style="width:100%" placeholder="0%" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Femalesacre" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Femalescarat" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Femalesshare" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <label style="font-weight:bold"> البنت الواحدة<label>
+            </center>
+          </td>
+        </tr>
+
+        <tr class="sons">
+          <td>
+            <center>
+              <input type="input" id="txt_malePercent" style="width:100%" placeholder="0%" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_malesacre" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_malescarat" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_malesshare" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <label style="font-weight:bold"> الأبن الواحد<label>
+            </center>
+          </td>
+        </tr>
+
+        <tr class="tableFooterTotal">
+          <td>
+            <center>
+              <input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+          <td>
+            <center>
+              <input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly>
+            </center>
+          </td>
+
+          <td>
+            <center>
+              <label style="font-weight:bold"> الاجمالى <label>
+            </center>
+          </td>
+        </tr>
+
+      </table>
+
+      <p id="leftSharesMessage" style="text-align: center; direction: rtl; font-size: 20px;"></p>
+      <br>
+      <br>
+
+
+
+  </center>
+
+
+
+
+  </div>
+  <div class="nav" dir="rtl">
+    <a href="help2/index.html" class="nav-box">
+      <img src="../imgs/nav1.png" alt="nav1" />
+      <p>كسور</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../imgs/nav2.png" alt="nav1" />
+      <p>رجوع</p>
+    </a>
+    <a href="help/index.html" class="nav-box">
+      <img src="../imgs/nav3.png" alt="nav1" />
+      <p>مساعدة</p>
+    </a>
+    <a href="../index.html" class="nav-box">
+      <img src="../imgs/nav4.png" alt="nav1" />
+      <p>الرئسية</p>
+    </a>
+  </div>
+  </div>
+  <script src="../nav.js"></script>
+  <script>
+    function clearInputFields() {
+      // Refresh the page
+      location.reload();
+    }
+
+
+    function calculateScaresAndCarats(totalShares) {
+      // Calculate the number of scares, carats, and remaining shares
+      const scares = Math.floor(totalShares / (24 * 24));
+      const carats = Math.floor((totalShares - scares * 24 * 24) / 24);
+      const shares = (totalShares - scares * 24 * 24 - carats * 24).toFixed(2);
+      // Return an array containing the results
+      return [scares, carats, shares];
+    }
+
+    function calculatePercentage(part, total) {
+      const percentage = (part / total) * 100;
+      return percentage.toFixed(2);
+    }
+
+
+    function updateTables(numWivesValue = 0, numFemalesValue = 0, numMalesValue = 0, isSharesLeft = false) {
+      let tableHead = `
+      <tr>
+        <th>
+          <label>النسبة</label>
+        </th>
+        <th>
+          <label>فدان</label>
+        </th>
+        <th>
+          <label>قيراط</label>
+        </th>
+        <th>
+          <label>سهم</label>
+        </th>
+        <th>
+          <label>القرابة</label>
+        </th>
+      </tr>
+    `;
+
+
+      let tableWives = "";
+      for (let i = 0; i < numWivesValue; i++) {
+        tableWives = tableWives.concat(`
+      <tr class="wife">
+        <td>
+          <center>
+            <input type="input" id="txt_PercentWives${i}" style="width:100%" placeholder="0%" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Wivesacre${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Wivescarat${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Wivesshare${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <label style="font-weight:bold"> الزوجة ${i + 1} </label>
+          </center>
+        </td>
+      </tr>
+      `);
+      }
+
+
+      let tableFemale = "";
+      for (let i = 0; i < numFemalesValue; i++) {
+        tableFemale = tableFemale.concat(`
+    <tr class="females">
+        <td>
+          <center>
+            <input type="input" id="txt_FemalesPercent${i}" style="width:100%" placeholder="0%" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Femalesacre${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Femalescarat${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Femalesshare${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <label style="font-weight:bold"> البنت ${i + 1}<label>
+          </center>
+        </td>
+      </tr>
+      `);
+      }
+
+
+      let tableMale = "";
+      for (let i = 0; i < numMalesValue; i++) {
+        tableMale = tableMale.concat(`
+      <tr class="sons">
+        <td>
+          <center>
+            <input type="input" id="txt_malePercent${i}" style="width:100%" placeholder="0%" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_malesacre${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_malescarat${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_malesshare${i}" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <label style="font-weight:bold"> الأبن ${i + 1}<label>
+          </center>
+        </td>
+      </tr>
+      `);
+      }
+
+      let tableLeft = "";
+      if (isSharesLeft) {
+        tableLeft = `
+      <tr>
+        <td>
+          <center>
+            <input type="input" id="txt_leftPercent" style="width:100%" placeholder="0%" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_leftacre" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_leftscarat" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_leftshare" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+
+        <td>
+          <center>
+            <label style="font-weight:bold"> المتبقي <label>
+          </center>
+        </td>
+      </tr>
+
+      `
+
+      }
+
+      let tableFoot = `
+      <tr class = "tableFooterTotal">
+        <td>
+          <center>
+            <input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly> 
+          </center>
+        </td>
+        <td>
+          <center>
+            <input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly>
+          </center>
+        </td>
+
+        <td>
+          <center>
+            <label style="font-weight:bold"> الاجمالى <label>
+          </center>
+        </td>
+      </tr>
+
+    `;
+
+
+      document.getElementById("tbl_Results").innerHTML = tableHead + tableWives + tableFemale + tableMale + tableLeft + tableFoot;
+      // calculateShares();
+    }
+
+
+    function IntegerWithoutDecimal(inputElement) {
+      let numValue = Number(inputElement.value);
+
+      if (inputElement.value == '' || isNaN(numValue) || !isFinite(numValue)) {
+        return 0;
+      } else {
+        inputElement.value = Math.floor(numValue);
+        return +inputElement.value;
+      }
+    }
+
+    function ZeroToFourValidate(inputElement) {
+      let numValue = Number(inputElement.value);
+
+      if (numValue < 0) {
+        inputElement.value = 0;
+      } else if (numValue > 4) {
+        inputElement.value = 4;
+      }
+      return inputElement.value;
+    }
+
+    function calculateShares() {
+      // Get input values
+      let acreValue = IntegerWithoutDecimal(document.getElementById("txt_acre"));
+      let caratValue = IntegerWithoutDecimal(document.getElementById("txt_carat"));
+      let shareValue = parseFloat(document.getElementById("txt_share").value) || 0;
+      let numWivesValue = ZeroToFourValidate(document.getElementById("txt_numwives")) || 0;
+      let numFemalesValue = IntegerWithoutDecimal(document.getElementById("txt_numFemales"));
+      let numMalesValue = IntegerWithoutDecimal(document.getElementById("txt_numMales"));
+
+
+      // Perform the operations
+      // Perform the operations
+      let totalAllShares = acreValue * 24 * 24 + caratValue * 24 + shareValue;
+
+      let nasebZwga = 0;
+      if (numWivesValue == 0) {
+        nasebZwga = 0;
+      } else if (numFemalesValue + numMalesValue == 0) {
+        nasebZwga = 0.25 * totalAllShares;
+      } else if (numFemalesValue + numMalesValue > 0) {
+        nasebZwga = 0.125 * totalAllShares;
+      }
+
+      let nasebBnat = 0;
+      if (numFemalesValue == 0) {
+        nasebBnat = 0;
+      } else if (numMalesValue) {
+        nasebBnat = (totalAllShares - nasebZwga) / (2.0 * numMalesValue + numFemalesValue);
+        // console.log("HI0: ", nasebBnat);
+      } else if (numFemalesValue == 1) {
+        nasebBnat = 0.5 * (totalAllShares - nasebZwga);
+        // console.log("HI: ", nasebBnat);
+      } else if (numFemalesValue > 1) {
+        nasebBnat = 2.0 * (totalAllShares - nasebZwga) / 3.0;
+        nasebBnat = nasebBnat / numFemalesValue;
+        // console.log("HI2: ", nasebBnat);
+      }
+
+      let nasebAbn = 0;
+      if (numMalesValue == 0) {
+        nasebAbn = 0;
+      } else if (numFemalesValue) {
+        nasebAbn = 2 * nasebBnat;
+      } else if (numMalesValue) {
+        nasebAbn = (totalAllShares - nasebZwga) / numMalesValue;
+      }
+
+      if (numWivesValue != 0) {
+        nasebZwga = nasebZwga / numWivesValue;
+      }
+
+
+      // Print the values of each variable for debugging
+      // console.log("acreValue:", acreValue);
+      // console.log("caratValue:", caratValue);
+      // console.log("shareValue:", shareValue);
+      // console.log("numWivesValue:", numWivesValue);
+      // console.log("numFemalesValue:", numFemalesValue);
+      // console.log("numMalesValue:", numMalesValue);
+
+      // console.log("totalAllShares:", totalAllShares);
+      // console.log("nasebZwga:", nasebZwga);
+      // console.log("nasebBnat:", nasebBnat);
+      // console.log("nasebAbn:", nasebAbn);
+
+
+      const familyShares = numWivesValue * nasebZwga + numFemalesValue * nasebBnat + numMalesValue * nasebAbn;
+      // console.log("nasebAbn:", nasebAbn);
+
+      // console.log("----------------------------------------------");
+      let totalSharesleft = totalAllShares - familyShares;
+      isSharesLeft = (totalSharesleft > 0 ? true : false);
+
+      updateTables(numWivesValue, numFemalesValue, numMalesValue, isSharesLeft);
+
+      // Calculate the values using the helper function
+      const [wivesAcre, wivesCarat, wivesShare] = calculateScaresAndCarats(nasebZwga);
+      const percentWives = calculatePercentage(nasebZwga, totalAllShares);
+
+      const [femalesAcre, femalesCarat, femalesShare] = calculateScaresAndCarats(nasebBnat);
+      const femalesPercent = calculatePercentage(nasebBnat, totalAllShares);
+
+      const [malesAcre, malesCarat, malesShare] = calculateScaresAndCarats(nasebAbn);
+      const malePercent = calculatePercentage(nasebAbn, totalAllShares);
+
+      const [sharesLeftAcre, sharesLeftCarat, sharesLeftShare] = calculateScaresAndCarats(totalSharesleft);
+      const sharesLeftPercent = calculatePercentage(totalSharesleft, totalAllShares); // 100% of the total is itself
+
+      const [totalAcre, totalCarat, totalShare] = calculateScaresAndCarats(totalAllShares);
+      const totalPercentVal = calculatePercentage(totalAllShares, totalAllShares); // 100% of the total is itself
+
+      // Write the values back into the input boxes
+      document.getElementById("txt_TotalAllshare").value = totalAllShares;
+
+      for (let i = 0; i < numWivesValue; i++) {
+        document.getElementById(`txt_Wivesacre${i}`).value = wivesAcre;
+        document.getElementById(`txt_Wivescarat${i}`).value = wivesCarat;
+        document.getElementById(`txt_Wivesshare${i}`).value = wivesShare;
+        document.getElementById(`txt_PercentWives${i}`).value = percentWives + "%";
+      }
+
+      for (let i = 0; i < numFemalesValue; i++) {
+        document.getElementById(`txt_Femalesacre${i}`).value = femalesAcre;
+        document.getElementById(`txt_Femalescarat${i}`).value = femalesCarat;
+        document.getElementById(`txt_Femalesshare${i}`).value = femalesShare;
+        document.getElementById(`txt_FemalesPercent${i}`).value = femalesPercent + "%";
+      }
+
+      for (let i = 0; i < numMalesValue; i++) {
+        document.getElementById(`txt_malesacre${i}`).value = malesAcre;
+        document.getElementById(`txt_malescarat${i}`).value = malesCarat;
+        document.getElementById(`txt_malesshare${i}`).value = malesShare;
+        document.getElementById(`txt_malePercent${i}`).value = malePercent + "%";
+      }
+
+      if (isSharesLeft) {
+        document.getElementById("txt_leftacre").value = sharesLeftAcre;
+        document.getElementById("txt_leftscarat").value = sharesLeftCarat;
+        document.getElementById("txt_leftshare").value = sharesLeftShare;
+        document.getElementById("txt_leftPercent").value = sharesLeftPercent + "%";
+        document.getElementById("leftSharesMessage").innerHTML = ` ملاحظة : فى حالة عدم و جود
+      ابن للمتوفى فبعد
+      توريث الزوجة أو البنت,<br> فالمتبقى من المراث الاراضي يذهب للفروع الوارثة 
+      `
+      }
+      else {
+
+        document.getElementById("leftSharesMessage").innerHTML = "";
+      }
+
+
+      document.getElementById("txt_Totalsacre").value = totalAcre;
+      document.getElementById("txt_Totalcarat").value = totalCarat;
+      document.getElementById("txt_Totalshare").value = totalShare;
+      document.getElementById("txt_TotalPercentVal").value = totalPercentVal + "%";
+    }
+
+  </script>
+
+</body>
+
+</html>

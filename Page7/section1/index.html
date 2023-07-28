@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../nav.css">
+    <style>
+        * {
+            padding: 0px;
+            margin: 5px;
+            box-sizing: border-box;
+        }
+
+        .greenHeader {
+            width: 80%;
+            font-size: 14px;
+            font-size: 14px;
+            background-color: #17A20f;
+            color: white;
+            width: 100%;
+            text-align: center;
+            font-weight: normal;
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        } 
+
+        /* h3 {
+            font-size: 14px;
+            background-color: #17a201;
+            color: white;
+            width: 100%;
+            text-align: center;
+            font-weight: normal;
+            display: block;
+            font-size: 1.17em;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold;
+        } */
+
+        div {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-evenly;
+            width: 100%;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .buttons2 {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .buttons2 button {
+            line-height: 30px;
+            width: 70px;
+            border-radius: 10px;
+            outline: none;
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .buttons2 button:first-child {
+            margin-left: 10px;
+        }
+
+        .but1 {
+            background-color: rgb(149, 11, 63);
+        }
+
+        .but2 {
+            background-color: #DF8714;
+            margin-right: 200px;
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+    <div></div>
+    <div>
+        <h2>تحويل من قصبة طولي إلى متر طولي</h2>
+    </div>
+    <h3 class="greenHeader">ادخل العرض الذي تريد تحويله</h3>
+    <div>
+        <div>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>قصبة</th>
+                        <th>قبضة</th>
+                        <th>أقل من القبضة</th>
+                    </tr>
+                    <tr>
+                        <td><input type="number" id="input_reed" oninput="calculateFistReedToCM()" style="width: 70px;"></td>   
+                        <td><input type="number" id="input_fist" oninput="calculateFistReedToCM()" style="width: 70px;"></td>
+                        <td><input type="number" id="input_lessThanFist" oninput="calculateFistReedToCM()" style="width: 70px;"></td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="buttons2">
+        <button class="but2" onclick="calculateFistReedToCM()">أحسب</button>
+        <button class="but1" onclick="clearFistReed()">أحذف</button>
+    </div>
+    <h3 class="greenHeader">الناتج بالمتر الطولي</h3>
+    <div id="resultInMeter">Result</div>
+    <h3 class="greenHeader">الناتج بالسنتيمتر الطولي</h3>
+    <div id="resultInCM" style="margin-bottom:200px;">Result</div>
+
+    <script>
+        function IntegerWithoutDecimal(inputElement) {
+            let numValue = Number(inputElement.value);
+
+            if (inputElement.value == '' || isNaN(numValue) || !isFinite(numValue)) {
+                return 0;
+            } else {
+                inputElement.value = Math.floor(numValue);
+                return +inputElement.value;
+            }
+        }
+        function calculateFistReedToCM() {
+            const reedInput = document.getElementById("input_reed");
+            const fistInput = document.getElementById("input_fist");
+            const lessThanFistInput = document.getElementById("input_lessThanFist");
+            const resultDivMeter = document.getElementById("resultInMeter");
+            const resultDivCM = document.getElementById("resultInCM");
+
+            const reed = IntegerWithoutDecimal(reedInput) || 0;
+            const fist = IntegerWithoutDecimal(fistInput) || 0;
+            const lessThanFist = parseFloat(lessThanFistInput.value) || 0;
+
+            if (!isNaN(reed) && !isNaN(fist) && !isNaN(lessThanFist)) {
+                const centimeters = 14.7916666667 * lessThanFist + 14.7916666667 * fist + 355 * reed;
+                const meters = centimeters / 100; // Convert to meters
+
+                resultDivMeter.innerText = meters.toFixed(2) + " م";
+                resultDivCM.innerText = centimeters.toFixed(7) + " سم";
+            } else {
+                resultDivMeter.innerText = "يرجى إدخال أرقام صالحة.";
+                resultDivCM.innerText = "يرجى إدخال أرقام صالحة.";
+            }
+        }
+
+        function clearFistReed() {
+            const reedInput = document.getElementById("input_reed");
+            const fistInput = document.getElementById("input_fist");
+            const lessThanFistInput = document.getElementById("input_lessThanFist");
+            const resultDivMeter = document.getElementById("resultInMeter");
+            const resultDivCM = document.getElementById("resultInCM");
+
+            reedInput.value = "";
+            fistInput.value = "";
+            lessThanFistInput.value = "";
+            resultDivMeter.innerText = "Result";
+            resultDivCM.innerText = "Result";
+        }
+    </script>
+    <div class="nav" dir="rtl">
+      <a href="help2/index.html" class="nav-box">
+        <img src="../../imgs/nav1.png" alt="nav1" />
+        <p>كسور</p>
+      </a>
+      <a class="nav-box" onclick="history.back()">
+        <img src="../../imgs/nav2.png" alt="nav1" />
+        <p>رجوع</p>
+      </a>
+      <a href="help/index.html" class="nav-box">
+        <img src="../../imgs/nav3.png" alt="nav1" />
+        <p>مساعدة</p>
+      </a>
+      <a href="../../index.html" class="nav-box">
+        <img src="../../imgs/nav4.png" alt="nav1" />
+        <p>الرئسية</p>
+      </a>
+    </div>
+    <script src="../../nav.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="widp=device-widp, initial-scale=1.0" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Home</title>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
+      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap" rel="stylesheet" /> -->
+</head>
+
+<body>
+
+  <div class="con">
+    <div class="dec1"></div>
+    <div class="title">
+      <h1>فصل الحد بين المزارعين</h1>
+      <img src="../imgs/1.png" alt="">
+    </div>
+
+    <div class="s s1">
+      <h3>ادخل عدد القراريط الذي تريد توزيعها</h3>
+      <div class="inputs">
+        <div class="share input-div">
+          <label for="share-input">سهم</label>
+          <input dir="auto" type="number" id="share-input">
+        </div>
+        <div class="carat input-div">
+          <label for="carat-input">قيراط</label>
+          <input dir="auto" type="number" id="carat-input">
+        </div>
+        <div class="acre input-div">
+          <label for="acre-input">فدان</label>
+          <input dir="auto" type="number" id="acre-input">
+        </div>
+      </div>
+      <div class="buttons2">
+        <button class="but1" id="delete-btn">أحذف</button>
+        <button class="but2" id="calc-btn">أحسب</button>
+
+      </div>
+    </div>
+
+    <div class="s s2">
+      <h3>ادخل اجمالي عرض المساحة المذكورة بالمتر</h3>
+      <input dir="auto" type="number" id="cm">
+    </div>
+
+    <div class="s s3">
+      <h3>ادخل نصيب كل فرد من الاراضي و العرض القديم</h3>
+      <div class="table">
+        <div class="table-header">
+          <p>سهم</p>
+          <p>قيراط</p>
+          <p>عرض المساحة</p>
+          <p>العرض القديم</p>
+          <p>الفرق بالمتر</p>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input">
+          <input dir="auto" type="number">
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="number">
+          <input dir="auto" type="text" readonly>
+        </div>
+        <div class="table-input" id="total">
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="text" readonly>
+          <input dir="auto" type="text" readonly>
+        </div>
+      </div>
+      <div class="results">
+        <div class="result-right">
+          <p>المتبقي من عدد القراريط</p>
+          <div class="residual">
+            <div>
+              <p>سهم</p>
+              <span class="result-shares" dir="ltr">0</span>
+            </div>
+            <div>
+              <p>قيراط</p>
+              <span class="result-carat" dir="ltr">0</span>
+            </div>
+            <div>
+              <p>فدان</p>
+              <span class="result-acre" dir="ltr">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-left">
+          <p>نصيب القيراط الواحد بالمتر</p>
+          <span class="each-carat">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>عرض المساحة و نصيب القيراط بالقبضة</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>اقل من القبضة</th>
+            <th>قبضة</th>
+            <th>قصبة</th>
+          </tr>
+          <tr class="width-old">
+            <td>عرض المساحة المذكورة</td>
+            <td dir="auto" contenteditable="true">0</td>
+            <td dir="auto" contenteditable="true">0</td>
+            <td dir="auto" contenteditable="true">0</td>
+          </tr>
+          <tr class="each-old">
+            <td>نصيب القيراط الواحد</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a href="help2/index.html" class="nav-box">
+        <img src="../imgs/nav1.png" alt="nav1" />
+        <p>كسور</p>
+      </a>
+      <a class="nav-box" onclick="history.back()">
+        <img src="../imgs/nav2.png" alt="nav1" />
+        <p>رجوع</p>
+      </a>
+      <a href="help/index.html" class="nav-box">
+        <img src="../imgs/nav3.png" alt="nav1" />
+        <p>مساعدة</p>
+      </a>
+      <a href="../index.html" class="nav-box">
+        <img src="../imgs/nav4.png" alt="nav1" />
+        <p>الرئسية</p>
+      </a>
+    </div>
+  </div>
+  <script src="../nav.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

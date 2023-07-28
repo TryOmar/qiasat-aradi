@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- <link rel="stylesheet" href="../style.css" /> -->
+  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <title>Home</title>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
+      rel="stylesheet"
+    /> -->
+
+  <style>
+    .width1_result {
+      font-size: 20px !important;
+      padding: 0px 10px !important;
+      border: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dec1"></div>
+  <div class="con">
+
+
+
+    <div class="header-con">
+      <h1 class="header1">نزع وطرح الاراضى</h1>
+    </div>
+
+
+    <div class="s s1">
+      <h3>ادخل عدد القراريط</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result"><input type="number" id="input-shares" placeholder="مثال 9.5"
+                oninput="calculateValues()"></td>
+            <td class="width1_result"><input type="number" id="input-carat" placeholder="مثال 2"
+                oninput="calculateValues()"></td>
+            <td class="width1_result"><input type="number" id="input-acre" placeholder="مثال 6"
+                oninput="calculateValues()"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="buttons2">
+      <button class="but1" onclick="clearAll()">احذف</button>
+      <button class="but2" onclick="calculateValues()">إحسب</button>
+    </div>
+
+    <div class="s s2">
+      <h3>ادخل العدد الذى تريد نزعه او طرحه من كل قيراط </h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result"><input type="number" id="shares-subtract-each-carat" placeholder="مثال 6"
+                oninput="calculateValues()"></td>
+            </td>
+
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="s s3">
+      <h3>اجمالى عدد الأسهم والقراريط المنزوعة</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result" id="subtracted-shares">0</td>
+            <td class="width1_result" id="subtracted-carat">0</td>
+            <td class="width1_result" id="subtracted-acre">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>الصافى بعد النزع والطرح من كل قيراط</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result" id="shares-after-subtract">0</td>
+            <td class="width1_result" id="carat-after-subtract">0</td>
+            <td class="width1_result" id="acre-after-subtract">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="s s5">
+      <h3>ادخل الارض المباعة من الصافي </h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result"><input type="number" id="input-shares-sold" placeholder="مثال 17.5"
+                oninput="calculateValues()"></td>
+            <td class="width1_result"><input type="number" id="input-carat-sold" placeholder="مثال 5"
+                oninput="calculateValues()"></td>
+            <td class="width1_result"><input type="number" id="input-acre-sold" placeholder="مثال 23"
+                oninput="calculateValues()"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="s s6 last-element">
+      <h3>الفرق بين صافي الارض والمباع</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="width1_result" id="shares-sold-minus-after-subtract" dir="ltr">0</td>
+            <td class="width1_result" id="carat-sold-minus-after-subtract" dir="ltr">0</td>
+            <td class="width1_result" id="acre-sold-minus-after-subtract" dir="ltr">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+  <div class="nav">
+    <a href="help2/index.html" class="nav-box">
+      <img src="../imgs/nav1.png" alt="nav1" />
+      <p>كسور</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../imgs/nav2.png" alt="nav1" />
+      <p>رجوع</p>
+    </a>
+    <!-- <a href="help/index.html" class="nav-box">
+        <img src="../imgs/Group_306-removebg-preview.png" alt="nav1" />
+        <p>لقطة شاشة</p>
+      </a> -->
+    <a href="help/index.html" class="nav-box">
+      <img src="../imgs/nav3.png" alt="nav1" />
+      <p>مساعدة</p>
+    </a>
+    <a href="../index.html" class="nav-box">
+      <img src="../imgs/nav4.png" alt="nav1" />
+      <p>الرئسية</p>
+    </a>
+  </div>
+
+  <script>
+
+
+
+    function convertSharesToThree(shares) {
+      // Check if the input value is negative
+      let isNegative = shares < 0;
+      if (isNegative) {
+        // Convert shares to positive for calculation
+        shares = Math.abs(shares);
+      }
+
+      let acre = Math.floor(shares / (24 * 24));
+      shares -= acre * 24 * 24;
+
+      let carat = Math.floor(shares / 24);
+      shares -= carat * 24;
+
+      // Convert acre, carat, and shares back to negative if the original input was negative
+      if (isNegative) {
+        acre = -acre;
+        carat = -carat;
+        shares = -shares;
+      }
+
+      return [acre, carat, shares.toFixed(2)];
+    }
+
+
+    function calculateValues() {
+      // Get input values or set to 0 if empty
+      let sharesInput = parseFloat(document.getElementById("input-shares").value) || 0;
+      let caratInput = parseFloat(document.getElementById("input-carat").value) || 0;
+      let acreInput = parseFloat(document.getElementById("input-acre").value) || 0;
+      let totalShares = sharesInput + caratInput * 24 + acreInput * 24 * 24;
+      console.log("totalShares:", totalShares);
+
+      let inputSharesSold = parseFloat(document.getElementById("input-shares-sold").value) || 0;
+      let inputCaratsSold = parseFloat(document.getElementById("input-carat-sold").value) || 0;
+      let inputAcresSold = parseFloat(document.getElementById("input-acre-sold").value) || 0;
+      let totalSharesSold = inputSharesSold + inputCaratsSold * 24 + inputAcresSold * 24 * 24;
+      console.log("totalSharesSold:", totalSharesSold);
+
+      // Convert input shares to total shares
+
+      // Calculate total shares of subtract
+      let sharesToSubtract = parseFloat(document.getElementById("shares-subtract-each-carat").value) || 0;
+      let totalSharesOfSubtract = sharesToSubtract * (totalShares / 24);
+      console.log("totalSharesOfSubtract:", totalSharesOfSubtract);
+
+      let totalShareAfterSubtract = totalShares - totalSharesOfSubtract;
+      console.log("totalShareAfterSubtract:", totalShareAfterSubtract);
+
+      // Get elements by their IDs
+      let [acre, carat, shares] = convertSharesToThree(totalSharesOfSubtract);
+      document.getElementById("subtracted-acre").textContent = acre;
+      document.getElementById("subtracted-shares").textContent = shares;
+      document.getElementById("subtracted-carat").textContent = carat;
+
+      [acre, carat, shares] = convertSharesToThree(totalShareAfterSubtract);
+      document.getElementById("acre-after-subtract").textContent = acre;
+      document.getElementById("shares-after-subtract").textContent = shares;
+      document.getElementById("carat-after-subtract").textContent = carat;
+
+      let sharesSoldMinusSharesAfter = totalSharesSold - totalShareAfterSubtract;
+      console.log("sharesSoldMinusSharesAfter:", sharesSoldMinusSharesAfter);
+
+      // Save the IDs in variables
+      const acreSoldMinusAfterSubtractElement = document.getElementById("acre-sold-minus-after-subtract");
+      const sharesSoldMinusAfterSubtractElement = document.getElementById("shares-sold-minus-after-subtract");
+      const caratSoldMinusAfterSubtractElement = document.getElementById("carat-sold-minus-after-subtract");
+
+      [acre, carat, shares] = convertSharesToThree(sharesSoldMinusSharesAfter);
+      acreSoldMinusAfterSubtractElement.textContent = acre;
+      sharesSoldMinusAfterSubtractElement.textContent = shares;
+      caratSoldMinusAfterSubtractElement.textContent = carat;
+
+      // Use ternary operator to set the color based on the value being negative or positive
+      acreSoldMinusAfterSubtractElement.style.color = acreSoldMinusAfterSubtractElement.textContent < 0 ? "red" : "black";
+      sharesSoldMinusAfterSubtractElement.style.color = sharesSoldMinusAfterSubtractElement.textContent < 0 ? "red" : "black";
+      caratSoldMinusAfterSubtractElement.style.color = caratSoldMinusAfterSubtractElement.textContent < 0 ? "red" : "black";
+
+    }
+
+
+    function clearAll() {
+      // Store the IDs of input and output fields
+      const inputFieldIDs = [
+        "input-shares",
+        "input-carat",
+        "input-acre",
+        "input-shares-sold",
+        "input-carat-sold",
+        "input-acre-sold",
+        "shares-subtract-each-carat"
+      ];
+
+      const outputFieldIDs = [
+        "subtracted-acre",
+        "subtracted-shares",
+        "subtracted-carat",
+        "acre-after-subtract",
+        "shares-after-subtract",
+        "carat-after-subtract",
+        "acre-sold-minus-after-subtract",
+        "shares-sold-minus-after-subtract",
+        "carat-sold-minus-after-subtract"
+      ];
+      // Clear input fields
+      inputFieldIDs.forEach((id) => {
+        document.getElementById(id).value = "";
+      });
+
+      // Clear output fields
+      outputFieldIDs.forEach((id) => {
+        document.getElementById(id).textContent = "0";
+      });
+    }
+
+  </script>
+
+</body>
+
+</html>

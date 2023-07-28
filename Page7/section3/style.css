@@ -1,0 +1,422 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.title{
+    
+    display: flex;
+    
+}
+.title img{
+    width: 45px;
+}
+.title h1{
+    font-size: 23px;
+    margin-left: 15px;
+    margin-right: 20px;
+}
+body{
+    margin:0px;
+    height: auto;
+   
+}
+
+.dec1{
+    background-color: green; 
+    width: 100%;
+    height: 60px;
+ 
+}
+.header1{
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    color:black;
+    text-align: center;
+}
+
+
+
+.s{
+    width: 256px;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-top: 5px;
+    text-align: center;
+}
+.s h3{
+    font-size: 14px;
+    background-color: green;
+    color: white;
+    width: 100%;
+    text-align: center;
+    font-weight: normal;
+}
+.s > div{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    width: 100%;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.input-div{
+    /* background-color:gray; */
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+ .buttons2{
+   
+    /* width: 100%; */
+    display: flex;
+    justify-content: right;
+   
+}
+ .buttons2 button:first-child{
+    margin-left: 150px;
+}
+ .buttons2 button{
+    line-height: 30px;
+    width: 60px;
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    color: white;
+    font-weight: bold;
+}
+.but1{
+    background-color: rgb(149,11,63);
+}
+.but2{
+    background-color: #DF8714;
+}
+
+
+
+.s1 div{
+    justify-content: center;
+}
+.s1 input{
+    position: relative;
+    right: 10px;
+    width: 132px;
+    height: 32px;
+    text-align: center;
+}
+.s1 p{
+    margin-right: 20px;
+   
+}
+
+.s1 img{
+    width: 50px;
+}
+
+
+.input1{
+    text-align: center;
+    border: 1px solid #cccccc;
+    color: #cccccc;
+    width: 120px;
+}
+
+.opt1{
+    width: 45px;;
+}
+
+.s2 div{
+    justify-content: center;
+}
+.s2 input{
+    position: relative;
+    right: 10px;
+    width: 132px;
+    height: 32px;
+    text-align: center;
+}
+.s2 p{
+    margin-right: 20px;
+}
+
+.s2 img{
+    width: 50px;
+}
+.input1{
+    text-align: center;
+    border: 1px solid #cccccc;
+}
+
+.selector1{
+    text-align: center;
+}
+
+.s3{
+  
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+    /* border: 1px
+     solid red; */
+}
+.s4 .sec{
+font-size: 14px;
+font-weight: bold;
+margin-left: 25px;
+padding-left: 15px;
+text-align: right;
+}
+.s3 div table{
+    /* border: 1px solid red; */
+    border-collapse: separate;
+    border-spacing: 7px 7px;
+    
+}
+/* .s3 div table tr td input{
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px
+} */
+.s3 div table tr th{
+    white-space: wrap;
+    text-align: center;
+    font-size: 16px;
+}
+.s3 div table tr td{
+    /* border: 1px solid red; */
+    white-space: nowrap;
+    text-align: center;
+    width:100px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px;
+    border-radius: 0px;
+    color: #cccccc;
+    
+}
+
+.s3 div table tr td:not(:first-child){
+    border: 1px solid #cccccc;
+}
+.s3 h3{
+    margin: 0px;
+ 
+}
+.s3 th{
+    white-space:nowrap;
+    font-size: 13px;
+    
+}
+
+.s4{
+  
+    font-size: 14px;
+    margin-top: 10px;
+ 
+    /* border: 1px solid red; */
+}
+.s4 img{
+    width: 45px;
+}
+.s4 div table{
+    /* border: 1px solid red; */
+    border-collapse: separate;
+    border-spacing: 7px 7px;
+   
+ 
+}
+/* .s4 div table tr td input{
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px
+} */
+.s4 div table tr th{
+    white-space: wrap;
+    text-align: center;
+    font-size: 16px;
+}
+.s4 div table tr td{
+    /* border: 1px solid red; */
+    white-space: nowrap;
+    text-align: center;
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px;
+    border-radius: 5px;
+    color: black;
+    
+}
+.s4 div table tr td:not(:first-child){
+    border: 1px solid #cccccc;
+}
+.s4 h3{
+    margin: 0px;
+    
+}
+.s4 th{
+    white-space:nowrap;
+    font-size: 13px;
+    
+}
+.first{
+    border: 1px solid #cccccc; 
+}
+.selector1{
+    width: 120px;
+    height: 30px;
+    color: #cccccc;
+    border: 1px solid #cccccc;
+}
+
+.s5{
+  
+    font-size: 14px;
+    margin-top: 10px;
+    /* border: 1px solid red; */
+}
+
+.s5 .input2{
+border: 0px;
+text-align: center;
+font-weight: bold;
+}
+.s5 div table{
+    /* border: 1px solid red; */
+    border-collapse: separate;
+    border-spacing: 7px 7px;
+
+ 
+}
+/* .s4 div table tr td input{
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px
+} */
+.s5 div table tr th{
+    white-space: wrap;
+    text-align: center;
+    font-size: 16px;
+}
+.s5 div table tr td{
+    /* border: 1px solid red; */
+    white-space: nowrap;
+    text-align: center;
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px;
+   
+    color: #cccccc;
+    
+}
+
+.s5 h3{
+    margin: 0px;
+    
+}
+.s5 th{
+    white-space:nowrap;
+    font-size: 13px;
+    
+}
+
+
+
+
+.s6{
+  
+    font-size: 14px;
+    margin-top: 10px;
+    /* border: 1px solid red; */
+}
+
+
+.s6 img{
+    width: 25px;
+   
+ 
+   
+}
+.s6 div table{
+    /* border: 1px solid red; */
+    border-collapse: separate;
+    border-spacing: 7px 7px;
+    
+ 
+}
+/* .s6 div table tr td input{
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px
+} */
+.s6 div table tr th{
+    white-space: wrap;
+    text-align: center;
+    font-size: 16px;
+}
+.s6 div table tr td{
+    /* border: 1px solid red; */
+    white-space: nowrap;
+    text-align: left;
+    width:40px;
+    height: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: black;
+    
+}
+.s6 div table tr td:not(:first-child){
+    border: 0px solid #cccccc;
+}
+.s6 h3{
+    margin: 0px;
+    
+}
+.s6 th{
+    white-space:nowrap;
+    font-size: 13px;
+    
+}
+
+.nav{
+    position: fixed;
+    /* max-width: 600px; */
+    width: 100%;
+    height: 60px;
+    background-color: rgb(168,255,146);
+    bottom: 0px;
+    display: flex;
+    flex-flow: row-reverse;
+    justify-content: space-around;
+    align-items: center;
+    box-sizing: border-box;
+}
+.nav a{
+    height: 90%;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    color:black;
+    box-sizing: border-box;
+}
+.nav a img{
+    width: 28px;
+    height: 25px;
+    box-sizing: border-box;
+}
+.nav a p{
+    margin: 0px;
+    padding: 0px;
+}

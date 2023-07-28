@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../style2.css" />
+  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <title>Home</title>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
+      rel="stylesheet"
+    /> -->
+  <style>
+    td {
+      border: none !important;
+    }
+
+    .title {
+      margin-top: 10px !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dec1"></div>
+  <div class="con">
+    <div class="title">
+      <h1 class="header1">حساب رى الأراضى الزراعية</h1>
+    </div>
+
+    <div class="s s1">
+      <h3>ادخل القراريط الذى تريد حساب ريها</h3>
+      <div>
+        <table>
+          <tr>
+
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+
+            <td class="width1_result first">
+              <input type="number" id="sharesInput" name="shares" class="width1_result" oninput="calculateTotals()" />
+            </td>
+            <td class="width1_result">
+              <input type="number" id="caratInput" name="carat" class="width1_result" oninput="calculateTotals()" />
+            </td>
+            <td class="width1_result">
+              <input type="number" id="acreInput" name="acre" class="width1_result" oninput="calculateTotals()" />
+            </td>
+
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="buttons2">
+      <button class="but1" onclick="clearAll()">احذف</button>
+      <button class="but2" onclick="calculateTotals()">إحسب</button>
+    </div>
+
+
+
+    <div class="s s3">
+      <h3>اجمالى القراريط بالتقريب</h3>
+      <div>
+
+        <div>
+          <input type="number" id="totalCaratResult" dir="auto" value="0" class="input2" disabled />
+        </div>
+
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>ادخل سعر رى القيراط الواحد</h3>
+      <div>
+        <input type="number" id="wateringCostPerCaratInput" dir="auto" placeholder=" مثال 16 مرة" class="input1"
+          oninput="calculateTotals()" />
+      </div>
+    </div>
+    <div class="s s5">
+      <h3>ادخل عدد مرات الرى </h3>
+      <div>
+
+        <div>
+          <input type="number" id="wateringTimesInput" dir="auto" placeholder=" مثال 6 جنيه" class="input1"
+            oninput="calculateTotals()" />
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="s s6 last-element">
+
+      <h3>اجمالى سعر الرى</h3>
+      <div>
+
+        <div>
+          <input type="number" id="totalCostOfWatering" dir="auto" value="0" class="input2" />
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div class="nav" dir="rtl">
+    <a href="help2/index.html" class="nav-box">
+      <img src="../imgs/nav1.png" alt="nav1" />
+      <p>كسور</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../imgs/nav2.png" alt="nav1" />
+      <p>رجوع</p>
+    </a>
+    <a href="help/index.html" class="nav-box">
+      <img src="../imgs/nav3.png" alt="nav1" />
+      <p>مساعدة</p>
+    </a>
+    <a href="../index.html" class="nav-box">
+      <img src="../imgs/nav4.png" alt="nav1" />
+      <p>الرئسية</p>
+    </a>
+  </div>
+  </div>
+  <script src="../nav.js"></script>
+
+  <script>
+
+    function calculateTotals() {
+      // Get input elements
+      const sharesInput = document.getElementById('sharesInput');
+      const caratInput = document.getElementById('caratInput');
+      const acreInput = document.getElementById('acreInput');
+      const totalCaratResult = document.getElementById('totalCaratResult');
+      const wateringTimesInput = document.getElementById('wateringTimesInput');
+      const wateringCostPerCaratInput = document.getElementById('wateringCostPerCaratInput');
+      const totalCostOfWatering = document.getElementById('totalCostOfWatering');
+
+      // Convert input values to numbers and handle empty inputs by setting them to 0
+      const shares = Number(sharesInput.value) || 0;
+      const carat = Number(caratInput.value) || 0;
+      const acre = Number(acreInput.value) || 0;
+      const wateringTimes = Number(wateringTimesInput.value) || 0;
+      const wateringCostPerCarat = Number(wateringCostPerCaratInput.value) || 0;
+
+      // Calculate total carat with 2 decimal places
+      const sharesToCarat = (shares / 24).toFixed(2);
+      const acreToCarat = (acre * 24).toFixed(2);
+      const totalCarat = (Number(sharesToCarat) + carat + Number(acreToCarat)).toFixed(2);
+      totalCaratResult.value = totalCarat;
+
+      // Calculate total cost of watering with 2 decimal places
+      const totalCost = (totalCarat * wateringTimes * wateringCostPerCarat).toFixed(2);
+      totalCostOfWatering.value = totalCost;
+    }
+
+    function clearAll() {
+      const sharesInput = document.getElementById('sharesInput');
+      const caratInput = document.getElementById('caratInput');
+      const acreInput = document.getElementById('acreInput');
+      const totalCaratResult = document.getElementById('totalCaratResult');
+      const wateringTimesInput = document.getElementById('wateringTimesInput');
+      const wateringCostPerCaratInput = document.getElementById('wateringCostPerCaratInput');
+      const totalCostOfWatering = document.getElementById('totalCostOfWatering');
+
+      // Clear input fields
+      sharesInput.value = '';
+      caratInput.value = '';
+      acreInput.value = '';
+      wateringTimesInput.value = '';
+      wateringCostPerCaratInput.value = '';
+
+      // Clear result fields
+      totalCaratResult.value = '0';
+      totalCostOfWatering.value = '0';
+    }
+
+
+  </script>
+
+</body>
+
+</html>
