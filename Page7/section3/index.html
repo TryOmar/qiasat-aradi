@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../../style2.css" />
-    <link rel="stylesheet" href="style.css" />
-    <meta charset="utf-8">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../style2.css" />
+  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <title>Home</title>
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <title>Home</title>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
@@ -19,154 +20,227 @@
       href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
       rel="stylesheet"
     /> -->
-  </head>
-  <body>
-    <div class="dec1"></div>
-    <div class="con">
-     
+  <style>
+    ::placeholder {
+      opacity: 0.2;
+    }
 
-     
-      <div class="title">
-        <h1 class="header1">تحويل من قيراط  الى متر مربع</h1>
-        <img src="../../imgs/1.png" alt="">
-      </div>
+    .width1_result,
+    .input1,
+    .selector1 {
+      color: black !important;
+    }
+  </style>
+</head>
 
-      <div class="s s1">
-        <h3>ادخل عدد القراريط</h3>
-        <div>
-          <table>
-            <tr>
-           
-              <th>سهم</th>
-              <th>قيراط</th>
-              <th>فدان</th>
-            </tr>
-            <tr>
-            
-              <td class="width1_result first"  >6.25</td>
-              <td class="width1_result"> مثال 12</td>
-              <td class="width1_result"> مثال 1</td>
-          
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div class="s s2">
-        <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
-        <div>
-          <img src="../../imgs/4.png" alt="img" />
-          <select class="selector1" onchange="other()">
-            <option value="175.035" class="">مثال 175.035</option>
-            <option value="2">168</option>
-            <option value="3">171.388</option>
-            <option value="4">175.035</option>
-            <option value="5">اخر</option>
-          </select>
-          <p>متر مربع</p>
-        </div>
-      </div>
-
-
-      <div class="buttons2">
-        <button class="but1"  onclick="clearall()">احذف</button>
-        <button class="but2" onclick="calculate()">إحسب</button>
-      </div>
-
-     
-
-       <div class="s s3">
-        <h3>ادخل سعر القيراط الواحد</h3>
-        <div>
-          <input type="text" dir="auto" value=" مثال 5000" class="input1"/>
-          
-        </div>
-      </div>
-      <div class="s s4">
-        <h3>الناتج بالمتر المربع </h3>
-        <div>
-          <table>
-            <tr>
-            
-              <th></th>
-              <th></th>
-            </tr>
-            <tr>
-         <td class="sec">    
-          <img src="../../imgs/4.png" alt="img" />
-         6346.827</td>
-              
-          
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div class="s s5">
-        <h3>اجمالى السعر</h3>
-        <div>
-         
-          <div>
-            <input type="text" dir="auto" value="20000" class="input2"/>
-            
-          </div>
-     
-        </div>
-      </div>
-
-      
-      <div class="s s6 last-element">
-        
-        <h3>الناتج بالقصبة المربعة</h3>
-        <div>
-          <table>
-            <tr>
-              <th></th>
-              <th>اقل من القبضة</th>
-              <th>قبضة</th>
-              <th>قصبة</th>
-              <th></th>
-            </tr>
-          
-            <tr>
-              <td> 
-                 </td>
-              <td>.50</td>
-              <td > 21</td>
-              <td > 13</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      
-
-      
-      
-
-</div>
+<body>
+  <div class="dec1"></div>
+  <div class="con">
 
 
 
-      
-    
-    
-    <div class="nav">
-      <a href="help2/index.html" class="nav-box">
-        <img src="../../imgs/nav1.png" alt="nav1" />
-        <p>كسور</p>
-      </a>
-      <a class="nav-box" onclick="history.back()">
-        <img src="../../imgs/nav2.png" alt="nav1" />
-        <p>رجوع</p>
-      </a>
-      <a href="help/index.html" class="nav-box">
-        <img src="../../imgs/nav3.png" alt="nav1" />
-        <p>مساعدة</p>
-      </a>
-      <a href="../../index.html" class="nav-box">
-        <img src="../../imgs/nav4.png" alt="nav1" />
-        <p>الرئسية</p>
-      </a>
+    <div class="title">
+      <h1 class="header1">تحويل من قيراط الى متر مربع</h1>
+      <img src="../../imgs/1.png" alt="">
     </div>
-    <script src="../../nav.js"></script>
-  
-  </body>
+
+    <div class="s s1">
+      <h3>ادخل عدد القراريط</h3>
+      <div>
+        <table>
+          <tr>
+
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td class="width1_result first"><input type="text" id="input-shares" placeholder="6.25"></td>
+            <td class="width1_result"><input type="text" id="input-carat" placeholder=" مثال 12"></td>
+            <td class="width1_result"><input type="text" id="input-acre" placeholder=" مثال 1"></td>
+
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="s s2">
+      <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
+      <div>
+        <img src="../../imgs/4.png" alt="img" />
+        <select id="input-carat-area" class="selector1">
+          <option value="168">168</option>
+          <option value="171.388">171.388</option>
+          <option value="175.035">175.035</option>
+          <option value="0">اخرى</option>
+        </select>
+        <p>متر مربع</p>
+      </div>
+    </div>
+
+
+    <div class="buttons2">
+      <button class="but1" onclick="clearall()">احذف</button>
+      <button class="but2" onclick="calculate()">إحسب</button>
+    </div>
+
+
+
+    <div class="s s3">
+      <h3>ادخل سعر القيراط الواحد</h3>
+      <div>
+        <input type="text" dir="auto" placeholder="50000" class="input1" id="input-carat-price" />
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>الناتج بالمتر المربع </h3>
+      <div>
+        <table>
+          <tr>
+
+            <th></th>
+            <th></th>
+          </tr>
+          <tr>
+            <td class="sec">
+              <img src="../../imgs/4.png" alt="img" />
+              <span id="output-result-with-meter-squares">
+                6346.827
+              </span>
+
+            </td>
+
+
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="s s5">
+      <h3>اجمالى السعر</h3>
+      <div>
+
+        <div>
+          <!-- <input type="text" dir="auto" value="20000" class="input2" /> -->
+          <span id="output-result-total-price">200000</span>
+
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="s s6 last-element">
+
+      <h3>الناتج بالقصبة المربعة</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>اقل من القبضة</th>
+            <th>قبضة</th>
+            <th>قصبة</th>
+            <th></th>
+          </tr>
+
+          <tr>
+            <td>
+            </td>
+            <td id="output-less-than-fist"> .50</td>
+            <td id="output-fist"> 21</td>
+            <td id="output-reed"> 13</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+
+
+  </div>
+
+
+
+
+
+
+  <div class="nav">
+    <a href="help2/index.html" class="nav-box">
+      <img src="../../imgs/nav1.png" alt="nav1" />
+      <p>كسور</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../../imgs/nav2.png" alt="nav1" />
+      <p>رجوع</p>
+    </a>
+    <a href="help/index.html" class="nav-box">
+      <img src="../../imgs/nav3.png" alt="nav1" />
+      <p>مساعدة</p>
+    </a>
+    <a href="../../index.html" class="nav-box">
+      <img src="../../imgs/nav4.png" alt="nav1" />
+      <p>الرئسية</p>
+    </a>
+  </div>
+  <script src="../../nav.js"></script>
+  <script>
+    // JavaScript
+
+    // JavaScript
+    // JavaScript
+    function calculate() {
+      // Get all the input values or set them to 0 if empty
+      var shares = parseFloat(document.getElementById("input-shares").value) || 0;
+      var carat = parseFloat(document.getElementById("input-carat").value) || 0;
+      var acre = parseFloat(document.getElementById("input-acre").value) || 0;
+      console.log("shares : ", shares);
+      console.log("carat : ", carat);
+      console.log("acre : ", acre);
+
+      // Convert them to total shares
+      var totalAllShares = acre * 24 * 24 + carat * 24 + shares;
+      console.log("totalAllShares : ", totalAllShares);
+
+      // Convert back to carats
+      var caratValue = totalAllShares / 24;
+      console.log("caratValue : ", caratValue);
+
+      // Get the carat price
+      var caratPrice = parseFloat(document.getElementById("input-carat-price").value) || 0;
+      console.log("caratPrice : ", caratPrice);
+
+      // Calculate total price
+      var totalPrice = caratPrice * caratValue;
+      console.log("totalPrice : ", totalPrice);
+
+      // Get the meter unit from the selection
+      var meterUnit = parseFloat(document.getElementById("input-carat-area").value) || 0;
+      console.log("meterUnit : ", meterUnit);
+
+      // Calculate result in square meters
+      var resultInSquareMeter = totalAllShares * meterUnit / 24;
+      console.log("resultInSquareMeter : ", resultInSquareMeter);
+
+      // Update the result display
+      document.getElementById("output-result-total-price").innerText = totalPrice.toFixed(2);
+      document.getElementById("output-result-with-meter-squares").innerText = resultInSquareMeter.toFixed(3);
+
+      // Calculate and update output-reed, output-fist, and output-less-than-fist
+      var reedValue = Math.floor(resultInSquareMeter / 12.60250); // Integer part of the division
+      var fistValue = Math.floor((resultInSquareMeter / 12.60250 - reedValue) * 24); // Decimal part multiplied by 24
+      var lessThanFistValue = (resultInSquareMeter / 12.60250 - reedValue - (fistValue / 24)).toFixed(2); // Remaining decimal part
+      console.log("reedValue : ", reedValue);
+      console.log("fistValue : ", fistValue);
+      console.log("lessThanFistValue : ", lessThanFistValue);
+
+      document.getElementById("output-reed").innerText = reedValue;
+      document.getElementById("output-fist").innerText = fistValue;
+      document.getElementById("output-less-than-fist").innerText = lessThanFistValue;
+    }
+
+
+  </script>
+
+</body>
+
 </html>
