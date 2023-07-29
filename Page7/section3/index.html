@@ -55,9 +55,13 @@
             <th>فدان</th>
           </tr>
           <tr>
-            <td class="width1_result first"><input type="text" id="input-shares" placeholder="6.25"></td>
-            <td class="width1_result"><input type="text" id="input-carat" placeholder=" مثال 12"></td>
-            <td class="width1_result"><input type="text" id="input-acre" placeholder=" مثال 1"></td>
+            <td class="width1_result first"><input type="number" id="input-shares" placeholder="6.25"
+                oninput="calculate()"></td>
+            <td class="width1_result"><input type="number" id="input-carat" placeholder=" مثال 12"
+                oninput="calculate()">
+            </td>
+            <td class="width1_result"><input type="number" id="input-acre" placeholder=" مثال 1" oninput="calculate()">
+            </td>
 
           </tr>
         </table>
@@ -67,7 +71,7 @@
       <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
       <div>
         <img src="../../imgs/4.png" alt="img" />
-        <select id="input-carat-area" class="selector1">
+        <select id="input-carat-area" class="selector1" onchange="calculate()">
           <option value="168">168</option>
           <option value="171.388">171.388</option>
           <option value="175.035">175.035</option>
@@ -79,7 +83,7 @@
 
 
     <div class="buttons2">
-      <button class="but1" onclick="clearall()">احذف</button>
+      <button class="but1" onclick="clearAll()">احذف</button>
       <button class="but2" onclick="calculate()">إحسب</button>
     </div>
 
@@ -88,7 +92,8 @@
     <div class="s s3">
       <h3>ادخل سعر القيراط الواحد</h3>
       <div>
-        <input type="text" dir="auto" placeholder="50000" class="input1" id="input-carat-price" />
+        <input type="number" dir="auto" placeholder="50000" class="input1" id="input-carat-price"
+          oninput="calculate()" />
       </div>
     </div>
     <div class="s s4">
@@ -104,7 +109,7 @@
             <td class="sec">
               <img src="../../imgs/4.png" alt="img" />
               <span id="output-result-with-meter-squares">
-                6346.827
+                0.0
               </span>
 
             </td>
@@ -120,7 +125,7 @@
 
         <div>
           <!-- <input type="text" dir="auto" value="20000" class="input2" /> -->
-          <span id="output-result-total-price">200000</span>
+          <span id="output-result-total-price">0</span>
 
 
         </div>
@@ -237,6 +242,23 @@
       document.getElementById("output-fist").innerText = fistValue;
       document.getElementById("output-less-than-fist").innerText = lessThanFistValue;
     }
+    // JavaScript
+    function clearAll() {
+      // Clear all the input fields used in the calculate function
+      document.getElementById("input-shares").value = "";
+      document.getElementById("input-carat").value = "";
+      document.getElementById("input-acre").value = "";
+      document.getElementById("input-carat-price").value = "";
+      // document.getElementById("input-carat-area").value = "";
+
+      // Clear the result displays
+      document.getElementById("output-result-total-price").innerText = "0";
+      document.getElementById("output-result-with-meter-squares").innerText = "0";
+      document.getElementById("output-reed").innerText = "0";
+      document.getElementById("output-fist").innerText = "0";
+      document.getElementById("output-less-than-fist").innerText = "0.0";
+    }
+
 
 
   </script>
