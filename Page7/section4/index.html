@@ -20,6 +20,14 @@
       href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
       rel="stylesheet"
     /> -->
+  <style>
+    .width1_result,
+    .input1,
+    .selector1 {
+      color: black !important;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
@@ -40,14 +48,15 @@
       <div>
         <img src="../../imgs/4.png" alt="img" />
         <div>
-          <input type="number" dir="auto" placeholder="مثال 175.035" class="input1" id="input-meter-square" />
+          <input type="number" dir="auto" placeholder="مثال 175.035" class="input1" id="input-meter-square"
+            oninput="calculateValues()" />
         </div>
         <p>متر مربع</p>
       </div>
     </div>
 
     <div class="buttons2">
-      <button class="but1" onclick="clearall()">احذف</button>
+      <button class="but1" onclick="clearAll()">احذف</button>
       <button class="but2" onclick="calculateValues()">إحسب</button>
     </div>
 
@@ -70,7 +79,8 @@
     <div class="s s3">
       <h3>ادخل سعر القيراط الواحد</h3>
       <div>
-        <input type="number" dir="auto" placeholder=" مثال 5000" class="input1" id="input-carat-price" />
+        <input type="number" dir="auto" placeholder=" مثال 5000" class="input1" id="input-carat-price"
+          oninput="calculateValues()" />
       </div>
     </div>
     <div class="s s4">
@@ -187,10 +197,10 @@
     }
 
     function calculateValues() {
-      // Get input values from the HTML elements
-      let inputMeterSquare = parseFloat(document.getElementById("input-meter-square").value);
-      let inputCaratAreaInMeter = parseFloat(document.getElementById("input-carat-area-in-meter").value);
-      let inputCaratPrice = parseFloat(document.getElementById("input-carat-price").value);
+      // Get input values from the HTML elements and convert to numbers or set to zero if empty
+      let inputMeterSquare = parseFloat(document.getElementById("input-meter-square").value) || 0;
+      let inputCaratAreaInMeter = parseFloat(document.getElementById("input-carat-area-in-meter").value) || 0;
+      let inputCaratPrice = parseFloat(document.getElementById("input-carat-price").value) || 0;
 
       // Calculate total shares and total in carat
       let totalShares = inputMeterSquare * 24 / inputCaratAreaInMeter;
@@ -218,6 +228,24 @@
       document.getElementById("output-fist").textContent = fistValue;
       document.getElementById("output-less-than-fist").textContent = lessThanFistValue;
     }
+
+
+    function clearAll() {
+      // Clear input fields
+      document.getElementById("input-meter-square").value = "";
+      // document.getElementById("input-carat-area-in-meter").value = "175.035";
+      document.getElementById("input-carat-price").value = "";
+
+      // Clear output fields
+      document.getElementById("output-shares").textContent = "0.0";
+      document.getElementById("output-carat").textContent = "0";
+      document.getElementById("output-acre").textContent = "0";
+      document.getElementById("output-total-carat-price").value = "0.00";
+      document.getElementById("output-reed").textContent = "0";
+      document.getElementById("output-fist").textContent = "0";
+      document.getElementById("output-less-than-fist").textContent = "0.0";
+    }
+
 
   </script>
 
