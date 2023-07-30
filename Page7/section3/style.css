@@ -267,7 +267,7 @@ text-align: right;
     
 }
 .first{
-    border: 1px solid #cccccc; 
+    /* border: 1px solid #cccccc;  */
 }
 .selector1{
     width: 120px;
@@ -419,4 +419,23 @@ font-weight: bold;
 .nav a p{
     margin: 0px;
     padding: 0px;
+}
+.s1 table td{
+    border:none !important;
+}
+.s1 table td input{
+    width: 70px;
+    font-size: 15px;
+}
+td{
+    font-weight: bold;
+}
+.s6 table{
+    width: 200px;
+}
+.s6 table tbody{
+    width:200px;
+}
+#output-result-total-price{
+    font-weight: bold;
 }
