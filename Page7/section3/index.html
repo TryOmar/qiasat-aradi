@@ -60,7 +60,8 @@
             <td class="width1_result"><input tabindex="2" type="number" id="input-carat" placeholder=" مثال 12"
                 oninput="calculate()">
             </td>
-            <td class="width1_result"><input tabindex="1" type="number" id="input-acre" placeholder=" مثال 1" oninput="calculate()">
+            <td class="width1_result"><input tabindex="1" type="number" id="input-acre" placeholder=" مثال 1"
+                oninput="calculate()">
             </td>
 
           </tr>
@@ -71,7 +72,7 @@
       <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
       <div>
         <img src="../../imgs/4.png" alt="img" />
-        <select id="input-carat-area" class="selector1" onchange="calculate()">
+        <select id="input-carat-area-in-meter" class="selector1" onchange="calculate()">
           <option value="168">168</option>
           <option value="171.388">171.388</option>
           <option value="175.035">175.035</option>
@@ -90,14 +91,14 @@
 
 
     <div class="s s3">
-      <h3>ادخل سعر القيراط الواحد</h3>
+      <h3>ادخل سعر المتر الواحد</h3>
       <div>
-        <input tabindex="4" type="number" dir="auto" placeholder="50000" class="input1" id="input-carat-price"
+        <input tabindex="4" type="number" dir="auto" placeholder="50000" class="input1" id="input-meter-price"
           oninput="calculate()" />
       </div>
     </div>
     <div class="s s4">
-      <h3>الناتج بالمتر المربع </h3>
+      <h3>اجمالي عدد الامتار المربعة</h3>
       <div>
         <table>
           <tr>
@@ -120,7 +121,7 @@
       </div>
     </div>
     <div class="s s5">
-      <h3>اجمالى السعر</h3>
+      <h3>اجمالي سعر الامتار المربعة</h3>
       <div>
 
         <div>
@@ -206,25 +207,27 @@
       var totalAllShares = acre * 24 * 24 + carat * 24 + shares;
       console.log("totalAllShares : ", totalAllShares);
 
-      // Convert back to carats
-      var caratValue = totalAllShares / 24;
-      console.log("caratValue : ", caratValue);
 
       // Get the carat price
-      var caratPrice = parseFloat(document.getElementById("input-carat-price").value) || 0;
-      console.log("caratPrice : ", caratPrice);
+      var meterPrice = parseFloat(document.getElementById("input-meter-price").value) || 0;
+      console.log("meterPrice : ", meterPrice);
 
-      // Calculate total price
-      var totalPrice = caratPrice * caratValue;
-      console.log("totalPrice : ", totalPrice);
 
       // Get the meter unit from the selection
-      var meterUnit = parseFloat(document.getElementById("input-carat-area").value) || 0;
+      var meterUnit = parseFloat(document.getElementById("input-carat-area-in-meter").value) || 0;
       console.log("meterUnit : ", meterUnit);
 
       // Calculate result in square meters
       var resultInSquareMeter = totalAllShares * meterUnit / 24;
       console.log("resultInSquareMeter : ", resultInSquareMeter);
+
+      // Convert back to carats
+      // var caratValue = resultInSquareMeter / meterUnit;
+      // console.log("caratValue : ", caratValue);
+
+      // Calculate total price
+      var totalPrice = resultInSquareMeter * meterPrice;
+      console.log("totalPrice : ", totalPrice);
 
       // Update the result display
       document.getElementById("output-result-total-price").innerText = totalPrice.toFixed(2);
@@ -248,8 +251,8 @@
       document.getElementById("input-shares").value = "";
       document.getElementById("input-carat").value = "";
       document.getElementById("input-acre").value = "";
-      document.getElementById("input-carat-price").value = "";
-      // document.getElementById("input-carat-area").value = "";
+      document.getElementById("input-meter-price").value = "";
+      // document.getElementById("input-carat-area-in-meter").value = "";
 
       // Clear the result displays
       document.getElementById("output-result-total-price").innerText = "0";
