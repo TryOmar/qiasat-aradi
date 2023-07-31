@@ -9,11 +9,13 @@
     
 }
 .title img{
-    width: 35px;
+    /* width: 35px; */
+    height: 45px;
 }
 .title h1{
-    font-size: 23px;
+    font-size: 20px;
     text-align: center;
+    margin-left: 5px;
 }
 body{
     margin:0px;

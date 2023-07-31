@@ -9,7 +9,8 @@
     
 }
 .title img{
-    width: 45px;
+    /* width: 45px; */
+    height: 45px;
 }
 .title h1{
     font-size: 23px;
