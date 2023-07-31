@@ -27,6 +27,10 @@
       color: black !important;
       text-align: center;
     }
+
+    #other-input-field {
+      display: none;
+    }
   </style>
 </head>
 
@@ -64,13 +68,14 @@
       <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
       <div>
         <img src="../../imgs/4.png" alt="img" />
-        <select class="selector1" id="input-carat-area-in-meter">
+        <select class="selector1" id="input-carat-area-in-meter" onchange="handleSelection()">
           <!-- <option value="175.035" class="">مثال 175.035</option> -->
           <option value="168">168</option>
           <option value="171.388">171.388</option>
           <option value="175.035">175.035</option>
-          <option value="0">اخر</option>
+          <option value="0">اخرى</option>
         </select>
+        <input type="number" id="other-input-field" placeholder=" القيراط بالمتر مربع" oninput="calculateValues()">
         <p>متر مربع</p>
       </div>
     </div>
@@ -199,7 +204,7 @@
     function calculateValues() {
       // Get input values from the HTML elements and convert to numbers or set to zero if empty
       let inputMeterSquare = parseFloat(document.getElementById("input-meter-square").value) || 0;
-      let inputCaratAreaInMeter = parseFloat(document.getElementById("input-carat-area-in-meter").value) || 0;
+      let inputCaratAreaInMeter = parseFloat(document.getElementById("input-carat-area-in-meter").value) || parseFloat(document.getElementById("other-input-field").value) || 168;
       let inputCaratPrice = parseFloat(document.getElementById("input-carat-price").value) || 0;
 
       // Calculate total shares and total in carat
@@ -244,6 +249,20 @@
       document.getElementById("output-reed").textContent = "0";
       document.getElementById("output-fist").textContent = "0";
       document.getElementById("output-less-than-fist").textContent = "0.0";
+    }
+
+    function handleSelection() {
+      var selectElement = document.getElementById("input-carat-area-in-meter");
+      var otherInputField = document.getElementById("other-input-field");
+
+      if (selectElement.value === "0") {
+        otherInputField.style.display = "block"; // Show the other input field
+        otherInputField.focus();
+      } else {
+        otherInputField.style.display = "none"; // Hide the other input field
+      }
+
+      calculateValues();
     }
 
 
