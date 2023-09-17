@@ -96,7 +96,7 @@
           oninput="calculate()" />
       </div>
     </div>
-    
+
     <div class="s s5">
       <h3>العرض او الطول المناسب للمساحة المذكورة</h3>
       <div>
@@ -137,7 +137,7 @@
 
     <div class="s s6 last-element">
 
-      <h3>الناتج بالقصبة المربعة</h3>
+      <h3>الناتج بالقصبة الطولي</h3>
       <div>
         <table>
           <tr>
@@ -158,9 +158,9 @@
           </tr>
           <tr>
             <td>مثال</td>
-            <td> .50</td>
-            <td> 21</td>
-            <td> 13</td>
+            <td id="output-less-than-fist2"> .50</td>
+            <td id="output-fist2"> 21</td>
+            <td id="output-reed2"> 13</td>
           </tr>
         </table>
       </div>
@@ -206,30 +206,22 @@
       var shares = parseFloat(document.getElementById("input-shares").value) || 0;
       var carat = parseFloat(document.getElementById("input-carat").value) || 0;
       var acre = parseFloat(document.getElementById("input-acre").value) || 0;
-      console.log("shares : ", shares);
-      console.log("carat : ", carat);
-      console.log("acre : ", acre);
 
       // Convert them to total shares
       var totalAllShares = acre * 24 * 24 + carat * 24 + shares;
-      console.log("totalAllShares : ", totalAllShares);
 
       // Convert back to carats
       var caratValue = totalAllShares / 24;
-      console.log("caratValue : ", caratValue);
 
       // Get the carat price
       var caratPrice = parseFloat(document.getElementById("input-carat-price").value) || 0;
-      console.log("caratPrice : ", caratPrice);
 
 
       // Get the meter unit from the selection
       var meterUnit = parseFloat(document.getElementById("input-carat-area").value) || 0;
-      console.log("meterUnit : ", meterUnit);
 
       // Calculate result in square meters
       var resultInSquareMeter = totalAllShares * meterUnit / 24;
-      console.log("resultInSquareMeter : ", resultInSquareMeter);
 
 
       // Calculate total price
@@ -240,17 +232,34 @@
       document.getElementById("output-result-total-price").innerText = totalPrice.toFixed(2);
       document.getElementById("output-result-with-meter-squares").innerText = resultInSquareMeter.toFixed(3);
 
-      // Calculate and update output-reed, output-fist, and output-less-than-fist
-      var reedValue = Math.floor(resultInSquareMeter / 12.60250); // Integer part of the division
-      var fistValue = Math.floor((resultInSquareMeter / 12.60250 - reedValue) * 24); // Decimal part multiplied by 24
-      var lessThanFistValue = (resultInSquareMeter / 12.60250 - reedValue - (fistValue / 24)).toFixed(2); // Remaining decimal part
-      console.log("reedValue : ", reedValue);
-      console.log("fistValue : ", fistValue);
-      console.log("lessThanFistValue : ", lessThanFistValue);
+      let centimeters = caratPrice * 100;
 
-      document.getElementById("output-reed").innerText = reedValue;
-      document.getElementById("output-fist").innerText = fistValue;
-      document.getElementById("output-less-than-fist").innerText = lessThanFistValue;
+      // Calculate and update output-reed, output-fist, and output-less-than-fist
+
+      const reed = Math.floor(centimeters / 355);
+      const remainingCentimetersAfterReed = centimeters % 355;
+      const fist = Math.floor(remainingCentimetersAfterReed / 14.7916666667);
+      const remainingInFist = (remainingCentimetersAfterReed % 14.7916666667);
+      const remainingInFistConverted = (remainingInFist * (1 / 14.7916666667)).toFixed(2);
+
+      document.getElementById("output-reed").innerText = reed;
+      document.getElementById("output-fist").innerText = fist;
+      document.getElementById("output-less-than-fist").innerText = remainingInFistConverted;
+
+
+      let centimeters2 = totalPrice * 100;
+
+      const reed2 = Math.floor(centimeters2 / 355);
+      const remainingCentimetersAfterReed2 = centimeters2 % 355;
+      const fist2 = Math.floor(remainingCentimetersAfterReed2 / 14.7916666667);
+      const remainingInFist2 = (remainingCentimetersAfterReed2 % 14.7916666667);
+      const remainingInFistConverted2 = (remainingInFist2 * (1 / 14.7916666667)).toFixed(2);
+
+      document.getElementById("output-reed2").innerText = reed2;
+      document.getElementById("output-fist2").innerText = fist2;
+      document.getElementById("output-less-than-fist2").innerText = remainingInFistConverted2;
+
+
     }
     // JavaScript
     function clearAll() {
