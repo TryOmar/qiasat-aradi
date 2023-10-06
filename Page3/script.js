@@ -154,7 +154,7 @@ document
   )
   .forEach((e) => {
     e.addEventListener("input", () => {
-      each_carat.innerText = parseFloat(result_each().toFixed(3));
+      each_carat.innerText = result_each().toFixed(2);
       let each_carat_value = Number(each_carat.innerText);
       each_old[0].innerText = meter_to_old(each_carat_value, "num1");
       each_old[1].innerText = meter_to_old(each_carat_value, "num2");
