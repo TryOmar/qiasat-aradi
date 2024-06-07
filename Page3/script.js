@@ -181,7 +181,7 @@ function meter_to_old(number, num) {
   number = (number * 100) / 14.7916666667 / 24;
   let num1 = Math.floor(number);
   let num2 = Math.floor(getfloor(number) * 24);
-  let num3 = getfloor(getfloor(number) * 24).toFixed(2);
+  let num3 = getfloor(getfloor(number) * 24).toFixed(3);
   if (num3 == 1) {
     num3 -= 1;
     num2 += 1;
