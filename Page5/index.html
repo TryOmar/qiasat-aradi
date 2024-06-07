@@ -405,7 +405,7 @@
       // Calculate the number of scares, carats, and remaining shares
       const scares = Math.floor(totalShares / (24 * 24));
       const carats = Math.floor((totalShares - scares * 24 * 24) / 24);
-      const shares = (totalShares - scares * 24 * 24 - carats * 24).toFixed(2);
+      const shares = (totalShares - scares * 24 * 24 - carats * 24).toFixed(3);
       // Return an array containing the results
       return [scares, carats, shares];
     }
