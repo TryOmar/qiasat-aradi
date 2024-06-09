@@ -1,3 +1,4 @@
+// Select input elements and other relevant elements
 let shares = document.querySelector("#share-input");
 let carat = document.querySelector("#carat-input");
 let acre = document.querySelector("#acre-input");
@@ -16,10 +17,61 @@ let old_width = document
 let each_old = document
   .querySelector(".each-old")
   .querySelectorAll("td:not(:first-child)");
-// let table_inputs = document.querySelectorAll(".table-input:not(#total)")
 let last_table_inputs = document.querySelectorAll(".table-input:not(#total)")[
   document.querySelectorAll(".table-input:not(#total)").length - 1
 ];
+
+// Load data from sessionStorage when the page loads
+window.onload = function () {
+  loadData();
+};
+
+// Function to save input field data to sessionStorage
+function saveData() {
+  sessionStorage.setItem("shares", shares.value);
+  sessionStorage.setItem("carat", carat.value);
+  sessionStorage.setItem("acre", acre.value);
+  sessionStorage.setItem("cm", cm.value);
+  old_width.forEach((e, index) => {
+    sessionStorage.setItem(`old_width_${index}`, e.innerText);
+  });
+  document
+    .querySelectorAll(".table-input:not(#total)")
+    .forEach((row, rowIndex) => {
+      row.querySelectorAll("input").forEach((input, inputIndex) => {
+        sessionStorage.setItem(
+          `table_input_${rowIndex}_${inputIndex}`,
+          input.value
+        );
+      });
+    });
+}
+
+// Function to retrieve and set input field data from sessionStorage
+function loadData() {
+  shares.value = sessionStorage.getItem("shares") || "";
+  carat.value = sessionStorage.getItem("carat") || "";
+  acre.value = sessionStorage.getItem("acre") || "";
+  cm.value = sessionStorage.getItem("cm") || "";
+  old_width.forEach((e, index) => {
+    e.innerText = sessionStorage.getItem(`old_width_${index}`) || "";
+  });
+  document
+    .querySelectorAll(".table-input:not(#total)")
+    .forEach((row, rowIndex) => {
+      row.querySelectorAll("input").forEach((input, inputIndex) => {
+        input.value =
+          sessionStorage.getItem(`table_input_${rowIndex}_${inputIndex}`) || "";
+      });
+    });
+}
+
+// Add event listeners to save data on input change
+document.querySelectorAll("input").forEach((input) => {
+  input.addEventListener("input", saveData);
+});
+
+// The rest of your original code
 listen_to_last(last_table_inputs.children);
 function listen_to_last(last_table_inputs) {
   for (let i = 0; i < last_table_inputs.length - 1; i++) {
@@ -27,9 +79,6 @@ function listen_to_last(last_table_inputs) {
   }
 }
 function inputlistener() {
-  // for (let j = 0; j < last_table_inputs.children.length - 1; j++) {
-  //     if (last_table_inputs.children[j].value == "") return;
-  // }
   for (let j = 0; j < last_table_inputs.children.length - 1; j++) {
     last_table_inputs.children[j].removeEventListener("input", inputlistener);
   }
@@ -49,9 +98,11 @@ function inputlistener() {
   last_table_inputs.querySelectorAll("input").forEach((e) => {
     e.addEventListener("input", () => {
       run(e);
+      saveData(); // Save data when input changes
     });
   });
   listen_to_last(last_table_inputs.children);
+  saveData(); // Save data after new row is added
 }
 
 old_width.forEach((e) => {
@@ -64,6 +115,7 @@ old_width.forEach((e) => {
       24
     ).toFixed(3);
     cm.value = total_cm;
+    saveData(); // Save data when input changes
   });
 });
 for (let i = 0; i < total.children.length; i++) {
@@ -73,6 +125,7 @@ delete_btn.addEventListener("click", () => {
   document.querySelectorAll("input").forEach((e) => {
     e.value = "";
   });
+  sessionStorage.clear(); // Clear session storage on delete
 });
 document
   .querySelectorAll(
@@ -84,12 +137,14 @@ document
         .querySelectorAll(".table-input:not(#total) input")
         .forEach((e) => {
           run(e);
+          saveData(); // Save data when input changes
         });
     });
   });
 document.querySelectorAll(".table-input:not(#total) input").forEach((e) => {
   e.addEventListener("input", () => {
     run(e);
+    saveData(); // Save data when input changes
   });
 });
 
@@ -159,6 +214,7 @@ document
       each_old[0].innerText = meter_to_old(each_carat_value, "num1");
       each_old[1].innerText = meter_to_old(each_carat_value, "num2");
       each_old[2].innerText = meter_to_old(each_carat_value, "num3");
+      saveData(); // Save data when input changes
     });
   });
 
@@ -175,6 +231,7 @@ cm.addEventListener("input", () => {
   old_width[0].innerText = meter_to_old(meter, "num1");
   old_width[1].innerText = meter_to_old(meter, "num2");
   old_width[2].innerText = meter_to_old(meter, "num3");
+  saveData(); // Save data when input changes
 });
 
 function meter_to_old(number, num) {
