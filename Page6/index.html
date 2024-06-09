@@ -28,7 +28,8 @@
     .title {
       margin-top: 10px !important;
     }
-    input{
+
+    input {
       font-size: 15px;
     }
 
@@ -58,16 +59,16 @@
           <tr>
 
             <td class="width1_result first">
-              <input tabindex="3" type="number" id="sharesInput" name="shares" class="width1_result" oninput="calculateTotals()"
-                placeholder="6.25" dir="auto" />
+              <input tabindex="3" type="number" id="sharesInput" name="shares" class="width1_result"
+                oninput="calculateTotals()" placeholder="6.25" dir="auto" />
             </td>
             <td class="width1_result">
-              <input tabindex="2" type="number" id="caratInput" name="carat" class="width1_result" oninput="calculateTotals()"
-                placeholder="12" dir="auto" />
+              <input tabindex="2" type="number" id="caratInput" name="carat" class="width1_result"
+                oninput="calculateTotals()" placeholder="12" dir="auto" />
             </td>
             <td class="width1_result">
-              <input tabindex="1" type="number" id="acreInput" name="acre" class="width1_result" oninput="calculateTotals()"
-                placeholder="1" dir="auto" />
+              <input tabindex="1" type="number" id="acreInput" name="acre" class="width1_result"
+                oninput="calculateTotals()" placeholder="1" dir="auto" />
             </td>
 
           </tr>
@@ -95,8 +96,8 @@
     <div class="s s4">
       <h3>ادخل سعر رى القيراط الواحد</h3>
       <div>
-        <input tabindex="4" type="number" id="wateringCostPerCaratInput" dir="auto" placeholder="السعر 10 جنية" class="input1"
-          oninput="calculateTotals()" />
+        <input tabindex="4" type="number" id="wateringCostPerCaratInput" dir="auto" placeholder="السعر 10 جنية"
+          class="input1" oninput="calculateTotals()" />
       </div>
     </div>
     <div class="s s5">
@@ -104,8 +105,8 @@
       <div>
 
         <div>
-          <input tabindex="5" type="number" id="wateringTimesInput" dir="auto" placeholder="15 عدد مرات الري" class="input1"
-            oninput="calculateTotals()" />
+          <input tabindex="5" type="number" id="wateringTimesInput" dir="auto" placeholder="15 عدد مرات الري"
+            class="input1" oninput="calculateTotals()" />
         </div>
 
       </div>
@@ -149,6 +150,36 @@
   <script src="../nav.js"></script>
 
   <script>
+    // Load data from sessionStorage when the page loads
+    window.onload = function () {
+      loadData();
+    };
+
+    // Function to save input field data to sessionStorage
+    function saveData() {
+      sessionStorage.setItem('sharesInput', document.getElementById('sharesInput').value);
+      sessionStorage.setItem('caratInput', document.getElementById('caratInput').value);
+      sessionStorage.setItem('acreInput', document.getElementById('acreInput').value);
+      sessionStorage.setItem('wateringCostPerCaratInput', document.getElementById('wateringCostPerCaratInput').value);
+      sessionStorage.setItem('wateringTimesInput', document.getElementById('wateringTimesInput').value);
+    }
+
+    // Function to retrieve and set input field data from sessionStorage
+    function loadData() {
+      document.getElementById('sharesInput').value = sessionStorage.getItem('sharesInput') || '';
+      document.getElementById('caratInput').value = sessionStorage.getItem('caratInput') || '';
+      document.getElementById('acreInput').value = sessionStorage.getItem('acreInput') || '';
+      document.getElementById('wateringCostPerCaratInput').value = sessionStorage.getItem('wateringCostPerCaratInput') || '';
+      document.getElementById('wateringTimesInput').value = sessionStorage.getItem('wateringTimesInput') || '';
+    }
+
+    // Add event listeners to save data on input change
+    document.getElementById('sharesInput').addEventListener('input', saveData);
+    document.getElementById('caratInput').addEventListener('input', saveData);
+    document.getElementById('acreInput').addEventListener('input', saveData);
+    document.getElementById('wateringCostPerCaratInput').addEventListener('input', saveData);
+    document.getElementById('wateringTimesInput').addEventListener('input', saveData);
+
 
     function calculateTotals() {
       // Get input elements
@@ -197,6 +228,7 @@
       // Clear result fields
       totalCaratResult.value = '0';
       totalCostOfWatering.value = '0';
+      saveData();
     }
 
 
