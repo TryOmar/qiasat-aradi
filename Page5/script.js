@@ -10,8 +10,6 @@ function clearInputFields() {
 // Load data from sessionStorage when the page loads
 window.onload = function () {
   loadData();
-  calculateShares();
-  calculate();
 };
 
 // Function to save input field data to sessionStorage
