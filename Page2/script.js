@@ -1,4 +1,51 @@
 // JavaScript
+// Load data from sessionStorage when the page loads
+window.onload = function () {
+  loadData();
+};
+
+// Function to save input field data to sessionStorage
+function saveData() {
+  sessionStorage.setItem(
+    "shares",
+    document.getElementById("input-shares").value
+  );
+  sessionStorage.setItem("carat", document.getElementById("input-carat").value);
+  sessionStorage.setItem("acre", document.getElementById("input-acre").value);
+  sessionStorage.setItem(
+    "carat_area",
+    document.getElementById("input-carat-area").value
+  );
+  sessionStorage.setItem(
+    "carat_price",
+    document.getElementById("input-carat-price").value
+  );
+}
+
+// Function to retrieve and set input field data from sessionStorage
+function loadData() {
+  document.getElementById("input-shares").value =
+    sessionStorage.getItem("shares") || "";
+  document.getElementById("input-carat").value =
+    sessionStorage.getItem("carat") || "";
+  document.getElementById("input-acre").value =
+    sessionStorage.getItem("acre") || "";
+  document.getElementById("input-carat-area").value =
+    sessionStorage.getItem("carat_area") || "";
+  document.getElementById("input-carat-price").value =
+    sessionStorage.getItem("carat_price") || "";
+}
+
+// Add event listeners to save data on input change
+document.getElementById("input-shares").addEventListener("input", saveData);
+document.getElementById("input-carat").addEventListener("input", saveData);
+document.getElementById("input-acre").addEventListener("input", saveData);
+document
+  .getElementById("input-carat-area")
+  .addEventListener("change", saveData);
+document
+  .getElementById("input-carat-price")
+  .addEventListener("input", saveData);
 
 // JavaScript
 // JavaScript
@@ -90,6 +137,7 @@ function clearAll() {
   document.getElementById("output-less-than-fist2").innerText = "0.0";
   document.getElementById("output-fist2").innerText = "0.0";
   document.getElementById("output-reed2").innerText = "0.0";
+  saveData();
 }
 
 function handleSelection() {
