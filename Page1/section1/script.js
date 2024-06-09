@@ -1,8 +1,3 @@
-// width1 = s1-input1
-// width2 = s1-input2
-// height = s1-input3
-// area = s2-input1
-// price = s2-input2
 let width1 = document.querySelector(".input-s1 input");
 let width2 = document.querySelector(".input-s2 input");
 let height = document.querySelector(".input-s3 input");
@@ -18,6 +13,47 @@ let area_result3 = document.querySelector("#area-result3");
 let width1_result = document.querySelectorAll(".width1_result");
 let width2_result = document.querySelectorAll(".width2_result");
 let height_result = document.querySelectorAll(".height_result");
+
+// Load data from sessionStorage when the page loads
+window.onload = function () {
+  loadData();
+  calculate();
+};
+
+// Function to save input field data to sessionStorage
+function saveData() {
+  sessionStorage.setItem("width1", width1.value);
+  sessionStorage.setItem("width2", width2.value);
+  sessionStorage.setItem("height", height.value);
+  sessionStorage.setItem("area1", area1.value);
+  sessionStorage.setItem("area2", area2.value);
+  sessionStorage.setItem("price", price.value);
+}
+
+// Function to retrieve and set input field data from sessionStorage
+function loadData() {
+  width1.value = sessionStorage.getItem("width1") || "";
+  width2.value = sessionStorage.getItem("width2") || "";
+  height.value = sessionStorage.getItem("height") || "";
+  area1.value = sessionStorage.getItem("area1") || "";
+  area2.value = sessionStorage.getItem("area2") || "";
+  price.value = sessionStorage.getItem("price") || "";
+}
+
+// Add event listeners to save data on input change
+width1.addEventListener("input", saveData);
+width2.addEventListener("input", saveData);
+height.addEventListener("input", saveData);
+area1.addEventListener("change", saveData);
+area2.addEventListener("input", saveData);
+price.addEventListener("input", saveData);
+
+width1.addEventListener("input", calculate);
+width2.addEventListener("input", calculate);
+height.addEventListener("input", calculate);
+area1.addEventListener("change", calculate);
+area2.addEventListener("input", calculate);
+price.addEventListener("input", calculate);
 
 Number.prototype.toFixedNoRounding = function (n) {
   const reg = new RegExp("^-?\\d+(?:\\.\\d{0," + n + "})?", "g");
@@ -136,20 +172,6 @@ function clearall() {
     }
     inputs[i].value = "";
   }
+  saveData();
+  calculate();
 }
-// resize event listener to detect change in screen height
-// let input = document.querySelector("input");
-// let nav = document.querySelector(".nav");
-// let deviceHeight = window.innerHeight;
-// window.addEventListener("click", ()=>{
-//   if(window.innerHeight != deviceHeight){
-//     nav.style.display = "none"
-//   }
-// })
-// window.visualViewport.addEventListener("resize", () =>
-//   window.getComputedStyle(nav).display == "none"
-//     ? (nav.style.display = "flex")
-//     : window.getComputedStyle(nav).display == "flex"
-//     ? (nav.style.display = "none")
-//     : ""
-// );
