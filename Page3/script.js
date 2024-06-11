@@ -26,8 +26,6 @@ window.onload = function () {
   loadData();
 };
 
-// Test Git
-
 // Function to save input field data to sessionStorage
 function saveData() {
   sessionStorage.setItem("shares", shares.value);
