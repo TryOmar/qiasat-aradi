@@ -28,7 +28,7 @@ body {
 .header1 {
   font-size: 28px;
   font-weight: bold;
-  /* margin-top: 10px; */
+  margin-top: 10px;
   /* margin-bottom: 50px; */
   color: rgb(149, 11, 36);
   margin-right: 35px;
@@ -39,7 +39,7 @@ body {
   display: flex;
   flex-flow: column;
   align-items: center;
-  /* margin-top: 5px; */
+  margin-top: 5px;
   text-align: center;
 }
 .s h3 {
@@ -55,9 +55,9 @@ body {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-evenly;
-  /* width: 100%; */
+  width: 100%;
   align-items: center;
-  /* margin-top: 10px; */
+  margin-top: 10px;
 }
 
 .input-div {
@@ -94,13 +94,13 @@ body {
 
 .s1 {
   font-size: 14px;
-  /* margin-top: 10px; */
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s1 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 15px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s1 div table tr td input{
     width:40px;
@@ -137,14 +137,13 @@ body {
 
 .s2 {
   font-size: 14px;
-  /* margin-top: 10px; */
-  margin-bottom: 10px;
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s2 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 15px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s2 div table tr td input{
     width:40px;
@@ -181,13 +180,13 @@ body {
 
 .s3 {
   font-size: 14px;
-  /* margin-top: 10px;
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s3 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 15px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s3 div table tr td input{
     width:40px;
@@ -224,13 +223,13 @@ body {
 
 .s4 {
   font-size: 14px;
-  /* margin-top: 10px; */
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s4 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 15px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s4 div table tr td input{
     width:40px;
@@ -267,14 +266,13 @@ body {
 
 .s5 {
   font-size: 14px;
-  margin-bottom: 10px;
-  /* margin-top: 10px; */
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s5 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 3px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s4 div table tr td input{
     width:40px;
@@ -311,13 +309,13 @@ body {
 
 .s6 {
   font-size: 14px;
-  /* margin-top: 10px; */
+  margin-top: 10px;
   /* border: 1px solid red; */
 }
 .s6 div table {
   /* border: 1px solid red; */
   border-collapse: separate;
-  border-spacing: 15px 0px;
+  border-spacing: 7px 7px;
 }
 /* .s6 div table tr td input{
     width:40px;
