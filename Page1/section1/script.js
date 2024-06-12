@@ -36,7 +36,7 @@ function loadData() {
   width2.value = sessionStorage.getItem("width2") || "";
   height.value = sessionStorage.getItem("height") || "";
   area1.value = sessionStorage.getItem("area1") || "";
-  area2.value = sessionStorage.getItem("area2") || "";
+  area2.value = sessionStorage.getItem("area2") || "168";
   price.value = sessionStorage.getItem("price") || "";
 }
 
