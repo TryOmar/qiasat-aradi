@@ -31,7 +31,7 @@ function loadData() {
   document.getElementById("input-acre").value =
     sessionStorage.getItem("acre") || "";
   document.getElementById("input-carat-area").value =
-    sessionStorage.getItem("carat_area") || "";
+    sessionStorage.getItem("carat_area") || "168";
   document.getElementById("input-carat-price").value =
     sessionStorage.getItem("carat_price") || "";
 }
