@@ -10,16 +10,7 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <title>Home</title>
-  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
-      rel="stylesheet"
-    /> -->
+
   <style>
     ::placeholder {
       opacity: 0.2;
@@ -40,12 +31,9 @@
 <body>
   <div class="dec1"></div>
   <div class="con">
-
-
-
     <div class="title">
-      <h1 class="header1">لمعرفة العرض او الطول لأي مساحة </h1>
-      <img src="../imgs/1.png" alt="">
+      <h1 class="header1">لمعرفة العرض أو الطول لأي مساحة</h1>
+      <img src="../imgs/1.png" alt="image">
     </div>
 
     <div class="s s1">
@@ -53,135 +41,101 @@
       <div>
         <table>
           <tr>
-
             <th>سهم</th>
             <th>قيراط</th>
             <th>فدان</th>
           </tr>
           <tr>
-            <td class="width1_result first"><input dir="ltr" type="number" id="input-shares" placeholder="6.25"
-                oninput="calculate()"></td>
-            <td class="width1_result"><input dir="ltr" type="number" id="input-carat" placeholder=" مثال 12"
-                oninput="calculate()">
+            <td class="width1_result first">
+              <input dir="ltr" type="number" id="input-shares" placeholder="6.25" oninput="calculate()">
             </td>
-            <td class="width1_result"><input dir="ltr" type="number" id="input-acre" placeholder=" مثال 1"
-                oninput="calculate()">
+            <td class="width1_result">
+              <input dir="ltr" type="number" id="input-carat" placeholder="مثال: 12" oninput="calculate()">
             </td>
-
+            <td class="width1_result">
+              <input dir="ltr" type="number" id="input-acre" placeholder="مثال: 1" oninput="calculate()">
+            </td>
           </tr>
         </table>
       </div>
     </div>
+
     <div class="s s2">
-      <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
+      <h3>اختر المساحة القيراط التي تريد القسمة عليها</h3>
       <div>
-        <img src="../imgs/4.png" alt="img" />
+        <img src="../imgs/4.png" alt="image" />
         <select id="input-carat-area" class="selector1" onchange="handleSelection()">
           <option value="168">168</option>
           <option value="171.388">171.388</option>
           <option value="175.035">175.035</option>
-          <option value="0">اخرى</option>
+          <option value="0">أخرى</option>
         </select>
-        <input type="number" id="other-input-field" placeholder=" القيراط بالمتر مربع" oninput="calculate()">
+        <input type="number" id="other-input-field" placeholder="القيراط بالمتر المربع" oninput="calculate()">
         <p>متر مربع</p>
       </div>
     </div>
-
 
     <div class="buttons2">
       <button class="but1" onclick="clearAll()">احذف</button>
       <button class="but2" onclick="calculate()">إحسب</button>
     </div>
 
-
-
     <div class="s s3">
-      <h3>أدخل طول او عرض المساحة المذكورة</h3>
+      <h3>أدخل طول أو عرض المساحة المذكورة</h3>
       <div>
-        <input type="number" dir="auto" placeholder="50000" class="input1" id="input-carat-price"
-          oninput="calculate()" />
+        <input type="number" dir="auto" placeholder="50000" class="input1" id="input-carat-price" oninput="calculate()" />
       </div>
     </div>
 
     <div class="s s5">
-      <h3>ناتج الطول او العرض المناسب</h3>
+      <h3>ناتج الطول أو العرض المناسب</h3>
       <div>
-
         <div>
-          <!-- <input type="text" dir="auto" value="20000" class="input2" /> -->
           <span id="output-result-total-price">0</span>
-
-
         </div>
-
       </div>
     </div>
+
     <div class="s s4">
-      <h3>الناتج بالمتر المربع </h3>
+      <h3>الناتج بالمتر المربع</h3>
       <div>
         <table>
           <tr>
-
-            <th></th>
-            <th></th>
-          </tr>
-          <tr>
             <td class="sec">
-              <img src="../imgs/4.png" alt="img" />
-              <span id="output-result-with-meter-squares">
-                0.0
-              </span>
-
+              <img src="../imgs/4.png" alt="image" />
+              <span id="output-result-with-meter-squares">0.0</span>
             </td>
-
-
           </tr>
         </table>
       </div>
     </div>
 
-
     <div class="s s6 last-element">
-
       <h3>الناتج بالقصبة الطولي</h3>
       <div>
         <table>
           <tr>
             <th></th>
-            <th>اقل من القبضة</th>
+            <th>أقل من القبضة</th>
             <th>قبضة</th>
             <th>قصبة</th>
-            <!-- <th></th> -->
-          </tr>
-
-          <tr>
-            <!-- <td> -->
-            <!-- </td> -->
-            <td>الطول او العرض</td>
-            <td id="output-less-than-fist"> .50</td>
-            <td id="output-fist"> 21</td>
-            <td id="output-reed"> 13</td>
           </tr>
           <tr>
-            <td>ناتج الطول او العرض</td>
-            <td id="output-less-than-fist2"> .50</td>
-            <td id="output-fist2"> 21</td>
-            <td id="output-reed2"> 13</td>
+            <td>الطول أو العرض</td>
+            <td id="output-less-than-fist">0.50</td>
+            <td id="output-fist">21</td>
+            <td id="output-reed">13</td>
+          </tr>
+          <tr>
+            <td>ناتج الطول أو العرض</td>
+            <td id="output-less-than-fist2">0.50</td>
+            <td id="output-fist2">21</td>
+            <td id="output-reed2">13</td>
           </tr>
         </table>
       </div>
     </div>
-
-
-
-
-
   </div>
-
-
-
-
-
 
   <div class="nav">
     <a href="help2/index.html" class="nav-box">
@@ -189,18 +143,19 @@
       <p>كسور</p>
     </a>
     <a class="nav-box" onclick="history.back()">
-      <img src="../imgs/nav2.png" alt="nav1" />
+      <img src="../imgs/nav2.png" alt="nav2" />
       <p>رجوع</p>
     </a>
     <a href="help/index.html" class="nav-box">
-      <img src="../imgs/nav3.png" alt="nav1" />
+      <img src="../imgs/nav3.png" alt="nav3" />
       <p>مساعدة</p>
     </a>
     <a href="../index.html" class="nav-box">
-      <img src="../imgs/nav4.png" alt="nav1" />
-      <p>الرئسية</p>
+      <img src="../imgs/nav4.png" alt="nav4" />
+      <p>الرئيسية</p>
     </a>
   </div>
+
   <script src="../nav.js"></script>
   <script src="script.js"></script>
 </body>
