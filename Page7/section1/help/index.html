@@ -1,87 +1,331 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="widp=device-widp, initial-scale=1.0" />
-  <link rel="stylesheet" href="../../../style.css" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Home</title>
-  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Home</title>
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap" rel="stylesheet" /> -->
-</head>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
 
-<body>
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
 
-  <div class="con">
-    <div class="dec1"></div>
-    <h1>شرح استخدام كل حقل</h1>
-    <div class="first">
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      tr:hover {
+        background-color: #ddd;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+      }
+
+      .nav-box {
+        text-align: center;
+      }
+
+      .nav-box img {
+        width: 50px;
+        height: 50px;
+      }
+
+      .nav-box p {
+        margin-top: 5px;
+      }
+
+      .con {
+        padding: 15px;
+        max-width: 900px;
+        margin: auto;
+      }
+
+      .first p {
+        text-align: justify;
+        line-height: 1.8;
+      }
+
+      span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="con">
+      <div class="dec1"></div>
       <h1>الطريقة الصحيحة لكتابة الكسور</h1>
-    <div class="first">
-      <p>اذا اردت كتابة اي كسر سوء في حقل الأسهم او اقل من قبضة مثال اردت كتابة ربع سوف ترى امام الربع 0.25 واذا اردت كتابة ثلث سوف ترى 0.33 اختار كما تشاء من الجدول التالي</p>
-    </div>
-    <img src="../../../imgs/table.PNG" alt="">
-    <div style="margin-top:5px;">
-      <p>في خانة السهم اذا كان الكسر اكبر من 23,99 اضف رقم واحد في خانة القيراط اذا كان اكبر من 23 قيراط اضف رقم واحد في خانة الفدان
-<br>( في خانة القيراط و السهم يجب ان يكون اقل من 24)<br>
-<span style="color:blue;">ملاحظة</span>: لا تكتب علامة عشرية في خانة القيراط و الفدان<br>
-مثال: اذا اردت كتابة قصبة و نصف و ستة قبض و ربع قبضة اكتب كما موضح بالشكل</p>
-    </div>
-    <table class="last">
-      <tr>
-        <th>اقل من قبضة</th>
-        <th>قبضة</th>
-        <th>قصبة</th>
-      </tr>
-      <tr>
-        <td>0.75</td>
-        <td>23</td>
-        <td>5</td>
-      </tr>
-    </table>
- <h2>ثانيا: الناتج بالسنتيمتر </h2>
-      <p>ﺳﻮف ﻳﻘﻮم اﻟﺒﺮﻧﺎﻣﺞ بضرب 3.55 متر وهي قيمة (القصبة بالمتر ) ﻓﻲ ﻋﺪد اﻟﻘﺼﺒﺔ
-و ضرب 14.7916667 <p>
-   (وهي قيمة القبضة بالسنتيمتر) ﻓﻲ ﻋﺪد اﻟﻘﺒﻀﺔ 
-  <p> و ضرب 14.7916667  في حقل اقل من قبضة و تحويلهم بالمتر او بالسنتيمتر
+      <div class="first">
+        <p>
+          إذا أردت إدخال أي كسر في حقل "الأسهم" أو حقل "أقل من قبضة"، اتبع هذه
+          الخطوات:<br />
+          مثال: إذا أردت كتابة ربع، سترى أمام "الربع" القيمة 0.25.<br />
+          مثال آخر: إذا أردت كتابة ثلث، سترى أمام "الثلث" القيمة 0.333.<br />
+          اختر الكسر المناسب من الجدول التالي بناءً على احتياجاتك، وتأكد من
+          إدخال القيمة العشرية المرتبطة بالكسر.
+          <br />استخدام الجدول يساعدك في اختيار الكسر الصحيح وكتابته بدقة.
+        </p>
+      </div>
 
-      <h2>رابعاً: احسب</h2>
-      <p>بعد ملئ كل الحقول اضغط احسب حتى يتم تنفيذ الامر</p>
-    </div>
-    <div>
-      <h2>خامساً: احذف</h2>
-      <p>في حالة تمت المهمة واردت حساب مسئلة اخرى اضغط احذف</p>
-    </div>
-    <div class="last">
-     
-    </div>
+      <table>
+        <thead>
+          <tr>
+            <th>الكسر</th>
+            <th>الكسر العشري</th>
+            <th>النسبة المئوية</th>
+            <th>الاسم بالعربي</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1/100</td>
+            <td>0.01</td>
+            <td>1%</td>
+            <td>واحد في المائة</td>
+          </tr>
+          <tr>
+            <td>1/50</td>
+            <td>0.02</td>
+            <td>2%</td>
+            <td>واحد على خمسين</td>
+          </tr>
+          <tr>
+            <td>1/40</td>
+            <td>0.025</td>
+            <td>2.5%</td>
+            <td>واحد على أربعين</td>
+          </tr>
+          <tr>
+            <td>1/25</td>
+            <td>0.04</td>
+            <td>4%</td>
+            <td>واحد على خمسة وعشرون</td>
+          </tr>
+          <tr>
+            <td>1/20</td>
+            <td>0.05</td>
+            <td>5%</td>
+            <td>واحد على عشرين</td>
+          </tr>
+          <tr>
+            <td>1/16</td>
+            <td>0.0625</td>
+            <td>6.25%</td>
+            <td>سدس عشر</td>
+          </tr>
+          <tr>
+            <td>1/12</td>
+            <td>0.083</td>
+            <td>8.33%</td>
+            <td>واحد على اثني عشر</td>
+          </tr>
+          <tr>
+            <td>1/10</td>
+            <td>0.1</td>
+            <td>10%</td>
+            <td>عشر</td>
+          </tr>
+          <tr>
+            <td>1/8</td>
+            <td>0.125</td>
+            <td>12.5%</td>
+            <td>ثمن</td>
+          </tr>
+          <tr>
+            <td>1/6</td>
+            <td>0.166</td>
+            <td>16.66%</td>
+            <td>سدس</td>
+          </tr>
+          <tr>
+            <td>1/5</td>
+            <td>0.2</td>
+            <td>20%</td>
+            <td>خمس</td>
+          </tr>
+          <tr>
+            <td>1/4</td>
+            <td>0.25</td>
+            <td>25%</td>
+            <td>ربع</td>
+          </tr>
+          <tr>
+            <td>1/3</td>
+            <td>0.333</td>
+            <td>33.33%</td>
+            <td>ثلث</td>
+          </tr>
+          <tr>
+            <td>3/8</td>
+            <td>0.375</td>
+            <td>37.5%</td>
+            <td>ثلاثة أثمان</td>
+          </tr>
+          <tr>
+            <td>1/2</td>
+            <td>0.5</td>
+            <td>50%</td>
+            <td>نصف</td>
+          </tr>
+          <tr>
+            <td>3/5</td>
+            <td>0.6</td>
+            <td>60%</td>
+            <td>ثلاث أخماس</td>
+          </tr>
+          <tr>
+            <td>5/8</td>
+            <td>0.625</td>
+            <td>62.5%</td>
+            <td>خمسة أثمان</td>
+          </tr>
+          <tr>
+            <td>2/3</td>
+            <td>0.666</td>
+            <td>66.66%</td>
+            <td>ثلثين</td>
+          </tr>
+          <tr>
+            <td>3/4</td>
+            <td>0.75</td>
+            <td>75%</td>
+            <td>ثلاثة أرباع</td>
+          </tr>
+          <tr>
+            <td>4/5</td>
+            <td>0.8</td>
+            <td>80%</td>
+            <td>أربعة أخماس</td>
+          </tr>
+          <tr>
+            <td>5/6</td>
+            <td>0.833</td>
+            <td>83.33%</td>
+            <td>خمسة أسداس</td>
+          </tr>
+          <tr>
+            <td>7/8</td>
+            <td>0.875</td>
+            <td>87.5%</td>
+            <td>سبعة أثمان</td>
+          </tr>
+          <tr>
+            <td>9/10</td>
+            <td>0.9</td>
+            <td>90%</td>
+            <td>تسعة أعشار</td>
+          </tr>
+          <tr>
+            <td>99/100</td>
+            <td>0.99</td>
+            <td>99%</td>
+            <td>تسعة وتسعون في المائة</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>1.0</td>
+            <td>100%</td>
+            <td>واحد كامل</td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div class="nav">
-      <a href="../help2/index.html" class="nav-box">
-        <img src="../../../imgs/nav1.png" alt="nav1" />
-        <p>كسور</p>
-      </a>
-      <a class="nav-box" onclick="history.back()">
-        <img src="../../../imgs/nav2.png" alt="nav1" />
-        <p>رجوع</p>
-      </a>
-      <a href="#" class="nav-box">
-        <img src="../../../imgs/nav3.png" alt="nav1" />
-        <p>مساعدة</p>
-      </a>
-      <a href="../../../index.html" class="nav-box">
-        <img src="../../../imgs/nav4.png" alt="nav1" />
-        <p>الرئسية</p>
-      </a>
-    </div>
-  </div>
-  <script src="script.js"></script>
-  <!-- <script src="../../nav.js"></script> -->
-</body>
+      <div style="margin-top: 5px">
+        <!-- الجزء الأول: إدخال عدد القراريط -->
+        <div class="first">
+          <h2>إدخال عدد القراريط</h2>
+          <p>
+            في حقل السهم، إذا كان الكسر أكبر من 23.99، أضف رقمًا واحدًا في حقل
+            القيراط.
+          </p>
+          <p>
+            في حقل القيراط إذا كان أكبر من 23 قيراطًا، أضف رقمًا واحدًا في حقل
+            الفدان.<br />
+            (يجب أن يكون القيراط والسهم أقل من 24).<br />
+            <strong>ملاحظة:</strong> لا تكتب علامة عشرية في حقل القيراط أو
+            الفدان.<br />
+            <strong>مثال:</strong> إذا أردت كتابة فدان ونصف وستة أسهم وربع سهم،
+            اكتب كما هو موضح بالشكل.
+          </p>
+        </div>
 
+        <!-- جدول توضيحي للقيراط والفدان والسهم -->
+        <table>
+          <tr>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td>6.25</td>
+            <td>12</td>
+            <td>1</td>
+          </tr>
+        </table>
+
+        <p>
+          الناتج بالسنتيمتر:.<br />
+          يقوم البرنامج بضرب 3.55 متر (قيمة القصبة بالمتر) في عدد القصبات
+          المدخلة. ثم يتم ضرب 14.7916667 سنتيمتر (قيمة القبضة بالسنتيمتر) في عدد
+          القبضات المدخلة. يتم ضرب نفس القيمة (14.7916667) في عدد الأجزاء أقل من
+          القبضة وتحويل القيم إلى متر أو سنتيمتر بناءً على اختيارك.
+
+          <br />
+        </p>
+
+        <p>
+          احسب:.<br />بعد ملء جميع الحقول، اضغط على زر "احسب" حتى يتم تنفيذ
+          العملية وحساب القيم.
+          <br />
+
+          احذف :
+          <br />
+          <span style="color: blue"></span> اعادة الحساب اذا انتهيت من حساب مهمة
+          معينة وترغب في حساب مسألة أخرى، اضغط على زر "احذف" لإعادة ضبط جميع
+          الحقول.
+        </p>
+        <!-- <div class="nav">
+          <a href="#" class="nav-box">
+            <img src="../../imgs/nav1.png" alt="nav1" />
+            <p>كسور</p>
+          </a>
+          <a class="nav-box" onclick="history.back()">
+            <img src="../../imgs/nav2.png" alt="nav1" />
+            <p>رجوع</p>
+          </a>
+          <a href="../help/index.html" class="nav"></a>
+        </div> -->
+        <script src="../../../addnav.js"></script>
+      </div>
+    </div>
+  </body>
 </html>

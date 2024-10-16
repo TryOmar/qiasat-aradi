@@ -27,4 +27,6 @@
 }
 .con{
     position: relative;
+    height: fit-content;
+    padding-bottom: 100px;
 }

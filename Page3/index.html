@@ -25,18 +25,18 @@
     </div>
 
     <div class="s s1">
-      <h3>ادخل عدد القراريط الذي تريد توزيعها</h3>
+      <h3>ادخل اجمالي عدد القراريط</h3>
       <div class="inputs">
         <div class="share input-div">
-          <label for="share-input">سهم</label>
+          <label for="share-input">الاسهم</label>
           <input tabindex="3" dir="auto" type="number" id="share-input">
         </div>
         <div class="carat input-div">
-          <label for="carat-input">قيراط</label>
+          <label for="carat-input">القراريط</label>
           <input tabindex="2" dir="auto" type="number" id="carat-input">
         </div>
         <div class="acre input-div">
-          <label for="acre-input">فدان</label>
+          <label for="acre-input">الفدادين</label>
           <input tabindex="1" dir="auto" type="number" id="acre-input">
         </div>
       </div>
@@ -48,19 +48,19 @@
     </div>
 
     <div class="s s2">
-      <h3>ادخل اجمالي عرض المساحة المذكورة بالمتر</h3>
+      <h3>إدخال إجمالي عرض المساحة (بالمتر)</h3>
       <input tabindex="4" dir="auto" type="number" id="cm">
     </div>
 
     <div class="s s3">
-      <h3>ادخل نصيب كل فرد من الاراضي و العرض القديم</h3>
+      <h3>إدخال حصة كل مزارع بالقيراط والسهم و العرض القديم</h3>
       <div class="table">
         <div class="table-header">
           <p>سهم</p>
           <p>قيراط</p>
-          <p>عرض المساحة</p>
-          <p>العرض القديم</p>
-          <p>الفرق بالمتر</p>
+          <p>العرض الحالي</p>
+          <p>العرض السابق</p>
+          <p>الفرق بين العرضين</p>
         </div>
         <div class="table-input">
           <input dir="auto" type="number">
@@ -121,7 +121,7 @@
       </div>
       <div class="results">
         <div class="result-right">
-          <p>المتبقي من عدد القراريط</p>
+          <p>المتبقي او الناقص من قراريط</p>
           <div class="residual">
             <div>
               <p>سهم</p>
@@ -138,13 +138,13 @@
           </div>
         </div>
         <div class="result-left">
-          <p>نصيب القيراط الواحد بالمتر</p>
+          <p>عرض القيراط الواحد بالمتر</p>
           <span class="each-carat">0</span>
         </div>
       </div>
     </div>
     <div class="s s4">
-      <h3>عرض المساحة و نصيب القيراط بالقبضة</h3>
+      <h3> تحويل المساحة من متر طولي إلى قصبة طولي</h3>
       <div>
         <table>
           <tr>
@@ -154,13 +154,13 @@
             <th>قصبة</th>
           </tr>
           <tr class="width-old">
-            <td>عرض المساحة المذكورة</td>
+            <td>عرض اجمالي المساحة المذكورة</td>
             <td dir="auto" contenteditable="true">0</td>
             <td dir="auto" contenteditable="true">0</td>
             <td dir="auto" contenteditable="true">0</td>
           </tr>
           <tr class="each-old">
-            <td>نصيب القيراط الواحد</td>
+            <td>عرض القيراط الواحد</td>
             <td>0</td>
             <td>0</td>
             <td>0</td>

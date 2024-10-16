@@ -7,10 +7,17 @@ let nav = document.querySelector(".nav");
 //     nav.style.display = "none"
 //   }
 // })
-window.visualViewport.addEventListener("resize", () =>
-  window.getComputedStyle(nav).display == "none"
-    ? (nav.style.display = "flex")
-    : window.getComputedStyle(nav).display == "flex"
-    ? (nav.style.display = "none")
-    : ""
-);
+
+
+let mainViewPort;
+
+window.onload = ()=>{
+  mainViewPort = screen.height;
+}
+// window.visualViewport.addEventListener("resize", () =>{
+//   if(mainViewPort - screen.height >= 20){
+//     nav.style.display = "none";
+//   }else{
+//     nav.style.display = "flex";
+//   }
+// });

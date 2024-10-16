@@ -5,6 +5,7 @@
 }
 .con{
     padding: 4px;
+    height:fit-content;
 }
 .con > h1{
     margin-top: 50px;
