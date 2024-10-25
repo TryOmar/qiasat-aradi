@@ -123,7 +123,7 @@
                                 style="width: 70px;text-align: center;"></td>
                         <td> <input type="number" id="input_lessThanFist"
                                 oninput="validateInput(); calculateFistReedToCM();"
-                                style="width: 70px; text-align: center;" step="0.001">
+                                style="width: 70px; text-align: center;" step="any">
                         </td>
 
                     </tr>
@@ -150,7 +150,8 @@
             if (value !== "" && !/^0\.|^0$/.test(value)) {
                 value = "0." + value;
                 inputField.value = value;
-                inputField.setCustomValidity("يجب أن تبدأ القيمة بـ 0.");
+                inputField.setCustomValidity("يجب أن تبدأ القيمة بصفر ثم علامة عشرية .0");
+
             } else if (value !== "" && (parseFloat(value) < 0.0 || parseFloat(value) > 0.99)) {
                 inputField.setCustomValidity("يجب إدخال قيمة من 0.1 إلى 0.99.");
             } else {
