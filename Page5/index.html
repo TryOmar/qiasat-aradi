@@ -185,7 +185,7 @@
       <div>
 
         <span>
-          <input type="button" id="btn_Calculate" name="احسب" value="احسب" onclick="calculateShares()">
+          <input type="button" id="btn_Calculate" name="احسب" value="احسب" onclick="calculateShares(true)">
         </span>
         <span>
           <input type="button" id="btn_Delete" name="حذف" value="حذف" onclick="clearInputFields()">
@@ -229,137 +229,46 @@
       <br>
 
       <table id="tbl_Results">
-
         <tr>
-          <th>
-            <label>النسبة</label>
-          </th>
-          <th>
-            <label>فدان</label>
-          </th>
-          <th>
-            <label>قيراط</label>
-          </th>
-          <th>
-            <label>سهم</label>
-          </th>
-          <th>
-            <label>القرابة</label>
-          </th>
+          <th><label>النسبة</label></th>
+          <th><label>فدان</label></th>
+          <th><label>قيراط</label></th>
+          <th><label>سهم</label></th>
+          <th><label>القرابة</label></th>
+          <th><label>اختيار</label></th> <!-- Checkbox column header on the right -->
         </tr>
         <tr class="wife">
-          <td>
-            <center>
-              <input type="input" id="txt_PercentWives" style="width:100%" placeholder="0%" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Wivesacre" style="width:100%" placeholder="0" min="0" max="4" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Wivescarat" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Wivesshare" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <label style="font-weight:bold"> نصيب الزوجات</label>
-            </center>
-          </td>
+          <td><input type="input" id="txt_PercentWives" style="width:100%" placeholder="0%" readonly></td>
+          <td><input type="input" id="txt_Wivesacre" style="width:100%" placeholder="0" min="0" max="4" readonly></td>
+          <td><input type="input" id="txt_Wivescarat" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_Wivesshare" style="width:100%" placeholder="0" readonly></td>
+          <td><label style="font-weight:bold"> نصيب الزوجات</label></td>
+          <td><input type="checkbox" checked disabled onchange="updateTotal()"></td> <!-- Checkbox on the right -->
         </tr>
-
         <tr class="females">
-          <td>
-            <center>
-              <input type="input" id="txt_FemalesPercent" style="width:100%" placeholder="0%" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Femalesacre" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Femalescarat" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Femalesshare" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <label style="font-weight:bold"> البنت الواحدة<label>
-            </center>
-          </td>
+          <td><input type="input" id="txt_FemalesPercent" style="width:100%" placeholder="0%" readonly></td>
+          <td><input type="input" id="txt_Femalesacre" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_Femalescarat" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_Femalesshare" style="width:100%" placeholder="0" readonly></td>
+          <td><label style="font-weight:bold"> البنت الواحدة<label></td>
+          <td><input type="checkbox" checked disabled onchange="updateTotal()"></td> <!-- Checkbox on the right -->
         </tr>
-
         <tr class="sons">
-          <td>
-            <center>
-              <input type="input" id="txt_malePercent" style="width:100%" placeholder="0%" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_malesacre" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_malescarat" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_malesshare" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <label style="font-weight:bold"> الأبن الواحد<label>
-            </center>
-          </td>
+          <td><input type="input" id="txt_malePercent" style="width:100%" placeholder="0%" readonly></td>
+          <td><input type="input" id="txt_malesacre" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_malescarat" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_malesshare" style="width:100%" placeholder="0" readonly></td>
+          <td><label style="font-weight:bold"> الأبن الواحد<label></td>
+          <td><input type="checkbox" checked disabled onchange="updateTotal()"></td> <!-- Checkbox on the right -->
         </tr>
-
         <tr class="tableFooterTotal">
-          <td>
-            <center>
-              <input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-          <td>
-            <center>
-              <input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly>
-            </center>
-          </td>
-
-          <td>
-            <center>
-              <label style="font-weight:bold"> الاجمالى <label>
-            </center>
-          </td>
+          <td><input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly></td>
+          <td><input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly></td>
+          <td><input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly></td>
+          <td><label style="font-weight:bold">اجمالي</label></td> <!-- Total label -->
+          <td id="checkboxCount">0</td> <!-- Checkbox count  -->
         </tr>
-
       </table>
 
       <p id="leftSharesMessage" style="text-align: center; direction: rtl; font-size: 20px;"></p>

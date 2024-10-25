@@ -73,197 +73,120 @@ function updateTables(
   numWivesValue = 0,
   numFemalesValue = 0,
   numMalesValue = 0,
-  isSharesLeft = false
+  isSharesLeft = false,
+  listOfCheckboxValues = []
 ) {
-  let tableHead = `
-      <tr>
-        <th>
-          <label>النسبة</label>
-        </th>
-        <th>
-          <label>فدان</label>
-        </th>
-        <th>
-          <label>قيراط</label>
-        </th>
-        <th>
-          <label>سهم</label>
-        </th>
-        <th>
-          <label>القرابة</label>
-        </th>
-      </tr>
-    `;
+  // Initialize listOfCheckboxValues with true if empty
+  if (!listOfCheckboxValues || listOfCheckboxValues.length == 0) {
+    listOfCheckboxValues = Array(
+      numWivesValue + numFemalesValue + numMalesValue
+    ).fill(true);
+  }
+  console.log("Num: ", numWivesValue, numFemalesValue, numMalesValue);
+  console.log("After: ", listOfCheckboxValues);
 
+  let tableHead = `
+    <tr>
+      <th><label>النسبة</label></th>
+      <th><label>فدان</label></th>
+      <th><label>قيراط</label></th>
+      <th><label>سهم</label></th>
+      <th><label>القرابة</label></th>
+      <th><label>اختيار</label></th>
+    </tr>
+  `;
+
+  // Generating table rows for wives
   let tableWives = "";
   for (let i = 0; i < numWivesValue; i++) {
-    tableWives = tableWives.concat(`
+    tableWives += `
       <tr class="wife">
-        <td>
-          <center>
-            <input type="input" id="txt_PercentWives${i}" style="width:100%" placeholder="0%" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Wivesacre${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Wivescarat${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Wivesshare${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <label style="font-weight:bold"> الزوجة ${i + 1} </label>
-          </center>
-        </td>
+        <td><center><input type="input" id="txt_PercentWives${i}" style="width:100%" placeholder="0%" readonly></center></td>
+        <td><center><input type="input" id="txt_Wivesacre${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_Wivescarat${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_Wivesshare${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><label style="font-weight:bold"> الزوجة ${
+          i + 1
+        } </label></center></td>
+        <td><center><input type="checkbox" ${
+          listOfCheckboxValues[i] ? "checked" : ""
+        } onchange="calculateShares()"></center></td>
       </tr>
-      `);
+    `;
   }
 
+  // Generating table rows for females
   let tableFemale = "";
   for (let i = 0; i < numFemalesValue; i++) {
-    tableFemale = tableFemale.concat(`
-    <tr class="females">
-        <td>
-          <center>
-            <input type="input" id="txt_FemalesPercent${i}" style="width:100%" placeholder="0%" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Femalesacre${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Femalescarat${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Femalesshare${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <label style="font-weight:bold"> البنت ${i + 1}<label>
-          </center>
-        </td>
+    tableFemale += `
+      <tr class="females">
+        <td><center><input type="input" id="txt_FemalesPercent${i}" style="width:100%" placeholder="0%" readonly></center></td>
+        <td><center><input type="input" id="txt_Femalesacre${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_Femalescarat${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_Femalesshare${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><label style="font-weight:bold"> البنت ${
+          i + 1
+        } </label></center></td>
+        <td><center><input type="checkbox" ${
+          listOfCheckboxValues[numWivesValue + i] ? "checked" : ""
+        } onchange="calculateShares()"></center></td>
       </tr>
-      `);
+    `;
   }
 
+  // Generating table rows for males
   let tableMale = "";
   for (let i = 0; i < numMalesValue; i++) {
-    tableMale = tableMale.concat(`
+    tableMale += `
       <tr class="sons">
-        <td>
-          <center>
-            <input type="input" id="txt_malePercent${i}" style="width:100%" placeholder="0%" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_malesacre${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_malescarat${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_malesshare${i}" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <label style="font-weight:bold"> الأبن ${i + 1}<label>
-          </center>
-        </td>
+        <td><center><input type="input" id="txt_malePercent${i}" style="width:100%" placeholder="0%" readonly></center></td>
+        <td><center><input type="input" id="txt_malesacre${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_malescarat${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_malesshare${i}" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><label style="font-weight:bold"> الأبن ${
+          i + 1
+        } </label></center></td>
+        <td><center><input type="checkbox" ${
+          listOfCheckboxValues[numWivesValue + numFemalesValue + i]
+            ? "checked"
+            : ""
+        } onchange="calculateShares()"></center></td>
       </tr>
-      `);
+    `;
   }
 
+  // Additional row if isSharesLeft is true
   let tableLeft = "";
   if (isSharesLeft) {
     tableLeft = `
       <tr>
-        <td>
-          <center>
-            <input type="input" id="txt_leftPercent" style="width:100%" placeholder="0%" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_leftacre" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_leftscarat" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_leftshare" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-
-        <td>
-          <center>
-            <label style="font-weight:bold"> المتبقي <label>
-          </center>
-        </td>
+        <td><center><input type="input" id="txt_leftPercent" style="width:100%" placeholder="0%" readonly></center></td>
+        <td><center><input type="input" id="txt_leftacre" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_leftscarat" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><input type="input" id="txt_leftshare" style="width:100%" placeholder="0" readonly></center></td>
+        <td><center><label style="font-weight:bold"> المتبقي </label></center></td>
+        <td><center><input type="checkbox" onchange="calculateShares()"></center></td>
       </tr>
-
-      `;
+    `;
   }
 
+  // Footer row
   let tableFoot = `
-      <tr class = "tableFooterTotal">
-        <td>
-          <center>
-            <input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly> 
-          </center>
-        </td>
-        <td>
-          <center>
-            <input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly>
-          </center>
-        </td>
+    <tr class="tableFooterTotal">
+      <td><center><input type="input" id="txt_TotalPercentVal" style="width:100%" placeholder="0%" readonly></center></td>
+      <td><center><input type="input" id="txt_Totalsacre" style="width:100%" placeholder="0" readonly></center></td>
+      <td><center><input type="input" id="txt_Totalcarat" style="width:100%" placeholder="0" readonly></center></td>
+      <td><center><input type="input" id="txt_Totalshare" style="width:100%" placeholder="0" readonly></center></td>
+      <td><center><label style="font-weight:bold"> الاجمالى </label></center></td>
+      <td id="checkboxCount">${
+        numWivesValue + numFemalesValue + numMalesValue
+      }</td>
+    </tr>
+  `;
 
-        <td>
-          <center>
-            <label style="font-weight:bold"> الاجمالى <label>
-          </center>
-        </td>
-      </tr>
-
-    `;
-
+  // Updating the table with all the generated rows
   document.getElementById("tbl_Results").innerHTML =
     tableHead + tableWives + tableFemale + tableMale + tableLeft + tableFoot;
-  // calculateShares();
 }
 
 function IntegerWithoutDecimal(inputElement) {
@@ -288,7 +211,26 @@ function ZeroToFourValidate(inputElement) {
   return inputElement.value;
 }
 
-function calculateShares() {
+function getUncheckedCounts(
+  numWives,
+  numFemales,
+  numMales,
+  listOfCheckboxValues
+) {
+  let uncheckedWives = listOfCheckboxValues
+    .slice(0, numWives)
+    .filter((val) => !val).length;
+  let uncheckedFemales = listOfCheckboxValues
+    .slice(numWives, numWives + numFemales)
+    .filter((val) => !val).length;
+  let uncheckedMales = listOfCheckboxValues
+    .slice(numWives + numFemales, numWives + numFemales + numMales)
+    .filter((val) => !val).length;
+
+  return [uncheckedWives, uncheckedFemales, uncheckedMales];
+}
+
+function calculateShares(newCalculation = false) {
   // Get input values
   let acreValue = IntegerWithoutDecimal(document.getElementById("txt_acre"));
   let caratValue = IntegerWithoutDecimal(document.getElementById("txt_carat"));
@@ -301,6 +243,12 @@ function calculateShares() {
   let numMalesValue = IntegerWithoutDecimal(
     document.getElementById("txt_numMales")
   );
+
+  let listOfCheckboxValues = Array.from(
+    document.querySelectorAll("#tbl_Results input[type=checkbox]")
+  )
+    .filter((checkbox) => !checkbox.disabled) // Only include enabled checkboxes
+    .map((checkbox) => checkbox.checked); // Get checked state
 
   // Perform the operations
   // Perform the operations
@@ -357,6 +305,16 @@ function calculateShares() {
   // console.log("nasebBnat:", nasebBnat);
   // console.log("nasebAbn:", nasebAbn);
 
+  numWivesValue = Number(numWivesValue);
+  numFemalesValue = Number(numFemalesValue);
+  numMalesValue = Number(numMalesValue);
+
+  if (newCalculation) {
+    listOfCheckboxValues = Array(
+      numWivesValue + numFemalesValue + numMalesValue
+    ).fill(true);
+  }
+
   const familyShares =
     numWivesValue * nasebZwga +
     numFemalesValue * nasebBnat +
@@ -367,7 +325,13 @@ function calculateShares() {
   let totalSharesleft = totalAllShares - familyShares;
   isSharesLeft = totalSharesleft > 0 ? true : false;
 
-  updateTables(numWivesValue, numFemalesValue, numMalesValue, isSharesLeft);
+  updateTables(
+    numWivesValue,
+    numFemalesValue,
+    numMalesValue,
+    isSharesLeft,
+    listOfCheckboxValues
+  );
 
   // Calculate the values using the helper function
   const [wivesAcre, wivesCarat, wivesShare] =
@@ -388,10 +352,6 @@ function calculateShares() {
     totalSharesleft,
     totalAllShares
   ); // 100% of the total is itself
-
-  const [totalAcre, totalCarat, totalShare] =
-    calculateScaresAndCarats(totalAllShares);
-  const totalPercentVal = calculatePercentage(totalAllShares, totalAllShares); // 100% of the total is itself
 
   // Write the values back into the input boxes
   document.getElementById("txt_TotalAllshare").value = totalAllShares;
@@ -433,6 +393,29 @@ function calculateShares() {
     document.getElementById("leftSharesMessage").innerHTML = "";
   }
 
+  console.log();
+
+  const totalChecked = listOfCheckboxValues.filter((val) => val).length;
+  const [uncheckedWives, uncheckedFemales, uncheckedMales] = getUncheckedCounts(
+    numWivesValue,
+    numFemalesValue,
+    numMalesValue,
+    listOfCheckboxValues
+  );
+  const unCheckedShares =
+    uncheckedWives * nasebZwga +
+      uncheckedFemales * nasebBnat +
+      uncheckedMales * nasebAbn || 0;
+
+  console.log("unCheckedShares:", unCheckedShares);
+  const [totalAcre, totalCarat, totalShare] = calculateScaresAndCarats(
+    totalAllShares - unCheckedShares
+  );
+  const totalPercentVal = calculatePercentage(
+    totalAllShares - unCheckedShares,
+    totalAllShares
+  ); // 100% of the total is itself
+  document.getElementById("checkboxCount").innerHTML = totalChecked;
   document.getElementById("txt_Totalsacre").value = totalAcre;
   document.getElementById("txt_Totalcarat").value = totalCarat;
   document.getElementById("txt_Totalshare").value = totalShare;
