@@ -63,7 +63,12 @@
     <div class="s s2">
       <h3>ادخل سعر القيراط الواحد</h3>
       <div>
+        <!-- Display input (formatted) -->
         <input tabindex="4" type="text" dir="auto" onkeyup="formatNumber(this)" />
+
+        <!-- Hidden input (unformatted, for calculations) -->
+        <input type="hidden" id="numericValue" name="numericValue" />
+
         <p class="s2-input2">جنية</p>
       </div>
     </div>

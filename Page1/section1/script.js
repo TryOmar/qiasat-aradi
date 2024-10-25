@@ -3,7 +3,7 @@ let width2 = document.querySelector(".input-s2 input");
 let height = document.querySelector(".input-s3 input");
 let area1 = document.querySelector(".selector1");
 let area2 = document.querySelector(".selector2");
-let price = document.querySelector(".s2 div input");
+let price = document.getElementById("numericValue");
 let average_result = document.querySelector("#average-result");
 let totalArea_result = document.querySelector("#totalArea-result");
 let price_result = document.querySelector("#price-result");
@@ -177,7 +177,10 @@ function clearall() {
 }
 
 function formatNumber(input) {
-  // Remove non-digit characters, format with commas
-  const value = input.value.replace(/\D/g, "");
-  input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // Remove non-digit characters for the hidden value
+  const rawValue = input.value.replace(/\D/g, "");
+  // Set the hidden input with the numeric value
+  document.getElementById("numericValue").value = rawValue;
+  // Format the displayed value with commas
+  input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
