@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../../style.css" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Home</title>
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Home</title>
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&display=swap"
@@ -17,135 +18,137 @@
       href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap"
       rel="stylesheet"
     /> -->
-  </head>
-  <body>
-    <div class="con">
-      <div class="dec1"></div>
+</head>
 
-      <div class="header-con">
-        <h1 class="header1">حساب مساحة الاراضي بالمتر </h1>
-        <img src="../../imgs/1.png" alt="" />
-      </div>
-      <div class="input">
-        <div class="input-s1">
-          <p> أدخل العرض الاول</p>
-          <input tabindex="1" type="number" placeholder="مثال 18.87" id="but5" dir="auto" />
-        </div>
-        <div class="input-s2">
-          <p>أدخل العرض الاخر</p>
-          <input tabindex="2" type="number" placeholder="مثال 18.50" dir="auto" />
-        </div>
-        <div class="input-s3">
-          <p>أدخل الطول</p>
-          <input tabindex="3" type="number" placeholder="مثال 180.75" dir="auto" />
-        </div>
-      </div>
-      <div class="buttons2">
-        <button class="but1" onclick="clearall()">أحذف</button>
-        <button class="but2" onclick="calculate()">أحسب</button>
-      </div>
-      <div class="s s1">
-        <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
-        <div>
-          <img src="../../imgs/4.png" alt="img" />
-          <input type="number" class="selector2" value="168" dir="auto" />
-          <select class="selector1" onchange="other()">
-            <option value="1">168</option>
-            <option value="2">171.388</option>
-            <option value="3">175.035</option>
-            <option value="4">اخر</option>
-          </select>
-          <p>متر مربع</p>
-        </div>
-      </div>
-      <div class="s s2">
-        <h3>ادخل سعر القيراط الواحد</h3>
-        <div>
-          <input tabindex="4" type="number" dir="auto" />
-          <p class="s2-input2">جنية</p>
-        </div>
-      </div>
-      <div class="s s3">
-        <h3>اجمالي المساحة </h3>
-        <div>
-          <table>
-            <tr>
-              <th>سهم</th>
-              <th>قيراط</th>
-              <th>فدان</th>
-            </tr>
-            <tr>
-              <td id="area-result3">0</td>
-              <td id="area-result2">0</td>
-              <td id="area-result1">0</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div class="s s4">
-        <h3>اجمالي عدد الامتار المربعة</h3>
-        <div>
-          <p id="totalArea-result">0</p>
-        </div>
-      </div>
-      <div class="s s4">
-        <h3>اجمالي السعر قطعة الارض</h3>
-        <div>
-          <p id="price-result">0</p>
-        </div>
-      </div>
-      <div class="s s5">
-        <h3>تحويل من متر طولي الي القصبة و القبضة</h3>
-        <div>
-          <table>
-            <tr>
-              <th></th>
-              <th>اقل من القبضة</th>
-              <th>قبضة</th>
-              <th>قصبة</th>
-            </tr>
-            <tr>
-              <td> ناتج العرض الاول</td>
-              <td class="width1_result">0</td>
-              <td class="width1_result">0</td>
-              <td class="width1_result">0</td>
-            </tr>
-            <tr>
-              <td>ناتج العرض الاخر</td>
-              <td class="width2_result">0</td>
-              <td class="width2_result">0</td>
-              <td class="width2_result">0</td>
-            </tr>
-            <tr>
-              <td>ناتج الطول</td>
-              <td class="height_result">0</td>
-              <td class="height_result">0</td>
-              <td class="height_result">0</td>
-            </tr>
-          </table>
-        </div>
-      </div>
+<body>
+  <div class="con">
+    <div class="dec1"></div>
 
-      <div class="nav">
-        <a href="help2/index.html" class="nav-box">
-          <img src="../../imgs/nav1.png" alt="nav1" />
-          <p>كسور</p>
-        </a>
-        <a class="nav-box" onclick="history.back()">
-          <img src="../../imgs/nav2.png" alt="nav1" />
-          <p>رجوع</p>
-        </a>
-        <a href="help/index.html" class="nav-box">
-          <img src="../../imgs/nav3.png" alt="nav1" />
-          <p>مساعدة</p>
-        </a>
-        <a href="../../index.html" class="nav-box">
-          <img src="../../imgs/nav4.png" alt="nav1" />
-          <p>الرئسية</p>
-        </a>
+    <div class="header-con">
+      <h1 class="header1">حساب مساحة الاراضي بالمتر </h1>
+      <img src="../../imgs/1.png" alt="" />
+    </div>
+    <div class="input">
+      <div class="input-s1">
+        <p> أدخل العرض الاول</p>
+        <input tabindex="1" type="number" placeholder="مثال 18.87" id="but5" dir="auto" />
+      </div>
+      <div class="input-s2">
+        <p>أدخل العرض الاخر</p>
+        <input tabindex="2" type="number" placeholder="مثال 18.50" dir="auto" />
+      </div>
+      <div class="input-s3">
+        <p>أدخل الطول</p>
+        <input tabindex="3" type="number" placeholder="مثال 180.75" dir="auto" />
       </div>
     </div>
-    <script src="script.js"></script>
-    <script src="../../nav.js"></script>
-  </body>
+    <div class="buttons2">
+      <button class="but1" onclick="clearall()">أحذف</button>
+      <button class="but2" onclick="calculate()">أحسب</button>
+    </div>
+    <div class="s s1">
+      <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
+      <div>
+        <img src="../../imgs/4.png" alt="img" />
+        <input type="number" class="selector2" value="168" dir="auto" />
+        <select class="selector1" onchange="other()">
+          <option value="1">168</option>
+          <option value="2">171.388</option>
+          <option value="3">175.035</option>
+          <option value="4">اخر</option>
+        </select>
+        <p>متر مربع</p>
+      </div>
+    </div>
+    <div class="s s2">
+      <h3>ادخل سعر القيراط الواحد</h3>
+      <div>
+        <input tabindex="4" type="text" dir="auto" onkeyup="formatNumber(this)" />
+        <p class="s2-input2">جنية</p>
+      </div>
+    </div>
+    <div class="s s3">
+      <h3>اجمالي المساحة </h3>
+      <div>
+        <table>
+          <tr>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+          <tr>
+            <td id="area-result3">0</td>
+            <td id="area-result2">0</td>
+            <td id="area-result1">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>اجمالي عدد الامتار المربعة</h3>
+      <div>
+        <p id="totalArea-result">0</p>
+      </div>
+    </div>
+    <div class="s s4">
+      <h3>اجمالي السعر قطعة الارض</h3>
+      <div>
+        <p id="price-result">0</p>
+      </div>
+    </div>
+    <div class="s s5">
+      <h3>تحويل من متر طولي الي القصبة و القبضة</h3>
+      <div>
+        <table>
+          <tr>
+            <th></th>
+            <th>اقل من القبضة</th>
+            <th>قبضة</th>
+            <th>قصبة</th>
+          </tr>
+          <tr>
+            <td> ناتج العرض الاول</td>
+            <td class="width1_result">0</td>
+            <td class="width1_result">0</td>
+            <td class="width1_result">0</td>
+          </tr>
+          <tr>
+            <td>ناتج العرض الاخر</td>
+            <td class="width2_result">0</td>
+            <td class="width2_result">0</td>
+            <td class="width2_result">0</td>
+          </tr>
+          <tr>
+            <td>ناتج الطول</td>
+            <td class="height_result">0</td>
+            <td class="height_result">0</td>
+            <td class="height_result">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a href="help2/index.html" class="nav-box">
+        <img src="../../imgs/nav1.png" alt="nav1" />
+        <p>كسور</p>
+      </a>
+      <a class="nav-box" onclick="history.back()">
+        <img src="../../imgs/nav2.png" alt="nav1" />
+        <p>رجوع</p>
+      </a>
+      <a href="help/index.html" class="nav-box">
+        <img src="../../imgs/nav3.png" alt="nav1" />
+        <p>مساعدة</p>
+      </a>
+      <a href="../../index.html" class="nav-box">
+        <img src="../../imgs/nav4.png" alt="nav1" />
+        <p>الرئسية</p>
+      </a>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script src="../../nav.js"></script>
+</body>
+
 </html>

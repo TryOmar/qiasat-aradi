@@ -175,3 +175,9 @@ function clearall() {
   saveData();
   calculate();
 }
+
+function formatNumber(input) {
+  // Remove non-digit characters, format with commas
+  const value = input.value.replace(/\D/g, "");
+  input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
