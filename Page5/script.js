@@ -29,31 +29,73 @@ function saveData() {
     "num_males",
     document.getElementById("txt_numMales").value
   );
+  // save checkbox values
+
+  let listOfCheckboxValues = Array.from(
+    document.querySelectorAll("#tbl_Results input[type=checkbox]")
+  )
+    .filter((checkbox) => !checkbox.disabled) // Only include enabled checkboxes
+    .map((checkbox) => checkbox.checked); // Get checked state
+
+  sessionStorage.setItem(
+    "checkboxValues",
+    JSON.stringify(listOfCheckboxValues)
+  );
 }
 
 // Function to retrieve and set input field data from sessionStorage
 function loadData() {
-  document.getElementById("txt_acre").value =
-    sessionStorage.getItem("acre") || "";
-  document.getElementById("txt_carat").value =
-    sessionStorage.getItem("carat") || "";
-  document.getElementById("txt_share").value =
-    sessionStorage.getItem("share") || "";
-  document.getElementById("txt_numwives").value =
-    sessionStorage.getItem("num_wives") || "";
-  document.getElementById("txt_numFemales").value =
-    sessionStorage.getItem("num_females") || "";
-  document.getElementById("txt_numMales").value =
-    sessionStorage.getItem("num_males") || "";
+  // get values
+  let acreValue = sessionStorage.getItem("acre");
+  let caratValue = sessionStorage.getItem("carat");
+  let shareValue = sessionStorage.getItem("share");
+  let num_wivesValue = Number(sessionStorage.getItem("num_wives"));
+  let num_femalesValue = Number(sessionStorage.getItem("num_females"));
+  let num_malesValue = Number(sessionStorage.getItem("num_males"));
+  let isSharesLeft = sessionStorage.getItem("isSharesLeft") === "true";
+  console.log(isSharesLeft);
+  let listOfCheckboxValues = JSON.parse(
+    sessionStorage.getItem("checkboxValues")
+  );
+  // constructu a new list has the same values
+
+  // set valuesj
+  document.getElementById("txt_acre").value = acreValue;
+  document.getElementById("txt_carat").value = caratValue;
+  document.getElementById("txt_share").value = shareValue;
+  document.getElementById("txt_numwives").value = num_wivesValue;
+  document.getElementById("txt_numFemales").value = num_femalesValue;
+  document.getElementById("txt_numMales").value = num_malesValue;
+  updateTables(
+    num_wivesValue,
+    num_femalesValue,
+    num_malesValue,
+    isSharesLeft,
+    listOfCheckboxValues
+  );
+  calculateShares();
+
+  // document.getElementById("txt_acre").value =
+  //   sessionStorage.getItem("acre") || "";
+  // document.getElementById("txt_carat").value =
+  //   sessionStorage.getItem("carat") || "";
+  // document.getElementById("txt_share").value =
+  //   sessionStorage.getItem("share") || "";
+  // document.getElementById("txt_numwives").value =
+  //   sessionStorage.getItem("num_wives") || "";
+  // document.getElementById("txt_numFemales").value =
+  //   sessionStorage.getItem("num_females") || "";
+  // document.getElementById("txt_numMales").value =
+  //   sessionStorage.getItem("num_males") || "";
 }
 
 // Add event listeners to save data on input change
-document.getElementById("txt_acre").addEventListener("input", saveData);
-document.getElementById("txt_carat").addEventListener("input", saveData);
-document.getElementById("txt_share").addEventListener("input", saveData);
-document.getElementById("txt_numwives").addEventListener("input", saveData);
-document.getElementById("txt_numFemales").addEventListener("input", saveData);
-document.getElementById("txt_numMales").addEventListener("input", saveData);
+// document.getElementById("txt_acre").addEventListener("input", saveData);
+// document.getElementById("txt_carat").addEventListener("input", saveData);
+// document.getElementById("txt_share").addEventListener("input", saveData);
+// document.getElementById("txt_numwives").addEventListener("input", saveData);
+// document.getElementById("txt_numFemales").addEventListener("input", saveData);
+// document.getElementById("txt_numMales").addEventListener("input", saveData);
 
 function calculateScaresAndCarats(totalShares) {
   // Calculate the number of scares, carats, and remaining shares
@@ -76,6 +118,7 @@ function updateTables(
   isSharesLeft = false,
   listOfCheckboxValues = []
 ) {
+  console.log("Before: ", listOfCheckboxValues);
   // Initialize listOfCheckboxValues with true if empty
   if (!listOfCheckboxValues || listOfCheckboxValues.length == 0) {
     listOfCheckboxValues = Array(
@@ -165,7 +208,9 @@ function updateTables(
         <td><center><input type="input" id="txt_leftscarat" style="width:100%" placeholder="0" readonly></center></td>
         <td><center><input type="input" id="txt_leftshare" style="width:100%" placeholder="0" readonly></center></td>
         <td><center><label style="font-weight:bold"> المتبقي </label></center></td>
-        <td><center><input type="checkbox" onchange="calculateShares()"></center></td>
+        <td><center><input type="checkbox" ${
+          listOfCheckboxValues[listOfCheckboxValues.length - 1] ? "checked" : ""
+        } onchange="calculateShares()"></center></td>
       </tr>
     `;
   }
@@ -311,7 +356,10 @@ function calculateShares(newCalculation = false) {
 
   if (newCalculation) {
     listOfCheckboxValues = Array(
-      numWivesValue + numFemalesValue + numMalesValue
+      numWivesValue +
+        numFemalesValue +
+        numMalesValue +
+        (numWivesValue > 0 ? 1 : 0)
     ).fill(true);
   }
 
@@ -379,6 +427,7 @@ function calculateShares(newCalculation = false) {
   }
 
   if (isSharesLeft) {
+    sessionStorage.setItem("isSharesLeft", true);
     document.getElementById("txt_leftacre").value = sharesLeftAcre;
     document.getElementById("txt_leftscarat").value = sharesLeftCarat;
     document.getElementById("txt_leftshare").value = sharesLeftShare;
@@ -393,8 +442,6 @@ function calculateShares(newCalculation = false) {
     document.getElementById("leftSharesMessage").innerHTML = "";
   }
 
-  console.log();
-
   const totalChecked = listOfCheckboxValues.filter((val) => val).length;
   const [uncheckedWives, uncheckedFemales, uncheckedMales] = getUncheckedCounts(
     numWivesValue,
@@ -402,10 +449,15 @@ function calculateShares(newCalculation = false) {
     numMalesValue,
     listOfCheckboxValues
   );
+
+  console.log("uncheckedWives:", listOfCheckboxValues);
+  const unCheckedSharesLeft =
+    isSharesLeft & !listOfCheckboxValues[listOfCheckboxValues.length - 1];
   const unCheckedShares =
     uncheckedWives * nasebZwga +
       uncheckedFemales * nasebBnat +
-      uncheckedMales * nasebAbn || 0;
+      uncheckedMales * nasebAbn +
+      unCheckedSharesLeft * totalSharesleft || 0;
 
   console.log("unCheckedShares:", unCheckedShares);
   const [totalAcre, totalCarat, totalShare] = calculateScaresAndCarats(
@@ -420,4 +472,5 @@ function calculateShares(newCalculation = false) {
   document.getElementById("txt_Totalcarat").value = totalCarat;
   document.getElementById("txt_Totalshare").value = totalShare;
   document.getElementById("txt_TotalPercentVal").value = totalPercentVal + "%";
+  saveData();
 }
