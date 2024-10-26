@@ -63,9 +63,12 @@ function loadData() {
   document.getElementById("txt_acre").value = acreValue;
   document.getElementById("txt_carat").value = caratValue;
   document.getElementById("txt_share").value = shareValue;
-  document.getElementById("txt_numwives").value = num_wivesValue;
-  document.getElementById("txt_numFemales").value = num_femalesValue;
-  document.getElementById("txt_numMales").value = num_malesValue;
+  if (num_wivesValue > 0)
+    document.getElementById("txt_numwives").value = num_wivesValue;
+  if (num_femalesValue > 0)
+    document.getElementById("txt_numFemales").value = num_femalesValue;
+  if (num_malesValue > 0)
+    document.getElementById("txt_numMales").value = num_malesValue;
   updateTables(
     num_wivesValue,
     num_femalesValue,
