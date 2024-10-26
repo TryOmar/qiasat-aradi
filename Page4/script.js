@@ -45,6 +45,8 @@ function loadData() {
     sessionStorage.getItem("carat_sold") || "";
   document.getElementById("input-acre-sold").value =
     sessionStorage.getItem("acre_sold") || "";
+
+  calculateValues();
 }
 
 // Add event listeners to save data on input change
