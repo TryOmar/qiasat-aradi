@@ -30,95 +30,74 @@ window.onload = function () {
 let isTableInMeter = true;
 document.addEventListener("DOMContentLoaded", function () {
   const toggleBtn = document.getElementById("toggle-btn");
-  const tableHeader = document.querySelector(".table-header"); // Select table header
   const meterOrFist = document.querySelector("#cm");
-
-  const tableInputs = document.querySelectorAll(".table-input"); // Select all rows in the table
+  const tableHeader = document.querySelector(".table-header");
+  const tableInputs = document.querySelectorAll(".table-input:not(#total)");
   const titleDiv = document.querySelector(".title");
   const pElement = document.querySelector(
     "body > div > div.s.s3 > div.results > div.result-left > p"
   );
   const h3Element = document.querySelector("body > div > div.s.s2 > h3");
-  const one_carat_width = document.querySelector(
+  const oneCaratWidth = document.querySelector(
     "body > div > div.s.s3 > div.results > div.result-left > span"
   );
 
-  toggleBtn.addEventListener("click", function () {
-    isTableInMeter = !isTableInMeter;
-    console.log("isTableInMeter:", isTableInMeter);
-    toggleBtn.innerText = isTableInMeter ? "حول الى قبضة" : "حول الى متر";
+  let isTableInMeter = false;
 
-    if (isTableInMeter) {
-      meterOrFist.value = convertFistsToMeters(meterOrFist.value).toFixed(3);
-      one_carat_width.innerText = convertFistsToMeters(
-        one_carat_width.innerText
-      ).toFixed(3);
-      titleDiv.querySelector("h1").textContent =
-        "فصل الحد بين المزارعين بالمتر";
+  function updateUI(mode) {
+    const unit = mode ? "متر" : "قبضة";
+    toggleBtn.innerText = mode ? "حول الى قبضة" : "حول الى متر";
+    titleDiv.querySelector(
+      "h1"
+    ).textContent = `فصل الحد بين المزارعين بـ${unit}`;
+    pElement.textContent = `عرض القيراط الواحد بـ${unit}`;
+    h3Element.textContent = `إدخال إجمالي عرض المساحة بـ(${unit})`;
+    titleDiv.querySelector("img").src = mode
+      ? "../imgs/1.png"
+      : "../imgs/fist.png";
 
-      pElement.textContent = "عرض القيراط الواحد بالمتر";
-      h3Element.textContent = "إدخال إجمالي عرض المساحة (بالمتر)";
-
-      titleDiv.querySelector("img").src = "../imgs/1.png";
-
-      tableInputs.forEach((row) => {
-        const secondToLastInput =
-          row.querySelectorAll("input")[
-            row.querySelectorAll("input").length - 2
-          ];
-        secondToLastInput.value = convertFistsToMeters(
-          secondToLastInput.value
-        ).toFixed(3);
-      });
-    } else {
-      meterOrFist.value = convertMetersToFists(meterOrFist.value).toFixed(3);
-      one_carat_width.innerText = convertMetersToFists(
-        one_carat_width.innerText
-      ).toFixed(3);
-      titleDiv.querySelector("h1").textContent =
-        "فصل الحد بين المزارعين بالقبضه";
-      pElement.textContent = "عرض القيراط الواحد بالقبضة";
-      h3Element.textContent = "إدخال إجمالي عرض المساحة (بالقبضة)";
-
-      titleDiv.querySelector("img").src = "../imgs/fist.png";
-
-      tableInputs.forEach((row) => {
-        const secondToLastInput =
-          row.querySelectorAll("input")[
-            row.querySelectorAll("input").length - 2
-          ];
-        secondToLastInput.value = convertMetersToFists(
-          secondToLastInput.value
-        ).toFixed(3);
-      });
-    }
-
-    // Update table header based on the mode
-    tableHeader.innerHTML = isTableInMeter
-      ? `
+    tableHeader.innerHTML = `
       <p>سهم</p>
       <p>قيراط</p>
-      <p>العرض الحالي بالمتر</p>
-      <p>العرض السابق بالمتر</p>
-      <p>الفرق بين العرضين بالمتر</p>
-    `
-      : `
-      <p>سهم</p>
-      <p>قيراط</p>
-      <p>العرض الحالي بالقبضه</p>
-      <p>العرض السابق بالقبضه</p>
-      <p>الفرق بين العرضين بالقبضه</p>
+      <p>العرض الحالي ${unit}</p>
+      <p>العرض السابق ${unit}</p>
+      <p>الفرق بين العرضين ${unit}</p>
     `;
+  }
 
-    showDownPart(isTableInMeter);
+  function updateValues(mode) {
+    const convertFunction = mode ? convertFistsToMeters : convertMetersToFists;
+    const formatValue = (value) => convertFunction(value).toFixed(3);
 
-    // Loop through each .table-input element and trigger the run function
-    tableInputs.forEach(function (row) {
-      // only run
-      row.querySelectorAll("input").forEach(function (cell) {
+    meterOrFist.value = convertFunction(meterOrFist.value).toFixed(2);
+    oneCaratWidth.innerText = formatValue(oneCaratWidth.innerText);
+
+    tableInputs.forEach((row) => {
+      const inputs = row.querySelectorAll("input");
+      const firstToLastInput = inputs[inputs.length - 1];
+      const secondToLastInput = inputs[inputs.length - 2];
+      const thirdToLastInput = inputs[inputs.length - 3];
+
+      if (secondToLastInput.value > 0 || secondToLastInput.value < 0) {
+        secondToLastInput.value = formatValue(secondToLastInput.value);
+      }
+
+      // Re-run functions on each input
+      row.querySelectorAll("input").forEach((cell) => {
         run(cell, true);
       });
+
+      if (firstToLastInput.value == 0) firstToLastInput.value = "";
+      if (secondToLastInput.value == 0) secondToLastInput.value = "";
+      if (thirdToLastInput.value == 0) thirdToLastInput.value = "";
     });
+  }
+
+  toggleBtn.addEventListener("click", function () {
+    isTableInMeter = !isTableInMeter;
+    updateUI(isTableInMeter);
+    updateValues(isTableInMeter);
+    showDownPart(isTableInMeter);
   });
 });
 

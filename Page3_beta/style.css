@@ -140,7 +140,6 @@
 }
 .s3 .table-header p {
   width: calc(100% / 5.2);
-  height: auto;
   font-size: 10px;
   font-weight: bold;
   text-align: center;
@@ -149,9 +148,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 30px;
-  padding: 1px;
+  padding: 5px;
+  min-height: 30px;
+  line-height: 1.2;
+  white-space: normal;
 }
+
 .s3 .table input {
   text-align: center;
   font-size: 10px;
