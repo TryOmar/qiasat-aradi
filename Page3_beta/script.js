@@ -23,7 +23,7 @@ let last_table_inputs = document.querySelectorAll(".table-input:not(#total)")[
 
 // Load data from sessionStorage when the page loads
 window.onload = function () {
-  loadData();
+  //loadData();
 };
 
 // Toggle Button
@@ -41,17 +41,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const oneCaratWidth = document.querySelector(
     "body > div > div.s.s3 > div.results > div.result-left > span"
   );
-
-  let isTableInMeter = false;
+  const meterOrFistModeText = document.querySelector(
+    "body > div > div.s.s1 > h3"
+  );
 
   function updateUI(mode) {
-    const unit = mode ? "متر" : "قبضة";
+    const unit = mode ? "مـتـر" : "قبضة";
     toggleBtn.innerText = mode ? "حول الى قبضة" : "حول الى متر";
     titleDiv.querySelector(
       "h1"
-    ).textContent = `فصل الحد بين المزارعين بـ${unit}`;
-    pElement.textContent = `عرض القيراط الواحد بـ${unit}`;
-    h3Element.textContent = `إدخال إجمالي عرض المساحة بـ(${unit})`;
+    ).innerHTML = `فصل الحد بين المزارعين بال${unit} <br> أنت الآن في وضع الحساب بال${unit}`;
+
+    pElement.textContent = `عرض القيراط الواحد بال${unit}`;
+    h3Element.textContent = `إدخال إجمالي عرض المساحة بال${unit}`;
+    meterOrFistModeText.textContent = `أنت الآن في وضع الحساب بال${unit}`;
     titleDiv.querySelector("img").src = mode
       ? "../imgs/1.png"
       : "../imgs/fist.png";
@@ -59,9 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
     tableHeader.innerHTML = `
       <p>سهم</p>
       <p>قيراط</p>
-      <p>العرض الحالي ${unit}</p>
-      <p>العرض السابق ${unit}</p>
-      <p>الفرق بين العرضين ${unit}</p>
+      <p>العرض الحالي بال${unit}</p>
+      <p>العرض السابق بال${unit}</p>
+      <p>الفرق بين العرضين بال${unit}</p>
     `;
   }
 
@@ -70,6 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formatValue = (value) => convertFunction(value).toFixed(3);
 
     meterOrFist.value = convertFunction(meterOrFist.value).toFixed(2);
+    if (meterOrFist.value == 0) meterOrFist.value = "";
     oneCaratWidth.innerText = formatValue(oneCaratWidth.innerText);
 
     tableInputs.forEach((row) => {
@@ -222,22 +226,22 @@ document.querySelectorAll(".table-input:not(#total) input").forEach((e) => {
 });
 
 function convertMetersToFists(meters) {
-  const centimeters = meters * 100; // Convert meters to centimeters
-  const fists = centimeters / 14.7916666667; // Calculate total fists
+  const centimeters = meters * 100;
+  const fists = centimeters / 14.7916666667;
 
   return fists;
 }
 
 function convertFistsToMeters(fists) {
-  const centimeters = fists * 14.7916666667; // Convert fists to centimeters
-  const meters = centimeters / 100; // Calculate total meters
+  const centimeters = fists * 14.7916666667;
+  const meters = centimeters / 100;
 
   return meters;
 }
 
 function run(e, isConvertClicked = false) {
-  console.log(e);
-  console.log("isTableInMeter : ", isTableInMeter);
+  //console.log(e);
+  //console.log("isTableInMeter : ", isTableInMeter);
   let parent = e.parentElement;
   let real_width = total_carat_table(e.parentElement) * result_each();
   // if (isTableInMeter) {
