@@ -28,6 +28,7 @@ window.onload = function () {
 
 // Toggle Button
 let isTableInMeter = true;
+let saveMeterValue = 0;
 document.addEventListener("DOMContentLoaded", function () {
   const toggleBtn = document.getElementById("toggle-btn");
   const meterOrFist = document.querySelector("#cm");
@@ -46,18 +47,18 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   function updateUI(mode) {
-    const unit = mode ? "مـتـر" : 'قبضة';
+    const unit = mode ? "مـتـر" : "قبضة";
     toggleBtn.innerText = mode ? "حول الى قبضة" : "حول الى متر";
-    if(mode){
+    if (mode) {
       toggleBtn.style.backgroundColor = "rgb(22,16,18)";
-    }else{
+    } else {
       toggleBtn.style.backgroundColor = "rgb(221,105,92)";
     }
-    if(mode){
+    if (mode) {
       titleDiv.querySelector(
         "h1"
       ).innerHTML = `فصل الحد بين المزارعين بالقبضة <br> <section style="color:rgb(200,160,29)">أنت الآن في وضع الحساب بالمتر</section> `;
-    }else{
+    } else {
       titleDiv.querySelector(
         "h1"
       ).innerHTML = `فصل الحد بين المزارعين بالقبضة <br> <section style="color:rgb(221,105,92)">أنت الآن في وضع الحساب بالقبضة</section> `;
@@ -83,7 +84,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const convertFunction = mode ? convertFistsToMeters : convertMetersToFists;
     const formatValue = (value) => convertFunction(value).toFixed(3);
 
-    meterOrFist.value = convertFunction(meterOrFist.value).toFixed(2);
+    if (mode) {
+      meterOrFist.disabled = false;
+      meterOrFist.value = saveMeterValue;
+    } else {
+      saveMeterValue = meterOrFist.value;
+      meterOrFist.disabled = true;
+      meterOrFist.value = convertFunction(meterOrFist.value).toFixed(2);
+    }
+    //
     if (meterOrFist.value == 0) meterOrFist.value = "";
     oneCaratWidth.innerText = formatValue(oneCaratWidth.innerText);
 
