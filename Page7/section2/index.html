@@ -223,7 +223,8 @@
                 // Update the resultDivs with the calculated values
                 resultDivReed.innerText = reed.toFixed(0);
                 resultDivFist.innerText = fist.toFixed(0);
-                resultDivLessThanFist.innerText = remainingInFistConverted + "  \n= " + decimalToApproximateFraction(remainingInFistConverted);
+                resultDivLessThanFist.innerText = remainingInFistConverted;
+                //+ "  \n= " + decimalToApproximateFraction(remainingInFistConverted);
             } else {
                 // Handle invalid input
                 resultDivReed.innerText = "Result";
