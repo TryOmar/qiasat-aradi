@@ -102,10 +102,36 @@
       font-weight: bold;
     }
 
+    /* Table cells should wrap content */
     #tbl_Results td,
     #tbl_Results th {
+      word-wrap: break-word;
+      /* Enable word wrapping */
+      text-align: center;
+      /* Center text in cells */
       border: 1px solid #ddd;
-      padding: 9px;
+      padding: 8px;
+      /* Add padding for better spacing */
+    }
+
+    /* Adjustments for smaller screens */
+    @media (max-width: 768px) {
+
+      #tbl_Results td,
+      #tbl_Results th {
+        font-size: 8px;
+        /* Reduce font size */
+        padding: 6px;
+        /* Reduce padding */
+      }
+    }
+
+    /* Responsive container for the table */
+    .table-responsive {
+      overflow-x: auto;
+      /* Allow horizontal scrolling on small screens */
+      -webkit-overflow-scrolling: touch;
+      /* Smooth scrolling for iOS devices */
     }
 
     #tbl_Results th {
@@ -140,8 +166,12 @@
 
     /* Give margin to to the bottom navigation  bar*/
 
+    /* General table styles */
     #tbl_Results {
+      width: 100%;
+      /* Make table take full width */
       margin-bottom: 10%;
+      border-collapse: collapse;
     }
   </style>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">

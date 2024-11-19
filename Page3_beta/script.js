@@ -46,15 +46,26 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   function updateUI(mode) {
-    const unit = mode ? "مـتـر" : "قبضة";
+    const unit = mode ? "مـتـر" : 'قبضة';
     toggleBtn.innerText = mode ? "حول الى قبضة" : "حول الى متر";
-    titleDiv.querySelector(
-      "h1"
-    ).innerHTML = `فصل الحد بين المزارعين بال${unit} <br> أنت الآن في وضع الحساب بال${unit}`;
+    if(mode){
+      toggleBtn.style.backgroundColor = "rgb(22,16,18)";
+    }else{
+      toggleBtn.style.backgroundColor = "rgb(221,105,92)";
+    }
+    if(mode){
+      titleDiv.querySelector(
+        "h1"
+      ).innerHTML = `فصل الحد بين المزارعين بالقبضة <br> <section style="color:rgb(200,160,29)">أنت الآن في وضع الحساب بالمتر</section> `;
+    }else{
+      titleDiv.querySelector(
+        "h1"
+      ).innerHTML = `فصل الحد بين المزارعين بالقبضة <br> <section style="color:rgb(221,105,92)">أنت الآن في وضع الحساب بالقبضة</section> `;
+    }
 
     pElement.textContent = `عرض القيراط الواحد بال${unit}`;
     h3Element.textContent = `إدخال إجمالي عرض المساحة بال${unit}`;
-    meterOrFistModeText.textContent = `أنت الآن في وضع الحساب بال${unit}`;
+    // meterOrFistModeText.textContent = `أنت الآن في وضع الحساب بال${unit}`;
     titleDiv.querySelector("img").src = mode
       ? "../imgs/1.png"
       : "../imgs/fist.png";
@@ -228,14 +239,12 @@ document.querySelectorAll(".table-input:not(#total) input").forEach((e) => {
 function convertMetersToFists(meters) {
   const centimeters = meters * 100;
   const fists = centimeters / 14.7916666667;
-
   return fists;
 }
 
 function convertFistsToMeters(fists) {
   const centimeters = fists * 14.7916666667;
   const meters = centimeters / 100;
-
   return meters;
 }
 
