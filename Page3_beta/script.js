@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (mode) {
       titleDiv.querySelector(
         "h1"
-      ).innerHTML = `فصل الحد بين المزارعين بالقبضة <br> <section style="color:rgb(200,160,29)">أنت الآن في وضع الحساب بالمتر</section> `;
+      ).innerHTML = `فصل الحد بين المزارعين بالمتر <br> <section style="color:rgb(200,160,29)">أنت الآن في وضع الحساب بالمتر</section> `;
     } else {
       titleDiv.querySelector(
         "h1"
