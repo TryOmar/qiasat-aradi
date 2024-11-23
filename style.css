@@ -1,5 +1,4 @@
 * {
-  /* font-family: 'Cairo', sans-serif; */
   padding: 0px;
   margin: 0px;
   box-sizing: border-box;
@@ -10,7 +9,7 @@
   --nav: rgb(168, 255, 146);
 }
 body {
-  height: 1000px;
+  height: 100vh;
   display: flex;
   justify-content: center;
   background-color: white;
@@ -20,7 +19,6 @@ body {
   width: 900px;
   height: fit-content;
   padding-bottom: 100px;
-  /* flex-shrink: 0; */
   position: relative;
   display: flex;
   align-items: center;
@@ -46,13 +44,10 @@ body {
   margin-top: 20px;
 }
 .buttons {
-  height: fit-content;
   width: 100%;
   display: flex;
   flex-flow: column;
-  /* justify-content: space-around; */
   align-items: center;
-  /* margin-bottom: 20px; */
 }
 .button1 {
   background-color: var(--green);
@@ -61,28 +56,27 @@ body {
   height: 50px;
   display: flex;
   width: fit-content;
-  min-width: 230px;
+  min-width: 250px; /* الحد الأدنى لعرض الأزرار */
+  max-width: 100%; /* السماح بالاستجابة */
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   font-size: 18px;
   font-weight: bold;
-  position: relative;
   padding: 10px;
   margin-bottom: 20px;
   text-decoration: none;
+  text-align: center;
 }
 .img-con {
   display: flex;
   flex-flow: row-reverse nowrap;
-  height: calc(70% / 7);
   width: 100%;
   justify-content: center;
   align-items: center;
   height: 50px;
   position: relative;
   margin-bottom: 20px;
-  left: 10px;
 }
 .img-con a {
   margin: 0 10px;
@@ -124,7 +118,6 @@ body {
 }
 
 @media (min-width: 962px) {
-  /* big landscape tablets, laptops, and desktops */
   .con {
     width: 600px;
   }
@@ -137,9 +130,8 @@ body {
 }
 
 @media (max-width: 400px) {
-  /* big landscape tablets, laptops, and desktops */
   .button1 {
-    font-size: 20px;
+    font-size: 16px;
     min-width: 150px;
   }
 }

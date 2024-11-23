@@ -192,3 +192,11 @@ function clearAll() {
 
   saveData();
 }
+
+function validateShareInput(input) {
+    const maxAllowed = 24;
+    if (input.value > maxAllowed) {
+        input.value = maxAllowed; // تصحيح القيمة المدخلة
+        alert("القيمة المدخلة أكبر من الحد المسموح به لكل قيراط (24 سهمًا كحد أقصى).");
+    }
+}
