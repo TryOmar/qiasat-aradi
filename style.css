@@ -41,32 +41,35 @@ body {
   font-size: 20px;
   color: var(--green);
   margin-bottom: 20px;
-  margin-top: 20px;
 }
 .buttons {
-  width: 100%;
   display: flex;
-  flex-flow: column;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch; /* Ensures all buttons have equal width */
+  gap: 20px; /* Space between buttons */
+  width: 100%; /* Ensures full responsiveness */
 }
+/* Button styling */
 .button1 {
   background-color: var(--green);
   color: white;
   border-radius: 15px;
   height: 50px;
   display: flex;
-  width: fit-content;
-  min-width: 250px; /* الحد الأدنى لعرض الأزرار */
-  max-width: 100%; /* السماح بالاستجابة */
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   font-size: 18px;
   font-weight: bold;
   padding: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 0; /* Adjusted to avoid extra spacing */
   text-decoration: none;
   text-align: center;
+
+  /* Ensure consistent width */
+  width: 100%;
+  max-width: 400px; /* Optional: restrict max width for larger screens */
+  margin: 0 auto; /* Center-align buttons */
 }
 .img-con {
   display: flex;
