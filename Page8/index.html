@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من سيربح الفدادين</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .header {
+            background-color: #004080;
+            color: #fff;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .scoreboard {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #222;
+            border-radius: 10px;
+            width: 80%;
+            color: #ff0;
+            text-align: right;
+        }
+
+        .question-box {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            width: 80%;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .answer {
+            margin: 10px auto;
+            padding: 15px;
+            background-color: #444;
+            border: 2px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 70%;
+            transition: 0.3s;
+        }
+
+        .answer:hover {
+            background-color: #555;
+            border-color: #ff0;
+        }
+
+        .correct {
+            background-color: green !important;
+        }
+
+        .wrong {
+            background-color: red !important;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            background-color: #004080;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            background-color: #003060;
+        }
+
+        .restart-btn {
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #ff5733;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 150px;
+        }
+
+        .restart-btn:hover {
+            background-color: #c44127;
+        }
+
+        .actions {
+            margin: 20px auto;
+        }
+
+        #timer {
+            font-size: 18px;
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        من سيربح الفدادين
+    </div>
+    <div class="actions">
+        <button class="action-btn" onclick="removeTwoAnswers()">احذف إجابتين</button>
+        <button class="action-btn" onclick="changeQuestion()">غيّر السؤال</button>
+        <button class="action-btn" onclick="callFriend()">اتصل بصديق</button>
+        <button class="action-btn" onclick="useGuide()">استعن بالدلال</button>
+        <button class="restart-btn" onclick="resetGame()">العب من جديد</button>
+    </div>
+    <div class="scoreboard" id="scoreboard">
+        <p>السؤال الحالي: <span id="question-number">1</span> من 15</p>
+        <p>الإجابات الصحيحة: <span id="correct-answers">0</span> / 15</p>
+        <p>رصيدك: <span id="land-points">0</span> فدان</p>
+        <p>الوقت المتبقي: <span id="timer">60</span> ثانية</p>
+    </div>
+    <div class="question-box" id="question-box">
+        <p id="question">ما هو السؤال؟</p>
+        <div class="answer" onclick="checkAnswer(this, true)">الإجابة 1</div>
+        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 2</div>
+        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 3</div>
+        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 4</div>
+    </div>
+
+    <script>
+        let questions = [
+
+
+
+            {
+                question: "كم قيراط لأرض طولها 120 مترًا وعرضها 15 مترًا تم القسمة على 175 متر؟",
+                answers: ["10 قيراط", "12 قيراط", "11 قيراط", "13 قيراط"],
+                correct: 0,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "120", area1: "15", area2: "175", width2: "15", height: "120" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 80 مترًا وعرضها 25 مترًا تم القسمة على 175 متر؟",
+                answers: ["11 قيراط", "10 قيراط", "12 قيراط", "13 قيراط"],
+                correct: 0,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "80", area1: "25", area2: "175", width2: "25", height: "80" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 200 متر وعرضها 18 مترًا تم القسمة على 175 متر؟",
+                answers: ["20 قيراط", "22 قيراط", "21 قيراط", "19 قيراط"],
+                correct: 0,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "200", area1: "18", area2: "175", width2: "18", height: "200" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 150 مترًا وعرضها 20 مترًا تم القسمة على 168 متر؟",
+                answers: ["17 قيراط", "18 قيراط", "16 قيراط", "15 قيراط"],
+                correct: 1,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "150", area1: "20", area2: "168", width2: "20", height: "150" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 120 مترًا وعرضها 15 مترًا تم القسمة على 168 متر؟",
+                answers: ["10 قيراط", "11 قيراط", "12 قيراط", "9 قيراط"],
+                correct: 1,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "120", area1: "15", area2: "168", width2: "15", height: "120" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 80 مترًا وعرضها 25 مترًا تم القسمة على 168 متر؟",
+                answers: ["12 قيراط", "13 قيراط", "11 قيراط", "10 قيراط"],
+                correct: 0,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "80", area1: "25", area2: "168", width2: "25", height: "80" }
+            },
+            {
+                question: "كم قيراط لأرض طولها 200 متر وعرضها 18 مترًا تم القسمة على 168 متر؟",
+                answers: ["21 قيراط", "22 قيراط", "23 قيراط", "20 قيراط"],
+                correct: 1,
+                guideLink: "../Page1/section1/index.html",
+                sessionvars: { width1: "200", area1: "18", area2: "168", width2: "18", height: "200" }
+            },
+
+
+
+            {
+                question: "إذا كان عرض 10 قراريط في الجهتين 12 مترًا، فما هو الطول المناسب إذا كان القيراط يساوي 175 مترًا؟",
+                answers: ["145.86 متر", "140 متر", "150 متر", "160 متر"],
+                correct: 0
+            },
+
+            // guideLink: "../Page2/index.html",
+
+            {
+                question: "إذا كانت مساحة قطعة أرض 30 قيراطًا، وعرضها 15 مترًا، فما هو عرض 10 قراريط؟",
+                answers: ["5 متر", "3 متر", "2 متر", "6 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "30", cm: "15", table_input_0_1: "10", table_input_0_2: "5" }
+            },
+            {
+                question: "إذا كانت مساحة قطعة أرض 50 قيراطًا، وعرضها 10 مترًا، فما هو عرض 12 قيراطًا؟",
+                answers: ["2.4 متر", "4 متر", "3 متر", "1.2 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "50", cm: "10", table_input_0_1: "12", table_input_0_2: "2.4" }
+            },
+            {
+                question: "إذا كانت مساحة قطعة أرض 40 قيراطًا، وعرضها 20 مترًا، فما هو عرض 8 قراريط؟",
+                answers: ["4 متر", "5 متر", "2 متر", "8 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "40", cm: "20", table_input_0_1: "8", table_input_0_2: "4" }
+            },
+            {
+                question: "إذا كانت مساحة قطعة أرض 60 قيراطًا، وعرضها 24 مترًا، فما هو عرض 15 قيراطًا؟",
+                answers: ["6 متر", "8 متر", "7 متر", "5 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "60", cm: "24", table_input_0_1: "15", table_input_0_2: "6" }
+            },
+            {
+                question: "إذا كانت مساحة قطعة أرض 100 قيراطًا، وعرضها 25 مترًا، فما هو عرض 20 قيراطًا؟",
+                answers: ["4 متر", "5 متر", "6 متر", "8 متر"],
+                correct: 1,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "100", cm: "25", table_input_0_1: "20", table_input_0_2: "5" }
+            },
+
+
+
+            // فصل الحد بين المزارعين مسائلة متوسطة
+
+            {
+                question: "قطعة أرض مساحتها 45 قيراطًا وعرضها 18 مترًا، إذا تم تقسيمها بين 3 إخوة، فما هو الفرق إذا استلم أحدهم 8 أمتار؟",
+                answers: ["2 متر", "1 متر", "3 متر", "0.5 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "45", cm: "18", old_width_0: "0.690", old_width_1: "1", old_width_2: "5", table_input_0_1: "15", table_input_0_2: "6", table_input_0_3: "8", table_input_0_4: "-2", table_input_1_1: "15", table_input_1_2: "6", table_input_1_3: "5", table_input_1_4: "1", table_input_2_1: "15", table_input_2_2: "6", table_input_2_3: "5", table_input_2_4: "1" }
+            },
+            {
+                question: "قطعة أرض مساحتها 60 قيراطًا وعرضها 24 مترًا، إذا تم تقسيمها بين 4 إخوة، فما هو الفرق إذا استلم أحدهم 7 أمتار؟",
+                answers: ["1 متر", "2 متر", "3 متر", "0.5 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "60", cm: "24", old_width_0: "0.800", old_width_1: "1.2", old_width_2: "6", table_input_0_0: "0", table_input_0_1: "15", table_input_0_2: "6", table_input_0_3: "7", table_input_0_4: "-1", table_input_1_0: "0", table_input_1_1: "15", table_input_1_2: "6", table_input_1_3: "6", table_input_1_4: "0", table_input_2_0: "0", table_input_2_1: "15", table_input_2_2: "6", table_input_2_3: "6", table_input_2_4: "0", table_input_3_0: "0", table_input_3_1: "15", table_input_3_2: "6", table_input_3_3: "5", table_input_3_4: "1" }
+
+
+            },
+            {
+                question: "قطعة أرض مساحتها 25 قيراطًا وعرضها 10 مترًا، إذا تم تقسيمها بين 5 إخوة، فما هو الفرق إذا استلم أحدهم 3 أمتار؟",
+                answers: ["0.5 متر", "1 متر", "2 متر", "3 متر"],
+                correct: 1,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "25", cm: "10", old_width_0: "0.400", old_width_1: "0.8", old_width_2: "3", table_input_0_0: "0", table_input_0_1: "5", table_input_0_2: "2", table_input_0_3: "3", table_input_0_4: "-1", table_input_1_0: "0", table_input_1_1: "5", table_input_1_2: "2", table_input_1_3: "1", table_input_1_4: "1", table_input_2_0: "0", table_input_2_1: "5", table_input_2_2: "2", table_input_2_3: "2", table_input_2_4: "0", table_input_3_0: "0", table_input_3_1: "5", table_input_3_2: "2", table_input_3_3: "2", table_input_3_4: "0", table_input_4_0: "0", table_input_4_1: "5", table_input_4_2: "2", table_input_4_3: "2", table_input_4_4: "0" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 50 قيراطًا وعرضها 20 مترًا، إذا تم تقسيمها بين 5 إخوة، فما هو الفرق إذا استلم أحدهم 6 أمتار؟",
+                answers: ["1 متر", "2 متر", "0.5 متر", "3 متر"],
+                correct: 1,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "50", cm: "20", old_width_0: "1.000", old_width_1: "1.5", old_width_2: "6", table_input_0_0: "0", table_input_0_1: "10", table_input_0_2: "4", table_input_0_3: "6", table_input_0_4: "-2", table_input_1_0: "0", table_input_1_1: "10", table_input_1_2: "4", table_input_1_3: "2", table_input_1_4: "2", table_input_2_0: "0", table_input_2_1: "10", table_input_2_2: "4", table_input_2_3: "4", table_input_2_4: "0", table_input_3_0: "0", table_input_3_1: "10", table_input_3_2: "4", table_input_3_3: "4", table_input_3_4: "0", table_input_4_0: "0", table_input_4_1: "10", table_input_4_2: "4", table_input_4_3: "4", table_input_4_4: "0" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 40 قيراطًا وعرضها 16 مترًا، إذا تم تقسيمها بين 4 إخوة، فما هو الفرق إذا استلم أحدهم 5 أمتار؟",
+                answers: ["1 متر", "2 متر", "0.5 متر", "3 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "40", cm: "16", old_width_0: "0.800", old_width_1: "1.0", old_width_2: "5", table_input_0_0: "0", table_input_0_1: "10", table_input_0_2: "4", table_input_0_3: "5", table_input_0_4: "-1", table_input_1_0: "0", table_input_1_1: "10", table_input_1_2: "4", table_input_1_3: "3", table_input_1_4: "1", table_input_2_0: "0", table_input_2_1: "10", table_input_2_2: "4", table_input_2_3: "4", table_input_2_4: "0", table_input_3_0: "0", table_input_3_1: "10", table_input_3_2: "4", table_input_3_3: "4", table_input_3_4: "0", table_input_4_0: "0", table_input_4_1: "10", table_input_4_2: "4", table_input_4_3: "4", table_input_4_4: "0", table_input_5_0: "0" }
+
+            },
+
+
+
+            // فصل الحد بين المزارعين مسائلة صعبة 
+            {
+                question: "قطعة أرض مساحتها 90 قيراطًا وعرضها 36 مترًا، إذا تم تقسيمها بين 6 إخوة، فما هو الفرق إذا استلم أحدهم 12 مترًا؟",
+                answers: ["6 متر", "5 متر", "4 متر", "3 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "90", cm: "36", old_width_0: "1.200", old_width_1: "1.8", old_width_2: "6", table_input_0_0: "0", table_input_0_1: "15", table_input_0_2: "6", table_input_0_3: "12", table_input_0_4: "-6", table_input_1_0: "0", table_input_1_1: "15", table_input_1_2: "6", table_input_1_3: "5", table_input_1_4: "1", table_input_2_0: "0", table_input_2_1: "15", table_input_2_2: "6", table_input_2_3: "5", table_input_2_4: "1", table_input_3_0: "0", table_input_3_1: "15", table_input_3_2: "6", table_input_3_3: "5", table_input_3_4: "1", table_input_4_0: "0", table_input_4_1: "15", table_input_4_2: "6", table_input_4_3: "5", table_input_4_4: "1", table_input_5_0: "0", table_input_5_1: "15", table_input_5_2: "6", table_input_5_3: "4", table_input_5_4: "2" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 150 قيراطًا وعرضها 50 مترًا، إذا تم تقسيمها بين 5 إخوة، فما هو الفرق إذا استلم أحدهم 18 مترًا؟",
+                answers: ["8 متر", "7 متر", "6 متر", "5 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "150", cm: "50", old_width_0: "2.000", old_width_1: "3.0", old_width_2: "9", table_input_0_0: "0", table_input_0_1: "30", table_input_0_2: "10", table_input_0_3: "18", table_input_0_4: "-8", table_input_1_0: "0", table_input_1_1: "30", table_input_1_2: "10", table_input_1_3: "8", table_input_1_4: "2", table_input_2_0: "0", table_input_2_1: "30", table_input_2_2: "10", table_input_2_3: "8", table_input_2_4: "2", table_input_3_0: "0", table_input_3_1: "30", table_input_3_2: "10", table_input_3_3: "8", table_input_3_4: "2", table_input_4_0: "0", table_input_4_1: "30", table_input_4_2: "10", table_input_4_3: "8", table_input_4_4: "2" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 120 قيراطًا وعرضها 48 مترًا، إذا تم تقسيمها بين 6 إخوة، فما هو الفرق إذا استلم أحدهم 15 مترًا؟",
+                answers: ["7 متر", "6 متر", "5 متر", "4 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "120", cm: "48", old_width_0: "1.600", old_width_1: "2.4", old_width_2: "12", table_input_0_0: "0", table_input_0_1: "20", table_input_0_2: "8", table_input_0_3: "15", table_input_0_4: "-7", table_input_1_0: "0", table_input_1_1: "20", table_input_1_2: "8", table_input_1_3: "7", table_input_1_4: "1", table_input_2_0: "0", table_input_2_1: "20", table_input_2_2: "8", table_input_2_3: "7", table_input_2_4: "1", table_input_3_0: "0", table_input_3_1: "20", table_input_3_2: "8", table_input_3_3: "7", table_input_3_4: "1", table_input_4_0: "0", table_input_4_1: "20", table_input_4_2: "8", table_input_4_3: "6", table_input_4_4: "2", table_input_5_0: "0", table_input_5_1: "20", table_input_5_2: "8", table_input_5_3: "6", table_input_5_4: "2" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 200 قيراطًا وعرضها 80 مترًا، إذا تم تقسيمها بين 8 إخوة، فما هو الفرق إذا استلم أحدهم 18 مترًا؟",
+                answers: ["8 متر", "7 متر", "6 متر", "5 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "200", cm: "80", old_width_0: "2.500", old_width_1: "4.0", old_width_2: "16", table_input_0_0: "0", table_input_0_1: "25", table_input_0_2: "10", table_input_0_3: "18", table_input_0_4: "-8", table_input_1_0: "0", table_input_1_1: "25", table_input_1_2: "10", table_input_1_3: "9", table_input_1_4: "1", table_input_2_0: "0", table_input_2_1: "25", table_input_2_2: "10", table_input_2_3: "9", table_input_2_4: "1", table_input_3_0: "0", table_input_3_1: "25", table_input_3_2: "10", table_input_3_3: "9", table_input_3_4: "1", table_input_4_0: "0", table_input_4_1: "25", table_input_4_2: "10", table_input_4_3: "9", table_input_4_4: "1", table_input_5_0: "0", table_input_5_1: "25", table_input_5_2: "10", table_input_5_3: "9", table_input_5_4: "1", table_input_6_0: "0", table_input_6_1: "25", table_input_6_2: "10", table_input_6_3: "9", table_input_6_4: "1", table_input_7_0: "0", table_input_7_1: "25", table_input_7_2: "10", table_input_7_3: "8", table_input_7_4: "2", table_input_8_0: "" }
+
+            },
+            {
+                question: "قطعة أرض مساحتها 80 قيراطًا وعرضها 40 مترًا، إذا تم تقسيمها بين 5 إخوة، فما هو الفرق إذا استلم أحدهم 14 مترًا؟",
+                answers: ["6 متر", "5 متر", "4 متر", "3 متر"],
+                correct: 0,
+                guideLink: "../Page3/index.html",
+                sessionvars: { carat: "80", cm: "40", old_width_0: "1.000", old_width_1: "2.0", old_width_2: "8", table_input_0_0: "0", table_input_0_1: "16", table_input_0_2: "8", table_input_0_3: "14", table_input_0_4: "-6", table_input_1_0: "0", table_input_1_1: "16", table_input_1_2: "8", table_input_1_3: "8", table_input_1_4: "0", table_input_2_0: "0", table_input_2_1: "16", table_input_2_2: "8", table_input_2_3: "8", table_input_2_4: "0", table_input_3_0: "0", table_input_3_1: "16", table_input_3_2: "8", table_input_3_3: "5", table_input_3_4: "3", table_input_4_0: "0", table_input_4_1: "16", table_input_4_2: "8", table_input_4_3: "5", table_input_4_4: "3", table_input_5_0: "" }
+
+            },
+
+
+
+            // guideLink: "../Page3/index.html", 
+
+
+
+            // برنامج نزع وطرح الاراضي اسائلة سهلة ../Page4/index.html
+            // sessionvars: { carat: "8", shares_subtract: "6" }
+
+
+            {
+                question: "إذا كان يتم نزع 6 أسهم من كل قيراط، فما هو عدد القراريط المتبقية من 8 قراريط؟",
+                answers: ["6 قراريط", "7 قراريط", "5 قراريط", "4 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 8, shares_subtract: 6 }
+            },
+            {
+                question: "إذا كان يتم نزع 8 أسهم من كل قيراط، فما هو عدد القراريط المتبقية من 9 قراريط؟",
+                answers: ["6 قراريط", "5 قراريط", "7 قراريط", "4 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 9, shares_subtract: 8 }
+            },
+            {
+                question: "إذا كان يتم نزع 12 سهمًا من كل قيراط، فما هو عدد القراريط المتبقية من 6 قراريط؟",
+                answers: ["3 قراريط", "4 قراريط", "2 قراريط", "1 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 6, shares_subtract: 12 }
+            },
+            {
+                question: "إذا كان يتم نزع 4 أسهم من كل قيراط، فما هو عدد القراريط المتبقية من 10 قراريط؟",
+                answers: ["8.33 قراريط", "8.5 قراريط", "8 قراريط", "7.5 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 10, shares_subtract: 4 }
+            },
+            {
+                question: "إذا كان يتم نزع 2 سهم من كل قيراط، فما هو عدد القراريط المتبقية من 12 قيراطًا؟",
+                answers: ["11 قراريط", "10 قراريط", "9 قراريط", "8 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 12, shares_subtract: 2 }
+            },
+
+
+
+
+
+
+            // برنامج نزع وطرح الاراضي صعبة 
+
+            // guideLink: "../Page4/index.html", 
+            // sessionvars: { carat: "24", carat_sold: "12", shares_subtract: "8" }
+            {
+                question: "إذا كانت الأرض 24 قيراطًا و نزع 8 أسهم من كل قيراط، وتم بيع 12 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["4 قراريط", "8 قراريط", "10 قراريط", "12 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 24, carat_sold: 12, shares_subtract: 8 }
+            },
+            {
+                question: "إذا كانت الأرض 36 قيراطًا و نزع 6 أسهم من كل قيراط، وتم بيع 20 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["10 قراريط", "7 قراريط", "14 قراريط", "16 قراريط"],
+                correct: 1,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 36, carat_sold: 20, shares_subtract: 6 }
+            },
+            {
+                question: "إذا كانت الأرض 48 قيراطًا و نزع 4 أسهم من كل قيراط، وتم بيع 30 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["12 قراريط", "14 قراريط", "10 قراريط", "18 قراريط"],
+                correct: 2,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 48, carat_sold: 30, shares_subtract: 4 }
+            },
+            {
+                question: "إذا كانت الأرض 60 قيراطًا و نزع 10 أسهم من كل قيراط، وتم بيع 30 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["10 قراريط", "12 قراريط", "5 قراريط", "18 قراريط"],
+                correct: 2,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 60, carat_sold: 30, shares_subtract: 10 }
+            },
+            {
+                question: "إذا كانت الأرض 20 قيراطًا و نزع 12 سهمًا من كل قيراط، وتم بيع 10 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["0 قراريط", "6 قراريط", "7 قراريط", "8 قراريط"],
+                correct: 0,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 20, carat_sold: 10, shares_subtract: 12 }
+            },
+            {
+                question: "إذا كانت الأرض 30 قيراطًا و نزع 8 أسهم من كل قيراط، وتم بيع 16 قيراطًا من المتبقي، فما الصافي؟",
+                answers: ["8 قراريط", "9 قراريط", "10 قراريط", "4 قراريط"],
+                correct: 3,
+                guideLink: "../Page4/index.html",
+                sessionvars: { carat: 30, carat_sold: 16, shares_subtract: 8 }
+            },
+
+
+            // تقسيم الميراث الاراضي الزراعية Page5/index.html
+            // sessionvars: { acre: "10", carat_sold: "12", checkboxValues: [true, true], isSharesLeft: "true", num_males: "1", num_wives: "1", shares_subtract: "8" }
+
+
+
+            {
+                question: "مات وترك 10 فدادين وزوجة وابن واحد، كم نصيب الابن؟",
+                answers: ["4 فدادين", "5 فدادين", "8.75 فدادين", "8 فدادين"],
+                correct: 2,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_males: 1, num_wives: 1, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 10 فدادين وزوجة وثلاث بنات، كم نصيب الزوجة؟",
+                answers: ["1.5 فدان", "2 فدان", "1 فدان", "1.25 فدان"],
+                correct: 3,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true, true, true]", isSharesLeft: true, num_wives: 1, num_females: 3, num_wives: 1, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 10 فدادين وزوجة وابنتين، كم نصيب البنت؟",
+                answers: ["2 فدان 22 قيراط", "4 فدادين", "2.5 فدادين", "2 فدادين"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true, true]", isSharesLeft: true, num_wives: 1, num_females: 2, num_wives: 1, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 12 فدانًا وولدان، كم نصيب كل ولد؟",
+                answers: ["6 فدادين", "7 فدادين", "8 فدادين", "5 فدادين"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 12, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_males: 2, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 16 فدانًا وولدين، كم نصيب كل ولد؟",
+                answers: ["6 فدادين", "8 فدادين", "9 فدادين", "7 فدادين"],
+                correct: 1,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 16, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_males: 2, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 20 فدانًا وولدًا واحدًا، كم نصيب الولد؟",
+                answers: ["20 فدانًا", "15 فدانًا", "18 فدانًا", "12 فدانًا"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 20, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_males: 1, shares_subtract: 8 }
+            },
+
+
+
+
+
+            {
+                question: "مات وترك 20 فدانًا و1 ابنة، كم نصيب الابنة؟",
+                answers: ["10 فدادين", "12 فدانًا", "8 فدادين", "5 فدادين"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 20, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_females: 1, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 30 فدانًا و1 ابن و2 بنات، كم نصيب كل بنت؟",
+                answers: ["10 فدادين", "7.5 فدادين", "8 فدادين", "6 فدادين"],
+                correct: 1,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 30, carat_sold: 12, checkboxValues: "[true, true, true, true]", isSharesLeft: true, num_males: 1, num_females: 2, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 24 فدانًا و1 ابن و3 بنات، كم نصيب الابن؟",
+                answers: ["9 فدانًا", "18 فدانًا", "20 فدانًا", "12 فدانًا"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 24, carat_sold: 12, checkboxValues: "[true, true, true, true, true]", isSharesLeft: true, num_males: 1, num_females: 3, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 50 فدانًا و2 ابن و4 بنات، كم نصيب كل ابن؟",
+                answers: ["12.5 فدانًا", "25 فدانًا", "20 فدانًا", "15 فدانًا و 9 قيراط"],
+                correct: 0,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 50, carat_sold: 12, checkboxValues: "[true, true, true, true, true, true]", isSharesLeft: true, num_males: 2, num_females: 4, shares_subtract: 8 }
+            },
+            {
+                question: "مات وترك 10 فدانًا و3 بنات، كم نصيب كل بنت؟",
+                answers: ["3 فدادين", "2 فدادين و 5 قراريط", "4 فدادين", "2 فدان"],
+                correct: 1,
+                guideLink: "../Page5/index.html",
+                sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true, true, true, true]", isSharesLeft: true, num_females: 3, shares_subtract: 8 }
+            },
+
+
+
+
+
+            // برنامج حساب رئ الاراضي /Page6/index.html
+            // sessionvars: { caratInput: "10", wateringCostPerCaratInput: "7", wateringTimesInput: "1" }
+
+            {
+                question: "ما هي المعادلة المستخدمة لحساب تكلفة ري محصول القمح؟",
+                answers: [
+                    "(عدد القراريط × عدد مرات الري) ÷ سعر الري للقيراط",
+                    "(سعر الري للقيراط × عدد القراريط) × عدد مرات الري",
+                    "(سعر الري للقيراط ÷ عدد القراريط) × عدد مرات الري",
+                    "(سعر الري للقيراط × عدد مرات الري) ÷ عدد القراريط"
+                ],
+                correct: 1,
+                guideLink: "../Page6/help/index.html"
+            },
+            {
+                question: "إذا كان لديك 10 قراريط من محصول القمح وسعر الري للقيراط الواحد هو 7 جنيهات، كم تبلغ تكلفة الري لمرة واحدة؟",
+                answers: ["70 جنيه", "60 جنيه", "77 جنيه", "700 جنيه"],
+                correct: 0,
+                guideLink: "../Page6/index.html",
+                sessionvars: { caratInput: "10", wateringCostPerCaratInput: "7", wateringTimesInput: "1" }
+            },
+            {
+                question: "إذا تمت عملية الري 6 مرات، وسعر الري للقيراط الواحد هو 7 جنيهات لعدد 10 قراريط، ما التكلفة الإجمالية؟",
+                answers: ["400 جنيه", "420 جنيه", "600 جنيه", "700 جنيه"],
+                correct: 1,
+                guideLink: "../Page6/index.html",
+                sessionvars: { caratInput: "10", wateringCostPerCaratInput: "7", wateringTimesInput: "6" }
+            },
+            {
+                question: "إذا كان سعر الري للقيراط الواحد 5 جنيهات وعدد القراريط 12 وتم الري 8 مرات، كم التكلفة الإجمالية؟",
+                answers: ["450 جنيه", "480 جنيه", "500 جنيه", "520 جنيه"],
+                correct: 1,
+                guideLink: "../Page6/index.html",
+                sessionvars: { caratInput: "12", wateringCostPerCaratInput: "5", wateringTimesInput: "8" }
+            },
+
+
+
+
+
+
+            // guideLink: "../Page6/index.html", 
+
+            // برامج التحويلات Page7/index.html
+
+            // تحويل من قصبة الي متر Page7/section1/index.html
+            // تحويل من متر الي قصبة Page7/section2/index.html
+            // تحويل من قيراط الي متر Page7/section3/index.html
+            // تحويل من متر الي قيراط Page7/section4/index.html
+            // تحويل من متر الي قبضة صفحة فصل الحد Page3_beta/index.html
+
+            // برنامج تحويلات تحويل من قصبة الي متر مربع aradi/Page7/section1/index.html
+
+            {
+                question: "كم يبلغ طول القصبة الواحدة بالمتر؟",
+                answers: ["3.55", "4.00", "3.75", "3.30"],
+                correct: 0,
+                guideLink: "../Page7/section1/index.html",
+                sessionvars: { "input_reed": "1" }
+
+            },
+
+            // guideLink: "../Page7/section1/index.html", 
+
+            // تحويل من متر الي قصبة Page7/section2/index.html
+
+            {
+                question: "كيف يمكن تحويل عدد الأمتار الطولية إلى قصبة؟",
+                answers: ["يتم ضرب عدد الأمتار في 14.7916666667", "يتم تقسيم عدد الأمتار على 14.7916666667", "يتم ضرب عدد الأمتار في 24", "يتم تقسيم عدد الأمتار على 24"],
+                correct: 1,
+                guideLink: "../Page7/section2/help/index.html",
+
+            },
+
+
+            // guideLink: "../Page7/section2/index.html",
+
+            // برنامج تحويلات تحويل من قيراط الى متر مربع Page7/section3/index.html
+
+            {
+                question: "في حالة كان القيراط 175.035 كم تبلغ مساحة الفدان بالمتر المربع؟",
+                answers: ["4200.84", "4000.00", "4300.50", "4050.25"],
+                correct: 0,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.035", "input-meter-price": "1" }
+            },
+            {
+                question: "في حالة كان الفدان 4200.83 متر مربع كم يبلغ مساحة القيراط؟",
+                answers: ["168.00", "175.3458", "180.00", "150.00"],
+                correct: 1,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.035", "input-meter-price": "1" }
+            },
+            {
+                question: "في حالة كان القيراط 175.3458 كم تبلغ مساحة السهم الواحد بالمتر المربع؟",
+                answers: ["7.00", "7.293125", "6.90", "8.00"],
+                correct: 1,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-carat-area-in-meter": "175.035", "input-meter-price": "1", "input-shares": "1" }
+            },
+            {
+                question: "كم يساوي القيراط الواحد بالقبضات؟",
+                answers: ["336", "333.33", "350", "300"],
+                correct: 1,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-acre": "0", "input-carat": "1", "input-carat-area-in-meter": "175.035", "input-meter-price": "0", "input-shares": "0" }
+            },
+            {
+                question: "كم تبلغ مساحة الفدان بالقصبات المربعة؟",
+                answers: ["200", "300", "420", "333.33"],
+                correct: 3,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.035", "input-meter-price": "0", "input-shares": "0" }
+            },
+            {
+                question: "كم يساوي القيراط الواحد بالقصبات المربعة؟",
+                answers: ["13.889", "15.000", "12.500", "10.000"],
+                correct: 0,
+                guideLink: "../Page7/section3/index.html",
+                sessionvars: { "input-carat": "1", "input-carat-area-in-meter": "175.035", "input-meter-price": "0" }
+            },
+
+
+
+            //  guideLink: "../Page7/section3/index.html",
+
+
+            // تحويل من متر الي قيراط Page7/section4/index.html
+
+
+            {
+                question: "إذا كانت مساحة الأرض 8400 متر مربع، كم عدد الأفدنة التي تمثلها؟",
+                answers: ["2 فدان", "1.5 فدان", "2.5 فدان", "2.1 فدان"],
+                correct: 0,
+                guideLink: "../Page7/section4/index.html",
+                sessionvars: { "acre": "2", "carat": "0", "caratAreaInMeter": "175", "fist": "12", "lessThanFist": "0.03", "meterSquare": "8400", "reed": "666", "shares": "0.00", "totalCaratPrice": "0.00" }
+            },
+            {
+                question: "إذا كانت المساحة 6300 متر مربع، كم عدد الأفدنة والقيراط؟",
+                answers: ["1 فدان و12 قيراط", "1.5 فدان", "1 فدان و6 قيراط", "1 فدان و9 قيراط"],
+                correct: 0,
+                guideLink: "../Page7/section4/index.html",
+                sessionvars: { "acre": "2", "carat": "0", "caratAreaInMeter": "175", "fist": "12", "lessThanFist": "0.03", "meterSquare": "8400", "reed": "666", "shares": "0.00", "totalCaratPrice": "0.00" }
+            },
+
+            //  guideLink: "../Page7/section4/index.html",
+
+
+            // صفحة فصل الحد حول الي قبضة   Page3_beta/index.html
+
+
+            {
+                question: "إذا كانت مساحة قطعة أرض 30 قيراطًا، وعرضها 15 مترًا، فما هو عرض 10 قراريط بالقبضة؟",
+                answers: ["33.803 قبضة", "30.000 قبضة", "27.500 قبضة", "40.000 قبضة"],
+                correct: 0,
+                guideLink: "../page3_beta/index.html",
+                sessionvars: { "acre": "0", "carat": "30", "cm": "101.41", "isTableInMeter": "false", "old_width_0": "0.408", "old_width_1": "5", "old_width_2": "4", "table_input_0_1": "10", "table_input_0_2": "33.803", "table_input_6_2": "0" }
+            },
+
+
+            //  guideLink: "..Page3_beta/index.html
+
+            // معلومات عامة عن القياس
+
+            {
+                question: "كم يساوي الفدان الواحد بالقيراطات؟",
+                answers: ["12 قيراط", "24 قيراط", "36 قيراط", "48 قيراط"],
+                correct: 1
+            }, // السؤال الأول المضاف
+            {
+                question: "كم يساوي القيراط الواحد بالأسهم؟",
+                answers: ["12 سهم", "18 سهم", "24 سهم", "36 سهم"],
+                correct: 2
+            }, // السؤال الثاني المضاف
+            {
+                question: "ما هي اقرب مساحة الفدان بالمتر المربع؟",
+                answers: ["175 متر مربع", "168 متر مربع", "4200 متر مربع", "5000 متر مربع"],
+                correct: 2
+            }, // السؤال الثالث المضاف
+            {
+                question: "ما مساحة القيراط في أغلب مناطق مصر؟",
+                answers: ["168 متر مربع", "175 متر مربع", "171.388 متر مربع", "175.3458 متر مربع"],
+                correct: 1
+            },
+            {
+                question: "كم تبلغ مساحة القبضة الواحدة بالمتر المربع؟",
+                answers: ["0.140", "0.1479166666666667", "0.150", "0.160"],
+                correct: 1
+            },
+            {
+                question: "ما الذي يرمز إليه السهم في القيراط؟",
+                answers: ["وحدة مساحة أصغر داخل القيراط", "مساحة الفدان", "مساحة القيراط بالكامل", "جزء من مساحة الفدان"],
+                correct: 0
+            },
+            {
+                question: "كم تبلغ مساحة القصبة المربعة بالمتر المربع؟",
+                answers: ["12.00000 متر مربع", "13.00000 متر مربع", "12.60250 متر مربع", "11.50000 متر مربع"],
+                correct: 2
+            },
+            {
+                question: "ما طول ضلع القصبة المربعة بالمتر؟",
+                answers: ["3.55 متر", "3.75 متر", "4.00 متر", "3.25 متر"],
+                correct: 0
+            },
+            {
+                question: "ماذا تعني كلمة 'نزع' في سياق الأراضي الزراعية؟",
+                answers: ["إضافة مساحة جديدة إلى الأرض", "خصم مساحة من الأرض لأغراض معينة", "تحويل المساحة من قيراط إلى فدان", "تقسيم الأرض إلى عدة قطع"],
+                correct: 1
+            },
+
+
+
+
+
+
+            // اسئلة خاصة بشرح البرنامج
+
+        ];
+
+        function shuffle(array) {
+            let currentIndex = array.length;
+
+            // While there remain elements to shuffle...
+            while (currentIndex != 0) {
+
+                // Pick a remaining element...
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+        }
+
+        // shuffle(questions);
+
+
+        const pointsPerQuestion = 50 / 15; // عدد النقاط لكل سؤال
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let landPoints = 0;
+        let timer;
+        let timeLeft = 120;
+
+        function loadNextQuestion() {
+            if (correctAnswers === 15) {
+                alert("مبروك! لقد ربحت ٥٠ فدانًا!");
+                return;
+            }
+
+            if (currentQuestion >= questions.length) {
+                alert("لقد انتهت الأسئلة المتاحة. أعد تشغيل اللعبة!");
+                return;
+            }
+
+            resetTimer();
+            const q = questions[currentQuestion];
+            document.getElementById("question").textContent = q.question;
+            document.getElementById("question-number").textContent = currentQuestion + 1;
+            const answers = document.querySelectorAll(".answer");
+            answers.forEach((answer, index) => {
+                answer.style.display = "block";
+                answer.textContent = q.answers[index];
+                answer.onclick = () => checkAnswer(answer, index === q.correct);
+            });
+            startTimer();
+        }
+
+        function startTimer() {
+            document.getElementById("timer").textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("انتهى الوقت! حاول مرة أخرى.");
+                    resetGame();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 120;
+        }
+
+        function checkAnswer(selectedAnswer, isCorrect) {
+            resetTimer();
+            if (isCorrect) {
+                correctAnswers++;
+                landPoints += pointsPerQuestion;
+                document.getElementById("correct-answers").textContent = correctAnswers;
+                document.getElementById("land-points").textContent = landPoints.toFixed(2);
+                selectedAnswer.classList.add("correct");
+            } else {
+                alert("إجابة خاطئة! لقد خسرت جميع الفدادين.");
+                resetGame();
+                return;
+            }
+
+            setTimeout(() => {
+                selectedAnswer.classList.remove("correct", "wrong");
+                currentQuestion++;
+                loadNextQuestion();
+            }, 1000);
+        }
+
+        function resetGame() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            landPoints = 0;
+            document.getElementById("correct-answers").textContent = correctAnswers;
+            document.getElementById("land-points").textContent = landPoints.toFixed(2);
+            resetTimer();
+            loadNextQuestion();
+        }
+
+        function removeTwoAnswers() {
+            const answers = document.querySelectorAll(".answer");
+            let removed = 0;
+            answers.forEach((answer, index) => {
+                if (index !== questions[currentQuestion].correct && removed < 2) {
+                    answer.style.display = "none";
+                    removed++;
+                }
+            });
+        }
+
+        function changeQuestion() {
+            resetTimer();
+            currentQuestion++;
+            loadNextQuestion();
+        }
+
+        function callFriend() {
+            alert("صديقك يقترح الإجابة رقم " + (questions[currentQuestion].correct + 1));
+        }
+
+        function useGuide() {
+            const guideLink = questions[currentQuestion].guideLink;
+            const sessionData = questions[currentQuestion].sessionvars;
+            sessionStorage.clear();
+
+            // Loop through the session variables and store them one by one in localStorage
+            for (let key in sessionData) {
+                if (sessionData.hasOwnProperty(key)) {
+                    sessionStorage.setItem(key, sessionData[key]);
+                }
+            }
+
+            // Open the guide link in a new window
+            if (guideLink) {
+                window.open(guideLink, "_blank");
+            } else {
+                alert("لا يوجد دليل لهذا السؤال.");
+            }
+        }
+
+        loadNextQuestion();
+    </script>
+</body>
+
+</html>
