@@ -20,6 +20,11 @@ window.onload = function () {
   calculate();
 };
 
+document.addEventListener("DOMContentLoaded", function () {
+  loadData();
+  calculate();
+});
+
 // Function to save input field data to sessionStorage
 function saveData() {
   sessionStorage.setItem("width1", width1.value);
