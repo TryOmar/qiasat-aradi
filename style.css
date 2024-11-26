@@ -68,7 +68,7 @@ body {
 
   /* Ensure consistent width */
   width: 100%;
-  max-width: 400px; /* Optional: restrict max width for larger screens */
+  max-width: 250px; /* Optional: restrict max width for larger screens */
   margin: 0 auto; /* Center-align buttons */
 }
 .img-con {
