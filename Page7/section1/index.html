@@ -142,16 +142,14 @@
     <div id="resultInCM" style="margin-bottom:200px;">Result</div>
 
     <script>
-
         function validateInput() {
-            const inputField = document.getElementById('input_lessThanFist');
+            const inputField = document.getElementById("input_lessThanFist");
             let value = inputField.value;
 
             if (value !== "" && !/^0\.|^0$/.test(value)) {
                 value = "0." + value;
                 inputField.value = value;
                 inputField.setCustomValidity("يجب أن تبدأ القيمة بصفر ثم علامة عشرية .0");
-
             } else if (value !== "" && (parseFloat(value) < 0.0 || parseFloat(value) > 0.99)) {
                 inputField.setCustomValidity("يجب إدخال قيمة من 0.1 إلى 0.99.");
             } else {
@@ -159,15 +157,8 @@
             }
 
             inputField.reportValidity();
+            saveToSessionStorage(); // Save the input value after validation
         }
-
-        function calculateFistReedToCM() {
-            const inputField = document.getElementById('input_lessThanFist');
-
-            // Your existing logic for calculating fist reed to cm goes here
-            // This function can work independently of the validation
-        }
-
 
         function IntegerWithoutDecimal(inputElement) {
             let numValue = Number(inputElement.value);
@@ -176,9 +167,11 @@
                 return 0;
             } else {
                 inputElement.value = Math.floor(numValue);
+                saveToSessionStorage(); // Save the updated integer value
                 return +inputElement.value;
             }
         }
+
         function calculateFistReedToCM() {
             const reedInput = document.getElementById("input_reed");
             const fistInput = document.getElementById("input_fist");
@@ -200,6 +193,8 @@
                 resultDivMeter.innerText = "يرجى إدخال أرقام صالحة.";
                 resultDivCM.innerText = "يرجى إدخال أرقام صالحة.";
             }
+
+            saveToSessionStorage(); // Save inputs after calculation
         }
 
         function clearFistReed() {
@@ -214,8 +209,42 @@
             lessThanFistInput.value = "";
             resultDivMeter.innerText = "Result";
             resultDivCM.innerText = "Result";
+
+            sessionStorage.clear(); // Clear sessionStorage
         }
+
+        // Save input values to sessionStorage
+        function saveToSessionStorage() {
+            const reedInput = document.getElementById("input_reed");
+            const fistInput = document.getElementById("input_fist");
+            const lessThanFistInput = document.getElementById("input_lessThanFist");
+
+            sessionStorage.setItem("input_reed", reedInput.value || "");
+            sessionStorage.setItem("input_fist", fistInput.value || "");
+            sessionStorage.setItem("input_lessThanFist", lessThanFistInput.value || "");
+        }
+
+        // Load input values from sessionStorage
+        function loadFromSessionStorage() {
+            const reedInput = document.getElementById("input_reed");
+            const fistInput = document.getElementById("input_fist");
+            const lessThanFistInput = document.getElementById("input_lessThanFist");
+
+            const storedReed = sessionStorage.getItem("input_reed");
+            const storedFist = sessionStorage.getItem("input_fist");
+            const storedLessThanFist = sessionStorage.getItem("input_lessThanFist");
+
+            if (storedReed !== null && storedReed.trim() !== "") reedInput.value = storedReed;
+            if (storedFist !== null && storedFist.trim() !== "") fistInput.value = storedFist;
+            if (storedLessThanFist !== null && storedLessThanFist.trim() !== "") lessThanFistInput.value = storedLessThanFist;
+
+            calculateFistReedToCM(); // Recalculate after loading values
+        }
+
+        // Load inputs on DOM load
+        document.addEventListener("DOMContentLoaded", loadFromSessionStorage);
     </script>
+
     <div class="nav" dir="rtl">
         <a href="help2/index.html" class="nav-box">
             <img src="../../imgs/nav1.png" alt="nav1" />
