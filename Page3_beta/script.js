@@ -20,15 +20,85 @@ let each_old = document
 let last_table_inputs = document.querySelectorAll(".table-input:not(#total)")[
   document.querySelectorAll(".table-input:not(#total)").length - 1
 ];
-
-// Load data from sessionStorage when the page loads
-window.onload = function () {
-  //loadData();
-};
-
 // Toggle Button
 let isTableInMeter = true;
 let saveMeterValue = 0;
+
+// Save data to sessionStorage
+function saveData() {
+  // Save basic input values
+  sessionStorage.setItem("shares", shares.value);
+  sessionStorage.setItem("carat", carat.value);
+  sessionStorage.setItem("acre", acre.value);
+  sessionStorage.setItem("cm", cm.value);
+  sessionStorage.setItem("isTableInMeter", isTableInMeter);
+
+  // Save old width values
+  old_width.forEach((e, index) => {
+    sessionStorage.setItem(`old_width_${index}`, e.innerText);
+  });
+
+  // Save table input values row by row
+  document
+    .querySelectorAll(".table-input:not(#total)")
+    .forEach((row, rowIndex) => {
+      row.querySelectorAll("input").forEach((input, inputIndex) => {
+        sessionStorage.setItem(
+          `table_input_${rowIndex}_${inputIndex}`,
+          input.value
+        );
+      });
+    });
+}
+
+// Load data from sessionStorage
+function loadData() {
+  // Load basic input values
+  shares.value = sessionStorage.getItem("shares") || "";
+  carat.value = sessionStorage.getItem("carat") || "";
+  acre.value = sessionStorage.getItem("acre") || "";
+  cm.value = sessionStorage.getItem("cm") || "";
+  if (sessionStorage.getItem("isTableInMeter"))
+    isTableInMeter = sessionStorage.getItem("isTableInMeter") == "true";
+
+  // Load old width values
+  old_width.forEach((e, index) => {
+    e.innerText = sessionStorage.getItem(`old_width_${index}`) || "";
+  });
+
+  // Load table input values row by row
+  document
+    .querySelectorAll(".table-input:not(#total)")
+    .forEach((row, rowIndex) => {
+      row.querySelectorAll("input").forEach((input, inputIndex) => {
+        input.value =
+          sessionStorage.getItem(`table_input_${rowIndex}_${inputIndex}`) || "";
+      });
+    });
+}
+
+// Attach save on input change for all inputs
+document.querySelectorAll("input").forEach((input) => {
+  input.addEventListener("input", saveData);
+});
+
+// Attach delete functionality
+delete_btn.addEventListener("click", () => {
+  document.querySelectorAll("input").forEach((input) => {
+    input.value = ""; // Clear input values
+  });
+  sessionStorage.clear(); // Clear sessionStorage
+});
+
+// Ensure new rows have save functionality attached
+function listen_to_last(last_table_inputs) {
+  for (let i = 0; i < last_table_inputs.length - 1; i++) {
+    last_table_inputs[i].addEventListener("input", () => {
+      saveData(); // Save data on input change
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const toggleBtn = document.getElementById("toggle-btn");
   const meterOrFist = document.querySelector("#cm");
@@ -45,6 +115,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const meterOrFistModeText = document.querySelector(
     "body > div > div.s.s1 > h3"
   );
+
+  loadData();
+
+  updateUI(isTableInMeter);
+  // updateValues(isTableInMeter);
+  // showDownPart(isTableInMeter);
 
   function updateUI(mode) {
     const unit = mode ? "مـتـر" : "قبضة";
@@ -124,46 +200,6 @@ document.addEventListener("DOMContentLoaded", function () {
     showDownPart(isTableInMeter);
   });
 });
-
-// Function to save input field data to sessionStorage
-function saveData() {
-  sessionStorage.setItem("shares", shares.value);
-  sessionStorage.setItem("carat", carat.value);
-  sessionStorage.setItem("acre", acre.value);
-  sessionStorage.setItem("cm", cm.value);
-  old_width.forEach((e, index) => {
-    sessionStorage.setItem(`old_width_${index}`, e.innerText);
-  });
-  document
-    .querySelectorAll(".table-input:not(#total)")
-    .forEach((row, rowIndex) => {
-      row.querySelectorAll("input").forEach((input, inputIndex) => {
-        sessionStorage.setItem(
-          `table_input_${rowIndex}_${inputIndex}`,
-          input.value
-        );
-      });
-    });
-}
-
-// Function to retrieve and set input field data from sessionStorage
-function loadData() {
-  shares.value = sessionStorage.getItem("shares") || "";
-  carat.value = sessionStorage.getItem("carat") || "";
-  acre.value = sessionStorage.getItem("acre") || "";
-  cm.value = sessionStorage.getItem("cm") || "";
-  old_width.forEach((e, index) => {
-    e.innerText = sessionStorage.getItem(`old_width_${index}`) || "";
-  });
-  document
-    .querySelectorAll(".table-input:not(#total)")
-    .forEach((row, rowIndex) => {
-      row.querySelectorAll("input").forEach((input, inputIndex) => {
-        input.value =
-          sessionStorage.getItem(`table_input_${rowIndex}_${inputIndex}`) || "";
-      });
-    });
-}
 
 // Add event listeners to save data on input change
 document.querySelectorAll("input").forEach((input) => {
