@@ -195,11 +195,55 @@
     </a>
   </div>
   <script src="../../nav.js"></script>
-  <script>
-    // JavaScript
 
-    // JavaScript
-    // JavaScript
+  <script>
+    // Save input values to sessionStorage
+    function saveToSessionStorage() {
+      // Gather all inputs by their IDs
+      const inputs = [
+        "input-shares",
+        "input-carat",
+        "input-acre",
+        "input-meter-price",
+        "input-carat-area-in-meter",
+        "other-input-field"
+      ];
+
+      // Loop through the inputs and save their values
+      inputs.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+          sessionStorage.setItem(id, element.value || "");
+        }
+      });
+    }
+
+    // Load input values from sessionStorage
+    function loadFromSessionStorage() {
+      const inputs = [
+        "input-shares",
+        "input-carat",
+        "input-acre",
+        "input-meter-price",
+        "input-carat-area-in-meter",
+        "other-input-field"
+      ];
+
+      // Loop through the inputs and set their values only if non-empty
+      inputs.forEach((id) => {
+        const element = document.getElementById(id);
+        const storedValue = sessionStorage.getItem(id);
+
+        if (element && storedValue !== null && storedValue.trim() !== "") {
+          element.value = storedValue;
+        }
+      });
+
+      // Trigger the calculation after loading values
+      calculate();
+    }
+
+    // Modified calculate function to include saving inputs
     function calculate() {
       // Get all the input values or set them to 0 if empty
       var shares = parseFloat(document.getElementById("input-shares").value) || 0;
@@ -213,23 +257,17 @@
       var totalAllShares = acre * 24 * 24 + carat * 24 + shares;
       console.log("totalAllShares : ", totalAllShares);
 
-
       // Get the carat price
       var meterPrice = parseFloat(document.getElementById("input-meter-price").value) || 0;
       console.log("meterPrice : ", meterPrice);
-
 
       // Get the meter unit from the selection
       var meterUnit = parseFloat(document.getElementById("input-carat-area-in-meter").value) || parseFloat(document.getElementById("other-input-field").value) || 0;
       console.log("meterUnit : ", meterUnit);
 
       // Calculate result in square meters
-      var resultInSquareMeter = totalAllShares * meterUnit / 24;
+      var resultInSquareMeter = (totalAllShares * meterUnit) / 24;
       console.log("resultInSquareMeter : ", resultInSquareMeter);
-
-      // Convert back to carats
-      // var caratValue = resultInSquareMeter / meterUnit;
-      // console.log("caratValue : ", caratValue);
 
       // Calculate total price
       var totalPrice = resultInSquareMeter * meterPrice;
@@ -242,7 +280,7 @@
       // Calculate and update output-reed, output-fist, and output-less-than-fist
       var reedValue = Math.floor(resultInSquareMeter / 12.60250); // Integer part of the division
       var fistValue = Math.floor((resultInSquareMeter / 12.60250 - reedValue) * 24); // Decimal part multiplied by 24
-      var lessThanFistValue = (resultInSquareMeter / 12.60250 - reedValue - (fistValue / 24)).toFixed(2); // Remaining decimal part
+      var lessThanFistValue = (resultInSquareMeter / 12.60250 - reedValue - fistValue / 24).toFixed(2); // Remaining decimal part
       console.log("reedValue : ", reedValue);
       console.log("fistValue : ", fistValue);
       console.log("lessThanFistValue : ", lessThanFistValue);
@@ -250,8 +288,11 @@
       document.getElementById("output-reed").innerText = reedValue;
       document.getElementById("output-fist").innerText = fistValue;
       document.getElementById("output-less-than-fist").innerText = lessThanFistValue;
+
+      // Save inputs to sessionStorage at the end of calculation
+      saveToSessionStorage();
     }
-    // JavaScript
+
     function clearAll() {
       // Clear all the input fields used in the calculate function
       document.getElementById("input-shares").value = "";
@@ -259,7 +300,6 @@
       document.getElementById("input-acre").value = "";
       document.getElementById("input-meter-price").value = "";
       document.getElementById("other-input-field").value = "";
-      // document.getElementById("input-carat-area-in-meter").value = "";
 
       // Clear the result displays
       document.getElementById("output-result-total-price").innerText = "0";
@@ -268,6 +308,8 @@
       document.getElementById("output-fist").innerText = "0";
       document.getElementById("output-less-than-fist").innerText = "0.0";
 
+      // Clear sessionStorage
+      sessionStorage.clear();
     }
 
     function handleSelection() {
@@ -284,8 +326,8 @@
       calculate();
     }
 
-
-
+    // Load inputs on DOM load
+    document.addEventListener("DOMContentLoaded", loadFromSessionStorage);
   </script>
 
 </body>
