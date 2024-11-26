@@ -178,6 +178,42 @@
   </div>
   <script src="../../nav.js"></script>
   <script>
+
+    function saveToSession() {
+      // Save input values individually
+      sessionStorage.setItem("meterSquare", document.getElementById("input-meter-square").value || "");
+      sessionStorage.setItem("caratAreaInMeter", document.getElementById("input-carat-area-in-meter").value || "168");
+      sessionStorage.setItem("caratPrice", document.getElementById("input-carat-price").value || "");
+      sessionStorage.setItem("otherInputField", document.getElementById("other-input-field").value || "");
+
+      // Save output values individually
+      sessionStorage.setItem("shares", document.getElementById("output-shares").textContent || "0.0");
+      sessionStorage.setItem("carat", document.getElementById("output-carat").textContent || "0");
+      sessionStorage.setItem("acre", document.getElementById("output-acre").textContent || "0");
+      sessionStorage.setItem("totalCaratPrice", document.getElementById("output-total-carat-price").value || "0.00");
+      sessionStorage.setItem("reed", document.getElementById("output-reed").textContent || "0");
+      sessionStorage.setItem("fist", document.getElementById("output-fist").textContent || "0");
+      sessionStorage.setItem("lessThanFist", document.getElementById("output-less-than-fist").textContent || "0.0");
+    }
+
+    function loadFromSession() {
+      // Load input values individually
+      document.getElementById("input-meter-square").value = sessionStorage.getItem("meterSquare") || "";
+      document.getElementById("input-carat-area-in-meter").value = sessionStorage.getItem("caratAreaInMeter") || "168";
+      document.getElementById("input-carat-price").value = sessionStorage.getItem("caratPrice") || "";
+      document.getElementById("other-input-field").value = sessionStorage.getItem("otherInputField") || "";
+
+      // Load output values individually
+      document.getElementById("output-shares").textContent = sessionStorage.getItem("shares") || "0.0";
+      document.getElementById("output-carat").textContent = sessionStorage.getItem("carat") || "0";
+      document.getElementById("output-acre").textContent = sessionStorage.getItem("acre") || "0";
+      document.getElementById("output-total-carat-price").value = sessionStorage.getItem("totalCaratPrice") || "0.00";
+      document.getElementById("output-reed").textContent = sessionStorage.getItem("reed") || "0";
+      document.getElementById("output-fist").textContent = sessionStorage.getItem("fist") || "0";
+      document.getElementById("output-less-than-fist").textContent = sessionStorage.getItem("lessThanFist") || "0.0";
+    }
+
+
     function convertSharesToThree(shares) {
       // Check if the input value is negative
       let isNegative = shares < 0;
@@ -233,6 +269,9 @@
       document.getElementById("output-reed").textContent = reedValue;
       document.getElementById("output-fist").textContent = fistValue;
       document.getElementById("output-less-than-fist").textContent = lessThanFistValue;
+
+      saveToSession();
+
     }
 
 
@@ -250,6 +289,8 @@
       document.getElementById("output-reed").textContent = "0";
       document.getElementById("output-fist").textContent = "0";
       document.getElementById("output-less-than-fist").textContent = "0.0";
+      sessionStorage.clear();
+
     }
 
     function handleSelection() {
@@ -266,7 +307,7 @@
       calculateValues();
     }
 
-
+    document.addEventListener("DOMContentLoaded", loadFromSession);
   </script>
 
 </body>
