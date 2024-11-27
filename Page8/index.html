@@ -143,63 +143,65 @@
 
             {
                 question: "كم قيراط لأرض طولها 120 مترًا وعرضها 15 مترًا تم القسمة على 175 متر؟",
-                answers: ["10 قيراط", "12 قيراط", "11 قيراط", "13 قيراط"],
+                answers: ["10 قراريط و 6.85 سهم", "12 قيراط", "11 قيراط", "13 قيراط"],
                 correct: 0,
                 guideLink: "../Page1/section1/index.html",
                 sessionvars: { width1: "15", area1: "15", area2: "175", width2: "15", height: "120" }
             },
             {
                 question: "كم قيراط لأرض طولها 80 مترًا وعرضها 25 مترًا تم القسمة على 175 متر؟",
-                answers: ["11 قيراط", "10 قيراط", "12 قيراط", "13 قيراط"],
+                answers: ["11 قيراط و10.28 سهم", "10 قيراط", "12 قيراط", "13 قيراط"],
                 correct: 0,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "80", area1: "25", area2: "175", width2: "25", height: "80" }
+                sessionvars: { width1: "25", area1: "25", area2: "175", width2: "25", height: "80" }
             },
             {
                 question: "كم قيراط لأرض طولها 200 متر وعرضها 18 مترًا تم القسمة على 175 متر؟",
-                answers: ["20 قيراط", "22 قيراط", "21 قيراط", "19 قيراط"],
+                answers: ["20 قيراط و 13.71 سهم", "22 قيراط", "21 قيراط", "19 قيراط"],
                 correct: 0,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "200", area1: "18", area2: "175", width2: "18", height: "200" }
+                sessionvars: { width1: "18", area1: "18", area2: "175", width2: "18", height: "200" }
             },
             {
                 question: "كم قيراط لأرض طولها 150 مترًا وعرضها 20 مترًا تم القسمة على 168 متر؟",
-                answers: ["17 قيراط", "18 قيراط", "16 قيراط", "15 قيراط"],
-                correct: 1,
+                answers: ["17 قيراط و20.57 سهم", "18 قيراط", "16 قيراط", "15 قيراط"],
+                correct: 0,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "150", area1: "20", area2: "168", width2: "20", height: "150" }
+                sessionvars: { width1: "20", area1: "20", area2: "168", width2: "20", height: "150" }
             },
             {
                 question: "كم قيراط لأرض طولها 120 مترًا وعرضها 15 مترًا تم القسمة على 168 متر؟",
-                answers: ["10 قيراط", "11 قيراط", "12 قيراط", "9 قيراط"],
-                correct: 1,
+                answers: ["10 قراريط و17.14 سهم", "11 قيراط", "12 قيراط", "9 قيراط"],
+                correct: 0,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "120", area1: "15", area2: "168", width2: "15", height: "120" }
+                sessionvars: { width1: "15", area1: "15", area2: "168", width2: "15", height: "120" }
             },
             {
                 question: "كم قيراط لأرض طولها 80 مترًا وعرضها 25 مترًا تم القسمة على 168 متر؟",
-                answers: ["12 قيراط", "13 قيراط", "11 قيراط", "10 قيراط"],
+                answers: ["11 قيراط و 21.71 سمهم", "13 قيراط", "11 قيراط", "10 قيراط"],
                 correct: 0,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "80", area1: "25", area2: "168", width2: "25", height: "80" }
+                sessionvars: { width1: "25", area1: "25", area2: "168", width2: "25", height: "80" }
             },
             {
                 question: "كم قيراط لأرض طولها 200 متر وعرضها 18 مترًا تم القسمة على 168 متر؟",
-                answers: ["21 قيراط", "22 قيراط", "23 قيراط", "20 قيراط"],
+                answers: ["21 قيراط", "21 قيراط و 10.28 سهم", "23 قيراط", "20 قيراط"],
                 correct: 1,
                 guideLink: "../Page1/section1/index.html",
-                sessionvars: { width1: "200", area1: "18", area2: "168", width2: "18", height: "200" }
+                sessionvars: { width1: "18", area1: "18", area2: "168", width2: "18", height: "200" }
             },
 
 
+                           // لمعرفةالعرض والطول المناسب
 
             {
                 question: "إذا كان عرض 10 قراريط في الجهتين 12 مترًا، فما هو الطول المناسب إذا كان القيراط يساوي 175 مترًا؟",
                 answers: ["145.86 متر", "140 متر", "150 متر", "160 متر"],
-                correct: 0
+                correct: 0,
+                guideLink: "../Page2/index.html",
+                sessionvars: { carat_area: "175", carat: "10", carat_price: "12" }
             },
 
-            // guideLink: "../Page2/index.html",
 
             {
                 question: "إذا كانت مساحة قطعة أرض 30 قيراطًا، وعرضها 15 مترًا، فما هو عرض 10 قراريط؟",
@@ -751,8 +753,9 @@
                     array[randomIndex], array[currentIndex]];
             }
         }
-
-        // shuffle(questions);
+        
+        // لو عايز تخليهم مترتبين شيل السطر الي تحت
+        shuffle(questions);
 
 
         const pointsPerQuestion = 50 / 15; // عدد النقاط لكل سؤال
