@@ -139,11 +139,12 @@
     <script>
         let questions = [
 
-            // مثال كامل لتقسيم بين الاخوة
+       
+        // مثال كامل لتقسيم بين الاخوة
 
-            {
+ {
                 question: "إذا كانت الأرض 10 فدادين و12 قيراطًا و6.25 سهم و نزع 3.833 أسهم من كل قيراط، وتم بيع 6 قراريط و 6.333 من المتبقي، فما الصافي؟",
-                answers: ["8 فدادين و13 قيراط و17 سهم", "8 قراريط", "10 قراريط", "12 قراريط"],
+                answers: ["8 فدادين و13 قيراط و17 سهم", "8 فدادين و12 قيراط و17 سهم", "8 فدادين و16 قيراط و17 سهم","8 فدادين و14 قيراط و17 سهم"],
                 correct: 0,
                 guideLink: "../Page4/index.html",
                 sessionvars: { carat: "12", carat_sold: "6", shares: "6.25", shares_sold: "6.33", shares_subtract: "3.833", acre: "10" }
@@ -151,23 +152,23 @@
             },
             {
                 question: "مات مات وترك 8 فدادين و13 قيراط و17 سهمًا و زوجة و4 بنات و ولدين. كم نصيب البنات والزوجة؟  ",
-                answers: ["4 فدادين و19 قيراط و17.063 سهم", "25 فدانًا", "20 فدانًا", "15 فدانًا و 9 قيراط"],
+                answers: ["4 فدادين و19 قيراط و17.063 سهم", "4 فدادين 15 قيراط و17.063 سهم", "4 فدادين و9 قيراط و17.063 سهم","4 فدادين و18 قيراط و17.063 سهم"],
                 correct: 0,
                 guideLink: "../Page5/index.html",
-                sessionvars: { cre: "8", carat: "13", checkboxValues: [true, true, true, true, true, false, false], isSharesLeft: "true", num_females: "4", num_males: "2", num_wives: "1", share: "17" }
+                sessionvars: { isSharesLeft: true, acre: 8, carat: 13, share: 17, num_wives: 1, num_females: 4, num_males: 2, checkboxValues: "[true, true, true, true, true, true, true]" }
 
             },
             {
                 question: "قم بتحويل 4 فدادين و19 قيراط إلى قراريط ثم اضف إليهم 17.063 سهم.",
-                answers: ["450 جنيه", "115 قيراط و17.063 سهم", "500 جنيه", "520 جنيه"],
+                answers: ["125 قيراط و17.063 سهم", "115 قيراط و17.063 سهم","119 قيراط و17.063 سهم","116 قيراط و17.063 سهم"],
                 correct: 1,
                 guideLink: "../Page6/index.html",
-                sessionvars: { caratInput: "19", acreInput: "4", }
+                sessionvars: { caratInput: "19",acreInput:"4" , }
             },
 
             {
-                question: "قطعة أرض 8 فدادين و13 قيراط و17 سهمًا، ونصيب الأم والبنات 115 قيراط و17.063 سهم. قم بعمل فصل حد، والباقي من الأرض يوزع على الأخوين الاثنين بالتساوي.",
-                answers: ["115 قيراط و17.063 سهم", "7 متر", "6 متر", "5 متر"],
+                question: "إجمالي عرض مساحة الأرض 104.03 متر لإجمالي 8 فدادين و13 قيراط و17 سهمًا. قم بحساب المساحة الناقصة من أرض الأم والبنات.",
+                answers: [" النقص 6.069 متر"," النقص 7.069 متر"," النقص 5.069 متر"," النقص 9.069 متر"],
                 correct: 0,
                 guideLink: "../Page3/index.html",
                 sessionvars: { shares: "17", carat: "13", acre: "8", cm: "104.03", old_width_0: "0.301", old_width_1: "7", old_width_2: "29", table_input_0_0: "17.063", table_input_0_1: "115", table_input_0_2: "58.517", table_input_0_3: "52.448", table_input_0_4: "6.069", table_input_1_0: "23.969", table_input_1_1: "44", table_input_1_2: "22.757", table_input_1_3: "26.802", table_input_1_4: "-4.045", table_input_2_0: "23.969", table_input_2_1: "44", table_input_2_2: "22.757", table_input_2_3: "24.779", table_input_2_4: "-2.022" }
@@ -176,7 +177,7 @@
 
             {
                 question: "بعد عمل فصل حد بين الأم والبنات، اكتُشف نقص في الأرض بعرضها الأول 6.069 متر والعرض الثاني 5.719 متر، وبطول 356.32 متر. كم مقدار النقص؟",
-                answers: ["النقص 12 قيراط وكسور", "النقص 13 قيراط وكسور", "النقص 11 قيراط وكسور", "14 قيراط النقص"],
+                answers: ["النقص 12 قيراط وكسور","النقص 13 قيراط وكسور", "النقص 11 قيراط وكسور","النقص 14 قيراط وكسور"],
                 correct: 0,
                 guideLink: "../Page1/section1/index.html",
                 sessionvars: { area2: "175", height: "356.32", width1: "6.069", width2: "5.719" }
@@ -233,7 +234,7 @@
             },
 
 
-            // لمعرفةالعرض والطول المناسب
+                           // لمعرفةالعرض والطول المناسب
 
             {
                 question: "إذا كان عرض 10 قراريط في الجهتين 12 مترًا، فما هو الطول المناسب إذا كان القيراط يساوي 175 مترًا؟",
@@ -400,9 +401,10 @@
                 guideLink: "../Page4/index.html",
                 sessionvars: { carat: 6, shares_subtract: 12 }
             },
+        
             {
                 question: "إذا كان يتم نزع 4 أسهم من كل قيراط، فما هو عدد القراريط المتبقية من 10 قراريط؟",
-                answers: ["8.33 قراريط", "8.5 قراريط", "8 قراريط", "7.5 قراريط"],
+                answers: ["8 قراريط و 8 اسهم", "8.5 قراريط", "8 قراريط", "7.5 قراريط"],
                 correct: 0,
                 guideLink: "../Page4/index.html",
                 sessionvars: { carat: 10, shares_subtract: 4 }
@@ -432,7 +434,7 @@
                 sessionvars: { carat: 24, carat_sold: 12, shares_subtract: 8 }
             },
             {
-                question: "إذا كانت الأرض 10 فدادين و12 قيراطًا و6.25 سهم و نزع 3.833 أسهم من كل قيراط، وتم بيع 6 قراريط و 6.333 من المتبقي، فما الصافي؟",
+                question: "إذا كانت الأرض 10 فدادين و12 قيراطًا و6.25 سهم و نزع 3.833 أسهم من كل قيراط، وتم بيع 6 قراريط و 6.333 اسهم من المتبقي، فكم الصافي؟",
                 answers: ["8 فدادين و13 قيراط و17 سهم", "8 قراريط", "10 قراريط", "12 قراريط"],
                 correct: 0,
                 guideLink: "../Page4/index.html",
@@ -460,6 +462,7 @@
                 guideLink: "../Page4/index.html",
                 sessionvars: { carat: 60, carat_sold: 30, shares_subtract: 10 }
             },
+        
             {
                 question: "إذا كانت الأرض 20 قيراطًا و نزع 12 سهمًا من كل قيراط، وتم بيع 10 قيراطًا من المتبقي، فما الصافي؟",
                 answers: ["0 قراريط", "6 قراريط", "7 قراريط", "8 قراريط"],
@@ -483,7 +486,7 @@
 
             {
                 question: "مات وترك 10 فدادين وزوجة وابن واحد، كم نصيب الابن؟",
-                answers: ["4 فدادين", "5 فدادين", "10فدادين و 18 قيرايط ", "8 فدادين"],
+                answers: ["4 فدادين", "5 فدادين", " 8 فدادين و 18 قيرايط ", "8 فدادين"],
                 correct: 2,
                 guideLink: "../Page5/index.html",
                 sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_males: 1, num_wives: 1, shares_subtract: 8 }
@@ -529,13 +532,13 @@
 
 
             {
-                question: "مات وترك 20 فدانًا و1 ابنة، كم نصيب الابنة؟",
+                question: "مات وترك 20 فدانًا و بنت، كم نصيب البنت؟",
                 answers: ["10 فدادين", "12 فدانًا", "8 فدادين", "5 فدادين"],
                 correct: 0,
                 guideLink: "../Page5/index.html",
                 sessionvars: { acre: 20, carat_sold: 12, checkboxValues: "[true, true]", isSharesLeft: true, num_females: 1, shares_subtract: 8 }
             },
-
+         
             {
                 question: "مات وترك 30 فدانًا و1 ابن و2 بنات، كم نصيب كل بنت؟",
                 answers: ["10 فدادين", "7.5 فدادين", "8 فدادين", "6 فدادين"],
@@ -543,9 +546,10 @@
                 guideLink: "../Page5/index.html",
                 sessionvars: { acre: 30, carat_sold: 12, checkboxValues: "[true, true, true, true]", isSharesLeft: true, num_males: 1, num_females: 2, shares_subtract: 8 }
             },
+       
             {
                 question: "مات وترك 24 فدانًا و1 ابن و3 بنات، كم نصيب الابن؟",
-                answers: ["تسعة أفدنة و14 قيراطًا و6.60 سهم", "18 فدانًا", "20 فدانًا", "12 فدانًا"],
+                answers: ["تسعة أفدنة و14 قيراطًا و9.60 سهم", "18 فدانًا", "20 فدانًا", "12 فدانًا"],
                 correct: 0,
                 guideLink: "../Page5/index.html",
                 sessionvars: { acre: 24, carat_sold: 12, checkboxValues: "[true, true, true, true, true]", isSharesLeft: true, num_males: 1, num_females: 3, shares_subtract: 8 }
@@ -559,7 +563,7 @@
             },
             {
                 question: "مات وترك 10 فدانًا و3 بنات، كم نصيب كل بنت؟",
-                answers: ["3 فدادين", "فدَّانان و5 قراريط و6 أسهم", "4 فدادين", "2 فدان"],
+                answers: ["3 فدادين","فدَّانان و5 قراريط و6 أسهم", "4 فدادين", "2 فدان"],
                 correct: 1,
                 guideLink: "../Page5/index.html",
                 sessionvars: { acre: 10, carat_sold: 12, checkboxValues: "[true, true, true, true, true]", isSharesLeft: true, num_females: 3, shares_subtract: 8 }
@@ -631,6 +635,44 @@
 
             },
 
+            {         
+        "question": "ما هي الطريقة الصحيحة لكتابة ثلثي قبضة او ثلثي سهم؟",
+        "answers": ["0.666", "0.67", "0.66", "0.33"],
+        "correct": 0,
+        "guideLink": "../Page7/section1/index.html",
+        "sessionvars": { "input_lessThanFist": "0.666" },
+    },
+    {
+        "question": "ما هي الطريقة الصحيحة لكتابة نصف قبضة او نصف سهم؟",
+        "answers": ["0.5", "0.51", "0.25", "1.0"],
+        "correct": 0,
+        "guideLink": "../Page7/section1/index.html",
+        "sessionvars": { "input_lessThanFist": "0.5" },
+    },
+    {
+        "question": "ما هي الطريقة الصحيحة لكتابة ثلاثة أرباع قبضة او ثلاثة ارباع سهم؟",
+        "answers": ["0.75", "0.70", "0.50", "1.0"],
+        "correct": 0,
+        "guideLink": "../Page7/section1/index.html",
+        "sessionvars": { "input_lessThanFist": "0.75" },
+    },
+    {
+        "question": "ما هي الطريقة الصحيحة لكتابة ربع قبضة او ربع سهم؟",
+        "answers": ["0.25", "0.20", "0.50", "0.75"],
+        "correct": 0,
+        "guideLink": "../Page7/section1/index.html",
+        "sessionvars": { "input_lessThanFist": "0.25" },
+    },
+    {
+        "question": "ما هي الطريقة الصحيحة لكتابة خمسة أسداس قبضة او خمس اسداس سهم؟",
+        "answers": ["0.833", "0.80", "0.85", "0.75"],
+        "correct": 0,
+        "guideLink": "../Page7/section1/index.html",
+        "sessionvars": { "input_lessThanFist": "0.833" },
+    },
+
+
+            
             // guideLink: "../Page7/section1/index.html", 
 
             // تحويل من متر الي قصبة Page7/section2/index.html
@@ -643,6 +685,13 @@
 
             },
 
+            {
+              "question": "ما هي الطريقة الصحيحة لكتابة ثلاثون متر وثلاثة سنتيمتر؟",
+              "answers": ["30.03", "30.3", "3.03", "33.0"],
+              "correct": 0,
+               "guideLink": "../Page7/section2/index.html"
+            },
+
 
             // guideLink: "../Page7/section2/index.html",
 
@@ -653,9 +702,9 @@
                 answers: ["4200.83", "4000.00", "4300.50", "4050.25"],
                 correct: 0,
                 guideLink: "../Page7/section3/index.html",
-                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.03458 " }
+                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.03458 "}
             },
-
+          
             {
                 question: "في حالة كان القيراط 168 كم تبلغ مساحة الفدان بالمتر المربع؟",
                 answers: ["4032", "4000.00", "4300.50", "4050.25"],
@@ -663,7 +712,7 @@
                 guideLink: "../Page7/section3/index.html",
                 sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "168", "input-meter-price": "1" }
             },
-
+          
             {
                 question: "في حالة كان القيراط 175 كم تبلغ مساحة الفدان بالمتر المربع؟",
                 answers: ["4200", "4000.00", "4300.50", "4050.25"],
@@ -678,15 +727,13 @@
                 answers: ["168.00", "175.3458", "180.00", "150.00"],
                 correct: 1,
                 guideLink: "../Page7/section3/index.html",
-                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.03458 " }
-            },
+                sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175.03458 "}            },
             {
                 question: "في حالة كان القيراط 175.3458 كم تبلغ مساحة السهم الواحد بالمتر المربع؟",
                 answers: ["7.00", "7.293125", "6.90", "8.00"],
                 correct: 1,
                 guideLink: "../Page7/section3/index.html",
-                sessionvars: { "input-shares": "1", "input-carat-area-in-meter": "175.03458 " }
-            },
+                sessionvars: { "input-shares": "1", "input-carat-area-in-meter": "175.03458 "}            },
             {
                 question: "كم يساوي القيراط الواحد بالقبضات في حالة لو كان القيراط بالمتر 175 ؟",
                 answers: ["336", "333", "350", "300"],
@@ -696,14 +743,14 @@
             },
             {
                 question: "كم تبلغ مساحة الفدان بالقصبات المربعة في حالة كان بالمتر 4200؟",
-                answers: ["200", "300", "420", "333 قصبة و6 قبض"],
+                answers: ["200", "300", "420","333 قصبة و6 قبض" ],
                 correct: 3,
                 guideLink: "../Page7/section3/index.html",
                 sessionvars: { "input-acre": "1", "input-carat-area-in-meter": "175" }
             },
             {
                 question: "كم يساوي القيراط الواحد بالقصبات المربعة في حالة كان بالمتر 175؟",
-                answers: ["13 قصبة و21 قبضة", "15.000", "12.500", "10.000"],
+                answers: ["13 قصبة و21 قبضة","13 قصبة و23 قبضة","13 قصبة و22 قبضة", "13 قصبة و30 قبضة"],
                 correct: 0,
                 guideLink: "../Page7/section3/index.html",
                 sessionvars: { "input-carat": "1", "input-carat-area-in-meter": "175", "input-meter-price": "0" }
@@ -755,15 +802,15 @@
                 question: "كم يساوي الفدان الواحد بالقيراطات؟",
                 answers: ["12 قيراط", "24 قيراط", "36 قيراط", "48 قيراط"],
                 correct: 1
-
-
+           
+          
             }, // السؤال الأول المضاف
             {
                 question: "كم يساوي القيراط الواحد بالأسهم؟",
                 answers: ["12 سهم", "18 سهم", "24 سهم", "36 سهم"],
                 correct: 2
             }, // السؤال الثاني المضاف
-
+           
             {
                 question: "ما مساحة القيراط في أغلب مناطق مصر؟",
                 answers: ["168 متر مربع", "175 متر مربع", "171.388 متر مربع", "175.3458 متر مربع"],
@@ -774,9 +821,10 @@
                 answers: ["0.140", "0.1479166666666667", "0.150", "0.160"],
                 correct: 1
             },
+        
             {
                 question: "ما الذي يرمز إليه السهم في القيراط؟",
-                answers: ["وحدة مساحة أصغر داخل القيراط", "مساحة الفدان", "مساحة القيراط بالكامل", "جزء من مساحة الفدان"],
+                answers: ["وحدة مساحة أصغر داخل القيراط", "مساحة الفدان", "مساحة القيراط بالكامل", "  القصبة "],
                 correct: 0
             },
             {
@@ -819,9 +867,9 @@
                     array[randomIndex], array[currentIndex]];
             }
         }
-
+        
         // لو عايز تخليهم مترتبين شيل السطر اللي تحت
-        shuffle(questions);
+       shuffle(questions);
 
 
         const pointsPerQuestion = 50 / 15; // عدد النقاط لكل سؤال
