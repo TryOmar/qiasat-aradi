@@ -20,6 +20,7 @@ function saveData() {
     "carat_price",
     document.getElementById("input-carat-price").value
   );
+  sessionStorage.setItem("output-result-total-price", document.getElementById("output-result-total-price").innerText);
 }
 
 // Function to retrieve and set input field data from sessionStorage
@@ -34,6 +35,8 @@ function loadData() {
     sessionStorage.getItem("carat_area") || "168";
   document.getElementById("input-carat-price").value =
     sessionStorage.getItem("carat_price") || "";
+  document.querySelector("#output-result-total-price").innerText =
+    sessionStorage.getItem("output-result-total-price") || "";
 }
 
 // Add event listeners to save data on input change

@@ -167,6 +167,7 @@
             const centimeters = meters * 100;
             document.getElementById("input_centimeters").value = centimeters.toFixed(2);
             calculateCMToFistReed();
+            saveInputsToSessionStorage(); // Save to session storage
         }
 
         // Function to convert centimeters to meters
@@ -175,8 +176,8 @@
             const meters = centimeters / 100;
             document.getElementById("input_meters").value = meters.toFixed(2);
             calculateCMToFistReed();
+            saveInputsToSessionStorage(); // Save to session storage
         }
-
 
         function decimalToApproximateFraction(decimal) {
             // Function to find the greatest common divisor (GCD) of two numbers
@@ -197,14 +198,10 @@
             return `${numerator}/${denominator}`;
         }
 
-
-
         // Function to convert centimeters to fist, reed, and less than fist
         function calculateCMToFistReed() {
             const centimetersInput = document.getElementById("input_centimeters") || 0;
             const metersInput = document.getElementById("input_meters") || 0;
-
-            // (centimetersInput ? convertToMeters(centimetersInput.value) : convertToMeters(metersInput.value));
 
             const resultDivReed = document.getElementById("resultReed");
             const resultDivFist = document.getElementById("resultFist");
@@ -224,13 +221,37 @@
                 resultDivReed.innerText = reed.toFixed(0);
                 resultDivFist.innerText = fist.toFixed(0);
                 resultDivLessThanFist.innerText = remainingInFistConverted;
-                //+ "  \n= " + decimalToApproximateFraction(remainingInFistConverted);
             } else {
                 // Handle invalid input
                 resultDivReed.innerText = "Result";
                 resultDivFist.innerText = "Result";
                 resultDivLessThanFist.innerText = "Result";
             }
+        }
+
+        // Function to save inputs to sessionStorage
+        function saveInputsToSessionStorage() {
+            const meters = document.getElementById("input_meters").value;
+            const centimeters = document.getElementById("input_centimeters").value;
+
+            sessionStorage.setItem("meters", meters);
+            sessionStorage.setItem("centimeters", centimeters);
+        }
+
+        // Function to load inputs from sessionStorage when the page loads
+        function loadInputsFromSessionStorage() {
+            const savedMeters = sessionStorage.getItem("meters");
+            const savedCentimeters = sessionStorage.getItem("centimeters");
+
+            if (savedMeters !== null) {
+                document.getElementById("input_meters").value = savedMeters;
+            }
+            if (savedCentimeters !== null) {
+                document.getElementById("input_centimeters").value = savedCentimeters;
+            }
+
+            // Calculate the values based on loaded inputs
+            calculateCMToFistReed();
         }
 
         // Function to clear all input fields and result fields
@@ -240,8 +261,16 @@
             document.getElementById("resultReed").innerText = "Result";
             document.getElementById("resultFist").innerText = "Result";
             document.getElementById("resultLessThanFist").innerText = "Result";
+
+            // Clear session storage
+            sessionStorage.removeItem("meters");
+            sessionStorage.removeItem("centimeters");
         }
+
+        // Event listener to load the saved inputs when the page is loaded
+        window.addEventListener("DOMContentLoaded", loadInputsFromSessionStorage);
     </script>
+
     <div class="nav" dir="rtl">
         <a href="help2/index.html" class="nav-box">
             <img src="../../imgs/nav1.png" alt="nav1" />
