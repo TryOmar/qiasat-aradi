@@ -39,6 +39,7 @@
   </style>
 </head>
 <!--test-->
+
 <body>
   <div class="dec1"></div>
   <div class="con">
@@ -119,7 +120,7 @@
       <div>
 
         <div>
-          <input type="number" id="totalCostOfWatering" dir="auto" value="0" class="input2" />
+          <input type="text" id="totalCostOfWatering" dir="auto" value="0" class="input2" />
         </div>
 
       </div>
@@ -207,7 +208,7 @@
 
       // Calculate total cost of watering with 2 decimal places
       const totalCost = (totalCarat * wateringTimes * wateringCostPerCarat).toFixed(2);
-      totalCostOfWatering.value = totalCost;
+      totalCostOfWatering.value = getFormattedNumber(totalCost);
     }
 
     function clearAll() {
@@ -231,6 +232,11 @@
       totalCostOfWatering.value = '0';
       saveData();
     }
+
+    function getFormattedNumber(value) {
+      return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
 
 
   </script>
