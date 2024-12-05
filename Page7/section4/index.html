@@ -85,8 +85,10 @@
     <div class="s s3">
       <h3>ادخل سعر القيراط الواحد</h3>
       <div>
-        <input type="number" dir="auto" placeholder=" مثال 5000" class="input1" id="input-carat-price"
-          oninput="calculateValues()" />
+        <input type="tel" dir="auto" placeholder=" مثال 5000" class="input1" id="input-carat-price-display"
+          onkeyup="formatNumber(this); calculateValues();" />
+
+        <input type="hidden" id="input-carat-price" />
       </div>
     </div>
     <div class="s s4">
@@ -114,7 +116,7 @@
       <div>
 
         <div>
-          <input type="number" dir="auto" value="0" class="input1" id="output-total-carat-price" disabled />
+          <input type="text" dir="auto" value="0" class="input1" id="output-total-carat-price" disabled />
           <!-- <span id="output-total-carat-price" class="input1"> 0 </span> -->
 
         </div>
@@ -184,13 +186,14 @@
       sessionStorage.setItem("meterSquare", document.getElementById("input-meter-square").value || "");
       sessionStorage.setItem("caratAreaInMeter", document.getElementById("input-carat-area-in-meter").value || "168");
       sessionStorage.setItem("caratPrice", document.getElementById("input-carat-price").value || "");
+      sessionStorage.setItem("caratPriceDisplay", document.getElementById("input-carat-price-display").value || "");
       sessionStorage.setItem("otherInputField", document.getElementById("other-input-field").value || "");
 
       // Save output values individually
       sessionStorage.setItem("shares", document.getElementById("output-shares").textContent || "0.0");
       sessionStorage.setItem("carat", document.getElementById("output-carat").textContent || "0");
       sessionStorage.setItem("acre", document.getElementById("output-acre").textContent || "0");
-      sessionStorage.setItem("totalCaratPrice", document.getElementById("output-total-carat-price").value || "0.00");
+      sessionStorage.setItem("totalCaratPrice", document.getElementById("output-total-carat-price").value || "0");
       sessionStorage.setItem("reed", document.getElementById("output-reed").textContent || "0");
       sessionStorage.setItem("fist", document.getElementById("output-fist").textContent || "0");
       sessionStorage.setItem("lessThanFist", document.getElementById("output-less-than-fist").textContent || "0.0");
@@ -207,7 +210,7 @@
       document.getElementById("output-shares").textContent = sessionStorage.getItem("shares") || "0.0";
       document.getElementById("output-carat").textContent = sessionStorage.getItem("carat") || "0";
       document.getElementById("output-acre").textContent = sessionStorage.getItem("acre") || "0";
-      document.getElementById("output-total-carat-price").value = sessionStorage.getItem("totalCaratPrice") || "0.00";
+      document.getElementById("output-total-carat-price").value = sessionStorage.getItem("totalCaratPrice") || "0";
       document.getElementById("output-reed").textContent = sessionStorage.getItem("reed") || "0";
       document.getElementById("output-fist").textContent = sessionStorage.getItem("fist") || "0";
       document.getElementById("output-less-than-fist").textContent = sessionStorage.getItem("lessThanFist") || "0.0";
@@ -258,7 +261,7 @@
 
       // Calculate and update the total carat price
       let outputTotalCarotPrice = totalInCarat * inputCaratPrice;
-      document.getElementById("output-total-carat-price").value = outputTotalCarotPrice.toFixed(2);
+      document.getElementById("output-total-carat-price").value = getFormattedNumber(outputTotalCarotPrice.toFixed(0));
 
       // Calculate reed, fist, and lessThanFist values
       var reedValue = Math.floor(inputMeterSquare / 12.60250); // Integer part of the division
@@ -280,12 +283,13 @@
       document.getElementById("input-meter-square").value = "";
       // document.getElementById("input-carat-area-in-meter").value = "175.035";
       document.getElementById("input-carat-price").value = "";
+      document.getElementById("input-carat-price-display").value = "";
 
       // Clear output fields
       document.getElementById("output-shares").textContent = "0.0";
       document.getElementById("output-carat").textContent = "0";
       document.getElementById("output-acre").textContent = "0";
-      document.getElementById("output-total-carat-price").value = "0.00";
+      document.getElementById("output-total-carat-price").value = "0";
       document.getElementById("output-reed").textContent = "0";
       document.getElementById("output-fist").textContent = "0";
       document.getElementById("output-less-than-fist").textContent = "0.0";
@@ -305,6 +309,20 @@
       }
 
       calculateValues();
+    }
+
+
+    function formatNumber(input) {
+      // Remove non-digit characters for the hidden value
+      const rawValue = input.value.replace(/\D/g, "");
+      // Set the hidden input with the numeric value
+      document.getElementById("input-carat-price").value = rawValue;
+      // Format the displayed value with commas
+      input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function getFormattedNumber(value) {
+      return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     document.addEventListener("DOMContentLoaded", loadFromSession);
