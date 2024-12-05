@@ -1,8 +1,14 @@
 // JavaScript
 // Load data from sessionStorage when the page loads
-window.onload = function () {
+
+document.addEventListener("DOMContentLoaded", function () {
   loadData();
-};
+  calculate();
+});
+
+// window.onload = function () {
+//   loadData();
+// };
 
 // Function to save input field data to sessionStorage
 function saveData() {
@@ -20,7 +26,10 @@ function saveData() {
     "carat_price",
     document.getElementById("input-carat-price").value
   );
-  sessionStorage.setItem("output-result-total-price", document.getElementById("output-result-total-price").innerText);
+  sessionStorage.setItem(
+    "output-result-total-price",
+    document.getElementById("output-result-total-price").innerText
+  );
 }
 
 // Function to retrieve and set input field data from sessionStorage
