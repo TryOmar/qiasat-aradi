@@ -280,7 +280,7 @@
       console.log("totalPrice : ", totalPrice);
 
       // Update the result display
-      document.getElementById("output-result-total-price").innerText = getFormattedNumber(totalPrice);
+      document.getElementById("output-result-total-price").innerText = getFormattedNumber(totalPrice.toFixed(0));
       document.getElementById("output-result-with-meter-squares").innerText = resultInSquareMeter.toFixed(3);
 
       // Calculate and update output-reed, output-fist, and output-less-than-fist
