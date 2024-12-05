@@ -99,8 +99,12 @@
     <div class="s s3">
       <h3>ادخل سعر المتر الواحد</h3>
       <div>
-        <input tabindex="4" type="number" dir="auto" placeholder="50000" class="input1" id="input-meter-price"
-          oninput="calculate()" />
+        <!-- Visible Input (Formatted for Display) -->
+        <input tabindex="4" type="text" dir="auto" placeholder="50000" class="input1" id="input-meter-price-display"
+          onkeyup="formatNumber(this); calculate();" />
+
+        <!-- Hidden Input (Stores Actual Numeric Value) -->
+        <input type="hidden" id="input-meter-price" />
       </div>
     </div>
     <div class="s s4">
@@ -206,7 +210,8 @@
         "input-acre",
         "input-meter-price",
         "input-carat-area-in-meter",
-        "other-input-field"
+        "other-input-field",
+        "input-meter-price-display"
       ];
 
       // Loop through the inputs and save their values
@@ -226,7 +231,8 @@
         "input-acre",
         "input-meter-price",
         "input-carat-area-in-meter",
-        "other-input-field"
+        "other-input-field",
+        "input-meter-price-display"
       ];
 
       // Loop through the inputs and set their values only if non-empty
@@ -274,7 +280,7 @@
       console.log("totalPrice : ", totalPrice);
 
       // Update the result display
-      document.getElementById("output-result-total-price").innerText = totalPrice.toFixed(2);
+      document.getElementById("output-result-total-price").innerText = getFormattedNumber(totalPrice);
       document.getElementById("output-result-with-meter-squares").innerText = resultInSquareMeter.toFixed(3);
 
       // Calculate and update output-reed, output-fist, and output-less-than-fist
@@ -300,6 +306,7 @@
       document.getElementById("input-acre").value = "";
       document.getElementById("input-meter-price").value = "";
       document.getElementById("other-input-field").value = "";
+      document.getElementById("input-meter-price-display").value = "";
 
       // Clear the result displays
       document.getElementById("output-result-total-price").innerText = "0";
@@ -325,6 +332,25 @@
 
       calculate();
     }
+
+
+    function formatNumber(input) {
+      // Remove non-digit characters for the hidden value
+      const rawValue = input.value.replace(/\D/g, "");
+      // Set the hidden input with the numeric value
+      document.getElementById("input-meter-price").value = rawValue;
+      // Format the displayed value with commas
+      input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function getFormattedNumber(value) {
+      // Convert value to a string and ensure it's not null or undefined
+      if (value == null) return ""; // Handle null or undefined
+
+      value = value.toString(); // Convert to string if it's a number
+      return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
 
     // Load inputs on DOM load
     document.addEventListener("DOMContentLoaded", loadFromSessionStorage);
