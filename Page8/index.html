@@ -6,119 +6,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>من سيربح الفدادين</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
-            text-align: center;
-            background-color: #000;
-            color: #fff;
+            background: #000000;
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
         .header {
-            background-color: #004080;
-            color: #fff;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .scoreboard {
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #222;
-            border-radius: 10px;
-            width: 80%;
-            color: #ff0;
-            text-align: right;
-        }
-
-        .question-box {
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #333;
-            border-radius: 10px;
-            width: 80%;
+            font-size: 2em;
+            color: #ffffff;
             text-align: center;
-            color: #fff;
-            font-size: 20px;
-        }
-
-        .answer {
-            margin: 10px auto;
-            padding: 15px;
-            background-color: #444;
-            border: 2px solid #555;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 70%;
-            transition: 0.3s;
-        }
-
-        .answer:hover {
-            background-color: #555;
-            border-color: #ff0;
-        }
-
-        .correct {
-            background-color: green !important;
-        }
-
-        .wrong {
-            background-color: red !important;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            background-color: #004080;
-            color: #fff;
-            font-size: 18px;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-            margin-right: 10px;
-            display: inline-block;
-        }
-
-        .action-btn:hover {
-            background-color: #003060;
-        }
-
-        .restart-btn {
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #ff5733;
-            color: #fff;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: block;
-            width: 150px;
-        }
-
-        .restart-btn:hover {
-            background-color: #c44127;
+            margin: 20px 0;
         }
 
         .actions {
-            margin: 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
         }
 
-        #timer {
-            font-size: 18px;
-            color: #f00;
+        .action-btn, .restart-btn {
+            background: transparent;
+            border: 2px solid #0066cc;
+            color: white;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 1em;
+            position: relative;
+            clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%);
+            width: 200px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .action-btn:hover, .restart-btn:hover {
+            background: #0066cc;
         }
 
         .scoreboard {
             display: flex;
             justify-content: space-between;
+            width: 100%;
+            max-width: 1000px;
+            background: transparent;
+            border: 2px solid #0066cc;
             padding: 20px;
+            margin: 20px 0;
         }
 
-        .left-half,
-        .right-half {
-            width: 48%;
-            /* Each half takes up 48% of the width */
+        .right-half p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        #question-number {
+            color: #ff0000;
+        }
+
+        #land-points {
+            color: #00ff00;
+        }
+
+        #timer, #correct-answers {
+            color: #ffffff;
+        }
+
+        .question-box {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        #question {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #fff;
+            background: #000;
+            border: 2px solid #ffffff;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .answer {
+            background: transparent;
+            border: 2px solid #0066cc;
+            color: white;
+            margin: 10px 0;
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%);
+            text-align: center;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
+        }
+
+        .answer:hover {
+            background: #0066cc;
         }
 
         table {
@@ -126,24 +126,31 @@
             border-collapse: collapse;
         }
 
-        th,
-        td {
+        th, td {
             padding: 8px;
-            text-align: center;
-            border: 1px solid #ccc;
+            text-align: right;
+            border: 1px solid #0066cc;
+            color: #ffffff;
         }
 
-        .highlight {
-            background-color: #ffeeba;
-            /* Light yellow highlight */
-            color: #856404;
-            /* Darker color for better readability */
-            font-weight: bold;
-            /* Optional: Make the text bold */
-            border: 2px solid #ffd966;
-            /* Optional: Add a border for emphasis */
-            transition: background-color 0.3s ease;
-            /* Smooth transition effect */
+        th {
+            background: rgba(0, 102, 204, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .scoreboard {
+                flex-direction: column;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-btn, .restart-btn {
+                width: 100%;
+                max-width: 300px;
+            }
         }
     </style>
 </head>
@@ -160,12 +167,6 @@
         <button class="restart-btn" onclick="resetGame()">العب من جديد</button>
     </div>
     <div class="scoreboard" id="scoreboard">
-        <div class="right-half">
-            <p>السؤال الحالي: <span id="question-number">1</span> من 15</p>
-            <p>الإجابات الصحيحة: <span id="correct-answers">0</span> / 15</p>
-            <p>رصيدك: <span id="land-points">0</span> فدان</p>
-            <p>الوقت المتبقي: <span id="timer">60</span> ثانية</p>
-        </div>
         <div class="left-half">
             <table id="rounds-table">
                 <thead>
@@ -179,13 +180,19 @@
                 </tbody>
             </table>
         </div>
+        <div class="right-half">
+            <p>السؤال الحالي: <span id="question-number">1</span> من 15</p>
+            <p>الإجابات الصحيحة: <span id="correct-answers">0</span> / 15</p>
+            <p>رصيدك: <span id="land-points">0</span> فدان</p>
+            <p>الوقت المتبقي: <span id="timer">60</span> ثانية</p>
+        </div>
     </div>
     <div class="question-box" id="question-box">
-        <p id="question">ما هو السؤال؟</p>
-        <div class="answer" onclick="checkAnswer(this, true)">الإجابة 1</div>
-        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 2</div>
-        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 3</div>
-        <div class="answer" onclick="checkAnswer(this, false)">الإجابة 4</div>
+        <p id="question">أين ولد الشاعر أبو العلاء المعري؟</p>
+        <div class="answer" onclick="checkAnswer(this, true)">سوريا</div>
+        <div class="answer" onclick="checkAnswer(this, false)">الحجاز</div>
+        <div class="answer" onclick="checkAnswer(this, false)">العراق</div>
+        <div class="answer" onclick="checkAnswer(this, false)">اليمن</div>
     </div>
 
     <script>
@@ -1234,6 +1241,7 @@
 
         // Function to update the scoreboard table
         function updateScoreboard() {
+            return;
             const tableBody = document.getElementById("rounds-table").getElementsByTagName("tbody")[0];
             tableBody.innerHTML = ""; // Clear the existing table
 
