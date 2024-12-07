@@ -12,6 +12,20 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+        .answer.correct {
+            background-color: #00aa00 !important;
+            border-color: #00aa00;
+        }
+
+        .answer.incorrect {
+            background-color: #ff0000 !important;
+            border-color: #ff0000;
+        }
+
+        .answer.highlight-correct {
+            background-color: #ffa500 !important;
+            border-color: #ffa500;
+        }
         .answer::before, .action-btn::before, .restart-btn::before{
             content: "";
             clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%);
