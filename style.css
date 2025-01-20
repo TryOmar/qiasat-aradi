@@ -9,20 +9,24 @@
   --nav: rgb(168, 255, 146);
 }
 body {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   background-color: white;
+  width: 100%;
+  overflow-x: hidden;
 }
 .con {
   background-color: white;
-  width: 900px;
+  width: 100%;
+  max-width: 900px;
   height: fit-content;
-  padding-bottom: 100px;
+  padding: 0 20px 100px 20px;
   position: relative;
   display: flex;
   align-items: center;
   flex-flow: column;
+  margin: 0 auto;
 }
 .dec1 {
   background-color: var(--green);
@@ -132,9 +136,22 @@ body {
   }
 }
 
+@media (max-width: 768px) {
+  .con {
+    padding: 0 10px 100px 10px;
+  }
+  .header1 {
+    font-size: 40px;
+    text-align: center;
+  }
+}
+
 @media (max-width: 400px) {
   .button1 {
     font-size: 16px;
     min-width: 150px;
+  }
+  .header1 {
+    font-size: 30px;
   }
 }
