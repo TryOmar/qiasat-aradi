@@ -207,7 +207,7 @@
       totalCaratResult.value = totalCarat;
 
       // Calculate total cost of watering with 2 decimal places
-      const totalCost = (totalCarat * wateringTimes * wateringCostPerCarat).toFixed(2);
+      const totalCost = (totalCarat * wateringTimes * wateringCostPerCarat).toFixed(0);
       totalCostOfWatering.value = getFormattedNumber(totalCost);
     }
 
