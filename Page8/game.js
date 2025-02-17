@@ -180,6 +180,7 @@ if (q) {
     updateScoreboard();
 
     startTimer();
+    saveGameState(); // Save state after loading new question
 } else {
     showPopup("لا توجد المزيد من الأسئلة المتاحة");
 }
@@ -219,6 +220,7 @@ if (isCorrect) {
     document.getElementById("land-points").textContent =
     landPoints.toFixed(2);
     selectedAnswer.classList.add("correct");
+    saveGameState(); // Save state after correct answer
 } else {
     showPopup("إجابة خاطئة! لقد خسرت جميع الفدادين.");
     resetGame();
@@ -275,26 +277,104 @@ showPopup("صديقك يقترح الإجابة رقم " + (currentGameQuestion.
 }
 
 function useGuide() {
-const guideLink = currentGameQuestion.guideLink;
-const sessionData = currentGameQuestion.sessionvars;
-sessionStorage.clear();
+    const guideLink = currentGameQuestion.guideLink;
+    const sessionData = currentGameQuestion.sessionvars;
+    
+    // Save the current game state before clearing session storage
+    const savedGameState = sessionStorage.getItem('gameState');
+    
+    // Clear only the guide-related session data
+    sessionStorage.clear();
+    
+    // Restore the game state
+    if (savedGameState) {
+        sessionStorage.setItem('gameState', savedGameState);
+    }
 
-// Loop through the session variables and store them one by one in localStorage
-for (let key in sessionData) {
-    if (sessionData.hasOwnProperty(key)) {
-    sessionStorage.setItem(key, sessionData[key]);
+    // Set the guide session variables
+    if (sessionData) {
+        for (let key in sessionData) {
+            if (sessionData.hasOwnProperty(key)) {
+                sessionStorage.setItem(key, sessionData[key]);
+            }
+        }
+    }
+
+    // Open the guide link in a new window
+    if (guideLink) {
+        window.open(guideLink, "_blank");
+    } else {
+        showPopup("لا يوجد دليل لهذا السؤال.");
     }
 }
 
-// Open the guide link in a new window
-if (guideLink) {
-    window.open(guideLink, "_blank");
-} else {
-//   alert("لا يوجد دليل لهذا السؤال.");
-    showPopup("لا يوجد دليل لهذا السؤال.");
-}
+function saveGameState() {
+    const gameState = {
+        currentGameQuestion,
+        currentRound,
+        roundScore,
+        correctAnswers,
+        timeLeft,
+        landPoints,
+        questionState: {} // Save the state of questions for each list
+    };
+    
+    // Save the state of remaining questions for each list
+    for (const listName in questions) {
+        gameState.questionState[listName] = [...questions[listName]];
+    }
+    
+    sessionStorage.setItem('gameState', JSON.stringify(gameState));
 }
 
+function loadGameState() {
+    const savedState = sessionStorage.getItem('gameState');
+    if (savedState) {
+        const gameState = JSON.parse(savedState);
+        currentGameQuestion = gameState.currentGameQuestion;
+        currentRound = gameState.currentRound;
+        roundScore = gameState.roundScore;
+        correctAnswers = gameState.correctAnswers;
+        timeLeft = gameState.timeLeft;
+        landPoints = gameState.landPoints;
+        
+        // Restore the questions state
+        if (gameState.questionState) {
+            for (const listName in gameState.questionState) {
+                questions[listName] = gameState.questionState[listName];
+            }
+        }
+        
+        // Update UI
+        document.getElementById("correct-answers").textContent = correctAnswers;
+        document.getElementById("land-points").textContent = landPoints.toFixed(2);
+        
+        // Load the current question UI
+        if (currentGameQuestion.question) {
+            document.getElementById("question").textContent = currentGameQuestion.question;
+            document.getElementById("question-number").textContent = `السؤال ${correctAnswers + 1}`;
+            
+            const answers = document.querySelectorAll(".answer");
+            answers.forEach((answer, index) => {
+                answer.style.display = "block";
+                answer.textContent = currentGameQuestion.answers[index];
+                answer.onclick = () => checkAnswer(answer, index === currentGameQuestion.correct);
+            });
+            
+            startTimer();
+            updateScoreboard();
+        }
+    } else {
+        resetGame();
+    }
+}
 
-// Start the game
-loadNextQuestion();
+// Add event listener to load game state when page loads
+window.addEventListener('load', () => {
+    const savedState = sessionStorage.getItem('gameState');
+    if (savedState) {
+        loadGameState();
+    } else {
+        loadNextQuestion();
+    }
+});
