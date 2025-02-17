@@ -1,0 +1,272 @@
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: "Arial", sans-serif;
+}
+.answer.correct {
+background-color: #00aa00 !important;
+border-color: #00aa00;
+}
+
+.answer.incorrect {
+background-color: #ff0000 !important;
+border-color: #ff0000;
+}
+
+.answer.highlight-correct {
+background-color: #ffa500 !important;
+border-color: #ffa500;
+}
+.answer::before,
+.action-btn::before,
+.restart-btn::before {
+content: "";
+clip-path: polygon(
+    15px 0%,
+    calc(100% - 15px) 0%,
+    100% 50%,
+    calc(100% - 15px) 100%,
+    15px 100%,
+    0% 50%
+);
+clear: both;
+position: absolute;
+top: 0;
+right: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+background-color: black;
+}
+.answer:hover::before,
+.action-btn:hover::before,
+.restart-btn:hover::before {
+background-color: transparent;
+}
+body {
+direction: rtl;
+background: #000000;
+color: white;
+padding: 20px;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+}
+
+.header {
+font-size: 2em;
+color: #ffffff;
+text-align: center;
+margin: 20px 0;
+}
+
+.actions {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+justify-content: center;
+width: 100%;
+max-width: 800px;
+}
+
+.action-btn,
+.restart-btn {
+background: transparent;
+background-color: #0066cc;
+border: 2px solid #0066cc;
+color: white;
+padding: 12px 24px;
+cursor: pointer;
+font-size: 1em;
+position: relative;
+clip-path: polygon(
+    15px 0%,
+    calc(100% - 15px) 0%,
+    100% 50%,
+    calc(100% - 15px) 100%,
+    15px 100%,
+    0% 50%
+);
+width: 200px;
+text-align: center;
+transition: background-color 0.3s;
+}
+
+.action-btn:hover,
+.restart-btn:hover {
+background: #0066cc;
+}
+
+.scoreboard {
+display: flex;
+justify-content: space-between;
+width: 100%;
+max-width: 1000px;
+background: transparent;
+border: 2px solid #0066cc;
+padding: 20px;
+margin: 20px 0;
+}
+
+.right-half p {
+margin: 10px 0;
+font-size: 1.1em;
+}
+
+#question-number {
+color: #ff0000;
+}
+
+#land-points {
+color: #00ff00;
+}
+
+#timer,
+#correct-answers {
+color: #ffffff;
+}
+
+.question-box {
+width: 100%;
+max-width: 800px;
+margin-top: 20px;
+}
+
+#question {
+font-size: 1.3em;
+margin-bottom: 20px;
+text-align: center;
+color: #fff;
+background: #000;
+border: 2px solid #ffffff;
+padding: 15px;
+margin: 20px 0;
+}
+
+.answer {
+display: flex;
+justify-content: center;
+align-items: center;
+background: #0066cc;
+border: 2px solid #0066cc;
+color: white;
+margin: 10px 0;
+padding: 15px;
+cursor: pointer;
+position: relative;
+clip-path: polygon(
+    15px 0%,
+    calc(100% - 15px) 0%,
+    100% 50%,
+    calc(100% - 15px) 100%,
+    15px 100%,
+    0% 50%
+);
+text-align: center;
+font-size: 1.1em;
+transition: background-color 0.3s;
+}
+
+.answer:hover {
+background: #0066cc;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+}
+
+th,
+td {
+padding: 8px;
+text-align: right;
+border: 1px solid #0066cc;
+color: #ffffff;
+}
+
+th {
+background: rgba(0, 102, 204, 0.3);
+}
+
+.dark-popup-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+opacity: 0;
+visibility: hidden;
+transition: opacity 0.3s, visibility 0.3s;
+z-index: 1000;
+}
+
+.dark-popup-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.dark-popup {
+background-color: #1a1a1a;
+color: white;
+padding: 20px;
+border-radius: 8px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+position: relative;
+max-width: 400px;
+width: 90%;
+transform: scale(0.9);
+transition: transform 0.3s;
+}
+
+.dark-popup.active {
+transform: scale(1);
+}
+
+.dark-popup-close {
+position: absolute;
+top: 10px;
+right: 10px;
+background: none;
+border: none;
+color: #666;
+cursor: pointer;
+padding: 5px;
+font-size: 25px;
+line-height: 1;
+transition: color 0.3s;
+}
+
+.dark-popup-close:hover {
+color: white;
+}
+
+.dark-popup-content {
+margin-top: 20px;
+font-size: 16px;
+line-height: 1.5;
+text-align: center;
+}
+
+@media (max-width: 768px) {
+.scoreboard {
+    flex-direction: column;
+}
+
+.actions {
+    flex-direction: column;
+    align-items: center;
+}
+
+.action-btn,
+.restart-btn {
+    width: 100%;
+    max-width: 300px;
+}
+}
