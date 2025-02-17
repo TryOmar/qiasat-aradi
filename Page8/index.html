@@ -2615,12 +2615,18 @@
           return;
         }
 
-        const currentGame = gameQuestions[currentRound];
-        const listName = currentGame.list; // Get the list for the current round
-        roundScore = currentGame.score; // Get the score for the current round
+        let q = null;
+        while (currentRound < gameQuestions.length && !q) {
+          const currentGame = gameQuestions[currentRound];
+          const listName = currentGame.list;
+          roundScore = currentGame.score;
 
-        // Get a random question from the selected list
-        const q = getRandomQuestionAndRemove(listName);
+          q = getRandomQuestionAndRemove(listName);
+          
+          if (!q) {
+            currentRound++; // Move to next list if current one is empty
+          }
+        }
 
         if (q) {
           // Assign the selected question to currentGameQuestion
@@ -2645,8 +2651,7 @@
 
           startTimer();
         } else {
-        //   alert(`لا توجد أسئلة متاحة في قائمة ${listName}`);
-          showPopup(`لا توجد أسئلة متاحة في قائمة ${listName}`);
+          showPopup("لا توجد المزيد من الأسئلة المتاحة");
         }
       }
 
