@@ -3,7 +3,7 @@
 ## 🌾 About The Project
 Qiasat Aradi is a comprehensive agricultural land measurement and calculation tool designed specifically for farmers and agricultural land owners. It provides accurate measurements, conversions, and calculations for agricultural lands using traditional Egyptian measurement units.
 
-👉 **[Live Preview of Qiasat Aradi](https://omar7001-b.github.io/qiasat-aradi/)** 👈
+👉 **[Live Preview of Qiasat Aradi](https://tryomar.github.io/qiasat-aradi/)** 👈
 
 ## 🚀 Features
 
