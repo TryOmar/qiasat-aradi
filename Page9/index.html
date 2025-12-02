@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>محاكاة توزيع المساحة</title>
+</head>
+
+<body>
+    <div class="con">
+        <div class="dec1"></div>
+        <h1 class="header1">محاكاة توزيع المساحة</h1>
+
+        <!-- Land Area Calculation -->
+        <div class="section-box">
+            <h2 class="header2">1. حساب مساحة الأرض</h2>
+            <div class="input-group">
+                <label>العرض الأول (م):</label>
+                <input type="number" id="width1" placeholder="مثال: 10">
+            </div>
+            <div class="input-group">
+                <label>العرض الثاني (م):</label>
+                <input type="number" id="width2" placeholder="مثال: 10">
+            </div>
+            <div class="input-group">
+                <label>الطول (م):</label>
+                <input type="number" id="length" placeholder="مثال: 20">
+            </div>
+            <button class="button1" onclick="calculateArea()">احسب المساحة</button>
+            <div class="result-display">
+                المساحة الكلية: <span id="totalArea">0</span> م²
+            </div>
+        </div>
+
+        <!-- Deductions -->
+        <div class="section-box">
+            <h2 class="header2">2. الخصومات (شوارع، خدمات...)</h2>
+            <div class="input-group">
+                <label>قيمة الخصم (م²):</label>
+                <input type="number" id="deductionValue" placeholder="مثال: 20">
+            </div>
+            <div class="input-group">
+                <label>اسم الخصم (اختياري):</label>
+                <input type="text" id="deductionName" placeholder="مثال: شارع">
+            </div>
+            <button class="button1" onclick="addDeduction()">تنفيذ الخصم</button>
+            <p class="note">المساحة المتبقية بعد الخصم سيتم توزيعها بالتساوي بين جميع الأشخاص.</p>
+        </div>
+
+        <!-- Add Persons -->
+        <div class="section-box">
+            <h2 class="header2">3. إضافة الأشخاص</h2>
+            <div class="input-group">
+                <label>اسم الشخص:</label>
+                <input type="text" id="personName" placeholder="مثال: محمد">
+            </div>
+            <button class="button1" onclick="addPerson()">إضافة شخص</button>
+        </div>
+
+        <!-- Transfers -->
+        <div class="section-box">
+            <h2 class="header2">4. نقل المساحة (بيع/شراء)</h2>
+            <div class="input-group">
+                <label>من:</label>
+                <select id="transferFrom"></select>
+            </div>
+            <div class="input-group">
+                <label>إلى:</label>
+                <select id="transferTo"></select>
+            </div>
+            <div class="input-group">
+                <label>القيمة (م²):</label>
+                <input type="number" id="transferValue" placeholder="مثال: 10">
+            </div>
+            <button class="button1" onclick="transfer()">تنفيذ النقل</button>
+        </div>
+
+        <!-- Results Table -->
+        <div class="section-box">
+            <h2 class="header2">النتائج النهائية</h2>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>المساحة النهائية (م²)</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <!-- Rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Operations Table -->
+        <div class="section-box">
+            <h2 class="header2">سجل العمليات</h2>
+            <div id="operationsList" class="operations-list">
+                <!-- Operations will be added here -->
+            </div>
+        </div>
+
+        <div class="nav">
+            <a class="nav-box" onclick="history.back()">
+                <img src="../imgs/nav2.png" alt="back" />
+                <p>رجوع</p>
+            </a>
+            <a href="../index.html" class="nav-box">
+                <img src="../imgs/nav4.png" alt="home" />
+                <p>الرئيسية</p>
+            </a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+/* Page10 Specific Styles */
+
+.section-box {
+    background-color: #f9f9f9;
+    border: 2px solid var(--green);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.input-group input,
+.input-group select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--green);
+}
+
+.result-display {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--red);
+    text-align: center;
+}
+
+.note {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Tables */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid var(--green);
+    padding: 10px;
+    text-align: center;
+}
+
+.results-table th {
+    background-color: var(--green);
+    color: white;
+}
+
+/* Operations List */
+.operations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.operation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.operation-item.deduction {
+    background-color: #ffebee;
+    border-color: #ffcdd2;
+}
+
+.operation-item.transfer {
+    background-color: #e8f5e9;
+    border-color: #c8e6c9;
+}
+
+.delete-btn {
+    background-color: transparent;
+    border: none;
+    color: red;
+    font-size: 18px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.delete-btn:hover {
+    color: darkred;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .section-box {
+        padding: 15px;
+    }
+}
