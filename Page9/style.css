@@ -108,6 +108,62 @@
     color: darkred;
 }
 
+/* Nested Rows for Split Parts */
+.nested-row {
+    /* Base style, background handled by group classes */
+}
+
+.nested-name {
+    padding-right: 40px !important;
+    /* Indentation */
+    font-size: 0.9em;
+    color: #555;
+    position: relative;
+}
+
+.nested-value {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.delete-part-btn {
+    background: none;
+    border: none;
+    color: red;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.delete-part-btn:hover {
+    font-weight: bold;
+}
+
+/* Row Grouping */
+.person-main-row {
+    font-weight: bold;
+}
+
+.group-even {
+    background-color: #ffffff;
+}
+
+.group-odd {
+    background-color: #f1f8e9;
+    /* Light Green */
+}
+
+/* Ensure nested rows blend with the group but show indentation */
+.nested-row.group-even {
+    background-color: #f9f9f9;
+    /* Slightly darker than white */
+}
+
+.nested-row.group-odd {
+    background-color: #e8f5e9;
+    /* Slightly darker green */
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .section-box {
