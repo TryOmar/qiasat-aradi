@@ -97,39 +97,43 @@ function renderHeaderAndFooter() {
   
   if (currentInputMethod === "carats") {
     headerContainer.innerHTML = `
-      <p class="col-name" style="width: 22%;">الشريك</p>
-      <p class="col-carat" style="width: 13%;">قيراط</p>
-      <p class="col-share" style="width: 13%;">سهم</p>
-      <p class="col-width" style="width: 18%;">العرض (م)</p>
-      <p class="col-cum" style="width: 17%;">العلامة (م)</p>
-      <p class="col-border" style="width: 17%;">الفاصل (م)</p>
+      <p>الشريك</p>
+      <p>قيراط</p>
+      <p>سهم</p>
+      <p>العرض (م)</p>
+      <p>العلامة (م)</p>
+      <p>الفاصل (م)</p>
+      <p></p>
     `;
     
     footerContainer.innerHTML = `
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white; width: 22% !important;">
-      <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
-      <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
-      <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white; width: 18% !important;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
+      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
     `;
   } else {
     headerContainer.innerHTML = `
-      <p class="col-name" style="width: 22%;">الشريك</p>
-      <p class="col-fraction" style="width: 13%;">النسبة / الكسر</p>
-      <p class="col-equiv" style="width: 13%;">تعادل (ق.س)</p>
-      <p class="col-width" style="width: 18%;">العرض (م)</p>
-      <p class="col-cum" style="width: 17%;">العلامة (م)</p>
-      <p class="col-border" style="width: 17%;">الفاصل (م)</p>
+      <p>الشريك</p>
+      <p>النسبة / الكسر</p>
+      <p>تعادل (ق.س)</p>
+      <p>العرض (م)</p>
+      <p>العلامة (م)</p>
+      <p>الفاصل (م)</p>
+      <p></p>
     `;
     
     footerContainer.innerHTML = `
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white; width: 22% !important;">
-      <input type="text" id="total-fraction-entered" readonly value="0.0%" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
-      <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white; width: 18% !important;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
+      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-fraction-entered" readonly value="0.0%" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
     `;
   }
 }
@@ -201,27 +205,27 @@ function addNewPartnerRow(name = "", carats = "", shares = "", fraction = "") {
   
   if (currentInputMethod === "carats") {
     row.innerHTML = `
-      <div class="col-group name-group" style="width: 22%;">
+      <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
         <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
       </div>
-      <div class="col-group carat-group" style="width: 13%;">
+      <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
         <input type="number" class="partner-carats" placeholder="0" value="${carats}" oninput="saveAndCalc()">
       </div>
-      <div class="col-group share-group" style="width: 13%;">
+      <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
         <input type="number" class="partner-shares" placeholder="0" value="${shares}" oninput="saveAndCalc()">
       </div>
-      <div class="col-group width-group" style="width: 18%;">
+      <div class="col-group width-group">
         <span class="mobile-label">العرض (م)</span>
         <input type="text" class="partner-width" readonly value="-">
       </div>
-      <div class="col-group cum-group" style="width: 17%;">
+      <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
         <input type="text" class="partner-cum-width" readonly value="-">
       </div>
-      <div class="col-group border-group" style="width: 17%;">
+      <div class="col-group border-group">
         <span class="mobile-label">الفاصل (م)</span>
         <input type="text" class="partner-div-line" readonly value="-">
       </div>
@@ -229,27 +233,27 @@ function addNewPartnerRow(name = "", carats = "", shares = "", fraction = "") {
     `;
   } else {
     row.innerHTML = `
-      <div class="col-group name-group" style="width: 22%;">
+      <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
         <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
       </div>
-      <div class="col-group fraction-group" style="width: 13%;">
+      <div class="col-group fraction-group">
         <span class="mobile-label">النسبة / الكسر</span>
         <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" oninput="saveAndCalc()">
       </div>
-      <div class="col-group equiv-group" style="width: 13%;">
+      <div class="col-group equiv-group">
         <span class="mobile-label">تعادل (ق.س)</span>
         <input type="text" class="partner-equiv" readonly value="-">
       </div>
-      <div class="col-group width-group" style="width: 18%;">
+      <div class="col-group width-group">
         <span class="mobile-label">العرض (م)</span>
         <input type="text" class="partner-width" readonly value="-">
       </div>
-      <div class="col-group cum-group" style="width: 17%;">
+      <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
         <input type="text" class="partner-cum-width" readonly value="-">
       </div>
-      <div class="col-group border-group" style="width: 17%;">
+      <div class="col-group border-group">
         <span class="mobile-label">الفاصل (م)</span>
         <input type="text" class="partner-div-line" readonly value="-">
       </div>

@@ -1,4 +1,4 @@
-/* Page 11 Table Column Width Overrides and Styling */
+/* Page 11 - Land Division with Different Lengths Stylesheet */
 
 body {
   display: flex !important;
@@ -8,7 +8,8 @@ body {
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  background-color: white !important;
+  background-color: #f4f6f8 !important;
+  font-family: 'Cairo', sans-serif !important;
 }
 
 .con {
@@ -16,9 +17,9 @@ body {
   flex-direction: column !important;
   align-items: center !important;
   width: 100% !important;
-  max-width: 600px !important;
+  max-width: 900px !important;
   margin: 0 auto !important;
-  padding: 0 20px 150px 20px !important;
+  padding: 0 20px 120px 20px !important;
   float: none !important;
 }
 
@@ -26,23 +27,97 @@ body {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  width: 100%;
-  margin-top: 80px !important; /* Pushes the title down below the absolute green top bar */
+  width: 100% !important;
+  margin-top: 70px !important; /* Pushes the title down below the absolute green bar */
   margin-bottom: 20px !important;
+  gap: 12px !important;
 }
 
 .title h1 {
-  font-size: 23px !important;
-  margin: 0 15px 0 0 !important;
-  color: rgb(149, 11, 63) !important;
+  font-size: 22px !important;
+  color: rgb(149, 11, 63) !important; /* var(--red) */
+  margin: 0 !important;
+  font-weight: bold !important;
 }
 
 .title img {
-  width: 55px !important;
+  width: 45px !important;
   height: auto !important;
 }
 
-/* Center the action buttons and remove the off-center margins */
+/* Premium Card and Input Styling */
+.s {
+  width: 100% !important;
+  max-width: 600px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  margin-top: 18px !important;
+  padding: 15px !important;
+  overflow: hidden !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.s:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.s h3 {
+  font-size: 15px !important;
+  background-color: #1b5e20 !important; /* Dark Green */
+  color: white !important;
+  width: calc(100% + 30px) !important;
+  margin: -15px -15px 15px -15px !important;
+  padding: 10px 15px !important;
+  text-align: center !important;
+  font-weight: bold !important;
+  border-radius: 11px 11px 0 0 !important;
+}
+
+.inputs {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+.input-div {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.input-div label {
+  font-size: 11px !important;
+  color: #555555 !important;
+  margin-bottom: 5px !important;
+  font-weight: bold !important;
+}
+
+.inputs input {
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  background-color: #fafafa !important;
+  color: #333333 !important;
+  transition: all 0.2s !important;
+}
+
+.inputs input:focus {
+  border-color: #2e7d32 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+  outline: none !important;
+}
+
+/* Action Buttons */
 .buttons2 {
   display: flex !important;
   justify-content: center !important;
@@ -55,48 +130,54 @@ body {
 
 .buttons2 button {
   margin: 0 !important;
-  width: 80px !important;
-  height: 35px !important;
-  line-height: 35px !important;
+  height: 38px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
 }
 
-/* Responsive Table-to-Card Layout for Page 11 */
+/* Table Layout using CSS Grid (Desktop) */
+.table {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin-top: 15px !important;
+}
+
+.table-header, .partner-row, #total {
+  display: grid !important;
+  grid-template-columns: 22% 13% 13% 18% 17% 17% 24px !important;
+  gap: 4px !important;
+  align-items: center !important;
+  width: 100% !important;
+}
 
 .table-header {
-  display: flex !important;
-  width: 100% !important;
   background-color: #f5f5f5 !important;
   border-bottom: 2px solid #2e7d32 !important;
-  padding: 6px 0 !important;
-  font-weight: bold !important;
-  color: #555555 !important;
+  padding: 8px 0 !important;
+  border-radius: 6px 6px 0 0 !important;
 }
 
 .table-header p {
   text-align: center !important;
   font-size: 11px !important;
+  font-weight: bold !important;
+  color: #555555 !important;
   margin: 0 !important;
 }
 
 .col-group {
   display: flex !important;
   flex-direction: column !important;
-}
-
-/* Desktop View (Horizontal Row) */
-.partner-row {
-  display: flex !important;
   width: 100% !important;
-  align-items: center !important;
-  gap: 4px !important;
-  margin-top: 6px !important;
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
-  box-shadow: none !important;
 }
 
 .partner-row input {
+  width: 100% !important;
   height: 32px !important;
   border: 1px solid #cccccc !important;
   border-radius: 6px !important;
@@ -105,6 +186,7 @@ body {
   font-weight: bold !important;
   text-align: center !important;
   background-color: #ffffff !important;
+  box-sizing: border-box !important;
   transition: all 0.2s !important;
 }
 
@@ -148,17 +230,28 @@ body {
 }
 
 /* Totals Row */
-#total {
-  display: flex !important;
-  width: 100% !important;
-  gap: 4px !important;
-}
-
 #total input {
+  width: 100% !important;
   height: 32px !important;
   font-size: 11px !important;
   font-weight: bold !important;
   border-radius: 6px !important;
+  text-align: center !important;
+  border: 1px solid #e0e0e0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Selector & conversion styling */
+.selector1 {
+  background-color: #fafafa !important;
+  border: 1px solid #cccccc !important;
+  font-weight: bold !important;
+  transition: all 0.2s !important;
+  border-radius: 6px !important;
+}
+.selector1:focus {
+  border-color: #2e7d32 !important;
+  outline: none !important;
 }
 
 /* Mobile view helper labels */
@@ -187,6 +280,7 @@ body {
     margin-bottom: 12px !important;
     box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important;
     position: relative !important;
+    width: 100% !important;
   }
 
   .partner-row .col-group {
@@ -244,16 +338,4 @@ body {
     font-size: 14px !important;
     z-index: 10 !important;
   }
-}
-
-/* Selector & conversion styling */
-.selector1 {
-  background-color: #fafafa !important;
-  border: 1px solid #cccccc !important;
-  font-weight: bold !important;
-  transition: all 0.2s !important;
-}
-.selector1:focus {
-  border-color: #2e7d32 !important;
-  outline: none !important;
 }
