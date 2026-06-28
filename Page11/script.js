@@ -116,7 +116,8 @@ function renderHeaderAndFooter() {
   } else {
     headerContainer.innerHTML = `
       <p class="col-name" style="width: 22%;">الشريك</p>
-      <p class="col-fraction" style="width: 26%;">النسبة / الكسر</p>
+      <p class="col-fraction" style="width: 13%;">النسبة / الكسر</p>
+      <p class="col-equiv" style="width: 13%;">تعادل (ق.س)</p>
       <p class="col-width" style="width: 18%;">العرض (م)</p>
       <p class="col-cum" style="width: 17%;">العلامة (م)</p>
       <p class="col-border" style="width: 17%;">الفاصل (م)</p>
@@ -124,7 +125,8 @@ function renderHeaderAndFooter() {
     
     footerContainer.innerHTML = `
       <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white; width: 22% !important;">
-      <input type="text" id="total-fraction-entered" readonly value="0.0%" style="font-weight: bold; background: #222; color: white; width: 26% !important;">
+      <input type="text" id="total-fraction-entered" readonly value="0.0%" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 13% !important;">
       <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white; width: 18% !important;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white; width: 17% !important;">
@@ -199,21 +201,58 @@ function addNewPartnerRow(name = "", carats = "", shares = "", fraction = "") {
   
   if (currentInputMethod === "carats") {
     row.innerHTML = `
-      <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" style="width: 22% !important;">
-      <input type="number" class="partner-carats" placeholder="0" value="${carats}" oninput="saveAndCalc()" style="width: 13% !important;">
-      <input type="number" class="partner-shares" placeholder="0" value="${shares}" oninput="saveAndCalc()" style="width: 13% !important;">
-      <input type="text" class="partner-width" readonly value="-" style="width: 18% !important;">
-      <input type="text" class="partner-cum-width" readonly value="-" style="width: 17% !important;">
-      <input type="text" class="partner-div-line" readonly value="-" style="width: 17% !important;">
+      <div class="col-group name-group" style="width: 22%;">
+        <span class="mobile-label">الشريك</span>
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
+      </div>
+      <div class="col-group carat-group" style="width: 13%;">
+        <span class="mobile-label">قيراط</span>
+        <input type="number" class="partner-carats" placeholder="0" value="${carats}" oninput="saveAndCalc()">
+      </div>
+      <div class="col-group share-group" style="width: 13%;">
+        <span class="mobile-label">سهم</span>
+        <input type="number" class="partner-shares" placeholder="0" value="${shares}" oninput="saveAndCalc()">
+      </div>
+      <div class="col-group width-group" style="width: 18%;">
+        <span class="mobile-label">العرض (م)</span>
+        <input type="text" class="partner-width" readonly value="-">
+      </div>
+      <div class="col-group cum-group" style="width: 17%;">
+        <span class="mobile-label">العلامة (م)</span>
+        <input type="text" class="partner-cum-width" readonly value="-">
+      </div>
+      <div class="col-group border-group" style="width: 17%;">
+        <span class="mobile-label">الفاصل (م)</span>
+        <input type="text" class="partner-div-line" readonly value="-">
+      </div>
       <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
     `;
   } else {
     row.innerHTML = `
-      <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" style="width: 22% !important;">
-      <input type="text" class="partner-fraction" placeholder="مثال: 1/8" value="${fraction}" oninput="saveAndCalc()" style="width: 26% !important;">
-      <input type="text" class="partner-width" readonly value="-" style="width: 18% !important;">
-      <input type="text" class="partner-cum-width" readonly value="-" style="width: 17% !important;">
-      <input type="text" class="partner-div-line" readonly value="-" style="width: 17% !important;">
+      <div class="col-group name-group" style="width: 22%;">
+        <span class="mobile-label">الشريك</span>
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
+      </div>
+      <div class="col-group fraction-group" style="width: 13%;">
+        <span class="mobile-label">النسبة / الكسر</span>
+        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" oninput="saveAndCalc()">
+      </div>
+      <div class="col-group equiv-group" style="width: 13%;">
+        <span class="mobile-label">تعادل (ق.س)</span>
+        <input type="text" class="partner-equiv" readonly value="-">
+      </div>
+      <div class="col-group width-group" style="width: 18%;">
+        <span class="mobile-label">العرض (م)</span>
+        <input type="text" class="partner-width" readonly value="-">
+      </div>
+      <div class="col-group cum-group" style="width: 17%;">
+        <span class="mobile-label">العلامة (م)</span>
+        <input type="text" class="partner-cum-width" readonly value="-">
+      </div>
+      <div class="col-group border-group" style="width: 17%;">
+        <span class="mobile-label">الفاصل (م)</span>
+        <input type="text" class="partner-div-line" readonly value="-">
+      </div>
       <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
     `;
   }
@@ -360,18 +399,34 @@ function calculate() {
 
   rows.forEach((row, index) => {
     let partnerAreaM2 = 0;
+    let partnerCarats = 0;
     
     if (currentInputMethod === "carats") {
       const caratInput = row.querySelector(".partner-carats");
       const shareInput = row.querySelector(".partner-shares");
       const c = parseFloat(caratInput ? caratInput.value : 0) || 0;
       const s = parseFloat(shareInput ? shareInput.value : 0) || 0;
-      const partnerCarats = c + s / 24;
+      partnerCarats = c + s / 24;
       partnerAreaM2 = partnerCarats * caratArea;
     } else {
       const fracInput = row.querySelector(".partner-fraction");
       const fracVal = parseFraction(fracInput ? fracInput.value : "");
       partnerAreaM2 = fracVal * totalAreaM2;
+      partnerCarats = partnerAreaM2 / caratArea;
+    }
+    
+    // Update the equivalent carats and sahms for fraction method
+    if (currentInputMethod === "fractions") {
+      const equivInput = row.querySelector(".partner-equiv");
+      if (equivInput) {
+        if (partnerCarats > 0) {
+          const c_eq = Math.floor(partnerCarats);
+          const s_eq = ((partnerCarats - c_eq) * 24).toFixed(1);
+          equivInput.value = `${c_eq} ق، ${s_eq} س`;
+        } else {
+          equivInput.value = "-";
+        }
+      }
     }
     
     cumulativeArea += partnerAreaM2;
