@@ -203,6 +203,8 @@ body {
   background-color: #fafafa !important;
   color: #333333 !important;
   transition: all 0.2s !important;
+  position: static !important;
+  right: auto !important;
 }
 
 #lands-table td input:focus {
@@ -456,4 +458,67 @@ body {
 
 .sign-toggle-btn.minus:hover {
   background-color: #ffcdd2 !important;
+}
+
+/* Discount Table Inputs */
+#discount-table td input {
+  width: 100% !important;
+  height: 34px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 6px !important;
+  text-align: center !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  background-color: #fafafa !important;
+  color: #333333 !important;
+  transition: all 0.2s !important;
+  position: static !important;
+  right: auto !important;
+}
+
+#discount-table td input:focus {
+  border-color: #c62828 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.15) !important;
+  outline: none !important;
+}
+
+#discount-table .discount-name-input {
+  text-align: right !important;
+  font-size: 13px !important;
+  padding: 0 8px !important;
+}
+
+/* Distribution Table */
+#distribution-table td {
+  padding: 8px !important;
+  border: 1px solid #e0e0e0 !important;
+  font-size: 13px !important;
+}
+
+#distribution-table tr:nth-child(even) {
+  background-color: #f9f9f9 !important;
+}
+
+#distribution-table tr:hover {
+  background-color: #e8f5e9 !important;
+}
+
+/* Section h4 styling */
+.s h4 {
+  margin: 0 !important;
+}
+
+/* Individuals input styling */
+#individuals-section input[type="number"] {
+  font-size: 16px !important;
+}
+
+/* Report container print adjustments */
+#report-content h4 {
+  margin: 10px 0 5px !important;
+}
+
+#report-content table {
+  margin-bottom: 10px !important;
 }

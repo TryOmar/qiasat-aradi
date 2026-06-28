@@ -1,15 +1,31 @@
-// Local Storage saving and loading
-document.addEventListener("DOMContentLoaded", function () {
-  loadData();
-  calculate();
-});
+// ==========================================
+// جمع وطرح الأراضي الزراعية - script.js
+// ==========================================
 
+// --- Data Arrays ---
 let areas = [
   { name: "", shares: "", carat: "", acre: "", sign: "plus" },
   { name: "", shares: "", carat: "", acre: "", sign: "plus" }
 ];
 
-let currentOperation = "calc"; // 'calc' (add/subtract), 'multiply', 'divide'
+let discounts = [
+  { name: "", shares: "", carat: "", acre: "" }
+];
+
+let individualNames = [];
+
+// --- Initialization ---
+document.addEventListener("DOMContentLoaded", function () {
+  loadData();
+  renderAreas();
+  renderDiscounts();
+  restoreIndividuals();
+  calculate();
+});
+
+// ==========================================
+// AREA TABLE (جدول الجمع)
+// ==========================================
 
 function getAreaTitle(index) {
   const ordinals = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة", "التاسعة", "العاشرة"];
@@ -19,65 +35,41 @@ function getAreaTitle(index) {
   return `المساحة ${index + 1}`;
 }
 
-function syncInputsToMemory() {
-  const nameInputs = document.querySelectorAll(".area-name-input");
-  const shareInputs = document.querySelectorAll(".area-shares");
-  const caratInputs = document.querySelectorAll(".area-carat");
-  const acreInputs = document.querySelectorAll(".area-acre");
-  
-  nameInputs.forEach((input) => {
-    const idx = parseInt(input.getAttribute("data-index"));
-    if (areas[idx]) {
-      areas[idx].name = input.value;
-    }
-  });
-  shareInputs.forEach((input) => {
-    const idx = parseInt(input.getAttribute("data-index"));
-    if (areas[idx]) {
-      areas[idx].shares = input.value;
-    }
-  });
-  caratInputs.forEach((input) => {
-    const idx = parseInt(input.getAttribute("data-index"));
-    if (areas[idx]) {
-      areas[idx].carat = input.value;
-    }
-  });
-  acreInputs.forEach((input) => {
-    const idx = parseInt(input.getAttribute("data-index"));
-    if (areas[idx]) {
-      areas[idx].acre = input.value;
+function syncAreasFromDOM() {
+  const rows = document.querySelectorAll("#lands-table-body tr");
+  rows.forEach((row, i) => {
+    if (areas[i]) {
+      const nameInput = row.querySelector(".area-name-input");
+      const sharesInput = row.querySelector(".area-shares");
+      const caratInput = row.querySelector(".area-carat");
+      const acreInput = row.querySelector(".area-acre");
+      if (nameInput) areas[i].name = nameInput.value;
+      if (sharesInput) areas[i].shares = sharesInput.value;
+      if (caratInput) areas[i].carat = caratInput.value;
+      if (acreInput) areas[i].acre = acreInput.value;
     }
   });
 }
 
 function renderAreas() {
   const tbody = document.getElementById("lands-table-body");
-  
   let html = "";
   for (let i = 0; i < areas.length; i++) {
     const area = areas[i];
-    const isPlus = area.sign !== "minus";
-    
     html += `
       <tr id="area-block-${i}">
         <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
-        <td style="vertical-align: middle; text-align: center;">
-          <button type="button" class="sign-toggle-btn ${isPlus ? 'plus' : 'minus'}" onclick="toggleSign(${i})">
-            ${isPlus ? '+' : '-'}
-          </button>
+        <td style="vertical-align: middle;">
+          <input type="number" class="area-shares" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="${area.shares || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="number" class="area-shares" data-index="${i}" placeholder="0" oninput="calculate()" value="${area.shares || ''}">
+          <input type="number" class="area-carat" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="${area.carat || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="number" class="area-carat" data-index="${i}" placeholder="0" oninput="calculate()" value="${area.carat || ''}">
+          <input type="number" class="area-acre" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="${area.acre || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="number" class="area-acre" data-index="${i}" placeholder="0" oninput="calculate()" value="${area.acre || ''}">
-        </td>
-        <td style="vertical-align: middle;">
-          <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" oninput="calculate()" value="${area.name || ''}">
+          <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" oninput="onAreaInput(${i})" value="${area.name || ''}">
         </td>
         <td class="no-print" style="vertical-align: middle; text-align: center;">
           ${i > 0 ? `
@@ -92,42 +84,64 @@ function renderAreas() {
       </tr>
     `;
   }
-  
   tbody.innerHTML = html;
 }
 
-function toggleSign(index) {
-  syncInputsToMemory();
-  if (areas[index]) {
-    areas[index].sign = areas[index].sign === "plus" ? "minus" : "plus";
-    renderAreas();
-    saveData();
-    calculate();
+function onAreaInput(index) {
+  syncAreasFromDOM();
+  // Auto-add row if typing in the last row
+  if (index === areas.length - 1) {
+    const area = areas[index];
+    if (area.name || area.shares || area.carat || area.acre) {
+      areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
+      // Append a new row without re-rendering to preserve focus
+      appendAreaRow(areas.length - 1);
+    }
   }
+  calculate();
+  saveData();
+}
+
+function appendAreaRow(i) {
+  const tbody = document.getElementById("lands-table-body");
+  const tr = document.createElement("tr");
+  tr.id = `area-block-${i}`;
+  tr.innerHTML = `
+    <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="area-shares" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="area-carat" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="area-acre" data-index="${i}" placeholder="0" oninput="onAreaInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" oninput="onAreaInput(${i})" value="">
+    </td>
+    <td class="no-print" style="vertical-align: middle; text-align: center;">
+      <button type="button" class="btn-remove-area" onclick="removeArea(${i})" title="حذف هذه المساحة" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: #d32f2f; cursor: pointer; padding: 0; margin: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
+    </td>
+  `;
+  tbody.appendChild(tr);
 }
 
 function addArea() {
-  syncInputsToMemory();
+  syncAreasFromDOM();
   areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
   renderAreas();
   saveData();
   calculate();
-  
-  // Smoothly scroll to the newly added row and focus on the name input
-  setTimeout(() => {
-    const newRow = document.getElementById(`area-block-${areas.length - 1}`);
-    if (newRow) {
-      newRow.scrollIntoView({ behavior: "smooth", block: "center" });
-      const nameInput = newRow.querySelector(".area-name-input");
-      if (nameInput) {
-        nameInput.focus();
-      }
-    }
-  }, 100);
 }
 
 function removeArea(index) {
-  syncInputsToMemory();
+  syncAreasFromDOM();
   if (areas.length > 1) {
     areas.splice(index, 1);
   }
@@ -136,74 +150,602 @@ function removeArea(index) {
   calculate();
 }
 
-function saveData() {
-  syncInputsToMemory();
-  sessionStorage.setItem("areas", JSON.stringify(areas));
-  sessionStorage.setItem("op2-number", document.getElementById("op2-number").value);
-  sessionStorage.setItem("carat-area-calc", document.getElementById("input-carat-area").value);
-  sessionStorage.setItem("other-carat-area-calc", document.getElementById("other-input-field").value);
-  sessionStorage.setItem("operation", currentOperation);
-}
+// ==========================================
+// DISCOUNT TABLE (جدول الخصم)
+// ==========================================
 
-function loadData() {
-  const savedAreas = sessionStorage.getItem("areas");
-  if (savedAreas) {
-    try {
-      areas = JSON.parse(savedAreas);
-    } catch (e) {
-      console.error(e);
-      areas = [
-        { name: "", shares: "", carat: "", acre: "", sign: "plus" },
-        { name: "", shares: "", carat: "", acre: "", sign: "plus" }
-      ];
+function syncDiscountsFromDOM() {
+  const rows = document.querySelectorAll("#discount-table-body tr");
+  rows.forEach((row, i) => {
+    if (discounts[i]) {
+      const nameInput = row.querySelector(".discount-name-input");
+      const sharesInput = row.querySelector(".discount-shares");
+      const caratInput = row.querySelector(".discount-carat");
+      const acreInput = row.querySelector(".discount-acre");
+      if (nameInput) discounts[i].name = nameInput.value;
+      if (sharesInput) discounts[i].shares = sharesInput.value;
+      if (caratInput) discounts[i].carat = caratInput.value;
+      if (acreInput) discounts[i].acre = acreInput.value;
     }
-  } else {
-    areas = [
-      { name: "", shares: "", carat: "", acre: "", sign: "plus" },
-      { name: "", shares: "", carat: "", acre: "", sign: "plus" }
-    ];
-  }
-  
-  document.getElementById("op2-number").value = sessionStorage.getItem("op2-number") || "";
-  document.getElementById("input-carat-area").value = sessionStorage.getItem("carat-area-calc") || "175.035";
-  document.getElementById("other-input-field").value = sessionStorage.getItem("other-carat-area-calc") || "";
-  
-  currentOperation = sessionStorage.getItem("operation") || "calc";
-  updateOperationUI();
+  });
 }
 
-function setOperation(op) {
-  currentOperation = op;
-  updateOperationUI();
+function renderDiscounts() {
+  const tbody = document.getElementById("discount-table-body");
+  let html = "";
+  for (let i = 0; i < discounts.length; i++) {
+    const d = discounts[i];
+    html += `
+      <tr id="discount-block-${i}">
+        <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
+        <td style="vertical-align: middle;">
+          <input type="number" class="discount-shares" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="${d.shares || ''}">
+        </td>
+        <td style="vertical-align: middle;">
+          <input type="number" class="discount-carat" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="${d.carat || ''}">
+        </td>
+        <td style="vertical-align: middle;">
+          <input type="number" class="discount-acre" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="${d.acre || ''}">
+        </td>
+        <td style="vertical-align: middle;">
+          <input type="text" class="discount-name-input" data-index="${i}" placeholder="مثال: مشروع صرف" oninput="onDiscountInput(${i})" value="${d.name || ''}">
+        </td>
+        <td class="no-print" style="vertical-align: middle; text-align: center;">
+          ${discounts.length > 1 ? `
+            <button type="button" class="btn-remove-area" onclick="removeDiscount(${i})" title="حذف هذا الخصم" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: #d32f2f; cursor: pointer; padding: 0; margin: 0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          ` : ''}
+        </td>
+      </tr>
+    `;
+  }
+  tbody.innerHTML = html;
+}
+
+function onDiscountInput(index) {
+  syncDiscountsFromDOM();
+  // Auto-add row if typing in the last row
+  if (index === discounts.length - 1) {
+    const d = discounts[index];
+    if (d.name || d.shares || d.carat || d.acre) {
+      discounts.push({ name: "", shares: "", carat: "", acre: "" });
+      appendDiscountRow(discounts.length - 1);
+    }
+  }
+  calculate();
+  saveData();
+}
+
+function appendDiscountRow(i) {
+  const tbody = document.getElementById("discount-table-body");
+  const d = discounts[i];
+  const tr = document.createElement("tr");
+  tr.id = `discount-block-${i}`;
+  tr.innerHTML = `
+    <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="discount-shares" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="discount-carat" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="number" class="discount-acre" data-index="${i}" placeholder="0" oninput="onDiscountInput(${i})" value="">
+    </td>
+    <td style="vertical-align: middle;">
+      <input type="text" class="discount-name-input" data-index="${i}" placeholder="مثال: مشروع صرف" oninput="onDiscountInput(${i})" value="">
+    </td>
+    <td class="no-print" style="vertical-align: middle; text-align: center;">
+      <button type="button" class="btn-remove-area" onclick="removeDiscount(${i})" title="حذف هذا الخصم" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: #d32f2f; cursor: pointer; padding: 0; margin: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function removeDiscount(index) {
+  syncDiscountsFromDOM();
+  if (discounts.length > 1) {
+    discounts.splice(index, 1);
+  }
+  renderDiscounts();
+  saveData();
   calculate();
 }
 
-function updateOperationUI() {
-  const buttons = document.querySelectorAll(".operation-btn");
-  buttons.forEach(btn => {
-    if (btn.getAttribute("onclick").includes(currentOperation)) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-  
-  const numberDiv = document.getElementById("operand2-number-div");
-  const numTitle = document.getElementById("op2-number-title");
-  
-  if (currentOperation === "calc") {
-    numberDiv.style.display = "none";
-  } else {
-    numberDiv.style.display = "flex";
-    if (currentOperation === "multiply") {
-      numTitle.innerText = "الرقم المضروب فيه (المضاعف)";
-    } else {
-      numTitle.innerText = "الرقم المقسوم عليه (عدد الأجزاء)";
+// ==========================================
+// INDIVIDUALS (الأفراد)
+// ==========================================
+
+function handleIndividualsCountChange() {
+  const countInput = document.getElementById("individuals-count");
+  const count = parseInt(countInput.value) || 0;
+  const container = document.getElementById("individuals-names-container");
+
+  // Preserve existing names
+  const existingInputs = container.querySelectorAll(".individual-name-input");
+  const existingNames = [];
+  existingInputs.forEach(input => existingNames.push(input.value));
+
+  // Build new name fields
+  let html = "";
+  const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
+  for (let i = 0; i < count; i++) {
+    const label = i < ordinals.length ? `اسم الفرد ${ordinals[i]}` : `اسم الفرد ${i + 1}`;
+    const existingValue = i < existingNames.length ? existingNames[i] : "";
+    html += `
+      <div class="input-group-custom">
+        <label>${label}:</label>
+        <input type="text" class="individual-name-input" data-index="${i}" placeholder="${label}" value="${existingValue}" oninput="onIndividualNameChange()" style="flex: 1; height: 34px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-size: 13px;">
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+
+  // Update individual names array
+  individualNames = [];
+  for (let i = 0; i < count; i++) {
+    individualNames.push(i < existingNames.length ? existingNames[i] : "");
+  }
+
+  calculate();
+  saveData();
+}
+
+function onIndividualNameChange() {
+  const inputs = document.querySelectorAll(".individual-name-input");
+  individualNames = [];
+  inputs.forEach(input => individualNames.push(input.value));
+  calculate();
+  saveData();
+}
+
+function restoreIndividuals() {
+  const countInput = document.getElementById("individuals-count");
+  const savedCount = sessionStorage.getItem("individuals-count");
+  const savedNames = sessionStorage.getItem("individual-names");
+
+  if (savedCount) {
+    countInput.value = savedCount;
+  }
+  if (savedNames) {
+    try {
+      individualNames = JSON.parse(savedNames);
+    } catch (e) {
+      individualNames = [];
     }
   }
-  
-  renderAreas();
+
+  const count = parseInt(countInput.value) || 0;
+  if (count > 0) {
+    const container = document.getElementById("individuals-names-container");
+    const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
+    let html = "";
+    for (let i = 0; i < count; i++) {
+      const label = i < ordinals.length ? `اسم الفرد ${ordinals[i]}` : `اسم الفرد ${i + 1}`;
+      const val = i < individualNames.length ? individualNames[i] : "";
+      html += `
+        <div class="input-group-custom">
+          <label>${label}:</label>
+          <input type="text" class="individual-name-input" data-index="${i}" placeholder="${label}" value="${val}" oninput="onIndividualNameChange()" style="flex: 1; height: 34px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-size: 13px;">
+        </div>
+      `;
+    }
+    container.innerHTML = html;
+  }
 }
+
+// ==========================================
+// HELPER: Convert sahms to units
+// ==========================================
+
+function sahmsToUnits(totalSahms) {
+  const isNegative = totalSahms < 0;
+  const abs = Math.abs(totalSahms);
+  const acre = Math.floor(abs / 576);
+  const remaining = abs % 576;
+  const carat = Math.floor(remaining / 24);
+  const shares = +(remaining % 24).toFixed(3);
+  return { acre, carat, shares, isNegative, prefix: isNegative ? "-" : "" };
+}
+
+// ==========================================
+// CALCULATION
+// ==========================================
+
+function calculate() {
+  syncAreasFromDOM();
+  syncDiscountsFromDOM();
+
+  // --- 1. Calculate total area from lands table (always addition) ---
+  let totalAreaSahms = 0;
+  areas.forEach(area => {
+    const sh = parseFloat(area.shares) || 0;
+    const ca = parseFloat(area.carat) || 0;
+    const ac = parseFloat(area.acre) || 0;
+    const sahms = ac * 576 + ca * 24 + sh;
+    totalAreaSahms += sahms;
+  });
+
+  const totalUnits = sahmsToUnits(totalAreaSahms);
+
+  // Update table footer
+  document.getElementById("total-acre").innerText = totalUnits.prefix + totalUnits.acre;
+  document.getElementById("total-carat").innerText = totalUnits.carat;
+  document.getElementById("total-shares").innerText = totalUnits.shares;
+
+  // Update total area section
+  document.getElementById("total-area-acre").innerText = totalUnits.prefix + totalUnits.acre;
+  document.getElementById("total-area-carat").innerText = totalUnits.carat;
+  document.getElementById("total-area-shares").innerText = totalUnits.shares;
+
+  // Total in qarats
+  const totalQarats = +(totalAreaSahms / 24).toFixed(3);
+  document.getElementById("total-area-only-carat").innerText = totalQarats + " قيراط";
+
+  // --- 2. Calculate total discounts ---
+  let totalDiscountSahms = 0;
+  discounts.forEach(d => {
+    const sh = parseFloat(d.shares) || 0;
+    const ca = parseFloat(d.carat) || 0;
+    const ac = parseFloat(d.acre) || 0;
+    totalDiscountSahms += ac * 576 + ca * 24 + sh;
+  });
+
+  const discountUnits = sahmsToUnits(totalDiscountSahms);
+  document.getElementById("total-discount-acre").innerText = discountUnits.acre;
+  document.getElementById("total-discount-carat").innerText = discountUnits.carat;
+  document.getElementById("total-discount-shares").innerText = discountUnits.shares;
+
+  // --- 3. Calculate remaining ---
+  const remainingSahms = totalAreaSahms - totalDiscountSahms;
+  const remainingUnits = sahmsToUnits(remainingSahms);
+
+  document.getElementById("remaining-acre").innerText = remainingUnits.prefix + remainingUnits.acre;
+  document.getElementById("remaining-carat").innerText = remainingUnits.carat;
+  document.getElementById("remaining-shares").innerText = remainingUnits.shares;
+
+  // M2 conversion for remaining
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
+  }
+
+  const remainingQarats = remainingSahms / 24;
+  const remainingM2 = remainingQarats * caratArea;
+  const squareReeds = remainingM2 / 12.6025;
+  document.getElementById("remaining-m2").innerHTML = `${remainingM2.toFixed(3)} م² <br><span style="font-size: 12px; color: gray; font-weight: normal;">(تعادل ${squareReeds.toFixed(3)} قصبة مربعة)</span>`;
+
+  // --- 4. Distribution ---
+  const countInput = document.getElementById("individuals-count");
+  const count = parseInt(countInput.value) || 0;
+  const distSection = document.getElementById("distribution-section");
+  const distBody = document.getElementById("distribution-table-body");
+
+  if (count > 0) {
+    distSection.style.display = "block";
+    const sharePerPerson = remainingSahms / count;
+    const perPersonUnits = sahmsToUnits(sharePerPerson);
+    const perPersonQarats = sharePerPerson / 24;
+    const perPersonM2 = perPersonQarats * caratArea;
+
+    let html = "";
+    const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
+
+    for (let i = 0; i < count; i++) {
+      const name = (individualNames[i] && individualNames[i].trim()) ||
+        (i < ordinals.length ? `الفرد ${ordinals[i]}` : `الفرد ${i + 1}`);
+      html += `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;">${i + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${name}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.shares}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; direction: ltr;">${perPersonM2.toFixed(2)} م²</td>
+        </tr>
+      `;
+    }
+    distBody.innerHTML = html;
+  } else {
+    distSection.style.display = "none";
+    distBody.innerHTML = "";
+  }
+
+  // --- 5. Update report ---
+  updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSahms, count);
+}
+
+// ==========================================
+// REPORT
+// ==========================================
+
+function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSahms, individualsCount) {
+  const reportContainer = document.getElementById("report-container");
+  const reportContent = document.getElementById("report-content");
+
+  // Check if there is meaningful data to show
+  const hasAreaData = areas.some(a => (parseFloat(a.shares) || 0) + (parseFloat(a.carat) || 0) + (parseFloat(a.acre) || 0) > 0);
+  if (!hasAreaData) {
+    reportContainer.style.display = "none";
+    return;
+  }
+  reportContainer.style.display = "block";
+
+  let html = "";
+
+  // --- Lands Table ---
+  html += `<h4 style="font-weight: bold; color: #1b5e20; font-size: 14px; margin: 10px 0 5px;">جدول جمع الأراضي:</h4>`;
+  html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 15px;">`;
+  html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+    <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
+    <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">البيان</th>
+    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
+    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
+    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
+    <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
+  </tr></thead><tbody>`;
+
+  areas.forEach((area, i) => {
+    const name = area.name || getAreaTitle(i);
+    const sh = parseFloat(area.shares) || 0;
+    const ca = parseFloat(area.carat) || 0;
+    const ac = parseFloat(area.acre) || 0;
+    const sahms = ac * 576 + ca * 24 + sh;
+    const m2 = (sahms / 24) * caratArea;
+
+    if (sh || ca || ac) {
+      html += `<tr>
+        <td style="padding: 6px; border: 1px solid #ddd;">${i + 1}</td>
+        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${name}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${sh}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${ca}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${ac}</td>
+        <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${m2.toFixed(2)} م²</td>
+      </tr>`;
+    }
+  });
+
+  // Total row
+  const totalUnits = sahmsToUnits(totalAreaSahms);
+  const totalM2 = (totalAreaSahms / 24) * caratArea;
+  html += `<tr style="background-color: #e8f5e9; font-weight: bold; border-top: 2px solid #2e7d32; color: #1b5e20;">
+    <td colspan="2" style="padding: 6px; border: 1px solid #ddd; text-align: right;">الإجمالي:</td>
+    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.shares}</td>
+    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.carat}</td>
+    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.prefix}${totalUnits.acre}</td>
+    <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${totalM2.toFixed(2)} م²</td>
+  </tr>`;
+  html += `</tbody></table>`;
+
+  // --- Discounts Table ---
+  const hasDiscountData = discounts.some(d => (parseFloat(d.shares) || 0) + (parseFloat(d.carat) || 0) + (parseFloat(d.acre) || 0) > 0);
+  if (hasDiscountData) {
+    html += `<h4 style="font-weight: bold; color: #c62828; font-size: 14px; margin: 10px 0 5px;">جدول الخصومات:</h4>`;
+    html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 15px;">`;
+    html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+      <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
+      <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">البيان</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
+    </tr></thead><tbody>`;
+
+    let discNum = 0;
+    discounts.forEach((d, i) => {
+      const sh = parseFloat(d.shares) || 0;
+      const ca = parseFloat(d.carat) || 0;
+      const ac = parseFloat(d.acre) || 0;
+      if (sh || ca || ac) {
+        discNum++;
+        const sahms = ac * 576 + ca * 24 + sh;
+        const m2 = (sahms / 24) * caratArea;
+        const name = d.name || `خصم ${discNum}`;
+        html += `<tr>
+          <td style="padding: 6px; border: 1px solid #ddd;">${discNum}</td>
+          <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${name}</td>
+          <td style="padding: 6px; border: 1px solid #ddd;">${sh}</td>
+          <td style="padding: 6px; border: 1px solid #ddd;">${ca}</td>
+          <td style="padding: 6px; border: 1px solid #ddd;">${ac}</td>
+          <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${m2.toFixed(2)} م²</td>
+        </tr>`;
+      }
+    });
+
+    const discountUnits = sahmsToUnits(totalDiscountSahms);
+    const discM2 = (totalDiscountSahms / 24) * caratArea;
+    html += `<tr style="background-color: #ffebee; font-weight: bold; border-top: 2px solid #c62828; color: #c62828;">
+      <td colspan="2" style="padding: 6px; border: 1px solid #ddd; text-align: right;">إجمالي الخصم:</td>
+      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.shares}</td>
+      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.carat}</td>
+      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.acre}</td>
+      <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${discM2.toFixed(2)} م²</td>
+    </tr>`;
+    html += `</tbody></table>`;
+  }
+
+  // --- Remaining ---
+  const remainingUnits = sahmsToUnits(remainingSahms);
+  const remainingM2 = (remainingSahms / 24) * caratArea;
+  html += `<div style="background: #e8f5e9; border: 1px solid #2e7d32; border-radius: 8px; padding: 10px; margin: 10px 0; text-align: center;">
+    <strong style="color: #1b5e20; font-size: 14px;">المتبقي بعد الخصم:</strong><br>
+    <span style="font-size: 16px; font-weight: bold; color: #1b5e20;">${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم</span><br>
+    <span style="font-size: 13px; color: #555;">(${remainingM2.toFixed(2)} م²)</span>
+  </div>`;
+
+  // --- Distribution ---
+  if (individualsCount > 0) {
+    const sharePerPerson = remainingSahms / individualsCount;
+    const perPersonUnits = sahmsToUnits(sharePerPerson);
+    const perPersonM2 = (sharePerPerson / 24) * caratArea;
+    const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
+
+    html += `<h4 style="font-weight: bold; color: #0d47a1; font-size: 14px; margin: 15px 0 5px;">ناتج التوزيع بالتساوي (${individualsCount} أفراد):</h4>`;
+    html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px;">`;
+    html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+      <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
+      <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">الاسم</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
+      <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
+    </tr></thead><tbody>`;
+
+    for (let i = 0; i < individualsCount; i++) {
+      const name = (individualNames[i] && individualNames[i].trim()) ||
+        (i < ordinals.length ? `الفرد ${ordinals[i]}` : `الفرد ${i + 1}`);
+      html += `<tr>
+        <td style="padding: 6px; border: 1px solid #ddd;">${i + 1}</td>
+        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${name}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
+        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.shares}</td>
+        <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${perPersonM2.toFixed(2)} م²</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+
+  // --- Footer ---
+  html += `<div style="text-align: center; margin-top: 15px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 8px;">
+    تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية 🌾<br>
+    مساحة القيراط المعتمدة: ${caratArea} م²
+  </div>`;
+
+  reportContent.innerHTML = html;
+}
+
+// ==========================================
+// COPY TO CLIPBOARD (WhatsApp)
+// ==========================================
+
+function copyReportToClipboard() {
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
+  }
+
+  let text = `📝 *تقرير جمع وطرح الأراضي الزراعية* 📝\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+
+  // Areas
+  text += `🟢 *جدول جمع الأراضي:*\n`;
+  areas.forEach((area, i) => {
+    const sh = parseFloat(area.shares) || 0;
+    const ca = parseFloat(area.carat) || 0;
+    const ac = parseFloat(area.acre) || 0;
+    if (sh || ca || ac) {
+      const name = area.name || getAreaTitle(i);
+      const sahms = ac * 576 + ca * 24 + sh;
+      const m2 = (sahms / 24) * caratArea;
+      text += `  🔹 *(${i + 1}) ${name}*:\n`;
+      text += `     📍 ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
+      text += `     📐 تعادل: ${m2.toFixed(2)} م²\n\n`;
+    }
+  });
+
+  // Total
+  syncAreasFromDOM();
+  let totalAreaSahms = 0;
+  areas.forEach(area => {
+    const sh = parseFloat(area.shares) || 0;
+    const ca = parseFloat(area.carat) || 0;
+    const ac = parseFloat(area.acre) || 0;
+    const sahms = ac * 576 + ca * 24 + sh;
+    totalAreaSahms += sahms;
+  });
+  const totalUnits = sahmsToUnits(totalAreaSahms);
+  const totalM2 = (totalAreaSahms / 24) * caratArea;
+  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `🏆 *الإجمالي:*\n`;
+  text += `   📍 ${totalUnits.prefix}${totalUnits.acre} فدان، ${totalUnits.carat} قيراط، ${totalUnits.shares} سهم\n`;
+  text += `   📐 تعادل: ${totalM2.toFixed(2)} م²\n\n`;
+
+  // Discounts
+  syncDiscountsFromDOM();
+  let totalDiscountSahms = 0;
+  const hasDiscountData = discounts.some(d => (parseFloat(d.shares) || 0) + (parseFloat(d.carat) || 0) + (parseFloat(d.acre) || 0) > 0);
+
+  if (hasDiscountData) {
+    text += `🔴 *الخصومات:*\n`;
+    let discNum = 0;
+    discounts.forEach(d => {
+      const sh = parseFloat(d.shares) || 0;
+      const ca = parseFloat(d.carat) || 0;
+      const ac = parseFloat(d.acre) || 0;
+      if (sh || ca || ac) {
+        discNum++;
+        const sahms = ac * 576 + ca * 24 + sh;
+        totalDiscountSahms += sahms;
+        const m2 = (sahms / 24) * caratArea;
+        const name = d.name || `خصم ${discNum}`;
+        text += `  🔸 *(${discNum}) ${name}:*\n`;
+        text += `     📍 ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
+        text += `     📐 تعادل: ${m2.toFixed(2)} م²\n\n`;
+      }
+    });
+  }
+
+  // Remaining
+  const remainingSahms = totalAreaSahms - totalDiscountSahms;
+  const remainingUnits = sahmsToUnits(remainingSahms);
+  const remainingM2 = (remainingSahms / 24) * caratArea;
+  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `✅ *المتبقي بعد الخصم:*\n`;
+  text += `   📍 ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n`;
+  text += `   📐 تعادل: ${remainingM2.toFixed(2)} م²\n\n`;
+
+  // Distribution
+  const count = parseInt(document.getElementById("individuals-count").value) || 0;
+  if (count > 0) {
+    const sharePerPerson = remainingSahms / count;
+    const perPersonUnits = sahmsToUnits(sharePerPerson);
+    const perPersonM2 = (sharePerPerson / 24) * caratArea;
+    const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
+
+    text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    text += `👥 *التوزيع بالتساوي (${count} أفراد):*\n`;
+    text += `   نصيب كل فرد: ${perPersonUnits.prefix}${perPersonUnits.acre} فدان، ${perPersonUnits.carat} قيراط، ${perPersonUnits.shares} سهم (${perPersonM2.toFixed(2)} م²)\n\n`;
+
+    for (let i = 0; i < count; i++) {
+      const name = (individualNames[i] && individualNames[i].trim()) ||
+        (i < ordinals.length ? `الفرد ${ordinals[i]}` : `الفرد ${i + 1}`);
+      text += `  ${i + 1}. *${name}*: ${perPersonUnits.prefix}${perPersonUnits.acre} ف، ${perPersonUnits.carat} ط، ${perPersonUnits.shares} س\n`;
+    }
+    text += `\n`;
+  }
+
+  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `   (مساحة القيراط المعتمدة: ${caratArea} م²)\n`;
+  text += `تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية 🌾`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert("تم نسخ التقرير بنجاح! يمكنك الآن لصقه ومشاركته على واتساب.");
+  }).catch(err => {
+    console.error("Could not copy text: ", err);
+  });
+}
+
+// ==========================================
+// PRINT
+// ==========================================
+
+function printReport() {
+  window.print();
+}
+
+// ==========================================
+// CARAT AREA SELECTOR
+// ==========================================
 
 function handleSelection() {
   const selectElement = document.getElementById("input-carat-area");
@@ -219,210 +761,69 @@ function handleSelection() {
   calculate();
 }
 
-function calculate() {
-  syncInputsToMemory();
+// ==========================================
+// SAVE / LOAD
+// ==========================================
 
-  let s_res = 0;
-
-  // Calculate the net total of the table (adding 'plus' rows, subtracting 'minus' rows)
-  let totalShares = 0;
-  areas.forEach((area, i) => {
-    const sh = parseFloat(area.shares) || 0;
-    const ca = parseFloat(area.carat) || 0;
-    const ac = parseFloat(area.acre) || 0;
-    const s_i = ac * 24 * 24 + ca * 24 + sh;
-    
-    if (area.sign === "minus") {
-      totalShares -= s_i;
-    } else {
-      totalShares += s_i;
-    }
-  });
-
-  if (currentOperation === "calc") {
-    s_res = totalShares;
-  } else if (currentOperation === "multiply") {
-    const factor = parseFloat(document.getElementById("op2-number").value) || 1;
-    s_res = totalShares * factor;
-  } else if (currentOperation === "divide") {
-    const divisor = parseFloat(document.getElementById("op2-number").value) || 1;
-    s_res = divisor !== 0 ? totalShares / divisor : 0;
-  }
-
-  const isNegative = s_res < 0;
-  const absS = Math.abs(s_res);
-
-  const res_acre = Math.floor(absS / 576);
-  const remainingSahms = absS % 576;
-  const res_carat = Math.floor(remainingSahms / 24);
-  const res_shares = (remainingSahms % 24).toFixed(3);
-
-  const prefix = isNegative ? "-" : "";
-  document.getElementById("res-acre").innerText = prefix + res_acre;
-  document.getElementById("res-carat").innerText = res_carat;
-  document.getElementById("res-shares").innerText = res_shares;
-
-  // Also update table footer totals
-  document.getElementById("total-acre").innerText = prefix + res_acre;
-  document.getElementById("total-carat").innerText = res_carat;
-  document.getElementById("total-shares").innerText = res_shares;
-
-  // Update the new visual badges
-  document.getElementById("res-badge-acre").innerText = prefix + res_acre;
-  document.getElementById("res-badge-carat").innerText = res_carat;
-  document.getElementById("res-badge-shares").innerText = res_shares;
-
-  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
-  if (caratArea === 0) {
-    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
-  }
-
-
-
-  const totalCarats = s_res / 24;
-  const areaM2 = totalCarats * caratArea;
-  const squareReeds = areaM2 / 12.6025;
-  
-  document.getElementById("res-m2").innerHTML = `${areaM2.toFixed(3)} م² <br><span style="font-size: 13px; color: gray; font-weight: normal;">(تعادل ${squareReeds.toFixed(3)} قصبة مربعة)</span>`;
-
-  const sideLengthM = Math.sqrt(Math.abs(areaM2));
-  const centimeters = sideLengthM * 100;
-  const reed = Math.floor(centimeters / 355);
-  const remainingCentimetersAfterReed = centimeters % 355;
-  const fist = Math.floor(remainingCentimetersAfterReed / 14.7916666667);
-  const remainingInFist = remainingCentimetersAfterReed % 14.7916666667;
-  const remainingInFistConverted = (remainingInFist * (1 / 14.7916666667)).toFixed(2);
-
-  document.getElementById("res-reed").innerText = (isNegative ? "-" : "") + reed;
-  document.getElementById("res-fist").innerText = fist;
-  document.getElementById("res-less-than-fist").innerText = remainingInFistConverted;
-
-  // Update Report Table
-  updateReport(caratArea, areaM2, res_acre, res_carat, res_shares);
-
+function saveData() {
+  syncAreasFromDOM();
+  syncDiscountsFromDOM();
   sessionStorage.setItem("areas", JSON.stringify(areas));
-  sessionStorage.setItem("op2-number", document.getElementById("op2-number").value);
+  sessionStorage.setItem("discounts", JSON.stringify(discounts));
   sessionStorage.setItem("carat-area-calc", document.getElementById("input-carat-area").value);
   sessionStorage.setItem("other-carat-area-calc", document.getElementById("other-input-field").value);
-  sessionStorage.setItem("operation", currentOperation);
+  sessionStorage.setItem("individuals-count", document.getElementById("individuals-count").value);
+  sessionStorage.setItem("individual-names", JSON.stringify(individualNames));
 }
 
-function updateReport(caratArea, totalM2, resAcre, resCarat, resShares) {
-  const reportContainer = document.getElementById("report-container");
-  
-  // Show report for all operations
-  reportContainer.style.display = "block";
-  const tbody = document.getElementById("report-table-body");
-  let html = "";
-  
-  areas.forEach((area, i) => {
-    const name = area.name || getAreaTitle(i);
-    const sh = parseFloat(area.shares) || 0;
-    const ca = parseFloat(area.carat) || 0;
-    const ac = parseFloat(area.acre) || 0;
-    const areaShares = ac * 24 * 24 + ca * 24 + sh;
-    const areaM2 = (areaShares / 24) * caratArea;
-    const signChar = area.sign === "minus" ? "-" : "+";
-    
-    html += `
-      <tr>
-        <td>${i + 1}</td>
-        <td style="text-align: right; font-weight: normal;">(${signChar}) ${name}</td>
-        <td>${sh}</td>
-        <td>${ca}</td>
-        <td>${ac}</td>
-        <td style="direction: ltr;">${area.sign === 'minus' ? '-' : ''}${areaM2.toFixed(2)} م²</td>
-      </tr>
-    `;
-  });
-  
-  let totalLabel = "النتيجة الكلية:";
-  if (currentOperation === "multiply") {
-    totalLabel = "النتيجة الكلية بعد الضرب:";
-  } else if (currentOperation === "divide") {
-    totalLabel = "النتيجة الكلية بعد القسمة:";
+function loadData() {
+  // Load areas
+  const savedAreas = sessionStorage.getItem("areas");
+  if (savedAreas) {
+    try {
+      areas = JSON.parse(savedAreas);
+    } catch (e) {
+      console.error(e);
+      areas = [
+        { name: "", shares: "", carat: "", acre: "", sign: "plus" },
+        { name: "", shares: "", carat: "", acre: "", sign: "plus" }
+      ];
+    }
   }
-  
-  const prefix = totalM2 < 0 ? "-" : "";
-  const absTotalM2 = Math.abs(totalM2);
-  
-  html += `
-    <tr style="background-color: #e8f5e9; font-weight: bold; border-top: 2px solid #2e7d32; color: #1b5e20;">
-      <td colspan="2" style="text-align: right;">${totalLabel}</td>
-      <td>${resShares}</td>
-      <td>${resCarat}</td>
-      <td>${prefix}${resAcre}</td>
-      <td style="direction: ltr;">${prefix}${absTotalM2.toFixed(2)} م²</td>
-    </tr>
-  `;
-  
-  tbody.innerHTML = html;
+
+  // Load discounts
+  const savedDiscounts = sessionStorage.getItem("discounts");
+  if (savedDiscounts) {
+    try {
+      discounts = JSON.parse(savedDiscounts);
+    } catch (e) {
+      console.error(e);
+      discounts = [{ name: "", shares: "", carat: "", acre: "" }];
+    }
+  }
+
+  // Load carat area
+  document.getElementById("input-carat-area").value = sessionStorage.getItem("carat-area-calc") || "175.035";
+  document.getElementById("other-input-field").value = sessionStorage.getItem("other-carat-area-calc") || "";
 }
 
-function printReport() {
-  window.print();
-}
-
-function copyReportToClipboard() {
-  let text = `📝 *تقرير حساب مساحات الأراضي* 📝\n`;
-  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  
-  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
-  if (caratArea === 0) {
-    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
-  }
-  
-  areas.forEach((area, i) => {
-    const name = area.name || getAreaTitle(i);
-    const sh = parseFloat(area.shares) || 0;
-    const ca = parseFloat(area.carat) || 0;
-    const ac = parseFloat(area.acre) || 0;
-    const areaShares = ac * 24 * 24 + ca * 24 + sh;
-    const areaM2 = (areaShares / 24) * caratArea;
-    const signChar = area.sign === "minus" ? "(-) طرح" : "(+) جمع";
-    
-    text += `🔹 *(${i + 1}) ${name}* [${signChar}]:\n`;
-    text += `   📍 المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
-    text += `   📐 تعادل: ${area.sign === 'minus' ? '-' : ''}${areaM2.toFixed(2)} م²\n\n`;
-  });
-  
-  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  
-  const resAcre = document.getElementById("res-acre").innerText;
-  const resCarat = document.getElementById("res-carat").innerText;
-  const resShares = document.getElementById("res-shares").innerText;
-  
-  // Get m2 text
-  let totalM2Text = document.getElementById("res-m2").innerHTML.split(" ")[0] || "0";
-  
-  let totalLabel = "النتيجة الكلية";
-  if (currentOperation === "multiply") {
-    totalLabel = "النتيجة بعد الضرب";
-  } else if (currentOperation === "divide") {
-    totalLabel = "النتيجة بعد القسمة";
-  }
-  
-  text += `🏆 *${totalLabel}*:\n`;
-  text += `   📍 ${resAcre} فدان، ${resCarat} قيراط، ${resShares} سهم\n`;
-  text += `   📐 تعادل: ${totalM2Text} م²\n`;
-  text += `   (مساحة القيراط المعتمدة: ${caratArea} م²)\n`;
-  text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `تم الحساب بواسطة حاسبة القراريط والأراضي 🌾`;
-  
-  navigator.clipboard.writeText(text).then(() => {
-    alert("تم نسخ التقرير بنجاح! يمكنك الآن لصقه ومشاركته على واتساب.");
-  }).catch(err => {
-    console.error("Could not copy text: ", err);
-  });
-}
+// ==========================================
+// CLEAR ALL
+// ==========================================
 
 function clearAll() {
   areas = [
     { name: "", shares: "", carat: "", acre: "", sign: "plus" },
     { name: "", shares: "", carat: "", acre: "", sign: "plus" }
   ];
-  document.getElementById("op2-number").value = "";
+  discounts = [
+    { name: "", shares: "", carat: "", acre: "" }
+  ];
+  individualNames = [];
+  document.getElementById("individuals-count").value = "";
+  document.getElementById("individuals-names-container").innerHTML = "";
   renderAreas();
+  renderDiscounts();
   saveData();
   calculate();
 }
