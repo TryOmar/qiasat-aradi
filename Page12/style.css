@@ -8,8 +8,36 @@ body {
 }
 
 .con {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
   max-width: 900px !important;
-  padding-bottom: 120px !important;
+  margin: 0 auto !important;
+  padding: 0 20px 120px 20px !important;
+  float: none !important;
+}
+
+.title {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 70px !important; /* Pushes the title down below the absolute green bar */
+  margin-bottom: 20px !important;
+  gap: 12px !important;
+}
+
+.title h1 {
+  font-size: 22px !important;
+  color: rgb(149, 11, 63) !important; /* var(--red) */
+  margin: 0 !important;
+  font-weight: bold !important;
+}
+
+.title img {
+  width: 45px !important;
+  height: auto !important;
 }
 
 /* Control Grid Layout */
