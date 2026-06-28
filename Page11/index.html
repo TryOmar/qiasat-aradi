@@ -103,9 +103,10 @@
         </div>
       </div>
 
-      <div class="buttons2" style="margin-top: 15px; width: 100%; display: flex; justify-content: center; gap: 10px;">
-        <button class="but1" onclick="clearAll()" style="margin-left: 0;">أحذف</button>
-        <button class="but2" onclick="addNewPartnerRow()">أضف شريك</button>
+      <div class="buttons2" style="margin-top: 15px; width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+        <button class="but1" onclick="clearAll()" style="margin-left: 0; width: 90px !important;">أحذف الكل</button>
+        <button class="but2" onclick="addNewPartnerRow()" style="width: 90px !important;">أضف شريك</button>
+        <button type="button" class="but3" onclick="promptDivideEqually()" style="background-color: #00796b !important; color: white !important; border: none !important; border-radius: 10px !important; font-weight: bold !important; height: 35px !important; padding: 0 15px !important; font-size: 13px !important; cursor: pointer !important; transition: background-color 0.2s !important;">تقسيم بالتساوي</button>
       </div>
 
       <!-- Remaining / Excess Area -->

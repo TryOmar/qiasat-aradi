@@ -1,0 +1,215 @@
+/* Page 12 Map Drawing and Division Styles */
+
+body {
+  font-family: 'Cairo', sans-serif !important;
+  background-color: #f4f6f8 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.con {
+  max-width: 900px !important;
+  padding-bottom: 120px !important;
+}
+
+/* Control Grid Layout */
+.control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-section {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-section h4 {
+  margin: 0 0 5px 0;
+  color: #1b5e20;
+  font-size: 14px;
+  font-weight: bold;
+  border-bottom: 1px dashed #c8e6c9;
+  padding-bottom: 5px;
+}
+
+/* Area Display Badges */
+.area-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.area-badge.m2-badge {
+  width: 100%;
+  background: #e8f5e9;
+  border: 2px solid #2e7d32;
+  border-radius: 10px;
+  padding: 15px 10px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.area-badge.m2-badge span {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: #1b5e20;
+}
+
+.area-badge.m2-badge label {
+  font-size: 12px;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.area-badges-sub {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.sub-badge {
+  flex: 1;
+  padding: 8px 5px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.sub-badge.acre {
+  background: #eaf6ec;
+  border: 1px solid #4caf50;
+}
+.sub-badge.acre span { color: #2e7d32; }
+.sub-badge.acre label { color: #4caf50; }
+
+.sub-badge.carat {
+  background: #fff8e1;
+  border: 1px solid #ffb300;
+}
+.sub-badge.carat span { color: #ff8f00; }
+.sub-badge.carat label { color: #ffb300; }
+
+.sub-badge.shares {
+  background: #e3f2fd;
+  border: 1px solid #1e88e5;
+}
+.sub-badge.shares span { color: #1565c0; }
+.sub-badge.shares label { color: #1e88e5; }
+
+.sub-badge span {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.sub-badge label {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* Form Controls */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #444;
+}
+
+.form-group select,
+.form-group input {
+  height: 36px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: bold;
+  background-color: white;
+  color: #333;
+  transition: border-color 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  border-color: #2e7d32;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(46,125,50,0.1);
+}
+
+/* Action Buttons */
+.btn-calc,
+.btn-reset {
+  flex: 1;
+  height: 38px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-calc {
+  background-color: #2e7d32;
+  color: white;
+}
+.btn-calc:hover {
+  background-color: #1b5e20;
+}
+.btn-calc:active {
+  transform: scale(0.98);
+}
+
+.btn-reset {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.btn-reset:hover {
+  background-color: #bdbdbd;
+}
+.btn-reset:active {
+  transform: scale(0.98);
+}
+
+/* Custom Div Icon labels on Map */
+.edge-label-icon {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-pm-toolbar {
+  direction: ltr !important; /* Ensure drawing toolbar flows nicely */
+}
+
+/* Slices Table Styling */
+#slices-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

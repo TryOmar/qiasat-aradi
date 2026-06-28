@@ -259,3 +259,56 @@ function clearAll() {
   
   saveAndCalc();
 }
+
+function promptDivideEqually() {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w = parseFloat(document.getElementById("total-width").value) || 0;
+  
+  if (l1 <= 0 || l2 <= 0 || w <= 0) {
+    alert("الرجاء إدخال أبعاد الأرض الإجمالية أولاً (الحد الأيمن، الحد الأيسر، والعرض الكلي).");
+    return;
+  }
+  
+  const numPartnersStr = prompt("أدخل عدد الشركاء لتوزيع الأرض بينهم بالتساوي:");
+  if (!numPartnersStr) return;
+  
+  const numPartners = parseInt(numPartnersStr);
+  if (isNaN(numPartners) || numPartners <= 0) {
+    alert("الرجاء إدخال عدد شركاء صحيح (أكبر من 0).");
+    return;
+  }
+  
+  // Calculate total area of the trapezoid
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+  
+  // Get carat area
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+  
+  if (caratArea <= 0) {
+    alert("الرجاء تحديد مساحة القيراط بالمتر المربع.");
+    return;
+  }
+  
+  // Total carats
+  const totalCarats = totalAreaM2 / caratArea;
+  const partnerCarats = totalCarats / numPartners;
+  
+  // Convert partner carats to carat and sahm
+  const c = Math.floor(partnerCarats);
+  const s = parseFloat(((partnerCarats - c) * 24).toFixed(4));
+  
+  // Clear existing partners
+  const list = document.getElementById("partners-list");
+  list.innerHTML = "";
+  
+  // Add new partner rows
+  for (let i = 0; i < numPartners; i++) {
+    addNewPartnerRow(`شريك ${i + 1}`, c, s);
+  }
+  
+  saveAndCalc();
+}

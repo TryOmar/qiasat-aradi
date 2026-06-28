@@ -105,10 +105,13 @@ body {
   height: 60px;
   background-color: var(--nav);
   bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-flow: row-reverse;
   justify-content: space-around;
   align-items: center;
+  z-index: 9999;
 }
 .nav a {
   height: 90%;
@@ -132,7 +135,8 @@ body {
     background-color: white;
   }
   .nav {
-    top: 950px;
+    bottom: 0px;
+    top: auto;
   }
 }
 
