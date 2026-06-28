@@ -259,6 +259,75 @@ body {
   display: none !important;
 }
 
+/* Results & Residual Area Styles */
+.results {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 15px !important;
+  width: 100% !important;
+  margin-top: 25px !important;
+  margin-bottom: 40px !important;
+}
+
+.result-right, .result-left {
+  flex: 1 !important;
+  background: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 12px !important;
+  padding: 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+}
+
+.result-right > p, .result-left > p {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #555555 !important;
+  margin: 0 0 10px 0 !important;
+  text-align: center !important;
+}
+
+.residual {
+  display: flex !important;
+  gap: 8px !important;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+.residual > div {
+  flex: 1 !important;
+  text-align: center !important;
+  background: #f9f9f9 !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  padding: 6px 4px !important;
+}
+
+.residual > div p {
+  font-size: 9px !important;
+  color: #888888 !important;
+  font-weight: bold !important;
+  margin: 0 0 2px 0 !important;
+}
+
+.residual > div span {
+  display: block !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+}
+
+#calc-total-width-val {
+  font-size: 24px !important;
+  font-weight: bold !important;
+  color: #c62828 !important; /* Red accent for total width */
+  margin-top: 5px !important;
+  display: block !important;
+  text-align: center !important;
+}
+
 /* Mobile View (Card-based Layout) */
 @media (max-width: 600px) {
   #table-header-container {
@@ -267,6 +336,12 @@ body {
   
   #total {
     display: none !important; /* Hide footer total row on mobile to save space */
+  }
+
+  .results {
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
   }
 
   .partner-row {
