@@ -72,20 +72,25 @@
     </div>
 
     <!-- Partners Table -->
-    <div class="s s3" style="max-width: 340px; width: 100%; margin-top: 20px;">
+    <div class="s s3" style="max-width: 500px; width: 100%; margin-top: 20px;">
       <h3>نصيب كل شريك والنتائج</h3>
+      
+      <!-- Share Input Method Selection -->
+      <div style="margin: 10px 0 15px 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+        <label for="share-input-method" style="font-weight: bold; font-size: 12px; color: #333;">طريقة تحديد الأنصبة:</label>
+        <select id="share-input-method" onchange="handleInputMethodChange()" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-size: 12px; color: black; background-color: #fafafa;">
+          <option value="carats">بالقراريط والأسهم (مثال: 4 قيراط، 12 سهم)</option>
+          <option value="fractions">بالنسب والكسور (مثال: 1/8 أو 1/4 أو النصف)</option>
+        </select>
+      </div>
+
       <p style="font-size: 11px; color: gray; margin: 5px 0; text-align: center; line-height: 1.4;">
         سيقوم النظام بحساب العرض والحد التراكمي وطول الفاصل تلقائياً.
       </p>
       
-      <div class="table">
-        <div class="table-header">
-          <p class="col-name">الشريك</p>
-          <p class="col-carat">قيراط</p>
-          <p class="col-share">سهم</p>
-          <p class="col-width">العرض (م)</p>
-          <p class="col-cum">العلامة (م)</p>
-          <p class="col-border">الفاصل (م)</p>
+      <div class="table" style="width: 100%;">
+        <div id="table-header-container" class="table-header" style="width: 100%;">
+          <!-- Dynamic Header -->
         </div>
 
         <div id="partners-list" style="display: flex; flex-direction: column; width: 100%;">
@@ -93,13 +98,8 @@
         </div>
 
         <!-- Totals Row -->
-        <div class="table-input" id="total" style="margin-top: 5px;">
-          <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
-          <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-          <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-          <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white;">
-          <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-          <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+        <div class="table-input" id="total" style="margin-top: 5px; width: 100%;">
+          <!-- Dynamic Footer -->
         </div>
       </div>
 
