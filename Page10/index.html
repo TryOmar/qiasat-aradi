@@ -21,76 +21,71 @@
 </head>
 
 <body>
-  <div class="dec1"></div>
+  <div class="dec1 no-print"></div>
   <div class="con">
-    <div class="title">
+    <div class="title no-print">
       <h1 class="header1">حاسبة القراريط والأراضي</h1>
       <img src="../imgs/1.png" alt="image">
     </div>
 
     <!-- Operation Selection -->
-    <div class="s s2">
+    <div class="s s2 no-print">
       <h3>اختر العملية الحسابية</h3>
-      <div style="justify-content: center; gap: 10px; padding: 10px 0;">
-        <button type="button" class="operation-btn active" onclick="setOperation('add')">جمع (+)</button>
-        <button type="button" class="operation-btn" onclick="setOperation('subtract')">طرح (-)</button>
-        <button type="button" class="operation-btn" onclick="setOperation('multiply')">ضرب (×)</button>
-        <button type="button" class="operation-btn" onclick="setOperation('divide')">قسمة (÷)</button>
+      <div style="display: flex; justify-content: center; gap: 10px; padding: 10px 0; flex-wrap: wrap; width: 100%;">
+        <button type="button" class="operation-btn active" onclick="setOperation('calc')" style="width: 130px !important;">حساب الإجمالي (+ / -)</button>
+        <button type="button" class="operation-btn" onclick="setOperation('multiply')" style="width: 90px !important;">ضرب (×)</button>
+        <button type="button" class="operation-btn" onclick="setOperation('divide')" style="width: 90px !important;">قسمة (÷)</button>
       </div>
     </div>
 
-    <!-- Operand 1 (Land Area) -->
-    <div class="s s1">
-      <h3>المساحة الأولى</h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result first">
-              <input dir="ltr" type="number" id="op1-shares" placeholder="0" oninput="calculate()">
-            </td>
-            <td class="width1_result">
-              <input dir="ltr" type="number" id="op1-carat" placeholder="0" oninput="calculate()">
-            </td>
-            <td class="width1_result">
-              <input dir="ltr" type="number" id="op1-acre" placeholder="0" oninput="calculate()">
-            </td>
-          </tr>
+    <!-- Lands Table Container -->
+    <div class="s s1 no-print" style="width: 100%; max-width: 600px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px;">
+      <h3 id="table-card-header" style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">جدول مساحات الأراضي</h3>
+      
+      <div style="width: 100%; overflow-x: auto;">
+        <table id="lands-table" style="width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center;">
+          <thead>
+            <tr style="background-color: #f5f5f5; border-bottom: 2px solid #2e7d32;">
+              <th style="width: 30px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">م</th>
+              <th style="width: 50px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">+/-</th>
+              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">سهم</th>
+              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">قيراط (ط)</th>
+              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">فدان</th>
+              <th style="text-align: right; font-size: 12px; font-weight: bold; color: #555; min-width: 120px;">البيان (اسم الأرض)</th>
+              <th class="no-print" style="width: 40px;"></th>
+            </tr>
+          </thead>
+          <tbody id="lands-table-body">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+          <tfoot>
+            <tr style="background-color: #e8f5e9; font-weight: bold; border-top: 2px solid #2e7d32; color: #1b5e20;">
+              <td></td>
+              <td></td>
+              <td id="total-shares" style="padding: 8px; font-size: 15px; text-align: center;">0</td>
+              <td id="total-carat" style="padding: 8px; font-size: 15px; text-align: center;">0</td>
+              <td id="total-acre" style="padding: 8px; font-size: 15px; text-align: center;">0</td>
+              <td style="text-align: right; padding: 8px; font-size: 13px;">الإجمالي:</td>
+              <td class="no-print"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
-    </div>
 
-    <!-- Operand 2 (Land Area - for Add/Subtract) -->
-    <div class="s s1" id="operand2-land-div">
-      <h3>المساحة الثانية</h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result first">
-              <input dir="ltr" type="number" id="op2-shares" placeholder="0" oninput="calculate()">
-            </td>
-            <td class="width1_result">
-              <input dir="ltr" type="number" id="op2-carat" placeholder="0" oninput="calculate()">
-            </td>
-            <td class="width1_result">
-              <input dir="ltr" type="number" id="op2-acre" placeholder="0" oninput="calculate()">
-            </td>
-          </tr>
-        </table>
+      <!-- Add Area Button -->
+      <div id="add-area-btn-container" class="no-print" style="display: flex; justify-content: center; width: 100%; margin-top: 15px;">
+        <button type="button" class="add-area-btn" onclick="addArea()" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>إضافة أرض أخرى</span>
+        </button>
       </div>
     </div>
 
     <!-- Operand 2 (Number - for Multiply/Divide) -->
-    <div class="s s3" id="operand2-number-div" style="display: none;">
+    <div class="s s3 no-print" id="operand2-number-div" style="display: none;">
       <h3 id="op2-number-title">الرقم (المضاعف / المقسوم عليه)</h3>
       <div>
         <input type="number" dir="auto" placeholder="مثال: 2" class="input1" id="op2-number" oninput="calculate()" style="color: black !important;" />
@@ -98,7 +93,7 @@
     </div>
 
     <!-- Carat Area Selector (for m2 conversion) -->
-    <div class="s s2">
+    <div class="s s2 no-print">
       <h3>مساحة القيراط بالمتر المربع</h3>
       <div>
         <img src="../imgs/4.png" alt="image" />
@@ -115,15 +110,35 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="buttons2">
+    <div class="buttons2 no-print">
       <button class="but1" onclick="clearAll()">احذف</button>
       <button class="but2" onclick="calculate()">إحسب</button>
     </div>
 
     <!-- Result Display -->
-    <div class="s s1">
+    <div class="s s1 no-print">
       <h3>النتيجة بالقراريط</h3>
-      <div>
+      <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 10px 0;">
+        
+        <!-- Large visual badges result -->
+        <div style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
+          <!-- Sahm Card -->
+          <div style="flex: 1; background: #e3f2fd; border: 2px solid #1565c0; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+            <div id="res-badge-shares" style="font-size: 26px; font-weight: bold; color: #0d47a1;">0</div>
+            <div style="font-size: 13px; color: #1565c0; font-weight: bold; margin-top: 4px;">سهم</div>
+          </div>
+          <!-- Qirat Card -->
+          <div style="flex: 1; background: #fff3e0; border: 2px solid #ef6c00; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+            <div id="res-badge-carat" style="font-size: 26px; font-weight: bold; color: #e65100;">0</div>
+            <div style="font-size: 13px; color: #ef6c00; font-weight: bold; margin-top: 4px;">قيراط (ط)</div>
+          </div>
+          <!-- Feddan Card -->
+          <div style="flex: 1; background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+            <div id="res-badge-acre" style="font-size: 26px; font-weight: bold; color: #1b5e20;">0</div>
+            <div style="font-size: 13px; color: #2e7d32; font-weight: bold; margin-top: 4px;">فدان</div>
+          </div>
+        </div>
+        
         <table class="result-table">
           <tr>
             <th>سهم</th>
@@ -146,7 +161,7 @@
     </div>
 
     <!-- Result in Square Meters -->
-    <div class="s s4">
+    <div class="s s4 no-print">
       <h3>النتيجة بالمتر المربع والقصاب</h3>
       <div>
         <table>
@@ -161,7 +176,7 @@
     </div>
 
     <!-- Result in Reeds & Fists -->
-    <div class="s s6 last-element">
+    <div class="s s6 last-element no-print">
       <h3>النتيجة بالقصبة الطولية (لضلع مربع)</h3>
       <div>
         <table>
@@ -178,6 +193,47 @@
             <td id="res-reed">0</td>
           </tr>
         </table>
+      </div>
+    </div>
+
+    <!-- Detailed Report -->
+    <div class="s" id="report-container" style="display: none; width: 100%; max-width: 500px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-top: 20px; padding: 15px; border: 1px solid #e0e0e0;">
+      <h3 style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: bold; text-align: center;">تقرير مساحات الأراضي</h3>
+      
+      <div style="width: 100%; overflow-x: auto;">
+        <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
+          <thead>
+            <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 30px;">م</th>
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; text-align: right;">البيان (اسم الأرض)</th>
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 55px;">سهم</th>
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 55px;">قيراط</th>
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 55px;">فدان</th>
+              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 100px;">المساحة (م²)</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 15px; display: flex; justify-content: space-between; gap: 10px;" class="no-print">
+        <button type="button" onclick="printReport()" class="btn-report-action btn-print">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>طباعة التقرير</span>
+        </button>
+        <button type="button" onclick="copyReportToClipboard()" class="btn-report-action btn-copy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>نسخ للنشر (واتساب)</span>
+        </button>
       </div>
     </div>
 
