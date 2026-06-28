@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../Page3/style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <title>القسمة في حال اختلاف الأطوال</title>
+</head>
+
+<body>
+
+  <div class="con">
+    <div class="dec1"></div>
+    <div class="title">
+      <h1>القسمة في حال اختلاف الأطوال</h1>
+      <img src="../imgs/1.png" alt="image">
+    </div>
+
+    <!-- Land Dimensions -->
+    <div class="s s1">
+      <h3>أدخل أبعاد الأرض الإجمالية</h3>
+      <div class="inputs">
+        <div class="share input-div">
+          <label for="length1">الحد الأيمن (م)</label>
+          <input tabindex="3" dir="auto" type="number" id="length1" oninput="calculate()">
+        </div>
+        <div class="carat input-div">
+          <label for="length2">الحد الأيسر (م)</label>
+          <input tabindex="2" dir="auto" type="number" id="length2" oninput="calculate()">
+        </div>
+        <div class="acre input-div">
+          <label for="total-width">العرض الكلي (م)</label>
+          <input tabindex="1" dir="auto" type="number" id="total-width" oninput="calculate()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Carat Area Selector -->
+    <div class="s s2">
+      <h3>مساحة القيراط بالمتر المربع</h3>
+      <div style="display: flex; justify-content: space-evenly; width: 100%; align-items: center; margin-top: 10px;">
+        <select id="input-carat-area" class="selector1" onchange="handleCaratAreaChange()" style="width: 120px; height: 30px; text-align: center; border-radius: 5px; color: black !important; border: 1px solid #ccc;">
+          <option value="175.035">175.035</option>
+          <option value="175">175</option>
+          <option value="171.388">171.388</option>
+          <option value="168">168</option>
+          <option value="0">أخرى</option>
+        </select>
+        <input type="number" id="other-carat-area" placeholder="م² للقيراط" oninput="calculate()" style="display: none; width: 80px; height: 30px; text-align: center; border-radius: 5px; color: black !important; border: 1px solid #ccc;">
+        <p style="margin: 0; font-weight: bold;">متر مربع</p>
+      </div>
+    </div>
+
+    <!-- Total Area Info -->
+    <div class="s s1" style="margin-top: 15px;">
+      <h3>المساحة الإجمالية المحسوبة</h3>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 10px; width: 100%;">
+        <p style="font-weight: bold; color: var(--red); font-size: 15px; margin: 5px 0;">
+          المساحة: <span id="calc-area-m2" style="font-size: 16px;">0.0</span> م²
+        </p>
+        <p style="font-size: 12px; font-weight: bold; margin: 0; color: black;">
+          تعادل: 
+          <span id="calc-area-acre">0</span> فدان و 
+          <span id="calc-area-carat">0</span> قيراط و 
+          <span id="calc-area-shares">0.00</span> سهم
+        </p>
+      </div>
+    </div>
+
+    <!-- Partners Table -->
+    <div class="s s3" style="max-width: 340px; width: 100%; margin-top: 20px;">
+      <h3>نصيب كل شريك والنتائج</h3>
+      <p style="font-size: 11px; color: gray; margin: 5px 0; text-align: center; line-height: 1.4;">
+        سيقوم النظام بحساب العرض والحد التراكمي وطول الفاصل تلقائياً.
+      </p>
+      
+      <div class="table">
+        <div class="table-header">
+          <p class="col-name">الشريك</p>
+          <p class="col-carat">قيراط</p>
+          <p class="col-share">سهم</p>
+          <p class="col-width">العرض (م)</p>
+          <p class="col-cum">العلامة (م)</p>
+          <p class="col-border">الفاصل (م)</p>
+        </div>
+
+        <div id="partners-list" style="display: flex; flex-direction: column; width: 100%;">
+          <!-- Dynamic rows will be added here -->
+        </div>
+
+        <!-- Totals Row -->
+        <div class="table-input" id="total" style="margin-top: 5px;">
+          <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
+          <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+          <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+          <input type="text" id="total-width-calculated" readonly value="0.00" style="font-weight: bold; background: #222; color: white;">
+          <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+          <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+        </div>
+      </div>
+
+      <div class="buttons2" style="margin-top: 15px; width: 100%; display: flex; justify-content: center; gap: 10px;">
+        <button class="but1" onclick="clearAll()" style="margin-left: 0;">أحذف</button>
+        <button class="but2" onclick="addNewPartnerRow()">أضف شريك</button>
+      </div>
+
+      <!-- Remaining / Excess Area -->
+      <div class="results" style="margin-top: 20px; margin-bottom: 150px; width: 100%;">
+        <div class="result-right" style="width: 58%;">
+          <p>المتبقي من الأرض (غير الموزع)</p>
+          <div class="residual">
+            <div>
+              <p>سهم</p>
+              <span id="rem-shares" dir="ltr">0</span>
+            </div>
+            <div>
+              <p>قيراط</p>
+              <span id="rem-carats" dir="ltr">0</span>
+            </div>
+            <div>
+              <p>فدان</p>
+              <span id="rem-acres" dir="ltr">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-left" style="width: 40%;">
+          <p>عرض الأرض الكلي</p>
+          <span id="calc-total-width-val" class="each-carat">0</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <a href="../Page7/index.html" class="nav-box">
+      <img src="../imgs/nav1.png" alt="nav1" />
+      <p>تحويلات</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../imgs/nav2.png" alt="nav2" />
+      <p>رجوع</p>
+    </a>
+    <a href="../index.html" class="nav-box">
+      <img src="../imgs/nav4.png" alt="nav4" />
+      <p>الرئيسية</p>
+    </a>
+  </div>
+
+  <script src="../nav.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

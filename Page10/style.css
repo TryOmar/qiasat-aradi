@@ -1,0 +1,111 @@
+/* Page specific styling for Page 10 */
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: white !important;
+}
+
+.con {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  padding: 0 20px 150px 20px !important;
+  float: none !important;
+}
+
+.title {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 80px !important; /* Pushes the title down below the absolute green top bar */
+  margin-bottom: 20px !important;
+}
+
+.title h1.header1 {
+  font-size: 24px !important;
+  margin: 0 15px 0 0 !important;
+  color: rgb(149, 11, 36) !important;
+  text-align: center !important;
+}
+
+.title img {
+  height: 45px !important;
+  width: auto !important;
+}
+
+.operation-btn {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: black;
+  width: 60px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 2px;
+}
+
+.operation-btn.active {
+  background-color: green;
+  color: white;
+  border-color: green;
+}
+
+/* Center the action buttons and remove the off-center margins */
+.buttons2 {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+  gap: 15px !important;
+}
+
+.buttons2 button {
+  margin: 0 !important;
+  width: 80px !important;
+  height: 35px !important;
+  line-height: 35px !important;
+}
+
+/* Style for the result table to give it borders and spacing */
+.result-table {
+  border-collapse: separate !important;
+  border-spacing: 5px !important;
+  width: 200px !important;
+  margin: 0 auto !important;
+}
+
+.result-table td {
+  border: 1px solid #cccccc !important;
+  border-radius: 5px !important;
+  background-color: #f9f9f9 !important;
+  color: black !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  width: 60px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  padding: 0 !important;
+}
+
+.result-table th {
+  text-align: center !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #333 !important;
+}

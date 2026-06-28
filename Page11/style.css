@@ -1,0 +1,141 @@
+/* Page 11 Table Column Width Overrides and Styling */
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: white !important;
+}
+
+.con {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  padding: 0 20px 150px 20px !important;
+  float: none !important;
+}
+
+.title {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100%;
+  margin-top: 80px !important; /* Pushes the title down below the absolute green top bar */
+  margin-bottom: 20px !important;
+}
+
+.title h1 {
+  font-size: 23px !important;
+  margin: 0 15px 0 0 !important;
+  color: rgb(149, 11, 63) !important;
+}
+
+.title img {
+  width: 55px !important;
+  height: auto !important;
+}
+
+/* Center the action buttons and remove the off-center margins */
+.buttons2 {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+  gap: 15px !important;
+}
+
+.buttons2 button {
+  margin: 0 !important;
+  width: 80px !important;
+  height: 35px !important;
+  line-height: 35px !important;
+}
+
+/* Override column widths from Page3's style.css to support 6 columns */
+.s3 .table-header p,
+.s3 .table-input input,
+.s3 .table-input p {
+    width: calc(100% / 6.2) !important;
+    font-size: 9px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.s3 .table-header p {
+    width: calc(100% / 6) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.partner-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    align-items: center;
+    gap: 2px;
+}
+
+.partner-row input {
+    width: calc((100% - 22px) / 6) !important;
+    height: 28px !important;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 10px !important;
+    color: black !important;
+    font-weight: bold;
+}
+
+.partner-row input[readonly] {
+    background-color: #f9f9f9;
+    color: #555 !important;
+    font-weight: normal;
+}
+
+.partner-row .delete-row-btn {
+    background-color: var(--red);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 18px;
+    height: 28px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+#total input {
+    width: calc(100% / 6) !important;
+    height: 28px !important;
+    font-size: 10px !important;
+    font-weight: bold;
+}
+
+.inputs input {
+    color: black !important;
+    font-weight: bold;
+}
+
+.col-name { width: 22%; }
+.col-carat { width: 13%; }
+.col-share { width: 13%; }
+.col-width { width: 18%; }
+.col-cum { width: 17%; }
+.col-border { width: 17%; }
