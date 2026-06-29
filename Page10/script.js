@@ -72,7 +72,7 @@ function renderAreas() {
           <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" oninput="onAreaInput(${i})" value="${area.name || ''}">
         </td>
         <td class="no-print" style="vertical-align: middle; text-align: center;">
-          ${i > 0 ? `
+          ${areas.length > 1 ? `
             <button type="button" class="btn-remove-area" onclick="removeArea(${i})" title="حذف هذه المساحة" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: #d32f2f; cursor: pointer; padding: 0; margin: 0;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -94,8 +94,15 @@ function onAreaInput(index) {
     const area = areas[index];
     if (area.name || area.shares || area.carat || area.acre) {
       areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
-      // Append a new row without re-rendering to preserve focus
-      appendAreaRow(areas.length - 1);
+      // Render to update delete buttons visibility (since length went from 1 to 2)
+      if (areas.length === 2) {
+        renderAreas();
+        // Focus the input user was typing in
+        const inputs = document.querySelectorAll(".area-name-input, .area-shares, .area-carat, .area-acre");
+        // find corresponding element
+      } else {
+        appendAreaRow(areas.length - 1);
+      }
     }
   }
   calculate();
@@ -142,8 +149,15 @@ function addArea() {
 
 function removeArea(index) {
   syncAreasFromDOM();
-  if (areas.length > 1) {
-    areas.splice(index, 1);
+  areas.splice(index, 1);
+  if (areas.length === 0) {
+    areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
+  } else {
+    // Ensure the last row is empty
+    const last = areas[areas.length - 1];
+    if (last.name || last.shares || last.carat || last.acre) {
+      areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
+    }
   }
   renderAreas();
   saveData();
@@ -213,7 +227,11 @@ function onDiscountInput(index) {
     const d = discounts[index];
     if (d.name || d.shares || d.carat || d.acre) {
       discounts.push({ name: "", shares: "", carat: "", acre: "" });
-      appendDiscountRow(discounts.length - 1);
+      if (discounts.length === 2) {
+        renderDiscounts();
+      } else {
+        appendDiscountRow(discounts.length - 1);
+      }
     }
   }
   calculate();
@@ -222,7 +240,6 @@ function onDiscountInput(index) {
 
 function appendDiscountRow(i) {
   const tbody = document.getElementById("discount-table-body");
-  const d = discounts[i];
   const tr = document.createElement("tr");
   tr.id = `discount-block-${i}`;
   tr.innerHTML = `
@@ -253,8 +270,15 @@ function appendDiscountRow(i) {
 
 function removeDiscount(index) {
   syncDiscountsFromDOM();
-  if (discounts.length > 1) {
-    discounts.splice(index, 1);
+  discounts.splice(index, 1);
+  if (discounts.length === 0) {
+    discounts.push({ name: "", shares: "", carat: "", acre: "" });
+  } else {
+    // Ensure the last row is empty
+    const last = discounts[discounts.length - 1];
+    if (last.name || last.shares || last.carat || last.acre) {
+      discounts.push({ name: "", shares: "", carat: "", acre: "" });
+    }
   }
   renderDiscounts();
   saveData();
@@ -607,7 +631,7 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
   html += `
   <div style="margin-bottom: 18px; background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 2px solid #2e7d32; border-radius: 12px; padding: 15px; text-align: center;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
-      <span style="font-weight: bold; font-size: 15px; color: #1b5e20;">المتبقي بعد الخصم</span>
+      <span style="font-weight: bold; font-size: 15px; color: #1b5e20;">إجمالي الأراضي المتبقية</span>
     </div>
     <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
       <div style="background: white; border: 1.5px solid #1565c0; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
@@ -763,7 +787,7 @@ function copyReportToClipboard() {
   const remainingUnits = sahmsToUnits(remainingSahms);
   const remainingM2 = (remainingSahms / 24) * caratArea;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `*المتبقي بعد الخصم:*\n`;
+  text += `*إجمالي الأراضي المتبقية:*\n`;
   text += `   - المساحة: ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n`;
   text += `   - تعادل: ${remainingM2.toFixed(2)} م²\n\n`;
 
@@ -848,7 +872,6 @@ function loadData() {
     } catch (e) {
       console.error(e);
       areas = [
-        { name: "", shares: "", carat: "", acre: "", sign: "plus" },
         { name: "", shares: "", carat: "", acre: "", sign: "plus" }
       ];
     }
@@ -865,6 +888,26 @@ function loadData() {
     }
   }
 
+  // Ensure trailing empty row for areas
+  if (areas.length === 0) {
+    areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
+  } else {
+    const last = areas[areas.length - 1];
+    if (last.name || last.shares || last.carat || last.acre) {
+      areas.push({ name: "", shares: "", carat: "", acre: "", sign: "plus" });
+    }
+  }
+
+  // Ensure trailing empty row for discounts
+  if (discounts.length === 0) {
+    discounts.push({ name: "", shares: "", carat: "", acre: "" });
+  } else {
+    const last = discounts[discounts.length - 1];
+    if (last.name || last.shares || last.carat || last.acre) {
+      discounts.push({ name: "", shares: "", carat: "", acre: "" });
+    }
+  }
+
   // Load carat area
   document.getElementById("input-carat-area").value = sessionStorage.getItem("carat-area-calc") || "175.035";
   document.getElementById("other-input-field").value = sessionStorage.getItem("other-carat-area-calc") || "";
@@ -876,7 +919,6 @@ function loadData() {
 
 function clearAll() {
   areas = [
-    { name: "", shares: "", carat: "", acre: "", sign: "plus" },
     { name: "", shares: "", carat: "", acre: "", sign: "plus" }
   ];
   discounts = [

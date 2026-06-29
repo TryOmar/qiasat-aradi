@@ -86,7 +86,7 @@
 
     <!-- Total Area Section -->
     <div class="s no-print" id="total-area-section">
-      <h3>إجمالي المساحة</h3>
+      <h3>إجمالي الأراضي</h3>
       <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 5px 0;">
         <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 10px; font-size: 14px;">الإجمالي بوحدات الأراضي:
         </h4>
@@ -161,7 +161,7 @@
 
     <!-- Remaining Section -->
     <div class="s no-print" id="remaining-section">
-      <h3>المتبقي</h3>
+      <h3>إجمالي الأراضي المتبقية</h3>
       <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 5px 0;">
         <div
           style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
@@ -188,7 +188,7 @@
         <!-- M2 conversion and reeds -->
         <div
           style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 14px;">
-          <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">المتبقي بالمتر المربع
+          <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">إجمالي الأراضي المتبقية بالمتر المربع
             والقصاب:</h4>
           <span id="remaining-m2" style="font-weight: bold; color: black; font-size: 15px;">0.00 م²</span>
         </div>
@@ -200,7 +200,7 @@
       <h3>عدد الأفراد</h3>
       <div style="display: flex; flex-direction: column; width: 100%; padding: 5px 0;">
         <div class="input-group-custom">
-          <label for="individuals-count">عدد الأفراد:</label>
+          <label for="individuals-count" style="min-width: 250px !important;">أدخل عدد الأفراد الذي ترغب القسمة عليهم:</label>
           <input type="number" id="individuals-count" min="1" placeholder="مثال: 4" class="input1"
             oninput="handleIndividualsCountChange()"
             style="flex: 1; height: 36px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-weight: bold;">
