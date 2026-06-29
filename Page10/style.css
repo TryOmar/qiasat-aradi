@@ -509,10 +509,7 @@ body {
   margin: 0 !important;
 }
 
-/* Individuals input styling */
-#individuals-section input[type="number"] {
-  font-size: 16px !important;
-}
+
 
 /* Report container print adjustments */
 #report-content h4 {

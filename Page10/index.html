@@ -34,6 +34,29 @@
       min-width: 90px;
       font-size: 13px;
     }
+
+    #individuals-section .input-group-custom label {
+      min-width: 250px;
+    }
+
+    @media (max-width: 480px) {
+      .input-group-custom {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+      }
+      .input-group-custom label, #individuals-section .input-group-custom label {
+        min-width: auto !important;
+        width: 100% !important;
+        margin-bottom: 2px !important;
+        text-align: right !important;
+      }
+      .input-group-custom input {
+        flex: none !important;
+        width: 100% !important;
+        height: 34px !important;
+      }
+    }
   </style>
 </head>
 
@@ -192,10 +215,10 @@
       <h3>عدد الأفراد</h3>
       <div style="display: flex; flex-direction: column; width: 100%; padding: 5px 0;">
         <div class="input-group-custom">
-          <label for="individuals-count" style="min-width: 250px !important;">أدخل عدد الأفراد الذي ترغب القسمة عليهم:</label>
+          <label for="individuals-count">أدخل عدد الأفراد الذي ترغب القسمة عليهم:</label>
           <input type="number" id="individuals-count" min="1" placeholder="مثال: 4" class="input1"
             oninput="handleIndividualsCountChange()"
-            style="flex: 1; height: 36px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-weight: bold;">
+            style="flex: 1; width: 100% !important; height: 34px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-size: 13px;">
         </div>
         <!-- Dynamic Name Inputs Container -->
         <div id="individuals-names-container"
