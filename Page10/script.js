@@ -482,18 +482,27 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
 
   let html = "";
 
-  // --- Lands Table ---
-  html += `<h4 style="font-weight: bold; color: #1b5e20; font-size: 14px; margin: 10px 0 5px;">جدول جمع الأراضي:</h4>`;
-  html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 15px;">`;
-  html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-    <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
-    <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">البيان</th>
-    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
-    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
-    <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
-    <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
-  </tr></thead><tbody>`;
+  // ===== Lands Table Section =====
+  html += `
+  <div style="margin-bottom: 18px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #1b5e20, #2e7d32); border-radius: 8px; color: white;">
+      <span style="font-size: 18px;">🌾</span>
+      <span style="font-weight: bold; font-size: 14px;">جدول جمع الأراضي</span>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
+      <thead>
+        <tr style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-bottom: 2px solid #2e7d32;">
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 28px;">م</th>
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; text-align: right;">البيان</th>
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">سهم</th>
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">قيراط</th>
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">فدان</th>
+          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 85px;">م²</th>
+        </tr>
+      </thead>
+      <tbody>`;
 
+  let rowIdx = 0;
   areas.forEach((area, i) => {
     const name = area.name || getAreaTitle(i);
     const sh = parseFloat(area.shares) || 0;
@@ -503,42 +512,56 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
     const m2 = (sahms / 24) * caratArea;
 
     if (sh || ca || ac) {
-      html += `<tr>
-        <td style="padding: 6px; border: 1px solid #ddd;">${i + 1}</td>
-        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${name}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${sh}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${ca}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${ac}</td>
-        <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${m2.toFixed(2)} م²</td>
-      </tr>`;
+      rowIdx++;
+      const bgColor = rowIdx % 2 === 0 ? "#f9f9f9" : "#ffffff";
+      html += `
+        <tr style="background-color: ${bgColor}; border-bottom: 1px solid #eee;">
+          <td style="padding: 7px 6px; color: #666; font-weight: bold;">${rowIdx}</td>
+          <td style="padding: 7px 6px; text-align: right; color: #333;">${name}</td>
+          <td style="padding: 7px 6px; color: #333;">${sh}</td>
+          <td style="padding: 7px 6px; color: #333;">${ca}</td>
+          <td style="padding: 7px 6px; color: #333;">${ac}</td>
+          <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${m2.toFixed(2)} م²</td>
+        </tr>`;
     }
   });
 
   // Total row
   const totalUnits = sahmsToUnits(totalAreaSahms);
   const totalM2 = (totalAreaSahms / 24) * caratArea;
-  html += `<tr style="background-color: #e8f5e9; font-weight: bold; border-top: 2px solid #2e7d32; color: #1b5e20;">
-    <td colspan="2" style="padding: 6px; border: 1px solid #ddd; text-align: right;">الإجمالي:</td>
-    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.shares}</td>
-    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.carat}</td>
-    <td style="padding: 6px; border: 1px solid #ddd;">${totalUnits.prefix}${totalUnits.acre}</td>
-    <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${totalM2.toFixed(2)} م²</td>
-  </tr>`;
-  html += `</tbody></table>`;
+  html += `
+        <tr style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-top: 2px solid #2e7d32;">
+          <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #1b5e20; font-size: 13px;">الإجمالي</td>
+          <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.shares}</td>
+          <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.carat}</td>
+          <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.prefix}${totalUnits.acre}</td>
+          <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20; direction: ltr; font-size: 11px;">${totalM2.toFixed(2)} م²</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
 
-  // --- Discounts Table ---
+  // ===== Discounts Table Section =====
   const hasDiscountData = discounts.some(d => (parseFloat(d.shares) || 0) + (parseFloat(d.carat) || 0) + (parseFloat(d.acre) || 0) > 0);
   if (hasDiscountData) {
-    html += `<h4 style="font-weight: bold; color: #c62828; font-size: 14px; margin: 10px 0 5px;">جدول الخصومات:</h4>`;
-    html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 15px;">`;
-    html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-      <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
-      <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">البيان</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
-    </tr></thead><tbody>`;
+    html += `
+    <div style="margin-bottom: 18px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #b71c1c, #c62828); border-radius: 8px; color: white;">
+        <span style="font-size: 18px;">📋</span>
+        <span style="font-weight: bold; font-size: 14px;">جدول الخصومات</span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
+        <thead>
+          <tr style="background: linear-gradient(135deg, #ffebee, #ffcdd2); border-bottom: 2px solid #c62828;">
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 28px;">م</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; text-align: right;">البيان</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">سهم</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">قيراط</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">فدان</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 85px;">م²</th>
+          </tr>
+        </thead>
+        <tbody>`;
 
     let discNum = 0;
     discounts.forEach((d, i) => {
@@ -550,75 +573,119 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
         const sahms = ac * 576 + ca * 24 + sh;
         const m2 = (sahms / 24) * caratArea;
         const name = d.name || `خصم ${discNum}`;
-        html += `<tr>
-          <td style="padding: 6px; border: 1px solid #ddd;">${discNum}</td>
-          <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${name}</td>
-          <td style="padding: 6px; border: 1px solid #ddd;">${sh}</td>
-          <td style="padding: 6px; border: 1px solid #ddd;">${ca}</td>
-          <td style="padding: 6px; border: 1px solid #ddd;">${ac}</td>
-          <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${m2.toFixed(2)} م²</td>
-        </tr>`;
+        const bgColor = discNum % 2 === 0 ? "#fff8f8" : "#ffffff";
+        html += `
+          <tr style="background-color: ${bgColor}; border-bottom: 1px solid #fce4ec;">
+            <td style="padding: 7px 6px; color: #666; font-weight: bold;">${discNum}</td>
+            <td style="padding: 7px 6px; text-align: right; color: #333;">${name}</td>
+            <td style="padding: 7px 6px; color: #333;">${sh}</td>
+            <td style="padding: 7px 6px; color: #333;">${ca}</td>
+            <td style="padding: 7px 6px; color: #333;">${ac}</td>
+            <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${m2.toFixed(2)} م²</td>
+          </tr>`;
       }
     });
 
     const discountUnits = sahmsToUnits(totalDiscountSahms);
     const discM2 = (totalDiscountSahms / 24) * caratArea;
-    html += `<tr style="background-color: #ffebee; font-weight: bold; border-top: 2px solid #c62828; color: #c62828;">
-      <td colspan="2" style="padding: 6px; border: 1px solid #ddd; text-align: right;">إجمالي الخصم:</td>
-      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.shares}</td>
-      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.carat}</td>
-      <td style="padding: 6px; border: 1px solid #ddd;">${discountUnits.acre}</td>
-      <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${discM2.toFixed(2)} م²</td>
-    </tr>`;
-    html += `</tbody></table>`;
+    html += `
+          <tr style="background: linear-gradient(135deg, #ffebee, #ffcdd2); border-top: 2px solid #c62828;">
+            <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #c62828; font-size: 13px;">➖ إجمالي الخصم</td>
+            <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.shares}</td>
+            <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.carat}</td>
+            <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.acre}</td>
+            <td style="padding: 8px 6px; font-weight: bold; color: #c62828; direction: ltr; font-size: 11px;">${discM2.toFixed(2)} م²</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
   }
 
-  // --- Remaining ---
+  // ===== Remaining Section =====
   const remainingUnits = sahmsToUnits(remainingSahms);
   const remainingM2 = (remainingSahms / 24) * caratArea;
-  html += `<div style="background: #e8f5e9; border: 1px solid #2e7d32; border-radius: 8px; padding: 10px; margin: 10px 0; text-align: center;">
-    <strong style="color: #1b5e20; font-size: 14px;">المتبقي بعد الخصم:</strong><br>
-    <span style="font-size: 16px; font-weight: bold; color: #1b5e20;">${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم</span><br>
-    <span style="font-size: 13px; color: #555;">(${remainingM2.toFixed(2)} م²)</span>
+  const remainingCarats = +(remainingSahms / 24).toFixed(3);
+
+  html += `
+  <div style="margin-bottom: 18px; background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 2px solid #2e7d32; border-radius: 12px; padding: 15px; text-align: center;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+      <span style="font-size: 20px;">🏆</span>
+      <span style="font-weight: bold; font-size: 15px; color: #1b5e20;">المتبقي بعد الخصم</span>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+      <div style="background: white; border: 1.5px solid #2e7d32; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 18px; font-weight: bold; color: #1b5e20;">${remainingUnits.prefix}${remainingUnits.acre}</div>
+        <div style="font-size: 10px; color: #2e7d32; font-weight: bold;">فدان</div>
+      </div>
+      <div style="background: white; border: 1.5px solid #ef6c00; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 18px; font-weight: bold; color: #e65100;">${remainingUnits.carat}</div>
+        <div style="font-size: 10px; color: #ef6c00; font-weight: bold;">قيراط</div>
+      </div>
+      <div style="background: white; border: 1.5px solid #1565c0; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 18px; font-weight: bold; color: #0d47a1;">${remainingUnits.shares}</div>
+        <div style="font-size: 10px; color: #1565c0; font-weight: bold;">سهم</div>
+      </div>
+    </div>
+    <div style="font-size: 12px; color: #555; border-top: 1px dashed #a5d6a7; padding-top: 8px;">
+      يعادل <strong style="color: #1b5e20;">${remainingM2.toFixed(2)} م²</strong> &nbsp;|&nbsp; <strong style="color: #ef6c00;">${remainingCarats} قيراط</strong>
+    </div>
   </div>`;
 
-  // --- Distribution ---
+  // ===== Distribution Section =====
   if (individualsCount > 0) {
     const sharePerPerson = remainingSahms / individualsCount;
     const perPersonUnits = sahmsToUnits(sharePerPerson);
     const perPersonM2 = (sharePerPerson / 24) * caratArea;
     const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
 
-    html += `<h4 style="font-weight: bold; color: #0d47a1; font-size: 14px; margin: 15px 0 5px;">ناتج التوزيع بالتساوي (${individualsCount} أفراد):</h4>`;
-    html += `<table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px;">`;
-    html += `<thead><tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-      <th style="padding: 6px; border: 1px solid #ddd; width: 25px;">م</th>
-      <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">الاسم</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">فدان</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">قيراط</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 45px;">سهم</th>
-      <th style="padding: 6px; border: 1px solid #ddd; width: 80px;">م²</th>
-    </tr></thead><tbody>`;
+    html += `
+    <div style="margin-bottom: 18px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #0d47a1, #1565c0); border-radius: 8px; color: white;">
+        <span style="font-size: 18px;">👥</span>
+        <span style="font-weight: bold; font-size: 14px;">التوزيع بالتساوي (${individualsCount} أفراد)</span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
+        <thead>
+          <tr style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-bottom: 2px solid #1565c0;">
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 28px;">م</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; text-align: right;">الاسم</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">فدان</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">قيراط</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">سهم</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 85px;">م²</th>
+          </tr>
+        </thead>
+        <tbody>`;
 
     for (let i = 0; i < individualsCount; i++) {
       const name = (individualNames[i] && individualNames[i].trim()) ||
         (i < ordinals.length ? `الفرد ${ordinals[i]}` : `الفرد ${i + 1}`);
-      html += `<tr>
-        <td style="padding: 6px; border: 1px solid #ddd;">${i + 1}</td>
-        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${name}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
-        <td style="padding: 6px; border: 1px solid #ddd;">${perPersonUnits.shares}</td>
-        <td style="padding: 6px; border: 1px solid #ddd; direction: ltr;">${perPersonM2.toFixed(2)} م²</td>
-      </tr>`;
+      const bgColor = i % 2 === 0 ? "#ffffff" : "#f5f9ff";
+      html += `
+          <tr style="background-color: ${bgColor}; border-bottom: 1px solid #e3f2fd;">
+            <td style="padding: 7px 6px; color: #666; font-weight: bold;">${i + 1}</td>
+            <td style="padding: 7px 6px; text-align: right; font-weight: bold; color: #333;">${name}</td>
+            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
+            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.carat}</td>
+            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.shares}</td>
+            <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${perPersonM2.toFixed(2)} م²</td>
+          </tr>`;
     }
-    html += `</tbody></table>`;
+    html += `
+        </tbody>
+      </table>
+    </div>`;
   }
 
-  // --- Footer ---
-  html += `<div style="text-align: center; margin-top: 15px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 8px;">
-    تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية 🌾<br>
-    مساحة القيراط المعتمدة: ${caratArea} م²
+  // ===== Footer =====
+  html += `
+  <div style="text-align: center; margin-top: 12px; padding: 10px 0 4px; border-top: 2px solid #e0e0e0;">
+    <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+      مساحة القيراط المعتمدة: <strong style="color: #555;">${caratArea} م²</strong>
+    </div>
+    <div style="font-size: 12px; color: #1b5e20; font-weight: bold;">
+      🌾 تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية
+    </div>
   </div>`;
 
   reportContent.innerHTML = html;

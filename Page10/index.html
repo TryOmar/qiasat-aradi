@@ -13,10 +13,12 @@
     ::placeholder {
       opacity: 0.2;
     }
+
     /* Simple overrides to ensure inputs are editable and correctly colored */
     .width1_result input {
       color: black !important;
     }
+
     .input-group-custom {
       display: flex;
       align-items: center;
@@ -24,6 +26,7 @@
       margin-bottom: 12px;
       width: 100%;
     }
+
     .input-group-custom label {
       font-weight: bold;
       color: #333;
@@ -43,18 +46,24 @@
     </div>
 
     <!-- Lands Table Container -->
-    <div class="s s1 no-print" style="width: 100%; max-width: 600px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px;">
-      <h3 id="table-card-header" style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">جدول جمع الأراضي الزراعية</h3>
-      
+    <div class="s s1 no-print"
+      style="width: 100%; max-width: 600px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px;">
+      <h3 id="table-card-header"
+        style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">
+        جدول جمع الأراضي الزراعية</h3>
+
       <div style="width: 100%; overflow-x: auto;">
-        <table id="lands-table" style="width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center;">
+        <table id="lands-table"
+          style="width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center;">
           <thead>
             <tr style="background-color: #f5f5f5; border-bottom: 2px solid #2e7d32;">
               <th style="width: 30px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">م</th>
               <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">سهم</th>
-              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">قيراط (ط)</th>
+              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">قيراط (ط)
+              </th>
               <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">فدان</th>
-              <th style="text-align: right; font-size: 12px; font-weight: bold; color: #555; min-width: 120px;">البيان (اسم الأرض)</th>
+              <th style="text-align: right; font-size: 12px; font-weight: bold; color: #555; min-width: 120px;">البيان
+                (اسم الأرض)</th>
               <th class="no-print" style="width: 40px;"></th>
             </tr>
           </thead>
@@ -79,26 +88,32 @@
     <div class="s no-print" id="total-area-section">
       <h3>إجمالي المساحة</h3>
       <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 5px 0;">
-        <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 10px; font-size: 14px;">الإجمالي بوحدات الأراضي:</h4>
-        <div style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
+        <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 10px; font-size: 14px;">الإجمالي بوحدات الأراضي:
+        </h4>
+        <div
+          style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
           <!-- Sahm Card -->
-          <div style="flex: 1; background: #e3f2fd; border: 2px solid #1565c0; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #e3f2fd; border: 2px solid #1565c0; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="total-area-shares" style="font-size: 22px; font-weight: bold; color: #0d47a1;">0</div>
             <div style="font-size: 12px; color: #1565c0; font-weight: bold; margin-top: 4px;">سهم</div>
           </div>
           <!-- Qirat Card -->
-          <div style="flex: 1; background: #fff3e0; border: 2px solid #ef6c00; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #fff3e0; border: 2px solid #ef6c00; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="total-area-carat" style="font-size: 22px; font-weight: bold; color: #e65100;">0</div>
             <div style="font-size: 12px; color: #ef6c00; font-weight: bold; margin-top: 4px;">قيراط</div>
           </div>
           <!-- Feddan Card -->
-          <div style="flex: 1; background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="total-area-acre" style="font-size: 22px; font-weight: bold; color: #1b5e20;">0</div>
             <div style="font-size: 12px; color: #2e7d32; font-weight: bold; margin-top: 4px;">فدان</div>
           </div>
         </div>
-        
-        <div style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center;">
+
+        <div
+          style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center;">
           <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">النتيجة بالقراريط:</h4>
           <div style="font-size: 20px; font-weight: bold; color: #ef6c00;" id="total-area-only-carat">0 قيراط</div>
         </div>
@@ -106,18 +121,24 @@
     </div>
 
     <!-- Discount Section -->
-    <div class="s s1 no-print" style="width: 100%; max-width: 600px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px;">
-      <h3 id="discount-card-header" style="background: #c62828; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">جدول خصم الأراضي (الخصومات)</h3>
-      
+    <div class="s s1 no-print"
+      style="width: 100%; max-width: 600px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px;">
+      <h3 id="discount-card-header"
+        style="background: #c62828; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">
+        جدول خصم الأراضي (الخصومات)</h3>
+
       <div style="width: 100%; overflow-x: auto;">
-        <table id="discount-table" style="width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center;">
+        <table id="discount-table"
+          style="width: 100%; border-collapse: separate; border-spacing: 4px; text-align: center;">
           <thead>
             <tr style="background-color: #f5f5f5; border-bottom: 2px solid #c62828;">
               <th style="width: 30px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">م</th>
               <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">سهم</th>
-              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">قيراط (ط)</th>
+              <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">قيراط (ط)
+              </th>
               <th style="width: 75px; text-align: center; font-size: 12px; font-weight: bold; color: #555;">فدان</th>
-              <th style="text-align: right; font-size: 12px; font-weight: bold; color: #555; min-width: 120px;">البيان (سبب الخصم)</th>
+              <th style="text-align: right; font-size: 12px; font-weight: bold; color: #555; min-width: 120px;">البيان
+                (سبب الخصم)</th>
               <th class="no-print" style="width: 40px;"></th>
             </tr>
           </thead>
@@ -142,27 +163,33 @@
     <div class="s no-print" id="remaining-section">
       <h3>المتبقي</h3>
       <div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 5px 0;">
-        <div style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
+        <div
+          style="display: flex; justify-content: center; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 15px;">
           <!-- Sahm Card -->
-          <div style="flex: 1; background: #e3f2fd; border: 2px solid #1565c0; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #e3f2fd; border: 2px solid #1565c0; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="remaining-shares" style="font-size: 22px; font-weight: bold; color: #0d47a1;">0</div>
             <div style="font-size: 12px; color: #1565c0; font-weight: bold; margin-top: 4px;">سهم</div>
           </div>
           <!-- Qirat Card -->
-          <div style="flex: 1; background: #fff3e0; border: 2px solid #ef6c00; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #fff3e0; border: 2px solid #ef6c00; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="remaining-carat" style="font-size: 22px; font-weight: bold; color: #e65100;">0</div>
             <div style="font-size: 12px; color: #ef6c00; font-weight: bold; margin-top: 4px;">قيراط</div>
           </div>
           <!-- Feddan Card -->
-          <div style="flex: 1; background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
+          <div
+            style="flex: 1; background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; padding: 10px 5px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.04);">
             <div id="remaining-acre" style="font-size: 22px; font-weight: bold; color: #1b5e20;">0</div>
             <div style="font-size: 12px; color: #2e7d32; font-weight: bold; margin-top: 4px;">فدان</div>
           </div>
         </div>
 
         <!-- M2 conversion and reeds -->
-        <div style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 14px;">
-          <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">المتبقي بالمتر المربع والقصاب:</h4>
+        <div
+          style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 14px;">
+          <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">المتبقي بالمتر المربع
+            والقصاب:</h4>
           <span id="remaining-m2" style="font-weight: bold; color: black; font-size: 15px;">0.00 م²</span>
         </div>
       </div>
@@ -174,10 +201,13 @@
       <div style="display: flex; flex-direction: column; width: 100%; padding: 5px 0;">
         <div class="input-group-custom">
           <label for="individuals-count">عدد الأفراد:</label>
-          <input type="number" id="individuals-count" min="1" placeholder="مثال: 4" class="input1" oninput="handleIndividualsCountChange()" style="flex: 1; height: 36px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-weight: bold;">
+          <input type="number" id="individuals-count" min="1" placeholder="مثال: 4" class="input1"
+            oninput="handleIndividualsCountChange()"
+            style="flex: 1; height: 36px; border-radius: 8px; border: 1px solid #ccc; padding: 0 10px; color: black !important; font-weight: bold;">
         </div>
         <!-- Dynamic Name Inputs Container -->
-        <div id="individuals-names-container" style="display: flex; flex-direction: column; gap: 8px; width: 100%; padding-top: 5px;">
+        <div id="individuals-names-container"
+          style="display: flex; flex-direction: column; gap: 8px; width: 100%; padding-top: 5px;">
           <!-- Generated inputs go here -->
         </div>
       </div>
@@ -187,7 +217,8 @@
     <div class="s no-print" id="distribution-section" style="display: none;">
       <h3>ناتج التوزيع بالتساوي</h3>
       <div style="width: 100%; overflow-x: auto; padding: 5px 0;">
-        <table id="distribution-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
+        <table id="distribution-table"
+          style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
           <thead>
             <tr style="background-color: #f5f5f5; border-bottom: 2px solid #1b5e20;">
               <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 30px;">م</th>
@@ -217,7 +248,8 @@
           <option value="168">168</option>
           <option value="0">أخرى</option>
         </select>
-        <input type="number" id="other-input-field" placeholder="القيراط بالمتر المربع" oninput="calculate()" style="display:none; width:120px; height:32px; text-align:center; color: black !important;">
+        <input type="number" id="other-input-field" placeholder="القيراط بالمتر المربع" oninput="calculate()"
+          style="display:none; width:120px; height:32px; text-align:center; color: black !important;">
         <p style="margin: 0;">متر مربع</p>
       </div>
     </div>
@@ -230,16 +262,20 @@
 
 
     <!-- Detailed Report -->
-    <div class="s" id="report-container" style="display: none; width: 100%; max-width: 500px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-top: 20px; padding: 15px; border: 1px solid #e0e0e0;">
-      <h3 style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: bold; text-align: center;">تقرير جمع وطرح الأراضي الزراعية</h3>
-      
-      <div id="report-content" style="width: 100%; overflow-x: auto;">
+    <div class="s" id="report-container"
+      style="display: none; width: 100%; max-width: 500px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-top: 20px; padding: 15px; border: 1px solid #e0e0e0;">
+      <h3
+        style="background: #1b5e20; color: white; margin: -15px -15px 15px -15px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: bold; text-align: center;">
+        تقرير جمع وطرح الأراضي الزراعية</h3>
+
+      <div id="report-content" style="width: 100%; overflow-x: auto; flex-flow: column;">
         <!-- Report content will be generated dynamically -->
       </div>
 
       <div style="margin-top: 15px; display: flex; justify-content: space-between; gap: 10px;" class="no-print">
         <button type="button" onclick="printReport()" class="btn-report-action btn-print">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
             <rect x="6" y="14" width="12" height="8"></rect>
@@ -247,7 +283,8 @@
           <span>طباعة التقرير</span>
         </button>
         <button type="button" onclick="copyReportToClipboard()" class="btn-report-action btn-copy">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
