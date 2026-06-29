@@ -184,14 +184,6 @@
             <div style="font-size: 12px; color: #2e7d32; font-weight: bold; margin-top: 4px;">فدان</div>
           </div>
         </div>
-
-        <!-- M2 conversion and reeds -->
-        <div
-          style="width: 100%; border-top: 1px solid #e8e8e8; padding-top: 10px; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 14px;">
-          <h4 style="font-weight: bold; color: #1b5e20; margin-bottom: 5px; font-size: 14px;">إجمالي الأراضي المتبقية بالمتر المربع
-            والقصاب:</h4>
-          <span id="remaining-m2" style="font-weight: bold; color: black; font-size: 15px;">0.00 م²</span>
-        </div>
       </div>
     </div>
 
@@ -226,7 +218,6 @@
               <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">سهم</th>
               <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">قيراط</th>
               <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">فدان</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 120px;">المساحة (م²)</th>
             </tr>
           </thead>
           <tbody id="distribution-table-body">
@@ -236,23 +227,7 @@
       </div>
     </div>
 
-    <!-- Carat Area Selector (for m2 conversion) -->
-    <div class="s no-print" style="margin-top: 15px;">
-      <h3>مساحة القيراط بالمتر المربع</h3>
-      <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <img src="../imgs/4.png" alt="image" style="height: 30px;" />
-        <select id="input-carat-area" class="selector1" style="color: black !important;" onchange="handleSelection()">
-          <option value="175.035">175.035</option>
-          <option value="175">175</option>
-          <option value="171.388">171.388</option>
-          <option value="168">168</option>
-          <option value="0">أخرى</option>
-        </select>
-        <input type="number" id="other-input-field" placeholder="القيراط بالمتر المربع" oninput="calculate()"
-          style="display:none; width:120px; height:32px; text-align:center; color: black !important;">
-        <p style="margin: 0;">متر مربع</p>
-      </div>
-    </div>
+
 
     <!-- Action Buttons -->
     <div class="buttons2 no-print">

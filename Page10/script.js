@@ -437,17 +437,6 @@ function calculate() {
   document.getElementById("remaining-carat").innerText = remainingUnits.carat;
   document.getElementById("remaining-shares").innerText = remainingUnits.shares;
 
-  // M2 conversion for remaining
-  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
-  if (caratArea === 0) {
-    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
-  }
-
-  const remainingQarats = remainingSahms / 24;
-  const remainingM2 = remainingQarats * caratArea;
-  const squareReeds = remainingM2 / 12.6025;
-  document.getElementById("remaining-m2").innerHTML = `${remainingM2.toFixed(3)} م² <br><span style="font-size: 12px; color: gray; font-weight: normal;">(تعادل ${squareReeds.toFixed(3)} قصبة مربعة)</span>`;
-
   // --- 4. Distribution ---
   const countInput = document.getElementById("individuals-count");
   const count = parseInt(countInput.value) || 0;
@@ -458,8 +447,6 @@ function calculate() {
     distSection.style.display = "block";
     const sharePerPerson = remainingSahms / count;
     const perPersonUnits = sahmsToUnits(sharePerPerson);
-    const perPersonQarats = sharePerPerson / 24;
-    const perPersonM2 = perPersonQarats * caratArea;
 
     let html = "";
     const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
@@ -474,7 +461,6 @@ function calculate() {
           <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.shares}</td>
           <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
           <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; direction: ltr;">${perPersonM2.toFixed(2)} م²</td>
         </tr>
       `;
     }
@@ -485,14 +471,14 @@ function calculate() {
   }
 
   // --- 5. Update report ---
-  updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSahms, count);
+  updateReport(totalAreaSahms, totalDiscountSahms, remainingSahms, count);
 }
 
 // ==========================================
 // REPORT
 // ==========================================
 
-function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSahms, individualsCount) {
+function updateReport(totalAreaSahms, totalDiscountSahms, remainingSahms, individualsCount) {
   const reportContainer = document.getElementById("report-container");
   const reportContent = document.getElementById("report-content");
 
@@ -520,7 +506,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
           <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">سهم</th>
           <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">قيراط</th>
           <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 50px;">فدان</th>
-          <th style="padding: 8px 6px; font-weight: bold; color: #1b5e20; width: 85px;">م²</th>
         </tr>
       </thead>
       <tbody>`;
@@ -531,8 +516,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
     const sh = parseFloat(area.shares) || 0;
     const ca = parseFloat(area.carat) || 0;
     const ac = parseFloat(area.acre) || 0;
-    const sahms = ac * 576 + ca * 24 + sh;
-    const m2 = (sahms / 24) * caratArea;
 
     if (sh || ca || ac) {
       rowIdx++;
@@ -544,21 +527,18 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
           <td style="padding: 7px 6px; color: #333;">${sh}</td>
           <td style="padding: 7px 6px; color: #333;">${ca}</td>
           <td style="padding: 7px 6px; color: #333;">${ac}</td>
-          <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${m2.toFixed(2)} م²</td>
         </tr>`;
     }
   });
 
   // Total row
   const totalUnits = sahmsToUnits(totalAreaSahms);
-  const totalM2 = (totalAreaSahms / 24) * caratArea;
   html += `
         <tr style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-top: 2px solid #2e7d32;">
           <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #1b5e20; font-size: 13px;">الإجمالي</td>
           <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.shares}</td>
           <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.carat}</td>
           <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20;">${totalUnits.prefix}${totalUnits.acre}</td>
-          <td style="padding: 8px 6px; font-weight: bold; color: #1b5e20; direction: ltr; font-size: 11px;">${totalM2.toFixed(2)} م²</td>
         </tr>
       </tbody>
     </table>
@@ -580,7 +560,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
             <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">سهم</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">قيراط</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 50px;">فدان</th>
-            <th style="padding: 8px 6px; font-weight: bold; color: #b71c1c; width: 85px;">م²</th>
           </tr>
         </thead>
         <tbody>`;
@@ -592,8 +571,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
       const ac = parseFloat(d.acre) || 0;
       if (sh || ca || ac) {
         discNum++;
-        const sahms = ac * 576 + ca * 24 + sh;
-        const m2 = (sahms / 24) * caratArea;
         const name = d.name || `خصم ${discNum}`;
         const bgColor = discNum % 2 === 0 ? "#fff8f8" : "#ffffff";
         html += `
@@ -603,20 +580,17 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
             <td style="padding: 7px 6px; color: #333;">${sh}</td>
             <td style="padding: 7px 6px; color: #333;">${ca}</td>
             <td style="padding: 7px 6px; color: #333;">${ac}</td>
-            <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${m2.toFixed(2)} م²</td>
           </tr>`;
       }
     });
 
     const discountUnits = sahmsToUnits(totalDiscountSahms);
-    const discM2 = (totalDiscountSahms / 24) * caratArea;
     html += `
           <tr style="background: linear-gradient(135deg, #ffebee, #ffcdd2); border-top: 2px solid #c62828;">
             <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #c62828; font-size: 13px;">إجمالي الخصم</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.shares}</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.carat}</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.acre}</td>
-            <td style="padding: 8px 6px; font-weight: bold; color: #c62828; direction: ltr; font-size: 11px;">${discM2.toFixed(2)} م²</td>
           </tr>
         </tbody>
       </table>
@@ -625,15 +599,13 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
 
   // ===== Remaining Section =====
   const remainingUnits = sahmsToUnits(remainingSahms);
-  const remainingM2 = (remainingSahms / 24) * caratArea;
-  const remainingCarats = +(remainingSahms / 24).toFixed(3);
 
   html += `
   <div style="margin-bottom: 18px; background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 2px solid #2e7d32; border-radius: 12px; padding: 15px; text-align: center;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
       <span style="font-weight: bold; font-size: 15px; color: #1b5e20;">إجمالي الأراضي المتبقية</span>
     </div>
-    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+    <div style="display: flex; justify-content: center; gap: 10px;">
       <div style="background: white; border: 1.5px solid #1565c0; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
         <div style="font-size: 18px; font-weight: bold; color: #0d47a1;">${remainingUnits.shares}</div>
         <div style="font-size: 10px; color: #1565c0; font-weight: bold;">سهم</div>
@@ -647,16 +619,12 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
         <div style="font-size: 10px; color: #2e7d32; font-weight: bold;">فدان</div>
       </div>
     </div>
-    <div style="font-size: 12px; color: #555; border-top: 1px dashed #a5d6a7; padding-top: 8px;">
-      يعادل <strong style="color: #1b5e20;">${remainingM2.toFixed(2)} م²</strong> &nbsp;|&nbsp; <strong style="color: #ef6c00;">${remainingCarats} قيراط</strong>
-    </div>
   </div>`;
 
   // ===== Distribution Section =====
   if (individualsCount > 0) {
     const sharePerPerson = remainingSahms / individualsCount;
     const perPersonUnits = sahmsToUnits(sharePerPerson);
-    const perPersonM2 = (sharePerPerson / 24) * caratArea;
     const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
 
     html += `
@@ -672,7 +640,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">سهم</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">قيراط</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">فدان</th>
-            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 85px;">م²</th>
           </tr>
         </thead>
         <tbody>`;
@@ -688,7 +655,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
             <td style="padding: 7px 6px; color: #333;">${perPersonUnits.shares}</td>
             <td style="padding: 7px 6px; color: #333;">${perPersonUnits.carat}</td>
             <td style="padding: 7px 6px; color: #333;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
-            <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${perPersonM2.toFixed(2)} م²</td>
           </tr>`;
     }
     html += `
@@ -700,9 +666,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
   // ===== Footer =====
   html += `
   <div style="text-align: center; margin-top: 12px; padding: 10px 0 4px; border-top: 2px solid #e0e0e0;">
-    <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
-      مساحة القيراط المعتمدة: <strong style="color: #555;">${caratArea} م²</strong>
-    </div>
     <div style="font-size: 12px; color: #1b5e20; font-weight: bold;">
       تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية
     </div>
@@ -716,11 +679,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
 // ==========================================
 
 function copyReportToClipboard() {
-  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
-  if (caratArea === 0) {
-    caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
-  }
-
   let text = `*تقرير جمع وطرح الأراضي الزراعية*\n`;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
 
@@ -732,11 +690,8 @@ function copyReportToClipboard() {
     const ac = parseFloat(area.acre) || 0;
     if (sh || ca || ac) {
       const name = area.name || getAreaTitle(i);
-      const sahms = ac * 576 + ca * 24 + sh;
-      const m2 = (sahms / 24) * caratArea;
       text += `  - *(${i + 1}) ${name}*:\n`;
-      text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
-      text += `     - تعادل: ${m2.toFixed(2)} م²\n\n`;
+      text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n\n`;
     }
   });
 
@@ -751,11 +706,9 @@ function copyReportToClipboard() {
     totalAreaSahms += sahms;
   });
   const totalUnits = sahmsToUnits(totalAreaSahms);
-  const totalM2 = (totalAreaSahms / 24) * caratArea;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
   text += `*الإجمالي:*\n`;
-  text += `   - المساحة: ${totalUnits.prefix}${totalUnits.acre} فدان، ${totalUnits.carat} قيراط، ${totalUnits.shares} سهم\n`;
-  text += `   - تعادل: ${totalM2.toFixed(2)} م²\n\n`;
+  text += `   - المساحة: ${totalUnits.prefix}${totalUnits.acre} فدان، ${totalUnits.carat} قيراط، ${totalUnits.shares} سهم\n\n`;
 
   // Discounts
   syncDiscountsFromDOM();
@@ -773,11 +726,9 @@ function copyReportToClipboard() {
         discNum++;
         const sahms = ac * 576 + ca * 24 + sh;
         totalDiscountSahms += sahms;
-        const m2 = (sahms / 24) * caratArea;
         const name = d.name || `خصم ${discNum}`;
         text += `  - *(${discNum}) ${name}:*\n`;
-        text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
-        text += `     - تعادل: ${m2.toFixed(2)} م²\n\n`;
+        text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n\n`;
       }
     });
   }
@@ -785,23 +736,20 @@ function copyReportToClipboard() {
   // Remaining
   const remainingSahms = totalAreaSahms - totalDiscountSahms;
   const remainingUnits = sahmsToUnits(remainingSahms);
-  const remainingM2 = (remainingSahms / 24) * caratArea;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
   text += `*إجمالي الأراضي المتبقية:*\n`;
-  text += `   - المساحة: ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n`;
-  text += `   - تعادل: ${remainingM2.toFixed(2)} م²\n\n`;
+  text += `   - المساحة: ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n\n`;
 
   // Distribution
   const count = parseInt(document.getElementById("individuals-count").value) || 0;
   if (count > 0) {
     const sharePerPerson = remainingSahms / count;
     const perPersonUnits = sahmsToUnits(sharePerPerson);
-    const perPersonM2 = (sharePerPerson / 24) * caratArea;
     const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
 
     text += `━━━━━━━━━━━━━━━━━━━━━\n`;
     text += `*التوزيع بالتساوي (${count} أفراد):*\n`;
-    text += `   نصيب كل فرد: ${perPersonUnits.prefix}${perPersonUnits.acre} فدان، ${perPersonUnits.carat} قيراط، ${perPersonUnits.shares} سهم (${perPersonM2.toFixed(2)} م²)\n\n`;
+    text += `   نصيب كل فرد: ${perPersonUnits.prefix}${perPersonUnits.acre} فدان، ${perPersonUnits.carat} قيراط، ${perPersonUnits.shares} سهم\n\n`;
 
     for (let i = 0; i < count; i++) {
       const name = (individualNames[i] && individualNames[i].trim()) ||
@@ -812,7 +760,6 @@ function copyReportToClipboard() {
   }
 
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `   (مساحة القيراط المعتمدة: ${caratArea} م²)\n`;
   text += `تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية`;
 
   navigator.clipboard.writeText(text).then(() => {
@@ -831,24 +778,6 @@ function printReport() {
 }
 
 // ==========================================
-// CARAT AREA SELECTOR
-// ==========================================
-
-function handleSelection() {
-  const selectElement = document.getElementById("input-carat-area");
-  const otherInputField = document.getElementById("other-input-field");
-
-  if (selectElement.value === "0") {
-    otherInputField.style.display = "inline-block";
-    otherInputField.focus();
-  } else {
-    otherInputField.style.display = "none";
-  }
-  saveData();
-  calculate();
-}
-
-// ==========================================
 // SAVE / LOAD
 // ==========================================
 
@@ -857,8 +786,6 @@ function saveData() {
   syncDiscountsFromDOM();
   sessionStorage.setItem("areas", JSON.stringify(areas));
   sessionStorage.setItem("discounts", JSON.stringify(discounts));
-  sessionStorage.setItem("carat-area-calc", document.getElementById("input-carat-area").value);
-  sessionStorage.setItem("other-carat-area-calc", document.getElementById("other-input-field").value);
   sessionStorage.setItem("individuals-count", document.getElementById("individuals-count").value);
   sessionStorage.setItem("individual-names", JSON.stringify(individualNames));
 }
@@ -907,10 +834,6 @@ function loadData() {
       discounts.push({ name: "", shares: "", carat: "", acre: "" });
     }
   }
-
-  // Load carat area
-  document.getElementById("input-carat-area").value = sessionStorage.getItem("carat-area-calc") || "175.035";
-  document.getElementById("other-input-field").value = sessionStorage.getItem("other-carat-area-calc") || "";
 }
 
 // ==========================================
