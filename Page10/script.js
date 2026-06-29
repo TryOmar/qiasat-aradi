@@ -447,9 +447,9 @@ function calculate() {
         <tr>
           <td style="padding: 8px; border: 1px solid #ddd;">${i + 1}</td>
           <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${name}</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
           <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.shares}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.carat}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
           <td style="padding: 8px; border: 1px solid #ddd; direction: ltr;">${perPersonM2.toFixed(2)} م²</td>
         </tr>
       `;
@@ -486,7 +486,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
   html += `
   <div style="margin-bottom: 18px;">
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #1b5e20, #2e7d32); border-radius: 8px; color: white;">
-      <span style="font-size: 18px;">🌾</span>
       <span style="font-weight: bold; font-size: 14px;">جدول جمع الأراضي</span>
     </div>
     <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
@@ -547,7 +546,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
     html += `
     <div style="margin-bottom: 18px;">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #b71c1c, #c62828); border-radius: 8px; color: white;">
-        <span style="font-size: 18px;">📋</span>
         <span style="font-weight: bold; font-size: 14px;">جدول الخصومات</span>
       </div>
       <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
@@ -590,7 +588,7 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
     const discM2 = (totalDiscountSahms / 24) * caratArea;
     html += `
           <tr style="background: linear-gradient(135deg, #ffebee, #ffcdd2); border-top: 2px solid #c62828;">
-            <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #c62828; font-size: 13px;">➖ إجمالي الخصم</td>
+            <td colspan="2" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #c62828; font-size: 13px;">إجمالي الخصم</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.shares}</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.carat}</td>
             <td style="padding: 8px 6px; font-weight: bold; color: #c62828;">${discountUnits.acre}</td>
@@ -609,21 +607,20 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
   html += `
   <div style="margin-bottom: 18px; background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 2px solid #2e7d32; border-radius: 12px; padding: 15px; text-align: center;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
-      <span style="font-size: 20px;">🏆</span>
       <span style="font-weight: bold; font-size: 15px; color: #1b5e20;">المتبقي بعد الخصم</span>
     </div>
     <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
-      <div style="background: white; border: 1.5px solid #2e7d32; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
-        <div style="font-size: 18px; font-weight: bold; color: #1b5e20;">${remainingUnits.prefix}${remainingUnits.acre}</div>
-        <div style="font-size: 10px; color: #2e7d32; font-weight: bold;">فدان</div>
+      <div style="background: white; border: 1.5px solid #1565c0; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 18px; font-weight: bold; color: #0d47a1;">${remainingUnits.shares}</div>
+        <div style="font-size: 10px; color: #1565c0; font-weight: bold;">سهم</div>
       </div>
       <div style="background: white; border: 1.5px solid #ef6c00; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
         <div style="font-size: 18px; font-weight: bold; color: #e65100;">${remainingUnits.carat}</div>
         <div style="font-size: 10px; color: #ef6c00; font-weight: bold;">قيراط</div>
       </div>
-      <div style="background: white; border: 1.5px solid #1565c0; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
-        <div style="font-size: 18px; font-weight: bold; color: #0d47a1;">${remainingUnits.shares}</div>
-        <div style="font-size: 10px; color: #1565c0; font-weight: bold;">سهم</div>
+      <div style="background: white; border: 1.5px solid #2e7d32; border-radius: 10px; padding: 8px 14px; min-width: 70px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 18px; font-weight: bold; color: #1b5e20;">${remainingUnits.prefix}${remainingUnits.acre}</div>
+        <div style="font-size: 10px; color: #2e7d32; font-weight: bold;">فدان</div>
       </div>
     </div>
     <div style="font-size: 12px; color: #555; border-top: 1px dashed #a5d6a7; padding-top: 8px;">
@@ -641,7 +638,6 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
     html += `
     <div style="margin-bottom: 18px;">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 12px; background: linear-gradient(135deg, #0d47a1, #1565c0); border-radius: 8px; color: white;">
-        <span style="font-size: 18px;">👥</span>
         <span style="font-weight: bold; font-size: 14px;">التوزيع بالتساوي (${individualsCount} أفراد)</span>
       </div>
       <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
@@ -649,9 +645,9 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
           <tr style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-bottom: 2px solid #1565c0;">
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 28px;">م</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; text-align: right;">الاسم</th>
-            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">فدان</th>
-            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">قيراط</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">سهم</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">قيراط</th>
+            <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 50px;">فدان</th>
             <th style="padding: 8px 6px; font-weight: bold; color: #0d47a1; width: 85px;">م²</th>
           </tr>
         </thead>
@@ -665,9 +661,9 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
           <tr style="background-color: ${bgColor}; border-bottom: 1px solid #e3f2fd;">
             <td style="padding: 7px 6px; color: #666; font-weight: bold;">${i + 1}</td>
             <td style="padding: 7px 6px; text-align: right; font-weight: bold; color: #333;">${name}</td>
-            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
-            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.carat}</td>
             <td style="padding: 7px 6px; color: #333;">${perPersonUnits.shares}</td>
+            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.carat}</td>
+            <td style="padding: 7px 6px; color: #333;">${perPersonUnits.prefix}${perPersonUnits.acre}</td>
             <td style="padding: 7px 6px; color: #555; direction: ltr; font-size: 11px;">${perPersonM2.toFixed(2)} م²</td>
           </tr>`;
     }
@@ -684,7 +680,7 @@ function updateReport(caratArea, totalAreaSahms, totalDiscountSahms, remainingSa
       مساحة القيراط المعتمدة: <strong style="color: #555;">${caratArea} م²</strong>
     </div>
     <div style="font-size: 12px; color: #1b5e20; font-weight: bold;">
-      🌾 تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية
+      تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية
     </div>
   </div>`;
 
@@ -701,11 +697,11 @@ function copyReportToClipboard() {
     caratArea = parseFloat(document.getElementById("other-input-field").value) || 0;
   }
 
-  let text = `📝 *تقرير جمع وطرح الأراضي الزراعية* 📝\n`;
+  let text = `*تقرير جمع وطرح الأراضي الزراعية*\n`;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
 
   // Areas
-  text += `🟢 *جدول جمع الأراضي:*\n`;
+  text += `*جدول جمع الأراضي:*\n`;
   areas.forEach((area, i) => {
     const sh = parseFloat(area.shares) || 0;
     const ca = parseFloat(area.carat) || 0;
@@ -714,9 +710,9 @@ function copyReportToClipboard() {
       const name = area.name || getAreaTitle(i);
       const sahms = ac * 576 + ca * 24 + sh;
       const m2 = (sahms / 24) * caratArea;
-      text += `  🔹 *(${i + 1}) ${name}*:\n`;
-      text += `     📍 ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
-      text += `     📐 تعادل: ${m2.toFixed(2)} م²\n\n`;
+      text += `  - *(${i + 1}) ${name}*:\n`;
+      text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
+      text += `     - تعادل: ${m2.toFixed(2)} م²\n\n`;
     }
   });
 
@@ -733,9 +729,9 @@ function copyReportToClipboard() {
   const totalUnits = sahmsToUnits(totalAreaSahms);
   const totalM2 = (totalAreaSahms / 24) * caratArea;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `🏆 *الإجمالي:*\n`;
-  text += `   📍 ${totalUnits.prefix}${totalUnits.acre} فدان، ${totalUnits.carat} قيراط، ${totalUnits.shares} سهم\n`;
-  text += `   📐 تعادل: ${totalM2.toFixed(2)} م²\n\n`;
+  text += `*الإجمالي:*\n`;
+  text += `   - المساحة: ${totalUnits.prefix}${totalUnits.acre} فدان، ${totalUnits.carat} قيراط، ${totalUnits.shares} سهم\n`;
+  text += `   - تعادل: ${totalM2.toFixed(2)} م²\n\n`;
 
   // Discounts
   syncDiscountsFromDOM();
@@ -743,7 +739,7 @@ function copyReportToClipboard() {
   const hasDiscountData = discounts.some(d => (parseFloat(d.shares) || 0) + (parseFloat(d.carat) || 0) + (parseFloat(d.acre) || 0) > 0);
 
   if (hasDiscountData) {
-    text += `🔴 *الخصومات:*\n`;
+    text += `*الخصومات:*\n`;
     let discNum = 0;
     discounts.forEach(d => {
       const sh = parseFloat(d.shares) || 0;
@@ -755,9 +751,9 @@ function copyReportToClipboard() {
         totalDiscountSahms += sahms;
         const m2 = (sahms / 24) * caratArea;
         const name = d.name || `خصم ${discNum}`;
-        text += `  🔸 *(${discNum}) ${name}:*\n`;
-        text += `     📍 ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
-        text += `     📐 تعادل: ${m2.toFixed(2)} م²\n\n`;
+        text += `  - *(${discNum}) ${name}:*\n`;
+        text += `     - المساحة: ${ac} فدان، ${ca} قيراط، ${sh} سهم\n`;
+        text += `     - تعادل: ${m2.toFixed(2)} م²\n\n`;
       }
     });
   }
@@ -767,9 +763,9 @@ function copyReportToClipboard() {
   const remainingUnits = sahmsToUnits(remainingSahms);
   const remainingM2 = (remainingSahms / 24) * caratArea;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  text += `✅ *المتبقي بعد الخصم:*\n`;
-  text += `   📍 ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n`;
-  text += `   📐 تعادل: ${remainingM2.toFixed(2)} م²\n\n`;
+  text += `*المتبقي بعد الخصم:*\n`;
+  text += `   - المساحة: ${remainingUnits.prefix}${remainingUnits.acre} فدان، ${remainingUnits.carat} قيراط، ${remainingUnits.shares} سهم\n`;
+  text += `   - تعادل: ${remainingM2.toFixed(2)} م²\n\n`;
 
   // Distribution
   const count = parseInt(document.getElementById("individuals-count").value) || 0;
@@ -780,7 +776,7 @@ function copyReportToClipboard() {
     const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر"];
 
     text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    text += `👥 *التوزيع بالتساوي (${count} أفراد):*\n`;
+    text += `*التوزيع بالتساوي (${count} أفراد):*\n`;
     text += `   نصيب كل فرد: ${perPersonUnits.prefix}${perPersonUnits.acre} فدان، ${perPersonUnits.carat} قيراط، ${perPersonUnits.shares} سهم (${perPersonM2.toFixed(2)} م²)\n\n`;
 
     for (let i = 0; i < count; i++) {
@@ -793,7 +789,7 @@ function copyReportToClipboard() {
 
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
   text += `   (مساحة القيراط المعتمدة: ${caratArea} م²)\n`;
-  text += `تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية 🌾`;
+  text += `تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية`;
 
   navigator.clipboard.writeText(text).then(() => {
     alert("تم نسخ التقرير بنجاح! يمكنك الآن لصقه ومشاركته على واتساب.");

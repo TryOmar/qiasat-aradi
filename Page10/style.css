@@ -522,3 +522,13 @@ body {
 #report-content table {
   margin-bottom: 10px !important;
 }
+
+/* Fix report container display layout to be vertical column */
+#report-container.s > div#report-content {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-flow: column nowrap !important;
+  width: 100% !important;
+  align-items: stretch !important;
+}
+
