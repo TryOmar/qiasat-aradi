@@ -982,6 +982,74 @@ function generateHeirsTable() {
   updateHeirsDistribution();
 }
 
+let heirsUpdateTimeout = null;
+
+function debouncedUpdateHeirShare(idx, type, newValString) {
+  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
+  heirsUpdateTimeout = setTimeout(() => {
+    const newVal = parseFloat(newValString) || 0;
+    updateHeirShare(idx, type, newVal);
+  }, 500);
+}
+
+function commitHeirShareImmediately(idx, type, newValString) {
+  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
+  const newVal = parseFloat(newValString) || 0;
+  updateHeirShare(idx, type, newVal);
+}
+
+function debouncedUpdateHeirSplitShare(idx, unitType, newValString) {
+  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
+  heirsUpdateTimeout = setTimeout(() => {
+    let newVal = parseFloat(newValString) || 0;
+    if (unitType === 'carat' || unitType === 'feddan') {
+      newVal = parseInt(newValString) || 0;
+    }
+    updateHeirSplitShare(idx, unitType, newVal);
+  }, 500);
+}
+
+function commitHeirSplitShareImmediately(idx, unitType, newValString) {
+  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
+  let newVal = parseFloat(newValString) || 0;
+  if (unitType === 'carat' || unitType === 'feddan') {
+    newVal = parseInt(newValString) || 0;
+  }
+  updateHeirSplitShare(idx, unitType, newVal);
+}
+
+function updateHeirsUI() {
+  const caratSize = parseFloat(caratSizeInput.value) || 168;
+  heirsData.forEach((heir, idx) => {
+    const row = heirsListTbody.querySelector(`tr[data-index="${idx}"]`);
+    if (!row) return;
+    
+    const conv = convertSqmToFeddans(heir.share, caratSize);
+    
+    const inputName = row.querySelector('.heir-name');
+    const inputSqm = row.querySelector('.heir-share-sqm');
+    const inputSahm = row.querySelector('.heir-share-sahm');
+    const inputCarat = row.querySelector('.heir-share-carat');
+    const inputFeddan = row.querySelector('.heir-share-feddan');
+
+    if (inputName && document.activeElement !== inputName) {
+      inputName.value = heir.name;
+    }
+    if (inputSqm && document.activeElement !== inputSqm) {
+      inputSqm.value = heir.share.toFixed(2);
+    }
+    if (inputSahm && document.activeElement !== inputSahm) {
+      inputSahm.value = conv.shares.toFixed(2);
+    }
+    if (inputCarat && document.activeElement !== inputCarat) {
+      inputCarat.value = conv.carats;
+    }
+    if (inputFeddan && document.activeElement !== inputFeddan) {
+      inputFeddan.value = conv.feddans;
+    }
+  });
+}
+
 function renderHeirsRows() {
   const caratSize = parseFloat(caratSizeInput.value) || 168;
   heirsListTbody.innerHTML = "";
@@ -1003,16 +1071,28 @@ function renderHeirsRows() {
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-share" value="${heir.share.toFixed(2)}" onchange="updateHeirShare(${idx}, 'sqm', parseFloat(this.value) || 0)" />
+          <input type="number" step="any" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
+            oninput="debouncedUpdateHeirShare(${idx}, 'sqm', this.value)" 
+            onblur="commitHeirShareImmediately(${idx}, 'sqm', this.value)" 
+            onkeydown="if(event.key === 'Enter') { commitHeirShareImmediately(${idx}, 'sqm', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-share" value="${conv.shares.toFixed(2)}" onchange="updateHeirSplitShare(${idx}, 'sahm', parseFloat(this.value) || 0)" />
+          <input type="number" step="any" class="heir-share heir-share-sahm" value="${conv.shares.toFixed(2)}" 
+            oninput="debouncedUpdateHeirSplitShare(${idx}, 'sahm', this.value)" 
+            onblur="commitHeirSplitShareImmediately(${idx}, 'sahm', this.value)" 
+            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'sahm', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" class="heir-share" value="${conv.carats}" onchange="updateHeirSplitShare(${idx}, 'carat', parseInt(this.value) || 0)" />
+          <input type="number" class="heir-share heir-share-carat" value="${conv.carats}" 
+            oninput="debouncedUpdateHeirSplitShare(${idx}, 'carat', this.value)" 
+            onblur="commitHeirSplitShareImmediately(${idx}, 'carat', this.value)" 
+            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'carat', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" class="heir-share" value="${conv.feddans}" onchange="updateHeirSplitShare(${idx}, 'feddan', parseInt(this.value) || 0)" />
+          <input type="number" class="heir-share heir-share-feddan" value="${conv.feddans}" 
+            oninput="debouncedUpdateHeirSplitShare(${idx}, 'feddan', this.value)" 
+            onblur="commitHeirSplitShareImmediately(${idx}, 'feddan', this.value)" 
+            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'feddan', this.value); this.blur(); }" />
         </td>
         <td>
           <select class="heir-offset" id="offset-dest-${idx}">
@@ -1123,7 +1203,7 @@ function applyShareDiff(idx, diff) {
   }
 
   saveStateToSession();
-  renderHeirsRows();
+  updateHeirsUI();
   calculateAll();
 }
 
