@@ -249,52 +249,27 @@ function calculateAll() {
       ];
     }
 
-  } else if (activeShape === "parallelogram") {
-    const base = parseFloat(document.getElementById("para-base").value) || 0;
-    const height = parseFloat(document.getElementById("para-height").value) || 0;
-    const side = parseFloat(document.getElementById("para-side").value) || 0;
+  } else if (activeShape === "square") {
+    const side = parseFloat(document.getElementById("square-side").value) || 0;
 
     dimensionInputs = [
-      { name: "القاعدة (ب)", value: base },
-      { name: "الارتفاع العمودي (h)", value: height }
+      { name: "طول الضلع (أ)", value: side }
     ];
-    if (side > 0) dimensionInputs.push({ name: "الضلع المائل (أ)", value: side });
 
-    if (base > 0 && height > 0) {
-      area = base * height;
+    if (side > 0) {
+      area = side * side;
+      perimeter = 4 * side;
+      stepsText = `الشكل المختار: مربع\n` +
+                  `المعادلة: المساحة = الضلع × الضلع\n` +
+                  `الحساب: ${side} × ${side} = ${area.toFixed(2)} متر مربع\n` +
+                  `المحيط = 4 × الضلع = 4 × ${side} = ${perimeter.toFixed(2)} متر`;
       
-      if (side > 0) {
-        if (side < height) {
-          errorMsg = "خطأ: الضلع المائل يجب أن يكون أكبر من أو يساوي الارتفاع العمودي.";
-        } else {
-          perimeter = 2 * (base + side);
-        }
-      } else {
-        // Approximate side for layout and perimeter
-        const approxSide = Math.sqrt(height * height + (height * 0.3) * (height * 0.3));
-        perimeter = 2 * (base + approxSide);
-      }
-
-      stepsText = `الشكل المختار: متوازي أضلاع\n` +
-                  `المعادلة: المساحة = القاعدة × الارتفاع العمودي\n` +
-                  `الحساب: ${base} × ${height} = ${area.toFixed(2)} متر مربع\n`;
-      
-      if (side > 0) {
-        stepsText += `المحيط = 2 × (القاعدة + الضلع المائل) = 2 × (${base} + ${side}) = ${perimeter.toFixed(2)} متر`;
-      } else {
-        stepsText += `المحيط = غير معروف بدون إدخال الضلع المائل (أ). تم تقديره تقريبياً بـ ${perimeter.toFixed(2)} متر`;
-      }
-
-      // Coordinates
-      let dx = height * 0.3; // default slant angle offset
-      if (side >= height) {
-        dx = Math.sqrt(side * side - height * height);
-      }
+      // Coordinates (square)
       vertices = [
         { x: 0, y: 0 },
-        { x: base, y: 0 },
-        { x: base + dx, y: height },
-        { x: dx, y: height }
+        { x: side, y: 0 },
+        { x: side, y: side },
+        { x: 0, y: side }
       ];
     }
 
@@ -995,10 +970,8 @@ function saveStateToSession() {
   sessionStorage.setItem("rectLength", document.getElementById("rect-length").value);
   sessionStorage.setItem("rectWidth", document.getElementById("rect-width").value);
   
-  // Para
-  sessionStorage.setItem("paraBase", document.getElementById("para-base").value);
-  sessionStorage.setItem("paraHeight", document.getElementById("para-height").value);
-  sessionStorage.setItem("paraSide", document.getElementById("para-side").value);
+  // Square
+  sessionStorage.setItem("squareSide", document.getElementById("square-side").value);
 
   // Trap
   sessionStorage.setItem("trapBaseMajor", document.getElementById("trap-base-major").value);
@@ -1050,9 +1023,7 @@ function loadStateFromSession() {
   document.getElementById("rect-length").value = sessionStorage.getItem("rectLength") || "";
   document.getElementById("rect-width").value = sessionStorage.getItem("rectWidth") || "";
 
-  document.getElementById("para-base").value = sessionStorage.getItem("paraBase") || "";
-  document.getElementById("para-height").value = sessionStorage.getItem("paraHeight") || "";
-  document.getElementById("para-side").value = sessionStorage.getItem("paraSide") || "";
+  document.getElementById("square-side").value = sessionStorage.getItem("squareSide") || "";
 
   document.getElementById("trap-base-major").value = sessionStorage.getItem("trapBaseMajor") || "";
   document.getElementById("trap-base-minor").value = sessionStorage.getItem("trapBaseMinor") || "";

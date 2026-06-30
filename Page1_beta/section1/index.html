@@ -35,16 +35,16 @@
           </svg>
           <span>مستطيل / مربع</span>
         </div>
-        <div class="shape-card" data-shape="parallelogram">
+        <div class="shape-card" data-shape="square">
           <svg viewBox="0 0 100 70">
-            <polygon points="25,15 85,15 75,55 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">متوازي أضلاع</text>
-            <text x="12" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
-            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">b</text>
-            <line x1="25" y1="15" x2="25" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
-            <text x="29" y="38" font-family="Cairo" font-size="8" fill="currentColor">h</text>
+            <rect x="25" y="10" width="50" height="50" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">مربع</text>
+            <text x="20" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
+            <text x="50" y="68" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
+            <!-- Right angle symbol -->
+            <path d="M 25 50 L 30 50 L 30 60" fill="none" stroke="currentColor" stroke-width="1"/>
           </svg>
-          <span>متوازي أضلاع</span>
+          <span>مربع</span>
         </div>
         <div class="shape-card" data-shape="trapezoid">
           <svg viewBox="0 0 100 70">
@@ -87,19 +87,11 @@
         </div>
       </div>
 
-      <!-- Parallelogram Inputs -->
-      <div id="inputs-parallelogram" class="inputs-group">
+      <!-- Square Inputs -->
+      <div id="inputs-square" class="inputs-group">
         <div class="input-row">
-          <label for="para-base">القاعدة (ب) بالمتر:</label>
-          <input type="number" step="any" id="para-base" placeholder="مثال: 60" dir="auto" />
-        </div>
-        <div class="input-row">
-          <label for="para-height">الارتفاع العمودي (h) بالمتر:</label>
-          <input type="number" step="any" id="para-height" placeholder="مثال: 25" dir="auto" />
-        </div>
-        <div class="input-row">
-          <label for="para-side">الضلع المائل (أ) بالمتر (اختياري للمحيط):</label>
-          <input type="number" step="any" id="para-side" placeholder="مثال: 28" dir="auto" />
+          <label for="square-side">طول الضلع (أ) بالمتر:</label>
+          <input type="number" step="any" id="square-side" placeholder="مثال: 30" dir="auto" />
         </div>
       </div>
 
