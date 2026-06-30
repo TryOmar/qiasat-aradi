@@ -982,35 +982,26 @@ function generateHeirsTable() {
   updateHeirsDistribution();
 }
 
-let heirsUpdateTimeout = null;
-
+// Called on every keystroke in heirs inputs - updates instantly
 function debouncedUpdateHeirShare(idx, type, newValString) {
-  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
-  heirsUpdateTimeout = setTimeout(() => {
-    const newVal = parseFloat(newValString) || 0;
-    updateHeirShare(idx, type, newVal);
-  }, 500);
+  const newVal = parseFloat(newValString) || 0;
+  updateHeirShare(idx, type, newVal);
 }
 
 function commitHeirShareImmediately(idx, type, newValString) {
-  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
   const newVal = parseFloat(newValString) || 0;
   updateHeirShare(idx, type, newVal);
 }
 
 function debouncedUpdateHeirSplitShare(idx, unitType, newValString) {
-  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
-  heirsUpdateTimeout = setTimeout(() => {
-    let newVal = parseFloat(newValString) || 0;
-    if (unitType === 'carat' || unitType === 'feddan') {
-      newVal = parseInt(newValString) || 0;
-    }
-    updateHeirSplitShare(idx, unitType, newVal);
-  }, 500);
+  let newVal = parseFloat(newValString) || 0;
+  if (unitType === 'carat' || unitType === 'feddan') {
+    newVal = parseInt(newValString) || 0;
+  }
+  updateHeirSplitShare(idx, unitType, newVal);
 }
 
 function commitHeirSplitShareImmediately(idx, unitType, newValString) {
-  if (heirsUpdateTimeout) clearTimeout(heirsUpdateTimeout);
   let newVal = parseFloat(newValString) || 0;
   if (unitType === 'carat' || unitType === 'feddan') {
     newVal = parseInt(newValString) || 0;
