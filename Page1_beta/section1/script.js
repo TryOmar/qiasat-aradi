@@ -159,12 +159,15 @@ function clearAllInputs() {
 // Show/Hide Division Panel
 function toggleDivisionPanel() {
   isDivisionActive = !isDivisionActive;
+  const sketchPanel = document.getElementById('division-sketch-panel');
   if (isDivisionActive) {
     divisionPanel.style.display = "block";
+    if (sketchPanel) sketchPanel.style.display = "block";
     btnToggleDivision.classList.add("active-panel");
     generateHeirsTable();
   } else {
     divisionPanel.style.display = "none";
+    if (sketchPanel) sketchPanel.style.display = "none";
     btnToggleDivision.classList.remove("active-panel");
   }
   calculateAll();
@@ -174,7 +177,9 @@ function toggleDivisionPanel() {
 function resetDivision() {
   isDivisionActive = false;
   heirsData = [];
+  const sketchPanel = document.getElementById('division-sketch-panel');
   if (divisionPanel) divisionPanel.style.display = "none";
+  if (sketchPanel) sketchPanel.style.display = "none";
   if (btnToggleDivision) btnToggleDivision.classList.remove("active-panel");
   if (heirsListTbody) heirsListTbody.innerHTML = "";
   if (heirsCountInput) heirsCountInput.value = "3";
@@ -614,6 +619,23 @@ function intersectCircles(x1, y1, r1, x2, y2, r2) {
   ];
 }
 
+// Geometry Engine for Division
+function solveDepthForArea(S, Top, Bottom, H) {
+  if (H <= 0) return 0;
+  let b = Top;
+  let c = (Bottom - Top) / (2 * H);
+  
+  if (Math.abs(c) < 0.0001) {
+    return S / b;
+  } else {
+    let discriminant = b * b + 4 * c * S;
+    if (discriminant < 0) return 0;
+    let y1 = (-b + Math.sqrt(discriminant)) / (2 * c);
+    let y2 = (-b - Math.sqrt(discriminant)) / (2 * c);
+    return (y1 >= 0 && y1 <= H + 0.1) ? y1 : y2;
+  }
+}
+
 // Canvas Drawer
 function drawLandCanvas(vertices) {
   // Clear canvas
@@ -810,147 +832,161 @@ function drawLandCanvas(vertices) {
     ctx.restore();
   }
 
-  // 6. Draw Division lines and piece text badges
-  if (isDivisionActive && heirsData.length > 0 && calculatedArea > 0) {
+  // 6. Draw Division lines, piece info, and side dimensions
+  if (isDivisionActive && heirsData.length > 0 && calculatedArea > 0 && canvasPoints.length >= 4) {
     const caratSize = parseFloat(caratSizeInput.value) || 168;
     
-    // Bottom points interpolated along base AB (V0 to V1)
-    const A = vertices[0];
-    const B = vertices[1];
-    // Top points interpolated along base DC (V3 to V2)
-    const D = vertices[3];
-    const C = vertices[2];
-
-    const cpA = canvasPoints[0];
-    const cpB = canvasPoints[1];
-    const cpD = canvasPoints[3];
-    const cpC = canvasPoints[2];
-
-    // Total area coefficients for quadratic partition
-    const a = B.x - A.x;
-    const y_d = D.y - A.y;
-    const dx_cd = C.x - D.x;
-    const dy_cd = C.y - D.y;
-
-    // Calculate A_coef & B_coef
-    let A_coef = 0.5 * (a * y_d + dx_cd * y_d - dy_cd * D.x);
-    let B_coef = 0.5 * (a * dy_cd);
-    
-    // Adjust signs if necessary
-    const totalCheck = A_coef + B_coef;
-    let signFactor = 1;
-    if (totalCheck < 0) {
-      A_coef = -A_coef;
-      B_coef = -B_coef;
-      signFactor = -1;
+    // Get land side lengths for geometry engine
+    let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
+    if (activeShape === 'rectangle') {
+      landLeft = parseFloat(document.getElementById('rect-length')?.value) || 0;
+      landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+      landBottom = landTop; landRight = landLeft;
+    } else if (activeShape === 'square') {
+      let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+      landTop = s; landBottom = s; landLeft = s; landRight = s;
+    } else if (activeShape === 'trapezoid') {
+      landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+      landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+      let h = parseFloat(document.getElementById('trap-height')?.value) || 0;
+      landLeft = h; landRight = h;
+    } else if (activeShape === 'quadrilateral') {
+      landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+      landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
+      landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+      landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
     }
+    
+    let H = (landLeft + landRight) / 2;
 
-    // Cumulative shares to find split boundaries t_i
+    // Canvas corners
+    const cpA = canvasPoints[0]; // bottom-left
+    const cpB = canvasPoints[1]; // bottom-right
+    const cpC = canvasPoints[2]; // top-right
+    const cpD = canvasPoints[3]; // top-left
+
+    // Calculate cumulative t values using Geometry Engine
     let cumArea = 0;
     const splitTs = [0];
-
+    
     for (let i = 0; i < heirsData.length - 1; i++) {
       cumArea += heirsData[i].share;
       let t = 0;
-      if (Math.abs(B_coef) < 0.0001) {
-        // Linear equation
-        t = cumArea / A_coef;
+      if (H > 0) {
+        let depth = solveDepthForArea(cumArea, landTop, landBottom, H);
+        t = depth / H;
       } else {
-        // Quadratic equation: B_coef * t^2 + A_coef * t - cumArea = 0
-        const disc = A_coef * A_coef + 4 * B_coef * cumArea;
-        if (disc >= 0) {
-          t = (-A_coef + Math.sqrt(disc)) / (2 * B_coef);
-        } else {
-          t = cumArea / (A_coef + B_coef); // fallback
-        }
+        t = cumArea / calculatedArea;
       }
-      
-      // Clamp t to [0, 1]
       t = Math.max(0, Math.min(1, t));
       splitTs.push(t);
     }
-    splitTs.push(1); // last boundary
+    splitTs.push(1);
 
-    // Draw division lines and labels for each slice
-    for (let i = 1; i < splitTs.length; i++) {
-      const tPrev = splitTs[i - 1];
-      const tCurr = splitTs[i];
+    // Draw each piece
+    for (let i = 0; i < heirsData.length; i++) {
+      const tPrev = splitTs[i];
+      const tCurr = splitTs[i + 1];
+      const heir = heirsData[i];
+      if (!heir) continue;
 
-      // Left split boundary line
-      if (i > 1 && i < splitTs.length) {
-        const t = tPrev;
-        
-        // Canvas coordinates of split line
-        const bottomCanvasPt = {
-          x: cpA.x + t * (cpB.x - cpA.x),
-          y: cpA.y + t * (cpB.y - cpA.y)
-        };
-        const topCanvasPt = {
-          x: cpD.x + t * (cpC.x - cpD.x),
-          y: cpD.y + t * (cpC.y - cpD.y)
-        };
+      // Canvas coordinates for this slice (interpolated along the sides)
+      const cpLeftTop  = { x: cpD.x + tPrev * (cpA.x - cpD.x), y: cpD.y + tPrev * (cpA.y - cpD.y) };
+      const cpRightTop = { x: cpC.x + tPrev * (cpB.x - cpC.x), y: cpC.y + tPrev * (cpB.y - cpC.y) };
+      const cpLeftBot  = { x: cpD.x + tCurr * (cpA.x - cpD.x), y: cpD.y + tCurr * (cpA.y - cpD.y) };
+      const cpRightBot = { x: cpC.x + tCurr * (cpB.x - cpC.x), y: cpC.y + tCurr * (cpB.y - cpC.y) };
 
-        // Draw dashed blue boundary line
+      // Calculate real side lengths for this piece
+      let pieceTopW, pieceBotW, pieceLeftL, pieceRightL;
+      if (H > 0) {
+        pieceTopW  = landTop + tPrev * (landBottom - landTop);
+        pieceBotW  = landTop + tCurr * (landBottom - landTop);
+        pieceLeftL = (tCurr - tPrev) * landLeft;
+        pieceRightL = (tCurr - tPrev) * landRight;
+      } else {
+        pieceTopW = 0; pieceBotW = 0; pieceLeftL = 0; pieceRightL = 0;
+      }
+      if (i === heirsData.length - 1) pieceBotW = landBottom;
+
+      // Save to heirsData for table display
+      heir.topW = pieceTopW;
+      heir.botW = pieceBotW;
+      heir.leftL = pieceLeftL;
+      heir.rightL = pieceRightL;
+
+      // Draw dashed divider line (between pieces, not at start/end)
+      if (i > 0) {
         ctx.strokeStyle = "#0288d1";
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(bottomCanvasPt.x, bottomCanvasPt.y);
-        ctx.lineTo(topCanvasPt.x, topCanvasPt.y);
+        ctx.moveTo(cpLeftTop.x, cpLeftTop.y);
+        ctx.lineTo(cpRightTop.x, cpRightTop.y);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // 7. Render information badge for each partitioned piece
-      // Vertices of this slice
-      const cpBottomPrev = { x: cpA.x + tPrev * (cpB.x - cpA.x), y: cpA.y + tPrev * (cpB.y - cpA.y) };
-      const cpBottomCurr = { x: cpA.x + tCurr * (cpB.x - cpA.x), y: cpA.y + tCurr * (cpB.y - cpA.y) };
-      const cpTopCurr = { x: cpD.x + tCurr * (cpC.x - cpD.x), y: cpD.y + tCurr * (cpC.y - cpD.y) };
-      const cpTopPrev = { x: cpD.x + tPrev * (cpC.x - cpD.x), y: cpD.y + tPrev * (cpC.y - cpD.y) };
+      // Slice Centroid for info badge
+      const centroidX = (cpLeftTop.x + cpRightTop.x + cpLeftBot.x + cpRightBot.x) / 4;
+      const centroidY = (cpLeftTop.y + cpRightTop.y + cpLeftBot.y + cpRightBot.y) / 4;
 
-      // Slice Centroid for text writing
-      const centroidX = (cpBottomPrev.x + cpBottomCurr.x + cpTopCurr.x + cpTopPrev.x) / 4;
-      const centroidY = (cpBottomPrev.y + cpBottomCurr.y + cpTopCurr.y + cpTopPrev.y) / 4;
+      const heirConv = convertSqmToFeddans(heir.share, caratSize);
+      
+      // Info box
+      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+      ctx.strokeStyle = "#0288d1";
+      ctx.lineWidth = 1;
+      const boxW = 95;
+      const boxH = 58;
+      
+      ctx.beginPath();
+      ctx.roundRect(centroidX - boxW / 2, centroidY - boxH / 2, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
 
-      const heir = heirsData[i - 1];
-      if (heir) {
-        const heirConv = convertSqmToFeddans(heir.share, caratSize);
-        
-        // Piece Box drawing
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.strokeStyle = "#0288d1";
-        ctx.lineWidth = 1;
-        const boxW = 85;
-        const boxH = 50;
-        
-        ctx.beginPath();
-        ctx.roundRect(centroidX - boxW / 2, centroidY - boxH / 2, boxW, boxH, 6);
-        ctx.fill();
-        ctx.stroke();
+      // Line 1: Piece name
+      ctx.fillStyle = "#333";
+      ctx.font = "bold 10px Cairo";
+      ctx.textAlign = "center";
+      ctx.fillText(`${i + 1}- ${heir.name}`, centroidX, centroidY - 18);
+      
+      // Line 2: Area
+      ctx.fillStyle = "#01579b";
+      ctx.fillText(`${heir.share.toFixed(1)} م²`, centroidX, centroidY - 4);
 
-        // text lines
-        ctx.fillStyle = "#333";
-        ctx.font = "bold 9px Cairo";
-        ctx.textAlign = "center";
-        
-        // Line 1: Piece ID & Name
-        ctx.fillText(`${i}- ${heir.name}`, centroidX, centroidY - 14);
-        
-        // Line 2: Area in sqm
-        ctx.fillStyle = "#01579b";
-        ctx.fillText(`${heir.share.toFixed(1)} م²`, centroidX, centroidY - 2);
+      // Line 3: Feddan/Carat/Sahm
+      ctx.fillStyle = "#2e7d32";
+      ctx.font = "9px Cairo";
+      let parts = [];
+      if (heirConv.feddans > 0) parts.push(`${heirConv.feddans}ف`);
+      if (heirConv.carats > 0) parts.push(`${heirConv.carats}ط`);
+      if (heirConv.shares > 0) parts.push(`${heirConv.shares.toFixed(1)}س`);
+      if (parts.length === 0) parts.push("0س");
+      ctx.fillText(parts.join(" ، "), centroidX, centroidY + 10);
 
-        // Line 3: Feddan, carat, sahm
-        ctx.fillStyle = "#2e7d32";
-        ctx.font = "8px Cairo";
-        let parts = [];
-        if (heirConv.feddans > 0) parts.push(`${heirConv.feddans}ف`);
-        if (heirConv.carats > 0) parts.push(`${heirConv.carats}ط`);
-        if (heirConv.shares > 0) parts.push(`${heirConv.shares.toFixed(1)}س`);
-        if (parts.length === 0) parts.push("0س");
-        
-        ctx.fillText(parts.join(" ، "), centroidX, centroidY + 12);
+      // Line 4: Side dimensions
+      ctx.fillStyle = "#d32f2f";
+      ctx.font = "bold 8px Arial";
+      ctx.fillText(`${pieceTopW.toFixed(1)}×${pieceLeftL.toFixed(1)} | ${pieceBotW.toFixed(1)}×${pieceRightL.toFixed(1)}`, centroidX, centroidY + 22);
+
+      // Draw side length labels on the edges
+      ctx.font = "bold 10px Arial";
+      
+      // Top width of piece (only first piece shows top edge label outside box)
+      if (i === 0) {
+        ctx.fillStyle = "#d32f2f";
+        ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpLeftTop.x + cpRightTop.x) / 2, (cpLeftTop.y + cpRightTop.y) / 2 + 12);
       }
+      // Bottom width
+      ctx.fillStyle = "#d32f2f";
+      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpLeftBot.x + cpRightBot.x) / 2, (cpLeftBot.y + cpRightBot.y) / 2 - 8);
+      
+      // Left side length
+      ctx.fillStyle = "#1b5e20";
+      ctx.fillText(`${pieceLeftL.toFixed(2)}`, (cpLeftTop.x + cpLeftBot.x) / 2 + 15, (cpLeftTop.y + cpLeftBot.y) / 2);
+      
+      // Right side length
+      ctx.fillText(`${pieceRightL.toFixed(2)}`, (cpRightTop.x + cpRightBot.x) / 2 - 15, (cpRightTop.y + cpRightBot.y) / 2);
     }
   }
 }
@@ -993,6 +1029,27 @@ function commitHeirShareImmediately(idx, type, newValString) {
   updateHeirShare(idx, type, newVal);
 }
 
+// Update side lengths manually
+function updateHeirSide(idx, sideStr, valStr) {
+  const val = parseFloat(valStr) || 0;
+  if (!heirsData[idx]) return;
+  
+  heirsData[idx][sideStr] = val;
+  
+  // Recalculate area based on Dalaal's formula: ((Top+Bottom)/2) * ((Left+Right)/2)
+  let t = heirsData[idx].topW || 0;
+  let b = heirsData[idx].botW || 0;
+  let r = heirsData[idx].rightL || 0;
+  let l = heirsData[idx].leftL || 0;
+  
+  let newArea = ((t + b) / 2) * ((l + r) / 2);
+  
+  if (newArea > 0) {
+    heirsData[idx].share = newArea;
+    updateHeirShare(idx, 'sqm', newArea);
+  }
+}
+
 function debouncedUpdateHeirSplitShare(idx, unitType, newValString) {
   let newVal = parseFloat(newValString) || 0;
   if (unitType === 'carat' || unitType === 'feddan') {
@@ -1023,6 +1080,11 @@ function updateHeirsUI() {
     const inputCarat = row.querySelector('.heir-share-carat');
     const inputFeddan = row.querySelector('.heir-share-feddan');
 
+    const inputTop = row.querySelector('.heir-side-top');
+    const inputBot = row.querySelector('.heir-side-bot');
+    const inputRight = row.querySelector('.heir-side-right');
+    const inputLeft = row.querySelector('.heir-side-left');
+
     if (inputName && document.activeElement !== inputName) {
       inputName.value = heir.name;
     }
@@ -1038,11 +1100,20 @@ function updateHeirsUI() {
     if (inputFeddan && document.activeElement !== inputFeddan) {
       inputFeddan.value = conv.feddans;
     }
+    
+    // Update sides if they exist
+    if (inputTop && document.activeElement !== inputTop) inputTop.value = (heir.topW || 0).toFixed(2);
+    if (inputBot && document.activeElement !== inputBot) inputBot.value = (heir.botW || 0).toFixed(2);
+    if (inputRight && document.activeElement !== inputRight) inputRight.value = (heir.rightL || 0).toFixed(2);
+    if (inputLeft && document.activeElement !== inputLeft) inputLeft.value = (heir.leftL || 0).toFixed(2);
   });
 }
 
 function renderHeirsRows() {
   const caratSize = parseFloat(caratSizeInput.value) || 168;
+  
+  // Sides are calculated inside drawLandCanvas which is called by calculateAll
+  
   heirsListTbody.innerHTML = "";
 
   heirsData.forEach((heir, idx) => {
@@ -1060,6 +1131,18 @@ function renderHeirsRows() {
       <tr data-index="${idx}">
         <td>
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-top" style="width:60px;" value="${(heir.topW || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'topW', this.value)" />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-bot" style="width:60px;" value="${(heir.botW || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'botW', this.value)" />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-right" style="width:60px;" value="${(heir.rightL || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'rightL', this.value)" />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-left" style="width:60px;" value="${(heir.leftL || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'leftL', this.value)" />
         </td>
         <td>
           <input type="number" step="any" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
