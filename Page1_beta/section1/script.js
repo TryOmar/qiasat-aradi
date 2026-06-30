@@ -79,6 +79,7 @@ function setupEventListeners() {
       inputsGroups.forEach(group => group.classList.remove("active"));
       document.getElementById(`inputs-${activeShape}`).classList.add("active");
       
+      resetDivision();
       saveStateToSession();
       calculateAll();
     });
@@ -90,6 +91,9 @@ function setupEventListeners() {
     // Avoid double events on custom handlers
     if (input.id !== "carat-price-display" && input.id !== "heirs-count") {
       input.addEventListener("input", () => {
+        if (input.closest(".inputs-group")) {
+          resetDivision();
+        }
         saveStateToSession();
         calculateAll();
       });
@@ -147,6 +151,7 @@ function clearAllInputs() {
   caratPriceDisplay.value = "";
   caratPriceNumeric.value = "";
   
+  resetDivision();
   saveStateToSession();
   calculateAll();
 }
@@ -163,6 +168,17 @@ function toggleDivisionPanel() {
     btnToggleDivision.classList.remove("active-panel");
   }
   calculateAll();
+}
+
+// Reset Smart Division panel
+function resetDivision() {
+  isDivisionActive = false;
+  heirsData = [];
+  if (divisionPanel) divisionPanel.style.display = "none";
+  if (btnToggleDivision) btnToggleDivision.classList.remove("active-panel");
+  if (heirsListTbody) heirsListTbody.innerHTML = "";
+  if (heirsCountInput) heirsCountInput.value = "3";
+  saveStateToSession();
 }
 
 // Math conversions
@@ -274,39 +290,29 @@ function calculateAll() {
     }
 
   } else if (activeShape === "trapezoid") {
-    const a = parseFloat(document.getElementById("trap-base-major").value) || 0; // major base
-    const c = parseFloat(document.getElementById("trap-base-minor").value) || 0; // minor base
-    const h = parseFloat(document.getElementById("trap-height").value) || 0; // height
-    const leftSide = parseFloat(document.getElementById("trap-side-left").value) || 0;
-    const rightSide = parseFloat(document.getElementById("trap-side-right").value) || 0;
+    const a = parseFloat(document.getElementById("trap-base-major").value) || 0; // major base (القاعدة السفلية)
+    const c = parseFloat(document.getElementById("trap-base-minor").value) || 0; // minor base (القاعدة العلوية)
+    const h = parseFloat(document.getElementById("trap-height").value) || 0; // height (الطول)
 
     dimensionInputs = [
-      { name: "القاعدة الكبرى (أ)", value: a },
-      { name: "القاعدة الصغرى (ج)", value: c },
-      { name: "الارتفاع (h)", value: h }
+      { name: "القاعدة السفلية", value: a },
+      { name: "القاعدة العلوية", value: c },
+      { name: "الطول (أو الارتفاع)", value: h }
     ];
-    if (leftSide > 0) dimensionInputs.push({ name: "الضلع الأيسر (ب)", value: leftSide });
-    if (rightSide > 0) dimensionInputs.push({ name: "الضلع الأيمن (د)", value: rightSide });
 
     if (a > 0 && c > 0 && h > 0) {
       area = 0.5 * (a + c) * h;
       
-      let sideL = leftSide;
-      let sideR = rightSide;
-      
-      // Calculate missing sides assuming symmetric isosceles trapezoid if left/right are not supplied
+      // Calculate missing sides assuming symmetric isosceles trapezoid
       const dxHalf = Math.abs(a - c) / 2;
       const calculatedSide = Math.sqrt(h * h + dxHalf * dxHalf);
       
-      if (sideL <= 0) sideL = calculatedSide;
-      if (sideR <= 0) sideR = calculatedSide;
-      
-      perimeter = a + c + sideL + sideR;
+      perimeter = a + c + 2 * calculatedSide;
 
-      stepsText = `الشكل المختار: شبه منحرف\n` +
-                  `المعادلة: المساحة = 0.5 × (القاعدة الكبرى + القاعدة الصغرى) × الارتفاع\n` +
+      stepsText = `الشكل المختار: شبه منحرف زراعي (مبسط)\n` +
+                  `المعادلة: المساحة = 0.5 × (القاعدة السفلية + القاعدة العلوية) × الطول\n` +
                   `الحساب: 0.5 × (${a} + ${c}) × ${h} = ${area.toFixed(2)} متر مربع\n` +
-                  `المحيط = مجموع الأضلاع الأربعة = ${a} + ${c} + ${sideL.toFixed(2)} (أيسر) + ${sideR.toFixed(2)} (أيمن) = ${perimeter.toFixed(2)} متر`;
+                  `المحيط (تقريبي) = مجموع الأضلاع الأربعة = ${a} + ${c} + ${calculatedSide.toFixed(2)} (جانب أيسر) + ${calculatedSide.toFixed(2)} (جانب أيمن) = ${perimeter.toFixed(2)} متر`;
 
       // Coordinates (Centered top base)
       const dxLeft = (a - c) / 2;
@@ -445,9 +451,9 @@ function calculateAll() {
       conversionsTbody.innerHTML += `
         <tr>
           <td>${dim.name} (${dim.value || 0} م)</td>
-          <td>${qConv.qasaba}</td>
-          <td>${qConv.qabda}</td>
           <td>${qConv.fraction}</td>
+          <td>${qConv.qabda}</td>
+          <td>${qConv.qasaba}</td>
         </tr>
       `;
     });
@@ -812,13 +818,13 @@ function renderHeirsRows() {
           <input type="number" step="any" class="heir-share" value="${heir.share.toFixed(2)}" onchange="updateHeirShare(${idx}, 'sqm', parseFloat(this.value) || 0)" />
         </td>
         <td>
-          <input type="number" class="heir-share" value="${conv.feddans}" onchange="updateHeirSplitShare(${idx}, 'feddan', parseInt(this.value) || 0)" />
+          <input type="number" step="any" class="heir-share" value="${conv.shares.toFixed(2)}" onchange="updateHeirSplitShare(${idx}, 'sahm', parseFloat(this.value) || 0)" />
         </td>
         <td>
           <input type="number" class="heir-share" value="${conv.carats}" onchange="updateHeirSplitShare(${idx}, 'carat', parseInt(this.value) || 0)" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-share" value="${conv.shares.toFixed(2)}" onchange="updateHeirSplitShare(${idx}, 'sahm', parseFloat(this.value) || 0)" />
+          <input type="number" class="heir-share" value="${conv.feddans}" onchange="updateHeirSplitShare(${idx}, 'feddan', parseInt(this.value) || 0)" />
         </td>
         <td>
           <select class="heir-offset" id="offset-dest-${idx}">
@@ -977,8 +983,6 @@ function saveStateToSession() {
   sessionStorage.setItem("trapBaseMajor", document.getElementById("trap-base-major").value);
   sessionStorage.setItem("trapBaseMinor", document.getElementById("trap-base-minor").value);
   sessionStorage.setItem("trapHeight", document.getElementById("trap-height").value);
-  sessionStorage.setItem("trapSideLeft", document.getElementById("trap-side-left").value);
-  sessionStorage.setItem("trapSideRight", document.getElementById("trap-side-right").value);
 
   // Quad
   sessionStorage.setItem("quadSideA", document.getElementById("quad-side-a").value);
@@ -994,7 +998,7 @@ function saveStateToSession() {
 }
 
 function loadStateFromSession() {
-  activeShape = sessionStorage.getItem("activeShape") || "rectangle";
+  activeShape = sessionStorage.getItem("activeShape") || "quadrilateral";
   caratSizeInput.value = sessionStorage.getItem("caratSize") || "168";
   caratPresetSelect.value = (["168", "171.388", "175", "175.035"].includes(caratSizeInput.value)) ? caratSizeInput.value : "custom";
   
@@ -1028,8 +1032,6 @@ function loadStateFromSession() {
   document.getElementById("trap-base-major").value = sessionStorage.getItem("trapBaseMajor") || "";
   document.getElementById("trap-base-minor").value = sessionStorage.getItem("trapBaseMinor") || "";
   document.getElementById("trap-height").value = sessionStorage.getItem("trapHeight") || "";
-  document.getElementById("trap-side-left").value = sessionStorage.getItem("trapSideLeft") || "";
-  document.getElementById("trap-side-right").value = sessionStorage.getItem("trapSideRight") || "";
 
   document.getElementById("quad-side-a").value = sessionStorage.getItem("quadSideA") || "";
   document.getElementById("quad-side-b").value = sessionStorage.getItem("quadSideB") || "";

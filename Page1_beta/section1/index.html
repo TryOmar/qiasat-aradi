@@ -24,7 +24,7 @@
     <div class="shape-selector">
       <h3>اختر الشكل الهندسي للأرض</h3>
       <div class="shape-cards">
-        <div class="shape-card active" data-shape="rectangle">
+        <div class="shape-card" data-shape="rectangle">
           <svg viewBox="0 0 100 70">
             <rect x="15" y="15" width="70" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
             <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">مستطيل</text>
@@ -49,17 +49,15 @@
         <div class="shape-card" data-shape="trapezoid">
           <svg viewBox="0 0 100 70">
             <polygon points="30,15 70,15 85,55 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">شبه منحرف</text>
-            <text x="10" y="38" font-family="Cairo" font-size="8" fill="currentColor">b</text>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">شبه منحرف زراعي</text>
             <text x="50" y="11" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">c</text>
-            <text x="83" y="38" font-family="Cairo" font-size="8" fill="currentColor">d</text>
             <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
             <line x1="30" y1="15" x2="30" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
             <text x="34" y="38" font-family="Cairo" font-size="8" fill="currentColor">h</text>
           </svg>
-          <span>شبه منحرف</span>
+          <span>شبه منحرف زراعي (مبسط)</span>
         </div>
-        <div class="shape-card" data-shape="quadrilateral">
+        <div class="shape-card active" data-shape="quadrilateral">
           <svg viewBox="0 0 100 70">
             <polygon points="35,12 80,22 90,58 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
             <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">رباعي أضلاع</text>
@@ -76,7 +74,7 @@
     <!-- Dynamic Input Fields Container -->
     <div class="dynamic-inputs-container">
       <!-- Rectangle Inputs -->
-      <div id="inputs-rectangle" class="inputs-group active">
+      <div id="inputs-rectangle" class="inputs-group">
         <div class="input-row">
           <label for="rect-length">الطول (أ) بالمتر:</label>
           <input type="number" step="any" id="rect-length" placeholder="مثال: 50" dir="auto" />
@@ -98,29 +96,21 @@
       <!-- Trapezoid Inputs -->
       <div id="inputs-trapezoid" class="inputs-group">
         <div class="input-row">
-          <label for="trap-base-major">القاعدة الكبرى السفلى (أ) بالمتر:</label>
+          <label for="trap-base-major">القاعدة السفلية (بالمتر):</label>
           <input type="number" step="any" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="trap-base-minor">القاعدة الصغرى العليا (ج) بالمتر:</label>
+          <label for="trap-base-minor">القاعدة العلوية (بالمتر):</label>
           <input type="number" step="any" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="trap-height">الارتفاع العمودي (h) بالمتر:</label>
+          <label for="trap-height">الطول (أو الارتفاع) بالمتر:</label>
           <input type="number" step="any" id="trap-height" placeholder="مثال: 30" dir="auto" />
-        </div>
-        <div class="input-row">
-          <label for="trap-side-left">الضلع الأيسر (ب) بالمتر (اختياري للمحيط):</label>
-          <input type="number" step="any" id="trap-side-left" placeholder="مثال: 32" dir="auto" />
-        </div>
-        <div class="input-row">
-          <label for="trap-side-right">الضلع الأيمن (د) بالمتر (اختياري للمحيط):</label>
-          <input type="number" step="any" id="trap-side-right" placeholder="مثال: 32" dir="auto" />
         </div>
       </div>
 
       <!-- Quadrilateral Inputs -->
-      <div id="inputs-quadrilateral" class="inputs-group">
+      <div id="inputs-quadrilateral" class="inputs-group active">
         <div class="input-row">
           <label for="quad-side-a">الضلع الأول السفلي (أ) بالمتر:</label>
           <input type="number" step="any" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
@@ -183,7 +173,6 @@
     <div class="action-buttons">
       <button class="btn btn-clear" onclick="clearAllInputs()">أحذف</button>
       <button class="btn btn-calc" onclick="calculateAll()">أحسب</button>
-      <button class="btn btn-divide" id="btn-toggle-division" onclick="toggleDivisionPanel()">تقسيم الأرض</button>
     </div>
 
     <!-- Visual Canvas Card -->
@@ -194,6 +183,7 @@
       </div>
       <div class="canvas-controls">
         <button class="btn btn-secondary btn-sm" onclick="printCroquis()">طباعة الكروكي والنتائج</button>
+        <button class="btn btn-divide btn-sm" id="btn-toggle-division" onclick="toggleDivisionPanel()" style="margin-top: 8px;">تقسيم الأرض</button>
       </div>
     </div>
 
@@ -213,9 +203,9 @@
             <tr>
               <th>الاسم</th>
               <th>النصيب (م²)</th>
-              <th>فدان</th>
-              <th>قيراط</th>
               <th>سهم</th>
+              <th>قيراط</th>
+              <th>فدان</th>
               <th>خصم الفرق من</th>
             </tr>
           </thead>
@@ -283,9 +273,9 @@
           <thead>
             <tr>
               <th>البعد</th>
-              <th>قصبة</th>
-              <th>قبضة</th>
               <th>أقل من القبضة</th>
+              <th>قبضة</th>
+              <th>قصبة</th>
             </tr>
           </thead>
           <tbody id="conversions-tbody">
