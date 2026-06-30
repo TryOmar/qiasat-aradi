@@ -387,23 +387,99 @@ body {
 }
 
 /* Editable inputs inside conversion table */
-.conversion-table-wrapper td input[type="number"] {
-  width: 62px;
-  padding: 4px 2px;
-  border: 1.5px solid #a5d6a7;
-  border-radius: 6px;
+.conv-row td {
+  padding: 8px 4px;
+  vertical-align: middle;
+}
+
+/* Label cell */
+.conv-label-cell {
+  text-align: right !important;
+  padding: 8px 10px !important;
+  min-width: 130px;
+}
+
+.conv-dim-name {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2e7d32;
+  margin-bottom: 4px;
+}
+
+.conv-meter-badge {
+  display: inline-block;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #388e3c;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+/* Input cells */
+.conv-input-cell {
+  text-align: center !important;
+  padding: 6px 4px !important;
+}
+
+.conv-input {
+  width: 72px;
+  padding: 6px 4px;
+  border: 2px solid #a5d6a7;
+  border-radius: 8px;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   background: #f9fff9;
   color: #1b5e20;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  display: block;
+  margin: 0 auto;
+  -moz-appearance: number-input;
 }
 
-.conversion-table-wrapper td input[type="number"]:focus {
-  border-color: #388e3c;
+.conv-input:hover {
+  border-color: #66bb6a;
+  background: #f1fdf1;
+}
+
+.conv-input:focus {
+  border-color: #2e7d32;
   background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+}
+
+/* Color-code by type */
+.conv-fraction {
+  border-color: #ffe082;
+  background: #fffde7;
+  color: #6d4c00;
+  width: 64px;
+}
+.conv-fraction:focus { border-color: #f9a825; box-shadow: 0 0 0 3px rgba(249,168,37,0.18); }
+
+.conv-qabda  { border-color: #80cbc4; background: #e0f2f1; color: #004d40; }
+.conv-qabda:focus  { border-color: #00796b; box-shadow: 0 0 0 3px rgba(0,121,107,0.18); }
+
+.conv-qasaba { border-color: #a5d6a7; background: #f9fff9; color: #1b5e20; }
+.conv-qasaba:focus { border-color: #388e3c; box-shadow: 0 0 0 3px rgba(56,142,60,0.18); }
+
+/* Hint text under qabda */
+.conv-hint {
+  font-size: 10px;
+  color: #80868b;
+  margin-top: 3px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Highlight the meter badge when it updates */
+.conv-meter-badge.updated {
+  background: #c8e6c9;
 }
 
 .results-summary {

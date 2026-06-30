@@ -234,12 +234,56 @@ function fromQasabaToMeters(qasaba, qabda, fraction) {
   return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
 }
 
+// Normalize qabda overflow: if qabda >= 24, carry into qasaba
+function normalizeQasabaInputs(rowIndex) {
+  const qasabaEl  = document.getElementById('conv-qasaba-'  + rowIndex);
+  const qabdaEl   = document.getElementById('conv-qabda-'   + rowIndex);
+  const fracEl    = document.getElementById('conv-fraction-' + rowIndex);
+  if (!qasabaEl || !qabdaEl || !fracEl) return;
+
+  let qasaba  = Math.max(0, parseInt(qasabaEl.value)  || 0);
+  let qabda   = Math.max(0, parseInt(qabdaEl.value)   || 0);
+  let fraction = parseFloat(fracEl.value) || 0;
+
+  // Clamp fraction to [0, 0.99]
+  fraction = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
+
+  // Carry: 24 قبضة = 1 قصبة
+  if (qabda >= 24) {
+    const carry = Math.floor(qabda / 24);
+    qasaba += carry;
+    qabda = qabda % 24;
+  }
+
+  // Write back normalized values
+  qasabaEl.value  = qasaba;
+  qabdaEl.value   = qabda;
+  fracEl.value    = fraction;
+
+  return { qasaba, qabda, fraction };
+}
+
 // Called when user edits a cell in the conversions table
 function updateSideFromQasaba(sideId, rowIndex) {
-  const qasaba  = parseFloat(document.getElementById('conv-qasaba-'  + rowIndex).value) || 0;
-  const qabda   = parseFloat(document.getElementById('conv-qabda-'   + rowIndex).value) || 0;
-  const fraction = parseFloat(document.getElementById('conv-fraction-' + rowIndex).value) || 0;
+  const vals = normalizeQasabaInputs(rowIndex);
+  if (!vals) return;
+  const { qasaba, qabda, fraction } = vals;
+
   const meters = fromQasabaToMeters(qasaba, qabda, fraction);
+
+  // Update the meter display label in the row
+  const meterSpan = document.getElementById('conv-meter-' + rowIndex);
+  if (meterSpan) {
+    meterSpan.textContent = parseFloat(meters.toFixed(4));
+    // Flash the badge for visual feedback
+    const badge = meterSpan.closest('.conv-meter-badge');
+    if (badge) {
+      badge.classList.add('updated');
+      setTimeout(() => badge.classList.remove('updated'), 600);
+    }
+  }
+
+  // Update the main dimension input
   const sideInput = document.getElementById(sideId);
   if (sideInput) {
     sideInput.value = parseFloat(meters.toFixed(4));
@@ -482,28 +526,43 @@ function calculateAll() {
       const qConv = toQasabaAndQabda(dim.value);
       const sid = activeSideIds[i] || "";
       conversionsTbody.innerHTML += `
-        <tr>
-          <td>${dim.name} (<span id="conv-meter-${i}">${dim.value || 0}</span> م)</td>
-          <td>
-            <input type="number" id="conv-fraction-${i}" value="${qConv.fraction}" min="0" max="0.99" step="0.01"
-              style="width:60px;text-align:center;"
-              oninput="updateSideFromQasaba('${sid}', ${i})">
+        <tr class="conv-row">
+          <td class="conv-label-cell">
+            <span class="conv-dim-name">${dim.name}</span>
+            <span class="conv-meter-badge">
+              <span id="conv-meter-${i}">${dim.value || 0}</span> م
+            </span>
           </td>
-          <td>
-            <input type="number" id="conv-qabda-${i}" value="${qConv.qabda}" min="0" step="1"
-              style="width:60px;text-align:center;"
-              oninput="updateSideFromQasaba('${sid}', ${i})">
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-fraction"
+              id="conv-fraction-${i}" value="${qConv.fraction}"
+              min="0" max="0.99" step="0.01"
+              title="جزء أقل من القبضة (0 - 0.99)"
+              oninput="updateSideFromQasaba('${sid}', ${i})"
+              onchange="updateSideFromQasaba('${sid}', ${i})">
           </td>
-          <td>
-            <input type="number" id="conv-qasaba-${i}" value="${qConv.qasaba}" min="0" step="1"
-              style="width:60px;text-align:center;"
-              oninput="updateSideFromQasaba('${sid}', ${i})">
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qabda"
+              id="conv-qabda-${i}" value="${qConv.qabda}"
+              min="0" step="1"
+              title="عدد القبضات (24 قبضة = 1 قصبة تلقائياً)"
+              oninput="updateSideFromQasaba('${sid}', ${i})"
+              onchange="updateSideFromQasaba('${sid}', ${i})">
+            <div class="conv-hint">≤ 23 أو يُحمَل تلقائياً</div>
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qasaba"
+              id="conv-qasaba-${i}" value="${qConv.qasaba}"
+              min="0" step="1"
+              title="عدد القصبات"
+              oninput="updateSideFromQasaba('${sid}', ${i})"
+              onchange="updateSideFromQasaba('${sid}', ${i})">
           </td>
         </tr>
       `;
     });
   } else {
-    conversionsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
+    conversionsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
   }
 
   // Manage Heirs Division Limit
