@@ -379,11 +379,31 @@ body {
 }
 
 .results-table-wrapper td, .conversion-table-wrapper td {
-  padding: 10px 8px;
+  padding: 6px 4px;
   text-align: center;
   border: 1px solid #e0e0e0;
   font-weight: bold;
   font-size: 15px;
+}
+
+/* Editable inputs inside conversion table */
+.conversion-table-wrapper td input[type="number"] {
+  width: 62px;
+  padding: 4px 2px;
+  border: 1.5px solid #a5d6a7;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  background: #f9fff9;
+  color: #1b5e20;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.conversion-table-wrapper td input[type="number"]:focus {
+  border-color: #388e3c;
+  background: #ffffff;
 }
 
 .results-summary {

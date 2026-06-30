@@ -152,9 +152,9 @@
                 <th>اقل من قبضة</th>
             </tr>
             <tr>
-                <td id="resultReed">Result</td>
-                <td id="resultFist">Result</td>
-                <td id="resultLessThanFist">Result</td>
+                <td><input type="number" id="resultReed" value="0" min="0" style="width:80px;" oninput="updateFromReedFist()"></td>
+                <td><input type="number" id="resultFist" value="0" min="0" style="width:80px;" oninput="updateFromReedFist()"></td>
+                <td><input type="number" id="resultLessThanFist" value="0" min="0" step="0.01" style="width:80px;" oninput="updateFromReedFist()"></td>
             </tr>
         </table>
     </div>
@@ -198,8 +198,19 @@
             return `${numerator}/${denominator}`;
         }
 
-        // Function to convert centimeters to fist, reed, and less than fist
-        function calculateCMToFistReed() {
+        // Function to update inputs when reed, fist, less-than-fist are edited
+        function updateFromReedFist() {
+            const reed = parseInt(document.getElementById("resultReed").value) || 0;
+            const fist = parseInt(document.getElementById("resultFist").value) || 0;
+            const less = parseFloat(document.getElementById("resultLessThanFist").value) || 0;
+            // Convert less-than-fist (fraction of a fist) back to centimeters
+            const lessCm = less * 14.7916666667;
+            const totalCentimeters = reed * 355 + fist * 14.7916666667 + lessCm;
+            const meters = totalCentimeters / 100;
+            document.getElementById("input_meters").value = meters.toFixed(2);
+            document.getElementById("input_centimeters").value = totalCentimeters.toFixed(2);
+            saveInputsToSessionStorage();
+        }
             const centimetersInput = document.getElementById("input_centimeters") || 0;
             const metersInput = document.getElementById("input_meters") || 0;
 
@@ -218,14 +229,14 @@
                 const remainingInFistConverted = (remainingInFist * (1 / 14.7916666667)).toFixed(2);
 
                 // Update the resultDivs with the calculated values
-                resultDivReed.innerText = reed.toFixed(0);
-                resultDivFist.innerText = fist.toFixed(0);
-                resultDivLessThanFist.innerText = remainingInFistConverted;
+                resultDivReed.value = reed.toFixed(0);
+                resultDivFist.value = fist.toFixed(0);
+                resultDivLessThanFist.value = remainingInFistConverted;
             } else {
                 // Handle invalid input
-                resultDivReed.innerText = "Result";
-                resultDivFist.innerText = "Result";
-                resultDivLessThanFist.innerText = "Result";
+                resultDivReed.value = "";
+                resultDivFist.value = "";
+                resultDivLessThanFist.value = "";
             }
         }
 
@@ -258,9 +269,9 @@
         function clearInputFields() {
             document.getElementById("input_meters").value = "";
             document.getElementById("input_centimeters").value = "";
-            document.getElementById("resultReed").innerText = "Result";
-            document.getElementById("resultFist").innerText = "Result";
-            document.getElementById("resultLessThanFist").innerText = "Result";
+            document.getElementById("resultReed").value = "";
+            document.getElementById("resultFist").value = "";
+            document.getElementById("resultLessThanFist").value = "";
 
             // Clear session storage
             sessionStorage.removeItem("meters");

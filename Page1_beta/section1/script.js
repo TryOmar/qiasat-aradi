@@ -214,7 +214,7 @@ function convertSqmToFeddans(sqm, caratSize) {
 function toQasabaAndQabda(meters) {
   if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
   const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24; // ~0.1479
+  const qabdaLength = qasabaLength / 24; // ~0.1479167
   
   let qasaba = Math.floor(meters / qasabaLength);
   let rem = meters - (qasaba * qasabaLength);
@@ -225,6 +225,26 @@ function toQasabaAndQabda(meters) {
     qabda: qabda,
     fraction: parseFloat(fraction.toFixed(2))
   };
+}
+
+// Convert قصبة + قبضة + أقل من قبضة back to meters
+function fromQasabaToMeters(qasaba, qabda, fraction) {
+  const qasabaLength = 3.55;
+  const qabdaLength = qasabaLength / 24;
+  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
+}
+
+// Called when user edits a cell in the conversions table
+function updateSideFromQasaba(sideId, rowIndex) {
+  const qasaba  = parseFloat(document.getElementById('conv-qasaba-'  + rowIndex).value) || 0;
+  const qabda   = parseFloat(document.getElementById('conv-qabda-'   + rowIndex).value) || 0;
+  const fraction = parseFloat(document.getElementById('conv-fraction-' + rowIndex).value) || 0;
+  const meters = fromQasabaToMeters(qasaba, qabda, fraction);
+  const sideInput = document.getElementById(sideId);
+  if (sideInput) {
+    sideInput.value = parseFloat(meters.toFixed(4));
+  }
+  calculateAll();
 }
 
 // Main calculations controller
@@ -444,16 +464,41 @@ function calculateAll() {
   stepsContent.innerText = stepsText || "لم يتم إدخال بيانات كافية لإجراء الحسابات.";
 
   // Populate Qasaba Table
+  // Map dimensionInputs index to the corresponding side input ID
+  const sideIds = ["quad-side-a", "quad-side-b", "quad-side-c", "quad-side-d",
+                   "rect-length", "rect-width",
+                   "trap-a", "trap-b", "trap-h"];
+  // Build a lookup from dim.name to sideId using the order they come in
+  const activeSideIds = (() => {
+    if (activeShape === "quadrilateral") return ["quad-side-a", "quad-side-b", "quad-side-c", "quad-side-d"];
+    if (activeShape === "rectangle") return ["rect-length", "rect-width"];
+    if (activeShape === "trapezoid") return ["trap-a", "trap-b", "trap-h"];
+    return [];
+  })();
+
   conversionsTbody.innerHTML = "";
   if (dimensionInputs.length > 0) {
-    dimensionInputs.forEach(dim => {
+    dimensionInputs.forEach((dim, i) => {
       const qConv = toQasabaAndQabda(dim.value);
+      const sid = activeSideIds[i] || "";
       conversionsTbody.innerHTML += `
         <tr>
-          <td>${dim.name} (${dim.value || 0} م)</td>
-          <td>${qConv.fraction}</td>
-          <td>${qConv.qabda}</td>
-          <td>${qConv.qasaba}</td>
+          <td>${dim.name} (<span id="conv-meter-${i}">${dim.value || 0}</span> م)</td>
+          <td>
+            <input type="number" id="conv-fraction-${i}" value="${qConv.fraction}" min="0" max="0.99" step="0.01"
+              style="width:60px;text-align:center;"
+              oninput="updateSideFromQasaba('${sid}', ${i})">
+          </td>
+          <td>
+            <input type="number" id="conv-qabda-${i}" value="${qConv.qabda}" min="0" step="1"
+              style="width:60px;text-align:center;"
+              oninput="updateSideFromQasaba('${sid}', ${i})">
+          </td>
+          <td>
+            <input type="number" id="conv-qasaba-${i}" value="${qConv.qasaba}" min="0" step="1"
+              style="width:60px;text-align:center;"
+              oninput="updateSideFromQasaba('${sid}', ${i})">
+          </td>
         </tr>
       `;
     });
