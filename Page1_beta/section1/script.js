@@ -528,7 +528,7 @@ function drawLandCanvas(vertices) {
   }
 
   // 2. Scale and Fit vertices inside Canvas bounding box
-  const margin = 60;
+  const margin = 80;
   const drawW = canvas.width - 2 * margin;
   const drawH = canvas.height - 2 * margin;
 
@@ -577,49 +577,118 @@ function drawLandCanvas(vertices) {
     ctx.fill();
   });
 
-  // 5. Draw side labels
-  ctx.fillStyle = "#333333";
-  ctx.font = "11px Cairo";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
+  // 5. Draw side dimension labels with measurement lines
   const numVertices = vertices.length;
   for (let i = 0; i < numVertices; i++) {
     const p1 = vertices[i];
     const p2 = vertices[(i + 1) % numVertices];
-    
+
     const cp1 = canvasPoints[i];
     const cp2 = canvasPoints[(i + 1) % numVertices];
 
-    // Compute side length
+    // Compute real side length in meters
     const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
 
-    // Compute label coordinate offset
+    // Edge vector and length in canvas space
+    const vx = cp2.x - cp1.x;
+    const vy = cp2.y - cp1.y;
+    const edgeLen = Math.hypot(vx, vy) || 1;
+
+    // Unit edge vector
+    const ux = vx / edgeLen;
+    const uy = vy / edgeLen;
+
+    // Outward normal (perpendicular to edge)
+    const nx = -uy;
+    const ny = ux;
+
+    // Check which side is outward by testing against centroid
+    const centX = canvasPoints.reduce((s, p) => s + p.x, 0) / numVertices;
+    const centY = canvasPoints.reduce((s, p) => s + p.y, 0) / numVertices;
     const midX = (cp1.x + cp2.x) / 2;
     const midY = (cp1.y + cp2.y) / 2;
 
-    // Normal vector pointing outwards
-    const vx = cp2.x - cp1.x;
-    const vy = cp2.y - cp1.y;
-    const lenEdge = Math.hypot(vx, vy) || 1;
-    // Normal: (-vy, vx)
-    const nx = -vy / lenEdge;
-    const ny = vx / lenEdge;
+    // Dot product of normal with vector from mid to centroid
+    const toCentX = centX - midX;
+    const toCentY = centY - midY;
+    const dot = nx * toCentX + ny * toCentY;
+    // If dot > 0, normal points inward; flip it
+    const outNx = dot > 0 ? -nx : nx;
+    const outNy = dot > 0 ? -ny : ny;
 
-    // Push label out slightly
-    const offset = 16;
-    const labelX = midX + nx * offset;
-    const labelY = midY + ny * offset;
+    const offset = 22; // distance from edge to label line
 
-    // Drawing transparent card backing for legibility
-    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    // Dimension line endpoints (offset from edge)
+    const dlX1 = cp1.x + outNx * offset;
+    const dlY1 = cp1.y + outNy * offset;
+    const dlX2 = cp2.x + outNx * offset;
+    const dlY2 = cp2.y + outNy * offset;
+
+    // Draw extension lines (from vertex to dimension line)
+    ctx.strokeStyle = "rgba(46, 125, 50, 0.55)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.moveTo(cp1.x + outNx * 5, cp1.y + outNy * 5);
+    ctx.lineTo(dlX1, dlY1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cp2.x + outNx * 5, cp2.y + outNy * 5);
+    ctx.lineTo(dlX2, dlY2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw the dimension line itself
+    ctx.strokeStyle = "#2e7d32";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(dlX1, dlY1);
+    ctx.lineTo(dlX2, dlY2);
+    ctx.stroke();
+
+    // Tick marks at both ends
+    const tickLen = 5;
+    const perpX = outNx;
+    const perpY = outNy;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(dlX1 - perpX * tickLen / 2, dlY1 - perpY * tickLen / 2);
+    ctx.lineTo(dlX1 + perpX * tickLen / 2, dlY1 + perpY * tickLen / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(dlX2 - perpX * tickLen / 2, dlY2 - perpY * tickLen / 2);
+    ctx.lineTo(dlX2 + perpX * tickLen / 2, dlY2 + perpY * tickLen / 2);
+    ctx.stroke();
+
+    // Label position: middle of the dimension line, pushed out a bit more
+    const labelX = (dlX1 + dlX2) / 2 + outNx * 10;
+    const labelY = (dlY1 + dlY2) / 2 + outNy * 10;
+
+    // Compute text rotation angle
+    let angle = Math.atan2(vy, vx);
+    // Keep text readable (flip if upside down)
+    if (angle > Math.PI / 2 || angle < -Math.PI / 2) {
+      angle += Math.PI;
+    }
+
     const labelText = `${len.toFixed(2)} م`;
-    const labelWidth = ctx.measureText(labelText).width + 6;
-    ctx.fillRect(labelX - labelWidth / 2, labelY - 7, labelWidth, 14);
 
-    ctx.fillStyle = "#2e7d32";
-    ctx.font = "bold 10px Cairo";
-    ctx.fillText(labelText, labelX, labelY + 1);
+    ctx.save();
+    ctx.translate(labelX, labelY);
+    ctx.rotate(angle);
+
+    // White background for readability
+    ctx.font = "bold 11px Cairo";
+    const tw = ctx.measureText(labelText).width;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+    ctx.fillRect(-tw / 2 - 4, -9, tw + 8, 17);
+
+    // Draw text
+    ctx.fillStyle = "#1b5e20";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(labelText, 0, 1);
+    ctx.restore();
   }
 
   // 6. Draw Division lines and piece text badges
