@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <title>حساب وتقسيم مساحة الأراضي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="con main-container">
+    <div class="dec1"></div>
+
+    <div class="header-con">
+      <h1 class="header1">الدَّلاَّل</h1>
+      <h2 class="header2">حساب ورسم وتقسيم الأراضي</h2>
+    </div>
+
+    <!-- Shape Selection Cards -->
+    <div class="shape-selector">
+      <h3>اختر الشكل الهندسي للأرض</h3>
+      <div class="shape-cards">
+        <div class="shape-card active" data-shape="rectangle">
+          <svg viewBox="0 0 100 70">
+            <rect x="15" y="15" width="70" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">مستطيل</text>
+            <text x="5" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
+            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">b</text>
+            <!-- Right angle symbol -->
+            <path d="M 15 45 L 20 45 L 20 55" fill="none" stroke="currentColor" stroke-width="1"/>
+          </svg>
+          <span>مستطيل / مربع</span>
+        </div>
+        <div class="shape-card" data-shape="parallelogram">
+          <svg viewBox="0 0 100 70">
+            <polygon points="25,15 85,15 75,55 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">متوازي أضلاع</text>
+            <text x="12" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
+            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">b</text>
+            <line x1="25" y1="15" x2="25" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="29" y="38" font-family="Cairo" font-size="8" fill="currentColor">h</text>
+          </svg>
+          <span>متوازي أضلاع</span>
+        </div>
+        <div class="shape-card" data-shape="trapezoid">
+          <svg viewBox="0 0 100 70">
+            <polygon points="30,15 70,15 85,55 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">شبه منحرف</text>
+            <text x="10" y="38" font-family="Cairo" font-size="8" fill="currentColor">b</text>
+            <text x="50" y="11" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">c</text>
+            <text x="83" y="38" font-family="Cairo" font-size="8" fill="currentColor">d</text>
+            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
+            <line x1="30" y1="15" x2="30" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="34" y="38" font-family="Cairo" font-size="8" fill="currentColor">h</text>
+          </svg>
+          <span>شبه منحرف</span>
+        </div>
+        <div class="shape-card" data-shape="quadrilateral">
+          <svg viewBox="0 0 100 70">
+            <polygon points="35,12 80,22 90,58 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">رباعي أضلاع</text>
+            <text x="12" y="38" font-family="Cairo" font-size="8" fill="currentColor">b</text>
+            <text x="58" y="14" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">c</text>
+            <text x="89" y="38" font-family="Cairo" font-size="8" fill="currentColor">d</text>
+            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
+          </svg>
+          <span>رباعي غير منتظم</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Input Fields Container -->
+    <div class="dynamic-inputs-container">
+      <!-- Rectangle Inputs -->
+      <div id="inputs-rectangle" class="inputs-group active">
+        <div class="input-row">
+          <label for="rect-length">الطول (أ) بالمتر:</label>
+          <input type="number" step="any" id="rect-length" placeholder="مثال: 50" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="rect-width">العرض (ب) بالمتر:</label>
+          <input type="number" step="any" id="rect-width" placeholder="مثال: 30" dir="auto" />
+        </div>
+      </div>
+
+      <!-- Parallelogram Inputs -->
+      <div id="inputs-parallelogram" class="inputs-group">
+        <div class="input-row">
+          <label for="para-base">القاعدة (ب) بالمتر:</label>
+          <input type="number" step="any" id="para-base" placeholder="مثال: 60" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="para-height">الارتفاع العمودي (h) بالمتر:</label>
+          <input type="number" step="any" id="para-height" placeholder="مثال: 25" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="para-side">الضلع المائل (أ) بالمتر (اختياري للمحيط):</label>
+          <input type="number" step="any" id="para-side" placeholder="مثال: 28" dir="auto" />
+        </div>
+      </div>
+
+      <!-- Trapezoid Inputs -->
+      <div id="inputs-trapezoid" class="inputs-group">
+        <div class="input-row">
+          <label for="trap-base-major">القاعدة الكبرى السفلى (أ) بالمتر:</label>
+          <input type="number" step="any" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="trap-base-minor">القاعدة الصغرى العليا (ج) بالمتر:</label>
+          <input type="number" step="any" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="trap-height">الارتفاع العمودي (h) بالمتر:</label>
+          <input type="number" step="any" id="trap-height" placeholder="مثال: 30" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="trap-side-left">الضلع الأيسر (ب) بالمتر (اختياري للمحيط):</label>
+          <input type="number" step="any" id="trap-side-left" placeholder="مثال: 32" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="trap-side-right">الضلع الأيمن (د) بالمتر (اختياري للمحيط):</label>
+          <input type="number" step="any" id="trap-side-right" placeholder="مثال: 32" dir="auto" />
+        </div>
+      </div>
+
+      <!-- Quadrilateral Inputs -->
+      <div id="inputs-quadrilateral" class="inputs-group">
+        <div class="input-row">
+          <label for="quad-side-a">الضلع الأول السفلي (أ) بالمتر:</label>
+          <input type="number" step="any" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="quad-side-b">الضلع الثاني الأيسر (ب) بالمتر:</label>
+          <input type="number" step="any" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="quad-side-c">الضلع الثالث العلوي (ج) بالمتر:</label>
+          <input type="number" step="any" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="quad-side-d">الضلع الرابع الأيمن (د) بالمتر:</label>
+          <input type="number" step="any" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="quad-method">طريقة الحساب:</label>
+          <select id="quad-method" onchange="toggleQuadWarning()">
+            <option value="approx">الطريقة التقريبية (متوسط الطولين × متوسط العرضين)</option>
+            <option value="brahma">معادلة براهماجوبتا (لرباعي الأضلاع الدائري)</option>
+          </select>
+        </div>
+        <div id="brahma-warning" class="warning-box" style="display: none;">
+          <strong>تنبيه هندسي:</strong> تفترض معادلة براهماجوبتا أن الشكل رباعي دائري (مجموع الزوايا المتقابلة 180°). إذا كان الشكل غير دائري، فإن هذه معادلة تعطي الحد الأقصى للمساحة وقد تكون أكبر من المساحة الحقيقية.
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculation Settings (Carat Size & Price) -->
+    <div class="s settings-card">
+      <h3>إعدادات حساب القيراط والسعر</h3>
+      <div class="settings-grid">
+        <div class="settings-row">
+          <label>مساحة القيراط المعتمدة:</label>
+          <div class="input-with-select">
+            <input type="number" step="any" class="selector2" id="carat-size" value="168" dir="auto" />
+            <select class="selector1" id="carat-preset" onchange="updateCaratPreset()">
+              <option value="168">168</option>
+              <option value="171.388">171.388</option>
+              <option value="175">175</option>
+              <option value="175.035">175.035</option>
+              <option value="custom">أخرى</option>
+            </select>
+            <span>متر مربع</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label>سعر القيراط الواحد:</label>
+          <div class="price-input-wrapper">
+            <input tabindex="4" type="text" id="carat-price-display" placeholder="مثال: 50,000" dir="auto" onkeyup="formatPrice(this);" />
+            <input type="hidden" id="carat-price-numeric" />
+            <span>جنيه</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-clear" onclick="clearAllInputs()">أحذف</button>
+      <button class="btn btn-calc" onclick="calculateAll()">أحسب</button>
+      <button class="btn btn-divide" id="btn-toggle-division" onclick="toggleDivisionPanel()">تقسيم الأرض</button>
+    </div>
+
+    <!-- Visual Canvas Card -->
+    <div class="s canvas-card" id="canvas-container">
+      <h3>كروكي الأرض التفاعلي</h3>
+      <div class="canvas-wrapper">
+        <canvas id="landCanvas" width="600" height="400"></canvas>
+      </div>
+      <div class="canvas-controls">
+        <button class="btn btn-secondary btn-sm" onclick="printCroquis()">طباعة الكروكي والنتائج</button>
+      </div>
+    </div>
+
+    <!-- Division Controls Panel -->
+    <div class="s division-card" id="division-panel" style="display: none;">
+      <h3>لوحة تقسيم الأرض الذكي</h3>
+      <div class="division-settings">
+        <div class="input-row-inline">
+          <label for="heirs-count">عدد الورثة أو الشركاء:</label>
+          <input type="number" id="heirs-count" min="1" max="50" value="3" onchange="generateHeirsTable()" />
+          <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
+        </div>
+      </div>
+      <div class="heirs-table-wrapper">
+        <table id="heirs-table">
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>النصيب (م²)</th>
+              <th>فدان</th>
+              <th>قيراط</th>
+              <th>سهم</th>
+              <th>خصم الفرق من</th>
+            </tr>
+          </thead>
+          <tbody id="heirs-list">
+            <!-- Dynamic Heirs Rows -->
+          </tbody>
+        </table>
+      </div>
+      <div class="division-info">
+        <p>المساحة الموزعة: <span id="distributed-area">0</span> م² من إجمالي <span id="total-limit-area">0</span> م²</p>
+        <p id="distribution-status" class="status-ok">التوزيع متطابق 100%</p>
+      </div>
+    </div>
+
+    <!-- Area Results Card -->
+    <div class="s results-card">
+      <h3>النتائج الإجمالية للمساحة</h3>
+      <div class="results-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>سهم</th>
+              <th>قيراط</th>
+              <th>فدان</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="area-shares">0</td>
+              <td id="area-carats">0</td>
+              <td id="area-feddans">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="results-summary">
+        <div class="summary-item">
+          <span>إجمالي الأمتار المربعة:</span>
+          <strong id="total-sqm">0</strong> م²
+        </div>
+        <div class="summary-item">
+          <span>المحيط الإجمالي للأرض:</span>
+          <strong id="total-perimeter">0</strong> متر طولي
+        </div>
+        <div class="summary-item">
+          <span>إجمالي سعر قطعة الأرض:</span>
+          <strong id="total-price">0</strong> جنيه
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculation Steps (Details) -->
+    <details class="steps-details">
+      <summary>عرض خطوات الحساب بالتفصيل</summary>
+      <div class="steps-content" id="steps-content">
+        لم يتم إجراء حسابات بعد. يرجى ملء الحقول والضغط على زر "احسب".
+      </div>
+    </details>
+
+    <!-- Legacy / Conversions table (Qasaba & Qabda) -->
+    <div class="s conversion-card">
+      <h3>التحويل من متر طولي إلى القصبة والقبضة</h3>
+      <div class="conversion-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>البعد</th>
+              <th>قصبة</th>
+              <th>قبضة</th>
+              <th>أقل من القبضة</th>
+            </tr>
+          </thead>
+          <tbody id="conversions-tbody">
+            <!-- Dynamic rows populated from Javascript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Navigation footer -->
+    <div class="nav no-print">
+      <a href="help2/index.html" class="nav-box">
+        <img src="../../imgs/nav1.png" alt="nav1" />
+        <p>كسور</p>
+      </a>
+      <a class="nav-box" onclick="history.back()">
+        <img src="../../imgs/nav2.png" alt="nav1" />
+        <p>رجوع</p>
+      </a>
+      <a href="help/index.html" class="nav-box">
+        <img src="../../imgs/nav3.png" alt="nav1" />
+        <p>مساعدة</p>
+      </a>
+      <a href="../../index.html" class="nav-box">
+        <img src="../../imgs/nav4.png" alt="nav1" />
+        <p>الرئيسية</p>
+      </a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="../../nav.js"></script>
+</body>
+</html>

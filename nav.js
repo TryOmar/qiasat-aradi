@@ -11,9 +11,9 @@ let nav = document.querySelector(".nav");
 
 let mainViewPort;
 
-window.onload = ()=>{
+window.addEventListener("load", () => {
   mainViewPort = screen.height;
-}
+});
 // window.visualViewport.addEventListener("resize", () =>{
 //   if(mainViewPort - screen.height >= 20){
 //     nav.style.display = "none";
