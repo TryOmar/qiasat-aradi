@@ -60,6 +60,15 @@ let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
 
+// Interaction & division global variables
+let isDraggingDivider = false;
+let draggedDividerIdx = -1;
+let dragStartX = 0;
+let originalShares = [];
+let dividerHandles = [];
+let currentCanvasPoints = [];
+
+
 // Page Load
 document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
@@ -111,7 +120,164 @@ function setupEventListeners() {
     saveStateToSession();
     calculateAll();
   });
+
+  // Canvas event listeners for dragging vertical dividers
+  canvas.addEventListener('mousedown', handleCanvasPointerDown);
+  canvas.addEventListener('mousemove', handleCanvasPointerMove);
+  canvas.addEventListener('mouseup', handleCanvasPointerUp);
+  canvas.addEventListener('mouseleave', handleCanvasPointerUp);
+
+  canvas.addEventListener('touchstart', handleCanvasPointerDown, {passive: false});
+  canvas.addEventListener('touchmove', handleCanvasPointerMove, {passive: false});
+  canvas.addEventListener('touchend', handleCanvasPointerUp);
+  canvas.addEventListener('touchcancel', handleCanvasPointerUp);
 }
+
+// Canvas events for division dragging
+function getEventPos(e) {
+  let rect = canvas.getBoundingClientRect();
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+  return {
+    x: (clientX - rect.left) * (canvas.width / rect.width),
+    y: (clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
+
+function handleCanvasPointerDown(e) {
+  if (!isDivisionActive || heirsData.length <= 1) return;
+  const pos = getEventPos(e);
+  
+  for (let i = 0; i < dividerHandles.length; i++) {
+    const handle = dividerHandles[i];
+    const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
+    if (dist < 15) { // 15px hitbox
+      isDraggingDivider = true;
+      draggedDividerIdx = handle.index;
+      dragStartX = pos.x;
+      originalShares = heirsData.map(h => h.share);
+      e.preventDefault();
+      return;
+    }
+  }
+}
+
+function handleCanvasPointerMove(e) {
+  if (!isDivisionActive || heirsData.length <= 1) return;
+  const pos = getEventPos(e);
+  
+  if (!isDraggingDivider) {
+    let hover = false;
+    for (let i = 0; i < dividerHandles.length; i++) {
+      const handle = dividerHandles[i];
+      const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
+      if (dist < 15) {
+        hover = true;
+        break;
+      }
+    }
+    canvas.style.cursor = hover ? "ew-resize" : "default";
+    return;
+  }
+  
+  e.preventDefault();
+  canvas.style.cursor = "ew-resize";
+  
+  if (currentCanvasPoints.length < 4) return;
+  const cpA = currentCanvasPoints[0];
+  const cpB = currentCanvasPoints[1];
+  const cpC = currentCanvasPoints[2];
+  const cpD = currentCanvasPoints[3];
+  
+  const y_m = pos.y;
+  
+  // Left side is cpD to cpA
+  let xLeft = cpD.x;
+  if (Math.abs(cpA.y - cpD.y) > 1) {
+    xLeft = cpD.x + ((y_m - cpD.y) / (cpA.y - cpD.y)) * (cpA.x - cpD.x);
+  }
+  
+  // Right side is cpC to cpB
+  let xRight = cpC.x;
+  if (Math.abs(cpB.y - cpC.y) > 1) {
+    xRight = cpC.x + ((y_m - cpC.y) / (cpB.y - cpC.y)) * (cpB.x - cpC.x);
+  }
+  
+  let t = 0.5;
+  const widthCanvas = xRight - xLeft;
+  if (widthCanvas > 1) {
+    t = (pos.x - xLeft) / widthCanvas;
+  }
+  t = Math.max(0.001, Math.min(0.999, t));
+  
+  // Get shape dimensions
+  let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
+  if (activeShape === 'rectangle') {
+    landLeft = parseFloat(document.getElementById('rect-length')?.value) || 0;
+    landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+    landBottom = landTop; landRight = landLeft;
+  } else if (activeShape === 'square') {
+    let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+    landTop = s; landBottom = s; landLeft = s; landRight = s;
+  } else if (activeShape === 'trapezoid') {
+    landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+    landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+    let h = parseFloat(document.getElementById('trap-height')?.value) || 0;
+    landLeft = h; landRight = h;
+  } else if (activeShape === 'quadrilateral') {
+    landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+    landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
+    landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+    landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
+  }
+  
+  const W = (landTop + landBottom) / 2;
+  if (W <= 0) return;
+  
+  const totalTrapArea = ((landLeft + landRight) / 2) * W;
+  const areaScaleFactor = (totalTrapArea > 0) ? (calculatedArea / totalTrapArea) : 1;
+  
+  // Trapezoid Area formula at t:
+  const trapAreaAtT = landLeft * t * W + 0.5 * t * t * (landRight - landLeft) * W;
+  const newCumArea = trapAreaAtT * areaScaleFactor;
+  
+  let cumAreaPrev = 0;
+  for (let idx = 0; idx < draggedDividerIdx - 1; idx++) {
+    cumAreaPrev += originalShares[idx]; // Use originalShares to prevent drift during continuous drag
+  }
+  
+  let cumAreaNext = 0;
+  for (let idx = 0; idx < draggedDividerIdx + 1; idx++) {
+    cumAreaNext += originalShares[idx];
+  }
+  
+  const minArea = cumAreaPrev + 1;
+  const maxArea = cumAreaNext - 1;
+  
+  let targetCumArea = Math.max(minArea, Math.min(maxArea, newCumArea));
+  
+  heirsData[draggedDividerIdx - 1].share = targetCumArea - cumAreaPrev;
+  heirsData[draggedDividerIdx].share = cumAreaNext - targetCumArea;
+  
+  saveStateToSession();
+  updateHeirsUI();
+  calculateAll();
+}
+
+function handleCanvasPointerUp(e) {
+  if (isDraggingDivider) {
+    isDraggingDivider = false;
+    draggedDividerIdx = -1;
+    canvas.style.cursor = "default";
+    saveStateToSession();
+    calculateAll();
+  }
+}
+
 
 function updateCaratPreset() {
   const preset = caratPresetSelect.value;
@@ -588,12 +754,13 @@ function calculateAll() {
   // Manage Heirs Division Limit
   totalLimitAreaSpan.innerText = area.toFixed(2);
   
-  if (isDivisionActive && area > 0) {
-    updateHeirsDistribution();
-  }
-
   // Draw on Canvas
   drawLandCanvas(vertices);
+
+  if (isDivisionActive && area > 0) {
+    updateHeirsDistribution();
+    updateHeirsUI();
+  }
 }
 
 // Circle intersection helper
@@ -694,6 +861,9 @@ function drawLandCanvas(vertices) {
       y: canvas.height - (margin + (v.y - minY) * scale + (drawH - dy * scale) / 2)
     };
   });
+
+  currentCanvasPoints = canvasPoints;
+
 
   // 3. Draw Polygon shape
   ctx.fillStyle = "rgba(46, 125, 50, 0.06)";
@@ -836,6 +1006,9 @@ function drawLandCanvas(vertices) {
   if (isDivisionActive && heirsData.length > 0 && calculatedArea > 0 && canvasPoints.length >= 4) {
     const caratSize = parseFloat(caratSizeInput.value) || 168;
     
+    // Reset divider handles array
+    dividerHandles = [];
+
     // Get land side lengths for geometry engine
     let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
     if (activeShape === 'rectangle') {
@@ -857,7 +1030,7 @@ function drawLandCanvas(vertices) {
       landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
     }
     
-    let H = (landLeft + landRight) / 2;
+    const W = (landTop + landBottom) / 2;
 
     // Canvas corners
     const cpA = canvasPoints[0]; // bottom-left
@@ -869,12 +1042,18 @@ function drawLandCanvas(vertices) {
     let cumArea = 0;
     const splitTs = [0];
     
+    // Scale area factor for Brahmagupta cyclic quadrilateral area consistency
+    const totalTrapArea = ((landLeft + landRight) / 2) * W;
+    const areaScaleFactor = (totalTrapArea > 0) ? (calculatedArea / totalTrapArea) : 1;
+
     for (let i = 0; i < heirsData.length - 1; i++) {
       cumArea += heirsData[i].share;
       let t = 0;
-      if (H > 0) {
-        let depth = solveDepthForArea(cumArea, landTop, landBottom, H);
-        t = depth / H;
+      if (W > 0) {
+        // Unscale area to solve in normal trapezoid space
+        const unscaledArea = cumArea / areaScaleFactor;
+        let depth = solveDepthForArea(unscaledArea, landLeft, landRight, W);
+        t = depth / W;
       } else {
         t = cumArea / calculatedArea;
       }
@@ -890,23 +1069,25 @@ function drawLandCanvas(vertices) {
       const heir = heirsData[i];
       if (!heir) continue;
 
-      // Canvas coordinates for this slice (interpolated along the sides)
-      const cpLeftTop  = { x: cpD.x + tPrev * (cpA.x - cpD.x), y: cpD.y + tPrev * (cpA.y - cpD.y) };
-      const cpRightTop = { x: cpC.x + tPrev * (cpB.x - cpC.x), y: cpC.y + tPrev * (cpB.y - cpC.y) };
-      const cpLeftBot  = { x: cpD.x + tCurr * (cpA.x - cpD.x), y: cpD.y + tCurr * (cpA.y - cpD.y) };
-      const cpRightBot = { x: cpC.x + tCurr * (cpB.x - cpC.x), y: cpC.y + tCurr * (cpB.y - cpC.y) };
+      // Canvas coordinates for vertical slice (interpolated along the top and bottom sides)
+      const cpTopPrev    = { x: cpD.x + tPrev * (cpC.x - cpD.x), y: cpD.y + tPrev * (cpC.y - cpD.y) };
+      const cpBottomPrev = { x: cpA.x + tPrev * (cpB.x - cpA.x), y: cpA.y + tPrev * (cpB.y - cpA.y) };
+      const cpTopCurr    = { x: cpD.x + tCurr * (cpC.x - cpD.x), y: cpD.y + tCurr * (cpC.y - cpD.y) };
+      const cpBottomCurr = { x: cpA.x + tCurr * (cpB.x - cpA.x), y: cpA.y + tCurr * (cpB.y - cpA.y) };
 
       // Calculate real side lengths for this piece
       let pieceTopW, pieceBotW, pieceLeftL, pieceRightL;
-      if (H > 0) {
-        pieceTopW  = landTop + tPrev * (landBottom - landTop);
-        pieceBotW  = landTop + tCurr * (landBottom - landTop);
-        pieceLeftL = (tCurr - tPrev) * landLeft;
-        pieceRightL = (tCurr - tPrev) * landRight;
+      if (W > 0) {
+        pieceLeftL = landLeft + tPrev * (landRight - landLeft);
+        pieceRightL = landLeft + tCurr * (landRight - landLeft);
+        pieceTopW = (tCurr - tPrev) * landTop;
+        pieceBotW = (tCurr - tPrev) * landBottom;
       } else {
         pieceTopW = 0; pieceBotW = 0; pieceLeftL = 0; pieceRightL = 0;
       }
-      if (i === heirsData.length - 1) pieceBotW = landBottom;
+      if (i === heirsData.length - 1) {
+        pieceRightL = landRight;
+      }
 
       // Save to heirsData for table display
       heir.topW = pieceTopW;
@@ -914,79 +1095,94 @@ function drawLandCanvas(vertices) {
       heir.leftL = pieceLeftL;
       heir.rightL = pieceRightL;
 
+      // Draw slice background fill
+      ctx.fillStyle = (i % 2 === 0) ? "rgba(46, 125, 50, 0.08)" : "rgba(46, 125, 50, 0.02)";
+      ctx.beginPath();
+      ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+      ctx.lineTo(cpTopCurr.x, cpTopCurr.y);
+      ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
+      ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+      ctx.closePath();
+      ctx.fill();
+
       // Draw dashed divider line (between pieces, not at start/end)
       if (i > 0) {
         ctx.strokeStyle = "#0288d1";
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(cpLeftTop.x, cpLeftTop.y);
-        ctx.lineTo(cpRightTop.x, cpRightTop.y);
+        ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+        ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
       // Slice Centroid for info badge
-      const centroidX = (cpLeftTop.x + cpRightTop.x + cpLeftBot.x + cpRightBot.x) / 4;
-      const centroidY = (cpLeftTop.y + cpRightTop.y + cpLeftBot.y + cpRightBot.y) / 4;
+      const centroidX = (cpTopPrev.x + cpTopCurr.x + cpBottomPrev.x + cpBottomCurr.x) / 4;
+      const centroidY = (cpTopPrev.y + cpTopCurr.y + cpBottomPrev.y + cpBottomCurr.y) / 4;
 
       const heirConv = convertSqmToFeddans(heir.share, caratSize);
       
-      // Info box
-      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-      ctx.strokeStyle = "#0288d1";
-      ctx.lineWidth = 1;
-      const boxW = 95;
-      const boxH = 58;
-      
-      ctx.beginPath();
-      ctx.roundRect(centroidX - boxW / 2, centroidY - boxH / 2, boxW, boxH, 6);
-      ctx.fill();
-      ctx.stroke();
+      ctx.save();
+      ctx.translate(centroidX, centroidY);
+      ctx.rotate(-Math.PI / 2);
 
       // Line 1: Piece name
       ctx.fillStyle = "#333";
-      ctx.font = "bold 10px Cairo";
+      ctx.font = "bold 11px Cairo";
       ctx.textAlign = "center";
-      ctx.fillText(`${i + 1}- ${heir.name}`, centroidX, centroidY - 18);
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${i + 1}- ${heir.name}`, -30, 0);
       
       // Line 2: Area
       ctx.fillStyle = "#01579b";
-      ctx.fillText(`${heir.share.toFixed(1)} م²`, centroidX, centroidY - 4);
+      ctx.font = "bold 11px Cairo";
+      ctx.fillText(`${heir.share.toFixed(1)} م²`, 30, 0);
 
-      // Line 3: Feddan/Carat/Sahm
-      ctx.fillStyle = "#2e7d32";
-      ctx.font = "9px Cairo";
-      let parts = [];
-      if (heirConv.feddans > 0) parts.push(`${heirConv.feddans}ف`);
-      if (heirConv.carats > 0) parts.push(`${heirConv.carats}ط`);
-      if (heirConv.shares > 0) parts.push(`${heirConv.shares.toFixed(1)}س`);
-      if (parts.length === 0) parts.push("0س");
-      ctx.fillText(parts.join(" ، "), centroidX, centroidY + 10);
-
-      // Line 4: Side dimensions
-      ctx.fillStyle = "#d32f2f";
-      ctx.font = "bold 8px Arial";
-      ctx.fillText(`${pieceTopW.toFixed(1)}×${pieceLeftL.toFixed(1)} | ${pieceBotW.toFixed(1)}×${pieceRightL.toFixed(1)}`, centroidX, centroidY + 22);
+      ctx.restore();
 
       // Draw side length labels on the edges
       ctx.font = "bold 10px Arial";
       
-      // Top width of piece (only first piece shows top edge label outside box)
-      if (i === 0) {
-        ctx.fillStyle = "#d32f2f";
-        ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpLeftTop.x + cpRightTop.x) / 2, (cpLeftTop.y + cpRightTop.y) / 2 + 12);
-      }
-      // Bottom width
+      // Top width of piece
       ctx.fillStyle = "#d32f2f";
-      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpLeftBot.x + cpRightBot.x) / 2, (cpLeftBot.y + cpRightBot.y) / 2 - 8);
+      ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8);
       
-      // Left side length
+      // Bottom width
+      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12);
+      
+      // Left side length (only first piece shows left edge label)
       ctx.fillStyle = "#1b5e20";
-      ctx.fillText(`${pieceLeftL.toFixed(2)}`, (cpLeftTop.x + cpLeftBot.x) / 2 + 15, (cpLeftTop.y + cpLeftBot.y) / 2);
+      if (i === 0) {
+        ctx.fillText(`${pieceLeftL.toFixed(2)}`, (cpTopPrev.x + cpBottomPrev.x) / 2 + 15, (cpTopPrev.y + cpBottomPrev.y) / 2);
+      }
       
       // Right side length
-      ctx.fillText(`${pieceRightL.toFixed(2)}`, (cpRightTop.x + cpRightBot.x) / 2 - 15, (cpRightTop.y + cpRightBot.y) / 2);
+      ctx.fillText(`${pieceRightL.toFixed(2)}`, (cpTopCurr.x + cpBottomCurr.x) / 2 - 15, (cpTopCurr.y + cpBottomCurr.y) / 2);
+
+      // Draw handle for dragging vertical dividers (between slices)
+      if (i > 0) {
+        const hX = (cpTopPrev.x + cpBottomPrev.x) / 2;
+        const hY = (cpTopPrev.y + cpBottomPrev.y) / 2;
+        
+        ctx.beginPath();
+        ctx.arc(hX, hY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#388e3c';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        dividerHandles.push({
+          index: i,
+          x: hX,
+          y: hY,
+          topX: cpTopPrev.x,
+          topY: cpTopPrev.y,
+          botX: cpBottomPrev.x,
+          botY: cpBottomPrev.y
+        });
+      }
     }
   }
 }
@@ -1133,16 +1329,16 @@ function renderHeirsRows() {
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-top" style="width:60px;" value="${(heir.topW || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'topW', this.value)" />
+          <input type="number" step="any" class="heir-side-top" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.topW || 0).toFixed(2)}" readonly />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-bot" style="width:60px;" value="${(heir.botW || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'botW', this.value)" />
+          <input type="number" step="any" class="heir-side-bot" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.botW || 0).toFixed(2)}" readonly />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-right" style="width:60px;" value="${(heir.rightL || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'rightL', this.value)" />
+          <input type="number" step="any" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-left" style="width:60px;" value="${(heir.leftL || 0).toFixed(2)}" oninput="updateHeirSide(${idx}, 'leftL', this.value)" />
+          <input type="number" step="any" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
         </td>
         <td>
           <input type="number" step="any" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
@@ -1191,6 +1387,11 @@ function updateHeirName(idx, value) {
 // Triggered when a user types in a share directly
 function updateHeirShare(idx, type, newVal) {
   if (calculatedArea <= 0) return;
+  if (heirsData.length === 1) {
+    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
+    renderHeirsRows();
+    return;
+  }
   const oldVal = heirsData[idx].share;
   const diff = newVal - oldVal;
   
@@ -1206,6 +1407,11 @@ function updateHeirShare(idx, type, newVal) {
 // Triggered when editing split shares (Feddan, Carat, Sahm)
 function updateHeirSplitShare(idx, unitType, newVal) {
   if (calculatedArea <= 0) return;
+  if (heirsData.length === 1) {
+    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
+    renderHeirsRows();
+    return;
+  }
   const caratSize = parseFloat(caratSizeInput.value) || 168;
   const currentConv = convertSqmToFeddans(heirsData[idx].share, caratSize);
   
