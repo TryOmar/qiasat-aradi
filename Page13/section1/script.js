@@ -59,6 +59,9 @@ let calculatedArea = 0;
 let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
+let zoomFactor = 1.0;
+let oldZoomFactor = 1.0;
+let isPrinting = false;
 
 // Interaction & division global variables
 let isDraggingDivider = false;
@@ -69,10 +72,102 @@ let dividerHandles = [];
 let currentCanvasPoints = [];
 
 
+// Aspect Ratio & Visual Stretch functions
+function getVisualVertices(vertices) {
+  if (!vertices || vertices.length < 3) return vertices;
+  
+  const viewType = document.getElementById("long-plot-view")?.value || "agricultural";
+  if (viewType === "real") {
+    return vertices;
+  }
+  
+  const xs = vertices.map(v => v.x);
+  const ys = vertices.map(v => v.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  
+  const dx = maxX - minX || 1;
+  const dy = maxY - minY || 1;
+  
+  const ratio = dx / dy;
+  const invRatio = dy / dx;
+  
+  // If the shape is extremely narrow vertically (ratio > 8.0)
+  if (ratio > 8.0) {
+    const stretchFactor = ratio / 3.5; // Cap visual aspect ratio to about 3.5
+    const centerY = (minY + maxY) / 2;
+    return vertices.map(v => ({
+      x: v.x,
+      y: centerY + (v.y - centerY) * stretchFactor
+    }));
+  }
+  
+  // If the shape is extremely narrow horizontally (invRatio > 8.0)
+  if (invRatio > 8.0) {
+    const stretchFactor = invRatio / 3.5; // Cap visual aspect ratio to about 3.5
+    const centerX = (minX + maxX) / 2;
+    return vertices.map(v => ({
+      x: centerX + (v.x - centerX) * stretchFactor,
+      y: v.y
+    }));
+  }
+  
+  return vertices;
+}
+
+function resizeCanvasToFit() {
+  calculateAll();
+  return true;
+}
+
+function zoomIn() {
+  zoomFactor = Math.min(3.0, zoomFactor + 0.15);
+  calculateAll();
+}
+
+function zoomOut() {
+  zoomFactor = Math.max(0.3, zoomFactor - 0.15);
+  calculateAll();
+}
+
+function fillScreen() {
+  zoomFactor = 1.0;
+  calculateAll();
+}
+
+window.addEventListener("resize", () => {
+  calculateAll();
+});
+
+window.addEventListener("beforeprint", () => {
+  isPrinting = true;
+  oldZoomFactor = zoomFactor;
+  zoomFactor = 1.0;
+  ctx.resetTransform();
+  
+  const printDateEl = document.getElementById("print-date");
+  if (printDateEl) {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    printDateEl.innerText = "تاريخ التقرير: " + today.toLocaleDateString('ar-EG', options);
+  }
+
+  calculateAll();
+});
+
+window.addEventListener("afterprint", () => {
+  isPrinting = false;
+  zoomFactor = oldZoomFactor;
+  calculateAll();
+});
+
 // Page Load
 document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
   setupEventListeners();
+  resizeCanvasToFit();
   calculateAll();
 });
 
@@ -133,7 +228,7 @@ function setupEventListeners() {
   canvas.addEventListener('touchcancel', handleCanvasPointerUp);
 }
 
-// Canvas events for division dragging
+// Canvas events for division dragging (returns coordinates in CSS pixels)
 function getEventPos(e) {
   let rect = canvas.getBoundingClientRect();
   let clientX = e.clientX;
@@ -143,19 +238,21 @@ function getEventPos(e) {
     clientY = e.touches[0].clientY;
   }
   return {
-    x: (clientX - rect.left) * (canvas.width / rect.width),
-    y: (clientY - rect.top) * (canvas.height / rect.height)
+    x: clientX - rect.left,
+    y: clientY - rect.top
   };
 }
 
 function handleCanvasPointerDown(e) {
   if (!isDivisionActive || heirsData.length <= 1) return;
   const pos = getEventPos(e);
+  const scaleMultiplier = Math.max(0.7, canvas.clientWidth / 600);
+  const hitBox = Math.max(15, 20 * scaleMultiplier);
   
   for (let i = 0; i < dividerHandles.length; i++) {
     const handle = dividerHandles[i];
     const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
-    if (dist < 15) { // 15px hitbox
+    if (dist < hitBox) { // Dynamic hitbox
       isDraggingDivider = true;
       draggedDividerIdx = handle.index;
       dragStartX = pos.x;
@@ -169,13 +266,15 @@ function handleCanvasPointerDown(e) {
 function handleCanvasPointerMove(e) {
   if (!isDivisionActive || heirsData.length <= 1) return;
   const pos = getEventPos(e);
+  const scaleMultiplier = Math.max(0.7, canvas.clientWidth / 600);
+  const hitBox = Math.max(15, 20 * scaleMultiplier);
   
   if (!isDraggingDivider) {
     let hover = false;
     for (let i = 0; i < dividerHandles.length; i++) {
       const handle = dividerHandles[i];
       const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
-      if (dist < 15) {
+      if (dist < hitBox) {
         hover = true;
         break;
       }
@@ -262,6 +361,13 @@ function handleCanvasPointerMove(e) {
   
   heirsData[draggedDividerIdx - 1].share = targetCumArea - cumAreaPrev;
   heirsData[draggedDividerIdx].share = cumAreaNext - targetCumArea;
+  
+  // Re-proportion topW and botW for all heirs since shares changed
+  const currentDims = getLandDimensions();
+  heirsData.forEach(h => {
+    h.topW = (h.share / (calculatedArea || 1)) * currentDims.landTop;
+    h.botW = (h.share / (calculatedArea || 1)) * currentDims.landBottom;
+  });
   
   saveStateToSession();
   updateHeirsUI();
@@ -805,43 +911,101 @@ function solveDepthForArea(S, Top, Bottom, H) {
 
 // Canvas Drawer
 function drawLandCanvas(vertices) {
-  // Clear canvas
+  // 1. Calculate shape aspect ratio
+  let shapeRatio = 1.5; // Default ratio
+  if (vertices && vertices.length >= 3) {
+    const xs = vertices.map(v => v.x);
+    const ys = vertices.map(v => v.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const dx = maxX - minX || 1;
+    const dy = maxY - minY || 1;
+    shapeRatio = dx / dy;
+  }
+  
+  // 2. Resolve CSS dimensions based on shape aspect ratio (clamp between 0.45 and 2.2)
+  let targetWidth = 800; // Safe default for printing/fallback
+  const wrapper = canvas.parentElement;
+  if (wrapper) {
+    const rect = wrapper.getBoundingClientRect();
+    const availableWidth = rect.width - 24;
+    if (availableWidth > 100) {
+      targetWidth = availableWidth;
+    }
+  }
+  
+  let targetRatio = Math.max(0.45, Math.min(2.2, shapeRatio));
+  let targetHeight = targetWidth / targetRatio;
+  
+  // Limit height to keep it on a single printed page, and visually pleasant on screen
+  const maxHeight = isPrinting ? 800 : 650;
+  if (targetHeight > maxHeight) {
+    targetHeight = maxHeight;
+    targetWidth = targetHeight * targetRatio;
+  }
+  targetHeight = Math.max(280, targetHeight);
+  
+  const dpr = isPrinting ? 2.0 : (window.devicePixelRatio || 1);
+  const newWidth = Math.round(targetWidth);
+  const newHeight = Math.round(targetHeight);
+  
+  if (canvas.width !== newWidth * dpr || canvas.height !== newHeight * dpr) {
+    canvas.width = newWidth * dpr;
+    canvas.height = newHeight * dpr;
+    canvas.style.width = newWidth + "px";
+    canvas.style.height = newHeight + "px";
+    ctx.resetTransform();
+    ctx.scale(dpr, dpr);
+  }
+
+  const cssW = canvas.width / dpr;
+  const cssH = canvas.height / dpr;
+
+  // Clear canvas physical dimensions
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Dynamic scale multiplier based on canvas CSS width (stable and doesn't scale with zoomFactor)
+  const scaleMultiplier = Math.max(0.7, cssW / 600);
   
   // 1. Draw professional Blueprint grid
   ctx.strokeStyle = "#eaf2f8";
-  ctx.lineWidth = 1;
-  const gridSpacing = 20;
-  for (let x = 0; x < canvas.width; x += gridSpacing) {
+  ctx.lineWidth = Math.max(1, 1 * scaleMultiplier);
+  const gridSpacing = Math.max(15, 20 * scaleMultiplier);
+  for (let x = 0; x < cssW; x += gridSpacing) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x, canvas.height);
+    ctx.lineTo(x, cssH);
     ctx.stroke();
   }
-  for (let y = 0; y < canvas.height; y += gridSpacing) {
+  for (let y = 0; y < cssH; y += gridSpacing) {
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.lineTo(canvas.width, y);
+    ctx.lineTo(cssW, y);
     ctx.stroke();
   }
 
   if (!vertices || vertices.length < 3) {
     // Draw placeholder message
     ctx.fillStyle = "#888888";
-    ctx.font = "bold 15px Cairo";
+    ctx.font = "bold " + Math.round(15 * scaleMultiplier) + "px Cairo";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("أدخل أبعاد الأرض الصحيحة لرسم الكروكي", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("أدخل أبعاد الأرض الصحيحة لرسم الكروكي", cssW / 2, cssH / 2);
     return;
   }
 
-  // 2. Scale and Fit vertices inside Canvas bounding box
-  const margin = 80;
-  const drawW = canvas.width - 2 * margin;
-  const drawH = canvas.height - 2 * margin;
+  // Get visually stretched vertices if aspect ratio is extreme
+  const visualVertices = getVisualVertices(vertices);
 
-  const xs = vertices.map(v => v.x);
-  const ys = vertices.map(v => v.y);
+  // 2. Scale and Fit visual vertices inside Canvas bounding box (85% to 90% footprint, with extra space for printing)
+  const margin = isPrinting ? 110 : Math.max(45, Math.min(52 * scaleMultiplier, 90));
+  const drawW = cssW - 2 * margin;
+  const drawH = cssH - 2 * margin;
+
+  const xs = visualVertices.map(v => v.x);
+  const ys = visualVertices.map(v => v.y);
   
   const minX = Math.min(...xs);
   const maxX = Math.max(...xs);
@@ -851,24 +1015,23 @@ function drawLandCanvas(vertices) {
   const dx = maxX - minX || 1;
   const dy = maxY - minY || 1;
 
-  const scale = Math.min(drawW / dx, drawH / dy);
+  const scale = Math.min(drawW / dx, drawH / dy) * zoomFactor;
 
   // Transform coordinates to canvas space
-  const canvasPoints = vertices.map(v => {
+  const canvasPoints = visualVertices.map(v => {
     return {
       x: margin + (v.x - minX) * scale + (drawW - dx * scale) / 2,
       // Invert Y because canvas goes down, math coordinates go up
-      y: canvas.height - (margin + (v.y - minY) * scale + (drawH - dy * scale) / 2)
+      y: cssH - (margin + (v.y - minY) * scale + (drawH - dy * scale) / 2)
     };
   });
 
   currentCanvasPoints = canvasPoints;
 
-
   // 3. Draw Polygon shape
   ctx.fillStyle = "rgba(46, 125, 50, 0.06)";
   ctx.strokeStyle = "#2e7d32";
-  ctx.lineWidth = 3;
+  ctx.lineWidth = Math.max(3, 4.5 * scaleMultiplier);
   ctx.lineJoin = "round";
 
   ctx.beginPath();
@@ -884,7 +1047,7 @@ function drawLandCanvas(vertices) {
   ctx.fillStyle = "#1b5e20";
   canvasPoints.forEach(p => {
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+    ctx.arc(p.x, p.y, Math.max(3.5, 5.5 * scaleMultiplier), 0, 2 * Math.PI);
     ctx.fill();
   });
 
@@ -927,7 +1090,8 @@ function drawLandCanvas(vertices) {
     const outNx = dot > 0 ? -nx : nx;
     const outNy = dot > 0 ? -ny : ny;
 
-    const offset = 22; // distance from edge to label line
+    // Dynamic offset distance from edge to label line
+    const offset = Math.max(18, 25 * scaleMultiplier);
 
     // Dimension line endpoints (offset from edge)
     const dlX1 = cp1.x + outNx * offset;
@@ -937,7 +1101,7 @@ function drawLandCanvas(vertices) {
 
     // Draw extension lines (from vertex to dimension line)
     ctx.strokeStyle = "rgba(46, 125, 50, 0.55)";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = Math.max(1, 1.2 * scaleMultiplier);
     ctx.setLineDash([2, 3]);
     ctx.beginPath();
     ctx.moveTo(cp1.x + outNx * 5, cp1.y + outNy * 5);
@@ -951,17 +1115,17 @@ function drawLandCanvas(vertices) {
 
     // Draw the dimension line itself
     ctx.strokeStyle = "#2e7d32";
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = Math.max(1.2, 1.6 * scaleMultiplier);
     ctx.beginPath();
     ctx.moveTo(dlX1, dlY1);
     ctx.lineTo(dlX2, dlY2);
     ctx.stroke();
 
     // Tick marks at both ends
-    const tickLen = 5;
+    const tickLen = Math.max(4, 6 * scaleMultiplier);
     const perpX = outNx;
     const perpY = outNy;
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = Math.max(1.5, 2 * scaleMultiplier);
     ctx.beginPath();
     ctx.moveTo(dlX1 - perpX * tickLen / 2, dlY1 - perpY * tickLen / 2);
     ctx.lineTo(dlX1 + perpX * tickLen / 2, dlY1 + perpY * tickLen / 2);
@@ -972,8 +1136,8 @@ function drawLandCanvas(vertices) {
     ctx.stroke();
 
     // Label position: middle of the dimension line, pushed out a bit more
-    const labelX = (dlX1 + dlX2) / 2 + outNx * 10;
-    const labelY = (dlY1 + dlY2) / 2 + outNy * 10;
+    const labelX = (dlX1 + dlX2) / 2 + outNx * Math.max(8, 12 * scaleMultiplier);
+    const labelY = (dlY1 + dlY2) / 2 + outNy * Math.max(8, 12 * scaleMultiplier);
 
     // Compute text rotation angle
     let angle = Math.atan2(vy, vx);
@@ -989,10 +1153,11 @@ function drawLandCanvas(vertices) {
     ctx.rotate(angle);
 
     // White background for readability
-    ctx.font = "bold 11px Cairo";
+    const fontSize = Math.round(Math.max(10, 13 * scaleMultiplier));
+    ctx.font = `bold ${fontSize}px Cairo`;
     const tw = ctx.measureText(labelText).width;
     ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-    ctx.fillRect(-tw / 2 - 4, -9, tw + 8, 17);
+    ctx.fillRect(-tw / 2 - 4 * scaleMultiplier, -fontSize / 2 - 2, tw + 8 * scaleMultiplier, fontSize + 4);
 
     // Draw text
     ctx.fillStyle = "#1b5e20";
@@ -1032,66 +1197,64 @@ function drawLandCanvas(vertices) {
     
     const W = (landTop + landBottom) / 2;
 
-    // Canvas corners
+    // Canvas corners (from visual canvas points)
     const cpA = canvasPoints[0]; // bottom-left
     const cpB = canvasPoints[1]; // bottom-right
     const cpC = canvasPoints[2]; // top-right
     const cpD = canvasPoints[3]; // top-left
 
-    // Calculate cumulative t values using Geometry Engine
-    let cumArea = 0;
-    const splitTs = [0];
-    
-    // Scale area factor for Brahmagupta cyclic quadrilateral area consistency
-    const totalTrapArea = ((landLeft + landRight) / 2) * W;
-    const areaScaleFactor = (totalTrapArea > 0) ? (calculatedArea / totalTrapArea) : 1;
-
-    for (let i = 0; i < heirsData.length - 1; i++) {
-      cumArea += heirsData[i].share;
-      let t = 0;
-      if (W > 0) {
-        // Unscale area to solve in normal trapezoid space
-        const unscaledArea = cumArea / areaScaleFactor;
-        let depth = solveDepthForArea(unscaledArea, landLeft, landRight, W);
-        t = depth / W;
-      } else {
-        t = cumArea / calculatedArea;
+    // Initialize topW and botW proportionally if they don't exist
+    heirsData.forEach(h => {
+      if (h.topW === undefined || h.botW === undefined || isNaN(h.topW) || isNaN(h.botW)) {
+        h.topW = (h.share / calculatedArea) * landTop;
+        h.botW = (h.share / calculatedArea) * landBottom;
       }
+    });
+
+    // Calculate cumulative t values for top and bottom sides separately
+    let cumTop = 0;
+    const splitTsTop = [0];
+    heirsData.forEach((h, idx) => {
+      cumTop += h.topW || 0;
+      let t = landTop > 0 ? cumTop / landTop : (idx + 1) / heirsData.length;
       t = Math.max(0, Math.min(1, t));
-      splitTs.push(t);
-    }
-    splitTs.push(1);
+      splitTsTop.push(t);
+    });
+    splitTsTop[splitTsTop.length - 1] = 1.0;
+
+    let cumBot = 0;
+    const splitTsBot = [0];
+    heirsData.forEach((h, idx) => {
+      cumBot += h.botW || 0;
+      let t = landBottom > 0 ? cumBot / landBottom : (idx + 1) / heirsData.length;
+      t = Math.max(0, Math.min(1, t));
+      splitTsBot.push(t);
+    });
+    splitTsBot[splitTsBot.length - 1] = 1.0;
 
     // Draw each piece
     for (let i = 0; i < heirsData.length; i++) {
-      const tPrev = splitTs[i];
-      const tCurr = splitTs[i + 1];
+      const tPrevTop = splitTsTop[i];
+      const tCurrTop = splitTsTop[i + 1];
+      const tPrevBot = splitTsBot[i];
+      const tCurrBot = splitTsBot[i + 1];
+      
       const heir = heirsData[i];
       if (!heir) continue;
 
-      // Canvas coordinates for vertical slice (interpolated along the top and bottom sides)
-      const cpTopPrev    = { x: cpD.x + tPrev * (cpC.x - cpD.x), y: cpD.y + tPrev * (cpC.y - cpD.y) };
-      const cpBottomPrev = { x: cpA.x + tPrev * (cpB.x - cpA.x), y: cpA.y + tPrev * (cpB.y - cpA.y) };
-      const cpTopCurr    = { x: cpD.x + tCurr * (cpC.x - cpD.x), y: cpD.y + tCurr * (cpC.y - cpD.y) };
-      const cpBottomCurr = { x: cpA.x + tCurr * (cpB.x - cpA.x), y: cpA.y + tCurr * (cpB.y - cpA.y) };
+      // Canvas coordinates for vertical slice (interpolated separately along the top and bottom sides)
+      const cpTopPrev    = { x: cpD.x + tPrevTop * (cpC.x - cpD.x), y: cpD.y + tPrevTop * (cpC.y - cpD.y) };
+      const cpBottomPrev = { x: cpA.x + tPrevBot * (cpB.x - cpA.x), y: cpA.y + tPrevBot * (cpB.y - cpA.y) };
+      const cpTopCurr    = { x: cpD.x + tCurrTop * (cpC.x - cpD.x), y: cpD.y + tCurrTop * (cpC.y - cpD.y) };
+      const cpBottomCurr = { x: cpA.x + tCurrBot * (cpB.x - cpA.x), y: cpA.y + tCurrBot * (cpB.y - cpA.y) };
 
       // Calculate real side lengths for this piece
-      let pieceTopW, pieceBotW, pieceLeftL, pieceRightL;
-      if (W > 0) {
-        pieceLeftL = landLeft + tPrev * (landRight - landLeft);
-        pieceRightL = landLeft + tCurr * (landRight - landLeft);
-        pieceTopW = (tCurr - tPrev) * landTop;
-        pieceBotW = (tCurr - tPrev) * landBottom;
-      } else {
-        pieceTopW = 0; pieceBotW = 0; pieceLeftL = 0; pieceRightL = 0;
-      }
-      if (i === heirsData.length - 1) {
-        pieceRightL = landRight;
-      }
+      const pieceTopW = heir.topW || 0;
+      const pieceBotW = heir.botW || 0;
+      const pieceLeftL = Math.hypot(cpTopPrev.x - cpBottomPrev.x, cpTopPrev.y - cpBottomPrev.y) / scale;
+      const pieceRightL = Math.hypot(cpTopCurr.x - cpBottomCurr.x, cpTopCurr.y - cpBottomCurr.y) / scale;
 
       // Save to heirsData for table display
-      heir.topW = pieceTopW;
-      heir.botW = pieceBotW;
       heir.leftL = pieceLeftL;
       heir.rightL = pieceRightL;
 
@@ -1108,7 +1271,7 @@ function drawLandCanvas(vertices) {
       // Draw dashed divider line (between pieces, not at start/end)
       if (i > 0) {
         ctx.strokeStyle = "#0288d1";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Math.max(2, 3.5 * scaleMultiplier);
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
         ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
@@ -1127,38 +1290,87 @@ function drawLandCanvas(vertices) {
       ctx.translate(centroidX, centroidY);
       ctx.rotate(-Math.PI / 2);
 
-      // Line 1: Piece name
-      ctx.fillStyle = "#333";
-      ctx.font = "bold 11px Cairo";
+      const badgeFontSize = Math.round(Math.max(10, 13 * scaleMultiplier));
+      ctx.font = `bold ${badgeFontSize}px Cairo`;
+
+      const labelName = `${i + 1}- ${heir.name}`;
+      const labelArea = `${heir.share.toFixed(1)} م²`;
+      
+      const nameW = ctx.measureText(labelName).width;
+      const areaW = ctx.measureText(labelArea).width;
+      const maxW = Math.max(nameW, areaW);
+      
+      const boxW = maxW + 12 * scaleMultiplier;
+      const boxH = Math.max(36, 42 * scaleMultiplier);
+
+      // White background box for readability
+      ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+      ctx.strokeStyle = "rgba(46, 125, 50, 0.25)";
+      ctx.lineWidth = Math.max(1, 1.5 * scaleMultiplier);
+      
+      ctx.beginPath();
+      ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, 4 * scaleMultiplier);
+      ctx.fill();
+      ctx.stroke();
+
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(`${i + 1}- ${heir.name}`, -30, 0);
+
+      // Line 1: Piece name
+      ctx.fillStyle = "#333";
+      ctx.fillText(labelName, 0, -9 * scaleMultiplier);
       
       // Line 2: Area
       ctx.fillStyle = "#01579b";
-      ctx.font = "bold 11px Cairo";
-      ctx.fillText(`${heir.share.toFixed(1)} م²`, 30, 0);
+      ctx.fillText(labelArea, 0, 9 * scaleMultiplier);
 
       ctx.restore();
 
       // Draw side length labels on the edges
-      ctx.font = "bold 10px Arial";
+      ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier)) + "px Cairo";
       
       // Top width of piece
       ctx.fillStyle = "#d32f2f";
-      ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
       
       // Bottom width
-      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12);
+      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
       
-      // Left side length (only first piece shows left edge label)
-      ctx.fillStyle = "#1b5e20";
+      // Left side length (only first piece shows left edge label, drawn at 0.25 from top with white bg and left alignment)
       if (i === 0) {
-        ctx.fillText(`${pieceLeftL.toFixed(2)}`, (cpTopPrev.x + cpBottomPrev.x) / 2 + 15, (cpTopPrev.y + cpBottomPrev.y) / 2);
+        const lx = cpTopPrev.x + 0.25 * (cpBottomPrev.x - cpTopPrev.x);
+        const ly = cpTopPrev.y + 0.25 * (cpBottomPrev.y - cpTopPrev.y);
+        const labelTextLeft = `${pieceLeftL.toFixed(2)} م`;
+        ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
+        const twLeft = ctx.measureText(labelTextLeft).width;
+        
+        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+        ctx.fillRect(lx + 4 * scaleMultiplier, ly - 8 * scaleMultiplier, twLeft + 6 * scaleMultiplier, 16 * scaleMultiplier);
+        
+        ctx.fillStyle = "#1b5e20";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelTextLeft, lx + 7 * scaleMultiplier, ly);
       }
       
-      // Right side length
-      ctx.fillText(`${pieceRightL.toFixed(2)}`, (cpTopCurr.x + cpBottomCurr.x) / 2 - 15, (cpTopCurr.y + cpBottomCurr.y) / 2);
+      // Right side length (drawn at 0.25 from top with white bg and right alignment next to divider)
+      {
+        const rx = cpTopCurr.x + 0.25 * (cpBottomCurr.x - cpTopCurr.x);
+        const ry = cpTopCurr.y + 0.25 * (cpBottomCurr.y - cpTopCurr.y);
+        const labelTextRight = `${pieceRightL.toFixed(2)} م`;
+        ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
+        const twRight = ctx.measureText(labelTextRight).width;
+        
+        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+        ctx.fillRect(rx - 4 * scaleMultiplier - twRight - 6 * scaleMultiplier, ry - 8 * scaleMultiplier, twRight + 6 * scaleMultiplier, 16 * scaleMultiplier);
+        
+        ctx.fillStyle = "#1b5e20";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelTextRight, rx - 7 * scaleMultiplier, ry);
+      }
 
       // Draw handle for dragging vertical dividers (between slices)
       if (i > 0) {
@@ -1166,11 +1378,11 @@ function drawLandCanvas(vertices) {
         const hY = (cpTopPrev.y + cpBottomPrev.y) / 2;
         
         ctx.beginPath();
-        ctx.arc(hX, hY, 6, 0, Math.PI * 2);
+        ctx.arc(hX, hY, Math.max(5, 7.5 * scaleMultiplier), 0, Math.PI * 2);
         ctx.fillStyle = '#388e3c';
         ctx.fill();
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = Math.max(1.5, 2 * scaleMultiplier);
         ctx.stroke();
         
         dividerHandles.push({
@@ -1198,6 +1410,7 @@ function generateHeirsTable() {
   heirsData = [];
   
   const equalShare = calculatedArea / count;
+  const dims = getLandDimensions();
 
   for (let i = 0; i < count; i++) {
     const defaultName = `الوارث ${i + 1}`;
@@ -1206,12 +1419,15 @@ function generateHeirsTable() {
     
     heirsData.push({
       name: name,
-      share: share
+      share: share,
+      topW: (share / (calculatedArea || 1)) * dims.landTop,
+      botW: (share / (calculatedArea || 1)) * dims.landBottom
     });
   }
 
   renderHeirsRows();
   updateHeirsDistribution();
+  calculateAll();
 }
 
 // Called on every keystroke in heirs inputs - updates instantly
@@ -1225,24 +1441,85 @@ function commitHeirShareImmediately(idx, type, newValString) {
   updateHeirShare(idx, type, newVal);
 }
 
-// Update side lengths manually
+// Helper to get total land dimensions based on shape
+function getLandDimensions() {
+  let landTop = 0, landBottom = 0;
+  if (activeShape === 'rectangle') {
+    landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+    landBottom = landTop;
+  } else if (activeShape === 'square') {
+    let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+    landTop = s; landBottom = s;
+  } else if (activeShape === 'trapezoid') {
+    landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+    landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+  } else if (activeShape === 'quadrilateral') {
+    landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+    landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+  }
+  return { landTop, landBottom };
+}
+
+// Update side widths manually with constant area conservation
 function updateHeirSide(idx, sideStr, valStr) {
-  const val = parseFloat(valStr) || 0;
+  const newVal = parseFloat(valStr) || 0;
   if (!heirsData[idx]) return;
   
-  heirsData[idx][sideStr] = val;
-  
-  // Recalculate area based on Dalaal's formula: ((Top+Bottom)/2) * ((Left+Right)/2)
-  let t = heirsData[idx].topW || 0;
-  let b = heirsData[idx].botW || 0;
-  let r = heirsData[idx].rightL || 0;
-  let l = heirsData[idx].leftL || 0;
-  
-  let newArea = ((t + b) / 2) * ((l + r) / 2);
-  
-  if (newArea > 0) {
-    heirsData[idx].share = newArea;
-    updateHeirShare(idx, 'sqm', newArea);
+  if (sideStr === 'topW' || sideStr === 'botW') {
+    const oldVal = heirsData[idx][sideStr] || 0;
+    const diff = newVal - oldVal;
+    if (diff === 0) return;
+    
+    const otherSideStr = (sideStr === 'topW') ? 'botW' : 'topW';
+    const oldOtherVal = heirsData[idx][otherSideStr] || 0;
+    const sum = oldVal + oldOtherVal;
+    
+    let actualDiff = diff;
+    if (diff > 0) {
+      actualDiff = Math.min(diff, oldOtherVal);
+    } else {
+      actualDiff = -Math.min(-diff, oldVal);
+    }
+    
+    if (actualDiff === 0) {
+      renderHeirsRows();
+      return;
+    }
+    
+    heirsData[idx][sideStr] = oldVal + actualDiff;
+    heirsData[idx][otherSideStr] = oldOtherVal - actualDiff;
+    
+    // Distribute opposite change to target to maintain total widths
+    const targetSelect = document.getElementById(`offset-dest-${idx}`);
+    const targetVal = targetSelect ? targetSelect.value : 'all';
+    
+    if (targetVal === 'all') {
+      const otherHeirs = heirsData.filter((_, i) => i !== idx);
+      if (otherHeirs.length > 0) {
+        const shareDiff = actualDiff / otherHeirs.length;
+        otherHeirs.forEach(h => {
+          h[sideStr] = Math.max(0, (h[sideStr] || 0) - shareDiff);
+          h[otherSideStr] = Math.max(0, (h[otherSideStr] || 0) + shareDiff);
+        });
+      }
+    } else {
+      const tIdx = parseInt(targetVal);
+      if (heirsData[tIdx]) {
+        const targetOldVal = heirsData[tIdx][sideStr] || 0;
+        const targetActualDiff = Math.min(actualDiff, targetOldVal);
+        
+        heirsData[tIdx][sideStr] = targetOldVal - targetActualDiff;
+        heirsData[tIdx][otherSideStr] = (heirsData[tIdx][otherSideStr] || 0) + targetActualDiff;
+        
+        if (targetActualDiff !== actualDiff) {
+          heirsData[idx][sideStr] = oldVal + targetActualDiff;
+          heirsData[idx][otherSideStr] = oldOtherVal - targetActualDiff;
+        }
+      }
+    }
+    
+    saveStateToSession();
+    calculateAll();
   }
 }
 
@@ -1329,10 +1606,12 @@ function renderHeirsRows() {
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-top" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.topW || 0).toFixed(2)}" readonly />
+          <input type="number" step="any" class="heir-side-top" style="width:65px;" value="${(heir.topW || 0).toFixed(2)}" 
+            oninput="updateHeirSide(${idx}, 'topW', this.value)" />
         </td>
         <td>
-          <input type="number" step="any" class="heir-side-bot" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.botW || 0).toFixed(2)}" readonly />
+          <input type="number" step="any" class="heir-side-bot" style="width:65px;" value="${(heir.botW || 0).toFixed(2)}" 
+            oninput="updateHeirSide(${idx}, 'botW', this.value)" />
         </td>
         <td>
           <input type="number" step="any" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
@@ -1482,6 +1761,13 @@ function applyShareDiff(idx, diff) {
     }
   }
 
+  // Recalculate topW and botW proportionally
+  const dims = getLandDimensions();
+  heirsData.forEach(h => {
+    h.topW = (h.share / (calculatedArea || 1)) * dims.landTop;
+    h.botW = (h.share / (calculatedArea || 1)) * dims.landBottom;
+  });
+
   saveStateToSession();
   updateHeirsUI();
   calculateAll();
@@ -1490,7 +1776,12 @@ function applyShareDiff(idx, diff) {
 function distributeEqually() {
   if (calculatedArea <= 0) return;
   const equalShare = calculatedArea / heirsData.length;
-  heirsData.forEach(h => h.share = equalShare);
+  const dims = getLandDimensions();
+  heirsData.forEach(h => {
+    h.share = equalShare;
+    h.topW = (equalShare / calculatedArea) * dims.landTop;
+    h.botW = (equalShare / calculatedArea) * dims.landBottom;
+  });
   
   saveStateToSession();
   renderHeirsRows();
@@ -1543,6 +1834,7 @@ function saveStateToSession() {
   sessionStorage.setItem("heirsCount", heirsCountInput.value);
   sessionStorage.setItem("heirsData", JSON.stringify(heirsData));
   sessionStorage.setItem("isDivisionActive", isDivisionActive ? "true" : "false");
+  sessionStorage.setItem("longPlotView", document.getElementById("long-plot-view").value);
 }
 
 function loadStateFromSession() {
@@ -1608,9 +1900,155 @@ function loadStateFromSession() {
     divisionPanel.style.display = "none";
     btnToggleDivision.classList.remove("active-panel");
   }
+
+  document.getElementById("long-plot-view").value = sessionStorage.getItem("longPlotView") || "agricultural";
 }
 
 // Print trigger
 function printCroquis() {
-  window.print();
+  // Capture canvas as image
+  const canvas = document.getElementById('landCanvas');
+  const canvasDataURL = canvas.toDataURL('image/png');
+
+  // Gather heirs table
+  const heirsBody = document.getElementById('heirs-list');
+  const heirsRows = heirsBody ? heirsBody.innerHTML : '';
+  const distributedArea = document.getElementById('distributed-area')?.innerText || '0';
+  const totalLimitArea = document.getElementById('total-limit-area')?.innerText || '0';
+
+  // Gather conversions table if exists
+  const convBody = document.getElementById('conversions-tbody');
+  const convRows = convBody ? convBody.innerHTML : '';
+
+  // Summary values
+  const totalSqm = document.getElementById('total-sqm')?.innerText || '';
+  const totalPerimeter = document.getElementById('total-perimeter')?.innerText || '';
+  const totalPrice = document.getElementById('total-price')?.innerText || '';
+  const areaShares = document.getElementById('area-shares')?.innerText || '0';
+  const areaCarats = document.getElementById('area-carats')?.innerText || '0';
+  const areaFeddans = document.getElementById('area-feddans')?.innerText || '0';
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('ar-EG');
+
+  const summarySection = (totalSqm || totalPerimeter || totalPrice) ? `
+    <div class="section">
+      <div class="section-title">ملخص نتائج المساحة</div>
+      <div class="summary-grid">
+        ${totalSqm ? `<div class="summary-card"><span class="label">إجمالي الأمتار المربعة</span><span class="value">${totalSqm} م²</span></div>` : ''}
+        ${totalPerimeter ? `<div class="summary-card"><span class="label">المحيط الإجمالي</span><span class="value">${totalPerimeter} م</span></div>` : ''}
+        ${totalPrice ? `<div class="summary-card"><span class="label">إجمالي سعر الأرض</span><span class="value">${totalPrice} ج</span></div>` : ''}
+      </div>
+    </div>` : '';
+
+  const areaSection = (areaFeddans !== '0' || areaCarats !== '0') ? `
+    <div class="section">
+      <div class="section-title">المساحة بالوحدات الزراعية</div>
+      <table>
+        <thead><tr><th>فدان</th><th>قيراط</th><th>سهم</th></tr></thead>
+        <tbody><tr>
+          <td><strong>${areaFeddans}</strong></td>
+          <td><strong>${areaCarats}</strong></td>
+          <td><strong>${areaShares}</strong></td>
+        </tr></tbody>
+      </table>
+    </div>` : '';
+
+  const convSection = convRows ? `
+    <div class="section">
+      <div class="section-title">تحويل من متر طولي إلى القصبة والقبضة</div>
+      <table>
+        <thead><tr><th>البعد</th><th>أقل من القبضة</th><th>قبضة</th><th>قصبة</th></tr></thead>
+        <tbody>${convRows}</tbody>
+      </table>
+    </div>` : '';
+
+  const printHTML = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8"/>
+  <title>تقرير تقسيم الأرض - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 10mm 8mm 10mm 8mm; }
+    body { font-family: 'Cairo', sans-serif; background: #fff; color: #222; font-size: 10pt; direction: rtl; }
+    .page { width: 100%; }
+    .header { text-align: center; padding: 6px 0 4px; border-bottom: 3px solid #2e7d32; margin-bottom: 6px; }
+    .header h1 { font-size: 18pt; color: #1b5e20; font-weight: 800; margin-bottom: 1px; }
+    .header h2 { font-size: 11pt; color: #388e3c; font-weight: 600; margin-bottom: 2px; }
+    .header .date-line { font-size: 8pt; color: #666; }
+    .croquis-box { text-align: center; margin: 4px 0; border: 1.5px solid #c8e6c9; border-radius: 6px; padding: 4px; background: #f9fbe7; page-break-inside: avoid; }
+    .croquis-box .box-title { font-size: 10pt; color: #2e7d32; font-weight: 700; margin-bottom: 3px; text-align: right; padding: 0 4px; }
+    .croquis-box img { max-width: 100%; max-height: 230px; object-fit: contain; display: block; margin: 0 auto; }
+    .section { margin-bottom: 6px; page-break-inside: avoid; }
+    .section-title { background: #e8f5e9; color: #1b5e20; font-weight: 700; font-size: 9.5pt; padding: 3px 8px; border-right: 4px solid #2e7d32; margin-bottom: 4px; border-radius: 2px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
+    .summary-card { border: 1px solid #c8e6c9; border-radius: 4px; padding: 4px 6px; text-align: center; background: #f1f8e9; }
+    .summary-card .label { font-size: 7.5pt; color: #555; display: block; margin-bottom: 1px; }
+    .summary-card .value { font-size: 10pt; font-weight: 700; color: #1b5e20; }
+    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #c8e6c9; padding: 3px 5px; text-align: center; }
+    td { border: 1px solid #e0e0e0; padding: 3px 5px; text-align: center; }
+    tr:nth-child(even) td { background: #f9fbe7; }
+    .summary-bar { background: #f1f8e9; border: 1px solid #c8e6c9; border-radius: 3px; padding: 3px 8px; margin-top: 4px; font-size: 8.5pt; color: #333; }
+    .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ccc; font-size: 7.5pt; color: #888; }
+    td select { display: none; }
+    td input { border: none; background: transparent; text-align: center; font-family: 'Cairo', sans-serif; font-size: 8.5pt; font-weight: 600; width: 100%; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>الدَّلاَّل</h1>
+    <h2>تقرير تقسيم الأرض على الورثة</h2>
+    <div class="date-line">تاريخ الطباعة: ${dateStr} — ${timeStr}</div>
+  </div>
+
+  <div class="croquis-box">
+    <div class="box-title">الرسم الكروكي للأرض مع التقسيم</div>
+    <img src="${canvasDataURL}" alt="كروكي الأرض"/>
+  </div>
+
+  ${summarySection}
+  ${areaSection}
+
+  <div class="section">
+    <div class="section-title">توزيع الأنصبة على الورثة أو الشركاء</div>
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>النصيب (م²)</th>
+          <th>سهم</th>
+          <th>قيراط</th>
+          <th>فدان</th>
+        </tr>
+      </thead>
+      <tbody>${heirsRows}</tbody>
+    </table>
+    <div class="summary-bar">
+      المساحة الموزعة: <strong>${distributedArea}</strong> م² من إجمالي <strong>${totalLimitArea}</strong> م²
+    </div>
+  </div>
+
+  ${convSection}
+
+  <div class="footer">
+    تطبيق الدلال الذكي — حساب مساحات الأراضي الزراعية وتقسيمها بدقة متناهية
+  </div>
+</div>
+<script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }</script>
+</body>
+</html>`;
+
+  const printWin = window.open('', '_blank', 'width=800,height=650,scrollbars=yes');
+  if (!printWin) {
+    alert('يرجى السماح بالنوافذ المنبثقة للطباعة');
+    return;
+  }
+  printWin.document.open();
+  printWin.document.write(printHTML);
+  printWin.document.close();
 }

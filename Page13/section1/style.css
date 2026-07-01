@@ -545,19 +545,20 @@ body {
 
 .heirs-table-wrapper table {
   width: 100%;
+  min-width: 800px; /* Enable horizontal scrolling instead of squishing */
   border-collapse: collapse;
 }
 
 .heirs-table-wrapper th {
   background-color: #e1f5fe;
   color: #01579b;
-  padding: 8px;
+  padding: 6px 3px;
   border: 1px solid #b3e5fc;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .heirs-table-wrapper td {
-  padding: 6px 4px;
+  padding: 4px 2px;
   text-align: center;
   border: 1px solid #e0e0e0;
 }
@@ -568,8 +569,19 @@ body {
   text-align: center;
   border-radius: 4px;
   border: 1.5px solid #d0d0d0;
-  padding: 3px;
+  padding: 3px 2px;
   outline: none;
+}
+
+/* Hide Chrome/Safari/Opera/Edge number spinners to reclaim text space */
+.heirs-table-wrapper input::-webkit-outer-spin-button,
+.heirs-table-wrapper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Hide Firefox number spinners */
+.heirs-table-wrapper input[type=number] {
+  -moz-appearance: textfield;
 }
 
 .heirs-table-wrapper input:focus {
@@ -680,16 +692,45 @@ body {
 
 /* Print CSS */
 @media print {
+  @page {
+    margin: 0.5cm;
+  }
   body {
     background: white;
     color: black;
-    font-size: 12pt;
+    font-size: 10pt;
+    font-family: 'Cairo', sans-serif;
   }
   .main-container {
     padding: 0 !important;
   }
   .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details {
     display: none !important;
+  }
+  .print-only-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .print-only-header h2 {
+    color: #2e7d32 !important;
+    font-size: 15pt !important;
+    margin: 0 0 2px 0;
+    font-weight: 800;
+  }
+  .print-only-header p {
+    color: #555 !important;
+    font-size: 9pt !important;
+    margin: 0;
+  }
+  .print-only-footer {
+    display: block !important;
+    text-align: center;
+    margin-top: 15px;
+  }
+  .print-only-footer p {
+    font-size: 8pt !important;
+    color: #777 !important;
   }
   .con {
     max-width: 100% !important;
@@ -698,39 +739,67 @@ body {
     padding: 0 !important;
   }
   .canvas-card, .results-card, .division-card, .conversion-card {
-    border: none !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
-    margin-top: 10px !important;
+    margin-top: 8px !important;
+    padding: 8px !important;
     page-break-inside: avoid;
+    background: #fff !important;
   }
   .canvas-card h3, .results-card h3, .division-card h3, .conversion-card h3 {
-    background-color: #555 !important;
-    color: white !important;
-    font-size: 12pt !important;
-    padding: 4px !important;
+    background-color: #f1f8e9 !important;
+    color: #2e7d32 !important;
+    font-size: 10pt !important;
+    padding: 4px 8px !important;
+    margin: -8px -8px 8px -8px !important;
+    border-bottom: 1px solid #c8e6c9 !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+    font-weight: bold !important;
   }
   .canvas-wrapper {
     background: white !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
   }
   .canvas-wrapper canvas {
-    border: 1px solid #000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    border: 1px solid #c8e6c9 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
+    page-break-inside: avoid !important;
   }
   .results-table-wrapper table, .conversion-table-wrapper table, .heirs-table-wrapper table {
-    border: 1px solid #000 !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 6px !important;
   }
   .results-table-wrapper th, .conversion-table-wrapper th, .heirs-table-wrapper th {
-    background-color: #ddd !important;
-    color: black !important;
-    border: 1px solid #000 !important;
+    background-color: #f1f8e9 !important;
+    color: #2e7d32 !important;
+    font-weight: bold !important;
+    border: 1px solid #c8e6c9 !important;
+    padding: 4px 6px !important;
+    font-size: 8.5pt !important;
   }
   .results-table-wrapper td, .conversion-table-wrapper td, .heirs-table-wrapper td {
-    border: 1px solid #000 !important;
+    border: 1px solid #e0e0e0 !important;
+    padding: 4px 6px !important;
+    font-size: 8.5pt !important;
   }
   /* Show static names and inputs in printing */
   .heirs-table-wrapper input {
     border: none !important;
     font-weight: bold !important;
     background: transparent !important;
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 8.5pt !important;
   }
 }

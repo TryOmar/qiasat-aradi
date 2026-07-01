@@ -13,7 +13,15 @@
 </head>
 <body>
   <div class="con main-container">
-    <div class="dec1"></div>
+    <div class="dec1 no-print"></div>
+
+    <!-- Print Only Header -->
+    <div class="print-only-header" style="display: none;">
+      <h2>تقرير كروكي ومساحة الأرض وتقسيمها</h2>
+      <p>تطبيق الدلال الذكي لحساب المساحات وقسمة المواريث</p>
+      <div style="font-size: 10pt; color: #555; margin-top: 5px;" id="print-date"></div>
+      <hr style="border: 0; border-top: 2px solid #2e7d32; margin: 12px 0 20px 0;" />
+    </div>
 
     <div class="header-con">
       <h1 class="header1">الدَّلاَّل</h1>
@@ -166,6 +174,13 @@
             <span>جنيه</span>
           </div>
         </div>
+        <div class="settings-row">
+          <label>عرض الأراضي الزراعية الطويلة:</label>
+          <select id="long-plot-view" class="selector1" onchange="saveStateToSession(); calculateAll();" style="width: 100%; max-width: 250px;">
+            <option value="agricultural" selected>عرض محسّن للأراضي الزراعية (بصري)</option>
+            <option value="real">عرض بمقياس حقيقي (متناسق)</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -182,7 +197,12 @@
         <canvas id="landCanvas" width="600" height="400"></canvas>
       </div>
       <div class="canvas-controls">
-        <button class="btn btn-secondary btn-sm" onclick="printCroquis()">طباعة الكروكي والنتائج</button>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%;">
+          <button class="btn btn-secondary btn-sm" onclick="zoomIn()" style="font-weight: bold; font-size: 16px; padding: 0 12px;">+</button>
+          <button class="btn btn-secondary btn-sm" onclick="zoomOut()" style="font-weight: bold; font-size: 16px; padding: 0 12px;">-</button>
+          <button class="btn btn-secondary btn-sm" onclick="fillScreen()">ملء الشاشة</button>
+          <button class="btn btn-secondary btn-sm" onclick="printCroquis()">طباعة الكروكي والنتائج</button>
+        </div>
         <button class="btn btn-divide btn-sm" id="btn-toggle-division" onclick="toggleDivisionPanel()" style="margin-top: 8px;">تقسيم الأرض</button>
       </div>
     </div>
@@ -193,7 +213,7 @@
       <div class="division-settings">
         <div class="input-row-inline">
           <label for="heirs-count">عدد الورثة أو الشركاء:</label>
-          <input type="number" id="heirs-count" min="1" max="50" value="3" onchange="generateHeirsTable()" />
+          <input type="number" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
           <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
         </div>
       </div>
@@ -303,6 +323,12 @@
         <img src="../../imgs/nav4.png" alt="nav1" />
         <p>الرئيسية</p>
       </a>
+    </div>
+    
+    <!-- Print Only Footer -->
+    <div class="print-only-footer" style="display: none;">
+      <hr style="border: 0; border-top: 1px solid #ccc; margin: 20px 0 10px 0;" />
+      <p>تطبيق الدلال الذكي - دقة متناهية وحساب مساحات الأراضي الزراعية وغير المنتظمة</p>
     </div>
   </div>
 
