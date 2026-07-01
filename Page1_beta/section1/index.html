@@ -182,6 +182,7 @@
         <canvas id="landCanvas" width="600" height="400"></canvas>
       </div>
       <div class="canvas-controls">
+        <button class="btn btn-secondary btn-sm" onclick="printCroquis()">طباعة الكروكي والنتائج</button>
         <button class="btn btn-divide btn-sm" id="btn-toggle-division" onclick="toggleDivisionPanel()" style="margin-top: 8px;">تقسيم الأرض</button>
       </div>
     </div>
@@ -196,15 +197,11 @@
           <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
         </div>
       </div>
-      <div class="heirs-table-wrapper" style="overflow-x: auto;">
+      <div class="heirs-table-wrapper">
         <table id="heirs-table">
           <thead>
             <tr>
               <th>الاسم</th>
-              <th>علوي</th>
-              <th>سفلي</th>
-              <th>يمين</th>
-              <th>يسار</th>
               <th>النصيب (م²)</th>
               <th>سهم</th>
               <th>قيراط</th>

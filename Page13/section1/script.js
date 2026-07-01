@@ -60,6 +60,15 @@ let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
 
+// Interaction & division global variables
+let isDraggingDivider = false;
+let draggedDividerIdx = -1;
+let dragStartX = 0;
+let originalShares = [];
+let dividerHandles = [];
+let currentCanvasPoints = [];
+
+
 // Page Load
 document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
@@ -111,7 +120,164 @@ function setupEventListeners() {
     saveStateToSession();
     calculateAll();
   });
+
+  // Canvas event listeners for dragging vertical dividers
+  canvas.addEventListener('mousedown', handleCanvasPointerDown);
+  canvas.addEventListener('mousemove', handleCanvasPointerMove);
+  canvas.addEventListener('mouseup', handleCanvasPointerUp);
+  canvas.addEventListener('mouseleave', handleCanvasPointerUp);
+
+  canvas.addEventListener('touchstart', handleCanvasPointerDown, {passive: false});
+  canvas.addEventListener('touchmove', handleCanvasPointerMove, {passive: false});
+  canvas.addEventListener('touchend', handleCanvasPointerUp);
+  canvas.addEventListener('touchcancel', handleCanvasPointerUp);
 }
+
+// Canvas events for division dragging
+function getEventPos(e) {
+  let rect = canvas.getBoundingClientRect();
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+  return {
+    x: (clientX - rect.left) * (canvas.width / rect.width),
+    y: (clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
+
+function handleCanvasPointerDown(e) {
+  if (!isDivisionActive || heirsData.length <= 1) return;
+  const pos = getEventPos(e);
+  
+  for (let i = 0; i < dividerHandles.length; i++) {
+    const handle = dividerHandles[i];
+    const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
+    if (dist < 15) { // 15px hitbox
+      isDraggingDivider = true;
+      draggedDividerIdx = handle.index;
+      dragStartX = pos.x;
+      originalShares = heirsData.map(h => h.share);
+      e.preventDefault();
+      return;
+    }
+  }
+}
+
+function handleCanvasPointerMove(e) {
+  if (!isDivisionActive || heirsData.length <= 1) return;
+  const pos = getEventPos(e);
+  
+  if (!isDraggingDivider) {
+    let hover = false;
+    for (let i = 0; i < dividerHandles.length; i++) {
+      const handle = dividerHandles[i];
+      const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
+      if (dist < 15) {
+        hover = true;
+        break;
+      }
+    }
+    canvas.style.cursor = hover ? "ew-resize" : "default";
+    return;
+  }
+  
+  e.preventDefault();
+  canvas.style.cursor = "ew-resize";
+  
+  if (currentCanvasPoints.length < 4) return;
+  const cpA = currentCanvasPoints[0];
+  const cpB = currentCanvasPoints[1];
+  const cpC = currentCanvasPoints[2];
+  const cpD = currentCanvasPoints[3];
+  
+  const y_m = pos.y;
+  
+  // Left side is cpD to cpA
+  let xLeft = cpD.x;
+  if (Math.abs(cpA.y - cpD.y) > 1) {
+    xLeft = cpD.x + ((y_m - cpD.y) / (cpA.y - cpD.y)) * (cpA.x - cpD.x);
+  }
+  
+  // Right side is cpC to cpB
+  let xRight = cpC.x;
+  if (Math.abs(cpB.y - cpC.y) > 1) {
+    xRight = cpC.x + ((y_m - cpC.y) / (cpB.y - cpC.y)) * (cpB.x - cpC.x);
+  }
+  
+  let t = 0.5;
+  const widthCanvas = xRight - xLeft;
+  if (widthCanvas > 1) {
+    t = (pos.x - xLeft) / widthCanvas;
+  }
+  t = Math.max(0.001, Math.min(0.999, t));
+  
+  // Get shape dimensions
+  let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
+  if (activeShape === 'rectangle') {
+    landLeft = parseFloat(document.getElementById('rect-length')?.value) || 0;
+    landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+    landBottom = landTop; landRight = landLeft;
+  } else if (activeShape === 'square') {
+    let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+    landTop = s; landBottom = s; landLeft = s; landRight = s;
+  } else if (activeShape === 'trapezoid') {
+    landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+    landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+    let h = parseFloat(document.getElementById('trap-height')?.value) || 0;
+    landLeft = h; landRight = h;
+  } else if (activeShape === 'quadrilateral') {
+    landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+    landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
+    landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+    landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
+  }
+  
+  const W = (landTop + landBottom) / 2;
+  if (W <= 0) return;
+  
+  const totalTrapArea = ((landLeft + landRight) / 2) * W;
+  const areaScaleFactor = (totalTrapArea > 0) ? (calculatedArea / totalTrapArea) : 1;
+  
+  // Trapezoid Area formula at t:
+  const trapAreaAtT = landLeft * t * W + 0.5 * t * t * (landRight - landLeft) * W;
+  const newCumArea = trapAreaAtT * areaScaleFactor;
+  
+  let cumAreaPrev = 0;
+  for (let idx = 0; idx < draggedDividerIdx - 1; idx++) {
+    cumAreaPrev += originalShares[idx]; // Use originalShares to prevent drift during continuous drag
+  }
+  
+  let cumAreaNext = 0;
+  for (let idx = 0; idx < draggedDividerIdx + 1; idx++) {
+    cumAreaNext += originalShares[idx];
+  }
+  
+  const minArea = cumAreaPrev + 1;
+  const maxArea = cumAreaNext - 1;
+  
+  let targetCumArea = Math.max(minArea, Math.min(maxArea, newCumArea));
+  
+  heirsData[draggedDividerIdx - 1].share = targetCumArea - cumAreaPrev;
+  heirsData[draggedDividerIdx].share = cumAreaNext - targetCumArea;
+  
+  saveStateToSession();
+  updateHeirsUI();
+  calculateAll();
+}
+
+function handleCanvasPointerUp(e) {
+  if (isDraggingDivider) {
+    isDraggingDivider = false;
+    draggedDividerIdx = -1;
+    canvas.style.cursor = "default";
+    saveStateToSession();
+    calculateAll();
+  }
+}
+
 
 function updateCaratPreset() {
   const preset = caratPresetSelect.value;
@@ -159,12 +325,15 @@ function clearAllInputs() {
 // Show/Hide Division Panel
 function toggleDivisionPanel() {
   isDivisionActive = !isDivisionActive;
+  const sketchPanel = document.getElementById('division-sketch-panel');
   if (isDivisionActive) {
     divisionPanel.style.display = "block";
+    if (sketchPanel) sketchPanel.style.display = "block";
     btnToggleDivision.classList.add("active-panel");
     generateHeirsTable();
   } else {
     divisionPanel.style.display = "none";
+    if (sketchPanel) sketchPanel.style.display = "none";
     btnToggleDivision.classList.remove("active-panel");
   }
   calculateAll();
@@ -174,7 +343,9 @@ function toggleDivisionPanel() {
 function resetDivision() {
   isDivisionActive = false;
   heirsData = [];
+  const sketchPanel = document.getElementById('division-sketch-panel');
   if (divisionPanel) divisionPanel.style.display = "none";
+  if (sketchPanel) sketchPanel.style.display = "none";
   if (btnToggleDivision) btnToggleDivision.classList.remove("active-panel");
   if (heirsListTbody) heirsListTbody.innerHTML = "";
   if (heirsCountInput) heirsCountInput.value = "3";
@@ -583,12 +754,13 @@ function calculateAll() {
   // Manage Heirs Division Limit
   totalLimitAreaSpan.innerText = area.toFixed(2);
   
-  if (isDivisionActive && area > 0) {
-    updateHeirsDistribution();
-  }
-
   // Draw on Canvas
   drawLandCanvas(vertices);
+
+  if (isDivisionActive && area > 0) {
+    updateHeirsDistribution();
+    updateHeirsUI();
+  }
 }
 
 // Circle intersection helper
@@ -612,6 +784,23 @@ function intersectCircles(x1, y1, r1, x2, y2, r2) {
       y: y_p + (h * (x2 - x1)) / d
     }
   ];
+}
+
+// Geometry Engine for Division
+function solveDepthForArea(S, Top, Bottom, H) {
+  if (H <= 0) return 0;
+  let b = Top;
+  let c = (Bottom - Top) / (2 * H);
+  
+  if (Math.abs(c) < 0.0001) {
+    return S / b;
+  } else {
+    let discriminant = b * b + 4 * c * S;
+    if (discriminant < 0) return 0;
+    let y1 = (-b + Math.sqrt(discriminant)) / (2 * c);
+    let y2 = (-b - Math.sqrt(discriminant)) / (2 * c);
+    return (y1 >= 0 && y1 <= H + 0.1) ? y1 : y2;
+  }
 }
 
 // Canvas Drawer
@@ -672,6 +861,9 @@ function drawLandCanvas(vertices) {
       y: canvas.height - (margin + (v.y - minY) * scale + (drawH - dy * scale) / 2)
     };
   });
+
+  currentCanvasPoints = canvasPoints;
+
 
   // 3. Draw Polygon shape
   ctx.fillStyle = "rgba(46, 125, 50, 0.06)";
@@ -810,146 +1002,186 @@ function drawLandCanvas(vertices) {
     ctx.restore();
   }
 
-  // 6. Draw Division lines and piece text badges
-  if (isDivisionActive && heirsData.length > 0 && calculatedArea > 0) {
+  // 6. Draw Division lines, piece info, and side dimensions
+  if (isDivisionActive && heirsData.length > 0 && calculatedArea > 0 && canvasPoints.length >= 4) {
     const caratSize = parseFloat(caratSizeInput.value) || 168;
     
-    // Bottom points interpolated along base AB (V0 to V1)
-    const A = vertices[0];
-    const B = vertices[1];
-    // Top points interpolated along base DC (V3 to V2)
-    const D = vertices[3];
-    const C = vertices[2];
+    // Reset divider handles array
+    dividerHandles = [];
 
-    const cpA = canvasPoints[0];
-    const cpB = canvasPoints[1];
-    const cpD = canvasPoints[3];
-    const cpC = canvasPoints[2];
-
-    // Total area coefficients for quadratic partition
-    const a = B.x - A.x;
-    const y_d = D.y - A.y;
-    const dx_cd = C.x - D.x;
-    const dy_cd = C.y - D.y;
-
-    // Calculate A_coef & B_coef
-    let A_coef = 0.5 * (a * y_d + dx_cd * y_d - dy_cd * D.x);
-    let B_coef = 0.5 * (a * dy_cd);
-    
-    // Adjust signs if necessary
-    const totalCheck = A_coef + B_coef;
-    let signFactor = 1;
-    if (totalCheck < 0) {
-      A_coef = -A_coef;
-      B_coef = -B_coef;
-      signFactor = -1;
+    // Get land side lengths for geometry engine
+    let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
+    if (activeShape === 'rectangle') {
+      landLeft = parseFloat(document.getElementById('rect-length')?.value) || 0;
+      landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+      landBottom = landTop; landRight = landLeft;
+    } else if (activeShape === 'square') {
+      let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+      landTop = s; landBottom = s; landLeft = s; landRight = s;
+    } else if (activeShape === 'trapezoid') {
+      landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+      landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+      let h = parseFloat(document.getElementById('trap-height')?.value) || 0;
+      landLeft = h; landRight = h;
+    } else if (activeShape === 'quadrilateral') {
+      landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+      landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
+      landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+      landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
     }
+    
+    const W = (landTop + landBottom) / 2;
 
-    // Cumulative shares to find split boundaries t_i
+    // Canvas corners
+    const cpA = canvasPoints[0]; // bottom-left
+    const cpB = canvasPoints[1]; // bottom-right
+    const cpC = canvasPoints[2]; // top-right
+    const cpD = canvasPoints[3]; // top-left
+
+    // Calculate cumulative t values using Geometry Engine
     let cumArea = 0;
     const splitTs = [0];
+    
+    // Scale area factor for Brahmagupta cyclic quadrilateral area consistency
+    const totalTrapArea = ((landLeft + landRight) / 2) * W;
+    const areaScaleFactor = (totalTrapArea > 0) ? (calculatedArea / totalTrapArea) : 1;
 
     for (let i = 0; i < heirsData.length - 1; i++) {
       cumArea += heirsData[i].share;
       let t = 0;
-      if (Math.abs(B_coef) < 0.0001) {
-        // Linear equation
-        t = cumArea / A_coef;
+      if (W > 0) {
+        // Unscale area to solve in normal trapezoid space
+        const unscaledArea = cumArea / areaScaleFactor;
+        let depth = solveDepthForArea(unscaledArea, landLeft, landRight, W);
+        t = depth / W;
       } else {
-        // Quadratic equation: B_coef * t^2 + A_coef * t - cumArea = 0
-        const disc = A_coef * A_coef + 4 * B_coef * cumArea;
-        if (disc >= 0) {
-          t = (-A_coef + Math.sqrt(disc)) / (2 * B_coef);
-        } else {
-          t = cumArea / (A_coef + B_coef); // fallback
-        }
+        t = cumArea / calculatedArea;
       }
-      
-      // Clamp t to [0, 1]
       t = Math.max(0, Math.min(1, t));
       splitTs.push(t);
     }
-    splitTs.push(1); // last boundary
+    splitTs.push(1);
 
-    // Draw division lines and labels for each slice
-    for (let i = 1; i < splitTs.length; i++) {
-      const tPrev = splitTs[i - 1];
-      const tCurr = splitTs[i];
+    // Draw each piece
+    for (let i = 0; i < heirsData.length; i++) {
+      const tPrev = splitTs[i];
+      const tCurr = splitTs[i + 1];
+      const heir = heirsData[i];
+      if (!heir) continue;
 
-      // Left split boundary line
-      if (i > 1 && i < splitTs.length) {
-        const t = tPrev;
-        
-        // Canvas coordinates of split line
-        const bottomCanvasPt = {
-          x: cpA.x + t * (cpB.x - cpA.x),
-          y: cpA.y + t * (cpB.y - cpA.y)
-        };
-        const topCanvasPt = {
-          x: cpD.x + t * (cpC.x - cpD.x),
-          y: cpD.y + t * (cpC.y - cpD.y)
-        };
+      // Canvas coordinates for vertical slice (interpolated along the top and bottom sides)
+      const cpTopPrev    = { x: cpD.x + tPrev * (cpC.x - cpD.x), y: cpD.y + tPrev * (cpC.y - cpD.y) };
+      const cpBottomPrev = { x: cpA.x + tPrev * (cpB.x - cpA.x), y: cpA.y + tPrev * (cpB.y - cpA.y) };
+      const cpTopCurr    = { x: cpD.x + tCurr * (cpC.x - cpD.x), y: cpD.y + tCurr * (cpC.y - cpD.y) };
+      const cpBottomCurr = { x: cpA.x + tCurr * (cpB.x - cpA.x), y: cpA.y + tCurr * (cpB.y - cpA.y) };
 
-        // Draw dashed blue boundary line
+      // Calculate real side lengths for this piece
+      let pieceTopW, pieceBotW, pieceLeftL, pieceRightL;
+      if (W > 0) {
+        pieceLeftL = landLeft + tPrev * (landRight - landLeft);
+        pieceRightL = landLeft + tCurr * (landRight - landLeft);
+        pieceTopW = (tCurr - tPrev) * landTop;
+        pieceBotW = (tCurr - tPrev) * landBottom;
+      } else {
+        pieceTopW = 0; pieceBotW = 0; pieceLeftL = 0; pieceRightL = 0;
+      }
+      if (i === heirsData.length - 1) {
+        pieceRightL = landRight;
+      }
+
+      // Save to heirsData for table display
+      heir.topW = pieceTopW;
+      heir.botW = pieceBotW;
+      heir.leftL = pieceLeftL;
+      heir.rightL = pieceRightL;
+
+      // Draw slice background fill
+      ctx.fillStyle = (i % 2 === 0) ? "rgba(46, 125, 50, 0.08)" : "rgba(46, 125, 50, 0.02)";
+      ctx.beginPath();
+      ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+      ctx.lineTo(cpTopCurr.x, cpTopCurr.y);
+      ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
+      ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw dashed divider line (between pieces, not at start/end)
+      if (i > 0) {
         ctx.strokeStyle = "#0288d1";
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(bottomCanvasPt.x, bottomCanvasPt.y);
-        ctx.lineTo(topCanvasPt.x, topCanvasPt.y);
+        ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+        ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // 7. Render information badge for each partitioned piece
-      // Vertices of this slice
-      const cpBottomPrev = { x: cpA.x + tPrev * (cpB.x - cpA.x), y: cpA.y + tPrev * (cpB.y - cpA.y) };
-      const cpBottomCurr = { x: cpA.x + tCurr * (cpB.x - cpA.x), y: cpA.y + tCurr * (cpB.y - cpA.y) };
-      const cpTopCurr = { x: cpD.x + tCurr * (cpC.x - cpD.x), y: cpD.y + tCurr * (cpC.y - cpD.y) };
-      const cpTopPrev = { x: cpD.x + tPrev * (cpC.x - cpD.x), y: cpD.y + tPrev * (cpC.y - cpD.y) };
+      // Slice Centroid for info badge
+      const centroidX = (cpTopPrev.x + cpTopCurr.x + cpBottomPrev.x + cpBottomCurr.x) / 4;
+      const centroidY = (cpTopPrev.y + cpTopCurr.y + cpBottomPrev.y + cpBottomCurr.y) / 4;
 
-      // Slice Centroid for text writing
-      const centroidX = (cpBottomPrev.x + cpBottomCurr.x + cpTopCurr.x + cpTopPrev.x) / 4;
-      const centroidY = (cpBottomPrev.y + cpBottomCurr.y + cpTopCurr.y + cpTopPrev.y) / 4;
+      const heirConv = convertSqmToFeddans(heir.share, caratSize);
+      
+      ctx.save();
+      ctx.translate(centroidX, centroidY);
+      ctx.rotate(-Math.PI / 2);
 
-      const heir = heirsData[i - 1];
-      if (heir) {
-        const heirConv = convertSqmToFeddans(heir.share, caratSize);
-        
-        // Piece Box drawing
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.strokeStyle = "#0288d1";
-        ctx.lineWidth = 1;
-        const boxW = 85;
-        const boxH = 50;
+      // Line 1: Piece name
+      ctx.fillStyle = "#333";
+      ctx.font = "bold 11px Cairo";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${i + 1}- ${heir.name}`, -30, 0);
+      
+      // Line 2: Area
+      ctx.fillStyle = "#01579b";
+      ctx.font = "bold 11px Cairo";
+      ctx.fillText(`${heir.share.toFixed(1)} م²`, 30, 0);
+
+      ctx.restore();
+
+      // Draw side length labels on the edges
+      ctx.font = "bold 10px Arial";
+      
+      // Top width of piece
+      ctx.fillStyle = "#d32f2f";
+      ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8);
+      
+      // Bottom width
+      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12);
+      
+      // Left side length (only first piece shows left edge label)
+      ctx.fillStyle = "#1b5e20";
+      if (i === 0) {
+        ctx.fillText(`${pieceLeftL.toFixed(2)}`, (cpTopPrev.x + cpBottomPrev.x) / 2 + 15, (cpTopPrev.y + cpBottomPrev.y) / 2);
+      }
+      
+      // Right side length
+      ctx.fillText(`${pieceRightL.toFixed(2)}`, (cpTopCurr.x + cpBottomCurr.x) / 2 - 15, (cpTopCurr.y + cpBottomCurr.y) / 2);
+
+      // Draw handle for dragging vertical dividers (between slices)
+      if (i > 0) {
+        const hX = (cpTopPrev.x + cpBottomPrev.x) / 2;
+        const hY = (cpTopPrev.y + cpBottomPrev.y) / 2;
         
         ctx.beginPath();
-        ctx.roundRect(centroidX - boxW / 2, centroidY - boxH / 2, boxW, boxH, 6);
+        ctx.arc(hX, hY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#388e3c';
         ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
         ctx.stroke();
-
-        // text lines
-        ctx.fillStyle = "#333";
-        ctx.font = "bold 9px Cairo";
-        ctx.textAlign = "center";
         
-        // Line 1: Piece ID & Name
-        ctx.fillText(`${i}- ${heir.name}`, centroidX, centroidY - 14);
-        
-        // Line 2: Area in sqm
-        ctx.fillStyle = "#01579b";
-        ctx.fillText(`${heir.share.toFixed(1)} م²`, centroidX, centroidY - 2);
-
-        // Line 3: Feddan, carat, sahm
-        ctx.fillStyle = "#2e7d32";
-        ctx.font = "8px Cairo";
-        let parts = [];
-        if (heirConv.feddans > 0) parts.push(`${heirConv.feddans}ف`);
-        if (heirConv.carats > 0) parts.push(`${heirConv.carats}ط`);
-        if (heirConv.shares > 0) parts.push(`${heirConv.shares.toFixed(1)}س`);
-        if (parts.length === 0) parts.push("0س");
-        
-        ctx.fillText(parts.join(" ، "), centroidX, centroidY + 12);
+        dividerHandles.push({
+          index: i,
+          x: hX,
+          y: hY,
+          topX: cpTopPrev.x,
+          topY: cpTopPrev.y,
+          botX: cpBottomPrev.x,
+          botY: cpBottomPrev.y
+        });
       }
     }
   }
@@ -993,6 +1225,27 @@ function commitHeirShareImmediately(idx, type, newValString) {
   updateHeirShare(idx, type, newVal);
 }
 
+// Update side lengths manually
+function updateHeirSide(idx, sideStr, valStr) {
+  const val = parseFloat(valStr) || 0;
+  if (!heirsData[idx]) return;
+  
+  heirsData[idx][sideStr] = val;
+  
+  // Recalculate area based on Dalaal's formula: ((Top+Bottom)/2) * ((Left+Right)/2)
+  let t = heirsData[idx].topW || 0;
+  let b = heirsData[idx].botW || 0;
+  let r = heirsData[idx].rightL || 0;
+  let l = heirsData[idx].leftL || 0;
+  
+  let newArea = ((t + b) / 2) * ((l + r) / 2);
+  
+  if (newArea > 0) {
+    heirsData[idx].share = newArea;
+    updateHeirShare(idx, 'sqm', newArea);
+  }
+}
+
 function debouncedUpdateHeirSplitShare(idx, unitType, newValString) {
   let newVal = parseFloat(newValString) || 0;
   if (unitType === 'carat' || unitType === 'feddan') {
@@ -1023,6 +1276,11 @@ function updateHeirsUI() {
     const inputCarat = row.querySelector('.heir-share-carat');
     const inputFeddan = row.querySelector('.heir-share-feddan');
 
+    const inputTop = row.querySelector('.heir-side-top');
+    const inputBot = row.querySelector('.heir-side-bot');
+    const inputRight = row.querySelector('.heir-side-right');
+    const inputLeft = row.querySelector('.heir-side-left');
+
     if (inputName && document.activeElement !== inputName) {
       inputName.value = heir.name;
     }
@@ -1038,11 +1296,20 @@ function updateHeirsUI() {
     if (inputFeddan && document.activeElement !== inputFeddan) {
       inputFeddan.value = conv.feddans;
     }
+    
+    // Update sides if they exist
+    if (inputTop && document.activeElement !== inputTop) inputTop.value = (heir.topW || 0).toFixed(2);
+    if (inputBot && document.activeElement !== inputBot) inputBot.value = (heir.botW || 0).toFixed(2);
+    if (inputRight && document.activeElement !== inputRight) inputRight.value = (heir.rightL || 0).toFixed(2);
+    if (inputLeft && document.activeElement !== inputLeft) inputLeft.value = (heir.leftL || 0).toFixed(2);
   });
 }
 
 function renderHeirsRows() {
   const caratSize = parseFloat(caratSizeInput.value) || 168;
+  
+  // Sides are calculated inside drawLandCanvas which is called by calculateAll
+  
   heirsListTbody.innerHTML = "";
 
   heirsData.forEach((heir, idx) => {
@@ -1060,6 +1327,18 @@ function renderHeirsRows() {
       <tr data-index="${idx}">
         <td>
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-top" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.topW || 0).toFixed(2)}" readonly />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-bot" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.botW || 0).toFixed(2)}" readonly />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
+        </td>
+        <td>
+          <input type="number" step="any" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
         </td>
         <td>
           <input type="number" step="any" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
@@ -1108,6 +1387,11 @@ function updateHeirName(idx, value) {
 // Triggered when a user types in a share directly
 function updateHeirShare(idx, type, newVal) {
   if (calculatedArea <= 0) return;
+  if (heirsData.length === 1) {
+    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
+    renderHeirsRows();
+    return;
+  }
   const oldVal = heirsData[idx].share;
   const diff = newVal - oldVal;
   
@@ -1123,6 +1407,11 @@ function updateHeirShare(idx, type, newVal) {
 // Triggered when editing split shares (Feddan, Carat, Sahm)
 function updateHeirSplitShare(idx, unitType, newVal) {
   if (calculatedArea <= 0) return;
+  if (heirsData.length === 1) {
+    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
+    renderHeirsRows();
+    return;
+  }
   const caratSize = parseFloat(caratSizeInput.value) || 168;
   const currentConv = convertSqmToFeddans(heirsData[idx].share, caratSize);
   
