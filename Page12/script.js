@@ -1368,151 +1368,37 @@ function printDallalMap() {
   const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
   const timeStr = now.toLocaleTimeString("ar-EG");
 
-  const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html dir="rtl" lang="ar">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>خريطة وكروكي تقسيم الأراضي - الدلال</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        
-        body, html {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          font-family: 'Cairo', Arial, sans-serif;
-          color: #111;
-          background: white;
-          direction: rtl;
-        }
-        .header {
-          text-align: center;
-          border-bottom: 2px dashed #004d40;
-          padding-bottom: 5px;
-          margin: 10px 15px;
-        }
-        .header h1 {
-          margin: 0;
-          color: #004d40;
-          font-size: 20px;
-          font-weight: bold;
-        }
-        .header p {
-          margin: 2px 0 0;
-          color: #666;
-          font-size: 11px;
-        }
-        .canvas-container {
-          width: 100%;
-          max-width: 1000px;
-          margin: 15px auto;
-          box-sizing: border-box;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        svg {
-          width: 100%;
-          height: 100%;
-          max-height: 100%;
-          max-width: 100%;
-          display: block;
-          background-color: white;
-          border: 1px solid #000;
-        }
-        .footer {
-          text-align: center;
-          font-size: 11px;
-          color: #777;
-          border-top: 1px dashed #eee;
-          padding-top: 15px;
-          margin: 20px 15px;
-        }
-        .print-btn {
-          margin-top: 5px;
-          padding: 12px 25px;
-          background: linear-gradient(135deg, #1b5e20, #2e7d32);
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-family: 'Cairo';
-          font-weight: bold;
-          font-size: 16px;
-          cursor: pointer;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-          transition: all 0.3s ease;
-        }
-        @media print {
-          @page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          body, html {
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-            padding: 0;
-          }
-          .header, .footer {
-            display: none !important;
-          }
-          .canvas-container {
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          svg {
-            border: none !important;
-            width: 100% !important;
-            height: 100% !important;
-          }
-          
-          /* Force Black & White Colors for Printing */
-          svg polygon, svg rect:not([fill^="url"]) {
-            fill: white !important;
-          }
-          svg path, svg line, svg polygon {
-            stroke: #000 !important;
-          }
-          svg text, svg tspan {
-            fill: #000 !important;
-          }
-          #blueprintGrid path {
-            stroke: rgba(0, 0, 0, 0.1) !important;
-          }
-          #waterPattern path {
-            stroke: #000 !important;
-          }
-          #waterPattern rect {
-            fill: white !important;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>كروكي الأراضي الهندسية - الدَّلاَّل</h1>
-        <p>تاريخ الاستخراج: ${dateStr} | الساعة: ${timeStr}</p>
-      </div>
+  const printOverlay = document.getElementById("printOverlay");
+  printOverlay.innerHTML = `
+      <div class="print-overlay-content" style="background: white; min-height: 100vh; display: flex; flex-direction: column;">
+        <div class="header" style="text-align: center; border-bottom: 2px dashed #004d40; padding-bottom: 5px; margin: 10px 15px;">
+          <h1 style="margin: 0; color: #004d40; font-size: 20px; font-weight: bold; font-family: 'Cairo';">كروكي الأراضي الهندسية - الدَّلاَّل</h1>
+          <p style="margin: 2px 0 0; color: #666; font-size: 11px; font-family: 'Cairo';">تاريخ الاستخراج: ${dateStr} | الساعة: ${timeStr}</p>
+        </div>
 
-      <div class="canvas-container">
-        ${svgHTML}
-      </div>
+        <div class="canvas-container" style="flex: 1; width: 100%; max-width: 1000px; margin: 15px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 10px;">
+          ${svgHTML}
+        </div>
 
-      <div class="footer">
-        <button class="no-print print-btn" onclick="window.print()">🖨️ طباعة الخريطة</button>
-        <p style="margin: 15px 0 5px; font-weight: bold; color: #1b5e20; font-size: 12px;">جميع الحقوق محفوظة © تطبيق الدلال لقياسات الأراضي</p>
+        <div class="footer no-print" style="text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #eee; padding-top: 15px; margin: 20px 15px 50px 15px; font-family: 'Cairo';">
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.print()" style="padding: 12px 25px; background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🖨️ طباعة عبر النظام</button>
+            <button onclick="document.getElementById('printOverlay').style.display='none'" style="padding: 12px 25px; background: #c62828; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">❌ إغلاق / العودة</button>
+          </div>
+          <p style="margin: 15px 0 5px; font-weight: bold; color: #1b5e20; font-size: 13px;">يمكنك التقاط صورة للشاشة (سكرين شوت) الآن!</p>
+          <p style="margin: 5px 0; font-weight: bold; color: #1b5e20; font-size: 12px;">جميع الحقوق محفوظة © تطبيق الدلال لقياسات الأراضي</p>
+        </div>
       </div>
-    </body>
-    </html>
-  `);
-  printWindow.document.close();
+  `;
+  
+  const overlaySvg = printOverlay.querySelector("svg");
+  if(overlaySvg) {
+      overlaySvg.style.width = "100%";
+      overlaySvg.style.height = "auto";
+      overlaySvg.style.maxHeight = "70vh";
+      overlaySvg.style.backgroundColor = "white";
+  }
+  
+  printOverlay.style.display = "block";
+  window.scrollTo(0, 0);
 }
