@@ -253,28 +253,69 @@ function printCroquis() {
 
   const canvas = document.createElement("canvas");
   canvas.width = 600;
-  canvas.height = 600;
+  canvas.height = 450;
   const ctx = canvas.getContext("2d");
 
   // Fill white background
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Draw Grid Background (شبكة مربعات هندسية احترافية)
+  const gridSize = 20;
+  for (let x = 0; x < canvas.width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    // Draw major lines thicker and minor lines thinner
+    ctx.strokeStyle = (x % (gridSize * 5) === 0) ? "#e2ebe7" : "#f1f6f3"; 
+    ctx.lineWidth = (x % (gridSize * 5) === 0) ? 1.2 : 0.6;
+    ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.strokeStyle = (y % (gridSize * 5) === 0) ? "#e2ebe7" : "#f1f6f3"; 
+    ctx.lineWidth = (y % (gridSize * 5) === 0) ? 1.2 : 0.6;
+    ctx.stroke();
+  }
+
   const w1 = Number(width1.value) || 0;
   const w2 = Number(width2.value) || 0;
   const h = Number(height.value) || 0;
 
+  // Calculate slant lengths
+  const dx = Math.abs(w2 - w1) / 2;
+  const slant = Math.sqrt(dx * dx + h * h);
+
+  // Scaling
   const maxW = Math.max(w1, w2);
-  const scaleX = 400 / maxW;
-  const scaleY = 400 / h;
+  const scaleX = 480 / maxW;
+  const scaleY = 320 / h;
   const scale = Math.min(scaleX, scaleY);
 
-  const drawW1 = w1 * scale;
-  const drawW2 = w2 * scale;
-  const drawH = h * scale;
+  // Calculate scaled dimensions with minimum constraints for extreme aspect ratios
+  let drawW1 = w1 * scale;
+  let drawW2 = w2 * scale;
+  let drawH = h * scale;
+
+  // Safeguard for narrow vertical shapes (longitudinal land, e.g., 400m length by 7m width)
+  const minDrawW = 120;
+  const maxDrawW = Math.max(drawW1, drawW2);
+  if (maxDrawW < minDrawW) {
+    const boost = maxDrawW > 0 ? (minDrawW / maxDrawW) : 1;
+    drawW1 = drawW1 * boost || minDrawW;
+    drawW2 = drawW2 * boost || minDrawW;
+  }
+
+  // Safeguard for narrow horizontal shapes (very wide/short land)
+  const minDrawH = 120;
+  if (drawH < minDrawH) {
+    drawH = minDrawH;
+  }
 
   const centerX = 300;
-  const centerY = 300;
+  const centerY = 225;
 
   const p1 = { x: centerX - drawW1 / 2, y: centerY - drawH / 2 };
   const p2 = { x: centerX + drawW1 / 2, y: centerY - drawH / 2 };
@@ -289,41 +330,168 @@ function printCroquis() {
   ctx.lineTo(p4.x, p4.y);
   ctx.closePath();
 
-  ctx.fillStyle = "#e8f5e9";
+  // Fill with Agricultural Green Gradient
+  const grad = ctx.createLinearGradient(centerX, p1.y, centerX, p4.y);
+  grad.addColorStop(0, "rgba(224, 242, 225, 0.75)"); // light organic green
+  grad.addColorStop(1, "rgba(165, 214, 167, 0.75)"); // richer farm green
+  ctx.fillStyle = grad;
   ctx.fill();
-  ctx.strokeStyle = "#2e7d32";
-  ctx.lineWidth = 3;
+
+  // Draw Strong Green Boundary Border
+  ctx.strokeStyle = "#2e7d32"; 
+  ctx.lineWidth = 3.5;
   ctx.stroke();
+
+  // Draw Inner Dashed Boundary Line (Survey Map Style)
+  ctx.save();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.0;
+  ctx.setLineDash([4, 3]);
+  ctx.stroke();
+  ctx.restore();
+
+  // Helper function to draw dimension lines
+  function drawDimensionLine(pStart, pEnd, label, offsetVal) {
+    const segmentDx = pEnd.x - pStart.x;
+    const segmentDy = pEnd.y - pStart.y;
+    const len = Math.sqrt(segmentDx * segmentDx + segmentDy * segmentDy);
+    if (len === 0) return;
+    
+    const ux = segmentDx / len;
+    const uy = segmentDy / len;
+    
+    const mX = (pStart.x + pEnd.x) / 2;
+    const mY = (pStart.y + pEnd.y) / 2;
+    
+    let nx = -uy;
+    let ny = ux;
+    const vx = mX - 300;
+    const vy = mY - 225;
+    if (nx * vx + ny * vy < 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+    
+    const pStartOffset = { x: pStart.x + nx * offsetVal, y: pStart.y + ny * offsetVal };
+    const pEndOffset = { x: pEnd.x + nx * offsetVal, y: pEnd.y + ny * offsetVal };
+    
+    // Draw dashed extension lines
+    ctx.beginPath();
+    ctx.setLineDash([3, 3]);
+    ctx.moveTo(pStart.x, pStart.y);
+    ctx.lineTo(pStartOffset.x, pStartOffset.y);
+    ctx.moveTo(pEnd.x, pEnd.y);
+    ctx.lineTo(pEndOffset.x, pEndOffset.y);
+    ctx.strokeStyle = "#999999";
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw main dimension line
+    ctx.beginPath();
+    ctx.moveTo(pStartOffset.x, pStartOffset.y);
+    ctx.lineTo(pEndOffset.x, pEndOffset.y);
+    ctx.strokeStyle = "#2e7d32";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    
+    // Draw endpoint dots
+    ctx.beginPath();
+    ctx.arc(pStartOffset.x, pStartOffset.y, 3, 0, 2 * Math.PI);
+    ctx.arc(pEndOffset.x, pEndOffset.y, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = "#2e7d32";
+    ctx.fill();
+    
+    // Draw text label
+    let angle = Math.atan2(segmentDy, segmentDx);
+    if (angle > Math.PI / 2) angle -= Math.PI;
+    if (angle < -Math.PI / 2) angle += Math.PI;
+    
+    ctx.save();
+    ctx.translate(mX + nx * offsetVal, mY + ny * offsetVal);
+    ctx.rotate(angle);
+    ctx.fillStyle = "#1b5e20";
+    ctx.font = "bold 11px Cairo, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(label, 0, -3);
+    ctx.restore();
+  }
+
+  // Draw 4 dimension lines with dynamic side offsets to avoid collision with center details card
+  const sideOffset = Math.max(30, 115 - Math.max(drawW1, drawW2) / 2);
+  drawDimensionLine(p1, p2, `${w1.toFixed(2)} م`, 30); 
+  drawDimensionLine(p2, p3, `${slant.toFixed(2)} م`, sideOffset); 
+  drawDimensionLine(p3, p4, `${w2.toFixed(2)} م`, 30); 
+  drawDimensionLine(p4, p1, `${slant.toFixed(2)} م`, sideOffset);  
 
   // Draw dashed line for height in the center
   ctx.beginPath();
-  ctx.setLineDash([5, 5]);
+  ctx.setLineDash([4, 4]);
   ctx.moveTo(centerX, p1.y);
   ctx.lineTo(centerX, p4.y);
   ctx.strokeStyle = "#388e3c";
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.2;
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Draw labels
-  ctx.fillStyle = "#222222";
-  ctx.font = "bold 13px Cairo, Arial, sans-serif";
-  ctx.textAlign = "center";
+  // Draw a white background card in the center to hold the text cleanly
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.strokeStyle = "rgba(46, 117, 89, 0.35)";
+  ctx.lineWidth = 1.2;
+  const cardW = 190;
+  const cardH = 75;
+  const cardX = centerX - cardW / 2;
+  const cardY = centerY - cardH / 2 - 10;
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(cardX, cardY, cardW, cardH, 8);
+  } else {
+    ctx.rect(cardX, cardY, cardW, cardH);
+  }
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
 
-  // Top side label
-  ctx.fillText(`العرض الأول: ${w1} م`, centerX, p1.y - 12);
+  // Draw height label inside a white background pill below the card
+  const heightText = `الطول: ${h.toFixed(2)} م`;
+  ctx.font = "bold 11px Cairo, Arial, sans-serif";
+  const hTextWidth = ctx.measureText(heightText).width;
   
-  // Bottom side label
-  ctx.fillText(`العرض الآخر: ${w2} م`, centerX, p4.y + 22);
-
-  // Height side label
-  ctx.textAlign = "right";
-  ctx.fillText(`الطول: ${h} م`, centerX - 10, centerY);
-
-  // Details inside the shape
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(centerX - hTextWidth / 2 - 6, centerY + drawH / 3 - 9, hTextWidth + 12, 16, 4);
+  } else {
+    ctx.rect(centerX - hTextWidth / 2 - 6, centerY + drawH / 3 - 9, hTextWidth + 12, 16);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "#2e7d32";
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  
   ctx.fillStyle = "#1b5e20";
-  ctx.font = "bold 13px Cairo, Arial, sans-serif";
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(heightText, centerX, centerY + drawH / 3 - 1);
+
+  // Draw corner vertices
+  [p1, p2, p3, p4].forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = "#1b5e20";
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // Details inside the shape card
+  ctx.fillStyle = "#1b5e20";
+  ctx.font = "bold 11px Cairo, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
 
   const totalArea = totalArea_result.innerText;
   const feddan = area_result1.innerText;
@@ -331,17 +499,48 @@ function printCroquis() {
   const shares_val = area_result3.innerText;
   const priceVal = price_result.innerText;
 
-  let startY = centerY - 25;
+  let startY = centerY - 32;
   ctx.fillText("المساحة الكلية", centerX, startY);
-  ctx.font = "bold 15px Cairo, Arial, sans-serif";
-  ctx.fillText(`${totalArea} م²`, centerX, startY + 20);
-  ctx.font = "bold 12px Cairo, Arial, sans-serif";
-  ctx.fillText(`${feddan} فدان ، ${carat} قيراط ، ${shares_val} سهم`, centerX, startY + 40);
+  ctx.font = "bold 14px Cairo, Arial, sans-serif";
+  ctx.fillText(`${totalArea} م²`, centerX, startY + 18);
+  ctx.font = "bold 10px Cairo, Arial, sans-serif";
+  ctx.fillText(`${feddan} فدان ، ${carat} قيراط ، ${shares_val} سهم`, centerX, startY + 34);
 
   if (priceVal && priceVal !== "0") {
-    ctx.font = "bold 12px Cairo, Arial, sans-serif";
-    ctx.fillText(`إجمالي السعر: ${priceVal} جنيه`, centerX, startY + 60);
+    ctx.font = "bold 10px Cairo, Arial, sans-serif";
+    ctx.fillText(`إجمالي السعر: ${priceVal} جنيه`, centerX, startY + 50);
   }
+
+  // Draw North Arrow (سهم اتجاه الشمال المساحي) in the top-right corner
+  ctx.save();
+  const arrowX = 550;
+  const arrowY = 60;
+  ctx.translate(arrowX, arrowY);
+  
+  // Draw N text (شمال)
+  ctx.fillStyle = "#1b5e20";
+  ctx.font = "bold 11px Cairo, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("ش", 0, -18);
+  
+  // Right half (darker)
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(4, 8);
+  ctx.lineTo(0, 3);
+  ctx.closePath();
+  ctx.fillStyle = "#1b5e20";
+  ctx.fill();
+
+  // Left half (lighter)
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(-4, 8);
+  ctx.lineTo(0, 3);
+  ctx.closePath();
+  ctx.fillStyle = "#388e3c";
+  ctx.fill();
+  ctx.restore();
 
   const imgURL = canvas.toDataURL("image/png");
 
@@ -359,38 +558,43 @@ function printCroquis() {
       <style>
         body {
           font-family: 'Cairo', Arial, sans-serif;
-          margin: 20px;
+          margin: 10px;
           color: #333;
           direction: rtl;
+          position: relative;
+          min-height: 96vh;
         }
         .header {
           text-align: center;
-          border-bottom: 3px solid #2e7d32;
-          padding-bottom: 10px;
-          margin-bottom: 20px;
+          border-bottom: 2px solid #2e7d32;
+          padding-bottom: 5px;
+          margin-bottom: 10px;
         }
         .header h1 {
           margin: 0;
           color: #1b5e20;
-          font-size: 24px;
+          font-size: 20px;
         }
         .header p {
-          margin: 5px 0 0;
+          margin: 3px 0 0;
           color: #666;
-          font-size: 14px;
+          font-size: 12px;
         }
         .container {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 20px;
+          gap: 10px;
+          width: 100%;
+          max-width: 600px;
+          margin: 0 auto;
         }
         .sketch {
           border: 2px solid #2e7d32;
           border-radius: 10px;
-          padding: 10px;
+          padding: 5px;
           background: #f9f9f9;
-          max-width: 500px;
+          max-width: 600px;
           width: 100%;
         }
         .sketch img {
@@ -401,13 +605,13 @@ function printCroquis() {
         .results-table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 10px;
+          margin-top: 5px;
         }
         .results-table th, .results-table td {
           border: 1px solid #ddd;
-          padding: 10px;
+          padding: 6px 10px;
           text-align: center;
-          font-size: 14px;
+          font-size: 13px;
         }
         .results-table th {
           background-color: #e8f5e9;
@@ -415,21 +619,77 @@ function printCroquis() {
           font-weight: bold;
         }
         .footer {
-          margin-top: 30px;
+          margin-top: 20px;
           text-align: center;
-          font-size: 12px;
+          font-size: 11px;
           color: #888;
           border-top: 1px solid #ddd;
           padding-top: 10px;
         }
         @media print {
           .no-print {
-            display: none;
+            display: none !important;
           }
+          body {
+            color: #000000 !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          h1, h2, h3, p, span, td, th {
+            color: #000000 !important;
+          }
+          .header {
+            border-bottom: 2px solid #000000 !important;
+          }
+          .header h1 {
+            color: #000000 !important;
+          }
+          .sketch {
+            border: 2px solid #000000 !important;
+          }
+          .sketch img {
+            filter: grayscale(100%) contrast(110%) !important;
+          }
+          .results-table th {
+            background-color: #f2f2f2 !important;
+            color: #000000 !important;
+            border: 1px solid #000000 !important;
+          }
+          .results-table td {
+            border: 1px solid #000000 !important;
+            color: #000000 !important;
+          }
+          .watermark {
+            color: #000000 !important;
+            opacity: 0.08 !important;
+          }
+          .footer {
+            border-top: 1px solid #000000 !important;
+          }
+        }
+        .watermark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-25deg);
+          font-size: 19px;
+          color: #2e7d32; 
+          opacity: 0.14;
+          font-weight: bold;
+          white-space: nowrap;
+          pointer-events: none;
+          z-index: 9999;
+          font-family: 'Cairo', Arial, sans-serif;
+          user-select: none;
+          text-align: center;
+          width: 100%;
         }
       </style>
     </head>
     <body>
+      <!-- Watermark Overlay -->
+      <div class="watermark">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
       <div class="header">
         <h1>تقرير كروكي الأرض الزراعية</h1>
         <p>تاريخ الطباعة: ${dateStr} - الساعة: ${timeStr}</p>
@@ -473,12 +733,35 @@ function printCroquis() {
         </table>
       </div>
 
+      <!-- Navigation Bar at the bottom (Hidden when printing) -->
+      <div class="no-print" style="margin-top: 30px; margin-bottom: 20px; width: 100%; display: flex; justify-content: center; direction: rtl;">
+        <div style="display: flex; justify-content: space-around; align-items: center; background-color: #a5f2a2; width: 100%; max-width: 500px; padding: 12px 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <a href="help2/index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
+            <img src="../../imgs/nav1.png" alt="كسور" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
+            <span style="font-family: 'Cairo', Arial, sans-serif;">كسور</span>
+          </a>
+          <a href="#" onclick="window.close(); return false;" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
+            <img src="../../imgs/nav2.png" alt="رجوع" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
+            <span style="font-family: 'Cairo', Arial, sans-serif;">رجوع</span>
+          </a>
+          <a href="help/index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
+            <img src="../../imgs/nav3.png" alt="مساعدة" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
+            <span style="font-family: 'Cairo', Arial, sans-serif;">مساعدة</span>
+          </a>
+          <a href="../../index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
+            <img src="../../imgs/nav4.png" alt="الرئيسية" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
+            <span style="font-family: 'Cairo', Arial, sans-serif;">الرئيسية</span>
+          </a>
+        </div>
+      </div>
+
       <div class="footer">
-        <p>تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
+        <p style="margin: 5px 0; font-size: 13px; color: #333; font-weight: bold;">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</p>
+        <p style="margin: 5px 0; font-size: 11px; color: #777;">تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
         <button class="no-print" onclick="window.print()" style="margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">بدء الطباعة</button>
       </div>
     </body>
     </html>
-  \`);
+  `);
   printWindow.document.close();
 }

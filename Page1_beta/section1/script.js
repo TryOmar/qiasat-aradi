@@ -1721,14 +1721,33 @@ function printCroquis() {
   const areaCarats = document.getElementById('area-carats')?.innerText || '0';
   const areaFeddans = document.getElementById('area-feddans')?.innerText || '0';
 
+  // Helper to sync current input/select values into their HTML attributes before serializing
+  function syncInputValues(container) {
+    if (!container) return;
+    container.querySelectorAll('input').forEach(input => {
+      input.setAttribute('value', input.value);
+    });
+    container.querySelectorAll('select').forEach(select => {
+      select.querySelectorAll('option').forEach(opt => {
+        if (opt.value === select.value) {
+          opt.setAttribute('selected', 'selected');
+        } else {
+          opt.removeAttribute('selected');
+        }
+      });
+    });
+  }
+
   // Gather conversions table
   const convBody = document.getElementById('conversions-tbody');
+  syncInputValues(convBody);
   const convRows = convBody ? convBody.innerHTML : '';
 
   // Gather heirs table if visible
   const divisionPanel = document.getElementById('division-panel');
   const isDivisionVisible = divisionPanel && divisionPanel.style.display !== 'none';
   const heirsBody = document.getElementById('heirs-list');
+  syncInputValues(heirsBody);
   const heirsRows = heirsBody ? heirsBody.innerHTML : '';
   const distributedArea = document.getElementById('distributed-area')?.innerText || '0';
   const totalLimitArea = document.getElementById('total-limit-area')?.innerText || '0';
@@ -1744,6 +1763,10 @@ function printCroquis() {
         <thead>
           <tr>
             <th>الاسم</th>
+            <th>العرض العلوي (م)</th>
+            <th>العرض السفلي (م)</th>
+            <th>الطول الأيمن (م)</th>
+            <th>الطول الأيسر (م)</th>
             <th>النصيب (م²)</th>
             <th>سهم</th>
             <th>قيراط</th>
@@ -1775,6 +1798,78 @@ function printCroquis() {
       color: #222;
       font-size: 10pt;
       direction: rtl;
+      position: relative;
+      min-height: 96vh;
+    }
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      h1, h2, .header h1, .header h2, .date-line, .box-title, .section-title, .summary-card .label, .summary-card .value, th, td, td input, .footer {
+        color: #000 !important;
+      }
+      .header {
+        border-bottom: 2px solid #000 !important;
+      }
+      .croquis-box {
+        border: 1.5px solid #000 !important;
+        background: #fff !important;
+      }
+      .croquis-box img {
+        filter: grayscale(100%) contrast(110%) !important;
+      }
+      .section-title {
+        background: #f2f2f2 !important;
+        color: #000 !important;
+        border-right: 4px solid #000 !important;
+      }
+      .summary-card {
+        border: 1px solid #000 !important;
+        background: #fff !important;
+      }
+      th {
+        background: #f2f2f2 !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+      }
+      td {
+        border: 1px solid #000 !important;
+      }
+      tr:nth-child(even) td {
+        background: #fff !important;
+      }
+      .summary-bar {
+        background: #f2f2f2 !important;
+        border: 1px solid #000 !important;
+        color: #000 !important;
+      }
+      .watermark {
+        color: #000 !important;
+        opacity: 0.08 !important;
+      }
+      .footer {
+        border-top: 1px solid #000 !important;
+      }
+    }
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-size: 19px;
+      color: #2e7d32; 
+      opacity: 0.14;
+      font-weight: bold;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+      font-family: 'Cairo', Arial, sans-serif;
+      user-select: none;
+      text-align: center;
+      width: 100%;
     }
     .page {
       width: 100%;
@@ -1923,6 +2018,8 @@ function printCroquis() {
   </style>
 </head>
 <body>
+<!-- Watermark Overlay -->
+<div class="watermark">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
 <div class="page">
   <!-- Header -->
   <div class="header">
@@ -1961,13 +2058,13 @@ function printCroquis() {
     <div class="section-title">المساحة بالوحدات الزراعية</div>
     <table>
       <thead>
-        <tr><th>فدان</th><th>قيراط</th><th>سهم</th></tr>
+        <tr><th>سهم</th><th>قيراط</th><th>فدان</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>${areaFeddans}</strong></td>
-          <td><strong>${areaCarats}</strong></td>
           <td><strong>${areaShares}</strong></td>
+          <td><strong>${areaCarats}</strong></td>
+          <td><strong>${areaFeddans}</strong></td>
         </tr>
       </tbody>
     </table>
@@ -1989,10 +2086,44 @@ function printCroquis() {
 
   <!-- Footer -->
   <div class="footer">
-    تطبيق الدلال الذكي — حساب مساحات الأراضي الزراعية بدقة متناهية
+    <p style="margin: 3px 0; font-size: 13px; color: #333; font-weight: bold;">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</p>
+    <p style="margin: 3px 0; font-size: 11px; color: #777;">تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
   </div>
 </div>
-<script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }</script>
+<script>
+  window.onload = function() {
+    const imgs = document.getElementsByTagName('img');
+    let loadedCount = 0;
+    function triggerPrint() {
+      setTimeout(function() { window.print(); window.close(); }, 350);
+    }
+    if (imgs.length === 0) {
+      triggerPrint();
+    } else {
+      for (let i = 0; i < imgs.length; i++) {
+        if (imgs[i].complete) {
+          loadedCount++;
+          if (loadedCount === imgs.length) {
+            triggerPrint();
+          }
+        } else {
+          imgs[i].onload = function() {
+            loadedCount++;
+            if (loadedCount === imgs.length) {
+              triggerPrint();
+            }
+          };
+          imgs[i].onerror = function() {
+            loadedCount++;
+            if (loadedCount === imgs.length) {
+              triggerPrint();
+            }
+          };
+        }
+      }
+    }
+  }
+</script>
 </body>
 </html>`;
 

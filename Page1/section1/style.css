@@ -16,7 +16,8 @@
   margin-right: 10px;
 }
 .input {
-  width: 270px;
+  width: 100%;
+  max-width: 320px;
   border: 1px solid #cccccc;
   height: 100px;
   display: flex;
@@ -55,18 +56,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.buttons2 button:first-child {
-  margin-left: 150px;
+  gap: 20px;
 }
 .buttons2 button {
-  line-height: 30px;
-  width: 60px;
+  line-height: 32px;
+  width: 70px;
   border-radius: 10px;
   outline: none;
   border: none;
   color: white;
   font-weight: bold;
+  cursor: pointer;
 }
 .but1 {
   background-color: rgb(149, 11, 63);
@@ -75,11 +75,12 @@
   background-color: #df8714;
 }
 .s {
-  width: 256px;
+  width: 100%;
+  max-width: 320px;
   display: flex;
   flex-flow: column;
   align-items: center;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 .s h3 {
   font-size: 14px;
@@ -153,7 +154,7 @@
   padding-bottom: 4px;
 }
 .s5 div table tr td input {
-  width: 62px;
+  width: 58px;
   height: 26px;
   text-align: center;
   font-size: 12px;
@@ -189,4 +190,23 @@
 }
 .s5 th {
   white-space: nowrap;
+}
+
+@media (max-width: 350px) {
+  .input, .s {
+    max-width: 290px;
+  }
+  .input div p {
+    font-size: 15px;
+    width: 90px;
+    margin-left: 10px;
+  }
+  .s5 div table tr td input {
+    width: 50px;
+    font-size: 11px;
+  }
+  .s5 div table tr td:first-child {
+    font-size: 11px;
+    padding-left: 4px;
+  }
 }
