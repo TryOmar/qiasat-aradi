@@ -17,6 +17,9 @@ const categoryMap = {
   convertMeterToKirat: "تحويل الأمتار إلى قراريط"
 };
 
+// Backup original questions database list to reload during game reset
+const questionsBackup = (typeof questions !== "undefined") ? JSON.parse(JSON.stringify(questions)) : null;
+
 // Global Variables
 let currentGameQuestion = {};
 let currentRound = 0;
@@ -258,8 +261,10 @@ function loadNextQuestion() {
 }
 
 // Timer Controls
-function startTimer() {
-  timeLeft = maxTime;
+function startTimer(resume = false) {
+  if (!resume) {
+    timeLeft = maxTime;
+  }
   updateTimerUI();
 
   timerInterval = setInterval(() => {
@@ -611,7 +616,7 @@ function loadGameState() {
     updateLifelineButtonsUI();
 
     // Render active question
-    if (currentGameQuestion.question) {
+    if (currentGameQuestion && currentGameQuestion.question) {
       const q = currentGameQuestion;
       
       const categoryName = categoryMap[gameQuestions[currentRound].list] || "معلومات قياس الأراضي";
@@ -634,16 +639,22 @@ function loadGameState() {
       });
 
       renderLadder();
-      startTimer();
+      startTimer(true);
+    } else {
+      resetGameData();
+      loadNextQuestion();
     }
   } else {
     resetGame();
   }
 }
 
-// Backup original questions database list to reload during game reset
-window.addEventListener("DOMContentLoaded", () => {
-  if (typeof questions !== "undefined") {
-    window.questionsBackup = JSON.parse(JSON.stringify(questions));
+// Automatically load game state on page load if active
+window.addEventListener("load", () => {
+  const savedState = sessionStorage.getItem("gameState");
+  if (savedState) {
+    document.getElementById("start-screen").classList.remove("active");
+    document.getElementById("game-screen").classList.add("active");
+    loadGameState();
   }
 });
