@@ -1,380 +1,649 @@
-function showPopup(text) {
-// Create overlay
-const overlay = document.createElement("div");
-overlay.className = "dark-popup-overlay";
+// Curated Arabic Titles for Game Categories
+const categoryMap = {
+  generalMeasurementInfo: "معلومات القياس العامة",
+  exampleQuestions: "مسائل تقسيم الأراضي",
+  areaCalculator: "حساب مساحات الأشكال",
+  dimensionChecker: "التحقق من الأبعاد",
+  boundarySeparation: "فصل الحدود (سهل)",
+  mediumBoundarySeparation: "فصل الحدود (متوسط)",
+  hardBoundarySeparation: "فصل الحدود (صعب)",
+  removalAndSubtraction: "طرح الأراضي (سهل)",
+  hardRemovalAndSubtraction: "طرح الأراضي (صعب)",
+  inheritanceDivision: "تقسيم المواريث والشركاء",
+  landValueCalculation: "حساب قيم الأراضي والأسعار",
+  convertQasabToMeter: "تحويل القصبات إلى أمتار",
+  convertMeterToQasab: "تحويل الأمتار إلى قصبات",
+  convertKiratToMeter: "تحويل القراريط إلى أمتار",
+  convertMeterToKirat: "تحويل الأمتار إلى قراريط"
+};
 
-// Create popup container
-const popup = document.createElement("div");
-popup.className = "dark-popup";
-
-// Create close button
-const closeButton = document.createElement("button");
-closeButton.className = "dark-popup-close";
-closeButton.innerHTML = "×";
-
-// Create content
-const content = document.createElement("div");
-content.className = "dark-popup-content";
-content.textContent = text;
-
-// Assemble popup
-popup.appendChild(closeButton);
-popup.appendChild(content);
-overlay.appendChild(popup);
-document.body.appendChild(overlay);
-
-// Trigger animation
-requestAnimationFrame(() => {
-    overlay.classList.add("active");
-    popup.classList.add("active");
-});
-
-// Handle closing
-function closePopup() {
-    overlay.classList.remove("active");
-    popup.classList.remove("active");
-
-    // Remove elements after animation
-    setTimeout(() => {
-    document.body.removeChild(overlay);
-    }, 300);
-}
-
-closeButton.addEventListener("click", closePopup);
-overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) {
-    closePopup();
-    }
-});
-
-// Close on escape key
-document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-    closePopup();
-    }
-});
-}
-
-
-
-let currentGameQuestion = {}; // Store the current question object
+// Global Variables
+let currentGameQuestion = {};
 let currentRound = 0;
 let roundScore = 0;
 let correctAnswers = 0;
-let timer;
+let timerInterval = null;
 let timeLeft = 120;
+let maxTime = 120;
 let landPoints = 0;
 
-// Function to update the scoreboard table
-function updateScoreboard() {
-return;
-const tableBody = document
-    .getElementById("rounds-table")
-    .getElementsByTagName("tbody")[0];
-tableBody.innerHTML = ""; // Clear the existing table
+let lifelines = {
+  removeTwo: true,
+  changeQuestion: true,
+  callFriend: true,
+  useGuide: true
+};
 
-gameQuestions.forEach((game, index) => {
-    const row = document.createElement("tr");
-    if (index === currentRound) {
-    row.classList.add("highlight"); // Highlight the current round
+// Custom Premium Modal Popup Helper
+function showCustomPopup(title, text, btnText = "موافق", callback = null) {
+  // Remove existing overlays just in case
+  const oldOverlay = document.querySelector(".dark-popup-overlay");
+  if (oldOverlay) document.body.removeChild(oldOverlay);
+
+  const overlay = document.createElement("div");
+  overlay.className = "dark-popup-overlay";
+
+  const popup = document.createElement("div");
+  popup.className = "dark-popup";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "dark-popup-close";
+  closeBtn.innerHTML = "×";
+  closeBtn.onclick = () => closePopup();
+
+  const titleEl = document.createElement("h3");
+  titleEl.style.color = "#ff9f1c";
+  titleEl.style.marginBottom = "15px";
+  titleEl.style.fontSize = "1.3em";
+  titleEl.textContent = title;
+
+  const content = document.createElement("div");
+  content.className = "dark-popup-content";
+  content.innerHTML = text;
+
+  const actionBtn = document.createElement("button");
+  actionBtn.className = "dark-popup-btn";
+  actionBtn.textContent = btnText;
+  actionBtn.onclick = () => {
+    closePopup();
+    if (callback) callback();
+  };
+
+  popup.appendChild(closeBtn);
+  popup.appendChild(titleEl);
+  popup.appendChild(content);
+  popup.appendChild(actionBtn);
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    overlay.classList.add("active");
+    popup.classList.add("active");
+  });
+
+  function closePopup() {
+    overlay.classList.remove("active");
+    popup.classList.remove("active");
+    setTimeout(() => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    }, 300);
+  }
+
+  // Close on ESC
+  const escHandler = (e) => {
+    if (e.key === "Escape") {
+      closePopup();
+      document.removeEventListener("keydown", escHandler);
     }
-
-    const scoreCell = document.createElement("td");
-    scoreCell.textContent = game.score;
-    row.appendChild(scoreCell);
-
-    const questionCell = document.createElement("td");
-    questionCell.textContent = `${index + 1}`;
-    row.appendChild(questionCell);
-
-    tableBody.appendChild(row);
-});
+  };
+  document.addEventListener("keydown", escHandler);
 }
 
+// Start Game from the main screen
+function startGame() {
+  document.getElementById("start-screen").classList.remove("active");
+  document.getElementById("game-screen").classList.add("active");
+
+  const savedState = sessionStorage.getItem("gameState");
+  if (savedState) {
+    loadGameState();
+  } else {
+    resetGameData();
+    loadNextQuestion();
+  }
+}
+
+// Render the 15-step side ladder dynamically
+function renderLadder() {
+  const ladderContainer = document.getElementById("sidebar-ladder");
+  if (!ladderContainer) return;
+  ladderContainer.innerHTML = "";
+
+  // gameQuestions has 15 entries. Let's list from index 14 down to 0
+  const steps = [...gameQuestions].reverse();
+  const originalIndices = [...Array(15).keys()].reverse();
+
+  // Let's compute cumulative points for each step to display on ladder
+  let cumulative = 0;
+  const cumulativeScores = gameQuestions.map((q) => {
+    cumulative += q.score;
+    return cumulative;
+  });
+
+  steps.forEach((step, reverseIdx) => {
+    const originalIdx = originalIndices[reverseIdx];
+    const isMilestone = (originalIdx + 1) === 5 || (originalIdx + 1) === 10 || (originalIdx + 1) === 15;
+    const isCurrent = originalIdx === correctAnswers;
+    const isCompleted = originalIdx < correctAnswers;
+
+    const stepDiv = document.createElement("div");
+    stepDiv.className = "ladder-step";
+    if (isMilestone) stepDiv.classList.add("milestone");
+    if (isCurrent) stepDiv.classList.add("active");
+    if (isCompleted) stepDiv.classList.add("completed");
+
+    let statusSymbol = "♦";
+    if (isCompleted) statusSymbol = "✓";
+    if (isCurrent) statusSymbol = "▶";
+
+    stepDiv.innerHTML = `
+      <span class="step-num">${originalIdx + 1} ${statusSymbol}</span>
+      <span class="step-points">${cumulativeScores[originalIdx]} فدان</span>
+    `;
+
+    ladderContainer.appendChild(stepDiv);
+  });
+}
+
+// Get random question and pull it from list to avoid duplication
 function getRandomQuestionAndRemove(listName) {
-if (questions[listName]?.length) {
-    const randomIndex = Math.floor(
-    Math.random() * questions[listName].length
-    );
-    const randomQuestion = questions[listName].splice(randomIndex, 1)[0]; // Remove and return question
+  if (questions[listName] && questions[listName].length > 0) {
+    const randomIndex = Math.floor(Math.random() * questions[listName].length);
+    const randomQuestion = questions[listName].splice(randomIndex, 1)[0];
     return randomQuestion;
-}
-return null;
+  }
+  return null;
 }
 
-// Function to shuffle array while keeping track of original indices
+// Shuffle option answers
 function shuffleAnswers(answers, correctIndex) {
-    const indexedAnswers = answers.map((answer, index) => ({
-        answer,
-        isCorrect: index === correctIndex
-    }));
-    
-    // Fisher-Yates shuffle
-    for (let i = indexedAnswers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
-    }
-    
-    // Find new correct index
-    const newCorrectIndex = indexedAnswers.findIndex(item => item.isCorrect);
-    
-    return {
-        shuffledAnswers: indexedAnswers.map(item => item.answer),
-        newCorrectIndex
-    };
+  const indexedAnswers = answers.map((answer, index) => ({
+    answer,
+    isCorrect: index === correctIndex
+  }));
+
+  for (let i = indexedAnswers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
+  }
+
+  const newCorrectIndex = indexedAnswers.findIndex((item) => item.isCorrect);
+
+  return {
+    shuffledAnswers: indexedAnswers.map((item) => item.answer),
+    newCorrectIndex
+  };
 }
 
+// Load Next question in sequence
 function loadNextQuestion() {
-if (correctAnswers === 15) {
-//   alert("مبروك! لقد ربحت ٥٠ فدانًا!");
-    showPopup("مبروك! لقد ربحت ٥٠ فدانًا!");
+  if (correctAnswers === 15) {
+    showCustomPopup(
+      "👑 فوز ساحق!",
+      "تهانينا الحارة! لقد أجبت على جميع الأسئلة الـ 15 بشكل صحيح وحصلت على الجائزة الكبرى: <strong>100 فدان زراعي</strong> ومكانة الدلال الأكبر!",
+      "العب من جديد",
+      () => { resetGameData(); resetGame(); }
+    );
     return;
-}
+  }
 
-if (currentRound >= gameQuestions.length) {
-//   alert("لقد انتهت الأسئلة!");
-    showPopup("لقد انتهت الأسئلة!");
-    return;
-}
-
-let q = null;
-while (currentRound < gameQuestions.length && !q) {
+  let q = null;
+  while (currentRound < gameQuestions.length && !q) {
     const currentGame = gameQuestions[currentRound];
     const listName = currentGame.list;
     roundScore = currentGame.score;
 
     q = getRandomQuestionAndRemove(listName);
-    
-    if (!q) {
-    currentRound++; // Move to next list if current one is empty
-    }
-}
 
-if (q) {
-    // Assign the selected question to currentGameQuestion
+    if (!q) {
+      currentRound++;
+    }
+  }
+
+  if (q) {
     currentGameQuestion = q;
 
-    // Shuffle the answers and get new correct index
+    // Shuffle answers
     const { shuffledAnswers, newCorrectIndex } = shuffleAnswers(q.answers, q.correct);
     q.answers = shuffledAnswers;
     q.correct = newCorrectIndex;
 
-    // Reset timer and update UI
+    // Reset Timer
     resetTimer();
+
+    // Set UI Category / Question Title
+    const categoryName = categoryMap[gameQuestions[currentRound].list] || "معلومات قياس الأراضي";
+    document.getElementById("level-category").textContent = categoryName;
+
     document.getElementById("question").textContent = q.question;
-    document.getElementById("question-number").textContent = `السؤال ${
-    correctAnswers + 1
-    }`;
+    document.getElementById("question-number").textContent = `${correctAnswers + 1} / 15`;
+    document.getElementById("land-points").textContent = `${landPoints} فدان`;
+    document.getElementById("guaranteed-points").textContent = `${calculateGuaranteedPoints()} فدان`;
 
-    // Log the correct answer and its option number for debugging
-    console.log('Correct answer:', `Option ${q.correct + 1}:`, q.answers[q.correct]);
+    // Populate answers
+    const answersButtons = document.querySelectorAll(".answer-btn");
+    const answersWrappers = document.querySelectorAll(".answer-wrapper");
 
-    const answers = document.querySelectorAll(".answer");
-    answers.forEach((answer, index) => {
-    answer.style.display = "block";
-    answer.textContent = q.answers[index];
-    answer.onclick = () => checkAnswer(answer, index === q.correct);
+    answersWrappers.forEach((wrapper, index) => {
+      wrapper.style.display = "block";
+      wrapper.className = "hexagon-wrapper answer-wrapper"; // clear custom state classes
+      
+      const btn = document.getElementById(`ans-${index}`);
+      btn.textContent = q.answers[index];
+      
+      wrapper.onclick = () => selectOption(wrapper, index === q.correct, index);
     });
 
-    // Update the scoreboard table
-    updateScoreboard();
+    renderLadder();
+    startTimer();
+    saveGameState();
+  } else {
+    showCustomPopup("انتهاء الأسئلة", "لقد نفدت الأسئلة في هذا القسم! سيتم تحويلك إلى الجولة التالية تلقائياً.", "التالي", () => {
+      currentRound++;
+      loadNextQuestion();
+    });
+  }
+}
+
+// Timer Controls
+function startTimer() {
+  timeLeft = maxTime;
+  updateTimerUI();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      showCustomPopup(
+        "⏰ انتهى الوقت!",
+        `نفد الوقت المسموح للتفكير في السؤال! الجائزة المضمونة التي حصلت عليها هي: <strong>${calculateGuaranteedPoints()} فدان</strong>.`,
+        "حاول مرة أخرى",
+        () => { resetGameData(); resetGame(); }
+      );
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+}
+
+function updateTimerUI() {
+  document.getElementById("timer").textContent = timeLeft;
+  const bar = document.getElementById("timer-bar");
+  if (bar) {
+    const percentage = (timeLeft / maxTime) * 100;
+    bar.style.width = `${percentage}%`;
+    
+    // Change colors based on remaining time
+    if (percentage > 50) {
+      bar.style.background = "linear-gradient(90deg, #2ec4b6, #00f5d4)";
+    } else if (percentage > 20) {
+      bar.style.background = "linear-gradient(90deg, #ff9f1c, #ffbf69)";
+    } else {
+      bar.style.background = "linear-gradient(90deg, #e63946, #ff4d6d)";
+    }
+  }
+}
+
+// Option selection check with Millionaire-like delay for excitement
+function selectOption(selectedWrapper, isCorrect, index) {
+  // Prevent double clicks
+  const wrappers = document.querySelectorAll(".answer-wrapper");
+  wrappers.forEach((w) => (w.onclick = null));
+
+  resetTimer();
+  selectedWrapper.classList.add("selected");
+
+  // Millionaire dramatic delay (1 second)
+  setTimeout(() => {
+    selectedWrapper.classList.remove("selected");
+    
+    if (isCorrect) {
+      selectedWrapper.classList.add("correct");
+      correctAnswers++;
+      landPoints += roundScore;
+      
+      document.getElementById("land-points").textContent = `${landPoints} فدان`;
+      
+      // Save state
+      saveGameState();
+
+      setTimeout(() => {
+        currentRound++;
+        loadNextQuestion();
+      }, 1500);
+    } else {
+      selectedWrapper.classList.add("incorrect");
+      
+      // Reveal correct answer
+      const correctIdx = currentGameQuestion.correct;
+      const correctWrapper = document.getElementById(`ans-wrapper-${correctIdx}`);
+      if (correctWrapper) correctWrapper.classList.add("correct");
+
+      setTimeout(() => {
+        const guaranteed = calculateGuaranteedPoints();
+        showCustomPopup(
+          "😢 إجابة خاطئة!",
+          `لقد اخترت إجابة غير صحيحة. رصيدك المضمون طبقاً لمحطات الأمان هو: <strong>${guaranteed} فدان</strong>.`,
+          "حاول مجدداً",
+          () => { resetGameData(); resetGame(); }
+        );
+      }, 1800);
+    }
+  }, 1000);
+}
+
+// Calculate Safe Points (Milestones)
+function calculateGuaranteedPoints() {
+  // Milestone 1 (Level 5): Cumulative points = 25 Feddans
+  // Milestone 2 (Level 10): Cumulative points = 50 Feddans
+  if (correctAnswers >= 10) {
+    return 50;
+  } else if (correctAnswers >= 5) {
+    return 25;
+  }
+  return 0;
+}
+
+// Game Reset Trigger
+function resetGameData() {
+  sessionStorage.removeItem("gameState");
+  correctAnswers = 0;
+  landPoints = 0;
+  currentRound = 0;
+  timeLeft = maxTime;
+
+  lifelines = {
+    removeTwo: true,
+    changeQuestion: true,
+    callFriend: true,
+    useGuide: true
+  };
+
+  // Re-read initial questions list from script file backup (refreshing arrays)
+  if (window.questionsBackup) {
+    questions = JSON.parse(JSON.stringify(window.questionsBackup));
+  }
+}
+
+function resetGame() {
+  resetTimer();
+  resetGameData();
+  
+  // Update UI Elements
+  document.getElementById("correct-answers-count")?.remove(); // clean up if any
+  document.getElementById("land-points").textContent = "0 فدان";
+  document.getElementById("guaranteed-points").textContent = "0 فدان";
+  document.getElementById("question-number").textContent = "1 / 15";
+
+  // Re-enable lifeline buttons visually
+  updateLifelineButtonsUI();
+  loadNextQuestion();
+}
+
+function confirmReset() {
+  showCustomPopup(
+    "تأكيد إعادة اللعب",
+    "هل أنت متأكد من رغبتك في إعادة تشغيل اللعبة؟ ستخسر كل التقدم الحالي ورصيد الفدادين الذي جمعته.",
+    "نعم، أعد اللعب",
+    () => { resetGameData(); resetGame(); }
+  );
+}
+
+// --- Lifelines Logic ---
+
+// 1. Remove 2 Incorrect Answers (50:50)
+function useLifelineRemove() {
+  if (!lifelines.removeTwo) return;
+
+  const correctIndex = currentGameQuestion.correct;
+  let removed = 0;
+
+  // Collect wrong answer indices
+  const wrongIndices = [];
+  for (let i = 0; i < 4; i++) {
+    if (i !== correctIndex) wrongIndices.push(i);
+  }
+
+  // Shuffle wrong indices and take 2
+  for (let i = wrongIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [wrongIndices[i], wrongIndices[j]] = [wrongIndices[j], wrongIndices[i]];
+  }
+
+  // Hide 2 of them
+  const answersWrappers = document.querySelectorAll(".answer-wrapper");
+  wrongIndices.slice(0, 2).forEach((idx) => {
+    answersWrappers[idx].style.display = "none";
+  });
+
+  lifelines.removeTwo = false;
+  updateLifelineButtonsUI();
+  saveGameState();
+}
+
+// 2. Change Question
+function useLifelineChange() {
+  if (!lifelines.changeQuestion) return;
+
+  resetTimer();
+  lifelines.changeQuestion = false;
+  updateLifelineButtonsUI();
+
+  // Reload another random question for the same list category without updating currentRound
+  const currentGame = gameQuestions[currentRound];
+  const listName = currentGame.list;
+  const q = getRandomQuestionAndRemove(listName);
+
+  if (q) {
+    currentGameQuestion = q;
+    
+    // Shuffle answers
+    const { shuffledAnswers, newCorrectIndex } = shuffleAnswers(q.answers, q.correct);
+    q.answers = shuffledAnswers;
+    q.correct = newCorrectIndex;
+
+    document.getElementById("question").textContent = q.question;
+
+    const answersWrappers = document.querySelectorAll(".answer-wrapper");
+    answersWrappers.forEach((wrapper, index) => {
+      wrapper.style.display = "block";
+      wrapper.className = "hexagon-wrapper answer-wrapper";
+      
+      const btn = document.getElementById(`ans-${index}`);
+      btn.textContent = q.answers[index];
+      
+      wrapper.onclick = () => selectOption(wrapper, index === q.correct, index);
+    });
 
     startTimer();
-    saveGameState(); // Save state after loading new question
-} else {
-    showPopup("لا توجد المزيد من الأسئلة المتاحة");
-}
-}
-
-function startTimer() {
-document.getElementById("timer").textContent = timeLeft;
-timer = setInterval(() => {
-    timeLeft--;
-    document.getElementById("timer").textContent = timeLeft;
-    if (timeLeft <= 0) {
-    clearInterval(timer);
-    // alert("انتهى الوقت! حاول مرة أخرى.");
-    showPopup("انتهى الوقت! حاول مرة أخرى.");
-    resetGame();
-    }
-}, 1000);
+    saveGameState();
+  } else {
+    showCustomPopup("خطأ", "لا توجد أسئلة بديلة متوفرة في هذا القسم.", "موافق");
+    lifelines.changeQuestion = true; // restore lifeline if failed
+    updateLifelineButtonsUI();
+    startTimer();
+  }
 }
 
-function resetTimer() {
-clearInterval(timer);
-timeLeft = 120;
-}
+// 3. Phone a Friend (Interactive dialogue simulation)
+function useLifelineFriend() {
+  if (!lifelines.callFriend) return;
 
-function resetTimer() {
-clearInterval(timer);
-timeLeft = 120;
-}
+  lifelines.callFriend = false;
+  updateLifelineButtonsUI();
+  saveGameState();
 
-function checkAnswer(selectedAnswer, isCorrect) {
-resetTimer();
-if (isCorrect) {
-    correctAnswers++;
-    landPoints += roundScore;
-    document.getElementById("correct-answers").textContent =
-    correctAnswers;
-    document.getElementById("land-points").textContent =
-    landPoints.toFixed(2);
-    selectedAnswer.classList.add("correct");
-    saveGameState(); // Save state after correct answer
-} else {
-    showPopup("إجابة خاطئة! لقد خسرت جميع الفدادين.");
-    resetGame();
-    return;
-}
+  // Show a calling screen simulator
+  showCustomPopup(
+    "📞 جاري الاتصال بالصديق...",
+    `<div style='display:flex; flex-direction:column; align-items:center; gap:12px; margin: 15px 0;'>
+      <div style='width: 50px; height: 50px; border: 3px solid #ff9f1c; border-top-color: transparent; border-radius: 50%; animation: rotateRing 1s linear infinite;'></div>
+      <p>يرجى الانتظار، جاري التواصل مع الخبير الزراعي...</p>
+     </div>`,
+    "انتظر الرد...",
+    null
+  );
 
-setTimeout(() => {
-    selectedAnswer.classList.remove("correct", "wrong");
-    currentRound++; // Move to the next round
-    loadNextQuestion();
-}, 1000);
-}
-
-function resetGame() {
-correctAnswers = 0;
-landPoints = 0;
-document.getElementById("correct-answers").textContent = correctAnswers;
-document.getElementById("land-points").textContent =
-    landPoints.toFixed(2);
-resetTimer();
-currentRound = 0; // Reset round to 0
-loadNextQuestion();
-}
-
-function resetGame() {
-correctAnswers = 0;
-landPoints = 0;
-document.getElementById("correct-answers").textContent = correctAnswers;
-document.getElementById("land-points").textContent =
-    landPoints.toFixed(2);
-resetTimer();
-loadNextQuestion();
-}
-
-function removeTwoAnswers() {
-const answers = document.querySelectorAll(".answer");
-let removed = 0;
-answers.forEach((answer, index) => {
-    if (index !== currentGameQuestion.correct && removed < 2) {
-    answer.style.display = "none";
-    removed++;
-    }
-});
-}
-
-function changeQuestion() {
-resetTimer();
-loadNextQuestion();
-}
-
-function callFriend() {
-// alert("صديقك يقترح الإجابة رقم " + (currentGameQuestion.correct + 1));
-showPopup("صديقك يقترح الإجابة رقم " + (currentGameQuestion.correct + 1));
-}
-
-function useGuide() {
-    const guideLink = currentGameQuestion.guideLink;
-    const sessionData = currentGameQuestion.sessionvars;
+  // Auto-answer after 2 seconds with friend dialog
+  setTimeout(() => {
+    const correctAnsText = currentGameQuestion.answers[currentGameQuestion.correct];
     
-    // Save the current game state before clearing session storage
-    const savedGameState = sessionStorage.getItem('gameState');
+    // Custom friendly speech
+    const dialogues = [
+      `أهلاً بك يا صديقي! بخصوص هذا السؤال، أنا واثق جداً من أن الإجابة الصحيحة هي: <strong style='color:#00f5d4; font-size:1.15em;'>"${correctAnsText}"</strong>. بالتوفيق!`,
+      `السلام عليكم! لقد راجعت دليل الدلال مؤخراً، وأكاد أجزم بنسبة 90% أن الإجابة الصحيحة هي: <strong style='color:#00f5d4; font-size:1.15em;'>"${correctAnsText}"</strong>.`,
+      `مرحباً! أعتقد أن الإجابة المنطقية بناء على الحسابات هي: <strong style='color:#00f5d4; font-size:1.15em;'>"${correctAnsText}"</strong>. توكل على الله واخترها!`
+    ];
     
-    // Clear only the guide-related session data
+    const randomSpeech = dialogues[Math.floor(Math.random() * dialogues.length)];
+
+    showCustomPopup(
+      "🎙️ المكالمة الهاتفية مع الصديق",
+      `<p style='text-align:right;'><strong>الصديق (الخبير):</strong> "${randomSpeech}"</p>`,
+      "شكراً لك يا صديقي",
+      null
+    );
+  }, 2000);
+}
+
+// 4. Use the Guide (Ask the guide / open calculator with variables preset)
+function useLifelineGuide() {
+  if (!lifelines.useGuide) return;
+
+  const guideLink = currentGameQuestion.guideLink;
+  const sessionData = currentGameQuestion.sessionvars;
+
+  if (guideLink) {
+    lifelines.useGuide = false;
+    updateLifelineButtonsUI();
+    saveGameState();
+
+    // Preserve game state
+    const savedGameState = sessionStorage.getItem("gameState");
     sessionStorage.clear();
-    
-    // Restore the game state
-    if (savedGameState) {
-        sessionStorage.setItem('gameState', savedGameState);
-    }
+    if (savedGameState) sessionStorage.setItem("gameState", savedGameState);
 
-    // Set the guide session variables
+    // Seed session data for calculator
     if (sessionData) {
-        for (let key in sessionData) {
-            if (sessionData.hasOwnProperty(key)) {
-                sessionStorage.setItem(key, sessionData[key]);
-            }
+      for (let key in sessionData) {
+        if (sessionData.hasOwnProperty(key)) {
+          sessionStorage.setItem(key, sessionData[key]);
         }
+      }
     }
 
-    // Open the guide link in a new window
-    if (guideLink) {
+    showCustomPopup(
+      "👳‍♂️ الدلال يقودك للحل!",
+      "سيقوم الدلال الآن بفتح الحاسبة المجهزة بالبيانات الافتراضية لهذا السؤال في نافذة جديدة. جرب الحساب والتقسيم بنفسك لمعرفة الحل بدقة!",
+      "افتح حاسبة الأراضي",
+      () => {
         window.open(guideLink, "_blank");
-    } else {
-        showPopup("لا يوجد دليل لهذا السؤال.");
-    }
+      }
+    );
+  } else {
+    showCustomPopup("👳‍♂️ الدلال يعتذر", "لا يوجد رابط دليل حاسوبي مخصص لهذا السؤال المحدد، يمكنك التفكير بالحل بنفسك.", "موافق");
+  }
 }
 
+// Update lifeline buttons view based on availability
+function updateLifelineButtonsUI() {
+  document.getElementById("lifeline-remove").disabled = !lifelines.removeTwo;
+  document.getElementById("lifeline-change").disabled = !lifelines.changeQuestion;
+  document.getElementById("lifeline-friend").disabled = !lifelines.callFriend;
+  document.getElementById("lifeline-guide").disabled = !lifelines.useGuide;
+}
+
+// State Persistence Saving / Loading
 function saveGameState() {
-    const gameState = {
-        currentGameQuestion,
-        currentRound,
-        roundScore,
-        correctAnswers,
-        timeLeft,
-        landPoints,
-        questionState: {} // Save the state of questions for each list
-    };
-    
-    // Save the state of remaining questions for each list
-    for (const listName in questions) {
-        gameState.questionState[listName] = [...questions[listName]];
-    }
-    
-    sessionStorage.setItem('gameState', JSON.stringify(gameState));
+  const gameState = {
+    currentGameQuestion,
+    currentRound,
+    roundScore,
+    correctAnswers,
+    timeLeft,
+    landPoints,
+    lifelines,
+    questionState: {}
+  };
+
+  for (const listName in questions) {
+    gameState.questionState[listName] = [...questions[listName]];
+  }
+
+  sessionStorage.setItem("gameState", JSON.stringify(gameState));
 }
 
 function loadGameState() {
-    const savedState = sessionStorage.getItem('gameState');
-    if (savedState) {
-        const gameState = JSON.parse(savedState);
-        currentGameQuestion = gameState.currentGameQuestion;
-        currentRound = gameState.currentRound;
-        roundScore = gameState.roundScore;
-        correctAnswers = gameState.correctAnswers;
-        timeLeft = gameState.timeLeft;
-        landPoints = gameState.landPoints;
-        
-        // Restore the questions state
-        if (gameState.questionState) {
-            for (const listName in gameState.questionState) {
-                questions[listName] = gameState.questionState[listName];
-            }
-        }
-        
-        // Update UI
-        document.getElementById("correct-answers").textContent = correctAnswers;
-        document.getElementById("land-points").textContent = landPoints.toFixed(2);
-        
-        // Load the current question UI
-        if (currentGameQuestion.question) {
-            document.getElementById("question").textContent = currentGameQuestion.question;
-            document.getElementById("question-number").textContent = `السؤال ${correctAnswers + 1}`;
-            
-            const answers = document.querySelectorAll(".answer");
-            answers.forEach((answer, index) => {
-                answer.style.display = "block";
-                answer.textContent = currentGameQuestion.answers[index];
-                answer.onclick = () => checkAnswer(answer, index === currentGameQuestion.correct);
-            });
-            
-            startTimer();
-            updateScoreboard();
-        }
-    } else {
-        resetGame();
+  const savedState = sessionStorage.getItem("gameState");
+  if (savedState) {
+    const gameState = JSON.parse(savedState);
+    currentGameQuestion = gameState.currentGameQuestion;
+    currentRound = gameState.currentRound;
+    roundScore = gameState.roundScore;
+    correctAnswers = gameState.correctAnswers;
+    timeLeft = gameState.timeLeft;
+    landPoints = gameState.landPoints;
+    lifelines = gameState.lifelines;
+
+    // Restore remaining questions pool
+    if (gameState.questionState) {
+      for (const listName in gameState.questionState) {
+        questions[listName] = gameState.questionState[listName];
+      }
     }
+
+    updateLifelineButtonsUI();
+
+    // Render active question
+    if (currentGameQuestion.question) {
+      const q = currentGameQuestion;
+      
+      const categoryName = categoryMap[gameQuestions[currentRound].list] || "معلومات قياس الأراضي";
+      document.getElementById("level-category").textContent = categoryName;
+
+      document.getElementById("question").textContent = q.question;
+      document.getElementById("question-number").textContent = `${correctAnswers + 1} / 15`;
+      document.getElementById("land-points").textContent = `${landPoints} فدان`;
+      document.getElementById("guaranteed-points").textContent = `${calculateGuaranteedPoints()} فدان`;
+
+      const answersWrappers = document.querySelectorAll(".answer-wrapper");
+      answersWrappers.forEach((wrapper, index) => {
+        wrapper.style.display = "block";
+        wrapper.className = "hexagon-wrapper answer-wrapper";
+        
+        const btn = document.getElementById(`ans-${index}`);
+        btn.textContent = q.answers[index];
+        
+        wrapper.onclick = () => selectOption(wrapper, index === q.correct, index);
+      });
+
+      renderLadder();
+      startTimer();
+    }
+  } else {
+    resetGame();
+  }
 }
 
-// Add event listener to load game state when page loads
-window.addEventListener('load', () => {
-    const savedState = sessionStorage.getItem('gameState');
-    if (savedState) {
-        loadGameState();
-    } else {
-        loadNextQuestion();
-    }
+// Backup original questions database list to reload during game reset
+window.addEventListener("DOMContentLoaded", () => {
+  if (typeof questions !== "undefined") {
+    window.questionsBackup = JSON.parse(JSON.stringify(questions));
+  }
 });

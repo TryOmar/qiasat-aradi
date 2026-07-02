@@ -3,49 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>من سيربح الفدادين</title>
+    <title>من سيربح الفدادين - لعبة كروكي الأراضي</title>
     <link rel="stylesheet" href="style.css" />
     <script src="questions.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   </head>
-
   <body>
-    <div class="header">من سيربح الفدادين</div>
-    <div class="actions">
-      <button class="action-btn" onclick="removeTwoAnswers()">
-        احذف إجابتين
-      </button>
-      <button class="action-btn" onclick="changeQuestion()">غيّر السؤال</button>
-      <button class="action-btn" onclick="callFriend()">اتصل بصديق</button>
-      <button class="action-btn" onclick="useGuide()">استعن بالدلال</button>
-      <button class="restart-btn" onclick="resetGame()">العب من جديد</button>
-    </div>
-    <div class="scoreboard" id="scoreboard">
-      <div class="left-half">
-        <table id="rounds-table">
-          <thead>
-            <tr>
-              <th>الدرجة</th>
-              <th>السؤال</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Table rows will be added dynamically -->
-          </tbody>
-        </table>
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+      <div class="logo-container">
+        <div class="glowing-ring"></div>
+        <div class="logo-text">من سيربح<br><span>الفدادين</span></div>
       </div>
-      <div class="right-half">
-        <p>السؤال الحالي: <span id="question-number">1</span> من 15</p>
-        <p>الإجابات الصحيحة: <span id="correct-answers">0</span> / 15</p>
-        <p>رصيدك: <span id="land-points">0</span> فدان</p>
-        <p>الوقت المتبقي: <span id="timer">60</span> ثانية</p>
+      <div class="rules-card">
+        <h3>مسابقة الدلال الذكي الكبرى</h3>
+        <p>اختبر مهاراتك في قياس ورسم وحساب مساحات الأراضي الزراعية والمواريث وفصل الحدود.</p>
+        <ul class="rules-list">
+          <li><strong>15</strong> سؤالاً متدرج الصعوبة.</li>
+          <li><strong>4</strong> وسائل مساعدة فريدة (تستخدم مرة واحدة).</li>
+          <li>محطات أمان عند السؤال <strong>5</strong> و <strong>10</strong> تضمن لك رصيدك.</li>
+          <li>الجائزة الكبرى <strong>100 فدان</strong> زراعي!</li>
+        </ul>
+        <button class="btn-start" onclick="startGame()">ابدأ المسابقة</button>
       </div>
     </div>
-    <div class="question-box" id="question-box">
-      <p id="question">أين ولد الشاعر أبو العلاء المعري؟</p>
-      <div class="answer" onclick="checkAnswer(this, true)">سوريا</div>
-      <div class="answer" onclick="checkAnswer(this, false)">الحجاز</div>
-      <div class="answer" onclick="checkAnswer(this, false)">العراق</div>
-      <div class="answer" onclick="checkAnswer(this, false)">اليمن</div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <div class="game-container">
+        <!-- Sidebar: Levels Ladder -->
+        <div class="sidebar-ladder" id="sidebar-ladder">
+          <!-- Will be populated dynamically -->
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="main-game-area">
+          <div class="game-header">
+            <div class="logo-mini">من سيربح الفدادين</div>
+            <!-- Lifelines Actions -->
+            <div class="lifelines">
+              <button id="lifeline-remove" class="lifeline-btn" onclick="useLifelineRemove()" title="حذف إجابتين (50:50)">
+                <span class="icon">50:50</span>
+              </button>
+              <button id="lifeline-change" class="lifeline-btn" onclick="useLifelineChange()" title="تغيير السؤال">
+                <span class="icon">🔄</span>
+              </button>
+              <button id="lifeline-friend" class="lifeline-btn" onclick="useLifelineFriend()" title="اتصال بصديق">
+                <span class="icon">📞</span>
+              </button>
+              <button id="lifeline-guide" class="lifeline-btn" onclick="useLifelineGuide()" title="استعن بالدلال">
+                <span class="icon">👳‍♂️</span>
+              </button>
+            </div>
+            <button class="restart-top-btn" onclick="confirmReset()">العب من جديد</button>
+          </div>
+
+          <div class="level-badge" id="level-category">معلومات القياس العامة</div>
+
+          <div class="scoreboard-row">
+            <div class="score-card">
+              <span class="label">السؤال</span>
+              <span class="value" id="question-number">1 / 15</span>
+            </div>
+            <div class="score-card">
+              <span class="label">الرصيد المضمون</span>
+              <span class="value" id="guaranteed-points">0 فدان</span>
+            </div>
+            <div class="score-card highlight">
+              <span class="label">الرصيد الحالي</span>
+              <span class="value" id="land-points">0 فدان</span>
+            </div>
+          </div>
+
+          <!-- Timer Bar -->
+          <div class="timer-container">
+            <div class="timer-track">
+              <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            <div class="timer-text"><span id="timer">120</span> ثانية</div>
+          </div>
+
+          <!-- Question & Answers Hexagons -->
+          <div class="quiz-container">
+            <div class="hexagon-wrapper question-wrapper">
+              <div class="hexagon-inner">
+                <p id="question">جاري تحميل السؤال...</p>
+              </div>
+            </div>
+
+            <div class="answers-grid">
+              <div class="hexagon-wrapper answer-wrapper" id="ans-wrapper-0">
+                <div class="hexagon-inner answer-btn" id="ans-0">الإجابة 1</div>
+              </div>
+              <div class="hexagon-wrapper answer-wrapper" id="ans-wrapper-1">
+                <div class="hexagon-inner answer-btn" id="ans-1">الإجابة 2</div>
+              </div>
+              <div class="hexagon-wrapper answer-wrapper" id="ans-wrapper-2">
+                <div class="hexagon-inner answer-btn" id="ans-2">الإجابة 3</div>
+              </div>
+              <div class="hexagon-wrapper answer-wrapper" id="ans-wrapper-3">
+                <div class="hexagon-inner answer-btn" id="ans-3">الإجابة 4</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
     <script src="game.js"></script>
   </body>
