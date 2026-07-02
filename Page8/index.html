@@ -57,7 +57,10 @@
                 <span class="icon">👳‍♂️</span>
               </button>
             </div>
-            <button class="restart-top-btn" onclick="confirmReset()">العب من جديد</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button id="sound-toggle-btn" class="restart-top-btn" onclick="toggleMute()" title="كتم/تفعيل الصوت">🔊</button>
+              <button class="restart-top-btn" onclick="confirmReset()">العب من جديد</button>
+            </div>
           </div>
 
           <div class="level-badge" id="level-category">معلومات القياس العامة</div>

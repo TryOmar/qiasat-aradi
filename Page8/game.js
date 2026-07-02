@@ -37,6 +37,214 @@ let lifelines = {
   useGuide: true
 };
 
+// --- Synthesizer Sound Engine (Native Web Audio API) ---
+let soundMuted = localStorage.getItem("gameSoundMuted") === "true";
+let audioCtx = null;
+
+function initAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq, type, duration, volume = 0.1) {
+  if (soundMuted) return;
+  try {
+    initAudioContext();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
+
+function playCorrectSound() {
+  const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+  notes.forEach((freq, index) => {
+    setTimeout(() => {
+      playTone(freq, "triangle", 0.6, 0.15);
+      playTone(freq * 2, "sine", 0.3, 0.05);
+    }, index * 100);
+  });
+}
+
+function playWrongSound() {
+  if (soundMuted) return;
+  try {
+    initAudioContext();
+    const duration = 0.8;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc1.type = "sawtooth";
+    osc2.type = "sawtooth";
+    
+    osc1.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc2.frequency.setValueAtTime(153, audioCtx.currentTime);
+    
+    osc1.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + duration);
+    osc2.frequency.exponentialRampToValueAtTime(81, audioCtx.currentTime + duration);
+    
+    gainNode.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    
+    osc1.stop(audioCtx.currentTime + duration);
+    osc2.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
+
+function playLifelineSound() {
+  if (soundMuted) return;
+  try {
+    initAudioContext();
+    const duration = 0.5;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + duration);
+    
+    gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
+
+function playPhoneRingSound() {
+  if (soundMuted) return;
+  try {
+    initAudioContext();
+    const duration = 1.8;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc1.type = "sine";
+    osc2.type = "sine";
+    
+    osc1.frequency.setValueAtTime(853, audioCtx.currentTime);
+    osc2.frequency.setValueAtTime(960, audioCtx.currentTime);
+    
+    const modulator = audioCtx.createOscillator();
+    const modGain = audioCtx.createGain();
+    
+    modulator.frequency.value = 15;
+    modGain.gain.value = 40;
+    
+    modulator.connect(osc1.frequency);
+    modulator.connect(osc2.frequency);
+    
+    gainNode.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime + 0.5);
+    gainNode.gain.setValueAtTime(0.06, audioCtx.currentTime + 0.7);
+    gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime + 1.2);
+    gainNode.gain.setValueAtTime(0.06, audioCtx.currentTime + 1.4);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    modulator.start();
+    osc1.start();
+    osc2.start();
+    
+    modulator.stop(audioCtx.currentTime + duration);
+    osc1.stop(audioCtx.currentTime + duration);
+    osc2.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
+
+function playStartFanfare() {
+  const notes = [
+    { freq: 261.63, delay: 0 },   // C4
+    { freq: 329.63, delay: 0.15 }, // E4
+    { freq: 392.00, delay: 0.3 },  // G4
+    { freq: 523.25, delay: 0.45 }, // C5
+    { freq: 659.25, delay: 0.6 }   // E5
+  ];
+  notes.forEach((note) => {
+    setTimeout(() => {
+      playTone(note.freq, "triangle", 0.7, 0.1);
+    }, note.delay * 1000);
+  });
+}
+
+function playTickSound() {
+  playTone(timeLeft <= 20 ? 900 : 550, "sine", 0.04, 0.04);
+}
+
+function playVictoryFanfare() {
+  const chords = [
+    { freqs: [261.63, 329.63, 392.00, 523.25], duration: 0.4, delay: 0 },
+    { freqs: [293.66, 349.23, 440.00, 587.33], duration: 0.4, delay: 0.4 },
+    { freqs: [329.63, 415.30, 493.88, 659.25], duration: 1.2, delay: 0.8 }
+  ];
+  chords.forEach((chord) => {
+    setTimeout(() => {
+      chord.freqs.forEach((f) => {
+        playTone(f, "triangle", chord.duration, 0.08);
+      });
+    }, chord.delay * 1000);
+  });
+}
+
+function toggleMute() {
+  soundMuted = !soundMuted;
+  localStorage.setItem("gameSoundMuted", soundMuted);
+  updateMuteButtonUI();
+  
+  if (!soundMuted) {
+    initAudioContext();
+    playTone(440, "sine", 0.15, 0.1);
+  }
+}
+
+function updateMuteButtonUI() {
+  const btn = document.getElementById("sound-toggle-btn");
+  if (btn) {
+    btn.textContent = soundMuted ? "🔇" : "🔊";
+  }
+}
+
+// Automatically sync the mute button icon on load
+window.addEventListener("load", updateMuteButtonUI);
+
 // Custom Premium Modal Popup Helper
 function showCustomPopup(title, text, btnText = "موافق", callback = null) {
   // Remove existing overlays just in case
@@ -113,6 +321,7 @@ function startGame() {
   if (savedState) {
     loadGameState();
   } else {
+    playStartFanfare();
     resetGameData();
     loadNextQuestion();
   }
@@ -193,6 +402,7 @@ function shuffleAnswers(answers, correctIndex) {
 // Load Next question in sequence
 function loadNextQuestion() {
   if (correctAnswers === 15) {
+    playVictoryFanfare();
     showCustomPopup(
       "👑 فوز ساحق!",
       "تهانينا الحارة! لقد أجبت على جميع الأسئلة الـ 15 بشكل صحيح وحصلت على الجائزة الكبرى: <strong>100 فدان زراعي</strong> ومكانة الدلال الأكبر!",
@@ -270,6 +480,7 @@ function startTimer(resume = false) {
   timerInterval = setInterval(() => {
     timeLeft--;
     updateTimerUI();
+    playTickSound();
 
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
@@ -312,6 +523,7 @@ function selectOption(selectedWrapper, isCorrect, index) {
   wrappers.forEach((w) => (w.onclick = null));
 
   resetTimer();
+  playTone(440, "sine", 0.08, 0.08);
   selectedWrapper.classList.add("selected");
 
   // Millionaire dramatic delay (1 second)
@@ -319,6 +531,7 @@ function selectOption(selectedWrapper, isCorrect, index) {
     selectedWrapper.classList.remove("selected");
     
     if (isCorrect) {
+      playCorrectSound();
       selectedWrapper.classList.add("correct");
       correctAnswers++;
       landPoints += roundScore;
@@ -333,6 +546,7 @@ function selectOption(selectedWrapper, isCorrect, index) {
         loadNextQuestion();
       }, 1500);
     } else {
+      playWrongSound();
       selectedWrapper.classList.add("incorrect");
       
       // Reveal correct answer
@@ -416,6 +630,7 @@ function confirmReset() {
 function useLifelineRemove() {
   if (!lifelines.removeTwo) return;
 
+  playLifelineSound();
   const correctIndex = currentGameQuestion.correct;
   let removed = 0;
 
@@ -447,6 +662,7 @@ function useLifelineChange() {
   if (!lifelines.changeQuestion) return;
 
   resetTimer();
+  playLifelineSound();
   lifelines.changeQuestion = false;
   updateLifelineButtonsUI();
 
@@ -490,6 +706,7 @@ function useLifelineChange() {
 function useLifelineFriend() {
   if (!lifelines.callFriend) return;
 
+  playPhoneRingSound();
   lifelines.callFriend = false;
   updateLifelineButtonsUI();
   saveGameState();
@@ -531,6 +748,7 @@ function useLifelineFriend() {
 function useLifelineGuide() {
   if (!lifelines.useGuide) return;
 
+  playLifelineSound();
   const guideLink = currentGameQuestion.guideLink;
   const sessionData = currentGameQuestion.sessionvars;
 
