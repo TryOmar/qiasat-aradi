@@ -13,10 +13,10 @@ let result_carat = document.querySelector(".result-carat");
 let result_acre = document.querySelector(".result-acre");
 let old_width = document
   .querySelector(".width-old")
-  .querySelectorAll("td:not(:first-child)");
+  .querySelectorAll("input");
 let each_old = document
   .querySelector(".each-old")
-  .querySelectorAll("td:not(:first-child)");
+  .querySelectorAll("input");
 let last_table_inputs = document.querySelectorAll(".table-input:not(#total)")[
   document.querySelectorAll(".table-input:not(#total)").length - 1
 ];
@@ -33,7 +33,7 @@ function saveData() {
   sessionStorage.setItem("acre", acre.value);
   sessionStorage.setItem("cm", cm.value);
   old_width.forEach((e, index) => {
-    sessionStorage.setItem(`old_width_${index}`, e.innerText);
+    sessionStorage.setItem(`old_width_${index}`, e.value);
   });
   document
     .querySelectorAll(".table-input:not(#total)")
@@ -54,7 +54,7 @@ function loadData() {
   acre.value = sessionStorage.getItem("acre") || "";
   cm.value = sessionStorage.getItem("cm") || "";
   old_width.forEach((e, index) => {
-    e.innerText = sessionStorage.getItem(`old_width_${index}`) || "";
+    e.value = sessionStorage.getItem(`old_width_${index}`) || "0";
   });
   document
     .querySelectorAll(".table-input:not(#total)")
@@ -85,10 +85,10 @@ function inputlistener() {
   last_table_inputs = document.createElement("div");
   last_table_inputs.className = "table-input";
   last_table_inputs.innerHTML = `
-          <input type="number">
-          <input type="number">
+          <input type="number" inputmode="decimal">
+          <input type="number" inputmode="decimal">
           <input type="text" readonly>
-          <input type="number">
+          <input type="number" inputmode="decimal">
           <input type="text" readonly>
         `;
   document
@@ -108,8 +108,8 @@ function inputlistener() {
 old_width.forEach((e) => {
   e.addEventListener("input", () => {
     let total_cm = (
-      (((Number(old_width[0].innerText) + Number(old_width[1].innerText)) / 24 +
-        Number(old_width[2].innerText)) /
+      (((Number(old_width[0].value) + Number(old_width[1].value)) / 24 +
+        Number(old_width[2].value)) /
         100) *
       14.7916666667 *
       24
@@ -129,7 +129,7 @@ delete_btn.addEventListener("click", () => {
 });
 document
   .querySelectorAll(
-    "input:not(.table-input input), .width-old td:not(:first-child)"
+    "input:not(.table-input input)"
   )
   .forEach((x) => {
     x.addEventListener("input", () => {
@@ -205,15 +205,15 @@ function result_each() {
 }
 document
   .querySelectorAll(
-    "input:not(.table-input input), .width-old td:not(:first-child)"
+    "input:not(.table-input input)"
   )
   .forEach((e) => {
     e.addEventListener("input", () => {
       each_carat.innerText = result_each().toFixed(3);
       let each_carat_value = Number(each_carat.innerText);
-      each_old[0].innerText = meter_to_old(each_carat_value, "num1");
-      each_old[1].innerText = meter_to_old(each_carat_value, "num2");
-      each_old[2].innerText = meter_to_old(each_carat_value, "num3");
+      each_old[0].value = meter_to_old(each_carat_value, "num1");
+      each_old[1].value = meter_to_old(each_carat_value, "num2");
+      each_old[2].value = meter_to_old(each_carat_value, "num3");
       saveData(); // Save data when input changes
     });
   });
@@ -228,9 +228,9 @@ function total_carat_table(e) {
 }
 cm.addEventListener("input", () => {
   let meter = Number(cm.value);
-  old_width[0].innerText = meter_to_old(meter, "num1");
-  old_width[1].innerText = meter_to_old(meter, "num2");
-  old_width[2].innerText = meter_to_old(meter, "num3");
+  old_width[0].value = meter_to_old(meter, "num1");
+  old_width[1].value = meter_to_old(meter, "num2");
+  old_width[2].value = meter_to_old(meter, "num3");
   saveData(); // Save data when input changes
 });
 

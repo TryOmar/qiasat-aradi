@@ -242,7 +242,20 @@
     border-radius: 5px
 }
 .s4 div table tr td:not(:first-child){
+    border: none;
+}
+.width-old-input, .each-old-input {
+    width: 65px;
+    height: 25px;
+    text-align: center;
     border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 11px;
+    outline: none;
+}
+.each-old-input {
+    background-color: #f0f0f0;
+    color: #555555;
 }
 .s4 h3{
     margin: 0px;
