@@ -177,11 +177,32 @@ function isFull() {
 }
 
 function calculate() {
-  totalArea_result.innerText = (totalArea() || 0).toFixed(2);
+  const area = totalArea() || 0;
+  totalArea_result.innerText = area.toFixed(2);
   price_result.innerText = Math.floor(getprice() || 0).toLocaleString();
   area_result1.innerText = Math.floor(acre() || 0);
   area_result2.innerText = Math.floor(carats() || 0);
   area_result3.innerText = (shares() || 0).toFixedNoRounding(2);
+
+  // Calculate square qasba, square qabda, and less-than-fist
+  const qasba_sq = area / 12.60250;
+  const reedValue = Math.floor(qasba_sq);
+  const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+  const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+
+  const area_qasba_res = document.querySelectorAll(".area_qasba_result");
+  if (area_qasba_res.length >= 3) {
+    area_qasba_res[0].value = lessThanFistValue;
+    area_qasba_res[1].value = fistValue;
+    area_qasba_res[2].value = reedValue;
+  }
+
+  // Update meter labels/badges
+  document.getElementById("width1_meter_val").innerText = (Number(width1.value) || 0).toFixed(2) + " م";
+  document.getElementById("width2_meter_val").innerText = (Number(width2.value) || 0).toFixed(2) + " م";
+  document.getElementById("height_meter_val").innerText = (Number(height.value) || 0).toFixed(2) + " م";
+  document.getElementById("area_meter_val").innerText = area.toFixed(2) + " م²";
+
   isFull();
 }
 
@@ -499,6 +520,12 @@ function printCroquis() {
   const shares_val = area_result3.innerText;
   const priceVal = price_result.innerText;
 
+  // Calculate square qasba, square qabda, and less-than-fist
+  const qasba_sq = (Number(totalArea.replace(/,/g, "")) || 0) / 12.60250;
+  const q_reed = Math.floor(qasba_sq);
+  const q_fist = Math.floor((qasba_sq - q_reed) * 24);
+  const q_less = (qasba_sq - q_reed - (q_fist / 24)).toFixed(2);
+
   let startY = centerY - 32;
   ctx.fillText("المساحة الكلية", centerX, startY);
   ctx.font = "bold 14px Cairo, Arial, sans-serif";
@@ -727,6 +754,10 @@ function printCroquis() {
             <tr>
               <td>المساحة بالفدان والقيراط والسهم</td>
               <td>${feddan} فدان و ${carat} قيراط و ${shares_val} سهم</td>
+            </tr>
+            <tr>
+              <td>النتيجة بالقصبة المربعة</td>
+              <td>${q_reed} قصبة و ${q_fist} قبضة و ${q_less} أقل من القبضة</td>
             </tr>
             ${priceVal && priceVal !== "0" ? '<tr><td>إجمالي السعر</td><td><strong>' + priceVal + ' جنيه</strong></td></tr>' : ""}
           </tbody>

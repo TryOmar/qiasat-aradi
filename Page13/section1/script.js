@@ -922,6 +922,32 @@ function calculateAll() {
           </tr>
         `;
       });
+
+      // Add square qasba row
+      const qasba_sq = area / 12.60250;
+      const reedValue = Math.floor(qasba_sq);
+      const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+      const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+
+      conversionsTbody.innerHTML += `
+        <tr class="conv-row" style="background-color: #fcfcfc;">
+          <td class="conv-label-cell" style="font-weight: bold;">
+            <span class="conv-dim-name">النتيجة بالقصبة المربعة</span>
+            <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32;">
+              <span>${area.toFixed(2)}</span> م²
+            </span>
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+        </tr>
+      `;
     } else {
       conversionsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
     }
@@ -2147,7 +2173,7 @@ function printCroquis() {
 
   const convSection = convRows ? `
     <div class="section">
-      <div class="section-title">تحويل من متر طولي إلى القصبة والقبضة</div>
+      <div class="section-title">تحويل من متر طولي ومربع إلى القصبة والقبضة</div>
       <table>
         <thead><tr><th>البعد</th><th>أقل من القبضة</th><th>قبضة</th><th>قصبة</th></tr></thead>
         <tbody>${convRows}</tbody>
