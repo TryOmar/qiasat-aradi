@@ -1372,6 +1372,7 @@ function printDallalMap() {
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>خريطة وكروكي تقسيم الأراضي - الدلال</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
@@ -1404,8 +1405,8 @@ function printDallalMap() {
         }
         .canvas-container {
           width: 100%;
-          height: calc(100vh - 120px);
-          margin: 0 auto;
+          max-width: 1000px;
+          margin: 15px auto;
           box-sizing: border-box;
           display: flex;
           justify-content: center;
@@ -1425,8 +1426,22 @@ function printDallalMap() {
           font-size: 11px;
           color: #777;
           border-top: 1px dashed #eee;
-          padding-top: 5px;
-          margin: 0 15px;
+          padding-top: 15px;
+          margin: 20px 15px;
+        }
+        .print-btn {
+          margin-top: 5px;
+          padding: 12px 25px;
+          background: linear-gradient(135deg, #1b5e20, #2e7d32);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-family: 'Cairo';
+          font-weight: bold;
+          font-size: 16px;
+          cursor: pointer;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          transition: all 0.3s ease;
         }
         @media print {
           @page {
@@ -1443,8 +1458,8 @@ function printDallalMap() {
             display: none !important;
           }
           .canvas-container {
-            height: 100vh !important;
             width: 100vw !important;
+            max-width: none !important;
             margin: 0 !important;
             padding: 0 !important;
           }
@@ -1490,8 +1505,8 @@ function printDallalMap() {
       </div>
 
       <div class="footer">
-        <p style="margin: 3px 0; font-weight: bold; color: #1b5e20;">جميع الحقوق محفوظة © تطبيق الدلال لقياسات الأراضي</p>
-        <button class="no-print" onclick="window.print()" style="margin-top: 10px; padding: 8px 18px; background-color: #004d40; color: white; border: none; border-radius: 5px; font-family:'Cairo'; font-weight: bold; cursor: pointer; font-size:12px;">🖨️ طباعة الخريطة الآن</button>
+        <button class="no-print print-btn" onclick="window.print()">🖨️ طباعة الخريطة</button>
+        <p style="margin: 15px 0 5px; font-weight: bold; color: #1b5e20; font-size: 12px;">جميع الحقوق محفوظة © تطبيق الدلال لقياسات الأراضي</p>
       </div>
     </body>
     </html>

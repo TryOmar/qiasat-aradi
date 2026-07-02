@@ -74,6 +74,11 @@
         <div class="canvas-hint no-print">
           * كل النصوص والبيانات والأبعاد وخطوط التقسيم قابلة للسحب والإفلات مباشرة داخل اللوحة.
         </div>
+        
+        <!-- Action Buttons Under Canvas -->
+        <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="action-btn generate-btn" onclick="printDallalMap()" style="padding: 12px 30px; font-size: 16px;">🖨️ إنشاء الخريطة والطباعة</button>
+        </div>
       </div>
 
       <!-- Properties & Presets Sidebar -->
@@ -110,7 +115,6 @@
         </div>
 
         <div style="margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="action-btn generate-btn" onclick="printDallalMap()">🖨️ إنشاء الخريطة والطباعة</button>
           <button type="button" class="action-btn reset-btn" onclick="resetCanvasToDefault()">🗑️ مسح اللوحة بالكامل</button>
         </div>
       </div>
