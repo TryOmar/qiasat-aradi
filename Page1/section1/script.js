@@ -149,24 +149,30 @@ function isFull() {
     height_num2 = 0;
     height_num1 = 0;
   }
+  const w1_res = document.querySelectorAll(".width1_result");
+  const w2_res = document.querySelectorAll(".width2_result");
+  const h_res = document.querySelectorAll(".height_result");
+
+  if (w1_res.length < 3 || w2_res.length < 3 || h_res.length < 3) return;
+
   const active = document.activeElement;
   
-  if (active !== width1_result[0] && active !== width1_result[1] && active !== width1_result[2]) {
-    width1_result[0].value = width1_num1;
-    width1_result[1].value = width1_num2;
-    width1_result[2].value = width1_num3;
+  if (active !== w1_res[0] && active !== w1_res[1] && active !== w1_res[2]) {
+    w1_res[0].value = width1_num1;
+    w1_res[1].value = width1_num2;
+    w1_res[2].value = width1_num3;
   }
   
-  if (active !== width2_result[0] && active !== width2_result[1] && active !== width2_result[2]) {
-    width2_result[0].value = width2_num1;
-    width2_result[1].value = width2_num2;
-    width2_result[2].value = width2_num3;
+  if (active !== w2_res[0] && active !== w2_res[1] && active !== w2_res[2]) {
+    w2_res[0].value = width2_num1;
+    w2_res[1].value = width2_num2;
+    w2_res[2].value = width2_num3;
   }
   
-  if (active !== height_result[0] && active !== height_result[1] && active !== height_result[2]) {
-    height_result[0].value = height_num1;
-    height_result[1].value = height_num2;
-    height_result[2].value = height_num3;
+  if (active !== h_res[0] && active !== h_res[1] && active !== h_res[2]) {
+    h_res[0].value = height_num1;
+    h_res[1].value = height_num2;
+    h_res[2].value = height_num3;
   }
 }
 
@@ -462,11 +468,7 @@ function printCroquis() {
               <td>المساحة بالفدان والقيراط والسهم</td>
               <td>${feddan} فدان و ${carat} قيراط و ${shares_val} سهم</td>
             </tr>
-            ${priceVal && priceVal !== "0" ? \`
-            <tr>
-              <td>إجمالي السعر</td>
-              <td><strong>\${priceVal} جنيه</strong></td>
-            </tr>\` : ""}
+            ${priceVal && priceVal !== "0" ? '<tr><td>إجمالي السعر</td><td><strong>' + priceVal + ' جنيه</strong></td></tr>' : ""}
           </tbody>
         </table>
       </div>
