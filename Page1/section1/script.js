@@ -238,3 +238,245 @@ height_result.forEach((input) => {
     calculate();
   });
 });
+
+function printCroquis() {
+  if (!width1.value || !width2.value || !height.value) {
+    alert("يرجى إدخال المقاسات أولاً (العرض الأول، العرض الآخر، الطول) لرسم الكروكي.");
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 600;
+  canvas.height = 600;
+  const ctx = canvas.getContext("2d");
+
+  // Fill white background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const w1 = Number(width1.value) || 0;
+  const w2 = Number(width2.value) || 0;
+  const h = Number(height.value) || 0;
+
+  const maxW = Math.max(w1, w2);
+  const scaleX = 400 / maxW;
+  const scaleY = 400 / h;
+  const scale = Math.min(scaleX, scaleY);
+
+  const drawW1 = w1 * scale;
+  const drawW2 = w2 * scale;
+  const drawH = h * scale;
+
+  const centerX = 300;
+  const centerY = 300;
+
+  const p1 = { x: centerX - drawW1 / 2, y: centerY - drawH / 2 };
+  const p2 = { x: centerX + drawW1 / 2, y: centerY - drawH / 2 };
+  const p3 = { x: centerX + drawW2 / 2, y: centerY + drawH / 2 };
+  const p4 = { x: centerX - drawW2 / 2, y: centerY + drawH / 2 };
+
+  // Draw Shape (Agricultural Land)
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.lineTo(p3.x, p3.y);
+  ctx.lineTo(p4.x, p4.y);
+  ctx.closePath();
+
+  ctx.fillStyle = "#e8f5e9";
+  ctx.fill();
+  ctx.strokeStyle = "#2e7d32";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Draw dashed line for height in the center
+  ctx.beginPath();
+  ctx.setLineDash([5, 5]);
+  ctx.moveTo(centerX, p1.y);
+  ctx.lineTo(centerX, p4.y);
+  ctx.strokeStyle = "#388e3c";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw labels
+  ctx.fillStyle = "#222222";
+  ctx.font = "bold 13px Cairo, Arial, sans-serif";
+  ctx.textAlign = "center";
+
+  // Top side label
+  ctx.fillText(`العرض الأول: ${w1} م`, centerX, p1.y - 12);
+  
+  // Bottom side label
+  ctx.fillText(`العرض الآخر: ${w2} م`, centerX, p4.y + 22);
+
+  // Height side label
+  ctx.textAlign = "right";
+  ctx.fillText(`الطول: ${h} م`, centerX - 10, centerY);
+
+  // Details inside the shape
+  ctx.fillStyle = "#1b5e20";
+  ctx.font = "bold 13px Cairo, Arial, sans-serif";
+  ctx.textAlign = "center";
+
+  const totalArea = totalArea_result.innerText;
+  const feddan = area_result1.innerText;
+  const carat = area_result2.innerText;
+  const shares_val = area_result3.innerText;
+  const priceVal = price_result.innerText;
+
+  let startY = centerY - 25;
+  ctx.fillText("المساحة الكلية", centerX, startY);
+  ctx.font = "bold 15px Cairo, Arial, sans-serif";
+  ctx.fillText(`${totalArea} م²`, centerX, startY + 20);
+  ctx.font = "bold 12px Cairo, Arial, sans-serif";
+  ctx.fillText(`${feddan} فدان ، ${carat} قيراط ، ${shares_val} سهم`, centerX, startY + 40);
+
+  if (priceVal && priceVal !== "0") {
+    ctx.font = "bold 12px Cairo, Arial, sans-serif";
+    ctx.fillText(`إجمالي السعر: ${priceVal} جنيه`, centerX, startY + 60);
+  }
+
+  const imgURL = canvas.toDataURL("image/png");
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+  const timeStr = now.toLocaleTimeString("ar-EG");
+
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <title>كروكي الأرض والنتائج - الدلال</title>
+      <style>
+        body {
+          font-family: 'Cairo', Arial, sans-serif;
+          margin: 20px;
+          color: #333;
+          direction: rtl;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 3px solid #2e7d32;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+        }
+        .header h1 {
+          margin: 0;
+          color: #1b5e20;
+          font-size: 24px;
+        }
+        .header p {
+          margin: 5px 0 0;
+          color: #666;
+          font-size: 14px;
+        }
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+        }
+        .sketch {
+          border: 2px solid #2e7d32;
+          border-radius: 10px;
+          padding: 10px;
+          background: #f9f9f9;
+          max-width: 500px;
+          width: 100%;
+        }
+        .sketch img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        .results-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+        .results-table th, .results-table td {
+          border: 1px solid #ddd;
+          padding: 10px;
+          text-align: center;
+          font-size: 14px;
+        }
+        .results-table th {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 30px;
+          text-align: center;
+          font-size: 12px;
+          color: #888;
+          border-top: 1px solid #ddd;
+          padding-top: 10px;
+        }
+        @media print {
+          .no-print {
+            display: none;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>تقرير كروكي الأرض الزراعية</h1>
+        <p>تاريخ الطباعة: ${dateStr} - الساعة: ${timeStr}</p>
+      </div>
+
+      <div class="container">
+        <div class="sketch">
+          <img src="${imgURL}" alt="كروكي الأرض">
+        </div>
+
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>البيان</th>
+              <th>القياس / الناتج</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>العرض الأول</td>
+              <td>${w1} متر</td>
+            </tr>
+            <tr>
+              <td>العرض الآخر</td>
+              <td>${w2} متر</td>
+            </tr>
+            <tr>
+              <td>الطول</td>
+              <td>${h} متر</td>
+            </tr>
+            <tr>
+              <td>المساحة الإجمالية</td>
+              <td><strong>${totalArea} متر مربع</strong></td>
+            </tr>
+            <tr>
+              <td>المساحة بالفدان والقيراط والسهم</td>
+              <td>${feddan} فدان و ${carat} قيراط و ${shares_val} سهم</td>
+            </tr>
+            ${priceVal && priceVal !== "0" ? \`
+            <tr>
+              <td>إجمالي السعر</td>
+              <td><strong>\${priceVal} جنيه</strong></td>
+            </tr>\` : ""}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        <p>تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
+        <button class="no-print" onclick="window.print()" style="margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">بدء الطباعة</button>
+      </div>
+    </body>
+    </html>
+  \`);
+  printWindow.document.close();
+}
