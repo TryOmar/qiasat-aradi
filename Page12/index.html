@@ -5,14 +5,10 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>رسم وتقسيم الأراضي على الخريطة</title>
+  <title>برنامج رسم خريطة الدَّلاَّل</title>
   
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Leaflet Geoman CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.15.0/dist/leaflet-geoman.css" />
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheets -->
   <link rel="stylesheet" href="../style.css" />
@@ -24,143 +20,122 @@
   <div class="con">
     <div class="dec1 no-print"></div>
     
-    <div class="title no-print">
-      <h1>رسم وتقسيم الأراضي على الخريطة</h1>
+    <div class="title no-print" style="position: relative;">
+      <button onclick="history.back()" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 8px 16px; background-color: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🔙 رجوع</button>
+      <h1>برنامج رسم خريطة الدَّلاَّل</h1>
       <img src="../imgs/1.png" alt="image">
     </div>
 
-    <!-- Map Container Card -->
-    <div class="s" style="width: 100%; max-width: 800px; padding: 10px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 10px;">
-      <h3 style="background: #1b5e20; color: white; margin: -10px -10px 10px -10px; padding: 10px; border-radius: 12px 12px 0 0; font-size: 15px; font-weight: bold; text-align: center;">الخريطة التفاعلية</h3>
-      
-      <!-- The Map Element -->
-      <div id="map" style="width: 100%; height: 480px; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
+    <!-- Instructions / Tips -->
+    <div class="s no-print instruction-card">
+      💡 <strong>طريقة الاستخدام السريعة:</strong>
+      <ul style="margin: 5px 0 0 0; padding-right: 20px; line-height: 1.6;">
+        <li>اختر <strong>الشركاء والتقسيم المناسب من القوالب الجاهزة</strong> في الجانب للبدء سريعاً.</li>
+        <li><strong>اسحب وأسقط</strong> أي نص، اسم مالك، بعد، أو خط تقسيم لتضعه في مكانه المناسب تماماً.</li>
+        <li>اضغط على <strong>أي قطعة أرض</strong> لتعديل اسم المالك والمساحة والملاحظات بالجدول.</li>
+        <li>اضغط على <strong>أي خط أو ضلع</strong> لتعديل طوله واسم الحد.</li>
+        <li><strong>انقر مرتين (Double Click)</strong> في أي مكان فارغ بالخريطة لإضافة نص حر (مثل: مباع، باقي).</li>
+      </ul>
     </div>
 
-    <!-- Control Panel Card -->
-    <div class="s" style="width: 100%; max-width: 800px; margin-top: 15px;">
-      <h3>لوحة تحكم التقسيم والقياسات</h3>
+    <!-- Main Workspace Container -->
+    <div class="workspace-container">
       
-      <div class="control-grid">
-        <!-- Area Info -->
-        <div class="panel-section">
-          <h4>المساحة الإجمالية للأرض</h4>
-          <div class="area-display">
-            <div class="area-badge m2-badge">
-              <span id="area-m2">0.0</span>
-              <label>متر مربع</label>
-            </div>
-            <div class="area-badges-sub">
-              <div class="sub-badge acre">
-                <span id="area-acre">0</span>
-                <label>فدان</label>
-              </div>
-              <div class="sub-badge carat">
-                <span id="area-carat">0</span>
-                <label>قيراط</label>
-              </div>
-              <div class="sub-badge shares">
-                <span id="area-shares">0.0</span>
-                <label>سهم</label>
-              </div>
-            </div>
-          </div>
+      <!-- SVG Canvas Viewport Card -->
+      <div class="canvas-card">
+        <h3 class="no-print">خريطة الدَّلاَّل التفاعلية</h3>
+        
+        <!-- Canvas wrapper with paper style background -->
+        <div class="canvas-wrapper">
+          <svg id="dallalSvg" viewBox="0 0 900 650" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background grid and paper styles are dynamically rendered or defined here -->
+            <defs>
+              <pattern id="blueprintGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0, 77, 64, 0.04)" stroke-width="0.8"/>
+              </pattern>
+              <pattern id="waterPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                <rect width="20" height="20" fill="#e0f7fa" />
+                <path d="M 0 10 Q 5 5 10 10 T 20 10" fill="none" stroke="#80deea" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M 0 20 Q 5 15 10 20 T 20 20" fill="none" stroke="#80deea" stroke-width="1.5" stroke-linecap="round"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#blueprintGrid)" stroke="#ccc" stroke-width="1" />
+            
+            <!-- Graphic content layers -->
+            <g id="waterwaysGroup"></g>
+            <g id="shapesGroup"></g>
+            <g id="splitLinesGroup"></g>
+            <g id="borderLabelsGroup"></g>
+            <g id="dimensionLabelsGroup"></g>
+            <g id="notesGroup"></g>
+          </svg>
         </div>
-
-        <!-- Division Settings -->
-        <div class="panel-section">
-          <h4>إعدادات التقسيم</h4>
-          
-          <div class="form-group">
-            <label for="division-type">طريقة التقسيم:</label>
-            <select id="division-type" onchange="toggleDivisionInputs()">
-              <option value="equal">بالتساوي بين الشركاء</option>
-              <option value="custom">حصص مخصصة (بالقراريط)</option>
-            </select>
-          </div>
-
-          <!-- Equal Division Input -->
-          <div class="form-group" id="equal-div-group">
-            <label for="num-partners">عدد الشركاء:</label>
-            <input type="number" id="num-partners" min="2" max="50" value="2" oninput="validateInputs()">
-          </div>
-
-          <!-- Custom Division Input -->
-          <div class="form-group" id="custom-div-group" style="display: none;">
-            <label for="custom-shares">الحصص (مفصولة بفاصلة ,):</label>
-            <input type="text" id="custom-shares" placeholder="مثال: 12, 6, 6" oninput="validateInputs()">
-            <span style="font-size: 11px; color: #666;">أدخل الأنصبة بالقيراط لكل شخص.</span>
-          </div>
-
-          <div class="form-group">
-            <label for="division-direction">اتجاه خطوط التقسيم:</label>
-            <select id="division-direction">
-              <option value="vertical">رأسي (من الشرق إلى الغرب)</option>
-              <option value="horizontal">أفقي (من الشمال إلى الجنوب)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="input-carat-area">مساحة القيراط المعتمدة:</label>
-            <select id="input-carat-area" onchange="updateCalculations()">
-              <option value="175.035">175.035 م² (رسمي)</option>
-              <option value="175">175 م²</option>
-              <option value="171.388">171.388 م²</option>
-              <option value="168">168 م²</option>
-            </select>
-          </div>
-
-          <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="button" class="btn-calc" onclick="divideLand()" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="6" cy="6" r="3"></circle>
-                <circle cx="6" cy="18" r="3"></circle>
-                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
-                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
-                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
-              </svg>
-              <span>احسب وقسم الأرض</span>
-            </button>
-            <button type="button" class="btn-reset" onclick="resetMap()" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              </svg>
-              <span>مسح الكل</span>
-            </button>
-          </div>
+        
+        <div class="canvas-hint no-print">
+          * كل النصوص والبيانات والأبعاد وخطوط التقسيم قابلة للسحب والإفلات مباشرة داخل اللوحة.
         </div>
       </div>
-    </div>
 
-    <!-- Slices Results Card -->
-    <div class="s" id="slices-card" style="display: none; width: 100%; max-width: 800px; margin-top: 15px;">
-      <h3>نتائج تقسيم الأنصبة</h3>
-      <div style="width: 100%; overflow-x: auto;">
-        <table class="report-table" id="slices-table" style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
-          <thead>
-            <tr style="background-color: #f5f5f5; border-bottom: 2px solid #2e7d32;">
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 40px;">م</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">الشريك / النصيب</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">فدان</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">قيراط</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 60px;">سهم</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 120px;">المساحة (م²)</th>
-              <th style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 100px;">النسبة</th>
-            </tr>
-          </thead>
-          <tbody id="slices-table-body">
-            <!-- Dynamic slices results -->
-          </tbody>
-        </table>
+      <!-- Properties & Presets Sidebar -->
+      <div class="sidebar-card no-print">
+        <h3>قوالب جاهزة سريعة</h3>
+        <div class="preset-grid">
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('rectangle')">🔳 مستطيل / مربع</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('square')">⏹️ مربع</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('trapezoid')">📐 شبه منحرف زراعي (مبسط)</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('quadrilateral')">⏢ رباعي غير منتظم</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('v_split')">📊 تقسيم رأسي</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('h_split')">🥞 تقسيم أفقي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطر</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط جديد (مجرى مائي)</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')">🗺️ التقسيم المختلط (من الصورة)</button>
+        </div>
+
+        <h3 style="margin-top: 20px;">أدوات الإضافة</h3>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="sidebar-btn add-btn" onclick="promptAddFreeText()" style="flex: 1;">➕ إضافة نص حر</button>
+          <button type="button" class="sidebar-btn add-btn" onclick="addNewSplitLine()" style="flex: 1;">📏 إضافة خط تقسيم</button>
+        </div>
+
+        <h3 style="margin-top: 20px;" id="editor-title">محرر العنصر المحدد</h3>
+        
+        <!-- Element Editor Panel -->
+        <div id="element-editor" class="editor-panel">
+          <p class="empty-editor-hint">اضغط على أي قطعة أرض أو نص أو ضلع لتعديل بياناته هنا.</p>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+          <button type="button" class="action-btn undo-btn" id="undoBtn" onclick="undo()" style="flex: 1;" title="تراجع عن التعديل الأخير" disabled>↩️ تراجع</button>
+          <button type="button" class="action-btn redo-btn" id="redoBtn" onclick="redo()" style="flex: 1;" title="إعادة تطبيق التعديل" disabled>↪️ إعادة</button>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" class="action-btn generate-btn" onclick="printDallalMap()">🖨️ إنشاء الخريطة والطباعة</button>
+          <button type="button" class="action-btn reset-btn" onclick="resetCanvasToDefault()">🗑️ مسح اللوحة بالكامل</button>
+        </div>
       </div>
+
     </div>
 
   </div>
 
+  <!-- Popups / Modals for quick overlay editing -->
+  <div id="editModal" class="modal no-print">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h3 id="modalTitle">تعديل البيانات</h3>
+      <div id="modalForm">
+        <!-- Dynamic Form Fields -->
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-save-btn" onclick="saveModalData()">حفظ التعديلات</button>
+        <button type="button" class="modal-cancel-btn" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Navigation Bar -->
-  <div class="nav no-print">
+  <div class="nav no-print" dir="rtl">
     <a href="../Page11/index.html" class="nav-box">
       <img src="../imgs/nav1.png" alt="nav1" />
       <p>القسمة المعتادة</p>
@@ -175,14 +150,6 @@
     </a>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Leaflet Geoman JS -->
-  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.15.0/dist/leaflet-geoman.min.js"></script>
-  <!-- Turf.js -->
-  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
-
-  <!-- App Scripts -->
   <script src="../nav.js"></script>
   <script src="script.js"></script>
 </body>
