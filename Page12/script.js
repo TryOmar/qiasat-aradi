@@ -556,7 +556,7 @@ function renderSVG() {
       activeClass += " active";
     }
     polygon.setAttribute("class", activeClass);
-    polygon.setAttribute("fill", s.color || "#ffffff");
+    polygon.setAttribute("fill", "#ffffff");
     polygon.onclick = (e) => onElementClick(e, 'shape', s.id);
     shapesGroup.appendChild(polygon);
 
@@ -571,7 +571,7 @@ function renderSVG() {
     const tSpanOwner = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tSpanOwner.setAttribute("x", s.textX);
     tSpanOwner.setAttribute("y", s.textY - 10);
-    tSpanOwner.setAttribute("fill", "#004d40");
+    tSpanOwner.setAttribute("fill", "#000000");
     tSpanOwner.setAttribute("font-size", "12.5");
     tSpanOwner.setAttribute("font-weight", "bold");
     tSpanOwner.setAttribute("text-anchor", "middle");
@@ -582,7 +582,7 @@ function renderSVG() {
     const tSpanArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tSpanArea.setAttribute("x", s.textX);
     tSpanArea.setAttribute("y", s.textY + 8);
-    tSpanArea.setAttribute("fill", "#b71c1c");
+    tSpanArea.setAttribute("fill", "#000000");
     tSpanArea.setAttribute("font-size", "12");
     tSpanArea.setAttribute("font-weight", "bold");
     tSpanArea.setAttribute("text-anchor", "middle");
@@ -600,8 +600,8 @@ function renderSVG() {
       lines.forEach((lineText, idx) => {
         const tSpanNote = document.createElementNS("http://www.w3.org/2000/svg", "text");
         tSpanNote.setAttribute("x", s.textX);
-        tSpanNote.setAttribute("y", s.textY + 24 + idx * 13);
-        tSpanNote.setAttribute("fill", "#555");
+        tSpanNote.setAttribute("y", s.textY + 25 + (idx * 14));
+        tSpanNote.setAttribute("fill", "#000000");
         tSpanNote.setAttribute("font-size", "10.5");
         tSpanNote.setAttribute("text-anchor", "middle");
         tSpanNote.textContent = lineText.trim();
@@ -626,7 +626,7 @@ function renderSVG() {
       line.setAttribute("stroke-dasharray", "5, 5");
     }
     if (l.color) {
-      line.setAttribute("stroke", l.color);
+      line.setAttribute("stroke", "#000000");
     }
     line.onclick = (e) => onElementClick(e, 'splitLine', l.id);
     splitLinesGroup.appendChild(line);
@@ -661,7 +661,7 @@ function renderSVG() {
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", l.labelX);
       text.setAttribute("y", l.labelY);
-      text.setAttribute("fill", "#1b5e20");
+      text.setAttribute("fill", "#000000");
       text.setAttribute("font-size", "11.5");
       text.setAttribute("font-weight", "800");
       text.setAttribute("text-anchor", "middle");
@@ -682,7 +682,7 @@ function renderSVG() {
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", b.x);
     text.setAttribute("y", b.y);
-    text.setAttribute("fill", "#1b5e20");
+    text.setAttribute("fill", "#000000");
     text.setAttribute("font-size", b.fontSize || "13.5");
     text.setAttribute("font-weight", "bold");
     text.setAttribute("text-anchor", "middle");
@@ -1459,6 +1459,7 @@ function printDallalMap() {
           }
           .canvas-container {
             width: 100vw !important;
+            height: 100vh !important;
             max-width: none !important;
             margin: 0 !important;
             padding: 0 !important;
