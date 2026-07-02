@@ -215,6 +215,8 @@
     font-size: 14px;
     margin-top: 10px;
     /* border: 1px solid red; */
+    width: 100%;
+    max-width: 480px;
 }
 .s4 div table{
     /* border: 1px solid red; */
@@ -235,14 +237,13 @@
     /* border: 1px solid red; */
     white-space: nowrap;
     text-align: center;
-    width:40px;
     height: 20px;
-    text-align: center;
     font-size: 11px;
     border-radius: 5px
 }
 .s4 div table tr td:not(:first-child){
     border: none;
+    width: 90px;
 }
 .width-old-input, .each-old-input {
     width: 65px;
@@ -263,4 +264,8 @@
 .s4 th{
     white-space:nowrap;
     font-size: 13px;
+    text-align: center;
+}
+.s4 th:not(:first-child){
+    width: 90px;
 }
