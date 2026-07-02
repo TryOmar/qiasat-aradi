@@ -557,6 +557,8 @@ function renderSVG() {
     }
     polygon.setAttribute("class", activeClass);
     polygon.setAttribute("fill", "#ffffff");
+    polygon.setAttribute("stroke", "#000000");
+    polygon.setAttribute("stroke-width", "2");
     polygon.onclick = (e) => onElementClick(e, 'shape', s.id);
     shapesGroup.appendChild(polygon);
 
