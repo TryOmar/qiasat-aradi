@@ -163,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <p>العرض السابق بال${unit}</p>
       <p>الفرق بين العرضين بال${unit}</p>
     `;
+    updateQabdaConversions();
   }
 
   function updateValues(mode) {
@@ -374,6 +375,7 @@ function run(e, isConvertClicked = false) {
   result_carat.style.color = result_carat.innerText < 0 ? "red" : "black";
   result_shares.style.color = result_shares.innerText < 0 ? "red" : "black";
   saveData();
+  updateQabdaConversions();
 }
 
 function result_each() {
@@ -386,15 +388,14 @@ document
   )
   .forEach((e) => {
     e.addEventListener("input", () => {
-      if (isTableInMeter) each_carat.innerText = result_each().toFixed(3);
-      else
-        each_carat.innerText = convertMetersToFists(result_each()).toFixed(3);
+      each_carat.innerText = result_each().toFixed(3);
 
       let each_carat_value = Number(result_each());
       each_old[0].value = meter_to_old(each_carat_value, "num1");
       each_old[1].value = meter_to_old(each_carat_value, "num2");
       each_old[2].value = meter_to_old(each_carat_value, "num3");
       saveData(); // Save data when input changes
+      updateQabdaConversions();
     });
   });
 
@@ -412,6 +413,7 @@ cm.addEventListener("input", () => {
   old_width[1].value = meter_to_old(meter, "num2");
   old_width[2].value = meter_to_old(meter, "num3");
   saveData(); // Save data when input changes
+  updateQabdaConversions();
 });
 
 function meter_to_old(number, num) {
@@ -453,5 +455,22 @@ function showDownPart(isVisible) {
     section.style.display = "block"; // Make the section visible
   } else {
     section.style.display = "none"; // Hide the section
+  }
+}
+
+function updateQabdaConversions() {
+  const box = document.getElementById("qabda-conversion-results");
+  if (!box) return;
+  
+  if (!isTableInMeter) {
+    // cm value is currently in Qabda (Fists)
+    const totalMeters = convertFistsToMeters(Number(cm.value));
+    const eachMeters = convertFistsToMeters(result_each());
+    
+    document.getElementById("qabda-total-meters").textContent = totalMeters.toFixed(3) + " م";
+    document.getElementById("qabda-each-meters").textContent = eachMeters.toFixed(3) + " م";
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
   }
 }
