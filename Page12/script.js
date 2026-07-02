@@ -183,10 +183,10 @@ function loadTemplate(type) {
     });
 
     // Outer border labels
-    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 110, angle: 0 });
-    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 540, angle: 0 });
-    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م الكل", x: 130, y: 325, angle: -90 });
-    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م الكل", x: 770, y: 325, angle: 90 });
+    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 135, angle: 0 });
+    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 520, angle: 0 });
+    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م الكل", x: 180, y: 325, angle: -90 });
+    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م الكل", x: 720, y: 325, angle: 90 });
 
   } else if (type === 'square') {
     shapes.push({
@@ -200,10 +200,10 @@ function loadTemplate(type) {
       textY: 325
     });
 
-    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 100 م", x: 425, y: 110, angle: 0 });
-    borderLabels.push({ id: "border_2", text: "الجنب الغربي 100 م", x: 425, y: 540, angle: 0 });
-    borderLabels.push({ id: "border_3", text: "الجنب البحري 100 م الكل", x: 180, y: 325, angle: -90 });
-    borderLabels.push({ id: "border_4", text: "الجنب القبلي 100 م الكل", x: 670, y: 325, angle: 90 });
+    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 100 م", x: 425, y: 135, angle: 0 });
+    borderLabels.push({ id: "border_2", text: "الجنب الغربي 100 م", x: 425, y: 520, angle: 0 });
+    borderLabels.push({ id: "border_3", text: "الجنب البحري 100 م الكل", x: 230, y: 325, angle: -90 });
+    borderLabels.push({ id: "border_4", text: "الجنب القبلي 100 م الكل", x: 620, y: 325, angle: 90 });
 
   } else if (type === 'trapezoid') {
     shapes.push({
@@ -217,10 +217,10 @@ function loadTemplate(type) {
       textY: 325
     });
 
-    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 300 م", x: 450, y: 110, angle: 0 });
-    borderLabels.push({ id: "border_2", text: "الجنب الغربي 500 م", x: 450, y: 540, angle: 0 });
-    borderLabels.push({ id: "border_3", text: "الضلع المائل البحري 17.55 م", x: 140, y: 325, angle: -74 });
-    borderLabels.push({ id: "border_4", text: "الضلع المائل القبلي 18.97 م", x: 760, y: 325, angle: 74 });
+    borderLabels.push({ id: "border_1", text: "الحد الشرقي 300 م", x: 735, y: 325, angle: 74 });
+    borderLabels.push({ id: "border_2", text: "الحد الغربي 360 م", x: 165, y: 325, angle: -74 });
+    borderLabels.push({ id: "border_3", text: "الحد البحري 450 م", x: 450, y: 130, angle: 0 });
+    borderLabels.push({ id: "border_4", text: "الحد القبلي 650 م", x: 450, y: 530, angle: 0 });
 
   } else if (type === 'quadrilateral') {
     shapes.push({
@@ -234,10 +234,10 @@ function loadTemplate(type) {
       textY: 320
     });
 
-    borderLabels.push({ id: "border_1", text: "الحد الشرقي 460 م", x: 450, y: 110, angle: -4 });
-    borderLabels.push({ id: "border_2", text: "الحد الغربي 540 م", x: 450, y: 550, angle: 4 });
-    borderLabels.push({ id: "border_3", text: "الحد البحري 18.00 م", x: 130, y: 325, angle: -80 });
-    borderLabels.push({ id: "border_4", text: "الحد القبلي 19.50 م", x: 770, y: 325, angle: 80 });
+    borderLabels.push({ id: "border_1", text: "الحد الشرقي 460 م", x: 740, y: 330, angle: 84 });
+    borderLabels.push({ id: "border_2", text: "الحد الغربي 540 م", x: 160, y: 325, angle: -83 });
+    borderLabels.push({ id: "border_3", text: "الحد البحري 18.00 م", x: 450, y: 135, angle: -4 });
+    borderLabels.push({ id: "border_4", text: "الحد القبلي 19.50 م", x: 450, y: 530, angle: 4 });
 
   } else if (type === 'mixed_waterway_new') {
     // Horizontal waterway splitting the land into north and south parcels
@@ -275,7 +275,7 @@ function loadTemplate(type) {
     // Outer Borders
     borderLabels.push({ id: "border_1", text: "الحد الشرقي 200 م", x: 720, y: 310, angle: 90 });
     borderLabels.push({ id: "border_2", text: "الحد الغربي 200 م", x: 180, y: 310, angle: -90 });
-    borderLabels.push({ id: "border_3", text: "الحد البحري 150 م", x: 450, y: 100, angle: 0 });
+    borderLabels.push({ id: "border_3", text: "الحد البحري 150 م", x: 450, y: 105, angle: 0 });
     borderLabels.push({ id: "border_4", text: "الحد القبلي 150 م", x: 450, y: 520, angle: 0 });
     
     // Inner Measurements
@@ -286,14 +286,14 @@ function loadTemplate(type) {
     freeTexts.push({ id: "note_inner_bl", text: "115 م", x: 215, y: 420, fontSize: 13, isBold: true, angle: -90 });
   } else if (type === 'mixed_split_image') {
     // Top Titles
-    freeTexts.push({ id: "note_top", text: "الجنب الشرقي", x: 450, y: 35, fontSize: 18, isBold: true, color: "#000" });
-    freeTexts.push({ id: "note_top_val", text: "436.95 سم الكل", x: 450, y: 55, fontSize: 14, isBold: true, color: "#000" });
+    freeTexts.push({ id: "note_top", text: "الجنب الشرقي", x: 450, y: 60, fontSize: 18, isBold: true, color: "#000" });
+    freeTexts.push({ id: "note_top_val", text: "436.95 سم الكل", x: 450, y: 75, fontSize: 14, isBold: true, color: "#000" });
 
-    freeTexts.push({ id: "note_tl_1", text: "الطول الجنب البحري 227.50 سم", x: 260, y: 80, fontSize: 13, isBold: true, color: "#000" });
-    freeTexts.push({ id: "note_tl_2", text: "24.4 قيراط مساحة الجنب البحري", x: 260, y: 100, fontSize: 11, isBold: false, color: "#000" });
+    freeTexts.push({ id: "note_tl_1", text: "الطول الجنب البحري 227.50 سم", x: 260, y: 95, fontSize: 13, isBold: true, color: "#000" });
+    freeTexts.push({ id: "note_tl_2", text: "24.4 قيراط مساحة الجنب البحري", x: 260, y: 110, fontSize: 11, isBold: false, color: "#000" });
 
-    freeTexts.push({ id: "note_tr_1", text: "الطول الجنب القبلي 209.45 سم", x: 640, y: 80, fontSize: 13, isBold: true, color: "#000" });
-    freeTexts.push({ id: "note_tr_2", text: "23.3 قيراط وثلثين سهم مساحة الجنب القبلي", x: 640, y: 100, fontSize: 11, isBold: false, color: "#000" });
+    freeTexts.push({ id: "note_tr_1", text: "الطول الجنب القبلي 209.45 سم", x: 640, y: 95, fontSize: 13, isBold: true, color: "#000" });
+    freeTexts.push({ id: "note_tr_2", text: "23.3 قيراط وثلثين سهم مساحة الجنب القبلي", x: 640, y: 110, fontSize: 11, isBold: false, color: "#000" });
 
     // Waterway
     waterways.push({
@@ -308,10 +308,10 @@ function loadTemplate(type) {
     freeTexts.push({ id: "note_w_r", text: "18.17 سم الكل", x: 468, y: 315, fontSize: 12, isBold: true, angle: 90 });
 
     // Outer Sides
-    freeTexts.push({ id: "note_l_1", text: "الجنب البحري", x: 50, y: 315, fontSize: 16, isBold: true, angle: -90 });
-    freeTexts.push({ id: "note_l_2", text: "17.55 سم الكل", x: 75, y: 315, fontSize: 15, isBold: true, angle: -90 });
-    freeTexts.push({ id: "note_r_1", text: "الجنب القبلي", x: 850, y: 315, fontSize: 16, isBold: true, angle: 90 });
-    freeTexts.push({ id: "note_r_2", text: "18.97 سم الكل", x: 825, y: 315, fontSize: 15, isBold: true, angle: 90 });
+    freeTexts.push({ id: "note_l_1", text: "الجنب البحري", x: 80, y: 315, fontSize: 16, isBold: true, angle: -90 });
+    freeTexts.push({ id: "note_l_2", text: "17.55 سم الكل", x: 100, y: 315, fontSize: 15, isBold: true, angle: -90 });
+    freeTexts.push({ id: "note_r_1", text: "الجنب القبلي", x: 820, y: 315, fontSize: 16, isBold: true, angle: 90 });
+    freeTexts.push({ id: "note_r_2", text: "18.97 سم الكل", x: 800, y: 315, fontSize: 15, isBold: true, angle: 90 });
 
     // Shapes
     shapes.push({
@@ -410,10 +410,10 @@ function loadTemplate(type) {
       labelX: 430, labelY: 325, angle: 90
     });
 
-    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 110, angle: 0 });
-    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 540, angle: 0 });
-    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م", x: 130, y: 325, angle: -90 });
-    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م", x: 770, y: 325, angle: 90 });
+    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 135, angle: 0 });
+    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 520, angle: 0 });
+    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م", x: 180, y: 325, angle: -90 });
+    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م", x: 720, y: 325, angle: 90 });
 
   } else if (type === 'h_split') {
     // Two horizontal halves
@@ -446,10 +446,10 @@ function loadTemplate(type) {
       labelX: 450, labelY: 305, angle: 0
     });
 
-    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 110, angle: 0 });
-    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 540, angle: 0 });
-    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م", x: 130, y: 325, angle: -90 });
-    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م", x: 770, y: 325, angle: 90 });
+    borderLabels.push({ id: "border_1", text: "الجنب الشرقي 436.95 م", x: 450, y: 135, angle: 0 });
+    borderLabels.push({ id: "border_2", text: "الجنب الغربي 436.95 م", x: 450, y: 520, angle: 0 });
+    borderLabels.push({ id: "border_3", text: "الجنب البحري 17.55 م", x: 180, y: 325, angle: -90 });
+    borderLabels.push({ id: "border_4", text: "الجنب القبلي 18.97 م", x: 720, y: 325, angle: 90 });
 
   } else if (type === 'quad_diagonal') {
     shapes.push({
@@ -468,7 +468,7 @@ function loadTemplate(type) {
       id: "split_diag_1",
       x1: 300, y1: 150, x2: 750, y2: 500,
       label: "القطر الأول (AC) 60 م",
-      labelX: 540, labelY: 310, angle: 37,
+      labelX: 600, labelY: 360, angle: 38,
       isDashed: true, color: "#0288d1"
     });
     
@@ -476,14 +476,14 @@ function loadTemplate(type) {
       id: "split_diag_2",
       x1: 150, y1: 480, x2: 650, y2: 200,
       label: "القطر الثاني (BD) 55 م",
-      labelX: 370, labelY: 330, angle: -29,
+      labelX: 350, labelY: 380, angle: -29,
       isDashed: true, color: "#0288d1"
     });
 
-    borderLabels.push({ id: "border_1", text: "الضلع الأيمن (D) 35 م", x: 720, y: 350, angle: 71 });
-    borderLabels.push({ id: "border_2", text: "الضلع الأيسر (B) 40 م", x: 200, y: 310, angle: -65 });
-    borderLabels.push({ id: "border_3", text: "الضلع العلوي (C) 45 م", x: 475, y: 155, angle: 5 });
-    borderLabels.push({ id: "border_4", text: "الضلع السفلي (A) 50 م", x: 450, y: 510, angle: -2 });
+    borderLabels.push({ id: "border_1", text: "الضلع الأيمن (D) 35 م", x: 745, y: 350, angle: 71 });
+    borderLabels.push({ id: "border_2", text: "الضلع الأيسر (B) 40 م", x: 185, y: 315, angle: -66 });
+    borderLabels.push({ id: "border_3", text: "الضلع العلوي (C) 45 م", x: 475, y: 145, angle: 8 });
+    borderLabels.push({ id: "border_4", text: "الضلع السفلي (A) 50 م", x: 450, y: 525, angle: 2 });
 
     freeTexts.push({
       id: "note_diag_info",
@@ -1455,6 +1455,26 @@ function printDallalMap() {
             border: none !important;
             width: 100% !important;
             height: 100% !important;
+          }
+          
+          /* Force Black & White Colors for Printing */
+          svg polygon, svg rect:not([fill^="url"]) {
+            fill: white !important;
+          }
+          svg path, svg line, svg polygon {
+            stroke: #000 !important;
+          }
+          svg text, svg tspan {
+            fill: #000 !important;
+          }
+          #blueprintGrid path {
+            stroke: rgba(0, 0, 0, 0.1) !important;
+          }
+          #waterPattern path {
+            stroke: #000 !important;
+          }
+          #waterPattern rect {
+            fill: white !important;
           }
         }
       </style>
