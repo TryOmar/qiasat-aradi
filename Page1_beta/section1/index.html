@@ -7,6 +7,39 @@
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="style.css" />
   <title>حساب وتقسيم مساحة الأراضي</title>
+  <style>
+    /* Highlight effect for input interactive elements inside SVG card */
+    .svg-highlight-line {
+      transition: stroke-width 0.3s, stroke 0.3s, filter 0.3s;
+    }
+    .svg-highlight-text {
+      transition: font-size 0.3s, fill 0.3s, filter 0.3s;
+    }
+    .svg-active-glow {
+      stroke-width: 4 !important;
+      stroke: #d32f2f !important; /* highlight color */
+      filter: drop-shadow(0 0 3px #d32f2f);
+      animation: pulse-stroke 1.5s infinite alternate;
+    }
+    /* Diagonals are blue, so let's keep them blue during highlight */
+    #svg-card-quad-ac.svg-active-glow, #svg-card-quad-bd.svg-active-glow {
+      stroke: #0288d1 !important;
+      filter: drop-shadow(0 0 3px #0288d1);
+    }
+    .svg-active-text-glow {
+      font-size: 10px !important;
+      fill: #d32f2f !important;
+      filter: drop-shadow(0 0 2px #d32f2f);
+    }
+    @keyframes pulse-stroke {
+      0% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -34,45 +67,64 @@
       <div class="shape-cards">
         <div class="shape-card" data-shape="rectangle">
           <svg viewBox="0 0 100 70">
-            <rect x="15" y="15" width="70" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">مستطيل</text>
-            <text x="5" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
-            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">b</text>
+            <!-- Outlines as individual lines (oriented vertically for agricultural land) -->
+            <line id="svg-card-rect-top" x1="35" y1="10" x2="65" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-rect-bottom" x1="35" y1="60" x2="65" y2="60" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-rect-left" x1="35" y1="10" x2="35" y2="60" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-rect-right" x1="65" y1="10" x2="65" y2="60" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <text x="50" y="38" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.3">مستطيل</text>
+            <text id="svg-card-rect-label-w" x="50" y="6" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">العرض</text>
+            <text id="svg-card-rect-label-l" x="12" y="38" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#2e7d32" class="svg-highlight-text">الطول</text>
             <!-- Right angle symbol -->
-            <path d="M 15 45 L 20 45 L 20 55" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M 35 52 L 40 52 L 40 60" fill="none" stroke="currentColor" stroke-width="1"/>
           </svg>
           <span>مستطيل / مربع</span>
         </div>
         <div class="shape-card" data-shape="square">
           <svg viewBox="0 0 100 70">
-            <rect x="25" y="10" width="50" height="50" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">مربع</text>
-            <text x="20" y="40" font-family="Cairo" font-size="8" fill="currentColor">a</text>
-            <text x="50" y="68" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
+            <rect id="svg-card-square-outline" x="25" y="10" width="50" height="50" rx="2" fill="none" stroke="currentColor" stroke-width="2" class="svg-highlight-line" />
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.3">مربع</text>
+            <text id="svg-card-square-label" x="50" y="68" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">الضلع</text>
             <!-- Right angle symbol -->
-            <path d="M 25 50 L 30 50 L 30 60" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M 25 52 L 30 52 L 30 60" fill="none" stroke="currentColor" stroke-width="1"/>
           </svg>
           <span>مربع</span>
         </div>
-        <div class="shape-card" data-shape="trapezoid">
+        <div class="shape-card active" data-shape="trapezoid">
           <svg viewBox="0 0 100 70">
-            <polygon points="30,15 70,15 85,55 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">شبه منحرف زراعي</text>
-            <text x="50" y="11" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">c</text>
-            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
-            <line x1="30" y1="15" x2="30" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
-            <text x="34" y="38" font-family="Cairo" font-size="8" fill="currentColor">h</text>
+            <line id="svg-card-trap-top" x1="30" y1="15" x2="70" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-trap-bottom" x1="15" y1="55" x2="85" y2="55" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-trap-left" x1="30" y1="15" x2="15" y2="55" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-trap-right" x1="70" y1="15" x2="85" y2="55" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.3">شبه منحرف</text>
+            <text id="svg-card-trap-label-c" x="50" y="11" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">العلوية</text>
+            <text id="svg-card-trap-label-a" x="50" y="67" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">السفلية</text>
+            <line id="svg-card-trap-height" x1="30" y1="15" x2="30" y2="55" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2" class="svg-highlight-line"/>
+            <text id="svg-card-trap-label-h" x="34" y="38" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#2e7d32" class="svg-highlight-text">الطول</text>
           </svg>
           <span>شبه منحرف زراعي (مبسط)</span>
         </div>
-        <div class="shape-card active" data-shape="quadrilateral">
+        <div class="shape-card" data-shape="quadrilateral">
           <svg viewBox="0 0 100 70">
-            <polygon points="35,12 80,22 90,58 15,55" fill="none" stroke="currentColor" stroke-width="2"/>
-            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle">رباعي أضلاع</text>
-            <text x="12" y="38" font-family="Cairo" font-size="8" fill="currentColor">b</text>
-            <text x="58" y="14" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">c</text>
-            <text x="89" y="38" font-family="Cairo" font-size="8" fill="currentColor">d</text>
-            <text x="50" y="66" font-family="Cairo" font-size="8" fill="currentColor" text-anchor="middle">a</text>
+            <!-- Diagonals dashed -->
+            <line id="svg-card-quad-ac" x1="15" y1="55" x2="80" y2="22" stroke="#0288d1" stroke-width="0.8" stroke-dasharray="1.5,1.5" class="svg-highlight-line" />
+            <line id="svg-card-quad-bd" x1="90" y1="58" x2="35" y2="12" stroke="#0288d1" stroke-width="0.8" stroke-dasharray="1.5,1.5" class="svg-highlight-line" />
+            <!-- Polygon outline as separate lines -->
+            <line id="svg-card-quad-c" x1="35" y1="12" x2="80" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-quad-a" x1="90" y1="58" x2="15" y2="55" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-quad-d" x1="80" y1="22" x2="90" y2="58" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <line id="svg-card-quad-b" x1="15" y1="55" x2="35" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="svg-highlight-line" />
+            <text x="50" y="40" font-family="Cairo" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.25">رباعي أضلاع</text>
+            <!-- Corner vertices labels -->
+            <text x="8" y="58" fill="#333" font-size="6.5" font-weight="bold">A</text>
+            <text x="92" y="60" fill="#333" font-size="6.5" font-weight="bold">B</text>
+            <text x="82" y="19" fill="#333" font-size="6.5" font-weight="bold">C</text>
+            <text x="28" y="10" fill="#333" font-size="6.5" font-weight="bold">D</text>
+            <!-- Side labels -->
+            <text id="svg-card-quad-label-b" x="18" y="34" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#2e7d32" class="svg-highlight-text">B</text>
+            <text id="svg-card-quad-label-c" x="58" y="9" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">C</text>
+            <text id="svg-card-quad-label-d" x="89" y="38" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#2e7d32" class="svg-highlight-text">D</text>
+            <text id="svg-card-quad-label-a" x="50" y="67" font-family="Cairo" font-size="7.5" font-weight="bold" fill="#d32f2f" text-anchor="middle" class="svg-highlight-text">A</text>
           </svg>
           <span>رباعي غير منتظم</span>
         </div>
@@ -84,66 +136,67 @@
       <!-- Rectangle Inputs -->
       <div id="inputs-rectangle" class="inputs-group">
         <div class="input-row">
-          <label for="rect-length">الطول (أ) بالمتر:</label>
-          <input type="number" step="any" id="rect-length" placeholder="مثال: 50" dir="auto" />
+          <label for="rect-width">العرض بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="rect-width" placeholder="مثال: 30" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="rect-width">العرض (ب) بالمتر:</label>
-          <input type="number" step="any" id="rect-width" placeholder="مثال: 30" dir="auto" />
+          <label for="rect-length">الطول بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="rect-length" placeholder="مثال: 50" dir="auto" />
         </div>
       </div>
 
       <!-- Square Inputs -->
       <div id="inputs-square" class="inputs-group">
         <div class="input-row">
-          <label for="square-side">طول الضلع (أ) بالمتر:</label>
-          <input type="number" step="any" id="square-side" placeholder="مثال: 30" dir="auto" />
+          <label for="square-side">ادخل طول اي ضلع (بالمتر):</label>
+          <input type="number" step="any" inputmode="decimal" id="square-side" placeholder="مثال: 30" dir="auto" />
         </div>
       </div>
 
       <!-- Trapezoid Inputs -->
-      <div id="inputs-trapezoid" class="inputs-group">
-        <div class="input-row">
-          <label for="trap-base-major">القاعدة السفلية (بالمتر):</label>
-          <input type="number" step="any" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
-        </div>
+      <div id="inputs-trapezoid" class="inputs-group active">
         <div class="input-row">
           <label for="trap-base-minor">القاعدة العلوية (بالمتر):</label>
-          <input type="number" step="any" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+          <input type="number" step="any" inputmode="decimal" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+        </div>
+        <div class="input-row">
+          <label for="trap-base-major">القاعدة السفلية (بالمتر):</label>
+          <input type="number" step="any" inputmode="decimal" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
         </div>
         <div class="input-row">
           <label for="trap-height">الطول (أو الارتفاع) بالمتر:</label>
-          <input type="number" step="any" id="trap-height" placeholder="مثال: 30" dir="auto" />
+          <input type="number" step="any" inputmode="decimal" id="trap-height" placeholder="مثال: 30" dir="auto" />
         </div>
       </div>
 
       <!-- Quadrilateral Inputs -->
-      <div id="inputs-quadrilateral" class="inputs-group active">
+      <div id="inputs-quadrilateral" class="inputs-group">
         <div class="input-row">
-          <label for="quad-side-a">الضلع الأول السفلي (أ) بالمتر:</label>
-          <input type="number" step="any" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
+          <label for="quad-side-c">الضلع العلوي <span style="color: #d32f2f; font-weight: bold;">(C)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="quad-side-b">الضلع الثاني الأيسر (ب) بالمتر:</label>
-          <input type="number" step="any" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
+          <label for="quad-side-a">الضلع السفلي <span style="color: #d32f2f; font-weight: bold;">(A)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="quad-side-c">الضلع الثالث العلوي (ج) بالمتر:</label>
-          <input type="number" step="any" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
+          <label for="quad-side-d">الضلع الأيمن <span style="color: #2e7d32; font-weight: bold;">(D)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="quad-side-d">الضلع الرابع الأيمن (د) بالمتر:</label>
-          <input type="number" step="any" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
+          <label for="quad-side-b">الضلع الأيسر <span style="color: #2e7d32; font-weight: bold;">(B)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
         </div>
         <div class="input-row">
-          <label for="quad-method">طريقة الحساب:</label>
-          <select id="quad-method" onchange="toggleQuadWarning()">
-            <option value="approx">الطريقة التقريبية (متوسط الطولين × متوسط العرضين)</option>
-            <option value="brahma">معادلة براهماجوبتا (لرباعي الأضلاع الدائري)</option>
-          </select>
+          <label for="quad-diag-ac">القطر الأول <span style="color: #0288d1; font-weight: bold;">(AC)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
         </div>
-        <div id="brahma-warning" class="warning-box" style="display: none;">
-          <strong>تنبيه هندسي:</strong> تفترض معادلة براهماجوبتا أن الشكل رباعي دائري (مجموع الزوايا المتقابلة 180°). إذا كان الشكل غير دائري، فإن هذه معادلة تعطي الحد الأقصى للمساحة وقد تكون أكبر من المساحة الحقيقية.
+        <div class="input-row">
+          <label for="quad-diag-bd">القطر الثاني <span style="color: #0288d1; font-weight: bold;">(BD)</span> بالمتر:</label>
+          <input type="number" step="any" inputmode="decimal" id="quad-diag-bd" placeholder="مثال: 55" dir="auto" />
+        </div>
+        <div style="font-size: 9.5pt; color: #c62828; background-color: #ffebee; border-right: 4px solid #c62828; padding: 8px; margin-top: 10px; border-radius: 4px; font-weight: bold; width: 100%; box-sizing: border-box;">
+          * يجب إدخال أحد القطرين (AC) أو (BD) لإجراء الحساب والتقسيم الدقيق.
         </div>
       </div>
     </div>
@@ -155,7 +208,7 @@
         <div class="settings-row">
           <label>مساحة القيراط المعتمدة:</label>
           <div class="input-with-select">
-            <input type="number" step="any" class="selector2" id="carat-size" value="168" dir="auto" />
+            <input type="number" step="any" inputmode="decimal" class="selector2" id="carat-size" value="168" dir="auto" />
             <select class="selector1" id="carat-preset" onchange="updateCaratPreset()">
               <option value="168">168</option>
               <option value="171.388">171.388</option>
@@ -169,7 +222,7 @@
         <div class="settings-row">
           <label>سعر القيراط الواحد:</label>
           <div class="price-input-wrapper">
-            <input tabindex="4" type="text" id="carat-price-display" placeholder="مثال: 50,000" dir="auto" onkeyup="formatPrice(this);" />
+            <input tabindex="4" type="text" inputmode="decimal" id="carat-price-display" placeholder="مثال: 50,000" dir="auto" onkeyup="formatPrice(this);" />
             <input type="hidden" id="carat-price-numeric" />
             <span>جنيه</span>
           </div>
@@ -213,7 +266,7 @@
       <div class="division-settings">
         <div class="input-row-inline">
           <label for="heirs-count">عدد الورثة أو الشركاء:</label>
-          <input type="number" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
+          <input type="number" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
           <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
         </div>
       </div>
