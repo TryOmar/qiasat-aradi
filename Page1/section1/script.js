@@ -149,15 +149,25 @@ function isFull() {
     height_num2 = 0;
     height_num1 = 0;
   }
-  width1_result[0].innerText = width1_num1;
-  width1_result[1].innerText = width1_num2;
-  width1_result[2].innerText = width1_num3;
-  width2_result[0].innerText = width2_num1;
-  width2_result[1].innerText = width2_num2;
-  width2_result[2].innerText = width2_num3;
-  height_result[0].innerText = height_num1;
-  height_result[1].innerText = height_num2;
-  height_result[2].innerText = height_num3;
+  const active = document.activeElement;
+  
+  if (active !== width1_result[0] && active !== width1_result[1] && active !== width1_result[2]) {
+    width1_result[0].value = width1_num1;
+    width1_result[1].value = width1_num2;
+    width1_result[2].value = width1_num3;
+  }
+  
+  if (active !== width2_result[0] && active !== width2_result[1] && active !== width2_result[2]) {
+    width2_result[0].value = width2_num1;
+    width2_result[1].value = width2_num2;
+    width2_result[2].value = width2_num3;
+  }
+  
+  if (active !== height_result[0] && active !== height_result[1] && active !== height_result[2]) {
+    height_result[0].value = height_num1;
+    height_result[1].value = height_num2;
+    height_result[2].value = height_num3;
+  }
 }
 
 function calculate() {
@@ -189,3 +199,42 @@ function formatNumber(input) {
   // Format the displayed value with commas
   input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+function convertInputsToMeters(inputs) {
+  // index 0: fraction (less than qabda)
+  // index 1: qabda
+  // index 2: qasaba
+  const fraction = Number(inputs[0].value) || 0;
+  const qabda = Number(inputs[1].value) || 0;
+  const qasaba = Number(inputs[2].value) || 0;
+  const fists = (qasaba * 24) + qabda + fraction;
+  const meters = (fists * 14.7916666667) / 100;
+  return meters;
+}
+
+width1_result.forEach((input) => {
+  input.addEventListener("input", () => {
+    const meters = convertInputsToMeters(width1_result);
+    width1.value = meters.toFixed(3);
+    saveData();
+    calculate();
+  });
+});
+
+width2_result.forEach((input) => {
+  input.addEventListener("input", () => {
+    const meters = convertInputsToMeters(width2_result);
+    width2.value = meters.toFixed(3);
+    saveData();
+    calculate();
+  });
+});
+
+height_result.forEach((input) => {
+  input.addEventListener("input", () => {
+    const meters = convertInputsToMeters(height_result);
+    height.value = meters.toFixed(3);
+    saveData();
+    calculate();
+  });
+});

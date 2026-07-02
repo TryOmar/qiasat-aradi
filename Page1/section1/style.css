@@ -145,30 +145,25 @@
   border-collapse: separate;
   border-spacing: 7px 7px;
 }
-/* .s5 div table tr td input{
-    width:40px;
-    height: 20px;
-    text-align: center;
-    font-size: 11px
-} */
-.s5 div table tr th {
-  white-space: wrap;
-}
-.s5 div table tr td {
-  /* border: 1px solid red; */
-  white-space: nowrap;
-  text-align: center;
-  width: 40px;
-  height: 20px;
+.s5 div table tr td input {
+  width: 60px;
+  height: 22px;
   text-align: center;
   font-size: 11px;
-  border-radius: 5px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  outline: none;
 }
 .s5 div table tr td:not(:first-child) {
-  border: 1px solid #cccccc;
+  border: none;
 }
 .s5 h3 {
   margin: 0px;
+}
+.s5 div table tr td {
+  white-space: nowrap;
+  font-size: 13px;
+  text-align: right;
 }
 .s5 th {
   white-space: nowrap;

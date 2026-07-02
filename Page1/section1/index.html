@@ -31,15 +31,15 @@
     <div class="input">
       <div class="input-s1">
         <p> أدخل العرض الاول</p>
-        <input tabindex="1" type="number" placeholder="مثال 18.87" id="but5" dir="auto" />
+        <input tabindex="1" type="number" inputmode="decimal" placeholder="مثال 18.87" id="but5" dir="auto" />
       </div>
       <div class="input-s2">
         <p>أدخل العرض الاخر</p>
-        <input tabindex="2" type="number" placeholder="مثال 18.50" dir="auto" />
+        <input tabindex="2" type="number" inputmode="decimal" placeholder="مثال 18.50" dir="auto" />
       </div>
       <div class="input-s3">
         <p>أدخل الطول</p>
-        <input tabindex="3" type="number" placeholder="مثال 180.75" dir="auto" />
+        <input tabindex="3" type="number" inputmode="decimal" placeholder="مثال 180.75" dir="auto" />
       </div>
     </div>
     <div class="buttons2">
@@ -50,7 +50,7 @@
       <h3>اختار المساحة القيراط الذي تريد القسمة عليه</h3>
       <div>
         <img src="../../imgs/4.png" alt="img" />
-        <input type="number" class="selector2" value="168" dir="auto" />
+        <input type="number" inputmode="decimal" class="selector2" value="168" dir="auto" />
         <select class="selector1" onchange="other()">
           <option value="168">168</option>
           <option value="171.388">171.388</option>
@@ -114,21 +114,21 @@
           </tr>
           <tr>
             <td> ناتج العرض الاول</td>
-            <td class="width1_result">0</td>
-            <td class="width1_result">0</td>
-            <td class="width1_result">0</td>
+            <td><input type="number" step="any" inputmode="decimal" class="width1_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="width1_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="width1_result" value="0"></td>
           </tr>
           <tr>
             <td>ناتج العرض الاخر</td>
-            <td class="width2_result">0</td>
-            <td class="width2_result">0</td>
-            <td class="width2_result">0</td>
+            <td><input type="number" step="any" inputmode="decimal" class="width2_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="width2_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="width2_result" value="0"></td>
           </tr>
           <tr>
             <td>ناتج الطول</td>
-            <td class="height_result">0</td>
-            <td class="height_result">0</td>
-            <td class="height_result">0</td>
+            <td><input type="number" step="any" inputmode="decimal" class="height_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="height_result" value="0"></td>
+            <td><input type="number" step="any" inputmode="decimal" class="height_result" value="0"></td>
           </tr>
         </table>
       </div>
