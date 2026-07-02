@@ -707,9 +707,6 @@ function useLifelineFriend() {
   if (!lifelines.callFriend) return;
 
   playPhoneRingSound();
-  lifelines.callFriend = false;
-  updateLifelineButtonsUI();
-  saveGameState();
 
   // Show a calling screen simulator
   showCustomPopup(
@@ -753,10 +750,6 @@ function useLifelineGuide() {
   const sessionData = currentGameQuestion.sessionvars;
 
   if (guideLink) {
-    lifelines.useGuide = false;
-    updateLifelineButtonsUI();
-    saveGameState();
-
     // Preserve game state
     const savedGameState = sessionStorage.getItem("gameState");
     sessionStorage.clear();
