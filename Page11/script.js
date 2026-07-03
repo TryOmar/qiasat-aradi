@@ -1079,8 +1079,8 @@ function renderCroquis() {
   }
   
   const textScale = window.isExporting ? 2.2 : 1;
-  const paddingH = 75 * textScale;  // هامش أفقي
-  const paddingV = 65 * textScale;  // هامش رأسي
+  const paddingH = window.isExporting ? 75 * textScale : 35;  // هامش أفقي (مصغر للشاشة ومكبر للتصدير)
+  const paddingV = window.isExporting ? 65 * textScale : 30;  // هامش رأسي (مصغر للشاشة ومكبر للتصدير)
   const maxLen = Math.max(l1, l2);
 
   const scaleX = (containerW - paddingH * 2) / w;
