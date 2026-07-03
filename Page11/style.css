@@ -713,6 +713,59 @@ body {
   100% { opacity: 0; }
 }
 
+/* شريط أدوات التحكم الأفقي (على غرار الصفحة 13) */
+.croquis-controls-bar {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.croquis-controls-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-croquis-secondary {
+  background-color: #eceff1;
+  color: #37474f;
+  border: 1px solid #cfd8dc;
+  font-family: 'Cairo', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  height: 32px;
+  font-size: 13px;
+  padding: 0 14px;
+  transition: background-color 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-croquis-secondary:hover {
+  background-color: #cfd8dc;
+}
+
+.btn-croquis-secondary:active {
+  transform: scale(0.97);
+}
+
+/* زر التكبير والتصغير يكونان أعرض وأكبر خطًا */
+.btn-croquis-secondary:first-child,
+.btn-croquis-secondary:nth-child(2) {
+  font-size: 18px;
+  padding: 0 16px;
+}
+
 /* وضع ملء الشاشة */
 .croquis-fullscreen-mode {
   position: fixed !important;
@@ -724,14 +777,24 @@ body {
   margin: 0 !important;
   border-radius: 0 !important;
   border: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: white !important;
 }
 
 .croquis-fullscreen-mode .croquis-header {
   border-radius: 0 !important;
+  height: 50px !important;
 }
 
 .croquis-fullscreen-mode .croquis-canvas-wrapper {
-  height: calc(100vh - 50px) !important;
+  flex: 1 !important;
+  height: calc(100vh - 102px) !important;
+}
+
+.croquis-fullscreen-mode .croquis-controls-bar {
+  border-top: 1px solid #cfd8dc !important;
+  background-color: #f0f4f8 !important;
 }
 
 /* ===== Nav links styling override ===== */
