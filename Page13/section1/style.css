@@ -803,3 +803,54 @@ body {
     font-size: 8.5pt !important;
   }
 }
+
+/* وضع ملء الشاشة الفعلي للكروكي التفاعلي */
+.canvas-fullscreen-mode {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background-color: #f0f4f8 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 15px !important;
+  box-sizing: border-box !important;
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+.canvas-fullscreen-mode h3 {
+  margin: 0 0 10px 0 !important;
+  border-radius: 0 !important;
+}
+
+.canvas-fullscreen-mode .canvas-wrapper {
+  flex: 1 !important;
+  height: calc(100vh - 120px) !important;
+  background-color: #eaeff2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+}
+
+.canvas-fullscreen-mode .canvas-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  height: auto !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+.canvas-fullscreen-mode .canvas-controls {
+  margin-top: 10px !important;
+  padding: 5px !important;
+}
+

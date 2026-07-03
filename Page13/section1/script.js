@@ -133,7 +133,24 @@ function zoomOut() {
   calculateAll();
 }
 
+let isCanvasFullscreen = false;
 function fillScreen() {
+  const container = document.getElementById("canvas-container");
+  const btn = event.currentTarget || document.querySelector("button[onclick='fillScreen()']");
+  if (!container) return;
+  
+  isCanvasFullscreen = !isCanvasFullscreen;
+  
+  if (isCanvasFullscreen) {
+    container.classList.add("canvas-fullscreen-mode");
+    if (btn) btn.innerText = "إنهاء ملء الشاشة";
+    document.body.style.overflow = "hidden";
+  } else {
+    container.classList.remove("canvas-fullscreen-mode");
+    if (btn) btn.innerText = "ملء الشاشة";
+    document.body.style.overflow = "";
+  }
+  
   zoomFactor = 1.0;
   calculateAll();
 }
@@ -1201,7 +1218,7 @@ function drawLandCanvas(vertices) {
   const visualVertices = getVisualVertices(vertices);
 
   // 2. Scale and Fit visual vertices inside Canvas bounding box (85% to 90% footprint, with extra space for printing)
-  const margin = isPrinting ? 110 : Math.max(45, Math.min(52 * scaleMultiplier, 90));
+  const margin = isPrinting ? 110 : Math.max(22, Math.min(28 * scaleMultiplier, 45));
   const drawW = cssW - 2 * margin;
   const drawH = cssH - 2 * margin;
 
