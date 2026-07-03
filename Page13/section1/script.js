@@ -60,6 +60,8 @@ let calculatedArea = 0;
 let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
+let showActualDims = false; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
+let useTruncateRounding = true; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
 let oldZoomFactor = 1.0;
 let isPrinting = false;
@@ -524,17 +526,103 @@ function resetDivision() {
   saveStateToSession();
 }
 
-// Math conversions
-Number.prototype.toFixedNoRounding = function (n) {
-  const reg = new RegExp("^-?\\d+(?:\\.\\d{0," + n + "})?", "g");
-  const a = this.toString().match(reg)[0];
-  const dot = a.indexOf(".");
-  if (dot === -1) {
-    return a + "." + "0".repeat(n);
+// إظهار/إخفاء خيار "الأبعاد الهندسية الفعلية" بناءً على الشكل المختار
+function updateDivisionSettingsUI() {
+  const toggleDiv = document.getElementById('actual-dims-toggle');
+  const checkbox = document.getElementById('show-actual-dims');
+  if (!toggleDiv || !checkbox) return;
+  
+  if (activeShape === 'trapezoid') {
+    // للنموذج المبسط: أظهر خيار الأبعاد الهندسية
+    toggleDiv.style.display = 'flex';
+    checkbox.checked = showActualDims;
+  } else {
+    // للأشكال الأخرى: أخفِ الخيار وأعِد showActualDims إلى true (يعرض يمين/يسار كالمعتاد)
+    toggleDiv.style.display = 'none';
+    showActualDims = true;
+    checkbox.checked = true;
   }
-  const b = n - (a.length - dot) + 1;
-  return b > 0 ? a + "0".repeat(b) : a;
+  
+  updateTableHeaders();
+}
+
+// تحديث عناوين أعمدة جدول التقسيم ديناميكياً
+function updateTableHeaders() {
+  const thRight = document.getElementById('th-side-right');
+  const thLeft  = document.getElementById('th-side-left');
+  if (!thRight || !thLeft) return;
+  
+  if (activeShape === 'trapezoid' && !showActualDims) {
+    // في النموذج المبسط بدون خيار الأبعاد الهندسية: أظهر عمود "الطول" واحد
+    thRight.textContent = 'الطول (م)';
+    thRight.setAttribute('colspan', '2');
+    thLeft.style.display = 'none';
+  } else {
+    // في الأشكال الأخرى أو عند تفعيل الخيار: أظهر يمين ويسار
+    thRight.textContent = 'يمين';
+    thRight.removeAttribute('colspan');
+    thLeft.style.display = '';
+    thLeft.textContent = 'يسار';
+  }
+}
+
+// معالج تفعيل/إيقاف الخيار المتقدم
+function onToggleActualDims() {
+  const checkbox = document.getElementById('show-actual-dims');
+  if (!checkbox) return;
+  showActualDims = checkbox.checked;
+  sessionStorage.setItem('showActualDims', showActualDims ? 'true' : 'false');
+  updateTableHeaders();
+  renderHeirsRows();
+  updateHeirsUI();
+}
+
+
+
+// Math conversions
+const originalToFixed = Number.prototype.toFixed;
+
+Number.prototype.toFixedNoRounding = function (n) {
+  if (isNaN(this)) return "0." + "0".repeat(n);
+  const val = parseFloat(this.toString());
+  if (!isFinite(val)) return "0." + "0".repeat(n);
+
+  let str = val.toString();
+  // Handling scientific notation if present
+  if (str.indexOf('e') !== -1) {
+    str = originalToFixed.call(val, n + 4);
+  }
+
+  const parts = str.split('.');
+  const integerPart = parts[0];
+  let decimalPart = parts[1] || '';
+  
+  if (decimalPart.length > n) {
+    decimalPart = decimalPart.substring(0, n);
+  } else {
+    decimalPart = decimalPart + '0'.repeat(n - decimalPart.length);
+  }
+  
+  return n > 0 ? `${integerPart}.${decimalPart}` : integerPart;
 };
+
+// Global interceptor for all .toFixed calls in the application
+Number.prototype.toFixed = function(digits) {
+  if (useTruncateRounding) {
+    return this.toFixedNoRounding(digits || 0);
+  }
+  return originalToFixed.call(this, digits || 0);
+};
+
+function toggleRoundingMode() {
+  const roundingSelect = document.getElementById("number-rounding-mode");
+  if (roundingSelect) {
+    useTruncateRounding = (roundingSelect.value === "truncate");
+  }
+  saveStateToSession();
+  calculateAll();
+}
+
 
 function convertSqmToFeddans(sqm, caratSize) {
   if (!sqm || sqm <= 0) return { feddans: 0, carats: 0, shares: 0 };
@@ -976,11 +1064,15 @@ function calculateAll() {
   // Draw on Canvas
   drawLandCanvas(vertices);
 
+  // تحديث واجهة إعدادات التقسيم (يمين/يسار مقابل الطول)
+  updateDivisionSettingsUI();
+
   if (isDivisionActive && area > 0) {
     updateHeirsDistribution();
     updateHeirsUI();
   }
 }
+
 
 // Helper for Heron's Formula Area
 function heronArea(side1, side2, side3) {
@@ -1279,7 +1371,12 @@ function drawLandCanvas(vertices) {
     const cp2 = canvasPoints[(i + 1) % numVertices];
 
     // Compute real side length in meters
-    const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    let len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    if (activeShape === 'trapezoid' && !showActualDims) {
+      if (i === 1 || i === 3) {
+        len = parseFloat(document.getElementById('trap-height')?.value) || 0;
+      }
+    }
 
     // Edge vector and length in canvas space
     const vx = cp2.x - cp1.x;
@@ -1509,7 +1606,7 @@ function drawLandCanvas(vertices) {
       ctx.font = `bold ${badgeFontSize}px Cairo`;
 
       const labelName = `${i + 1}- ${heir.name}`;
-      const labelArea = `${heir.share.toFixed(1)} م²`;
+      const labelArea = `${heir.share.toFixed(2)} م²`;
       
       const nameW = ctx.measureText(labelName).width;
       const areaW = ctx.measureText(labelArea).width;
@@ -1557,7 +1654,11 @@ function drawLandCanvas(vertices) {
       if (i === 0) {
         const lx = cpTopPrev.x + 0.25 * (cpBottomPrev.x - cpTopPrev.x);
         const ly = cpTopPrev.y + 0.25 * (cpBottomPrev.y - cpTopPrev.y);
-        const labelTextLeft = `${pieceLeftL.toFixed(2)} م`;
+        // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
+        const leftLabelVal = (activeShape === 'trapezoid' && !showActualDims)
+          ? landLeft  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
+          : pieceLeftL;
+        const labelTextLeft = `${leftLabelVal.toFixed(2)} م`;
         ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
         const twLeft = ctx.measureText(labelTextLeft).width;
         
@@ -1574,7 +1675,11 @@ function drawLandCanvas(vertices) {
       {
         const rx = cpTopCurr.x + 0.25 * (cpBottomCurr.x - cpTopCurr.x);
         const ry = cpTopCurr.y + 0.25 * (cpBottomCurr.y - cpTopCurr.y);
-        const labelTextRight = `${pieceRightL.toFixed(2)} م`;
+        // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
+        const rightLabelVal = (activeShape === 'trapezoid' && !showActualDims)
+          ? landRight  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
+          : pieceRightL;
+        const labelTextRight = `${rightLabelVal.toFixed(2)} م`;
         ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
         const twRight = ctx.measureText(labelTextRight).width;
         
@@ -1586,6 +1691,7 @@ function drawLandCanvas(vertices) {
         ctx.textBaseline = "middle";
         ctx.fillText(labelTextRight, rx - 7 * scaleMultiplier, ry);
       }
+
 
       // Draw handle for dragging vertical dividers (between slices)
       if (i > 0) {
@@ -1756,6 +1862,11 @@ function commitHeirSplitShareImmediately(idx, unitType, newValString) {
 
 function updateHeirsUI() {
   const caratSize = parseFloat(caratSizeInput.value) || 168;
+  const showHeightOnly = (activeShape === 'trapezoid' && !showActualDims);
+  const trapHeight = showHeightOnly
+    ? (parseFloat(document.getElementById('trap-height')?.value) || 0)
+    : 0;
+  
   heirsData.forEach((heir, idx) => {
     const row = heirsListTbody.querySelector(`tr[data-index="${idx}"]`);
     if (!row) return;
@@ -1772,6 +1883,7 @@ function updateHeirsUI() {
     const inputBot = row.querySelector('.heir-side-bot');
     const inputRight = row.querySelector('.heir-side-right');
     const inputLeft = row.querySelector('.heir-side-left');
+    const inputHeight = row.querySelector('.heir-side-height');
 
     if (inputName && document.activeElement !== inputName) {
       inputName.value = heir.name;
@@ -1794,6 +1906,8 @@ function updateHeirsUI() {
     if (inputBot && document.activeElement !== inputBot) inputBot.value = (heir.botW || 0).toFixed(2);
     if (inputRight && document.activeElement !== inputRight) inputRight.value = (heir.rightL || 0).toFixed(2);
     if (inputLeft && document.activeElement !== inputLeft) inputLeft.value = (heir.leftL || 0).toFixed(2);
+    // تحديث عمود الطول الثابت (في وضع المبسط)
+    if (inputHeight && document.activeElement !== inputHeight) inputHeight.value = trapHeight.toFixed(2);
   });
 }
 
@@ -1802,6 +1916,13 @@ function renderHeirsRows() {
   
   // Sides are calculated inside drawLandCanvas which is called by calculateAll
   
+  // هل نعرض عمود الطول الثابت (للمبسط) أم عمودي يمين/يسار؟
+  const showHeightOnly = (activeShape === 'trapezoid' && !showActualDims);
+  // الطول الثابت الذي أدخله المستخدم
+  const trapHeight = showHeightOnly
+    ? (parseFloat(document.getElementById('trap-height')?.value) || 0)
+    : 0;
+
   heirsListTbody.innerHTML = "";
 
   heirsData.forEach((heir, idx) => {
@@ -1814,6 +1935,25 @@ function renderHeirsRows() {
         optionsHtml += `<option value="${oIdx}">${oth.name}</option>`;
       }
     });
+
+    // عمودا يمين/يسار: إما عمود "الطول" الواحد (colspan=2) أو عمودين مستقلين
+    let sidesCells = '';
+    if (showHeightOnly) {
+      // عمود واحد: الطول الثابت (colspan=2 ليتوافق مع رأس الجدول)
+      sidesCells = `
+        <td colspan="2" style="text-align:center;">
+          <input type="number" step="any" inputmode="decimal" class="heir-side-height" style="width:75px; background-color: #f1f3f4; cursor: default;" value="${trapHeight.toFixed(2)}" readonly />
+        </td>`;
+    } else {
+      // عمودان: يمين ويسار (الأضلاع المائلة الهندسية)
+      sidesCells = `
+        <td>
+          <input type="number" step="any" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
+        </td>
+        <td>
+          <input type="number" step="any" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
+        </td>`;
+    }
 
     heirsListTbody.innerHTML += `
       <tr data-index="${idx}">
@@ -1828,12 +1968,7 @@ function renderHeirsRows() {
           <input type="number" step="any" inputmode="decimal" class="heir-side-bot" style="width:65px;" value="${(heir.botW || 0).toFixed(2)}" 
             oninput="updateHeirSide(${idx}, 'botW', this.value)" />
         </td>
-        <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
-        </td>
-        <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
-        </td>
+        ${sidesCells}
         <td>
           <input type="number" step="any" inputmode="decimal" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
             oninput="debouncedUpdateHeirShare(${idx}, 'sqm', this.value)" 
@@ -1867,6 +2002,7 @@ function renderHeirsRows() {
     `;
   });
 }
+
 
 function updateHeirName(idx, value) {
   if (heirsData[idx]) {
@@ -2051,6 +2187,12 @@ function saveStateToSession() {
   sessionStorage.setItem("heirsData", JSON.stringify(heirsData));
   sessionStorage.setItem("isDivisionActive", isDivisionActive ? "true" : "false");
   sessionStorage.setItem("longPlotView", document.getElementById("long-plot-view").value);
+  sessionStorage.setItem("showActualDims", showActualDims ? "true" : "false");
+  
+  const roundingSelect = document.getElementById("number-rounding-mode");
+  if (roundingSelect) {
+    sessionStorage.setItem("numberRoundingMode", roundingSelect.value);
+  }
 }
 
 function loadStateFromSession() {
@@ -2116,6 +2258,19 @@ function loadStateFromSession() {
   }
 
   document.getElementById("long-plot-view").value = sessionStorage.getItem("longPlotView") || "agricultural";
+  
+  // استرجاع خيار الأبعاد الهندسية الفعلية
+  showActualDims = sessionStorage.getItem("showActualDims") === "true";
+  const checkbox = document.getElementById('show-actual-dims');
+  if (checkbox) checkbox.checked = showActualDims;
+
+  // استرجاع خيار طريقة عرض الأرقام العشرية
+  const savedRounding = sessionStorage.getItem("numberRoundingMode") || "truncate";
+  useTruncateRounding = (savedRounding === "truncate");
+  const roundingSelect = document.getElementById("number-rounding-mode");
+  if (roundingSelect) {
+    roundingSelect.value = savedRounding;
+  }
 }
 
 // Print trigger
@@ -2311,8 +2466,10 @@ function printCroquis() {
           <th>الاسم</th>
           <th>العرض العلوي (م)</th>
           <th>العرض السفلي (م)</th>
-          <th>الطول الأيمن (م)</th>
-          <th>الطول الأيسر (م)</th>
+          ${(activeShape === 'trapezoid' && !showActualDims)
+            ? '<th colspan="2">الطول (م)</th>'
+            : '<th>الطول الأيمن (م)</th><th>الطول الأيسر (م)</th>'
+          }
           <th>النصيب (م²)</th>
           <th>سهم</th>
           <th>قيراط</th>
@@ -2325,6 +2482,7 @@ function printCroquis() {
       المساحة الموزعة: <strong>${distributedArea}</strong> م² من إجمالي <strong>${totalLimitArea}</strong> م²
     </div>
   </div>
+
 
   ${convSection}
 

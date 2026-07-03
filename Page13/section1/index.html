@@ -234,6 +234,13 @@
             <option value="real">عرض بمقياس حقيقي (متناسق)</option>
           </select>
         </div>
+        <div class="settings-row">
+          <label>طريقة عرض الأرقام العشرية:</label>
+          <select id="number-rounding-mode" class="selector1" onchange="toggleRoundingMode()" style="width: 100%; max-width: 250px;">
+            <option value="truncate" selected>بدون تقريب (قص الأرقام)</option>
+            <option value="round">تقريب اعتيادي (جبر الأرقام)</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -269,16 +276,21 @@
           <input type="number" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
           <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
         </div>
+        <!-- خيار متقدم: يظهر فقط لنموذج شبه المنحرف -->
+        <div id="actual-dims-toggle" style="display: none; margin-top: 8px; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; color: #01579b; font-weight: bold;">
+          <input type="checkbox" id="show-actual-dims" onchange="onToggleActualDims()" style="width: 16px; height: 16px; cursor: pointer; accent-color: #01579b;" />
+          <label for="show-actual-dims" style="cursor: pointer;">عرض الأبعاد الهندسية الفعلية (الأضلاع المائلة)</label>
+        </div>
       </div>
       <div class="heirs-table-wrapper" style="overflow-x: auto;">
         <table id="heirs-table">
           <thead>
-            <tr>
+            <tr id="heirs-table-header-row">
               <th>الاسم</th>
               <th>علوي</th>
               <th>سفلي</th>
-              <th>يمين</th>
-              <th>يسار</th>
+              <th id="th-side-right">يمين</th>
+              <th id="th-side-left">يسار</th>
               <th>النصيب (م²)</th>
               <th>سهم</th>
               <th>قيراط</th>

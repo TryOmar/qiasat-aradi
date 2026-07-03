@@ -510,10 +510,13 @@ body {
   background-color: #e1f5fe;
   border-bottom: 1px solid #b3e5fc;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 6px;
   width: 100%;
 }
+
 
 .input-row-inline {
   display: flex;
