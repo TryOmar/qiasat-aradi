@@ -1272,27 +1272,59 @@ function renderCroquis() {
 
 function exportCroquis() {
   const svgNode = document.getElementById("croquis-svg");
-  const serializer = new XMLSerializer();
-  let svgString = serializer.serializeToString(svgNode);
+  if (!svgNode) return;
   
-  svgString = svgString.replace('<svg ', '<svg style="background-color: white;" ');
+  // استنساخ عنصر الـ SVG لتجنب تعديل العنصر النشط على الصفحة
+  const clonedSvg = svgNode.cloneNode(true);
+  
+  // تحديد أبعاد صريحة بالبكسل للمستنسخ لتفادي فشل محرك الرسم بالمتصفح عند استخدام 100%
+  clonedSvg.setAttribute("width", "1600");
+  clonedSvg.setAttribute("height", "1000");
+  clonedSvg.style.backgroundColor = "white";
+  
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(clonedSvg);
   
   const img = new Image();
   const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   
   img.onload = function() {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1600; 
-    canvas.height = 1000;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1600; 
+      canvas.height = 1000;
+      const ctx = canvas.getContext("2d");
+      
+      // تعبئة الخلفية باللون الأبيض
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // رسم الصورة على الكانفاس
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // محاولة التصدير كـ PNG
+      const a = document.createElement("a");
+      a.download = "تقسيم_الأرض_الدلال.png";
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    } catch (err) {
+      console.error("Canvas PNG export failed, downloading SVG directly as fallback:", err);
+      // بديل آمن: تحميل ملف SVG مباشرة في حال قيود الحماية بالمتصفح (WebView)
+      const a = document.createElement("a");
+      a.download = "تقسيم_الأرض_الدلال.svg";
+      a.href = url;
+      a.click();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  };
+  
+  img.onerror = function(err) {
+    console.error("Image loading failed, downloading SVG directly:", err);
     const a = document.createElement("a");
-    a.download = "تقسيم_الأرض_الدلال.png";
-    a.href = canvas.toDataURL("image/png");
+    a.download = "تقسيم_الأرض_الدلال.svg";
+    a.href = url;
     a.click();
     URL.revokeObjectURL(url);
   };
