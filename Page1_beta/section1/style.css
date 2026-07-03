@@ -854,3 +854,109 @@ body {
   padding: 5px !important;
 }
 
+/* ============================================================
+   تحسين جدول التحويل ليكون متجاوباً بالكامل على كافة الجوالات
+   ============================================================ */
+@media screen and (max-width: 520px) {
+  .conversion-table-wrapper {
+    padding: 8px 10px !important;
+  }
+
+  .conversion-table-wrapper table {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .conversion-table-wrapper table thead {
+    display: none !important;
+  }
+
+  .conversion-table-wrapper table tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .conversion-table-wrapper tr.conv-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px 8px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #e8f5e9 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  .conv-label-cell {
+    grid-column: span 3 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border: none !important;
+    border-bottom: 1.5px solid #e8f5e9 !important;
+    padding: 0 0 8px 0 !important;
+    margin-bottom: 4px !important;
+    min-width: unset !important;
+    text-align: right !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .conv-dim-name {
+    margin-bottom: 0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+
+  .conv-input-cell {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* إضافة عناوين الأعمدة فوق المدخلات */
+  .conv-input-cell:nth-child(2)::before {
+    content: "أقل من القبضة" !important;
+    font-size: 10px !important;
+    color: #555 !important;
+    margin-bottom: 6px !important;
+    font-weight: bold !important;
+    white-space: nowrap !important;
+  }
+
+  .conv-input-cell:nth-child(3)::before {
+    content: "قبضة" !important;
+    font-size: 10px !important;
+    color: #555 !important;
+    margin-bottom: 6px !important;
+    font-weight: bold !important;
+    white-space: nowrap !important;
+  }
+
+  .conv-input-cell:nth-child(4)::before {
+    content: "قصبة" !important;
+    font-size: 10px !important;
+    color: #555 !important;
+    margin-bottom: 6px !important;
+    font-weight: bold !important;
+    white-space: nowrap !important;
+  }
+
+  .conv-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 38px !important;
+    font-size: 14px !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+
