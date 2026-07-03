@@ -311,6 +311,10 @@ body {
   width: 100% !important;
 }
 
+.mobile-label {
+  display: none !important;
+}
+
 .partner-row input {
   width: 100% !important;
   height: 32px !important;
