@@ -447,166 +447,284 @@ body {
   color: #111 !important;
 }
 
-/* Interactive Croquis layout */
-.interactive-croquis-full-card {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
+/* ============================================================
+   INTERACTIVE CROQUIS - Premium Redesign
+   ============================================================ */
 
-.croquis-layout-wrapper {
+/* رأس بطاقة الكروكي */
+.croquis-header {
   display: flex !important;
-  gap: 15px !important;
-  margin-top: 15px !important;
-  width: 100% !important;
-}
-
-@media(max-width: 768px) {
-  .croquis-layout-wrapper {
-    flex-direction: column-reverse !important;
-  }
-  .croquis-sidebar {
-    width: 100% !important;
-  }
-}
-
-.croquis-sidebar {
-  width: 190px !important;
-  display: flex !important;
-  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, #1b5e20, #2e7d32) !important;
+  border-radius: 12px 12px 0 0 !important;
+  color: white !important;
   gap: 10px !important;
-  background: #fcfcfc !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: 8px !important;
-  padding: 12px !important;
-  flex-shrink: 0 !important;
 }
 
-.sidebar-btn-group {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-}
-
-.sidebar-btn {
+.croquis-header-right {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  background: #fff !important;
-  border: 1px solid #ccc !important;
-  border-radius: 6px !important;
-  padding: 8px 10px !important;
-  cursor: pointer !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   font-weight: bold !important;
-  color: #333 !important;
-  transition: all 0.2s !important;
-  width: 100% !important;
-  text-align: right !important;
 }
 
-.sidebar-btn:hover {
-  background: #f0f0f0 !important;
-  border-color: #999 !important;
-}
-
-.sidebar-divider {
-  border: 0 !important;
-  border-top: 1px solid #eee !important;
-  margin: 5px 0 !important;
-}
-
-.sidebar-toggle-group {
+.croquis-header-left {
   display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
 }
 
-/* Premium toggle switch */
-.toggle-switch {
-  position: relative !important;
+/* Toggle chips في الهيدر */
+.croquis-toggle-chip {
   display: inline-flex !important;
   align-items: center !important;
+  gap: 5px !important;
+  background: rgba(255,255,255,0.15) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  border-radius: 20px !important;
+  padding: 4px 10px !important;
   cursor: pointer !important;
-  user-select: none !important;
-  width: 100% !important;
-}
-
-.toggle-switch input {
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.toggle-slider {
-  position: relative !important;
-  display: inline-block !important;
-  width: 36px !important;
-  height: 18px !important;
-  background-color: #ccc !important;
-  border-radius: 18px !important;
-  transition: .4s !important;
-  margin-left: 8px !important;
-}
-
-.toggle-slider:before {
-  position: absolute !important;
-  content: "" !important;
-  height: 12px !important;
-  width: 12px !important;
-  left: 3px !important;
-  bottom: 3px !important;
-  background-color: white !important;
-  border-radius: 50% !important;
-  transition: .4s !important;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #2e7d32 !important;
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(18px) !important;
-}
-
-.toggle-label {
   font-size: 11px !important;
   font-weight: bold !important;
-  color: #444 !important;
-}
-
-.sidebar-action-btn {
-  background-color: #2e7d32 !important;
   color: white !important;
-  border: none !important;
+  transition: all 0.2s !important;
+  user-select: none !important;
+}
+
+.croquis-toggle-chip input {
+  display: none !important;
+}
+
+.chip-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.4) !important;
+  transition: background 0.2s !important;
+}
+
+.croquis-toggle-chip input:checked ~ .chip-dot {
+  background: #76ff03 !important;
+  box-shadow: 0 0 6px rgba(118,255,3,0.6) !important;
+}
+
+.croquis-toggle-chip:hover {
+  background: rgba(255,255,255,0.25) !important;
+}
+
+.croquis-header-btn {
+  background: rgba(255,255,255,0.15) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
   border-radius: 6px !important;
-  padding: 8px 10px !important;
-  font-size: 11px !important;
+  color: white !important;
+  padding: 5px 8px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s !important;
+}
+.croquis-header-btn:hover {
+  background: rgba(255,255,255,0.3) !important;
+}
+
+/* المجمّع الرئيسي للكروكي */
+.croquis-canvas-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 520px !important;
+  background: #f0f4f0 !important;
+}
+
+@media (max-width: 768px) {
+  .croquis-canvas-wrapper {
+    height: 380px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .croquis-canvas-wrapper {
+    height: 300px !important;
+  }
+}
+
+/* منطقة رسم SVG */
+.croquis-drawing-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: hidden !important;
+  cursor: grab !important;
+  touch-action: none !important;
+  background: 
+    radial-gradient(ellipse at 30% 30%, rgba(200,230,201,0.3) 0%, transparent 60%),
+    linear-gradient(145deg, #fafffe 0%, #f0f7f0 100%) !important;
+}
+
+.croquis-drawing-container:active {
+  cursor: grabbing !important;
+}
+
+/* نص تلميحي */
+.croquis-placeholder {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  text-align: center !important;
+  color: #aaa !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+.croquis-placeholder p {
+  margin: 4px 0 !important;
+  font-size: 13px !important;
   font-weight: bold !important;
+}
+.croquis-placeholder svg {
+  display: block !important;
+  margin: 0 auto 10px !important;
+}
+
+/* ===== أزرار التحكم العائمة ===== */
+.croquis-floating-controls {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  z-index: 20 !important;
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 12px !important;
+  padding: 8px 6px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.fab-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  color: #444 !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.fab-btn:hover {
+  background: #e8f5e9 !important;
+  color: #1b5e20 !important;
+  transform: scale(1.05) !important;
+}
+
+.fab-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.fab-btn-primary {
+  background: #e8f5e9 !important;
+  color: #2e7d32 !important;
+}
+.fab-btn-primary:hover {
+  background: #c8e6c9 !important;
+}
+
+.fab-btn-green {
+  background: #2e7d32 !important;
+  color: white !important;
+}
+.fab-btn-green:hover {
+  background: #1b5e20 !important;
+}
+
+.fab-zoom-display {
+  font-size: 10px !important;
+  font-weight: bold !important;
+  color: #666 !important;
+  text-align: center !important;
+  background: #f5f5f5 !important;
+  border-radius: 4px !important;
+  padding: 2px 4px !important;
+  min-width: 34px !important;
+  font-family: monospace !important;
+}
+
+.fab-separator {
+  width: 24px !important;
+  height: 1px !important;
+  background: #e0e0e0 !important;
+  margin: 2px 0 !important;
+}
+
+/* تلميح اللمس للجوال */
+.croquis-touch-hint {
+  position: absolute !important;
+  bottom: 10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
   gap: 6px !important;
-  width: 100% !important;
-  transition: background-color 0.2s !important;
+  background: rgba(0,0,0,0.5) !important;
+  color: white !important;
+  font-size: 11px !important;
+  padding: 5px 12px !important;
+  border-radius: 20px !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s !important;
+  white-space: nowrap !important;
+  z-index: 10 !important;
 }
 
-.sidebar-action-btn:hover {
-  background-color: #1b5e20 !important;
+@media (pointer: coarse) {
+  .croquis-touch-hint {
+    opacity: 1 !important;
+    animation: hint-fade 3s ease forwards 1.5s !important;
+  }
 }
 
-.croquis-drawing-container {
-  flex-grow: 1 !important;
-  height: 450px !important;
-  background-color: #fafafa !important;
-  border: 1px solid #ddd !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  position: relative !important;
-  cursor: grab !important;
+@keyframes hint-fade {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
-/* Nav links styling override */
+/* وضع ملء الشاشة */
+.croquis-fullscreen-mode {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.croquis-fullscreen-mode .croquis-header {
+  border-radius: 0 !important;
+}
+
+.croquis-fullscreen-mode .croquis-canvas-wrapper {
+  height: calc(100vh - 50px) !important;
+}
+
+/* ===== Nav links styling override ===== */
 .nav {
   position: fixed !important;
   bottom: 0 !important;
