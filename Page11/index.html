@@ -13,34 +13,10 @@
 <body>
 
   <!-- Top premium navigation banner -->
-  <div class="top-nav-bar">
-    <div class="top-nav-right">
-      <button class="nav-btn" onclick="alert('دليل المساعدة: أدخل أطوال الأضلاع الأربعة للأرض ثم قم بإضافة الشركاء لتوزيع الأنصبة بالتساوي أو بنسبة محددة.')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-        مساعدة
-      </button>
-      <button class="nav-btn" onclick="alert('الإعدادات: يتم استخدام الحسابات الافتراضية للتقسيم.')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        الإعدادات
-      </button>
-    </div>
+  <div class="top-nav-bar" style="display: flex; justify-content: center; align-items: center; text-align: center; padding: 15px 0;">
     <div class="top-nav-center">
       <h2>القسمة في حال اختلاف الأطوال</h2>
       <p>حساب ورسم وتقسيم الأراضي</p>
-    </div>
-    <div class="top-nav-left">
-      <button class="nav-btn" onclick="saveData(); alert('تم حفظ البيانات بنجاح!')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        حفظ
-      </button>
-      <button class="nav-btn" onclick="loadData(); alert('تم استرجاع البيانات المحفوظة!')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-        فتح
-      </button>
-      <button class="nav-btn" onclick="clearAll()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-        جديد
-      </button>
     </div>
   </div>
 
@@ -70,6 +46,13 @@
             <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" oninput="calculate()">
           </div>
         </div>
+        
+        <!-- أزرار الإجراءات (على غرار الصفحة 13) -->
+        <div class="action-buttons" style="display: flex; gap: 8px; margin-top: 15px; width: 100%;">
+          <button class="btn-croquis-action btn-delete" onclick="clearAll()" style="flex: 1; height: 38px; border-radius: 8px; border: none; background-color: #b71c1c; color: white; font-family: Cairo, Arial, sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; transition: background-color 0.2s;">أحذف</button>
+          <button class="btn-croquis-action btn-calculate" onclick="calculate()" style="flex: 1; height: 38px; border-radius: 8px; border: none; background-color: #e65100; color: white; font-family: Cairo, Arial, sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; transition: background-color 0.2s;">أحسب</button>
+        </div>
+
         <div class="readonly-lengths-box" style="margin-top: 12px;">
           <span style="font-size: 11px; color: #555;">الطولين للعرض فقط (لا يمكن التعديل)</span>
           <div style="display: flex; justify-content: space-around; margin-top: 5px;">
