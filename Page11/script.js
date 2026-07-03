@@ -1215,18 +1215,23 @@ function renderCroquis() {
     const rX = mapX(0);
     const rY1 = mapY(0);
     const rY2 = mapY(l1);
+    
+    // خطوط المساعدة المقطعة
+    g.appendChild(svgLine(rX, rY1, rX + dimOffset, rY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    
     // خط الأبعاد
-    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
-    // أسهم
-    g.appendChild(svgLine(rX + dimOffset - 5 * textScale, rY1 + 6 * textScale, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset + 5 * textScale, rY1 + 6 * textScale, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset - 5 * textScale, rY2 - 6 * textScale, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset + 5 * textScale, rY2 - 6 * textScale, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#2e7d32", width: "1.5" }));
+    
+    // شُرط الحصر المتعامدة بدلاً من الأسهم
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY1, rX + dimOffset + 4 * textScale, rY1, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#2e7d32", width: "2" }));
+    
     // النص
     const rMidY = (rY1 + rY2) / 2;
     g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, "الطول الأيمن: " + l1 + " م", {
       anchor: "start",
-      fill: "#1b5e20",
+      fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
@@ -1237,15 +1242,22 @@ function renderCroquis() {
     const lX = mapX(w);
     const lY1 = mapY(0);
     const lY2 = mapY(l2);
-    g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset - 5 * textScale, lY1 + 6 * textScale, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset + 5 * textScale, lY1 + 6 * textScale, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset - 5 * textScale, lY2 - 6 * textScale, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset + 5 * textScale, lY2 - 6 * textScale, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
+    
+    // خطوط المساعدة المقطعة
+    g.appendChild(svgLine(lX, lY1, lX - dimOffset, lY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(lX, lY2, lX - dimOffset, lY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    
+    // خط الأبعاد
+    g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#2e7d32", width: "1.5" }));
+    
+    // شُرط الحصر المتعامدة
+    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY1, lX - dimOffset + 4 * textScale, lY1, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#2e7d32", width: "2" }));
+    
     const lMidY = (lY1 + lY2) / 2;
     g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, "الطول الأيسر: " + l2 + " م", {
       anchor: "start",
-      fill: "#1565c0",
+      fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
@@ -1256,13 +1268,20 @@ function renderCroquis() {
     const bY = mapY(0) + dimOffset;
     const bX1 = mapX(0);
     const bX2 = mapX(w);
-    g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX1 + 6 * textScale, bY - 5 * textScale, bX1, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX1 + 6 * textScale, bY + 5 * textScale, bX1, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX2 - 6 * textScale, bY - 5 * textScale, bX2, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX2 - 6 * textScale, bY + 5 * textScale, bX2, bY, { stroke: "#333", width: "1.5" }));
+    
+    // خطوط المساعدة المقطعة
+    g.appendChild(svgLine(bX1, mapY(0), bX1, bY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(bX2, mapY(0), bX2, bY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    
+    // خط الأبعاد
+    g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#2e7d32", width: "1.5" }));
+    
+    // شُرط الحصر المتعامدة
+    g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    
     g.appendChild(svgText((bX1 + bX2) / 2, bY + 16 * textScale, "العرض الأول: " + w1 + " م", {
-      fill: "#333",
+      fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
@@ -1274,11 +1293,27 @@ function renderCroquis() {
     const topX2 = mapX(w);
     const topRealY = mapY(Math.max(l1, l2)) - dimOffset + 5 * textScale;
     g.appendChild(svgText((topX1 + topX2) / 2, topRealY - 8 * textScale, "العرض الثاني: " + w2 + " م", {
-      fill: "#333",
+      fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
     }));
+
+    // --- رؤوس مضلع الأرض الخارجية (دوائر خضراء غامقة مثل الصفحة 13) ---
+    const corners = [
+      { x: mapX(0), y: mapY(0) },
+      { x: mapX(w), y: mapY(0) },
+      { x: mapX(w), y: mapY(l2) },
+      { x: mapX(0), y: mapY(l1) }
+    ];
+    corners.forEach(p => {
+      const c = svgEl("circle");
+      c.setAttribute("cx", p.x);
+      c.setAttribute("cy", p.y);
+      c.setAttribute("r", 5 * textScale);
+      c.setAttribute("fill", "#1b5e20");
+      g.appendChild(c);
+    });
   }
 }
 
