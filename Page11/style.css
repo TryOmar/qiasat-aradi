@@ -276,9 +276,15 @@ body {
 .btn-primary:hover { background-color: #004d40 !important; }
 
 /* Grid Table Styling (11 Columns) */
+.table {
+  min-width: 980px !important;
+  min-width: max-content !important;
+  width: 100% !important;
+}
+
 .table-header, .partner-row, #total {
   display: grid !important;
-  grid-template-columns: 4% 18% 7% 7% 7% 10% 9% 10% 11% 11% 6% !important;
+  grid-template-columns: 40px var(--name-column-width, 140px) 70px 60px 60px 100px 80px 100px 170px 100px 50px !important;
   gap: 4px !important;
   align-items: center !important;
   width: 100% !important;

@@ -911,6 +911,7 @@ function calculate() {
     document.getElementById("rem-shares").style.color = color;
   }
   
+  adjustNameColumnWidth();
   renderCroquis();
 }
 
@@ -1506,4 +1507,23 @@ function copyTableToClipboard() {
     }
     document.body.removeChild(textArea);
   });
+}
+
+function adjustNameColumnWidth() {
+  const nameInputs = document.querySelectorAll(".partner-name");
+  let maxChars = 10; // الحد الأدنى الافتراضي لعدد الحروف
+  
+  nameInputs.forEach(input => {
+    if (input.value.length > maxChars) {
+      maxChars = input.value.length;
+    }
+  });
+  
+  // حساب العرض بالبكسل (حوالي 9 بكسل لكل حرف + هامش)
+  const calculatedWidth = Math.max(120, Math.min(350, maxChars * 9 + 25));
+  
+  const table = document.querySelector(".table");
+  if (table) {
+    table.style.setProperty("--name-column-width", `${calculatedWidth}px`);
+  }
 }
