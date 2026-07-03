@@ -1010,7 +1010,10 @@ function svgText(x, y, content, opts = {}) {
   t.setAttribute("y", y);
   t.setAttribute("text-anchor", opts.anchor || "middle");
   t.setAttribute("font-family", "Cairo, Arial, sans-serif");
-  t.setAttribute("font-size", opts.size || "13");
+  
+  const textScale = window.isExporting ? 2.2 : 1;
+  const baseSize = parseFloat(opts.size || "13");
+  t.setAttribute("font-size", baseSize * textScale);
   t.setAttribute("font-weight", opts.weight || "bold");
   t.setAttribute("fill", opts.fill || "#222");
   if (opts.transform) t.setAttribute("transform", opts.transform);
@@ -1019,10 +1022,8 @@ function svgText(x, y, content, opts = {}) {
   
   // إضافة خلفية بيضاء للنص إذا طُلب
   if (opts.bg) {
-    const rect = svgEl("rect");
-    // سنضيفها بعد القياس في المتصفح - نستخدم stroke أبيض بدلاً
     t.setAttribute("stroke", "white");
-    t.setAttribute("stroke-width", "3");
+    t.setAttribute("stroke-width", 3 * textScale);
     t.setAttribute("paint-order", "stroke");
   }
   return t;
@@ -1035,8 +1036,15 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
   l.setAttribute("x2", x2);
   l.setAttribute("y2", y2);
   l.setAttribute("stroke", opts.stroke || "#666");
-  l.setAttribute("stroke-width", opts.width || "1");
-  if (opts.dash) l.setAttribute("stroke-dasharray", opts.dash);
+  
+  const textScale = window.isExporting ? 2.2 : 1;
+  const baseWidth = parseFloat(opts.width || "1");
+  l.setAttribute("stroke-width", baseWidth * textScale);
+  
+  if (opts.dash) {
+    const dashes = opts.dash.split(",").map(d => parseFloat(d) * textScale).join(",");
+    l.setAttribute("stroke-dasharray", dashes);
+  }
   if (opts.opacity) l.setAttribute("opacity", opts.opacity);
   return l;
 }
@@ -1062,12 +1070,17 @@ function renderCroquis() {
   const w = (w1 + w2) / 2;
   const container = document.getElementById("croquis-container");
   
-  // استخدام حجم الحاوية الفعلي
-  const containerW = container ? container.clientWidth || 700 : 700;
-  const containerH = container ? container.clientHeight || 500 : 500;
+  // استخدام حجم الحاوية الفعلي أو حجم التصدير العالي
+  let containerW = 1600;
+  let containerH = 1000;
+  if (!window.isExporting) {
+    containerW = container ? container.clientWidth || 700 : 700;
+    containerH = container ? container.clientHeight || 500 : 500;
+  }
   
-  const paddingH = 75;  // هامش أفقي
-  const paddingV = 65;  // هامش رأسي
+  const textScale = window.isExporting ? 2.2 : 1;
+  const paddingH = 75 * textScale;  // هامش أفقي
+  const paddingV = 65 * textScale;  // هامش رأسي
   const maxLen = Math.max(l1, l2);
 
   const scaleX = (containerW - paddingH * 2) / w;
@@ -1088,7 +1101,7 @@ function renderCroquis() {
 
   // === 1. الظل تحت الأرض ===
   const shadowPoly = svgEl("polygon");
-  const sOff = 4;
+  const sOff = 4 * textScale;
   shadowPoly.setAttribute("points",
     `${mapX(0)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(l2)+sOff} ${mapX(0)+sOff},${mapY(l1)+sOff}`
   );
@@ -1103,7 +1116,7 @@ function renderCroquis() {
   );
   mainPoly.setAttribute("fill", "#f8fdf8");
   mainPoly.setAttribute("stroke", "#1b5e20");
-  mainPoly.setAttribute("stroke-width", "2.5");
+  mainPoly.setAttribute("stroke-width", 2.5 * textScale);
   mainPoly.setAttribute("stroke-linejoin", "round");
   g.appendChild(mainPoly);
 
@@ -1123,7 +1136,7 @@ function renderCroquis() {
       poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x2},${y3} ${x1},${y4}`);
       poly.setAttribute("fill", color.fill);
       poly.setAttribute("stroke", color.stroke);
-      poly.setAttribute("stroke-width", "1.5");
+      poly.setAttribute("stroke-width", 1.5 * textScale);
       poly.setAttribute("stroke-linejoin", "round");
       g.appendChild(poly);
 
@@ -1135,7 +1148,7 @@ function renderCroquis() {
 
       // === اسم الشريك ===
       if (showCroquisNames) {
-        const nameText = svgText(cx, cy - 8, piece.name, {
+        const nameText = svgText(cx, cy - 8 * textScale, piece.name, {
           fill: color.text,
           size: "14",
           weight: "bold",
@@ -1148,7 +1161,7 @@ function renderCroquis() {
       if (showCroquisMeasurements) {
         // مستطيل خلفية للمساحة
         const areaLabel = Number(piece.area.toFixed(2)) + " م²";
-        const areaText = svgText(cx, cy + 14, areaLabel, {
+        const areaText = svgText(cx, cy + 14 * textScale, areaLabel, {
           fill: "#333",
           size: "12",
           weight: "bold",
@@ -1158,7 +1171,7 @@ function renderCroquis() {
 
         // عرض القطعة (أسفل)
         const widthLabel = "ع: " + piece.width.toFixed(4) + " م";
-        const widthText = svgText(cx, mapY(0) + 18, widthLabel, {
+        const widthText = svgText(cx, mapY(0) + 18 * textScale, widthLabel, {
           fill: color.stroke,
           size: "11",
           weight: "bold",
@@ -1175,8 +1188,8 @@ function renderCroquis() {
           divLine.setAttribute("x2", x1);
           divLine.setAttribute("y2", y4);
           divLine.setAttribute("stroke", "#d84315");
-          divLine.setAttribute("stroke-width", "2");
-          divLine.setAttribute("stroke-dasharray", "6,3");
+          divLine.setAttribute("stroke-width", 2 * textScale);
+          divLine.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
           g.appendChild(divLine);
 
           // قيمة الفاصل
@@ -1196,7 +1209,7 @@ function renderCroquis() {
 
   // === 4. أبعاد الأرض الخارجية ===
   if (showCroquisMeasurements) {
-    const dimOffset = 20; // مسافة خطوط الأبعاد عن الأرض
+    const dimOffset = 20 * textScale; // مسافة خطوط الأبعاد عن الأرض
 
     // --- الطول الأيمن (يمين) ---
     const rX = mapX(0);
@@ -1205,19 +1218,19 @@ function renderCroquis() {
     // خط الأبعاد
     g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
     // أسهم
-    g.appendChild(svgLine(rX + dimOffset - 5, rY1 + 6, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset + 5, rY1 + 6, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset - 5, rY2 - 6, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(rX + dimOffset + 5, rY2 - 6, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset - 5 * textScale, rY1 + 6 * textScale, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset + 5 * textScale, rY1 + 6 * textScale, rX + dimOffset, rY1, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset - 5 * textScale, rY2 - 6 * textScale, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset + 5 * textScale, rY2 - 6 * textScale, rX + dimOffset, rY2, { stroke: "#333", width: "1.5" }));
     // النص
     const rMidY = (rY1 + rY2) / 2;
-    g.appendChild(svgText(rX + dimOffset + 4, rMidY, "الطول الأيمن: " + l1 + " م", {
+    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, "الطول الأيمن: " + l1 + " م", {
       anchor: "start",
       fill: "#1b5e20",
       size: "13",
       weight: "bold",
       bg: true,
-      transform: `rotate(-90, ${rX + dimOffset + 4}, ${rMidY})`,
+      transform: `rotate(-90, ${rX + dimOffset + 4 * textScale}, ${rMidY})`,
     }));
 
     // --- الطول الأيسر (يسار) ---
@@ -1225,18 +1238,18 @@ function renderCroquis() {
     const lY1 = mapY(0);
     const lY2 = mapY(l2);
     g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset - 5, lY1 + 6, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset + 5, lY1 + 6, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset - 5, lY2 - 6, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(lX - dimOffset + 5, lY2 - 6, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(lX - dimOffset - 5 * textScale, lY1 + 6 * textScale, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(lX - dimOffset + 5 * textScale, lY1 + 6 * textScale, lX - dimOffset, lY1, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(lX - dimOffset - 5 * textScale, lY2 - 6 * textScale, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(lX - dimOffset + 5 * textScale, lY2 - 6 * textScale, lX - dimOffset, lY2, { stroke: "#333", width: "1.5" }));
     const lMidY = (lY1 + lY2) / 2;
-    g.appendChild(svgText(lX - dimOffset - 4, lMidY, "الطول الأيسر: " + l2 + " م", {
+    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, "الطول الأيسر: " + l2 + " م", {
       anchor: "start",
       fill: "#1565c0",
       size: "13",
       weight: "bold",
       bg: true,
-      transform: `rotate(-90, ${lX - dimOffset - 4}, ${lMidY})`,
+      transform: `rotate(-90, ${lX - dimOffset - 4 * textScale}, ${lMidY})`,
     }));
 
     // --- العرض الأول (أسفل) ---
@@ -1244,11 +1257,11 @@ function renderCroquis() {
     const bX1 = mapX(0);
     const bX2 = mapX(w);
     g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX1 + 6, bY - 5, bX1, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX1 + 6, bY + 5, bX1, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX2 - 6, bY - 5, bX2, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgLine(bX2 - 6, bY + 5, bX2, bY, { stroke: "#333", width: "1.5" }));
-    g.appendChild(svgText((bX1 + bX2) / 2, bY + 16, "العرض الأول: " + w1 + " م", {
+    g.appendChild(svgLine(bX1 + 6 * textScale, bY - 5 * textScale, bX1, bY, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(bX1 + 6 * textScale, bY + 5 * textScale, bX1, bY, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(bX2 - 6 * textScale, bY - 5 * textScale, bX2, bY, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgLine(bX2 - 6 * textScale, bY + 5 * textScale, bX2, bY, { stroke: "#333", width: "1.5" }));
+    g.appendChild(svgText((bX1 + bX2) / 2, bY + 16 * textScale, "العرض الأول: " + w1 + " م", {
       fill: "#333",
       size: "13",
       weight: "bold",
@@ -1259,9 +1272,8 @@ function renderCroquis() {
     const topY = mapY(Math.min(l1, l2)) - dimOffset;
     const topX1 = mapX(0);
     const topX2 = mapX(w);
-    // نحسب Y أعلى الأرض لكل طرف
-    const topRealY = mapY(Math.max(l1, l2)) - dimOffset + 5;
-    g.appendChild(svgText((topX1 + topX2) / 2, topRealY - 8, "العرض الثاني: " + w2 + " م", {
+    const topRealY = mapY(Math.max(l1, l2)) - dimOffset + 5 * textScale;
+    g.appendChild(svgText((topX1 + topX2) / 2, topRealY - 8 * textScale, "العرض الثاني: " + w2 + " م", {
       fill: "#333",
       size: "13",
       weight: "bold",
@@ -1274,14 +1286,35 @@ function exportCroquis() {
   const svgNode = document.getElementById("croquis-svg");
   if (!svgNode) return;
   
-  // استنساخ عنصر الـ SVG لتجنب تعديل العنصر النشط على الصفحة
-  const clonedSvg = svgNode.cloneNode(true);
+  // 1. حفظ حالة التحويل الأصلية للشاشة
+  const transformG = document.getElementById("croquis-transform");
+  let originalTransform = "";
+  if (transformG) {
+    originalTransform = transformG.getAttribute("transform");
+    // تعيين تحويل محايد مؤقتًا للتصدير
+    transformG.setAttribute("transform", "translate(0, 0) scale(1)");
+  }
   
-  // تحديد أبعاد صريحة بالبكسل للمستنسخ لتفادي فشل محرك الرسم بالمتصفح عند استخدام 100%
+  // 2. تفعيل وضع التصدير مؤقتًا وإعادة الرسم بالأبعاد العالية (1600 × 1000)
+  window.isExporting = true;
+  renderCroquis();
+  
+  // 3. استنساخ عنصر الـ SVG بدقته الكاملة
+  const clonedSvg = svgNode.cloneNode(true);
   clonedSvg.setAttribute("width", "1600");
   clonedSvg.setAttribute("height", "1000");
   clonedSvg.style.backgroundColor = "white";
   
+  // 4. استعادة الحالة الأصلية للشاشة وإعادة الرسم فورًا
+  window.isExporting = false;
+  if (transformG && originalTransform) {
+    transformG.setAttribute("transform", originalTransform);
+  } else if (transformG) {
+    transformG.removeAttribute("transform");
+  }
+  renderCroquis(); // إعادة الرسم بحجم الشاشة والزوم الحالي
+  
+  // 5. معالجة وتصدير الـ SVG المستنسخ
   const serializer = new XMLSerializer();
   const svgString = serializer.serializeToString(clonedSvg);
   
@@ -1296,21 +1329,20 @@ function exportCroquis() {
       canvas.height = 1000;
       const ctx = canvas.getContext("2d");
       
-      // تعبئة الخلفية باللون الأبيض
+      // خلفية بيضاء
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // رسم الصورة على الكانفاس
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       
-      // محاولة التصدير كـ PNG
+      // تنزيل كـ PNG
       const a = document.createElement("a");
       a.download = "تقسيم_الأرض_الدلال.png";
       a.href = canvas.toDataURL("image/png");
       a.click();
     } catch (err) {
-      console.error("Canvas PNG export failed, downloading SVG directly as fallback:", err);
-      // بديل آمن: تحميل ملف SVG مباشرة في حال قيود الحماية بالمتصفح (WebView)
+      console.error("Canvas PNG export failed, downloading SVG directly:", err);
+      // بديل مباشر
       const a = document.createElement("a");
       a.download = "تقسيم_الأرض_الدلال.svg";
       a.href = url;
