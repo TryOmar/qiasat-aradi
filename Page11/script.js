@@ -45,7 +45,7 @@ function setupSVGInteractions() {
   
   // === Mouse Events (سطح المكتب) ===
   container.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return; // زر الفأرة الأيسر فقط
+    if (e.button !== 0) return;
     isDragging = true;
     startDragX = e.clientX - croquisTranslateX;
     startDragY = e.clientY - croquisTranslateY;
@@ -66,13 +66,12 @@ function setupSVGInteractions() {
     updateCroquisTransform();
   });
   
-  // تكبير/تصغير بعجلة الفأرة (Wheel Zoom حول نقطة المؤشر)
+  // تكبير/تصغير بعجلة الفأرة
   container.addEventListener("wheel", (e) => {
     e.preventDefault();
     const rect = container.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    
     const factor = e.deltaY < 0 ? 1.12 : 0.9;
     zoomAroundPoint(factor, mouseX, mouseY);
   }, { passive: false });
@@ -177,7 +176,6 @@ function zoomCroquis(factor) {
   const container = document.getElementById("croquis-container");
   if (!container) return;
   const rect = container.getBoundingClientRect();
-  // التكبير حول مركز منطقة الرسم
   zoomAroundPoint(factor, rect.width / 2, rect.height / 2);
 }
 
@@ -241,7 +239,7 @@ function updateCroquisTransform() {
 
 // تبديل وضع ملء الشاشة
 function toggleFullscreenCroquis() {
-  const card = document.querySelector(".interactive-croquis-full-card");
+  const card = document.getElementById("canvas-container");
   const btnText = document.getElementById("btn-fullscreen-text");
   if (!card) return;
   
@@ -257,7 +255,6 @@ function toggleFullscreenCroquis() {
     document.body.style.overflow = "";
   }
   
-  // إعادة ملاءمة بعد تغيير الحجم
   setTimeout(fitCroquis, 100);
 }
 
@@ -1093,32 +1090,37 @@ function renderCroquis() {
   const offsetY = (containerH - drawnH) / 2;
 
   // دوال التحويل (الأرض موجهة أفقياً - العرض أفقي، الطول رأسي)
-  // الطول الأيمن على اليمين، الأيسر على اليسار
+  // الطول الأيمن (l1) على اليمين البصري = mapX(w)
+  // الطول الأيسر (l2) على اليسار البصري = mapX(0)
   const mapX = (x) => offsetX + x * drawScale;
   const mapY = (y) => containerH - (offsetY + y * drawScale);
 
-  const k = (l2 - l1) / w;
+  // k = معدل التغير في الطول بالنسبة للعرض
+  // l2 (يسار) في mapX(0)، l1 (يمين) في mapX(w)
+  const k = (l1 - l2) / w;
 
   // === 1. الظل تحت الأرض ===
   const shadowPoly = svgEl("polygon");
   const sOff = 4 * textScale;
   shadowPoly.setAttribute("points",
-    `${mapX(0)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(l2)+sOff} ${mapX(0)+sOff},${mapY(l1)+sOff}`
+    `${mapX(0)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(l1)+sOff} ${mapX(0)+sOff},${mapY(l2)+sOff}`
   );
   shadowPoly.setAttribute("fill", "rgba(0,0,0,0.08)");
   shadowPoly.setAttribute("rx", "4");
   g.appendChild(shadowPoly);
 
   // === 2. الإطار الخارجي الكامل ===
+  // أسفل-يسار → أسفل-يمين → أعلى-يمين (l1=الطول الأيمن) → أعلى-يسار (l2=الطول الأيسر)
   const mainPoly = svgEl("polygon");
   mainPoly.setAttribute("points",
-    `${mapX(0)},${mapY(0)} ${mapX(w)},${mapY(0)} ${mapX(w)},${mapY(l2)} ${mapX(0)},${mapY(l1)}`
+    `${mapX(0)},${mapY(0)} ${mapX(w)},${mapY(0)} ${mapX(w)},${mapY(l1)} ${mapX(0)},${mapY(l2)}`
   );
   mainPoly.setAttribute("fill", "#f8fdf8");
   mainPoly.setAttribute("stroke", "#1b5e20");
   mainPoly.setAttribute("stroke-width", 2.5 * textScale);
   mainPoly.setAttribute("stroke-linejoin", "round");
   g.appendChild(mainPoly);
+
 
   // === 3. رسم القطع ===
   if (window.calculatedPieces && window.calculatedPieces.length > 0) {
@@ -1128,8 +1130,9 @@ function renderCroquis() {
       const x2 = mapX(piece.endX);
       const y1 = mapY(0);
       const y2 = mapY(0);
-      const y3 = mapY(l1 + k * piece.endX);
-      const y4 = mapY(l1 + k * piece.startX);
+      // ارتفاع الحافة العليا: h(x) = l2 + k*x  (l2=يسار، l1=يمين، k=(l1-l2)/w)
+      const y3 = mapY(l2 + k * piece.endX);
+      const y4 = mapY(l2 + k * piece.startX);
 
       // تعبئة القطعة
       const poly = svgEl("polygon");
@@ -1211,37 +1214,10 @@ function renderCroquis() {
   if (showCroquisMeasurements) {
     const dimOffset = 20 * textScale; // مسافة خطوط الأبعاد عن الأرض
 
-    // --- الطول الأيمن (يمين) ---
-    const rX = mapX(0);
-    const rY1 = mapY(0);
-    const rY2 = mapY(l1);
-    
-    // خطوط المساعدة المقطعة
-    g.appendChild(svgLine(rX, rY1, rX + dimOffset, rY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    
-    // خط الأبعاد
-    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#2e7d32", width: "1.5" }));
-    
-    // شُرط الحصر المتعامدة بدلاً من الأسهم
-    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY1, rX + dimOffset + 4 * textScale, rY1, { stroke: "#2e7d32", width: "2" }));
-    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#2e7d32", width: "2" }));
-    
-    // النص
-    const rMidY = (rY1 + rY2) / 2;
-    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, "الطول الأيمن: " + l1 + " م", {
-      anchor: "start",
-      fill: "#2e7d32",
-      size: "13",
-      weight: "bold",
-      bg: true,
-      transform: `rotate(-90, ${rX + dimOffset + 4 * textScale}, ${rMidY})`,
-    }));
-
-    // --- الطول الأيسر (يسار) ---
-    const lX = mapX(w);
+    // --- الطول الأيسر (يسار بصرياً) - mapX(0) ---
+    const lX = mapX(0);
     const lY1 = mapY(0);
-    const lY2 = mapY(l2);
+    const lY2 = mapY(l2);  // l2 = الطول الأيسر هو ارتفاع الجانب الأيسر
     
     // خطوط المساعدة المقطعة
     g.appendChild(svgLine(lX, lY1, lX - dimOffset, lY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
@@ -1262,6 +1238,32 @@ function renderCroquis() {
       weight: "bold",
       bg: true,
       transform: `rotate(-90, ${lX - dimOffset - 4 * textScale}, ${lMidY})`,
+    }));
+
+    // --- الطول الأيمن (يمين بصرياً) - mapX(w) ---
+    const rX = mapX(w);
+    const rY1 = mapY(0);
+    const rY2 = mapY(l1);  // l1 = الطول الأيمن هو ارتفاع الجانب الأيمن
+    
+    // خطوط المساعدة المقطعة
+    g.appendChild(svgLine(rX, rY1, rX + dimOffset, rY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    
+    // خط الأبعاد
+    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#2e7d32", width: "1.5" }));
+    
+    // شُرط الحصر المتعامدة
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY1, rX + dimOffset + 4 * textScale, rY1, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#2e7d32", width: "2" }));
+    
+    const rMidY = (rY1 + rY2) / 2;
+    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, "الطول الأيمن: " + l1 + " م", {
+      anchor: "start",
+      fill: "#2e7d32",
+      size: "13",
+      weight: "bold",
+      bg: true,
+      transform: `rotate(-90, ${rX + dimOffset + 4 * textScale}, ${rMidY})`,
     }));
 
     // --- العرض الأول (أسفل) ---
@@ -1288,23 +1290,36 @@ function renderCroquis() {
     }));
 
     // --- العرض الثاني (أعلى) ---
-    const topY = mapY(Math.min(l1, l2)) - dimOffset;
+    // أعلى يسار = mapY(l2)، أعلى يمين = mapY(l1)
+    const topEdgeY = mapY(Math.max(l1, l2)) - dimOffset;
     const topX1 = mapX(0);
     const topX2 = mapX(w);
-    const topRealY = mapY(Math.max(l1, l2)) - dimOffset + 5 * textScale;
-    g.appendChild(svgText((topX1 + topX2) / 2, topRealY - 8 * textScale, "العرض الثاني: " + w2 + " م", {
+    
+    // خطوط مساعدة من كل سقف لأعلى
+    g.appendChild(svgLine(topX1, mapY(l2), topX1, topEdgeY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(topX2, mapY(l1), topX2, topEdgeY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    
+    // خط الأبعاد
+    g.appendChild(svgLine(topX1, topEdgeY, topX2, topEdgeY, { stroke: "#2e7d32", width: "1.5" }));
+    
+    // شُرط الحصر
+    g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY - 8 * textScale, "العرض الثاني (أعلى): " + w2 + " م", {
       fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
     }));
 
-    // --- رؤوس مضلع الأرض الخارجية (دوائر خضراء غامقة مثل الصفحة 13) ---
+    // --- رؤوس مضلع الأرض الخارجية ---
+    // أسفل-يسار، أسفل-يمين، أعلى-يمين (l1=الطول الأيمن)، أعلى-يسار (l2=الطول الأيسر)
     const corners = [
       { x: mapX(0), y: mapY(0) },
       { x: mapX(w), y: mapY(0) },
-      { x: mapX(w), y: mapY(l2) },
-      { x: mapX(0), y: mapY(l1) }
+      { x: mapX(w), y: mapY(l1) },
+      { x: mapX(0), y: mapY(l2) }
     ];
     corners.forEach(p => {
       const c = svgEl("circle");
