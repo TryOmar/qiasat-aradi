@@ -651,22 +651,22 @@ function calculate() {
 
   const areaM2Elements = document.querySelectorAll("#calc-area-m2");
   areaM2Elements.forEach(el => {
-    el.innerText = formatNum(totalAreaM2);
+    el.innerText = Number(totalAreaM2.toFixed(2));
   });
   
   if (document.getElementById("calc-avg-width")) {
-    document.getElementById("calc-avg-width").innerText = formatNum(w);
+    document.getElementById("calc-avg-width").innerText = w.toFixed(4);
   }
   if (document.getElementById("calc-avg-length")) {
-    document.getElementById("calc-avg-length").innerText = formatNum(l);
+    document.getElementById("calc-avg-length").innerText = l.toFixed(4);
   }
   if (document.getElementById("calc-perimeter")) {
-    document.getElementById("calc-perimeter").innerText = formatNum(perimeter);
+    document.getElementById("calc-perimeter").innerText = perimeter.toFixed(4);
   }
 
   // Update formula text:
   if (document.getElementById("formula-details")) {
-    document.getElementById("formula-details").innerText = `${formatNum(w1)} + ${formatNum(w2)} = 2 × ${formatNum(w)}`;
+    document.getElementById("formula-details").innerText = `${w1.toFixed(4)} + ${w2.toFixed(4)} = 2 × ${w.toFixed(4)}`;
   }
 
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
@@ -721,7 +721,7 @@ function calculate() {
       totalFractionsEntered += fracVal;
     });
     if (document.getElementById("total-fraction-entered")) {
-      document.getElementById("total-fraction-entered").value = formatNum(totalFractionsEntered * 100) + "%";
+      document.getElementById("total-fraction-entered").value = Number((totalFractionsEntered * 100).toFixed(2)) + "%";
     }
   }
 
@@ -768,13 +768,13 @@ function calculate() {
     
     // 2. Update Area (المساحة)
     const areaInput = row.querySelector(".partner-area");
-    if (areaInput) areaInput.value = formatNum(partnerAreaM2);
+    if (areaInput) areaInput.value = Number(partnerAreaM2.toFixed(2));
 
     // 3. Update Percentage (النسبة)
     const percentInput = row.querySelector(".partner-percent");
     if (percentInput) {
       const pct = totalAreaM2 > 0 ? (partnerAreaM2 / totalAreaM2) * 100 : 0;
-      percentInput.value = formatNum(pct) + " %";
+      percentInput.value = Number(pct.toFixed(2)) + " %";
     }
     
     totalDistributedArea += partnerAreaM2;
@@ -795,9 +795,9 @@ function calculate() {
     const partnerWidth = x_i - lastX;
     const dividingLineLength = l1 + k * x_i;
 
-    row.querySelector(".partner-width").value = formatNum(partnerWidth);
-    row.querySelector(".partner-cum-width").value = `${formatNum(lastX)} م إلى ${formatNum(x_i)} م`;
-    row.querySelector(".partner-div-line").value = formatNum(dividingLineLength);
+    row.querySelector(".partner-width").value = partnerWidth.toFixed(4);
+    row.querySelector(".partner-cum-width").value = `${lastX.toFixed(4)} م إلى ${x_i.toFixed(4)} م`;
+    row.querySelector(".partner-div-line").value = dividingLineLength.toFixed(4);
     
     const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
     window.calculatedPieces.push({
@@ -815,24 +815,24 @@ function calculate() {
 
   // Update Footer totals for area and percentage
   if (document.getElementById("total-area-distributed")) {
-    document.getElementById("total-area-distributed").value = formatNum(totalDistributedArea);
+    document.getElementById("total-area-distributed").value = Number(totalDistributedArea.toFixed(2));
   }
   if (document.getElementById("total-percent-distributed")) {
     const totalPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("total-percent-distributed").value = formatNum(totalPct) + " %";
+    document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
   }
   if (document.getElementById("total-width-calculated")) {
-    document.getElementById("total-width-calculated").value = formatNum(lastX);
+    document.getElementById("total-width-calculated").value = lastX.toFixed(4);
   }
 
   const remainingArea = totalAreaM2 - totalDistributedArea;
   
   // Update summaries
   if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = formatNum(totalAreaM2) + " م²";
+    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
-    document.getElementById("summary-rem-area").innerText = formatNum(remainingArea) + " م²";
+    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
@@ -848,29 +848,29 @@ function calculate() {
     }
   }
   if (document.getElementById("summary-total-width")) {
-    document.getElementById("summary-total-width").innerText = formatNum(lastX) + " م";
+    document.getElementById("summary-total-width").innerText = lastX.toFixed(4) + " م";
   }
 
   if (document.getElementById("info-partners-count")) {
     document.getElementById("info-partners-count").innerText = rows.length;
   }
   if (document.getElementById("info-distributed-area")) {
-    document.getElementById("info-distributed-area").innerText = formatNum(totalDistributedArea) + " م²";
+    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
   }
   if (document.getElementById("info-distributed-percent")) {
     const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("info-distributed-percent").innerText = formatNum(distPct) + " %";
+    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
   }
   if (document.getElementById("info-last-div-line")) {
     let lastDivLine = l1;
     if (window.calculatedPieces.length > 0) {
       lastDivLine = window.calculatedPieces[window.calculatedPieces.length - 1].divLine;
     }
-    document.getElementById("info-last-div-line").innerText = formatNum(lastDivLine) + " م";
+    document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
   }
 
   if (document.getElementById("rem-area-m2")) {
-    document.getElementById("rem-area-m2").innerText = formatNum(remainingArea);
+    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
   }
 
   if (caratArea > 0) {
@@ -1128,7 +1128,7 @@ function renderCroquis() {
       // === المساحة ===
       if (showCroquisMeasurements) {
         // مستطيل خلفية للمساحة
-        const areaLabel = formatNum(piece.area) + " م²";
+        const areaLabel = Number(piece.area.toFixed(2)) + " م²";
         const areaText = svgText(cx, cy + 14, areaLabel, {
           fill: "#333",
           size: "12",
@@ -1138,7 +1138,7 @@ function renderCroquis() {
         g.appendChild(areaText);
 
         // عرض القطعة (أسفل)
-        const widthLabel = "ع: " + formatNum(piece.width) + " م";
+        const widthLabel = "ع: " + piece.width.toFixed(4) + " م";
         const widthText = svgText(cx, mapY(0) + 18, widthLabel, {
           fill: color.stroke,
           size: "11",
@@ -1162,7 +1162,7 @@ function renderCroquis() {
 
           // قيمة الفاصل
           const midFasil = (y1 + y4) / 2;
-          const fasilText = svgText(x1, midFasil, formatNum(piece.leftLine) + " م", {
+          const fasilText = svgText(x1, midFasil, piece.leftLine.toFixed(4) + " م", {
             fill: "#d84315",
             size: "11",
             weight: "bold",
