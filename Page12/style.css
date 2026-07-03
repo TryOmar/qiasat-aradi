@@ -458,3 +458,89 @@ svg .waterway {
     object-fit: contain;
   }
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN OVERRIDES FOR MOBILE (Page 12)
+   ============================================================ */
+
+@media (max-width: 992px) {
+  .sidebar-card {
+    min-width: unset !important; /* إلغاء الحد الأدنى للعرض لتجنب التمرير الأفقي على الشاشات الصغيرة */
+  }
+}
+
+@media (max-width: 768px) {
+  .con {
+    padding: 0 10px 100px 10px !important;
+  }
+  
+  .title {
+    flex-direction: column !important;
+    margin-top: 20px !important;
+    gap: 8px !important;
+    position: relative !important;
+    text-align: center !important;
+  }
+  
+  .title h1 {
+    font-size: 18px !important;
+    margin-top: 40px !important; /* مسافة لزر الرجوع العلوي */
+  }
+  
+  .title button {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 200px !important;
+    margin: 5px auto !important;
+    order: -1 !important; /* يظهر زر الرجوع في البداية */
+  }
+}
+
+@media (max-width: 480px) {
+  .title h1 {
+    font-size: 16px !important;
+  }
+  
+  .instruction-card {
+    font-size: 12px !important;
+    padding: 10px 12px !important;
+  }
+  
+  .sidebar-btn {
+    height: 44px !important; /* حجم لمس أكبر */
+    font-size: 11px !important;
+  }
+  
+  .action-btn {
+    height: 46px !important; /* حجم لمس أكبر للأزرار الرئيسية */
+    font-size: 13px !important;
+  }
+  
+  .preset-grid {
+    grid-template-columns: 1fr !important; /* عمود واحد للقوالب على الهواتف الصغيرة */
+  }
+  
+  .preset-btn {
+    grid-column: span 1 !important;
+  }
+  
+  .modal-content {
+    width: 95% !important;
+    padding: 15px !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .sidebar-btn, .action-btn, .title button {
+    min-height: 44px !important;
+  }
+  
+  .editor-form-group input, 
+  .editor-form-group textarea, 
+  .editor-form-group select {
+    min-height: 40px !important;
+  }
+}
