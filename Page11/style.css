@@ -99,37 +99,47 @@ body {
   margin-top: 20px !important;
 }
 
-.inputs-subgrid {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 10px !important;
-}
-
-.input-div {
+.dynamic-inputs-container {
   display: flex !important;
   flex-direction: column !important;
-  gap: 4px !important;
+  gap: 10px !important;
+  width: 100% !important;
 }
 
-.input-div label {
-  font-size: 11px !important;
-  font-weight: bold !important;
-  color: #444 !important;
+.input-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
 }
 
-.input-div input {
-  height: 35px !important;
-  border: 1px solid #ccc !important;
-  border-radius: 6px !important;
-  padding: 0 10px !important;
-  font-size: 13px !important;
-  font-weight: bold !important;
+.input-row label {
+  font-size: 14px !important;
+  color: #4f4f4f !important;
+  font-weight: 600 !important;
+  text-align: right !important;
+  flex: 1 !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+.input-row input {
+  height: 38px !important;
+  width: 180px !important;
+  border: 1.5px solid #d0d0d0 !important;
+  border-radius: 8px !important;
+  outline: none !important;
   text-align: center !important;
+  padding: 5px !important;
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  transition: border-color 0.2s !important;
   color: black !important;
   box-sizing: border-box !important;
 }
 
-.input-div input:focus {
+.input-row input:focus {
   border-color: #2e7d32 !important;
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1) !important;

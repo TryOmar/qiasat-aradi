@@ -52,25 +52,25 @@
       <!-- Card 1: Input Dimensions -->
       <div class="s card-dimensions">
         <h3>أدخل أبعاد الأرض الإجمالية</h3>
-        <div class="inputs-subgrid">
-          <div class="input-div">
-            <label for="length1">الطول الأيمن (م)</label>
-            <input tabindex="1" dir="auto" type="number" id="length1" oninput="calculate()">
+        <div class="dynamic-inputs-container">
+          <div class="input-row">
+            <label for="length1">الطول الأيمن بالمتر:</label>
+            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" oninput="calculate()">
           </div>
-          <div class="input-div">
-            <label for="length2">الطول الأيسر (م)</label>
-            <input tabindex="2" dir="auto" type="number" id="length2" oninput="calculate()">
+          <div class="input-row">
+            <label for="length2">الطول الأيسر بالمتر:</label>
+            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" oninput="calculate()">
           </div>
-          <div class="input-div">
-            <label for="width1">العرض الأول (م)</label>
-            <input tabindex="3" dir="auto" type="number" id="width1" oninput="calculate()">
+          <div class="input-row">
+            <label for="width1">العرض الأول (أسفل) بالمتر:</label>
+            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" oninput="calculate()">
           </div>
-          <div class="input-div">
-            <label for="width2">العرض الثاني (م)</label>
-            <input tabindex="4" dir="auto" type="number" id="width2" oninput="calculate()">
+          <div class="input-row">
+            <label for="width2">العرض الثاني (أعلى) بالمتر:</label>
+            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" oninput="calculate()">
           </div>
         </div>
-        <div class="readonly-lengths-box">
+        <div class="readonly-lengths-box" style="margin-top: 12px;">
           <span style="font-size: 11px; color: #555;">الطولين للعرض فقط (لا يمكن التعديل)</span>
           <div style="display: flex; justify-content: space-around; margin-top: 5px;">
             <div>
