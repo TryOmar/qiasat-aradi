@@ -311,6 +311,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
   const row = document.createElement("div");
   row.className = "partner-row";
   
+
   if (currentInputMethod === "carats") {
     row.innerHTML = `
       <div class="col-group index-group">
@@ -982,4 +983,213 @@ function exportCroquis() {
   };
   
   img.src = url;
+}
+
+// ===================================================
+// دوال التصدير والطباعة والنسخ
+// ===================================================
+
+function getTableDataArray() {
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  const data = [];
+  
+  // رأس الجدول
+  if (currentInputMethod === "carats") {
+    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض (م)", "العلامة (م)", "الفاصل (م)"]);
+  } else {
+    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض (م)", "العلامة (م)", "الفاصل (م)"]);
+  }
+  
+  rows.forEach(row => {
+    const rowData = [];
+    rowData.push(row.querySelector(".partner-index") ? row.querySelector(".partner-index").value : "-");
+    rowData.push(row.querySelector(".partner-name") ? row.querySelector(".partner-name").value : "-");
+    
+    if (currentInputMethod === "carats") {
+      rowData.push(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : "0");
+      rowData.push(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : "0");
+      rowData.push(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : "0");
+    } else {
+      rowData.push(row.querySelector(".partner-fraction") ? row.querySelector(".partner-fraction").value : "-");
+      rowData.push(row.querySelector(".partner-equiv") ? row.querySelector(".partner-equiv").value : "-");
+    }
+    
+    rowData.push(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : "-");
+    rowData.push(row.querySelector(".partner-percent") ? row.querySelector(".partner-percent").value : "-");
+    rowData.push(row.querySelector(".partner-width") ? row.querySelector(".partner-width").value : "-");
+    rowData.push(row.querySelector(".partner-cum-width") ? row.querySelector(".partner-cum-width").value : "-");
+    rowData.push(row.querySelector(".partner-div-line") ? row.querySelector(".partner-div-line").value : "-");
+    data.push(rowData);
+  });
+  
+  return data;
+}
+
+function printReport() {
+  const l1 = document.getElementById("length1").value || "-";
+  const l2 = document.getElementById("length2").value || "-";
+  const w1 = document.getElementById("width1").value || "-";
+  const w2 = document.getElementById("width2").value || "-";
+  const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
+  const data = getTableDataArray();
+  
+  const tableRows = data.slice(1).map((row, idx) => {
+    const bg = idx % 2 === 0 ? "#f9f9f9" : "#fff";
+    return `<tr style="background:${bg};">${row.map(cell => `<td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${cell}</td>`).join("")}</tr>`;
+  }).join("");
+  
+  const headerRow = `<tr>${data[0].map(h => `<th style="padding:8px 10px;background:#1b5e20;color:white;border:1px solid #ddd;text-align:center;">${h}</th>`).join("")}</tr>`;
+  
+  const printContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تقرير تقسيم الأراضي - الدلال</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    * { font-family: 'Cairo', Arial, sans-serif; }
+    body { margin: 20px; color: #222; }
+    .header { text-align: center; border-bottom: 3px solid #1b5e20; padding-bottom: 10px; margin-bottom: 20px; }
+    .header h1 { color: #1b5e20; margin: 0; font-size: 22px; }
+    .header p { color: #666; margin: 5px 0 0; font-size: 13px; }
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .info-box { background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 10px; text-align: center; }
+    .info-box label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
+    .info-box strong { font-size: 16px; color: #1b5e20; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    .croquis-section { text-align: center; margin-top: 20px; }
+    .croquis-section h3 { color: #1b5e20; font-size: 16px; margin-bottom: 10px; }
+    .footer { text-align: center; color: #888; font-size: 11px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px; }
+    @media print { body { margin: 10px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌿 تقرير القسمة في حال اختلاف الأطوال - الدَّلاَّل</h1>
+    <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
+    <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
+    <div class="info-box"><label>العرض الأول</label><strong>${w1} م</strong></div>
+    <div class="info-box"><label>العرض الثاني</label><strong>${w2} م</strong></div>
+  </div>
+  <div class="info-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
+    <div class="info-box"><label>عدد الشركاء</label><strong>${data.length - 1}</strong></div>
+    <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${document.getElementById("summary-status") ? document.getElementById("summary-status").innerText : "-"}</strong></div>
+  </div>
+  <h3 style="color:#1b5e20; margin: 15px 0 8px 0; font-size:15px;">جدول تفاصيل التقسيم</h3>
+  <table>
+    ${headerRow}
+    ${tableRows}
+  </table>
+  <div class="footer">تم إنشاء هذا التقرير بواسطة تطبيق الدَّلاَّل - حسابات المزارع والفلاح</div>
+</body>
+</html>`;
+  
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => { printWindow.print(); }, 800);
+}
+
+function exportPDF() {
+  // نستخدم طباعة المتصفح للـ PDF - هي الطريقة الأكثر موثوقية بدون مكتبات خارجية
+  printReport();
+  // نعرض رسالة توجيهية بعد فتح نافذة الطباعة
+  setTimeout(() => {
+    alert('💡 في نافذة الطباعة، اختر "حفظ كـ PDF" من قائمة الطابعات لتصدير الملف كـ PDF.');
+  }, 1000);
+}
+
+function exportExcel() {
+  const data = getTableDataArray();
+  const l1 = document.getElementById("length1").value || "";
+  const l2 = document.getElementById("length2").value || "";
+  const w1 = document.getElementById("width1").value || "";
+  const w2 = document.getElementById("width2").value || "";
+  const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "";
+  
+  // ترويسة المعلومات
+  const infoRows = [
+    ["تقرير القسمة في حال اختلاف الأطوال - الدلال"],
+    ["تاريخ التقرير", new Date().toLocaleDateString('ar-EG')],
+    [],
+    ["أبعاد الأرض الإجمالية"],
+    ["الطول الأيمن (م)", l1, "الطول الأيسر (م)", l2],
+    ["العرض الأول (م)", w1, "العرض الثاني (م)", w2],
+    ["المساحة الإجمالية (م²)", totalArea],
+    [],
+    ["جدول التقسيم"]
+  ];
+  
+  const allRows = [...infoRows, ...data];
+  
+  // تحويل إلى CSV
+  const csvContent = allRows.map(row => {
+    if (!Array.isArray(row)) return "";
+    return row.map(cell => {
+      const cellStr = String(cell || "").replace(/"/g, '""');
+      return `"${cellStr}"`;
+    }).join(",");
+  }).join("\n");
+  
+  // إضافة BOM لدعم العربية في Excel
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `تقسيم_الأراضي_الدلال_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  // إشعار نجاح
+  const btn = event.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = "✅ تم التصدير!";
+  btn.style.background = "#2e7d32";
+  btn.style.color = "white";
+  setTimeout(() => { btn.innerHTML = originalText; btn.style.background = ""; btn.style.color = ""; }, 2500);
+}
+
+function copyTableToClipboard() {
+  const data = getTableDataArray();
+  
+  // تحويل إلى نص جدول محاذى
+  const textTable = data.map(row => row.join("\t")).join("\n");
+  
+  navigator.clipboard.writeText(textTable).then(() => {
+    const btn = event.currentTarget;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> تم النسخ!`;
+    btn.style.background = "#2e7d32";
+    btn.style.color = "white";
+    setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ""; btn.style.color = ""; }, 2500);
+  }).catch(() => {
+    // fallback للمتصفحات القديمة
+    const textArea = document.createElement("textarea");
+    textArea.value = textTable;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      alert("✅ تم نسخ الجدول إلى الحافظة! يمكنك لصقه في Excel أو Word.");
+    } catch (e) {
+      alert("❌ تعذر النسخ التلقائي. يُرجى تحديد الجدول ونسخه يدوياً.");
+    }
+    document.body.removeChild(textArea);
+  });
 }

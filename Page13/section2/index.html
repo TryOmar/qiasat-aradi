@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <title>حساب مساحة الأراضي بالقصبة والقبضة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="con">
+    <div class="dec1 no-print"></div>
+
+    <div class="header-con">
+      <h1 class="header1">الدَّلاَّل</h1>
+      <h2 class="header2">حساب مساحة الأراضي بالقصبة والقبضة</h2>
+    </div>
+
+    <!-- بطاقة التحويل المرجعي -->
+    <div class="s reference-card no-print">
+      <h3>📏 جدول التحويل المرجعي</h3>
+      <div class="ref-grid">
+        <div class="ref-item">
+          <span class="ref-label">1 قصبة</span>
+          <span class="ref-eq">=</span>
+          <span class="ref-val">3.55 م</span>
+        </div>
+        <div class="ref-item">
+          <span class="ref-label">1 قبضة</span>
+          <span class="ref-eq">=</span>
+          <span class="ref-val">3.55 ÷ 6 = 0.5917 م</span>
+        </div>
+        <div class="ref-item">
+          <span class="ref-label">1 قصبة مربعة</span>
+          <span class="ref-eq">=</span>
+          <span class="ref-val">12.6025 م²</span>
+        </div>
+        <div class="ref-item">
+          <span class="ref-label">1 فدان</span>
+          <span class="ref-eq">=</span>
+          <span class="ref-val">24 قيراط = 4200.833 م²</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم الإدخال الرئيسي -->
+    <div class="s main-input-card">
+      <h3>📐 أدخل أبعاد الأرض</h3>
+
+      <!-- اختيار نوع الشكل -->
+      <div class="shape-selector-row">
+        <label>شكل الأرض:</label>
+        <div class="shape-buttons">
+          <button class="shape-btn active" id="btn-rect" onclick="setShape('rect')">
+            <svg viewBox="0 0 40 30" width="30" height="22"><rect x="3" y="3" width="34" height="24" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+            مستطيل
+          </button>
+          <button class="shape-btn" id="btn-trap" onclick="setShape('trap')">
+            <svg viewBox="0 0 40 30" width="30" height="22"><polygon points="8,27 32,27 30,3 10,3" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+            شبه منحرف
+          </button>
+          <button class="shape-btn" id="btn-quad" onclick="setShape('quad')">
+            <svg viewBox="0 0 40 30" width="30" height="22"><polygon points="5,27 35,27 32,3 8,3" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+            رباعي مختلف الأطوال
+          </button>
+        </div>
+      </div>
+
+      <!-- حقول الإدخال -->
+      <div class="inputs-area">
+
+        <!-- وحدة الطول -->
+        <div class="unit-selector-row">
+          <label>وحدة الإدخال:</label>
+          <select id="input-unit" onchange="calculate()" class="selector1">
+            <option value="qasba">قصبة وقبضة</option>
+            <option value="meter">متر مباشرة</option>
+          </select>
+        </div>
+
+        <!-- مستطيل / شبه منحرف -->
+        <div id="inputs-rect-trap">
+          <div class="inputs-subgrid" id="inputs-grid">
+            <!-- العرض 1 -->
+            <div class="input-block" id="block-w1">
+              <div class="input-label-row">
+                <label id="lbl-w1">العرض الأول</label>
+              </div>
+              <div class="qasba-row" id="qasba-w1">
+                <div class="input-div">
+                  <label>قصبة</label>
+                  <input type="number" id="w1-qasba" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>قبضة</label>
+                  <input type="number" id="w1-qabda" min="0" max="5" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>سم</label>
+                  <input type="number" id="w1-cm" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+              </div>
+              <div class="meter-row" id="meter-w1" style="display:none;">
+                <div class="input-div">
+                  <label>بالمتر (م)</label>
+                  <input type="number" id="w1-meter" min="0" step="any" placeholder="0.00" oninput="calculate()">
+                </div>
+              </div>
+              <div class="equiv-display" id="equiv-w1">= 0.00 م</div>
+            </div>
+
+            <!-- العرض 2 -->
+            <div class="input-block" id="block-w2">
+              <div class="input-label-row">
+                <label id="lbl-w2">العرض الثاني</label>
+              </div>
+              <div class="qasba-row" id="qasba-w2">
+                <div class="input-div">
+                  <label>قصبة</label>
+                  <input type="number" id="w2-qasba" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>قبضة</label>
+                  <input type="number" id="w2-qabda" min="0" max="5" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>سم</label>
+                  <input type="number" id="w2-cm" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+              </div>
+              <div class="meter-row" id="meter-w2" style="display:none;">
+                <div class="input-div">
+                  <label>بالمتر (م)</label>
+                  <input type="number" id="w2-meter" min="0" step="any" placeholder="0.00" oninput="calculate()">
+                </div>
+              </div>
+              <div class="equiv-display" id="equiv-w2">= 0.00 م</div>
+            </div>
+
+            <!-- الطول 1 -->
+            <div class="input-block" id="block-l1">
+              <div class="input-label-row">
+                <label id="lbl-l1">الطول الأيمن</label>
+              </div>
+              <div class="qasba-row" id="qasba-l1">
+                <div class="input-div">
+                  <label>قصبة</label>
+                  <input type="number" id="l1-qasba" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>قبضة</label>
+                  <input type="number" id="l1-qabda" min="0" max="5" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>سم</label>
+                  <input type="number" id="l1-cm" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+              </div>
+              <div class="meter-row" id="meter-l1" style="display:none;">
+                <div class="input-div">
+                  <label>بالمتر (م)</label>
+                  <input type="number" id="l1-meter" min="0" step="any" placeholder="0.00" oninput="calculate()">
+                </div>
+              </div>
+              <div class="equiv-display" id="equiv-l1">= 0.00 م</div>
+            </div>
+
+            <!-- الطول 2 (للشبه منحرف والرباعي) -->
+            <div class="input-block" id="block-l2" style="display:none;">
+              <div class="input-label-row">
+                <label id="lbl-l2">الطول الأيسر</label>
+              </div>
+              <div class="qasba-row" id="qasba-l2">
+                <div class="input-div">
+                  <label>قصبة</label>
+                  <input type="number" id="l2-qasba" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>قبضة</label>
+                  <input type="number" id="l2-qabda" min="0" max="5" step="1" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-div">
+                  <label>سم</label>
+                  <input type="number" id="l2-cm" min="0" step="1" placeholder="0" oninput="calculate()">
+                </div>
+              </div>
+              <div class="meter-row" id="meter-l2" style="display:none;">
+                <div class="input-div">
+                  <label>بالمتر (م)</label>
+                  <input type="number" id="l2-meter" min="0" step="any" placeholder="0.00" oninput="calculate()">
+                </div>
+              </div>
+              <div class="equiv-display" id="equiv-l2">= 0.00 م</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- مساحة القيراط -->
+      <div class="carat-area-row">
+        <label for="carat-area-select">مساحة القيراط (م²):</label>
+        <select id="carat-area-select" class="selector1" onchange="handleCaratChange()">
+          <option value="175.035">175.035</option>
+          <option value="175">175</option>
+          <option value="171.388">171.388</option>
+          <option value="168">168</option>
+          <option value="0">أخرى</option>
+        </select>
+        <input type="number" id="other-carat-area" placeholder="م²" style="display:none; width:70px;" oninput="calculate()">
+      </div>
+    </div>
+
+    <!-- النتائج -->
+    <div class="s results-card">
+      <h3>📊 النتائج</h3>
+
+      <!-- الأبعاد المحسوبة -->
+      <div class="dims-result-grid">
+        <div class="dim-result-box">
+          <span class="dim-lbl">العرض الأول</span>
+          <strong id="res-w1-m">0.00 م</strong>
+          <span id="res-w1-q" class="dim-q">0 ق 0 قب</span>
+        </div>
+        <div class="dim-result-box" id="dim-w2-box">
+          <span class="dim-lbl">العرض الثاني</span>
+          <strong id="res-w2-m">0.00 م</strong>
+          <span id="res-w2-q" class="dim-q">0 ق 0 قب</span>
+        </div>
+        <div class="dim-result-box">
+          <span class="dim-lbl" id="lbl-res-l1">الطول</span>
+          <strong id="res-l1-m">0.00 م</strong>
+          <span id="res-l1-q" class="dim-q">0 ق 0 قب</span>
+        </div>
+        <div class="dim-result-box" id="dim-l2-box" style="display:none;">
+          <span class="dim-lbl">الطول الأيسر</span>
+          <strong id="res-l2-m">0.00 م</strong>
+          <span id="res-l2-q" class="dim-q">0 ق 0 قب</span>
+        </div>
+      </div>
+
+      <!-- المساحة الإجمالية -->
+      <div class="total-area-banner">
+        <div class="area-banner-inner">
+          <span class="area-banner-lbl">المساحة الإجمالية</span>
+          <strong class="area-banner-m2" id="res-area-m2">0.00</strong>
+          <span class="area-banner-unit">م²</span>
+        </div>
+      </div>
+
+      <!-- وحدات المساحة -->
+      <div class="units-result-grid">
+        <div class="unit-result-box">
+          <span class="unit-val" id="res-acres">0</span>
+          <span class="unit-lbl">فدان</span>
+        </div>
+        <div class="unit-result-box">
+          <span class="unit-val" id="res-carats">0</span>
+          <span class="unit-lbl">قيراط</span>
+        </div>
+        <div class="unit-result-box">
+          <span class="unit-val" id="res-shares">0.00</span>
+          <span class="unit-lbl">سهم</span>
+        </div>
+        <div class="unit-result-box qasba-unit">
+          <span class="unit-val" id="res-qasba-sq">0.00</span>
+          <span class="unit-lbl">قصبة²</span>
+        </div>
+      </div>
+
+      <!-- تفاصيل الحساب -->
+      <div class="calc-formula-box">
+        <span class="formula-title">📐 طريقة الحساب:</span>
+        <span id="formula-text">أدخل الأبعاد لعرض طريقة الحساب</span>
+      </div>
+    </div>
+
+    <!-- أداة تحويل القصبة/القبضة إلى متر -->
+    <div class="s converter-card no-print">
+      <h3>🔄 محول سريع: قصبة وقبضة ⟺ متر</h3>
+      <div class="converter-grid">
+        <div class="conv-direction">
+          <h4>قصبة/قبضة → متر</h4>
+          <div class="conv-inputs">
+            <div class="input-div">
+              <label>قصبة</label>
+              <input type="number" id="conv-q-qasba" min="0" step="1" placeholder="0" oninput="convertToMeter()">
+            </div>
+            <div class="input-div">
+              <label>قبضة (0-5)</label>
+              <input type="number" id="conv-q-qabda" min="0" max="5" step="1" placeholder="0" oninput="convertToMeter()">
+            </div>
+            <div class="input-div">
+              <label>سم</label>
+              <input type="number" id="conv-q-cm" min="0" step="1" placeholder="0" oninput="convertToMeter()">
+            </div>
+          </div>
+          <div class="conv-result">
+            <span>= </span>
+            <strong id="conv-result-meter">0.0000</strong>
+            <span>م</span>
+          </div>
+        </div>
+        <div class="conv-divider">⟺</div>
+        <div class="conv-direction">
+          <h4>متر → قصبة/قبضة</h4>
+          <div class="conv-inputs">
+            <div class="input-div">
+              <label>المتر</label>
+              <input type="number" id="conv-m-meter" min="0" step="any" placeholder="0.00" oninput="convertToQasba()">
+            </div>
+          </div>
+          <div class="conv-result">
+            <strong id="conv-result-qasba">0 قصبة, 0 قبضة, 0 سم</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- شريط التنقل -->
+  <div class="nav">
+    <a href="../section1/index.html" class="nav-box">
+      <img src="../../imgs/nav1.png" alt="nav1" />
+      <p>بالمتر</p>
+    </a>
+    <a class="nav-box" onclick="history.back()">
+      <img src="../../imgs/nav2.png" alt="nav2" />
+      <p>رجوع</p>
+    </a>
+    <a href="#" class="nav-box">
+      <img src="../../imgs/nav3.png" alt="nav3" />
+      <p>مساعدة</p>
+    </a>
+    <a href="../../index.html" class="nav-box">
+      <img src="../../imgs/nav4.png" alt="nav4" />
+      <p>الرئيسية</p>
+    </a>
+  </div>
+
+  <script src="../../nav.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

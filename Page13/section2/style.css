@@ -1,0 +1,488 @@
+/* ===================================================
+   Page13 Section2 - حساب بالقصبة والقبضة
+   ================================================== */
+
+/* استيراد الخط */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
+
+* {
+  font-family: 'Cairo', sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #f4f6f8 !important;
+}
+
+/* ترويسة الصفحة */
+.header-con {
+  text-align: center;
+  margin: 20px 0 10px 0;
+}
+
+.header1 {
+  font-size: 28px;
+  color: #1b5e20;
+  margin: 0;
+}
+
+.header2 {
+  font-size: 15px;
+  color: #555;
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+/* البطاقات العامة */
+.s {
+  width: 100%;
+  max-width: 860px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin: 12px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.s h3 {
+  font-size: 15px;
+  color: #1b5e20;
+  margin: 0 0 14px 0;
+  border-bottom: 2px solid #e8f5e9;
+  padding-bottom: 8px;
+}
+
+/* جدول المرجعي */
+.reference-card {
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border: 1px solid #a5d6a7;
+}
+
+.ref-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.ref-item {
+  background: #fff;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.ref-label {
+  font-weight: bold;
+  color: #1b5e20;
+  min-width: 90px;
+}
+
+.ref-eq {
+  color: #888;
+}
+
+.ref-val {
+  color: #c62828;
+  font-weight: bold;
+}
+
+/* اختيار شكل الأرض */
+.shape-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.shape-selector-row > label {
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  white-space: nowrap;
+}
+
+.shape-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shape-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: bold;
+  color: #555;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.shape-btn:hover {
+  background: #e8f5e9;
+  border-color: #81c784;
+  color: #1b5e20;
+}
+
+.shape-btn.active {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+}
+
+.shape-btn svg {
+  color: currentColor;
+}
+
+/* وحدة الإدخال */
+.unit-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.unit-selector-row label {
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+}
+
+.selector1 {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  background: #fff;
+}
+
+/* شبكة الإدخال */
+.inputs-subgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* بلوك كل حقل إدخال */
+.input-block {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.input-label-row label {
+  font-weight: bold;
+  font-size: 13px;
+  color: #1b5e20;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.qasba-row {
+  display: flex;
+  gap: 8px;
+}
+
+.meter-row {
+  display: flex;
+}
+
+.input-div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.input-div label {
+  font-size: 11px;
+  color: #777;
+  font-weight: bold;
+}
+
+.input-div input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: bold;
+  color: #222;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+
+.input-div input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+}
+
+.equiv-display {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #c62828;
+  text-align: center;
+  background: #fff8e1;
+  border-radius: 5px;
+  padding: 4px 8px;
+}
+
+/* مساحة القيراط */
+.carat-area-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: #f3e5f5;
+  border: 1px solid #ce93d8;
+  border-radius: 8px;
+}
+
+.carat-area-row label {
+  font-weight: bold;
+  font-size: 13px;
+  color: #6a1b9a;
+}
+
+/* النتائج */
+.dims-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dim-result-box {
+  background: #f1f8e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.dim-lbl {
+  font-size: 11px;
+  color: #555;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.dim-result-box strong {
+  font-size: 18px;
+  color: #1b5e20;
+  display: block;
+}
+
+.dim-q {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+  display: block;
+}
+
+/* لافتة المساحة الإجمالية */
+.total-area-banner {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(27, 94, 32, 0.25);
+}
+
+.area-banner-inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  color: white;
+}
+
+.area-banner-lbl {
+  font-size: 13px;
+  opacity: 0.88;
+}
+
+.area-banner-m2 {
+  font-size: 38px;
+  font-weight: bold;
+}
+
+.area-banner-unit {
+  font-size: 18px;
+  opacity: 0.88;
+}
+
+/* شبكة الوحدات */
+.units-result-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.unit-result-box {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.unit-result-box:hover {
+  border-color: #81c784;
+  box-shadow: 0 2px 8px rgba(46,125,50,0.12);
+}
+
+.unit-result-box.qasba-unit {
+  border-color: #ffcc80;
+  background: #fff8e1;
+}
+
+.unit-val {
+  display: block;
+  font-size: 22px;
+  font-weight: bold;
+  color: #c62828;
+}
+
+.unit-result-box.qasba-unit .unit-val {
+  color: #e65100;
+}
+
+.unit-lbl {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+/* صندوق الصيغة */
+.calc-formula-box {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #444;
+  direction: rtl;
+}
+
+.formula-title {
+  font-weight: bold;
+  color: #1b5e20;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* المحول السريع */
+.converter-grid {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.conv-direction {
+  flex: 1;
+  min-width: 220px;
+}
+
+.conv-direction h4 {
+  font-size: 13px;
+  color: #1b5e20;
+  margin: 0 0 10px 0;
+}
+
+.conv-inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.conv-result {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #c62828;
+  text-align: center;
+  background: #fff8e1;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.conv-divider {
+  font-size: 24px;
+  color: #2e7d32;
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+/* الهاتف */
+@media (max-width: 600px) {
+  .ref-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inputs-subgrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .units-result-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dims-result-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shape-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .converter-grid {
+    flex-direction: column;
+  }
+  
+  .conv-divider {
+    transform: rotate(90deg);
+  }
+  
+  .s {
+    margin: 10px;
+    padding: 14px;
+  }
+}
