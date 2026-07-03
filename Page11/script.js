@@ -493,6 +493,24 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
   const row = document.createElement("div");
   row.className = "partner-row";
   
+  // تهيئة وتنسيق قيم العرض لمنع الكسور الطويلة
+  let formattedFeddans = "";
+  if (feddans !== "" && feddans !== null && feddans !== undefined) {
+    const fVal = parseFloat(feddans);
+    if (!isNaN(fVal)) formattedFeddans = Math.round(fVal);
+  }
+  
+  let formattedCarats = "";
+  if (carats !== "" && carats !== null && carats !== undefined) {
+    const cVal = parseFloat(carats);
+    if (!isNaN(cVal)) formattedCarats = Math.round(cVal);
+  }
+  
+  let formattedShares = "";
+  if (shares !== "" && shares !== null && shares !== undefined) {
+    const sVal = parseFloat(shares);
+    if (!isNaN(sVal)) formattedShares = Number(sVal.toFixed(2));
+  }
 
   if (currentInputMethod === "carats") {
     row.innerHTML = `
@@ -506,11 +524,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="number" class="partner-shares" placeholder="0" step="any" value="${shares}" oninput="saveAndCalc()">
+        <input type="number" class="partner-shares" placeholder="0" step="any" value="${formattedShares}" oninput="saveAndCalc()">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="number" class="partner-carats" placeholder="0" value="${carats}" oninput="saveAndCalc()">
+        <input type="number" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="saveAndCalc()">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
