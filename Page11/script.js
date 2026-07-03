@@ -457,7 +457,7 @@ function handleInputMethodChange() {
         const partnerCarats = fracVal * (totalAreaM2 / caratArea);
         f = Math.floor(partnerCarats / 24);
         c = Math.floor(partnerCarats % 24);
-        s = ((partnerCarats - (f * 24 + c)) * 24);
+        s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
       }
       savedPartners.push({ name, feddans: f, carats: c, shares: s, fraction: "" });
     } else {
@@ -711,7 +711,7 @@ function calculate() {
       displayTotalCarats = displayTotalCarats % 24;
     }
     
-    if (document.getElementById("total-shares-entered")) document.getElementById("total-shares-entered").value = formatNum(displayTotalShares);
+    if (document.getElementById("total-shares-entered")) document.getElementById("total-shares-entered").value = Number(displayTotalShares.toFixed(2));
     if (document.getElementById("total-carats-entered")) document.getElementById("total-carats-entered").value = displayTotalCarats;
     if (document.getElementById("total-feddans-entered")) document.getElementById("total-feddans-entered").value = displayTotalFeddans;
   } else {
@@ -759,7 +759,7 @@ function calculate() {
           const f_eq = Math.floor(partnerCarats / 24);
           const c_eq = Math.floor(partnerCarats % 24);
           const s_eq = ((partnerCarats - (f_eq * 24 + c_eq)) * 24);
-          equivInput.value = `${formatNum(s_eq)} س، ${c_eq} ق، ${f_eq} ف`;
+          equivInput.value = `${Number(s_eq.toFixed(2))} س، ${c_eq} ق، ${f_eq} ف`;
         } else {
           equivInput.value = "-";
         }
@@ -885,7 +885,7 @@ function calculate() {
     const prefix = isNegative ? "-" : "";
     document.getElementById("rem-acres").innerText = prefix + remAcres;
     document.getElementById("rem-carats").innerText = remCarats;
-    document.getElementById("rem-shares").innerText = formatNum(remShares);
+    document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
 
     const color = isNegative ? "red" : "black";
     document.getElementById("rem-acres").style.color = color;
@@ -951,7 +951,7 @@ function promptDivideEqually() {
     const partnerCarats = totalCarats / numPartners;
     const f = Math.floor(partnerCarats / 24);
     const c = Math.floor(partnerCarats % 24);
-    const s = ((partnerCarats - (f * 24 + c)) * 24);
+    const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
     
     for (let i = 0; i < numPartners; i++) {
       addNewPartnerRow(`شريك ${i + 1}`, f, c, s, "");
