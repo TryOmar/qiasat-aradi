@@ -1310,7 +1310,7 @@ function drawLandCanvas(vertices) {
   const visualVertices = getVisualVertices(vertices);
 
   // 2. Scale and Fit visual vertices inside Canvas bounding box (85% to 90% footprint, with extra space for printing)
-  const margin = isPrinting ? 110 : Math.max(22, Math.min(28 * scaleMultiplier, 45));
+  const margin = isPrinting ? 110 : Math.max(50, Math.min(60 * scaleMultiplier, 80));
   const drawW = cssW - 2 * margin;
   const drawH = cssH - 2 * margin;
 
