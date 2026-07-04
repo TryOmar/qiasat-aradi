@@ -7,6 +7,7 @@ let startDragX = 0;
 let startDragY = 0;
 let showCroquisNames = true;
 let showCroquisMeasurements = true;
+let isPartitioned = false;
 
 // متغيرات Pinch-to-Zoom
 let lastTouchDist = 0;
@@ -24,7 +25,10 @@ document.addEventListener("DOMContentLoaded", function () {
     addNewPartnerRow();
   }
   renderHeaderAndFooter();
-  calculate();
+  calculateGeneral();
+  if (isPartitioned) {
+    runPartition();
+  }
   
   // Setup SVG interactions
   setupSVGInteractions();
@@ -287,6 +291,7 @@ function saveData() {
   localStorage.setItem("p11-carat-area", document.getElementById("input-carat-area").value);
   localStorage.setItem("p11-other-carat-area", document.getElementById("other-carat-area").value);
   localStorage.setItem("p11-input-method", document.getElementById("share-input-method").value);
+  localStorage.setItem("p11-is-partitioned", isPartitioned ? "true" : "false");
 
   const partners = [];
   const rows = document.querySelectorAll("#partners-list .partner-row");
@@ -339,6 +344,8 @@ function loadData() {
       console.error("Error parsing saved partners", e);
     }
   }
+
+  isPartitioned = (localStorage.getItem("p11-is-partitioned") === "true");
 }
 
 function handleCaratAreaChange(triggerCalculate = true) {
@@ -352,8 +359,7 @@ function handleCaratAreaChange(triggerCalculate = true) {
   }
 
   if (triggerCalculate) {
-    saveData();
-    calculate();
+    saveAndCalc();
   }
 }
 
@@ -370,7 +376,8 @@ function renderHeaderAndFooter() {
       <p>فدان</p>
       <p>المساحة (م²)</p>
       <p>النسبة (%)</p>
-      <p>العرض (م)</p>
+      <p>العرض الأول (أسفل)</p>
+      <p>العرض الثاني (أعلى)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -384,7 +391,8 @@ function renderHeaderAndFooter() {
       <input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
@@ -398,7 +406,8 @@ function renderHeaderAndFooter() {
       <p style="display:none;"></p>
       <p>المساحة (م²)</p>
       <p>النسبة (%)</p>
-      <p>العرض (م)</p>
+      <p>العرض الأول (أسفل)</p>
+      <p>العرض الثاني (أعلى)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -412,7 +421,8 @@ function renderHeaderAndFooter() {
       <input type="text" style="display:none;" readonly value="-">
       <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
@@ -539,9 +549,13 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">نسبة (%)</span>
         <input type="text" class="partner-percent" readonly value="-">
       </div>
-      <div class="col-group width-group">
-        <span class="mobile-label">العرض (م)</span>
-        <input type="text" class="partner-width" readonly value="-">
+      <div class="col-group width-bottom-group">
+        <span class="mobile-label">العرض الأول (أسفل)</span>
+        <input type="text" class="partner-width-bottom" readonly value="-">
+      </div>
+      <div class="col-group width-top-group">
+        <span class="mobile-label">العرض الثاني (أعلى)</span>
+        <input type="text" class="partner-width-top" readonly value="-">
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -580,9 +594,13 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">نسبة (%)</span>
         <input type="text" class="partner-percent" readonly value="-">
       </div>
-      <div class="col-group width-group">
-        <span class="mobile-label">العرض (م)</span>
-        <input type="text" class="partner-width" readonly value="-">
+      <div class="col-group width-bottom-group">
+        <span class="mobile-label">العرض الأول (أسفل)</span>
+        <input type="text" class="partner-width-bottom" readonly value="-">
+      </div>
+      <div class="col-group width-top-group">
+        <span class="mobile-label">العرض الثاني (أعلى)</span>
+        <input type="text" class="partner-width-top" readonly value="-">
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -608,9 +626,95 @@ function deletePartnerRow(button) {
   saveAndCalc();
 }
 
+function updateRowsReadOnlyStatus() {
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  rows.forEach((row, index) => {
+    const isFirst = (index === 0);
+    const feddansInput = row.querySelector(".partner-feddans");
+    const caratsInput = row.querySelector(".partner-carats");
+    const sharesInput = row.querySelector(".partner-shares");
+    const fractionInput = row.querySelector(".partner-fraction");
+    const deleteBtn = row.querySelector(".delete-row-btn");
+    
+    if (isFirst) {
+      if (feddansInput) {
+        feddansInput.readOnly = true;
+        feddansInput.style.backgroundColor = "#f5f5f5";
+        feddansInput.style.color = "#777";
+        feddansInput.style.cursor = "not-allowed";
+        feddansInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
+      }
+      if (caratsInput) {
+        caratsInput.readOnly = true;
+        caratsInput.style.backgroundColor = "#f5f5f5";
+        caratsInput.style.color = "#777";
+        caratsInput.style.cursor = "not-allowed";
+        caratsInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
+      }
+      if (sharesInput) {
+        sharesInput.readOnly = true;
+        sharesInput.style.backgroundColor = "#f5f5f5";
+        sharesInput.style.color = "#777";
+        sharesInput.style.cursor = "not-allowed";
+        sharesInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
+      }
+      if (fractionInput) {
+        fractionInput.readOnly = true;
+        fractionInput.style.backgroundColor = "#f5f5f5";
+        fractionInput.style.color = "#777";
+        fractionInput.style.cursor = "not-allowed";
+        fractionInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
+      }
+      if (deleteBtn) {
+        deleteBtn.style.visibility = "hidden";
+      }
+    } else {
+      if (feddansInput) {
+        feddansInput.readOnly = false;
+        feddansInput.style.backgroundColor = "";
+        feddansInput.style.color = "";
+        feddansInput.style.cursor = "";
+        feddansInput.removeAttribute("title");
+      }
+      if (caratsInput) {
+        caratsInput.readOnly = false;
+        caratsInput.style.backgroundColor = "";
+        caratsInput.style.color = "";
+        caratsInput.style.cursor = "";
+        caratsInput.removeAttribute("title");
+      }
+      if (sharesInput) {
+        sharesInput.readOnly = false;
+        sharesInput.style.backgroundColor = "";
+        sharesInput.style.color = "";
+        sharesInput.style.cursor = "";
+        sharesInput.removeAttribute("title");
+      }
+      if (fractionInput) {
+        fractionInput.readOnly = false;
+        fractionInput.style.backgroundColor = "";
+        fractionInput.style.color = "";
+        fractionInput.style.cursor = "";
+        fractionInput.removeAttribute("title");
+      }
+      if (deleteBtn) {
+        deleteBtn.style.visibility = "visible";
+      }
+    }
+  });
+}
+
 function saveAndCalc() {
   saveData();
-  calculate();
+  calculateGeneral();
+  
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  if (l1 > 0 && l2 > 0 && w1 > 0 && w2 > 0) {
+    runPartition();
+  }
 }
 
 function parseFraction(str) {
@@ -649,7 +753,7 @@ function formatNum(val) {
   return Number(val.toFixed(4));
 }
 
-function calculate() {
+function calculateGeneral() {
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -700,8 +804,53 @@ function calculate() {
     if (document.getElementById("calc-area-shares")) document.getElementById("calc-area-shares").innerText = shares.toFixed(2);
   }
 
-  const rows = document.querySelectorAll("#partners-list .partner-row");
-  let cumulativeArea = 0;
+  let rows = document.querySelectorAll("#partners-list .partner-row");
+  if (rows.length === 0) {
+    addNewPartnerRow("شريك 1");
+    // Re-select rows
+    rows = document.querySelectorAll("#partners-list .partner-row");
+  }
+  
+  updateRowsReadOnlyStatus();
+
+  let otherCaratsSum = 0;
+  let otherFractionsSum = 0;
+  
+  rows.forEach((row, index) => {
+    if (index > 0) {
+      if (currentInputMethod === "carats") {
+        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+        otherCaratsSum += (f * 24) + c + (s / 24);
+      } else {
+        const fracInput = row.querySelector(".partner-fraction");
+        const fracVal = parseFraction(fracInput ? fracInput.value : "");
+        otherFractionsSum += fracVal;
+      }
+    }
+  });
+
+  const firstRow = rows[0];
+  if (currentInputMethod === "carats") {
+    const totalCaratsOfLand = caratArea > 0 ? (totalAreaM2 / caratArea) : 0;
+    const firstPartnerCarats = Math.max(0, totalCaratsOfLand - otherCaratsSum);
+    
+    const f = Math.floor(firstPartnerCarats / 24);
+    const c = Math.floor(firstPartnerCarats % 24);
+    const s = Number(((firstPartnerCarats - (f * 24 + c)) * 24).toFixed(2));
+    
+    if (firstRow.querySelector(".partner-feddans")) firstRow.querySelector(".partner-feddans").value = f;
+    if (firstRow.querySelector(".partner-carats")) firstRow.querySelector(".partner-carats").value = c;
+    if (firstRow.querySelector(".partner-shares")) firstRow.querySelector(".partner-shares").value = s;
+  } else {
+    const firstPartnerFraction = Math.max(0, 1 - otherFractionsSum);
+    if (firstRow.querySelector(".partner-fraction")) {
+      firstRow.querySelector(".partner-fraction").value = firstPartnerFraction === 0 ? "0" : Number(firstPartnerFraction.toFixed(4));
+    }
+  }
+
+  let totalDistributedArea = 0;
   let totalFeddansEntered = 0;
   let totalCaratsEntered = 0;
   let totalSharesEntered = 0;
@@ -740,12 +889,6 @@ function calculate() {
     }
   }
 
-  const k = (l2 - l1) / w; 
-  let lastX = 0;
-  let totalDistributedArea = 0;
-  
-  window.calculatedPieces = [];
-
   rows.forEach((row, index) => {
     // 1. Update Serial Number (م)
     const indexInput = row.querySelector(".partner-index");
@@ -764,7 +907,7 @@ function calculate() {
       const fracInput = row.querySelector(".partner-fraction");
       const fracVal = parseFraction(fracInput ? fracInput.value : "");
       partnerAreaM2 = fracVal * totalAreaM2;
-      partnerCarats = partnerAreaM2 / caratArea;
+      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
     }
     
     if (currentInputMethod === "fractions") {
@@ -793,39 +936,18 @@ function calculate() {
     }
     
     totalDistributedArea += partnerAreaM2;
-    cumulativeArea += partnerAreaM2;
 
-    let x_i = 0;
-    if (Math.abs(k) < 1e-9) {
-      x_i = cumulativeArea / l1;
-    } else {
-      const termInsideSqrt = Math.max(0, l1 * l1 + 2 * k * cumulativeArea);
-      x_i = (Math.sqrt(termInsideSqrt) - l1) / k;
-    }
+    const widthBotInput = row.querySelector(".partner-width-bottom");
+    if (widthBotInput) widthBotInput.value = "-";
 
-    if (x_i > w) {
-      x_i = w;
-    }
+    const widthTopInput = row.querySelector(".partner-width-top");
+    if (widthTopInput) widthTopInput.value = "-";
 
-    const partnerWidth = x_i - lastX;
-    const dividingLineLength = l1 + k * x_i;
+    const cumWidthInput = row.querySelector(".partner-cum-width");
+    if (cumWidthInput) cumWidthInput.value = "-";
 
-    row.querySelector(".partner-width").value = partnerWidth.toFixed(4);
-    row.querySelector(".partner-cum-width").value = `${lastX.toFixed(4)} م إلى ${x_i.toFixed(4)} م`;
-    row.querySelector(".partner-div-line").value = dividingLineLength.toFixed(4);
-    
-    const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
-    window.calculatedPieces.push({
-        name: partnerName,
-        startX: lastX,
-        endX: x_i,
-        width: partnerWidth,
-        area: partnerAreaM2,
-        divLine: dividingLineLength,
-        leftLine: l1 + k * lastX 
-    });
-
-    lastX = x_i;
+    const divLineInput = row.querySelector(".partner-div-line");
+    if (divLineInput) divLineInput.value = "-";
   });
 
   // Update Footer totals for area and percentage
@@ -836,8 +958,11 @@ function calculate() {
     const totalPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
     document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
   }
-  if (document.getElementById("total-width-calculated")) {
-    document.getElementById("total-width-calculated").value = lastX.toFixed(4);
+  if (document.getElementById("total-width-bottom-calculated")) {
+    document.getElementById("total-width-bottom-calculated").value = "-";
+  }
+  if (document.getElementById("total-width-top-calculated")) {
+    document.getElementById("total-width-top-calculated").value = "-";
   }
 
   const remainingArea = totalAreaM2 - totalDistributedArea;
@@ -863,7 +988,7 @@ function calculate() {
     }
   }
   if (document.getElementById("summary-total-width")) {
-    document.getElementById("summary-total-width").innerText = lastX.toFixed(4) + " م";
+    document.getElementById("summary-total-width").innerText = "-";
   }
 
   if (document.getElementById("info-partners-count")) {
@@ -877,11 +1002,7 @@ function calculate() {
     document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
   }
   if (document.getElementById("info-last-div-line")) {
-    let lastDivLine = l1;
-    if (window.calculatedPieces.length > 0) {
-      lastDivLine = window.calculatedPieces[window.calculatedPieces.length - 1].divLine;
-    }
-    document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
+    document.getElementById("info-last-div-line").innerText = "-";
   }
 
   if (document.getElementById("rem-area-m2")) {
@@ -912,6 +1033,147 @@ function calculate() {
   renderCroquis();
 }
 
+function runPartition() {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+
+  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) return;
+
+  const w = (w1 + w2) / 2;
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+
+  isPartitioned = true;
+
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  let lastT = 0;
+  let totalDistributedArea = 0;
+  let totalBotWidthCalculated = 0;
+  let totalTopWidthCalculated = 0;
+  
+  window.calculatedPieces = [];
+  const diff = l2 - l1;
+
+  rows.forEach((row, index) => {
+    let partnerAreaM2 = 0;
+    let partnerCarats = 0;
+    
+    if (currentInputMethod === "carats") {
+      const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+      const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+      const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+      partnerCarats = (f * 24) + c + s / 24;
+      partnerAreaM2 = partnerCarats * caratArea;
+    } else {
+      const fracInput = row.querySelector(".partner-fraction");
+      const fracVal = parseFraction(fracInput ? fracInput.value : "");
+      partnerAreaM2 = fracVal * totalAreaM2;
+      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+    }
+    
+    totalDistributedArea += partnerAreaM2;
+
+    const L_right = l1 + lastT * (l2 - l1);
+    
+    let t_curr = 0;
+    if (index === rows.length - 1) {
+      t_curr = 1.0;
+    } else {
+      // الحل الرياضي التحليلي الدقيق للمعادلة التربيعية للمساحة:
+      if (Math.abs(diff) < 1e-9) {
+        const dt = partnerAreaM2 / (w * l1);
+        t_curr = lastT + dt;
+      } else {
+        const valInsideRoot = L_right * L_right + (2 * diff * partnerAreaM2) / w;
+        const dt = (-L_right + Math.sqrt(Math.max(0, valInsideRoot))) / diff;
+        t_curr = lastT + dt;
+      }
+    }
+
+    if (t_curr > 1.0) t_curr = 1.0;
+
+    const tPrev = lastT;
+    const tCurr = t_curr;
+
+    const botWidth = w1 * (tCurr - tPrev);
+    const topWidth = w2 * (tCurr - tPrev);
+    
+    const botStart = tPrev * w1;
+    const botEnd = tCurr * w1;
+    
+    const topStart = tPrev * w2;
+    const topEnd = tCurr * w2;
+
+    const rightLength = L_right;
+    const leftLength = l1 + tCurr * (l2 - l1);
+
+    totalBotWidthCalculated += botWidth;
+    totalTopWidthCalculated += topWidth;
+
+    const widthBotInput = row.querySelector(".partner-width-bottom");
+    if (widthBotInput) widthBotInput.value = botWidth.toFixed(4);
+
+    const widthTopInput = row.querySelector(".partner-width-top");
+    if (widthTopInput) widthTopInput.value = topWidth.toFixed(4);
+
+    const cumWidthInput = row.querySelector(".partner-cum-width");
+    if (cumWidthInput) {
+      cumWidthInput.value = `أسفل: ${botStart.toFixed(4)} إلى ${botEnd.toFixed(4)} م | أعلى: ${topStart.toFixed(4)} إلى ${topEnd.toFixed(4)} م`;
+    }
+
+    const divLineInput = row.querySelector(".partner-div-line");
+    if (divLineInput) {
+      divLineInput.value = `يمين: ${rightLength.toFixed(4)} م | يسار: ${leftLength.toFixed(4)} م`;
+    }
+    
+    // إعادة حساب المساحة الهندسية الفعلية وعرضها بالجدول
+    const calculatedGeoArea = ((rightLength + leftLength) / 2) * ((botWidth + topWidth) / 2);
+    const areaInput = row.querySelector(".partner-area");
+    if (areaInput) areaInput.value = Number(calculatedGeoArea.toFixed(2));
+    
+    const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
+    window.calculatedPieces.push({
+        name: partnerName,
+        startX: tPrev * w,
+        endX: tCurr * w,
+        botW: botWidth,
+        topW: topWidth,
+        width: (botWidth + topWidth) / 2,
+        area: calculatedGeoArea,
+        divLine: leftLength,
+        leftLine: rightLength 
+    });
+
+    lastT = tCurr;
+  });
+
+  if (document.getElementById("total-width-bottom-calculated")) {
+    document.getElementById("total-width-bottom-calculated").value = totalBotWidthCalculated.toFixed(4);
+  }
+  if (document.getElementById("total-width-top-calculated")) {
+    document.getElementById("total-width-top-calculated").value = totalTopWidthCalculated.toFixed(4);
+  }
+  if (document.getElementById("summary-total-width")) {
+    document.getElementById("summary-total-width").innerText = `أسفل: ${totalBotWidthCalculated.toFixed(4)} م | أعلى: ${totalTopWidthCalculated.toFixed(4)} م`;
+  }
+  if (document.getElementById("info-last-div-line")) {
+    let lastDivLine = l1;
+    if (window.calculatedPieces.length > 0) {
+      lastDivLine = window.calculatedPieces[window.calculatedPieces.length - 1].divLine;
+    }
+    document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
+  }
+
+  saveData();
+  renderCroquis();
+}
+
 function clearAll() {
   document.getElementById("length1").value = "";
   document.getElementById("length2").value = "";
@@ -925,7 +1187,7 @@ function clearAll() {
   saveAndCalc();
 }
 
-function promptDivideEqually() {
+function onCalculateBtnClick() {
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -936,17 +1198,34 @@ function promptDivideEqually() {
     return;
   }
   
-  const w = (w1 + w2) / 2;
-  
-  const numPartnersStr = prompt("أدخل عدد الشركاء لتوزيع الأرض بينهم بالتساوي:");
-  if (!numPartnersStr) return;
-  
-  const numPartners = parseInt(numPartnersStr);
-  if (isNaN(numPartners) || numPartners <= 0) {
-    alert("الرجاء إدخال عدد شركاء صحيح.");
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  if (rows.length === 0) {
+    alert("الرجاء إضافة شريك واحد على الأقل.");
     return;
   }
   
+  runPartition();
+}
+
+function divideEqually() {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  
+  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) {
+    alert("الرجاء إدخال أبعاد الأرض الإجمالية أولاً.");
+    return;
+  }
+  
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  const numPartners = rows.length;
+  if (numPartners === 0) {
+    alert("الرجاء إضافة شريك واحد على الأقل أولاً ليتم التقسيم بينهم بالتساوي.");
+    return;
+  }
+  
+  const w = (w1 + w2) / 2;
   const totalAreaM2 = ((l1 + l2) / 2) * w;
   
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
@@ -959,9 +1238,6 @@ function promptDivideEqually() {
     return;
   }
   
-  const list = document.getElementById("partners-list");
-  list.innerHTML = "";
-  
   if (currentInputMethod === "carats") {
     const totalCarats = totalAreaM2 / caratArea;
     const partnerCarats = totalCarats / numPartners;
@@ -969,13 +1245,21 @@ function promptDivideEqually() {
     const c = Math.floor(partnerCarats % 24);
     const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
     
-    for (let i = 0; i < numPartners; i++) {
-      addNewPartnerRow(`شريك ${i + 1}`, f, c, s, "");
-    }
+    rows.forEach((row, index) => {
+      if (index > 0) {
+        if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f;
+        if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c;
+        if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s;
+      }
+    });
   } else {
-    for (let i = 0; i < numPartners; i++) {
-      addNewPartnerRow(`شريك ${i + 1}`, "", "", "", `1/${numPartners}`);
-    }
+    rows.forEach((row, index) => {
+      if (index > 0) {
+        if (row.querySelector(".partner-fraction")) {
+          row.querySelector(".partner-fraction").value = `1/${numPartners}`;
+        }
+      }
+    });
   }
   
   saveAndCalc();
@@ -1059,7 +1343,26 @@ function renderCroquis() {
   // إظهار/إخفاء placeholder
   const placeholder = document.getElementById("croquis-placeholder");
   if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) {
-    if (placeholder) placeholder.style.display = "flex";
+    if (placeholder) {
+      placeholder.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a5d6a7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+        <p>أدخل أبعاد الأرض الإجمالية</p>
+        <p>لرؤية الكروكي التفاعلي</p>
+      `;
+      placeholder.style.display = "flex";
+    }
+    return;
+  }
+
+  if (!isPartitioned) {
+    if (placeholder) {
+      placeholder.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e65100" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <p style="font-weight: bold; color: #e65100; margin-top: 10px;">الرجاء الضغط على زر (أحسب / تقسيم)</p>
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">لبدء تقسيم الأرض ورسم الكروكي</p>
+      `;
+      placeholder.style.display = "flex";
+    }
     return;
   }
   if (placeholder) placeholder.style.display = "none";
@@ -1151,7 +1454,11 @@ function renderCroquis() {
 
       // === اسم الشريك ===
       if (showCroquisNames) {
-        const nameText = svgText(cx, cy - 8 * textScale, piece.name, {
+        let nameY = cy;
+        if (showCroquisMeasurements) {
+          nameY = cy - 22 * textScale;
+        }
+        const nameText = svgText(cx, nameY, piece.name, {
           fill: color.text,
           size: "14",
           weight: "bold",
@@ -1162,9 +1469,13 @@ function renderCroquis() {
 
       // === المساحة ===
       if (showCroquisMeasurements) {
+        let areaY = cy;
+        if (showCroquisNames) {
+          areaY = cy - 6 * textScale;
+        }
         // مستطيل خلفية للمساحة
         const areaLabel = Number(piece.area.toFixed(2)) + " م²";
-        const areaText = svgText(cx, cy + 14 * textScale, areaLabel, {
+        const areaText = svgText(cx, areaY, areaLabel, {
           fill: "#333",
           size: "12",
           weight: "bold",
@@ -1173,14 +1484,24 @@ function renderCroquis() {
         g.appendChild(areaText);
 
         // عرض القطعة (أسفل)
-        const widthLabel = "ع: " + piece.width.toFixed(4) + " م";
-        const widthText = svgText(cx, mapY(0) + 18 * textScale, widthLabel, {
+        const botWLabel = "أسفل: " + piece.botW.toFixed(2) + " م";
+        const botWText = svgText(cx, cy + 10 * textScale, botWLabel, {
           fill: color.stroke,
           size: "11",
           weight: "bold",
           bg: true,
         });
-        g.appendChild(widthText);
+        g.appendChild(botWText);
+
+        // عرض القطعة (أعلى)
+        const topWLabel = "أعلى: " + piece.topW.toFixed(2) + " م";
+        const topWText = svgText(cx, cy + 26 * textScale, topWLabel, {
+          fill: color.stroke,
+          size: "11",
+          weight: "bold",
+          bg: true,
+        });
+        g.appendChild(topWText);
 
         // خط الفاصل مع قيمته
         if (index > 0) {
@@ -1424,9 +1745,9 @@ function getTableDataArray() {
   
   // رأس الجدول
   if (currentInputMethod === "carats") {
-    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض (م)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض الأول (أسفل)", "العرض الثاني (أعلى)", "العلامة (م)", "الفاصل (م)"]);
   } else {
-    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض (م)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أسفل)", "العرض الثاني (أعلى)", "العلامة (م)", "الفاصل (م)"]);
   }
   
   rows.forEach(row => {
@@ -1445,7 +1766,8 @@ function getTableDataArray() {
     
     rowData.push(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : "-");
     rowData.push(row.querySelector(".partner-percent") ? row.querySelector(".partner-percent").value : "-");
-    rowData.push(row.querySelector(".partner-width") ? row.querySelector(".partner-width").value : "-");
+    rowData.push(row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : "-");
+    rowData.push(row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : "-");
     rowData.push(row.querySelector(".partner-cum-width") ? row.querySelector(".partner-cum-width").value : "-");
     rowData.push(row.querySelector(".partner-div-line") ? row.querySelector(".partner-div-line").value : "-");
     data.push(rowData);

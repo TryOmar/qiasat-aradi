@@ -31,26 +31,26 @@
         <div class="dynamic-inputs-container">
           <div class="input-row">
             <label for="length1">الطول الأيمن بالمتر:</label>
-            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" oninput="calculate()">
+            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" oninput="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="length2">الطول الأيسر بالمتر:</label>
-            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" oninput="calculate()">
+            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" oninput="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width1">العرض الأول (أسفل) بالمتر:</label>
-            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" oninput="calculate()">
+            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" oninput="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width2">العرض الثاني (أعلى) بالمتر:</label>
-            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" oninput="calculate()">
+            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" oninput="saveAndCalc()">
           </div>
         </div>
         
         <!-- أزرار الإجراءات (على غرار الصفحة 13) -->
         <div class="action-buttons" style="display: flex; gap: 8px; margin-top: 15px; width: 100%;">
           <button class="btn-croquis-action btn-delete" onclick="clearAll()" style="flex: 1; height: 38px; border-radius: 8px; border: none; background-color: #b71c1c; color: white; font-family: Cairo, Arial, sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; transition: background-color 0.2s;">أحذف</button>
-          <button class="btn-croquis-action btn-calculate" onclick="calculate()" style="flex: 1; height: 38px; border-radius: 8px; border: none; background-color: #e65100; color: white; font-family: Cairo, Arial, sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; transition: background-color 0.2s;">أحسب</button>
+          <button class="btn-croquis-action btn-calculate" onclick="onCalculateBtnClick()" style="flex: 1; height: 38px; border-radius: 8px; border: none; background-color: #e65100; color: white; font-family: Cairo, Arial, sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; transition: background-color 0.2s;">أحسب / تقسيم</button>
         </div>
 
         <div class="readonly-lengths-box" style="margin-top: 12px;">
@@ -82,7 +82,7 @@
                 <option value="168">168</option>
                 <option value="0">أخرى</option>
               </select>
-              <input type="number" id="other-carat-area" placeholder="م²" oninput="calculate()" style="display: none; width: 50px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc;">
+              <input type="number" id="other-carat-area" placeholder="م²" oninput="saveAndCalc()" style="display: none; width: 50px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc;">
             </div>
           </div>
 
@@ -223,7 +223,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
             أضف شريك
           </button>
-          <button class="btn-action btn-primary" onclick="promptDivideEqually()">
+          <button class="btn-action btn-primary" onclick="divideEqually()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line><line x1="12" y1="8" x2="12" y2="16"></line></svg>
             تقسيم بالتساوي
           </button>
