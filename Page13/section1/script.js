@@ -61,7 +61,7 @@ let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
 let showActualDims = false; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
-let useTruncateRounding = true; // متغير للتحكم في قص الأرقام العشرية دون تقريب
+let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
 let oldZoomFactor = 1.0;
 let isPrinting = false;
@@ -2265,7 +2265,7 @@ function loadStateFromSession() {
   if (checkbox) checkbox.checked = showActualDims;
 
   // استرجاع خيار طريقة عرض الأرقام العشرية
-  const savedRounding = sessionStorage.getItem("numberRoundingMode") || "truncate";
+  const savedRounding = sessionStorage.getItem("numberRoundingMode") || "round";
   useTruncateRounding = (savedRounding === "truncate");
   const roundingSelect = document.getElementById("number-rounding-mode");
   if (roundingSelect) {
