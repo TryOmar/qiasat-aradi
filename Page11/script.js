@@ -1031,6 +1031,7 @@ function calculateGeneral() {
   
   adjustNameColumnWidth();
   renderCroquis();
+  updateCalculationSteps();
 }
 
 function runPartition() {
@@ -1172,6 +1173,7 @@ function runPartition() {
 
   saveData();
   renderCroquis();
+  updateCalculationSteps();
 }
 
 function clearAll() {
@@ -1962,4 +1964,194 @@ function adjustNameColumnWidth() {
   if (table) {
     table.style.setProperty("--name-column-width", `${calculatedWidth}px`);
   }
+}
+
+function updateCalculationSteps() {
+  const stepsContainer = document.getElementById("calculation-steps-content");
+  if (!stepsContainer) return;
+
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+
+  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) {
+    stepsContainer.innerHTML = `<p style="text-align: center; color: #777; font-style: italic;">أدخل الأبعاد والشركاء لعرض تفاصيل الخطوات الحسابية</p>`;
+    return;
+  }
+
+  const w = (w1 + w2) / 2;
+  const l = (l1 + l2) / 2;
+  const totalAreaM2 = l * w;
+
+  let html = `
+    <!-- 1- متوسط الطول -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">1. حساب متوسط الطول:</strong>
+      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 2px 6px; border-radius: 4px; display: inline-block; direction: ltr;">
+        (${l1} + ${l2}) ÷ 2 = ${l.toFixed(4)} م
+      </code>
+    </div>
+
+    <!-- 2- متوسط العرض -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">2. حساب متوسط العرض:</strong>
+      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 2px 6px; border-radius: 4px; display: inline-block; direction: ltr;">
+        (${w1} + ${w2}) ÷ 2 = ${w.toFixed(4)} م
+      </code>
+    </div>
+
+    <!-- 3- المساحة الإجمالية -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">3. حساب المساحة الإجمالية للأرض:</strong>
+      <span style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">المعادلة: متوسط الطول × متوسط العرض</span>
+      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 2px 6px; border-radius: 4px; display: inline-block; direction: ltr;">
+        ${l.toFixed(4)} × ${w.toFixed(4)} = ${totalAreaM2.toFixed(4)} م²
+      </code>
+    </div>
+  `;
+
+  // 4- نسبة ومساحة كل شريك
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  if (rows.length > 0) {
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">4. حساب نسبة ومساحة الشركاء:</strong>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+    
+    rows.forEach((row, index) => {
+      const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
+      const partnerAreaValue = parseFloat(row.querySelector(".partner-area").value) || 0;
+      const partnerPct = totalAreaM2 > 0 ? (partnerAreaValue / totalAreaM2) * 100 : 0;
+      
+      html += `
+        <div style="border-right: 3px solid #66bb6a; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${partnerName}:</span><br>
+          <span style="font-size: 12px; color: #555;">المساحة المستحقة: <strong>${partnerAreaValue.toFixed(2)} م²</strong></span><br>
+          <span style="font-size: 12px; color: #555;">حساب النسبة: </span>
+          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; direction: ltr; display: inline-block;">
+            (${partnerAreaValue.toFixed(2)} ÷ ${totalAreaM2.toFixed(2)}) × 100 = ${partnerPct.toFixed(2)}%
+          </code>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 5- تقسيم الحدود والخطوط والفواصل هندسياً
+  if (isPartitioned && window.calculatedPieces && window.calculatedPieces.length > 0) {
+    html += `
+      <!-- 5- تقسيم الأبعاد وحساب عروض القطع -->
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">5. حساب عروض القطع الهندسية (أسفل وأعلى) ومواقع الفواصل:</strong>
+        <p style="font-size: 12px; color: #666; margin-bottom: 6px; line-height: 1.4;">
+          يعتمد التقسيم على حل المعادلة التربيعية لمساحة شبه المنحرف بشكل متتالي لكل شريك لضمان مطابقة المساحة هندسياً:<br>
+          <code style="font-family: monospace; direction: ltr; display: block; background: #f5f5f5; padding: 4px; border-radius: 4px; text-align: center; margin: 4px 0; font-size: 11px;">
+            dt = [-L_right + &radic;(L_right² + 2 &times; diff &times; partnerArea / w)] / diff
+          </code>
+          حيث أن <code style="font-family: monospace; direction: ltr; display: inline-block; background: #eee; padding: 0 3px; border-radius: 2px;">diff = l2 - l1</code>، و <code style="font-family: monospace; direction: ltr; display: inline-block; background: #eee; padding: 0 3px; border-radius: 2px;">L_right</code> هو طول الحد الفاصل الأيمن للقطعة الحالية.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+
+    window.calculatedPieces.forEach((piece, index) => {
+      html += `
+        <div style="border-right: 3px solid #42a5f5; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${piece.name} (قطعة رقم ${index + 1}):</span><br>
+          <span style="font-size: 12px; color: #555;">الحد الأيمن للقطعة: <strong>${piece.leftLine.toFixed(4)} م</strong></span> | 
+          <span style="font-size: 12px; color: #555;">الحد الأيسر للقطعة: <strong>${piece.divLine.toFixed(4)} م</strong></span><br>
+          <span style="font-size: 12px; color: #555;">حساب العرض السفلي: </span>
+          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; direction: ltr; display: inline-block;">
+            w1 &times; dt = ${w1} &times; ${(piece.botW / w1).toFixed(6)} = ${piece.botW.toFixed(4)} م
+          </code><br>
+          <span style="font-size: 12px; color: #555;">حساب العرض العلوي: </span>
+          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; direction: ltr; display: inline-block;">
+            w2 &times; dt = ${w2} &times; ${(piece.topW / w2).toFixed(6)} = ${piece.topW.toFixed(4)} م
+          </code><br>
+          <span style="font-size: 12px; color: #555;">إعادة التحقق من المساحة الهندسية للقطعة:</span><br>
+          <code style="font-family: monospace; font-size: 12px; background: #f9fbe7; border: 1px solid #d4e157; padding: 2px 6px; border-radius: 4px; direction: ltr; display: inline-block; font-weight: bold; color: #33691e; margin-top: 2px;">
+            [(${piece.leftLine.toFixed(4)} + ${piece.divLine.toFixed(4)}) ÷ 2] &times; [(${piece.botW.toFixed(4)} + ${piece.topW.toFixed(4)}) ÷ 2] = ${piece.area.toFixed(4)} م²
+          </code>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+
+    // 6- طول الفاصل (خطوط القسمة)
+    if (window.calculatedPieces.length > 1) {
+      html += `
+        <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+          <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">6. حساب أطوال خطوط القسمة (الفواصل الداخلية):</strong>
+          <p style="font-size: 12px; color: #666; margin-bottom: 6px;">
+            المعادلة: يتم حساب الفاصل عند الإحداثي الأفقي <code style="font-family: monospace; direction: ltr; display: inline-block; background: #eee; padding: 0 3px; border-radius: 2px;">t</code> باستخدام التدرج الخطي المباشر للأطوال:
+            <br>
+            <code style="font-family: monospace; direction: ltr; display: block; background: #f5f5f5; padding: 4px; border-radius: 4px; text-align: center; margin: 4px 0; font-size: 12px;">
+              L(t) = l1 + t &times; (l2 - l1)
+            </code>
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+      `;
+
+      window.calculatedPieces.forEach((piece, index) => {
+        if (index > 0) {
+          const t = (piece.leftLine - l1) / (l2 - l1);
+          html += `
+            <div style="border-right: 3px solid #ffb300; padding-right: 8px;">
+              <span style="font-weight: bold; color: #333;">الفاصل بين قطعة ${index} وقطعة ${index + 1}:</span><br>
+              <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; direction: ltr; display: inline-block;">
+                L(${t.toFixed(4)}) = ${l1} + ${t.toFixed(4)} &times; (${l2} - ${l1}) = ${piece.leftLine.toFixed(4)} م
+              </code>
+            </div>
+          `;
+        }
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+    }
+
+    // 7- التحقق النهائي
+    let totalPiecesArea = 0;
+    window.calculatedPieces.forEach(p => {
+      totalPiecesArea += p.area;
+    });
+    const difference = totalAreaM2 - totalPiecesArea;
+    const diffIcon = Math.abs(difference) < 0.01 ? "✔" : "❌";
+
+    html += `
+      <!-- 7- التحقق النهائي ومطابقة المساحات -->
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">7. التحقق النهائي من مطابقة المساحات:</strong>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <div>مجموع مساحات الشركاء الفعلية: <strong style="color: #2e7d32;">${totalPiecesArea.toFixed(4)} م²</strong></div>
+          <div>المساحة الإجمالية للأرض المحسوبة: <strong style="color: #2e7d32;">${totalAreaM2.toFixed(4)} م²</strong></div>
+          <div style="margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; font-weight: bold;">
+            الفرق المتبقي: 
+            <span style="color: ${Math.abs(difference) < 0.01 ? "#2e7d32" : "#c62828"};">
+              ${difference.toFixed(4)} م² ${diffIcon}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    html += `
+      <div style="text-align: center; padding: 12px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; color: #b76e00; font-weight: bold;">
+        يرجى إكمال التقسيم (الضغط على أحسب أو تقسيم بالتساوي) لعرض خطوات ومسار التقسيم الهندسي بالتفصيل.
+      </div>
+    `;
+  }
+
+  stepsContainer.innerHTML = html;
 }
