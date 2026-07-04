@@ -648,7 +648,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
   list.appendChild(row);
   if (!name && !feddans && !carats && !shares && !fraction) {
     isManualPartition = false;
-    saveAndCalc();
+    saveAndCalcImmediate();
   }
 }
 
@@ -656,7 +656,7 @@ function deletePartnerRow(button) {
   const row = button.parentElement;
   row.remove();
   isManualPartition = false;
-  saveAndCalc();
+  saveAndCalcImmediate();
 }
 
 function updateRowsReadOnlyStatus() {
@@ -737,7 +737,16 @@ function updateRowsReadOnlyStatus() {
   });
 }
 
+let debounceTimer = null;
+
 function saveAndCalc() {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    saveAndCalcImmediate();
+  }, 250); // 250ms debounce
+}
+
+function saveAndCalcImmediate() {
   saveData();
   calculateGeneral();
   
@@ -1383,7 +1392,7 @@ function divideEqually() {
   }
   
   isManualPartition = false;
-  saveAndCalc();
+  saveAndCalcImmediate();
 }
 
 // ===================================================
@@ -2358,7 +2367,16 @@ function getPartnerTargetArea(row) {
   }
 }
 
+let widthChangeTimer = null;
+
 function onWidthChange(input, type) {
+  if (widthChangeTimer) clearTimeout(widthChangeTimer);
+  widthChangeTimer = setTimeout(() => {
+    onWidthChangeActual(input, type);
+  }, 250); // 250ms debounce
+}
+
+function onWidthChangeActual(input, type) {
   const row = input.closest(".partner-row");
   const rows = Array.from(document.querySelectorAll("#partners-list .partner-row"));
   const rowIndex = rows.indexOf(row);
@@ -2656,9 +2674,13 @@ document.addEventListener("DOMContentLoaded", function() {
   const numpad = document.getElementById("custom-numpad");
   if (numpad) {
     numpad.querySelectorAll(".numpad-key").forEach(key => {
-      // نستخدم pointerdown لمنع فقدان التركيز (focusout) من الحقل الفعال
-      key.addEventListener("pointerdown", function(e) {
-        e.preventDefault(); // يمنع blur
+      let keyTriggered = false;
+      const handleKeyPress = function(e) {
+        e.preventDefault(); // يمنع blur على جميع المنصات والهواتف (بما فيها آيفون وأندرويد)
+        
+        if (keyTriggered) return;
+        keyTriggered = true;
+        setTimeout(() => { keyTriggered = false; }, 120);
         
         if (!activeInput) return;
         
@@ -2675,6 +2697,11 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
           insertAtCursor(activeInput, val);
         }
+      };
+
+      // ربط كافة الأحداث المسببة لسرقة التركيز لضمان التوافق المطلق
+      ["pointerdown", "touchstart", "mousedown"].forEach(evtName => {
+        key.addEventListener(evtName, handleKeyPress, { passive: false });
       });
     });
   }
