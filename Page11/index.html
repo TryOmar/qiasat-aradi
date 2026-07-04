@@ -221,6 +221,19 @@
       <p style="font-size: 11px; color: gray; margin: -5px 0 10px 0; text-align: center; font-weight: bold;">
         سيقوم النظام بحساب العرض والحد التراكمي وطول الفاصل والمساحة والنسبة المئوية لكل قطعة تلقائياً.
       </p>
+
+      <!-- Switch for Keeping Area vs Free Editing -->
+      <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0 15px 0; background: #f1f8e9; padding: 10px; border-radius: 8px; border: 1px solid #c8e6c9; direction: rtl; font-family: Cairo, Arial, sans-serif; flex-wrap: wrap;">
+        <span style="font-weight: bold; color: #2e7d32; font-size: 13px;">طريقة تعديل العروض يدوياً:</span>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; cursor: pointer;">
+          <input type="radio" name="manual-width-mode" id="mode-keep-area" checked style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData()">
+          <strong>الحفاظ على مساحة الشريك</strong> (تعديل عرض يحسب الآخر تلقائياً)
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; cursor: pointer; margin-right: 15px;">
+          <input type="radio" name="manual-width-mode" id="mode-free" style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData()">
+          <strong>تعديل حر</strong> (تتغير مساحة الشريك)
+        </label>
+      </div>
       
       <!-- Responsive Table Container -->
       <div class="table-container">

@@ -295,6 +295,11 @@ function saveData() {
   localStorage.setItem("p11-is-partitioned", isPartitioned ? "true" : "false");
   localStorage.setItem("p11-is-manual-partition", isManualPartition ? "true" : "false");
 
+  const modeKeepArea = document.getElementById("mode-keep-area");
+  if (modeKeepArea) {
+    localStorage.setItem("p11-manual-width-mode", modeKeepArea.checked ? "keep-area" : "free");
+  }
+
   const partners = [];
   const rows = document.querySelectorAll("#partners-list .partner-row");
   rows.forEach(row => {
@@ -341,6 +346,19 @@ function loadData() {
 
   isPartitioned = (localStorage.getItem("p11-is-partitioned") === "true");
   isManualPartition = (localStorage.getItem("p11-is-manual-partition") === "true");
+
+  const savedMode = localStorage.getItem("p11-manual-width-mode") || "keep-area";
+  const modeKeepArea = document.getElementById("mode-keep-area");
+  const modeFree = document.getElementById("mode-free");
+  if (modeKeepArea && modeFree) {
+    if (savedMode === "keep-area") {
+      modeKeepArea.checked = true;
+      modeFree.checked = false;
+    } else {
+      modeKeepArea.checked = false;
+      modeFree.checked = true;
+    }
+  }
 
   handleCaratAreaChange(false);
 
@@ -2314,6 +2332,32 @@ function updateCalculationSteps() {
   }
 }
 
+function getPartnerTargetArea(row) {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  const w = (w1 + w2) / 2;
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+
+  if (currentInputMethod === "carats") {
+    const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+    const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+    const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+    const partnerCarats = (f * 24) + c + s / 24;
+    return partnerCarats * caratArea;
+  } else {
+    const fracInput = row.querySelector(".partner-fraction");
+    const fracVal = parseFraction(fracInput ? fracInput.value : "");
+    return fracVal * totalAreaM2;
+  }
+}
+
 function onWidthChange(input, type) {
   const row = input.closest(".partner-row");
   const rows = Array.from(document.querySelectorAll("#partners-list .partner-row"));
@@ -2331,56 +2375,141 @@ function onWidthChange(input, type) {
     return;
   }
 
-  const totalWidth = (type === "bottom") ? w1 : w2;
-  const inputClass = (type === "bottom") ? ".partner-width-bottom" : ".partner-width-top";
+  const isKeepArea = document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
 
-  const newWidth = parseFloat(input.value) || 0;
-  const lastVal = parseFloat(input.getAttribute("data-last-val")) || 0;
+  const widthBotInput = row.querySelector(".partner-width-bottom");
+  const widthTopInput = row.querySelector(".partner-width-top");
+  if (!widthBotInput || !widthTopInput) return;
 
-  if (isNaN(newWidth) || newWidth < 0) {
+  const lastVal_bot = parseFloat(widthBotInput.getAttribute("data-last-val")) || 0;
+  const lastVal_top = parseFloat(widthTopInput.getAttribute("data-last-val")) || 0;
+
+  const val = parseFloat(input.value) || 0;
+  if (isNaN(val) || val < 0) {
     alert("يمنع إدخال قيمة سالبة أو غير صحيحة.");
-    input.value = lastVal.toFixed(4);
+    input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
     return;
   }
 
-  const diff = newWidth - lastVal;
+  let newBotW = 0;
+  let newTopW = 0;
+  const diff_L = l2 - l1;
 
+  if (isKeepArea) {
+    // ----------------------------------------------------
+    // وضع الحفاظ على مساحة الشريك (Keep Partner Area Mode)
+    // ----------------------------------------------------
+    const targetArea = getPartnerTargetArea(row);
+    if (targetArea <= 0) {
+      alert("الرجاء تحديد حصة أو مساحة مستهدفة للشريك أولاً للتمكن من الحفاظ عليها.");
+      input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
+      return;
+    }
+
+    // حساب إحداثيات البداية التراكمية للعلوي
+    let lastT_top = 0;
+    for (let i = 0; i < rowIndex; i++) {
+      const wTop = parseFloat(rows[i].querySelector(".partner-width-top").value) || 0;
+      lastT_top += wTop / w2;
+    }
+    const L_right = l1 + lastT_top * diff_L;
+
+    if (type === "bottom") {
+      newBotW = val;
+      
+      // حل لحساب newTopW للحفاظ على المساحة
+      if (Math.abs(diff_L) < 1e-9) {
+        newTopW = (2 * targetArea / L_right) - newBotW;
+      } else {
+        const a_quad = diff_L / (2 * w2);
+        const b_quad = L_right + (diff_L / (2 * w2)) * newBotW;
+        const c_quad = L_right * newBotW - 2 * targetArea;
+        const valInsideRoot = b_quad * b_quad - 4 * a_quad * c_quad;
+        if (valInsideRoot < 0) {
+          alert("القيمة المدخلة تؤدي إلى شكل هندسي مستحيل. التعديل غير ممكن.");
+          input.value = lastVal_bot.toFixed(4);
+          return;
+        }
+        newTopW = (-b_quad + Math.sqrt(valInsideRoot)) / (2 * a_quad);
+      }
+    } else {
+      newTopW = val;
+
+      // حل لحساب newBotW للحفاظ على المساحة
+      const tCurr_top = lastT_top + (newTopW / w2);
+      const L_left = l1 + tCurr_top * diff_L;
+      const avgL = (L_right + L_left) / 2;
+      newBotW = (2 * targetArea / avgL) - newTopW;
+    }
+
+    if (newBotW < 0 || newTopW < 0) {
+      alert("التعديل غير ممكن لأن العرض المقابل للشريك سيصبح سالباً للحفاظ على المساحة.");
+      input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
+      return;
+    }
+  } else {
+    // ----------------------------------------------------
+    // وضع التعديل الحر (Free Editing Mode)
+    // ----------------------------------------------------
+    if (type === "bottom") {
+      newBotW = val;
+      newTopW = lastVal_top;
+    } else {
+      newBotW = lastVal_bot;
+      newTopW = val;
+    }
+  }
+
+  // تحديد القطعة المجاورة لتعديلها
   let targetIndex = rowIndex + 1;
-  // إذا كانت هذه هي القطعة الأخيرة، نقوم بتعديل القطعة السابقة
   if (rowIndex === rows.length - 1) {
     targetIndex = rowIndex - 1;
   }
 
   if (targetIndex < 0 || targetIndex >= rows.length) {
     alert("لا توجد قطعة مجاورة لتعديلها.");
-    input.value = lastVal.toFixed(4);
+    input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
     return;
   }
 
   const targetRow = rows[targetIndex];
-  const targetInput = targetRow.querySelector(inputClass);
-  if (!targetInput) return;
+  const targetWidthBotInput = targetRow.querySelector(".partner-width-bottom");
+  const targetWidthTopInput = targetRow.querySelector(".partner-width-top");
+  if (!targetWidthBotInput || !targetWidthTopInput) return;
 
-  const targetOldWidth = parseFloat(targetInput.value) || 0;
-  const targetNewWidth = targetOldWidth - diff;
+  const targetOldBotW = parseFloat(targetWidthBotInput.value) || 0;
+  const targetOldTopW = parseFloat(targetWidthTopInput.value) || 0;
 
-  if (targetNewWidth < 0) {
+  // فرق التعديل للعلوي والسفلي
+  const diff_bot = newBotW - lastVal_bot;
+  const diff_top = newTopW - lastVal_top;
+
+  const targetNewBotW = targetOldBotW - diff_bot;
+  const targetNewTopW = targetOldTopW - diff_top;
+
+  if (targetNewBotW < 0 || targetNewTopW < 0) {
     alert("يمنع أن يصبح عرض أي قطعة أقل من الصفر. التعديل غير ممكن.");
-    input.value = lastVal.toFixed(4);
+    input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
     return;
   }
 
-  // تطبيق التعديلات
-  input.value = newWidth.toFixed(4);
-  input.setAttribute("data-last-val", newWidth.toFixed(4));
+  // تطبيق التعديلات للقطعة الحالية والقطعة المجاورة
+  widthBotInput.value = newBotW.toFixed(4);
+  widthBotInput.setAttribute("data-last-val", newBotW.toFixed(4));
+
+  widthTopInput.value = newTopW.toFixed(4);
+  widthTopInput.setAttribute("data-last-val", newTopW.toFixed(4));
   
-  targetInput.value = targetNewWidth.toFixed(4);
-  targetInput.setAttribute("data-last-val", targetNewWidth.toFixed(4));
+  targetWidthBotInput.value = targetNewBotW.toFixed(4);
+  targetWidthBotInput.setAttribute("data-last-val", targetNewBotW.toFixed(4));
+
+  targetWidthTopInput.value = targetNewTopW.toFixed(4);
+  targetWidthTopInput.setAttribute("data-last-val", targetNewTopW.toFixed(4));
 
   // الانتقال إلى نمط التقسيم اليدوي وحساب المساحات هندسياً
   isManualPartition = true;
 
-  // إعادة الحساب
+  // إعادة الحساب ورسم الكروكي والخطوات
   runPartition();
 }
 
