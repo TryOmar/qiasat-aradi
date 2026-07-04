@@ -562,15 +562,15 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="number" class="partner-shares" placeholder="0" step="any" value="${formattedShares}" oninput="onShareInput()" inputmode="none">
+        <input type="text" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" inputmode="none">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="number" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" inputmode="none">
+        <input type="text" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" inputmode="none">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
-        <input type="number" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" inputmode="none">
+        <input type="text" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" inputmode="none">
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
@@ -2592,6 +2592,7 @@ function insertAtCursor(input, char) {
   input.value = newText;
   
   const newCursorPos = start + char.length;
+  input.focus(); // إبقاء التركيز داخل الحقل
   input.setSelectionRange(newCursorPos, newCursorPos);
   
   // تحديث الحسابات تلقائياً
@@ -2621,6 +2622,7 @@ function handleBackspace(input) {
   }
   
   input.value = newText;
+  input.focus(); // إبقاء التركيز داخل الحقل
   input.setSelectionRange(newCursorPos, newCursorPos);
   
   input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -2658,6 +2660,14 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       activeInput = target;
       showCustomNumpad();
+      
+      // تحديد النص بالكامل عند التركيز (Select All)
+      setTimeout(() => {
+        if (target === activeInput) {
+          target.select();
+          target.setSelectionRange(0, target.value.length);
+        }
+      }, 50);
     }
   });
 
@@ -2668,6 +2678,47 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       hideCustomNumpad();
     }, 100);
+  });
+
+  // منع إدخال الأحرف من لوحة المفاتيح الحقيقية (للكمبيوتر ولحماية الحقول)
+  document.addEventListener("keydown", function(e) {
+    if (isNumericInput(e.target)) {
+      const key = e.key;
+      const allowedKeys = ["Backspace", "Delete", "Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Escape"];
+      if (allowedKeys.includes(key)) {
+        return; // السماح بالتحكم والحذف
+      }
+      // السماح بنسخ ولصق واختيار الكل
+      if (e.ctrlKey || e.metaKey) {
+        return;
+      }
+      // منع أي حرف ليس رقمًا أو علامة عشرية
+      const isDigit = /^[0-9]$/.test(key);
+      const isSeparator = key === "." || key === "," || key === "،";
+      if (!isDigit && !isSeparator) {
+        e.preventDefault();
+        return;
+      }
+      // تحويل الفاصلة تلقائياً إلى نقطة
+      if (key === "," || key === "،") {
+        e.preventDefault();
+        insertAtCursor(e.target, ".");
+      }
+    }
+  });
+
+  // منع لصق نصوص تحتوي على أحرف غير رقمية وتحويل الفواصل
+  document.addEventListener("paste", function(e) {
+    if (isNumericInput(e.target)) {
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const pastedData = clipboardData.getData("Text");
+      
+      let cleanData = pastedData.replace(/，|،,/g, ".");
+      cleanData = cleanData.replace(/[^0-9.]/g, "");
+      
+      e.preventDefault();
+      insertAtCursor(e.target, cleanData);
+    }
   });
 
   // نقرات أزرار لوحة المفاتيح
