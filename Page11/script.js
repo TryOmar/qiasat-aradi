@@ -2626,6 +2626,59 @@ function updateConversionsTable() {
     const w2 = parseFloat(document.getElementById("width2").value) || 0;
     const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
+    let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
+    if (caratArea === 0) {
+      caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+    }
+    
+    let botQiratWidth = 0;
+    let topQiratWidth = 0;
+    if (caratArea > 0 && totalAreaM2 > 0) {
+      const totalQirats = totalAreaM2 / caratArea;
+      botQiratWidth = w1 / totalQirats;
+      topQiratWidth = w2 / totalQirats;
+    }
+
+    const topQConv = toQasabaAndQabda(topQiratWidth);
+    const botQConv = toQasabaAndQabda(botQiratWidth);
+
+    tbody.innerHTML += `
+      <tr class="conv-row" style="background-color: #fcfcfc;">
+        <td class="conv-label-cell" style="font-weight: bold;">
+          <span class="conv-dim-name">واجهة القيراط العلوية</span>
+          <span class="conv-meter-badge" style="background-color: #e3f2fd; color: #1565c0;">
+            <span>${topQiratWidth.toFixed(4)}</span> م
+          </span>
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-fraction" value="${topQConv.fraction}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qabda" value="${topQConv.qabda}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qasaba" value="${topQConv.qasaba}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+      </tr>
+      <tr class="conv-row" style="background-color: #fcfcfc;">
+        <td class="conv-label-cell" style="font-weight: bold;">
+          <span class="conv-dim-name">واجهة القيراط السفلية</span>
+          <span class="conv-meter-badge" style="background-color: #e3f2fd; color: #1565c0;">
+            <span>${botQiratWidth.toFixed(4)}</span> م
+          </span>
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-fraction" value="${botQConv.fraction}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qabda" value="${botQConv.qabda}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qasaba" value="${botQConv.qasaba}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+      </tr>
+    `;
+
     const qasba_sq = totalAreaM2 / 12.60250;
     const reedValue = Math.floor(qasba_sq);
     const fistValue = Math.floor((qasba_sq - reedValue) * 24);
