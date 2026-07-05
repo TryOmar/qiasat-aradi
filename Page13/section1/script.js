@@ -559,10 +559,10 @@ function updateTableHeaders() {
     thLeft.style.display = 'none';
   } else {
     // في الأشكال الأخرى أو عند تفعيل الخيار: أظهر يمين ويسار
-    thRight.textContent = 'يمين';
+    thRight.textContent = 'الطول الأيمن';
     thRight.removeAttribute('colspan');
     thLeft.style.display = '';
-    thLeft.textContent = 'يسار';
+    thLeft.textContent = 'الطول الأيسر';
   }
 }
 
