@@ -818,7 +818,7 @@ function calculateGeneral() {
 
   let rows = document.querySelectorAll("#partners-list .partner-row");
   if (rows.length === 0) {
-    addNewPartnerRow("شريك 1");
+    addNewPartnerRow("المتبقي");
     // Re-select rows
     rows = document.querySelectorAll("#partners-list .partner-row");
   }
