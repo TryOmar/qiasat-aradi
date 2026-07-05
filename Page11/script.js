@@ -2184,10 +2184,10 @@ function printReport() {
     <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
   </div>
   <div class="info-grid">
-    <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
-    <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
     <div class="info-box"><label>العرض الأول</label><strong>${w1} م</strong></div>
     <div class="info-box"><label>العرض الثاني</label><strong>${w2} م</strong></div>
+    <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
+    <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
   </div>
   <div class="info-grid" style="grid-template-columns: repeat(3,1fr);">
     <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
@@ -2237,8 +2237,8 @@ function exportExcel() {
     ["تاريخ التقرير", new Date().toLocaleDateString('ar-EG')],
     [],
     ["أبعاد الأرض الإجمالية"],
-    ["الطول الأيمن (م)", l1, "الطول الأيسر (م)", l2],
     ["العرض الأول (م)", w1, "العرض الثاني (م)", w2],
+    ["الطول الأيمن (م)", l1, "الطول الأيسر (م)", l2],
     ["المساحة الإجمالية (م²)", totalArea],
     [],
     ["جدول التقسيم"]
@@ -2378,19 +2378,19 @@ function updateCalculationSteps() {
   const totalAreaM2 = l * w;
 
   let html = `
-    <!-- الخطوة 1: حساب متوسط الطول -->
+    <!-- الخطوة 1: حساب متوسط العرض -->
     <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 1: حساب متوسط الطول</strong>
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 1: حساب متوسط العرض</strong>
       <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: inline-block; direction: ltr; margin-top: 4px;">
-        (${l1} + ${l2}) ÷ 2<br>= ${l.toFixed(4)} م
+        (${w1} + ${w2}) ÷ 2<br>= ${w.toFixed(4)} م
       </code>
     </div>
 
-    <!-- الخطوة 2: حساب متوسط العرض -->
+    <!-- الخطوة 2: حساب متوسط الطول -->
     <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 2: حساب متوسط العرض</strong>
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 2: حساب متوسط الطول</strong>
       <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: inline-block; direction: ltr; margin-top: 4px;">
-        (${w1} + ${w2}) ÷ 2<br>= ${w.toFixed(4)} م
+        (${l1} + ${l2}) ÷ 2<br>= ${l.toFixed(4)} م
       </code>
     </div>
 
@@ -2677,10 +2677,10 @@ function toQasabaAndQabda(meters) {
 }
 
 const dimMap = [
-  { id: 'length1', name: 'الطول الأيمن' },
-  { id: 'length2', name: 'الطول الأيسر' },
   { id: 'width1', name: 'العرض الأول (أعلى)' },
-  { id: 'width2', name: 'العرض الثاني (أسفل)' }
+  { id: 'width2', name: 'العرض الثاني (أسفل)' },
+  { id: 'length1', name: 'الطول الأيمن' },
+  { id: 'length2', name: 'الطول الأيسر' }
 ];
 
 function updateConversionsTable() {
