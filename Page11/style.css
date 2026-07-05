@@ -1,4 +1,4 @@
-﻿/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
+/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
 
 body {
   display: flex !important;
@@ -739,6 +739,7 @@ body {
 .nav-box img {
   width: 24px !important;
   height: 24px !important;
+  filter: brightness(0) invert(1) !important;
 }
 .nav-box p {
   margin: 4px 0 0 0 !important;
