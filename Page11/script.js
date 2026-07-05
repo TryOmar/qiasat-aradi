@@ -952,14 +952,23 @@ function calculateGeneral() {
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
     if (Math.abs(remainingArea) < 0.1) {
-      statusEl.innerText = "مكتمل";
+      statusEl.innerHTML = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
       statusEl.style.color = "#2e7d32";
-    } else if (remainingArea > 0) {
-      statusEl.innerText = "يوجد فرق (متبقي)";
-      statusEl.style.color = "#c62828";
     } else {
-      statusEl.innerText = "يوجد فرق (زيادة)";
-      statusEl.style.color = "#c62828";
+      const isNegative = remainingArea < -0.005;
+      const absRem = Math.abs(remainingArea);
+      let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
+      const remFeddans = Math.floor(totalRemCarats / 24);
+      const remCarats = Math.floor(totalRemCarats % 24);
+      const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+      
+      if (isNegative) {
+        statusEl.innerHTML = `❌ يوجد عجز في مساحة الأرض بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.style.color = "#c62828";
+      } else {
+        statusEl.innerHTML = `⚠️ المساحة المتبقية:<br><strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.style.color = "#ef6c00";
+      }
     }
   }
   if (document.getElementById("summary-total-width")) {
@@ -1218,14 +1227,23 @@ function runPartition() {
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
     if (Math.abs(remainingArea) < 0.1) {
-      statusEl.innerText = "مكتمل";
+      statusEl.innerHTML = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
       statusEl.style.color = "#2e7d32";
-    } else if (remainingArea > 0) {
-      statusEl.innerText = "يوجد فرق (متبقي)";
-      statusEl.style.color = "#c62828";
     } else {
-      statusEl.innerText = "يوجد فرق (زيادة)";
-      statusEl.style.color = "#c62828";
+      const isNegative = remainingArea < -0.005;
+      const absRem = Math.abs(remainingArea);
+      let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
+      const remFeddans = Math.floor(totalRemCarats / 24);
+      const remCarats = Math.floor(totalRemCarats % 24);
+      const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+      
+      if (isNegative) {
+        statusEl.innerHTML = `❌ يوجد عجز في مساحة الأرض بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.style.color = "#c62828";
+      } else {
+        statusEl.innerHTML = `⚠️ المساحة المتبقية:<br><strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.style.color = "#ef6c00";
+      }
     }
   }
   if (document.getElementById("info-distributed-area")) {
