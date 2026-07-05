@@ -369,7 +369,7 @@ function handleCaratAreaChange(triggerCalculate = true) {
 
 function renderHeaderAndFooter() {
   const headerContainer = document.getElementById("table-header-container");
-  const footerContainer = document.getElementById("total");
+  const remainingContainer = document.getElementById("remaining-row");
   
   if (currentInputMethod === "carats") {
     headerContainer.innerHTML = `
@@ -387,19 +387,19 @@ function renderHeaderAndFooter() {
       <p></p>
     `;
     
-    footerContainer.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+    remainingContainer.innerHTML = `
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="المتبقي" style="font-weight: bold; background: #ffebee; color: #c62828; text-align: center;">
+      <input type="text" id="rem-shares-input" readonly value="0" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-carats-input" readonly value="0" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-feddans-input" readonly value="0" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-area-input" readonly value="0" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-percent-input" readonly value="0%" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-width-top-input" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-width-bot-input" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
     `;
   } else {
     headerContainer.innerHTML = `
@@ -417,19 +417,19 @@ function renderHeaderAndFooter() {
       <p></p>
     `;
     
-    footerContainer.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-fraction-entered" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+    remainingContainer.innerHTML = `
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="المتبقي" style="font-weight: bold; background: #ffebee; color: #c62828; text-align: center;">
+      <input type="text" id="rem-fraction-input" readonly value="0%" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
       <input type="text" style="display:none;" readonly value="-">
-      <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="rem-area-input" readonly value="0" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-percent-input" readonly value="0%" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-width-top-input" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" id="rem-width-bot-input" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #ffebee; color: #c62828;">
     `;
   }
 }
@@ -996,35 +996,44 @@ function calculateGeneral() {
       const totalPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
       document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
     }
-    if (document.getElementById("total-width-bottom-calculated")) {
-      document.getElementById("total-width-bottom-calculated").value = "-";
+  }
+
+  // Update Remaining row
+  const remainingArea = totalAreaM2 - totalDistributedArea;
+  const remPct = totalAreaM2 > 0 ? (remainingArea / totalAreaM2) * 100 : 0;
+  
+  if (document.getElementById("rem-area-input")) {
+    document.getElementById("rem-area-input").value = Number(remainingArea.toFixed(2));
+  }
+  if (document.getElementById("rem-percent-input")) {
+    document.getElementById("rem-percent-input").value = Number(remPct.toFixed(2)) + " %";
+  }
+
+  if (currentInputMethod === "carats") {
+    if (caratArea > 0) {
+      let remainingCarats = remainingArea / caratArea;
+      const isNegative = remainingCarats < 0;
+      const absRemaining = Math.abs(remainingCarats);
+  
+      const remAcres = Math.floor(absRemaining / 24);
+      const remCarats = Math.floor(absRemaining % 24);
+      const remShares = ((absRemaining - (remAcres * 24 + remCarats)) * 24);
+  
+      const prefix = isNegative ? "-" : "";
+      if (document.getElementById("rem-feddans-input")) document.getElementById("rem-feddans-input").value = prefix + remAcres;
+      if (document.getElementById("rem-carats-input")) document.getElementById("rem-carats-input").value = remCarats;
+      if (document.getElementById("rem-shares-input")) document.getElementById("rem-shares-input").value = Number(remShares.toFixed(2));
     }
-    if (document.getElementById("total-width-top-calculated")) {
-      document.getElementById("total-width-top-calculated").value = "-";
+  } else {
+    if (document.getElementById("rem-fraction-input")) {
+      const remainingFraction = Math.max(0, 1 - totalFractionsEntered);
+      document.getElementById("rem-fraction-input").value = Number((remainingFraction * 100).toFixed(2)) + "%";
     }
   }
 
-  const remainingArea = totalAreaM2 - totalDistributedArea;
-  
   // Update summaries
   if (document.getElementById("summary-total-area")) {
     document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
-  }
-  if (document.getElementById("summary-rem-area")) {
-    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
-  }
-  if (document.getElementById("summary-status")) {
-    const statusEl = document.getElementById("summary-status");
-    if (Math.abs(remainingArea) < 0.1) {
-      statusEl.innerText = "مكتمل";
-      statusEl.style.color = "#2e7d32";
-    } else if (remainingArea > 0) {
-      statusEl.innerText = "يوجد فرق (متبقي)";
-      statusEl.style.color = "#c62828";
-    } else {
-      statusEl.innerText = "يوجد فرق (زيادة)";
-      statusEl.style.color = "#c62828";
-    }
   }
   if (document.getElementById("summary-total-width")) {
     document.getElementById("summary-total-width").innerText = "-";
@@ -1044,29 +1053,7 @@ function calculateGeneral() {
     document.getElementById("info-last-div-line").innerText = "-";
   }
 
-  if (document.getElementById("rem-area-m2")) {
-    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
-  }
 
-  if (caratArea > 0) {
-    let remainingCarats = remainingArea / caratArea;
-    const isNegative = remainingCarats < 0;
-    const absRemaining = Math.abs(remainingCarats);
-
-    const remAcres = Math.floor(absRemaining / 24);
-    const remCarats = Math.floor(absRemaining % 24);
-    const remShares = ((absRemaining - (remAcres * 24 + remCarats)) * 24);
-
-    const prefix = isNegative ? "-" : "";
-    document.getElementById("rem-acres").innerText = prefix + remAcres;
-    document.getElementById("rem-carats").innerText = remCarats;
-    document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
-
-    const color = isNegative ? "red" : "black";
-    document.getElementById("rem-acres").style.color = color;
-    document.getElementById("rem-carats").style.color = color;
-    document.getElementById("rem-shares").style.color = color;
-  }
   
   adjustNameColumnWidth();
   updateConversionsTable();
@@ -1266,31 +1253,25 @@ function runPartition() {
     document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
   }
 
-  // update the remaining area card
-  const remainingArea = totalAreaM2 - totalDistributedArea;
-  const remAcres = document.getElementById("rem-acres");
-  if (remAcres) {
-    const isNegative = remainingArea < -0.005;
-    const absRem = Math.abs(remainingArea);
     
-    let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
+  if (totalAreaM2 - totalDistributedArea > 0.005) {
+    const remainingArea = totalAreaM2 - totalDistributedArea;
+    const botWidth = w1 * (1.0 - lastT_bot);
+    const topWidth = w2 * (1.0 - lastT_top);
     
-    // round or fix
-    const remFeddans = Math.floor(totalRemCarats / 24);
-    const remCarats = Math.floor(totalRemCarats % 24);
-    const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
-
-    document.getElementById("rem-m2").innerText = (isNegative ? "-" : "") + absRem.toFixed(2);
-    document.getElementById("rem-acres").innerText = (isNegative ? "-" : "") + remFeddans;
-    document.getElementById("rem-carats").innerText = (isNegative ? "-" : "") + remCarats;
-    document.getElementById("rem-shares").innerText = (isNegative ? "-" : "") + Number(remShares.toFixed(2));
-
-    const color = isNegative ? "red" : "black";
-    document.getElementById("rem-acres").style.color = color;
-    document.getElementById("rem-carats").style.color = color;
-    document.getElementById("rem-shares").style.color = color;
+    window.calculatedPieces.push({
+      name: "المتبقي",
+      startX: lastT_top * w,
+      endX: 1.0 * w,
+      botW: botWidth,
+      topW: topWidth,
+      width: (botWidth + topWidth) / 2,
+      area: remainingArea,
+      divLine: l2,
+      leftLine: l1 + lastT_top * (l2 - l1),
+      isRemaining: true
+    });
   }
-
   saveData();
   renderCroquis();
   updateCalculationSteps();
@@ -1608,7 +1589,12 @@ function renderCroquis() {
   // === 3. رسم القطع ===
   if (window.calculatedPieces && window.calculatedPieces.length > 0) {
     window.calculatedPieces.forEach((piece, index) => {
-      const color = PIECE_COLORS[index % PIECE_COLORS.length];
+      let color;
+      if (piece.isRemaining) {
+        color = { fill: "#f5f5f5", stroke: "#bdbdbd" };
+      } else {
+        color = PIECE_COLORS[index % PIECE_COLORS.length];
+      }
       const x1 = mapX(piece.startX);
       const x2 = mapX(piece.endX);
       const y1 = mapY(0);
