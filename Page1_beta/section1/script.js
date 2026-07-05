@@ -463,15 +463,47 @@ function exportCroquisAsImage() {
   calculateAll(); // يُعيد الرسم بأبعاد متناسبة ومقصوصة بشكل مثالي
   
   const canvas = document.getElementById('landCanvas');
-  const dataUrl = canvas.toDataURL("image/png");
+  const filename = "كروكي_الأرض_الدلال.png";
   
-  const a = document.createElement("a");
-  a.download = "كروكي_الأرض_الدلال.png";
-  a.href = dataUrl;
-  a.click();
-  
-  window.isExportingAsImage = false;
-  calculateAll(); // إعادة الأبعاد لوضع الشاشة الطبيعي
+  canvas.toBlob(async function(blob) {
+    if (!blob) {
+      window.isExportingAsImage = false;
+      calculateAll();
+      return;
+    }
+    
+    // محاولة استخدام Web Share API (ممتازة لتطبيقات الجوال)
+    try {
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'كروكي الأرض',
+          text: 'كروكي الأرض من تطبيق الدلال'
+        });
+        window.isExportingAsImage = false;
+        calculateAll();
+        return; // تمت المشاركة بنجاح
+      }
+    } catch (err) {
+      console.log("Web Share API failed, falling back to blob download", err);
+    }
+    
+    // الطريقة البديلة (تعمل بشكل أفضل من data: URL في متصفحات الجوال وتطبيقات الـ WebView)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      window.isExportingAsImage = false;
+      calculateAll();
+    }, 150);
+  }, "image/png");
 }
 
 let convBlurTimeout = null;

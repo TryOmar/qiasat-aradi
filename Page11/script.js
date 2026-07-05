@@ -1928,11 +1928,37 @@ function exportCroquis() {
       
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       
-      // تنزيل كـ PNG
-      const a = document.createElement("a");
-      a.download = "تقسيم_الأرض_الدلال.png";
-      a.href = canvas.toDataURL("image/png");
-      a.click();
+      // تنزيل كـ PNG بطريقة متوافقة مع تطبيقات الجوال
+      canvas.toBlob(async function(blob) {
+        if (!blob) return;
+        const filename = "تقسيم_الأرض_الدلال.png";
+        
+        try {
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'كروكي تقسيم الأرض',
+              text: 'كروكي تقسيم الأرض من تطبيق الدلال'
+            });
+            return;
+          }
+        } catch (err) {
+          console.log("Web Share API failed, falling back to blob download", err);
+        }
+        
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 150);
+      }, "image/png");
     } catch (err) {
       console.error("Canvas PNG export failed, downloading SVG directly:", err);
       // بديل مباشر
