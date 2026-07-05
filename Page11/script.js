@@ -9,6 +9,8 @@ let showCroquisNames = true;
 let showCroquisMeasurements = true;
 let isPartitioned = false;
 let isManualPartition = false;
+let isEditing = false;
+let activeFieldBefore = null;
 
 // متغيرات Pinch-to-Zoom
 let lastTouchDist = 0;
@@ -747,6 +749,7 @@ function saveAndCalc() {
 }
 
 function saveAndCalcImmediate() {
+  if (isEditing) return;
   saveData();
   calculateGeneral();
   
@@ -2377,6 +2380,7 @@ function onWidthChange(input, type) {
 }
 
 function onWidthChangeActual(input, type) {
+  if (isEditing) return;
   const row = input.closest(".partner-row");
   const rows = Array.from(document.querySelectorAll("#partners-list .partner-row"));
   const rowIndex = rows.indexOf(row);
@@ -2393,8 +2397,6 @@ function onWidthChangeActual(input, type) {
     return;
   }
 
-  const isKeepArea = document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
-
   const widthBotInput = row.querySelector(".partner-width-bottom");
   const widthTopInput = row.querySelector(".partner-width-top");
   if (!widthBotInput || !widthTopInput) return;
@@ -2402,7 +2404,13 @@ function onWidthChangeActual(input, type) {
   const lastVal_bot = parseFloat(widthBotInput.getAttribute("data-last-val")) || 0;
   const lastVal_top = parseFloat(widthTopInput.getAttribute("data-last-val")) || 0;
 
-  const val = parseFloat(input.value) || 0;
+  if (input.value.trim() === "") {
+    input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
+  }
+
+  const isKeepArea = document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+
+  const val = parseFloat(input.value);
   if (isNaN(val) || val < 0) {
     alert("يمنع إدخال قيمة سالبة أو غير صحيحة.");
     input.value = (type === "bottom" ? lastVal_bot : lastVal_top).toFixed(4);
@@ -2558,12 +2566,34 @@ function isNumericInput(el) {
   return false;
 }
 
+function finishEditingField(field) {
+  if (!field) return;
+  if (!isEditing) return;
+  
+  isEditing = false;
+  activeFieldBefore = null;
+  
+  if (field.classList.contains("partner-width-bottom")) {
+    onWidthChangeActual(field, "bottom");
+  } else if (field.classList.contains("partner-width-top")) {
+    onWidthChangeActual(field, "top");
+  } else {
+    saveAndCalcImmediate();
+  }
+}
+
 function showCustomNumpad() {
   const numpad = document.getElementById("custom-numpad");
   if (!numpad) return;
 
   numpad.classList.add("visible");
   document.body.style.paddingBottom = "270px"; // حجز مساحة لعدم تغطية الحقول
+  
+  // إخفاء شريط التنقل السفلي لتجنب التداخل مع لوحة المفاتيح
+  const nav = document.querySelector(".nav");
+  if (nav) {
+    nav.style.setProperty("display", "none", "important");
+  }
   
   if (activeInput) {
     setTimeout(() => {
@@ -2578,6 +2608,12 @@ function hideCustomNumpad() {
 
   numpad.classList.remove("visible");
   document.body.style.paddingBottom = "0px";
+  
+  // إعادة إظهار شريط التنقل السفلي
+  const nav = document.querySelector(".nav");
+  if (nav) {
+    nav.style.setProperty("display", "flex", "important");
+  }
 }
 
 function insertAtCursor(input, char) {
@@ -2654,34 +2690,63 @@ document.addEventListener("DOMContentLoaded", function() {
   // مستمعي التركيز
   document.addEventListener("focusin", function(e) {
     const target = e.target;
-    if (isNumericInput(target)) {
-      if (target.getAttribute("inputmode") !== "none") {
-        target.setAttribute("inputmode", "none");
+    if (target && target.tagName === "INPUT") {
+      // إذا كنا نعدل حقلاً آخر سابقاً، ننهي تعديله أولاً لتشغيل التحقق والحساب
+      if (isEditing && activeFieldBefore && activeFieldBefore !== target) {
+        finishEditingField(activeFieldBefore);
       }
-      activeInput = target;
-      showCustomNumpad();
       
-      // تحديد النص بالكامل عند التركيز (Select All)
-      setTimeout(() => {
-        if (target === activeInput) {
-          target.select();
-          target.setSelectionRange(0, target.value.length);
+      isEditing = true;
+      activeFieldBefore = target;
+      
+      if (isNumericInput(target)) {
+        if (target.getAttribute("inputmode") !== "none") {
+          target.setAttribute("inputmode", "none");
         }
-      }, 50);
+        activeInput = target;
+        showCustomNumpad();
+        
+        // تحديد النص بالكامل عند التركيز (Select All)
+        setTimeout(() => {
+          if (target === activeInput) {
+            target.select();
+            target.setSelectionRange(0, target.value.length);
+          }
+        }, 50);
+      }
     }
   });
 
   document.addEventListener("focusout", function(e) {
     setTimeout(() => {
+      // إذا كان التركيز قد انتقل إلى حقل رقمي آخر أو لوحة المفاتيح المخصصة، لا نغلقها
       if (document.activeElement && (isNumericInput(document.activeElement) || document.activeElement.closest("#custom-numpad"))) {
         return;
       }
+      
+      // إذا كنا نخرج من جميع حقول الإدخال، ننهي وضع التحرير ونحسب
+      if (isEditing && activeFieldBefore) {
+        const nextActive = document.activeElement;
+        const isNextInput = nextActive && nextActive.tagName === "INPUT";
+        if (!isNextInput) {
+          finishEditingField(activeFieldBefore);
+        }
+      }
+      
       hideCustomNumpad();
     }, 100);
   });
 
   // منع إدخال الأحرف من لوحة المفاتيح الحقيقية (للكمبيوتر ولحماية الحقول)
   document.addEventListener("keydown", function(e) {
+    const target = e.target;
+    if (target && target.tagName === "INPUT") {
+      if (e.key === "Enter") {
+        target.blur();
+        return;
+      }
+    }
+
     if (isNumericInput(e.target)) {
       const key = e.key;
       const allowedKeys = ["Backspace", "Delete", "Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Escape"];
@@ -2737,8 +2802,14 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const val = key.getAttribute("data-val");
         if (val === "close") {
-          activeInput.blur();
+          const field = activeInput;
+          if (activeInput) {
+            activeInput.blur();
+          }
           hideCustomNumpad();
+          if (isEditing && field) {
+            finishEditingField(field);
+          }
         } else if (val === "backspace") {
           handleBackspace(activeInput);
         } else if (val === "next") {
