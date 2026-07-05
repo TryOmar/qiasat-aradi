@@ -1069,7 +1069,7 @@ function calculateGeneral() {
   }
   
   adjustNameColumnWidth();
-  populateConversionsTable();
+  updateConversionsTable();
   renderCroquis();
   updateCalculationSteps();
 }
@@ -2578,12 +2578,9 @@ function updateConversionsTable() {
   if (!isEditingConversion) {
     tbody.innerHTML = "";
     
-    let hasValues = false;
-    
     dimMap.forEach((dim, i) => {
       const inputEl = document.getElementById(dim.id);
       const val = inputEl ? parseFloat(inputEl.value) || 0 : 0;
-      if (val > 0) hasValues = true;
       
       const qConv = toQasabaAndQabda(val);
       
@@ -2629,37 +2626,30 @@ function updateConversionsTable() {
     const w2 = parseFloat(document.getElementById("width2").value) || 0;
     const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
-    if (totalAreaM2 > 0) {
-      hasValues = true;
-      const qasba_sq = totalAreaM2 / 12.60250;
-      const reedValue = Math.floor(qasba_sq);
-      const fistValue = Math.floor((qasba_sq - reedValue) * 24);
-      const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+    const qasba_sq = totalAreaM2 / 12.60250;
+    const reedValue = Math.floor(qasba_sq);
+    const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+    const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
 
-      tbody.innerHTML += `
-        <tr class="conv-row" style="background-color: #fcfcfc;">
-          <td class="conv-label-cell" style="font-weight: bold;">
-            <span class="conv-dim-name">النتيجة بالقصبة المربعة</span>
-            <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32;">
-              <span>${totalAreaM2.toFixed(2)}</span> م²
-            </span>
-          </td>
-          <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-          <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-          <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-        </tr>
-      `;
-    }
-
-    if (!hasValues) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
-    }
+    tbody.innerHTML += `
+      <tr class="conv-row" style="background-color: #fcfcfc;">
+        <td class="conv-label-cell" style="font-weight: bold;">
+          <span class="conv-dim-name">النتيجة بالقصبة المربعة</span>
+          <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32;">
+            <span>${totalAreaM2.toFixed(2)}</span> م²
+          </span>
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+        <td class="conv-input-cell">
+          <input type="number" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
+        </td>
+      </tr>
+    `;
   }
 }
 
