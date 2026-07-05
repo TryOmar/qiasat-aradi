@@ -1,4 +1,4 @@
-﻿/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
+/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
 
 body {
   display: flex !important;
@@ -191,10 +191,22 @@ body {
   font-weight: bold !important;
   color: #1b5e20 !important;
 }
+
 .unit-lbl-mini {
   font-size: 9px !important;
   color: #2e7d32 !important;
   font-weight: bold !important;
+}
+
+.table-remaining-box.deficit-mode .unit-box-mini {
+  background: #ffebee !important;
+  border: 1px solid #ffcdd2 !important;
+}
+.table-remaining-box.deficit-mode .unit-val-mini {
+  color: #c62828 !important;
+}
+.table-remaining-box.deficit-mode .unit-lbl-mini {
+  color: #c62828 !important;
 }
 
 /* Verification list */
