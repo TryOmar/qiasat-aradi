@@ -1,4 +1,4 @@
-﻿let currentInputMethod = "carats";
+let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -418,8 +418,8 @@ function renderHeaderAndFooter() {
       <p>فدان</p>
       <p>المساحة (م²)</p>
       <p>النسبة (%)</p>
-      <p>العرض الأول (أسفل)</p>
-      <p>العرض الثاني (أعلى)</p>
+      <p>العرض الأول (أعلى)</p>
+      <p>العرض الثاني (أسفل)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -448,8 +448,8 @@ function renderHeaderAndFooter() {
       <p style="display:none;"></p>
       <p>المساحة (م²)</p>
       <p>النسبة (%)</p>
-      <p>العرض الأول (أسفل)</p>
-      <p>العرض الثاني (أعلى)</p>
+      <p>العرض الأول (أعلى)</p>
+      <p>العرض الثاني (أسفل)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -602,11 +602,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <input type="text" class="partner-percent" readonly value="-">
       </div>
       <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الأول (أسفل)</span>
+        <span class="mobile-label">العرض الأول (أعلى)</span>
         <input type="number" step="any" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
       </div>
       <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الثاني (أعلى)</span>
+        <span class="mobile-label">العرض الثاني (أسفل)</span>
         <input type="number" step="any" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
       </div>
       <div class="col-group cum-group">
@@ -647,11 +647,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <input type="text" class="partner-percent" readonly value="-">
       </div>
       <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الأول (أسفل)</span>
+        <span class="mobile-label">العرض الأول (أعلى)</span>
         <input type="text" class="partner-width-bottom" onchange="onWidthChange(this, 'bottom')" value="${botW}" inputmode="none">
       </div>
       <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الثاني (أعلى)</span>
+        <span class="mobile-label">العرض الثاني (أسفل)</span>
         <input type="text" class="partner-width-top" onchange="onWidthChange(this, 'top')" value="${topW}" inputmode="none">
       </div>
       <div class="col-group cum-group">
@@ -1596,7 +1596,7 @@ function renderCroquis() {
 
   // دوال التحويل مع تطبيق معامل التمدد البصري
   const mapX = (x) => offsetX + (x * stretchX) * drawScale;
-  const mapY = (y) => containerH - (offsetY + (y * stretchY) * drawScale);
+  const mapY = (y) => offsetY + (y * stretchY) * drawScale;
 
   // k = معدل التغير في الطول بالنسبة للعرض
   const k = (l1 - l2) / w;
@@ -1825,8 +1825,8 @@ function renderCroquis() {
       transform: `rotate(-90, ${rX + dimOffset + 4 * textScale}, ${rMidY})`,
     }));
 
-    // --- العرض الأول (أسفل) ---
-    const bY = mapY(0) + dimOffset;
+    // --- العرض الأول (أعلى) ---
+    const bY = mapY(0) - dimOffset;
     const bX1 = mapX(0);
     const bX2 = mapX(w);
     
@@ -1841,16 +1841,16 @@ function renderCroquis() {
     g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     
-    g.appendChild(svgText((bX1 + bX2) / 2, bY + 16 * textScale, w1 + " م", {
+    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w1 + " م", {
       fill: "#2e7d32",
       size: "13",
       weight: "bold",
       bg: true,
     }));
 
-    // --- العرض الثاني (أعلى) ---
+    // --- العرض الثاني (أسفل) ---
     // أعلى يسار = mapY(l2)، أعلى يمين = mapY(l1)
-    const topEdgeY = mapY(Math.max(l1, l2)) - dimOffset;
+    const topEdgeY = mapY(Math.max(l1, l2)) + dimOffset;
     const topX1 = mapX(0);
     const topX2 = mapX(w);
     
@@ -1865,7 +1865,7 @@ function renderCroquis() {
     g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     
-    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY - 8 * textScale, w2 + " م", {
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w2 + " م", {
       fill: "#2e7d32",
       size: "13",
       weight: "bold",
@@ -1983,9 +1983,9 @@ function getTableDataArray() {
   
   // رأس الجدول
   if (currentInputMethod === "carats") {
-    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض الأول (أسفل)", "العرض الثاني (أعلى)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "العلامة (م)", "الفاصل (م)"]);
   } else {
-    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أسفل)", "العرض الثاني (أعلى)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "العلامة (م)", "الفاصل (م)"]);
   }
   
   rows.forEach(row => {
@@ -2653,3 +2653,4 @@ function onShareInput() {
 window.addEventListener("resize", function() {
   renderCroquis();
 });
+
