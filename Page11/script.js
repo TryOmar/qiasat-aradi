@@ -2479,13 +2479,13 @@ function updateCalculationSteps() {
           <div style="border-right: 3px solid #ffb300; padding-right: 8px;">
             <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد السفلي:</span><br>
             <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-              ${w1} ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${botQiratWidth.toFixed(4)} متر
+              ${w1} متر ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${botQiratWidth.toFixed(4)} متر
             </code>
           </div>
           <div style="border-right: 3px solid #ffa000; padding-right: 8px;">
             <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد العلوي:</span><br>
             <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-              ${w2} ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${topQiratWidth.toFixed(4)} متر
+              ${w2} متر ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${topQiratWidth.toFixed(4)} متر
             </code>
           </div>
         </div>
