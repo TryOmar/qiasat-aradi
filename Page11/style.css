@@ -1,4 +1,4 @@
-/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
+﻿/* Page 11 - Land Division with Different Lengths Stylesheet - Premium Dashboard Theme */
 
 body {
   display: flex !important;
@@ -468,7 +468,7 @@ body {
 }
 
 /* ============================================================
-   أزرار مطابقة لأسلوب الصفحة 13
+   ط£ط²ط±ط§ط± ظ…ط·ط§ط¨ظ‚ط© ظ„ط£ط³ظ„ظˆط¨ ط§ظ„طµظپط­ط© 13
    ============================================================ */
 
 .btn {
@@ -514,16 +514,16 @@ body {
 }
 
 /* ============================================================
-   INTERACTIVE CROQUIS - تنسيق مطابق للصفحة 13
+   INTERACTIVE CROQUIS - طھظ†ط³ظٹظ‚ ظ…ط·ط§ط¨ظ‚ ظ„ظ„طµظپط­ط© 13
    ============================================================ */
 
-/* بطاقة الكروكي */
+/* ط¨ط·ط§ظ‚ط© ط§ظ„ظƒط±ظˆظƒظٹ */
 .canvas-card {
   padding-bottom: 10px !important;
   overflow: hidden !important;
 }
 
-/* صف مفاتيح التبديل */
+/* طµظپ ظ…ظپط§طھظٹط­ ط§ظ„طھط¨ط¯ظٹظ„ */
 .croquis-toggles-row {
   display: flex !important;
   justify-content: center !important;
@@ -572,7 +572,7 @@ body {
   border-color: #2e7d32 !important;
 }
 
-/* منطقة الرسمالخارجية */
+/* ظ…ظ†ط·ظ‚ط© ط§ظ„ط±ط³ظ…ط§ظ„ط®ط§ط±ط¬ظٹط© */
 .canvas-wrapper {
   width: 100% !important;
   height: auto !important;
@@ -585,7 +585,7 @@ body {
   overflow: hidden !important;
 }
 
-/* نص تلميحي */
+/* ظ†طµ طھظ„ظ…ظٹط­ظٹ */
 .croquis-placeholder {
   position: absolute !important;
   top: 50% !important;
@@ -606,7 +606,7 @@ body {
   margin: 0 auto 10px !important;
 }
 
-/* حاوية SVG الداخلية */
+/* ط­ط§ظˆظٹط© SVG ط§ظ„ط¯ط§ط®ظ„ظٹط© */
 .croquis-inner-container {
   position: absolute !important;
   top: 10px !important;
@@ -622,7 +622,7 @@ body {
   border: 1px solid #cfd8dc !important;
 }
 
-/* تلميح اللمس للجوال */
+/* طھظ„ظ…ظٹط­ ط§ظ„ظ„ظ…ط³ ظ„ظ„ط¬ظˆط§ظ„ */
 .croquis-touch-hint {
   position: absolute !important;
   bottom: 14px !important;
@@ -656,7 +656,7 @@ body {
   100% { opacity: 0; }
 }
 
-/* أزرار التحكم */
+/* ط£ط²ط±ط§ط± ط§ظ„طھط­ظƒظ… */
 .canvas-controls {
   padding: 8px !important;
   display: flex !important;
@@ -667,7 +667,7 @@ body {
   background-color: #f9f9f9 !important;
 }
 
-/* زر تقسيم الأرض */
+/* ط²ط± طھظ‚ط³ظٹظ… ط§ظ„ط£ط±ط¶ */
 .btn-divide {
   background-color: #0288d1 !important;
   color: white !important;
@@ -679,7 +679,7 @@ body {
   background-color: #0277bd !important;
 }
 
-/* وضع ملء الشاشة */
+/* ظˆط¶ط¹ ظ…ظ„ط، ط§ظ„ط´ط§ط´ط© */
 .croquis-fullscreen-mode {
   position: fixed !important;
   top: 0 !important;
@@ -710,11 +710,11 @@ body {
 /* Nav styling inherited from global style.css */
 
 /* ============================================================
-   RESPONSIVE DESIGN - دعم كامل لجميع أحجام الشاشات
-   يغطي: 320px, 360px, 375px, 390px, 412px, 480px, Tablet
+   RESPONSIVE DESIGN - ط¯ط¹ظ… ظƒط§ظ…ظ„ ظ„ط¬ظ…ظٹط¹ ط£ط­ط¬ط§ظ… ط§ظ„ط´ط§ط´ط§طھ
+   ظٹط؛ط·ظٹ: 320px, 360px, 375px, 390px, 412px, 480px, Tablet
    ============================================================ */
 
-/* === منع التمرير الأفقي === */
+/* === ظ…ظ†ط¹ ط§ظ„طھظ…ط±ظٹط± ط§ظ„ط£ظپظ‚ظٹ === */
 html {
   overflow-x: hidden !important;
 }
@@ -723,7 +723,7 @@ body {
   overflow-x: hidden !important;
 }
 
-/* === حاوية الجدول القابلة للتمرير أفقياً === */
+/* === ط­ط§ظˆظٹط© ط§ظ„ط¬ط¯ظˆظ„ ط§ظ„ظ‚ط§ط¨ظ„ط© ظ„ظ„طھظ…ط±ظٹط± ط£ظپظ‚ظٹط§ظ‹ === */
 .table-container {
   width: 100% !important;
   overflow-x: auto !important;
@@ -744,7 +744,7 @@ body {
 }
 
 /* ============================================================
-   الأجهزة اللوحية (768px)
+   ط§ظ„ط£ط¬ظ‡ط²ط© ط§ظ„ظ„ظˆط­ظٹط© (768px)
    ============================================================ */
 @media screen and (max-width: 768px) {
   .con {
@@ -803,7 +803,7 @@ body {
 }
 
 /* ============================================================
-   الهواتف المتوسطة (480px)
+   ط§ظ„ظ‡ظˆط§طھظپ ط§ظ„ظ…طھظˆط³ط·ط© (480px)
    ============================================================ */
 @media screen and (max-width: 480px) {
   .top-nav-bar {
@@ -883,7 +883,7 @@ body {
 }
 
 /* ============================================================
-   الهواتف الصغيرة (375px - iPhone SE, Galaxy A)
+   ط§ظ„ظ‡ظˆط§طھظپ ط§ظ„طµط؛ظٹط±ط© (375px - iPhone SE, Galaxy A)
    ============================================================ */
 @media screen and (max-width: 375px) {
   .con {
@@ -940,7 +940,7 @@ body {
 }
 
 /* ============================================================
-   الهواتف الأصغر (320px - Galaxy S5, iPhone 5)
+   ط§ظ„ظ‡ظˆط§طھظپ ط§ظ„ط£طµط؛ط± (320px - Galaxy S5, iPhone 5)
    ============================================================ */
 @media screen and (max-width: 320px) {
   .con {
@@ -985,7 +985,7 @@ body {
 }
 
 /* ============================================================
-   الاتجاه الأفقي (Landscape) على الهواتف
+   ط§ظ„ط§طھط¬ط§ظ‡ ط§ظ„ط£ظپظ‚ظٹ (Landscape) ط¹ظ„ظ‰ ط§ظ„ظ‡ظˆط§طھظپ
    ============================================================ */
 @media screen and (max-height: 500px) and (orientation: landscape) {
   .top-nav-bar {
@@ -1014,7 +1014,7 @@ body {
 }
 
 /* ============================================================
-   أجهزة اللمس - تكبير مناطق التفاعل لللمس
+   ط£ط¬ظ‡ط²ط© ط§ظ„ظ„ظ…ط³ - طھظƒط¨ظٹط± ظ…ظ†ط§ط·ظ‚ ط§ظ„طھظپط§ط¹ظ„ ظ„ظ„ظ„ظ…ط³
    ============================================================ */
 @media (pointer: coarse) {
   .btn-action {
@@ -1048,55 +1048,173 @@ body {
 }
 
 /* ============================================================
-   الطباعة
+   ط§ظ„ط·ط¨ط§ط¹ط©
    ============================================================ */
 @media print {
-  .top-nav-bar,
-  .nav,
-  .canvas-controls,
-  .croquis-toggles-row,
-  .buttons-container,
-  .main-actions-bar,
-  .reports-buttons-grid,
-  .croquis-touch-hint {
+  @page {
+    margin: 0.5cm;
+  }
+  body {
+    background: white;
+    color: black;
+    font-size: 10pt;
+    font-family: 'Cairo', sans-serif;
+  }
+  .main-container {
+    padding: 0 !important;
+  }
+  .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details {
     display: none !important;
+  }
+  .print-only-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .print-only-header h2 {
+    color: #2e7d32 !important;
+    font-size: 15pt !important;
+    margin: 0 0 2px 0;
+    font-weight: 800;
+  }
+  .print-only-header p {
+    color: #555 !important;
+    font-size: 9pt !important;
+    margin: 0;
+  }
+  .print-only-footer {
+    display: block !important;
+    text-align: center;
+    margin-top: 15px;
+  }
+  .print-only-footer p {
+    font-size: 8pt !important;
+    color: #777 !important;
   }
   .con {
-    padding: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  .s {
-    break-inside: avoid !important;
-    border: 1px solid #ccc !important;
+  .canvas-card, .results-card, .division-card, .conversion-card {
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
+    margin-top: 8px !important;
+    padding: 8px !important;
+    page-break-inside: avoid;
+    background: #fff !important;
   }
-  .table-container {
-    overflow: visible !important;
+  .canvas-card h3, .results-card h3, .division-card h3, .conversion-card h3 {
+    background-color: #f1f8e9 !important;
+    color: #2e7d32 !important;
+    font-size: 10pt !important;
+    padding: 4px 8px !important;
+    margin: -8px -8px 8px -8px !important;
+    border-bottom: 1px solid #c8e6c9 !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+    font-weight: bold !important;
   }
   .canvas-wrapper {
-    height: 400px !important;
+    background: white !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
   }
-  .steps-card {
-    display: none !important;
+  .canvas-wrapper canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    border: 1px solid #c8e6c9 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
   }
-  .steps-card.print-visible {
-    display: block !important;
-    break-inside: avoid !important;
+  .results-table-wrapper table, .conversion-table-wrapper table, .heirs-table-wrapper table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 6px !important;
   }
-  .steps-card.print-visible #calculation-steps-container {
-    max-height: none !important;
-    opacity: 1 !important;
-    padding-top: 12px !important;
+  .results-table-wrapper th, .conversion-table-wrapper th, .heirs-table-wrapper th {
+    background-color: #f1f8e9 !important;
+    color: #2e7d32 !important;
+    font-weight: bold !important;
+    border: 1px solid #c8e6c9 !important;
+    padding: 4px 6px !important;
+    font-size: 8.5pt !important;
   }
-  .steps-header label {
-    display: none !important;
+  .results-table-wrapper td, .conversion-table-wrapper td, .heirs-table-wrapper td {
+    border: 1px solid #e0e0e0 !important;
+    padding: 4px 6px !important;
+    font-size: 8.5pt !important;
   }
-  .steps-header #steps-arrow-icon {
-    display: none !important;
+  /* Show static names and inputs in printing */
+  .heirs-table-wrapper input {
+    border: none !important;
+    font-weight: bold !important;
+    background: transparent !important;
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 8.5pt !important;
   }
+}
+
+/* وضع ملء الشاشة الفعلي للكروكي التفاعلي */
+.canvas-fullscreen-mode {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background-color: #f0f4f8 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 15px !important;
+  box-sizing: border-box !important;
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+.canvas-fullscreen-mode h3 {
+  margin: 0 0 10px 0 !important;
+  border-radius: 0 !important;
+}
+
+.canvas-fullscreen-mode .canvas-wrapper {
+  flex: 1 !important;
+  height: calc(100vh - 120px) !important;
+  background-color: #eaeff2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+}
+
+.canvas-fullscreen-mode .canvas-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  height: auto !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+.canvas-fullscreen-mode .canvas-controls {
+  margin-top: 10px !important;
+  padding: 5px !important;
+}
 
 /* ============================================================
-   تنسيق جدول التحويل
+   تحسين جدول التحويل ليكون متجاوباً بالكامل على كافة الجوالات
    ============================================================ */
 @media screen and (max-width: 520px) {
   .conversion-table-wrapper {
@@ -1162,6 +1280,7 @@ body {
     box-sizing: border-box !important;
   }
 
+  /* إضافة عناوين الأعمدة فوق المدخلات */
   .conv-input-cell:nth-child(2)::before {
     content: "أقل من القبضة" !important;
     font-size: 10px !important;
@@ -1198,3 +1317,6 @@ body {
     box-sizing: border-box !important;
   }
 }
+
+
+

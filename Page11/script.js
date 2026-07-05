@@ -2561,102 +2561,163 @@ function toQasabaAndQabda(meters) {
   };
 }
 
-function renderConversionRow(label, metersVal) {
-  const result = toQasabaAndQabda(metersVal);
-  return `
-    <tr class="conv-row">
-      <td class="conv-label-cell">
-        <span class="conv-dim-name" style="color: #673ab7; font-weight: bold;">${label}</span>
-        <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 8px; font-size: 13px; margin-right: auto; display: inline-block;">
-          <span>${metersVal.toFixed(4)}</span> م
-        </span>
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-fraction" value="${result.fraction}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-qabda" value="${result.qabda}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-qasaba" value="${result.qasaba}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-    </tr>
-  `;
-}
+const dimMap = [
+  { id: 'length1', name: 'الطول الأيمن' },
+  { id: 'length2', name: 'الطول الأيسر' },
+  { id: 'width1', name: 'العرض الأول (أعلى)' },
+  { id: 'width2', name: 'العرض الثاني (أسفل)' }
+];
 
-function renderSquareConversionRow(label, areaSqm) {
-  const qasba_sq = areaSqm / 12.60250;
-  const reedValue = Math.floor(qasba_sq);
-  const fistValue = Math.floor((qasba_sq - reedValue) * 24);
-  const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
-  
-  return `
-    <tr class="conv-row" style="background-color: #fcfcfc;">
-      <td class="conv-label-cell" style="font-weight: bold;">
-        <span class="conv-dim-name" style="color: #2e7d32; font-weight: bold;">${label}</span>
-        <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 8px; font-size: 13px; margin-right: auto; display: inline-block;">
-          <span>${areaSqm.toFixed(4)}</span> م²
-        </span>
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-      <td class="conv-input-cell">
-        <input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
-      </td>
-    </tr>
-  `;
-}
+function updateConversionsTable() {
+  const tbody = document.getElementById("conversions-tbody");
+  if (!tbody) return;
 
-function populateConversionsTable() {
-  const l1 = parseFloat(document.getElementById("length1").value) || 0;
-  const l2 = parseFloat(document.getElementById("length2").value) || 0;
-  const w1 = parseFloat(document.getElementById("width1").value) || 0;
-  const w2 = parseFloat(document.getElementById("width2").value) || 0;
-  const h_total = (l1 + l2) / 2;
-  const w = (w1 + w2) / 2;
-  const totalAreaM2 = h_total * w;
+  const activeEl = document.activeElement;
+  const isEditingConversion = activeEl && activeEl.id && activeEl.id.startsWith('conv-');
 
-  let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
-  if (caratArea === 0) {
-    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
-  }
-
-  const tbody = document.getElementById("page11-conversions-tbody");
-  const section = document.getElementById("conversion-section");
-  if (!tbody || !section) return;
-
-  if (totalAreaM2 <= 0) {
-    section.style.display = "none";
-    return;
-  }
-
-  let html = "";
-  html += renderConversionRow("القاعدة العلوية", w2);
-  html += renderConversionRow("القاعدة السفلية", w1);
-  html += renderConversionRow("الطول أو الارتفاع", h_total);
-  html += renderSquareConversionRow("النتيجة بالقصبة المربعة", totalAreaM2);
-  
-  const partnersList = document.getElementById("partners-list");
-  if (caratArea > 0 && partnersList && partnersList.children.length > 0) {
-    const totalQirats = totalAreaM2 / caratArea;
-    const botQiratWidth = w1 / totalQirats;
-    const topQiratWidth = w2 / totalQirats;
+  if (!isEditingConversion) {
+    tbody.innerHTML = "";
     
-    // إظهار صفوف عرض القيراط فقط إذا كان هناك اختلاف فعلي لتجنب التكرار إذا كان العرض متساوي
-    if (botQiratWidth > 0 && topQiratWidth > 0 && Math.abs(w1 - w2) > 0.001) {
-       html += renderConversionRow("عرض القيراط عند الحد العلوي", topQiratWidth);
-       html += renderConversionRow("عرض القيراط عند الحد السفلي", botQiratWidth);
-    } else if (botQiratWidth > 0 && topQiratWidth > 0 && Math.abs(w1 - w2) <= 0.001) {
-       html += renderConversionRow("عرض القيراط", botQiratWidth);
+    let hasValues = false;
+    
+    dimMap.forEach((dim, i) => {
+      const inputEl = document.getElementById(dim.id);
+      const val = inputEl ? parseFloat(inputEl.value) || 0 : 0;
+      if (val > 0) hasValues = true;
+      
+      const qConv = toQasabaAndQabda(val);
+      
+      tbody.innerHTML += `
+        <tr class="conv-row">
+          <td class="conv-label-cell">
+            <span class="conv-dim-name">${dim.name}</span>
+            <span class="conv-meter-badge" id="conv-meter-badge-${i}">
+              <span id="conv-meter-${i}">${val || 0}</span> م
+            </span>
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" inputmode="decimal" class="conv-input conv-fraction"
+              id="conv-fraction-${i}" value="${qConv.fraction}"
+              min="0" max="0.99" step="0.01"
+              title="جزء أقل من القبضة (0 - 0.99)"
+              oninput="updateSideFromQasaba(${i})"
+              onchange="updateSideFromQasaba(${i})">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" inputmode="decimal" class="conv-input conv-qabda"
+              id="conv-qabda-${i}" value="${qConv.qabda}"
+              min="0" step="1"
+              title="عدد القبضات (24 قبضة = 1 قصبة تلقائياً)"
+              oninput="updateSideFromQasaba(${i})"
+              onchange="updateSideFromQasaba(${i})">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" inputmode="decimal" class="conv-input conv-qasaba"
+              id="conv-qasaba-${i}" value="${qConv.qasaba}"
+              min="0" step="1"
+              title="عدد القصبات"
+              oninput="updateSideFromQasaba(${i})"
+              onchange="updateSideFromQasaba(${i})">
+          </td>
+        </tr>
+      `;
+    });
+
+    const l1 = parseFloat(document.getElementById("length1").value) || 0;
+    const l2 = parseFloat(document.getElementById("length2").value) || 0;
+    const w1 = parseFloat(document.getElementById("width1").value) || 0;
+    const w2 = parseFloat(document.getElementById("width2").value) || 0;
+    const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+
+    if (totalAreaM2 > 0) {
+      hasValues = true;
+      const qasba_sq = totalAreaM2 / 12.60250;
+      const reedValue = Math.floor(qasba_sq);
+      const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+      const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+
+      tbody.innerHTML += `
+        <tr class="conv-row" style="background-color: #fcfcfc;">
+          <td class="conv-label-cell" style="font-weight: bold;">
+            <span class="conv-dim-name">النتيجة بالقصبة المربعة</span>
+            <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32;">
+              <span>${totalAreaM2.toFixed(2)}</span> م²
+            </span>
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+          <td class="conv-input-cell">
+            <input type="number" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
+          </td>
+        </tr>
+      `;
+    }
+
+    if (!hasValues) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
     }
   }
+}
 
-  tbody.innerHTML = html;
-  section.style.display = "block";
+function fromQasabaToMeters(qasaba, qabda, fraction) {
+  const qasabaLength = 3.55;
+  const qabdaLength = qasabaLength / 24;
+  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
+}
+
+function updateSideFromQasaba(index) {
+  const qasabaEl = document.getElementById('conv-qasaba-' + index);
+  const qabdaEl = document.getElementById('conv-qabda-' + index);
+  const fracEl = document.getElementById('conv-fraction-' + index);
+  if (!qasabaEl || !qabdaEl || !fracEl) return;
+
+  let fracRaw = fracEl.value;
+  if (fracRaw && !fracRaw.includes('.')) {
+    fracRaw = "0." + fracRaw;
+    fracEl.value = fracRaw;
+  }
+  
+  let qasaba = Math.max(0, parseInt(qasabaEl.value) || 0);
+  let qabda = Math.max(0, parseInt(qabdaEl.value) || 0);
+  let fraction = parseFloat(fracRaw) || 0;
+
+  fraction = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
+
+  if (qabda >= 24) {
+    const carry = Math.floor(qabda / 24);
+    qasaba += carry;
+    qabda = qabda % 24;
+  }
+
+  qasabaEl.value = qasaba;
+  qabdaEl.value = qabda;
+  fracEl.value = fraction;
+
+  const meters = fromQasabaToMeters(qasaba, qabda, fraction);
+  
+  const dimId = dimMap[index].id;
+  const inputEl = document.getElementById(dimId);
+  if (inputEl) {
+    inputEl.value = parseFloat(meters.toFixed(4));
+    
+    // Update badge in table
+    const badge = document.getElementById('conv-meter-' + index);
+    if (badge) badge.innerText = parseFloat(meters.toFixed(4));
+    
+    // Visual feedback
+    const badgeContainer = document.getElementById('conv-meter-badge-' + index);
+    if (badgeContainer) {
+      badgeContainer.classList.add('updated');
+      setTimeout(() => badgeContainer.classList.remove('updated'), 600);
+    }
+    
+    // Trigger calculation
+    saveAndCalc();
+  }
 }
 
 let isQiratInfoOpen = false;

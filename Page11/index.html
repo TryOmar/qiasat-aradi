@@ -30,24 +30,44 @@
         <div class="dynamic-inputs-container">
           <div class="input-row">
             <label for="length1">الطول الأيمن بالمتر:</label>
-            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" onblur="saveAndCalc()">
+            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" oninput="updateConversionsTable()" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="length2">الطول الأيسر بالمتر:</label>
-            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" onblur="saveAndCalc()">
+            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" oninput="updateConversionsTable()" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width1">العرض الأول (أعلى) بالمتر:</label>
-            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" onblur="saveAndCalc()">
+            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" oninput="updateConversionsTable()" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width2">العرض الثاني (أسفل) بالمتر:</label>
-            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" onblur="saveAndCalc()">
+            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" oninput="updateConversionsTable()" onblur="saveAndCalc()">
           </div>
         </div>
         
 
+      </div>
 
+      <!-- Conversions table (Qasaba & Qabda) - Interactive -->
+      <div class="s conversion-card">
+        <h3>التحويل من متر طولي ومربع إلى القصبة والقبضة</h3>
+        <div class="conversion-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>البعد</th>
+                <th>أقل من القبضة</th>
+                <th>قبضة</th>
+                <th>قصبة</th>
+              </tr>
+            </thead>
+            <tbody id="conversions-tbody">
+              <!-- Dynamic rows populated from Javascript -->
+              <tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Card 2: Carat & Total Area -->
@@ -390,31 +410,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Conversions Table Section -->
-    <div id="conversion-section" class="s summary-card-item print-visible conversion-card" style="width: 100%; margin-top: 15px; grid-column: span 2; padding: 0; overflow: hidden; border-right: 4px solid #673ab7; display: none;">
-      <div style="padding: 12px 16px; background: #f3e5f5; border-bottom: 1px solid #e1bee7;">
-        <h4 style="color: #673ab7; font-size: 15px; font-family: Cairo, Arial, sans-serif; font-weight: bold; margin: 0;">
-          التحويل من متر طولي ومربع إلى القصبة والقبضة
-        </h4>
-      </div>
-      <div class="conversion-table-wrapper" style="padding: 16px;">
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;">
-          <thead>
-            <tr>
-              <th style="padding: 8px; border: 1px solid #d1c4e9; background-color: #ede7f6;">البعد</th>
-              <th style="padding: 8px; border: 1px solid #d1c4e9; background-color: #ede7f6;">أقل من القبضة</th>
-              <th style="padding: 8px; border: 1px solid #d1c4e9; background-color: #ede7f6;">قبضة</th>
-              <th style="padding: 8px; border: 1px solid #d1c4e9; background-color: #ede7f6;">قصبة</th>
-            </tr>
-          </thead>
-          <tbody id="page11-conversions-tbody">
-            <!-- Dynamic rows populated from Javascript -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 
 
