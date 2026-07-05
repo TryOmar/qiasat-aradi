@@ -1,4 +1,4 @@
-﻿let currentInputMethod = "carats";
+let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -52,27 +52,7 @@ function setupSVGInteractions() {
   if(!container) return;
   
   // === Mouse Events (سطح المكتب) ===
-  container.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
-    isDragging = true;
-    startDragX = e.clientX - croquisTranslateX;
-    startDragY = e.clientY - croquisTranslateY;
-    container.style.cursor = "grabbing";
-    e.preventDefault();
-  });
-  
-  window.addEventListener("mouseup", () => {
-    isDragging = false;
-    const cont = document.getElementById("croquis-container");
-    if (cont) cont.style.cursor = "grab";
-  });
-  
-  window.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    croquisTranslateX = e.clientX - startDragX;
-    croquisTranslateY = e.clientY - startDragY;
-    updateCroquisTransform();
-  });
+  // تم إيقاف خاصية السحب لتحريك الصورة بناءً على طلب المستخدم
   
   // تكبير/تصغير بعجلة الفأرة
   container.addEventListener("wheel", (e) => {
@@ -106,11 +86,9 @@ function getTouchMid(t1, t2) {
 function handleTouchStart(e) {
   e.preventDefault();
   if (e.touches.length === 1) {
-    // سحب بإصبع واحد
+    // سحب بإصبع واحد - تم الإيقاف
     isTwoFingerTouch = false;
-    isDragging = true;
-    startDragX = e.touches[0].clientX - croquisTranslateX;
-    startDragY = e.touches[0].clientY - croquisTranslateY;
+    isDragging = false;
   } else if (e.touches.length === 2) {
     // Pinch-to-Zoom
     isTwoFingerTouch = true;
@@ -127,9 +105,7 @@ function handleTouchStart(e) {
 function handleTouchMove(e) {
   e.preventDefault();
   if (e.touches.length === 1 && isDragging && !isTwoFingerTouch) {
-    croquisTranslateX = e.touches[0].clientX - startDragX;
-    croquisTranslateY = e.touches[0].clientY - startDragY;
-    updateCroquisTransform();
+    // تم إيقاف السحب
   } else if (e.touches.length === 2) {
     const newDist = getTouchDistance(e.touches[0], e.touches[1]);
     if (lastTouchDist > 0) {

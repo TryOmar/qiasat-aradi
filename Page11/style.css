@@ -614,16 +614,12 @@ body {
   right: 10px !important;
   bottom: 10px !important;
   overflow: hidden !important;
-  cursor: grab !important;
+  cursor: default !important;
   touch-action: none !important;
   background: white !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
   border: 1px solid #cfd8dc !important;
-}
-
-.croquis-inner-container:active {
-  cursor: grabbing !important;
 }
 
 /* تلميح اللمس للجوال */
