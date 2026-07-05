@@ -480,10 +480,10 @@ function loadTemplate(type) {
       isDashed: true, color: "#0288d1"
     });
 
-    borderLabels.push({ id: "border_1", text: "الضلع الأيمن (D) 35 م", x: 745, y: 350, angle: 71 });
-    borderLabels.push({ id: "border_2", text: "الضلع الأيسر (B) 40 م", x: 185, y: 315, angle: -66 });
-    borderLabels.push({ id: "border_3", text: "الضلع العلوي (C) 45 م", x: 475, y: 145, angle: 8 });
-    borderLabels.push({ id: "border_4", text: "الضلع السفلي (A) 50 م", x: 450, y: 525, angle: 2 });
+    borderLabels.push({ id: "border_1", text: "الطول الأيمن (D) 35 م", x: 745, y: 350, angle: 71 });
+    borderLabels.push({ id: "border_2", text: "الطول الأيسر (B) 40 م", x: 185, y: 315, angle: -66 });
+    borderLabels.push({ id: "border_3", text: "العرض الأول (أعلى) (C) 45 م", x: 475, y: 145, angle: 8 });
+    borderLabels.push({ id: "border_4", text: "العرض الثاني (أسفل) (A) 50 م", x: 450, y: 525, angle: 2 });
 
     freeTexts.push({
       id: "note_diag_info",

@@ -2677,10 +2677,10 @@ function toQasabaAndQabda(meters) {
 }
 
 const dimMap = [
-  { id: 'width1', name: 'العرض الأول (أعلى)' },
-  { id: 'width2', name: 'العرض الثاني (أسفل)' },
-  { id: 'length1', name: 'الطول الأيمن' },
-  { id: 'length2', name: 'الطول الأيسر' }
+  { id: 'width1', name: 'العرض الأول (أعلى) (C)' },
+  { id: 'width2', name: 'العرض الثاني (أسفل) (A)' },
+  { id: 'length1', name: 'الطول الأيمن (D)' },
+  { id: 'length2', name: 'الطول الأيسر (B)' }
 ];
 
 function updateConversionsTable() {

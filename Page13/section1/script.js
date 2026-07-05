@@ -894,10 +894,10 @@ function calculateAll() {
     const d_bd = parseFloat(document.getElementById("quad-diag-bd").value) || 0;
 
     dimensionInputs = [
-      { name: "الضلع العلوي (C)", value: c },
-      { name: "الضلع السفلي (A)", value: a },
-      { name: "الضلع الأيمن (D)", value: d },
-      { name: "الضلع الأيسر (B)", value: b }
+      { name: "العرض الأول (أعلى) (C)", value: c },
+      { name: "العرض الثاني (أسفل) (A)", value: a },
+      { name: "الطول الأيمن (D)", value: d },
+      { name: "الطول الأيسر (B)", value: b }
     ];
     if (d_ac > 0) dimensionInputs.push({ name: "القطر (AC)", value: d_ac });
     if (d_bd > 0) dimensionInputs.push({ name: "القطر (BD)", value: d_bd });
