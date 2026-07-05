@@ -728,6 +728,7 @@ function saveAndCalc() {
 function saveAndCalcImmediate() {
   saveData();
   calculateGeneral();
+  updateConversionsTable();
   
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
