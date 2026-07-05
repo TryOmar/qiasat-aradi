@@ -273,9 +273,9 @@
       </div>
 
       <!-- المتبقي من الأرض (تحت الجدول مباشرة) -->
-      <div class="table-remaining-box" style="margin-top: 15px; padding: 12px; border: 1.5px solid #ffcdd2; background-color: #ffebee; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center; max-width: 420px; margin-left: auto; margin-right: auto; box-sizing: border-box; width: 100%;">
-        <span style="font-size: 13px; font-weight: bold; color: #c62828; font-family: Cairo, Arial, sans-serif;">المتبقي من الأرض:</span>
-        <div style="font-size: 18px; font-weight: bold; color: #c62828;">
+      <div class="table-remaining-box" id="table-remaining-box" style="margin-top: 15px; padding: 12px; border: 1.5px solid #ffcdd2; background-color: #ffebee; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center; max-width: 420px; margin-left: auto; margin-right: auto; box-sizing: border-box; width: 100%;">
+        <span id="rem-area-main-label" style="font-size: 13px; font-weight: bold; color: #c62828; font-family: Cairo, Arial, sans-serif;">المتبقي من الأرض:</span>
+        <div style="font-size: 18px; font-weight: bold; color: #c62828;" id="rem-area-m2-container">
           <span id="rem-area-m2">0.00</span> م²
         </div>
         <div style="display: flex; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
@@ -307,12 +307,12 @@
             <span>المساحة الإجمالية:</span>
             <strong id="summary-total-area">0.00</strong>
           </div>
-          <div class="detail-row">
-            <span>المساحة المتبقية:</span>
+          <div class="detail-row" id="rem-area-row">
+            <span id="rem-area-label">المساحة المتبقية:</span>
             <strong id="summary-rem-area">0.00</strong>
           </div>
-          <div class="detail-row">
-            <span>حالة التقسيم:</span>
+          <div class="detail-row" id="status-row">
+            <span id="status-label">حالة التقسيم:</span>
             <strong id="summary-status" style="color: #c62828;">يوجد فرق (متبقي)</strong>
           </div>
           <div class="detail-row">
