@@ -1795,7 +1795,7 @@ function generateHeirsTable() {
   const dims = getLandDimensions();
 
   for (let i = 0; i < count; i++) {
-    const defaultName = `الوارث ${i + 1}`;
+    const defaultName = `شريك ${i + 1}`;
     const name = (oldHeirs[i] && oldHeirs[i].name) ? oldHeirs[i].name : defaultName;
     const share = (oldHeirs[i] && oldHeirs[i].share > 0 && oldHeirs.length === count) ? oldHeirs[i].share : equalShare;
     
@@ -1990,7 +1990,7 @@ function renderHeirsRows() {
     const conv = convertSqmToFeddans(heir.share, caratSize);
     
     // Build select dropdown option for other heirs
-    let optionsHtml = `<option value="all">باقي الورثة بالتساوي</option>`;
+    let optionsHtml = `<option value="all">باقي الشركاء بالتساوي</option>`;
     heirsData.forEach((oth, oIdx) => {
       if (oIdx !== idx) {
         optionsHtml += `<option value="${oIdx}">${oth.name}</option>`;
@@ -2146,7 +2146,7 @@ function applyShareDiff(idx, diff) {
       });
 
       if (!valid) {
-        alert("فشل التعديل: التعديل سيؤدي لحصة سالبة لأحد الورثة. يرجى اختيار جهة خصم مخصصة.");
+        alert("فشل التعديل: التعديل سيؤدي لحصة سالبة لأحد الشركاء. يرجى اختيار جهة خصم مخصصة.");
         renderHeirsRows();
         return;
       }
@@ -2507,7 +2507,7 @@ function printCroquis() {
 <div class="page">
   <div class="header">
     <h1>الدَّلاَّل</h1>
-    <h2>تقرير تقسيم الأرض على الورثة</h2>
+    <h2>تقرير تقسيم الأرض على الشركاء</h2>
     <div class="date-line">تاريخ الطباعة: ${dateStr} — ${timeStr}</div>
   </div>
 
@@ -2520,7 +2520,7 @@ function printCroquis() {
   ${areaSection}
 
   <div class="section">
-    <div class="section-title">توزيع الأنصبة على الورثة أو الشركاء</div>
+    <div class="section-title">توزيع الأنصبة على الشركاء</div>
     <table>
       <thead>
         <tr>
