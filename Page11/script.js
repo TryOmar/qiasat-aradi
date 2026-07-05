@@ -51,23 +51,7 @@ function setupSVGInteractions() {
   const container = document.getElementById("croquis-container");
   if(!container) return;
   
-  // === Mouse Events (سطح المكتب) ===
-  // تم إيقاف خاصية السحب لتحريك الصورة بناءً على طلب المستخدم
-  
-  // تكبير/تصغير بعجلة الفأرة
-  container.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const rect = container.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const factor = e.deltaY < 0 ? 1.12 : 0.9;
-    zoomAroundPoint(factor, mouseX, mouseY);
-  }, { passive: false });
-  
-  // === Touch Events (الجوال) ===
-  container.addEventListener("touchstart", handleTouchStart, { passive: false });
-  container.addEventListener("touchmove", handleTouchMove, { passive: false });
-  container.addEventListener("touchend", handleTouchEnd, { passive: false });
+  // تم إيقاف خاصية السحب والتكبير بناءً على طلب المستخدم
 }
 
 function getTouchDistance(t1, t2) {
@@ -837,6 +821,20 @@ function calculateGeneral() {
     if (document.getElementById("calc-area-acre")) document.getElementById("calc-area-acre").innerText = acres;
     if (document.getElementById("calc-area-carat")) document.getElementById("calc-area-carat").innerText = carats;
     if (document.getElementById("calc-area-shares")) document.getElementById("calc-area-shares").innerText = shares.toFixed(2);
+
+    if (document.getElementById("total-area-feddans-res")) document.getElementById("total-area-feddans-res").innerText = acres;
+    if (document.getElementById("total-area-carats-res")) document.getElementById("total-area-carats-res").innerText = carats;
+    if (document.getElementById("total-area-shares-res")) document.getElementById("total-area-shares-res").innerText = shares.toFixed(2);
+  }
+
+  if (document.getElementById("total-area-sqm-res")) {
+    document.getElementById("total-area-sqm-res").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("carat-area-res")) {
+    document.getElementById("carat-area-res").innerText = caratArea;
+  }
+  if (document.getElementById("total-perimeter-res")) {
+    document.getElementById("total-perimeter-res").innerText = perimeter.toFixed(2) + " م";
   }
 
   let rows = document.querySelectorAll("#partners-list .partner-row");
