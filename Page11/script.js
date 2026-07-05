@@ -372,9 +372,21 @@ function renderHeaderAndFooter() {
   const footerContainer = document.getElementById("total");
   
   if (currentInputMethod === "carats") {
-    headerContainer.innerHTML = '';
-    headerContainer.style.display = 'none';
-
+    headerContainer.innerHTML = `
+      <p>م</p>
+      <p>الشريك</p>
+      <p>سهم</p>
+      <p>قيراط</p>
+      <p>فدان</p>
+      <p>المساحة (م²)</p>
+      <p>النسبة (%)</p>
+      <p>العرض الأول (أعلى)</p>
+      <p>العرض الثاني (أسفل)</p>
+      <p>العلامة (م)</p>
+      <p>الفاصل (م)</p>
+      <p></p>
+    `;
+    
     footerContainer.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
@@ -390,9 +402,21 @@ function renderHeaderAndFooter() {
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
     `;
   } else {
-    headerContainer.innerHTML = '';
-    headerContainer.style.display = 'none';
-
+    headerContainer.innerHTML = `
+      <p>م</p>
+      <p>الشريك</p>
+      <p>النسبة / الكسر</p>
+      <p>تعادل (س.ق.ف)</p>
+      <p style="display:none;"></p>
+      <p>المساحة (م²)</p>
+      <p>النسبة (%)</p>
+      <p>العرض الأول (أعلى)</p>
+      <p>العرض الثاني (أسفل)</p>
+      <p>العلامة (م)</p>
+      <p>الفاصل (م)</p>
+      <p></p>
+    `;
+    
     footerContainer.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
@@ -617,77 +641,42 @@ function deletePartnerRow(button) {
 function updateRowsReadOnlyStatus() {
   const rows = document.querySelectorAll("#partners-list .partner-row");
   rows.forEach((row, index) => {
-    const isFirst = (index === 0);
     const feddansInput = row.querySelector(".partner-feddans");
     const caratsInput = row.querySelector(".partner-carats");
     const sharesInput = row.querySelector(".partner-shares");
     const fractionInput = row.querySelector(".partner-fraction");
     const deleteBtn = row.querySelector(".delete-row-btn");
     
-    if (isFirst) {
-      if (feddansInput) {
-        feddansInput.readOnly = true;
-        feddansInput.style.backgroundColor = "#f5f5f5";
-        feddansInput.style.color = "#777";
-        feddansInput.style.cursor = "not-allowed";
-        feddansInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
-      }
-      if (caratsInput) {
-        caratsInput.readOnly = true;
-        caratsInput.style.backgroundColor = "#f5f5f5";
-        caratsInput.style.color = "#777";
-        caratsInput.style.cursor = "not-allowed";
-        caratsInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
-      }
-      if (sharesInput) {
-        sharesInput.readOnly = true;
-        sharesInput.style.backgroundColor = "#f5f5f5";
-        sharesInput.style.color = "#777";
-        sharesInput.style.cursor = "not-allowed";
-        sharesInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
-      }
-      if (fractionInput) {
-        fractionInput.readOnly = true;
-        fractionInput.style.backgroundColor = "#f5f5f5";
-        fractionInput.style.color = "#777";
-        fractionInput.style.cursor = "not-allowed";
-        fractionInput.title = "يُحسب تلقائياً كباقي مساحة الأرض";
-      }
-      if (deleteBtn) {
-        deleteBtn.style.visibility = "hidden";
-      }
-    } else {
-      if (feddansInput) {
-        feddansInput.readOnly = false;
-        feddansInput.style.backgroundColor = "";
-        feddansInput.style.color = "";
-        feddansInput.style.cursor = "";
-        feddansInput.removeAttribute("title");
-      }
-      if (caratsInput) {
-        caratsInput.readOnly = false;
-        caratsInput.style.backgroundColor = "";
-        caratsInput.style.color = "";
-        caratsInput.style.cursor = "";
-        caratsInput.removeAttribute("title");
-      }
-      if (sharesInput) {
-        sharesInput.readOnly = false;
-        sharesInput.style.backgroundColor = "";
-        sharesInput.style.color = "";
-        sharesInput.style.cursor = "";
-        sharesInput.removeAttribute("title");
-      }
-      if (fractionInput) {
-        fractionInput.readOnly = false;
-        fractionInput.style.backgroundColor = "";
-        fractionInput.style.color = "";
-        fractionInput.style.cursor = "";
-        fractionInput.removeAttribute("title");
-      }
-      if (deleteBtn) {
-        deleteBtn.style.visibility = "visible";
-      }
+    if (feddansInput) {
+      feddansInput.readOnly = false;
+      feddansInput.style.backgroundColor = "";
+      feddansInput.style.color = "";
+      feddansInput.style.cursor = "";
+      feddansInput.removeAttribute("title");
+    }
+    if (caratsInput) {
+      caratsInput.readOnly = false;
+      caratsInput.style.backgroundColor = "";
+      caratsInput.style.color = "";
+      caratsInput.style.cursor = "";
+      caratsInput.removeAttribute("title");
+    }
+    if (sharesInput) {
+      sharesInput.readOnly = false;
+      sharesInput.style.backgroundColor = "";
+      sharesInput.style.color = "";
+      sharesInput.style.cursor = "";
+      sharesInput.removeAttribute("title");
+    }
+    if (fractionInput) {
+      fractionInput.readOnly = false;
+      fractionInput.style.backgroundColor = "";
+      fractionInput.style.color = "";
+      fractionInput.style.cursor = "";
+      fractionInput.removeAttribute("title");
+    }
+    if (deleteBtn) {
+      deleteBtn.style.visibility = "visible";
     }
   });
 }
@@ -824,42 +813,7 @@ function calculateGeneral() {
   
   updateRowsReadOnlyStatus();
 
-  let otherCaratsSum = 0;
-  let otherFractionsSum = 0;
-  
-  rows.forEach((row, index) => {
-    if (index > 0) {
-      if (currentInputMethod === "carats") {
-        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-        otherCaratsSum += (f * 24) + c + (s / 24);
-      } else {
-        const fracInput = row.querySelector(".partner-fraction");
-        const fracVal = parseFraction(fracInput ? fracInput.value : "");
-        otherFractionsSum += fracVal;
-      }
-    }
-  });
-
-  const firstRow = rows[0];
-  if (currentInputMethod === "carats") {
-    const totalCaratsOfLand = caratArea > 0 ? (totalAreaM2 / caratArea) : 0;
-    const firstPartnerCarats = Math.max(0, totalCaratsOfLand - otherCaratsSum);
-    
-    const f = Math.floor(firstPartnerCarats / 24);
-    const c = Math.floor(firstPartnerCarats % 24);
-    const s = Number(((firstPartnerCarats - (f * 24 + c)) * 24).toFixed(2));
-    
-    if (firstRow.querySelector(".partner-feddans")) firstRow.querySelector(".partner-feddans").value = f;
-    if (firstRow.querySelector(".partner-carats")) firstRow.querySelector(".partner-carats").value = c;
-    if (firstRow.querySelector(".partner-shares")) firstRow.querySelector(".partner-shares").value = s;
-  } else {
-    const firstPartnerFraction = Math.max(0, 1 - otherFractionsSum);
-    if (firstRow.querySelector(".partner-fraction")) {
-      firstRow.querySelector(".partner-fraction").value = firstPartnerFraction === 0 ? "0" : Number(firstPartnerFraction.toFixed(4));
-    }
-  }
+  // No automatic 'first row remaining' calculation anymore
 
   let totalDistributedArea = 0;
   let totalFeddansEntered = 0;
@@ -1345,18 +1299,14 @@ function divideEqually() {
     const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
     
     rows.forEach((row, index) => {
-      if (index > 0) {
-        if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f;
-        if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c;
-        if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s;
-      }
+      if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f;
+      if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c;
+      if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s;
     });
   } else {
     rows.forEach((row, index) => {
-      if (index > 0) {
-        if (row.querySelector(".partner-fraction")) {
-          row.querySelector(".partner-fraction").value = `1/${numPartners}`;
-        }
+      if (row.querySelector(".partner-fraction")) {
+        row.querySelector(".partner-fraction").value = `1/${numPartners}`;
       }
     });
   }
