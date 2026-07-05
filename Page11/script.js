@@ -1533,6 +1533,27 @@ function renderCroquis() {
   const w_virtual = w * stretchX;
   const maxLen_virtual = maxLen * stretchY;
 
+  // تغيير ارتفاع الحاوية ديناميكياً بناءً على نسبة أبعاد الكروكي (مثل صفحة 13)
+  const wrapper = document.getElementById("croquis-wrapper");
+  if (wrapper && !window.isExporting) {
+    const parentWidth = wrapper.parentElement.clientWidth || 700;
+    const targetWidth = parentWidth - 24; // مسافة الهوامش
+    
+    // نسبة الأبعاد (shapeRatio)
+    const shapeRatio = w_virtual / (maxLen_virtual || 1);
+    let targetRatio = Math.max(0.45, Math.min(2.2, shapeRatio));
+    
+    let targetHeight = targetWidth / targetRatio;
+    const maxHeight = 650;
+    if (targetHeight > maxHeight) {
+      targetHeight = maxHeight;
+    }
+    targetHeight = Math.max(280, targetHeight);
+    
+    // تطبيق الارتفاع على الـ wrapper
+    wrapper.style.setProperty("height", targetHeight + "px", "important");
+  }
+
   const container = document.getElementById("croquis-container");
   
   // استخدام حجم الحاوية الفعلي أو حجم التصدير العالي
@@ -1617,10 +1638,8 @@ function renderCroquis() {
       if (showCroquisNames || showCroquisMeasurements) {
         const cardGroup = svgEl("g");
         
-        // إذا كان التمدد البصري مفعلاً للأراضي الزراعية الطويلة (stretchX > 1.0)، نقوم بتدوير البطاقة بزاوية -90 درجة
-        if (stretchX > 1.0) {
-          cardGroup.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
-        }
+        // تدوير بطاقة الشريك دائماً بزاوية -90 درجة (مثل صفحة 13)
+        cardGroup.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
 
         const cardWidth = 90 * textScale;
         const cardHeight = 45 * textScale;
@@ -1708,21 +1727,24 @@ function renderCroquis() {
         if (showCroquisMeasurements) {
           const midFasil = (y1 + y4) / 2;
 
-          // نقطة خضراء في منتصف الفاصل
+          // مقبض الفاصل الأخضر ذو الحدود البيضاء (مثل صفحة 13)
           const cDot = svgEl("circle");
           cDot.setAttribute("cx", x1);
           cDot.setAttribute("cy", midFasil);
-          cDot.setAttribute("r", 4.5 * textScale);
-          cDot.setAttribute("fill", "#2e7d32"); // أخضر
+          cDot.setAttribute("r", 6 * textScale);
+          cDot.setAttribute("fill", "#388e3c");
+          cDot.setAttribute("stroke", "#ffffff");
+          cDot.setAttribute("stroke-width", 1.5 * textScale);
           g.appendChild(cDot);
 
-          // قيمة الفاصل (الأخضر الداكن ومحاذي للخط)
-          const fasilText = svgText(x1 - 10 * textScale, midFasil, piece.leftLine.toFixed(2) + " م", {
-            fill: "#2e7d32", // أخضر
-            size: "11",
+          // موضع طول الفاصل في الثلث العلوي عند 0.25 من الأعلى (مثل صفحة 13)
+          const y_fasil_pos = y4 + 0.25 * (y1 - y4);
+          const fasilText = svgText(x1 - 10 * textScale, y_fasil_pos, piece.leftLine.toFixed(2) + " م", {
+            fill: "#1b5e20", // أخضر داكن مثل صفحة 13
+            size: "10.5",
             weight: "bold",
             bg: true,
-            transform: `rotate(-90, ${x1 - 10 * textScale}, ${midFasil})`,
+            transform: `rotate(-90, ${x1 - 10 * textScale}, ${y_fasil_pos})`,
           });
           g.appendChild(fasilText);
         }
@@ -2921,4 +2943,9 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
+});
+
+// مستمع لتغيير حجم الشاشة لإعادة رسم وتجاوب الكروكي (مثل صفحة 13)
+window.addEventListener("resize", function() {
+  renderCroquis();
 });

@@ -575,7 +575,8 @@ body {
 /* منطقة الرسمالخارجية */
 .canvas-wrapper {
   width: 100% !important;
-  height: 420px !important;
+  height: auto !important;
+  min-height: 280px !important;
   background-color: #eaeff2 !important;
   position: relative !important;
   display: flex !important;
