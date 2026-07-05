@@ -1773,7 +1773,7 @@ function renderCroquis() {
     g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#2e7d32", width: "2" }));
     
     const lMidY = (lY1 + lY2) / 2;
-    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, "الطول الأيسر: " + l2 + " م", {
+    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, l2 + " م", {
       anchor: "start",
       fill: "#2e7d32",
       size: "13",
@@ -1799,7 +1799,7 @@ function renderCroquis() {
     g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#2e7d32", width: "2" }));
     
     const rMidY = (rY1 + rY2) / 2;
-    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, "الطول الأيمن: " + l1 + " م", {
+    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, l1 + " م", {
       anchor: "start",
       fill: "#2e7d32",
       size: "13",
@@ -1824,7 +1824,7 @@ function renderCroquis() {
     g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     
-    g.appendChild(svgText((bX1 + bX2) / 2, bY + 16 * textScale, "العرض الأول: " + w1 + " م", {
+    g.appendChild(svgText((bX1 + bX2) / 2, bY + 16 * textScale, w1 + " م", {
       fill: "#2e7d32",
       size: "13",
       weight: "bold",
@@ -1848,7 +1848,7 @@ function renderCroquis() {
     g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
     
-    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY - 8 * textScale, "العرض الثاني (أعلى): " + w2 + " م", {
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY - 8 * textScale, w2 + " م", {
       fill: "#2e7d32",
       size: "13",
       weight: "bold",
