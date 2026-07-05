@@ -856,9 +856,9 @@ function calculateAll() {
     const h = parseFloat(document.getElementById("trap-height").value) || 0; // height (الطول)
 
     dimensionInputs = [
-      { name: "القاعدة العلوية", value: c },
-      { name: "القاعدة السفلية", value: a },
-      { name: "الطول (أو الارتفاع)", value: h }
+      { name: "العرض الأول (أعلى)", value: c },
+      { name: "العرض الثاني (أسفل)", value: a },
+      { name: "الطول", value: h }
     ];
 
     if (a > 0 && c > 0 && h > 0) {
@@ -871,9 +871,9 @@ function calculateAll() {
       perimeter = a + c + 2 * calculatedSide;
 
       stepsText = `الشكل المختار: شبه منحرف زراعي (مبسط)\n` +
-                  `المعادلة: المساحة = 0.5 × (القاعدة السفلية + القاعدة العلوية) × الطول\n` +
+                  `المعادلة: المساحة = 0.5 × (العرض الثاني (أسفل) + العرض الأول (أعلى)) × الطول\n` +
                   `الحساب: 0.5 × (${a} + ${c}) × ${h} = ${area.toFixed(2)} متر مربع\n` +
-                  `المحيط (تقريبي) = مجموع الأضلاع الأربعة = ${a} + ${c} + ${calculatedSide.toFixed(2)} (جانب أيسر) + ${calculatedSide.toFixed(2)} (جانب أيمن) = ${perimeter.toFixed(2)} متر`;
+                  `المحيط (تقريبي) = مجموع الأبعاد الأربعة = ${a} + ${c} + ${calculatedSide.toFixed(2)} (طول أيمن) + ${calculatedSide.toFixed(2)} (طول أيسر) = ${perimeter.toFixed(2)} متر`;
 
       // Coordinates (Centered top base)
       const dxLeft = (a - c) / 2;
