@@ -1,4 +1,4 @@
-let currentInputMethod = "carats";
+﻿let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -540,12 +540,6 @@ function handleInputMethodChange() {
 function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-") {
   // تصفية وضع التعديل قبل إضافة صف جديد لضمان تحديث الحسابات فوراً
   if (!name && !feddans && !carats && !shares && !fraction) {
-    clearAutoCloseTimer();
-    isEditing = false;
-    activeFieldBefore = null;
-    if (activeInput) {
-      activeInput.blur();
-    }
   }
 
   const list = document.getElementById("partners-list");
@@ -675,12 +669,6 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
 
 function deletePartnerRow(button) {
   // إلغاء وضع التعديل وتصفير مؤقت لوحة المفاتيح لتفادي تعارض الحسابات
-  clearAutoCloseTimer();
-  isEditing = false;
-  activeFieldBefore = null;
-  if (activeInput) {
-    activeInput.blur();
-  }
 
   const row = button.parentElement;
   row.remove();
@@ -2653,4 +2641,5 @@ function onShareInput() {
 window.addEventListener("resize", function() {
   renderCroquis();
 });
+
 
