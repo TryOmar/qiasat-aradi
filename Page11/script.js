@@ -1069,6 +1069,7 @@ function calculateGeneral() {
   }
   
   adjustNameColumnWidth();
+  populateConversionsTable();
   renderCroquis();
   updateCalculationSteps();
 }
@@ -2539,6 +2540,123 @@ function updateCalculationSteps() {
       container.style.maxHeight = container.scrollHeight + "px";
     }
   }
+}
+
+// ============================================================
+//   دوال التحويل للقصبة والقبضة (مأخوذة من صفحة 13)
+// ============================================================
+function toQasabaAndQabda(meters) {
+  if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
+  const qasabaLength = 3.55;
+  const qabdaLength = qasabaLength / 24;
+  
+  let qasaba = Math.floor(meters / qasabaLength);
+  let rem = meters - (qasaba * qasabaLength);
+  let qabda = Math.floor(rem / qabdaLength);
+  let fraction = (rem - (qabda * qabdaLength)) / qabdaLength;
+  return {
+    qasaba: qasaba,
+    qabda: qabda,
+    fraction: parseFloat(fraction.toFixed(2))
+  };
+}
+
+function renderConversionRow(label, metersVal) {
+  const result = toQasabaAndQabda(metersVal);
+  return `
+    <tr class="conv-row">
+      <td class="conv-label-cell">
+        <span class="conv-dim-name" style="color: #673ab7; font-weight: bold;">${label}</span>
+        <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 8px; font-size: 13px; margin-right: auto; display: inline-block;">
+          <span>${metersVal.toFixed(4)}</span> م
+        </span>
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-fraction" value="${result.fraction}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-qabda" value="${result.qabda}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-qasaba" value="${result.qasaba}" readonly style="text-align: center; background: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+    </tr>
+  `;
+}
+
+function renderSquareConversionRow(label, areaSqm) {
+  const qasba_sq = areaSqm / 12.60250;
+  const reedValue = Math.floor(qasba_sq);
+  const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+  const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+  
+  return `
+    <tr class="conv-row" style="background-color: #fcfcfc;">
+      <td class="conv-label-cell" style="font-weight: bold;">
+        <span class="conv-dim-name" style="color: #2e7d32; font-weight: bold;">${label}</span>
+        <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 8px; font-size: 13px; margin-right: auto; display: inline-block;">
+          <span>${areaSqm.toFixed(4)}</span> م²
+        </span>
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+      <td class="conv-input-cell">
+        <input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly style="text-align: center; background-color: #f5f5f5; color: #555; pointer-events: none; border: 1px solid #ccc; border-radius: 4px; width: 100%;">
+      </td>
+    </tr>
+  `;
+}
+
+function populateConversionsTable() {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  const h_total = (l1 + l2) / 2;
+  const w = (w1 + w2) / 2;
+  const totalAreaM2 = h_total * w;
+
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+
+  const tbody = document.getElementById("page11-conversions-tbody");
+  const section = document.getElementById("conversion-section");
+  if (!tbody || !section) return;
+
+  if (totalAreaM2 <= 0) {
+    section.style.display = "none";
+    return;
+  }
+
+  let html = "";
+  html += renderConversionRow("القاعدة العلوية", w2);
+  html += renderConversionRow("القاعدة السفلية", w1);
+  html += renderConversionRow("الطول أو الارتفاع", h_total);
+  html += renderSquareConversionRow("النتيجة بالقصبة المربعة", totalAreaM2);
+  
+  const partnersList = document.getElementById("partners-list");
+  if (caratArea > 0 && partnersList && partnersList.children.length > 0) {
+    const totalQirats = totalAreaM2 / caratArea;
+    const botQiratWidth = w1 / totalQirats;
+    const topQiratWidth = w2 / totalQirats;
+    
+    // إظهار صفوف عرض القيراط فقط إذا كان هناك اختلاف فعلي لتجنب التكرار إذا كان العرض متساوي
+    if (botQiratWidth > 0 && topQiratWidth > 0 && Math.abs(w1 - w2) > 0.001) {
+       html += renderConversionRow("عرض القيراط عند الحد العلوي", topQiratWidth);
+       html += renderConversionRow("عرض القيراط عند الحد السفلي", botQiratWidth);
+    } else if (botQiratWidth > 0 && topQiratWidth > 0 && Math.abs(w1 - w2) <= 0.001) {
+       html += renderConversionRow("عرض القيراط", botQiratWidth);
+    }
+  }
+
+  tbody.innerHTML = html;
+  section.style.display = "block";
 }
 
 let isQiratInfoOpen = false;
