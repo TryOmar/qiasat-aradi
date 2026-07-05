@@ -287,6 +287,10 @@ function toggleCroquisMeasurements() {
 }
 
 function saveData() {
+  const longPlotView = document.getElementById("long-plot-view");
+  if (longPlotView) {
+    localStorage.setItem("p11-long-plot-view", longPlotView.value);
+  }
   localStorage.setItem("p11-length1", document.getElementById("length1").value);
   localStorage.setItem("p11-length2", document.getElementById("length2").value);
   localStorage.setItem("p11-width1", document.getElementById("width1").value);
@@ -335,6 +339,10 @@ function saveData() {
 }
 
 function loadData() {
+  const longPlotView = document.getElementById("long-plot-view");
+  if (longPlotView) {
+    longPlotView.value = localStorage.getItem("p11-long-plot-view") || "agricultural";
+  }
   document.getElementById("length1").value = localStorage.getItem("p11-length1") || "";
   document.getElementById("length2").value = localStorage.getItem("p11-length2") || "";
   document.getElementById("width1").value = localStorage.getItem("p11-width1") || "";
@@ -1501,6 +1509,29 @@ function renderCroquis() {
   if (placeholder) placeholder.style.display = "none";
 
   const w = (w1 + w2) / 2;
+  const maxLen = Math.max(l1, l2);
+
+  // حساب معامل التمدد البصري للأراضي الطويلة جداً أو العريضة جداً
+  let stretchX = 1.0;
+  let stretchY = 1.0;
+
+  const viewType = document.getElementById("long-plot-view")?.value || "agricultural";
+  if (viewType === "agricultural" && w > 0 && maxLen > 0) {
+    const ratio = w / maxLen;
+    const invRatio = maxLen / w;
+    // إذا كانت الأرض طويلة ونحيفة جداً رأسياً (الارتفاع أكبر من العرض بـ 3.5 أضعاف)
+    if (invRatio > 3.5) {
+      stretchX = invRatio / 3.5; // نمدد العرض أفقياً لتملأ الشاشة بمعدل 3.5:1 كحد أقصى
+    }
+    // إذا كانت الأرض عريضة ونحيفة جداً أفقياً (العرض أكبر من الارتفاع بـ 3.5 أضعاف)
+    else if (ratio > 3.5) {
+      stretchY = ratio / 3.5; // نمدد الطول رأسياً لتملأ الشاشة بمعدل 3.5:1 كحد أقصى
+    }
+  }
+
+  const w_virtual = w * stretchX;
+  const maxLen_virtual = maxLen * stretchY;
+
   const container = document.getElementById("croquis-container");
   
   // استخدام حجم الحاوية الفعلي أو حجم التصدير العالي
@@ -1512,27 +1543,23 @@ function renderCroquis() {
   }
   
   const textScale = window.isExporting ? 2.2 : 1;
-  const paddingH = window.isExporting ? 75 * textScale : 35;  // هامش أفقي (مصغر للشاشة ومكبر للتصدير)
-  const paddingV = window.isExporting ? 65 * textScale : 30;  // هامش رأسي (مصغر للشاشة ومكبر للتصدير)
-  const maxLen = Math.max(l1, l2);
+  const paddingH = window.isExporting ? 75 * textScale : 65;  // هامش أفقي لتفادي قص النصوص
+  const paddingV = window.isExporting ? 65 * textScale : 60;  // هامش رأسي لتفادي قص النصوص
 
-  const scaleX = (containerW - paddingH * 2) / w;
-  const scaleY = (containerH - paddingV * 2) / maxLen;
+  const scaleX = (containerW - paddingH * 2) / w_virtual;
+  const scaleY = (containerH - paddingV * 2) / maxLen_virtual;
   const drawScale = Math.min(scaleX, scaleY);
 
-  const drawnW = w * drawScale;
-  const drawnH = maxLen * drawScale;
+  const drawnW = w_virtual * drawScale;
+  const drawnH = maxLen_virtual * drawScale;
   const offsetX = (containerW - drawnW) / 2;
   const offsetY = (containerH - drawnH) / 2;
 
-  // دوال التحويل (الأرض موجهة أفقياً - العرض أفقي، الطول رأسي)
-  // الطول الأيمن (l1) على اليمين البصري = mapX(w)
-  // الطول الأيسر (l2) على اليسار البصري = mapX(0)
-  const mapX = (x) => offsetX + x * drawScale;
-  const mapY = (y) => containerH - (offsetY + y * drawScale);
+  // دوال التحويل مع تطبيق معامل التمدد البصري
+  const mapX = (x) => offsetX + (x * stretchX) * drawScale;
+  const mapY = (y) => containerH - (offsetY + (y * stretchY) * drawScale);
 
   // k = معدل التغير في الطول بالنسبة للعرض
-  // l2 (يسار) في mapX(0)، l1 (يمين) في mapX(w)
   const k = (l1 - l2) / w;
 
   // === 1. الظل تحت الأرض ===
@@ -1585,78 +1612,116 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // === اسم الشريك ===
-      if (showCroquisNames) {
-        let nameY = cy;
-        if (showCroquisMeasurements) {
-          nameY = cy - 22 * textScale;
+      // 1. رسم بطاقة الشريك (Partner Card)
+      if (showCroquisNames || showCroquisMeasurements) {
+        const cardGroup = svgEl("g");
+        
+        // إذا كان التمدد البصري مفعلاً للأراضي الزراعية الطويلة (stretchX > 1.0)، نقوم بتدوير البطاقة بزاوية -90 درجة
+        if (stretchX > 1.0) {
+          cardGroup.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
         }
-        const nameText = svgText(cx, nameY, piece.name, {
-          fill: color.text,
-          size: "14",
-          weight: "bold",
-          bg: true,
-        });
-        g.appendChild(nameText);
+
+        const cardWidth = 90 * textScale;
+        const cardHeight = 45 * textScale;
+
+        // خلفية البطاقة (مستطيل ذو زوايا مستديرة وظل خفيف)
+        const cardRect = svgEl("rect");
+        cardRect.setAttribute("x", cx - cardWidth / 2);
+        cardRect.setAttribute("y", cy - cardHeight / 2);
+        cardRect.setAttribute("width", cardWidth);
+        cardRect.setAttribute("height", cardHeight);
+        cardRect.setAttribute("fill", "#ffffff");
+        cardRect.setAttribute("stroke", "#e0e0e0");
+        cardRect.setAttribute("stroke-width", 1.5 * textScale);
+        cardRect.setAttribute("rx", 6 * textScale);
+        cardRect.setAttribute("ry", 6 * textScale);
+        cardRect.setAttribute("filter", "url(#shadow-filter)");
+        cardGroup.appendChild(cardRect);
+
+        // اسم الشريك (بالأسود العريض)
+        if (showCroquisNames) {
+          const nameText = svgEl("text");
+          nameText.setAttribute("x", cx);
+          nameText.setAttribute("y", cy - 4 * textScale);
+          nameText.setAttribute("fill", "#263238");
+          nameText.setAttribute("font-size", 11 * textScale + "px");
+          nameText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          nameText.setAttribute("text-anchor", "middle");
+          nameText.setAttribute("font-weight", "bold");
+          nameText.textContent = piece.name || `شريك ${index + 1}`;
+          cardGroup.appendChild(nameText);
+        }
+
+        // المساحة (بالأزرق العريض)
+        if (showCroquisMeasurements) {
+          const areaText = svgEl("text");
+          areaText.setAttribute("x", cx);
+          areaText.setAttribute("y", cy + 13 * textScale);
+          areaText.setAttribute("fill", "#1565c0"); // أزرق داكن
+          areaText.setAttribute("font-size", 10.5 * textScale + "px");
+          areaText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          areaText.setAttribute("text-anchor", "middle");
+          areaText.setAttribute("font-weight", "bold");
+          areaText.textContent = Number(piece.area.toFixed(2)) + " م²";
+          cardGroup.appendChild(areaText);
+        }
+
+        g.appendChild(cardGroup);
       }
 
-      // === المساحة ===
+      // 2. عرض عروض القطع باللون الأحمر مباشرة على الحدود العليا والسفلى لكل قطعة
       if (showCroquisMeasurements) {
-        let areaY = cy;
-        if (showCroquisNames) {
-          areaY = cy - 6 * textScale;
-        }
-        // مستطيل خلفية للمساحة
-        const areaLabel = Number(piece.area.toFixed(2)) + " م²";
-        const areaText = svgText(cx, areaY, areaLabel, {
-          fill: "#333",
-          size: "12",
-          weight: "bold",
-          bg: true,
-        });
-        g.appendChild(areaText);
-
-        // عرض القطعة (أسفل)
-        const botWLabel = "أسفل: " + piece.botW.toFixed(2) + " م";
-        const botWText = svgText(cx, cy + 10 * textScale, botWLabel, {
-          fill: color.stroke,
+        // العرض السفلي للقطعة (أعلى الحدود السفلية)
+        const botWText = svgText(cx, mapY(0) - 8 * textScale, piece.botW.toFixed(2), {
+          fill: "#c62828", // أحمر
           size: "11",
           weight: "bold",
           bg: true,
         });
         g.appendChild(botWText);
 
-        // عرض القطعة (أعلى)
-        const topWLabel = "أعلى: " + piece.topW.toFixed(2) + " م";
-        const topWText = svgText(cx, cy + 26 * textScale, topWLabel, {
-          fill: color.stroke,
+        // العرض العلوي للقطعة (أسفل الحدود العليا)
+        const y_top_mid = (y3 + y4) / 2;
+        const topWText = svgText(cx, y_top_mid + 14 * textScale, piece.topW.toFixed(2), {
+          fill: "#c62828", // أحمر
           size: "11",
           weight: "bold",
           bg: true,
         });
         g.appendChild(topWText);
+      }
 
-        // خط الفاصل مع قيمته
-        if (index > 0) {
-          // خط الفاصل العمودي
-          const divLine = svgEl("line");
-          divLine.setAttribute("x1", x1);
-          divLine.setAttribute("y1", y1);
-          divLine.setAttribute("x2", x1);
-          divLine.setAttribute("y2", y4);
-          divLine.setAttribute("stroke", "#d84315");
-          divLine.setAttribute("stroke-width", 2 * textScale);
-          divLine.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
-          g.appendChild(divLine);
+      // 3. خطوط القسمة والفواصل الداخلية مع القيم والنقاط الخضراء
+      if (index > 0) {
+        // خط الفاصل العمودي (بالأزرق المقطع)
+        const divLine = svgEl("line");
+        divLine.setAttribute("x1", x1);
+        divLine.setAttribute("y1", y1);
+        divLine.setAttribute("x2", x1);
+        divLine.setAttribute("y2", y4);
+        divLine.setAttribute("stroke", "#1976d2"); // أزرق
+        divLine.setAttribute("stroke-width", 2 * textScale);
+        divLine.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
+        g.appendChild(divLine);
 
-          // قيمة الفاصل
+        if (showCroquisMeasurements) {
           const midFasil = (y1 + y4) / 2;
-          const fasilText = svgText(x1, midFasil, piece.leftLine.toFixed(4) + " م", {
-            fill: "#d84315",
+
+          // نقطة خضراء في منتصف الفاصل
+          const cDot = svgEl("circle");
+          cDot.setAttribute("cx", x1);
+          cDot.setAttribute("cy", midFasil);
+          cDot.setAttribute("r", 4.5 * textScale);
+          cDot.setAttribute("fill", "#2e7d32"); // أخضر
+          g.appendChild(cDot);
+
+          // قيمة الفاصل (الأخضر الداكن ومحاذي للخط)
+          const fasilText = svgText(x1 - 10 * textScale, midFasil, piece.leftLine.toFixed(2) + " م", {
+            fill: "#2e7d32", // أخضر
             size: "11",
             weight: "bold",
             bg: true,
-            transform: `rotate(-90, ${x1}, ${midFasil})`,
+            transform: `rotate(-90, ${x1 - 10 * textScale}, ${midFasil})`,
           });
           g.appendChild(fasilText);
         }
