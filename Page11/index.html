@@ -31,19 +31,19 @@
         <div class="dynamic-inputs-container">
           <div class="input-row">
             <label for="length1">الطول الأيمن بالمتر:</label>
-            <input tabindex="1" dir="auto" type="text" inputmode="none" id="length1" placeholder="مثال: 50" oninput="saveAndCalc()">
+            <input tabindex="1" dir="auto" type="number" step="any" inputmode="decimal" id="length1" placeholder="مثال: 50" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="length2">الطول الأيسر بالمتر:</label>
-            <input tabindex="2" dir="auto" type="text" inputmode="none" id="length2" placeholder="مثال: 45" oninput="saveAndCalc()">
+            <input tabindex="2" dir="auto" type="number" step="any" inputmode="decimal" id="length2" placeholder="مثال: 45" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width1">العرض الأول (أسفل) بالمتر:</label>
-            <input tabindex="3" dir="auto" type="text" inputmode="none" id="width1" placeholder="مثال: 30" oninput="saveAndCalc()">
+            <input tabindex="3" dir="auto" type="number" step="any" inputmode="decimal" id="width1" placeholder="مثال: 30" onblur="saveAndCalc()">
           </div>
           <div class="input-row">
             <label for="width2">العرض الثاني (أعلى) بالمتر:</label>
-            <input tabindex="4" dir="auto" type="text" inputmode="none" id="width2" placeholder="مثال: 35" oninput="saveAndCalc()">
+            <input tabindex="4" dir="auto" type="number" step="any" inputmode="decimal" id="width2" placeholder="مثال: 35" onblur="saveAndCalc()">
           </div>
         </div>
         
@@ -70,7 +70,7 @@
                 <option value="168">168</option>
                 <option value="0">أخرى</option>
               </select>
-              <input type="text" inputmode="none" id="other-carat-area" placeholder="م²" oninput="saveAndCalc()" style="display: none; width: 50px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc;">
+              <input type="number" step="any" inputmode="decimal" id="other-carat-area" placeholder="م²" onblur="saveAndCalc()" style="display: none; width: 50px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc;">
             </div>
           </div>
 
@@ -381,34 +381,6 @@
 
   <script src="../nav.js"></script>
   <script src="script.js"></script>
-
-  <!-- Custom Numpad Keyboard (لوحة مفاتيح رقمية مخصصة) -->
-  <div id="custom-numpad" class="custom-numpad-container">
-    <div class="numpad-row">
-      <button type="button" class="numpad-key" data-val="1" onpointerdown="event.preventDefault()">1</button>
-      <button type="button" class="numpad-key" data-val="2" onpointerdown="event.preventDefault()">2</button>
-      <button type="button" class="numpad-key" data-val="3" onpointerdown="event.preventDefault()">3</button>
-      <button type="button" class="numpad-key numpad-action numpad-backspace" data-val="backspace" onpointerdown="event.preventDefault()">⌫</button>
-    </div>
-    <div class="numpad-row">
-      <button type="button" class="numpad-key" data-val="4" onpointerdown="event.preventDefault()">4</button>
-      <button type="button" class="numpad-key" data-val="5" onpointerdown="event.preventDefault()">5</button>
-      <button type="button" class="numpad-key" data-val="6" onpointerdown="event.preventDefault()">6</button>
-      <button type="button" class="numpad-key numpad-action numpad-prev" data-val="prev" onpointerdown="event.preventDefault()">السابق</button>
-    </div>
-    <div class="numpad-row">
-      <button type="button" class="numpad-key" data-val="7" onpointerdown="event.preventDefault()">7</button>
-      <button type="button" class="numpad-key" data-val="8" onpointerdown="event.preventDefault()">8</button>
-      <button type="button" class="numpad-key" data-val="9" onpointerdown="event.preventDefault()">9</button>
-      <button type="button" class="numpad-key numpad-action numpad-next" data-val="next" onpointerdown="event.preventDefault()">التالي</button>
-    </div>
-    <div class="numpad-row">
-      <button type="button" class="numpad-key" data-val="." onpointerdown="event.preventDefault()">.</button>
-      <button type="button" class="numpad-key" data-val="0" onpointerdown="event.preventDefault()">0</button>
-      <button type="button" class="numpad-key" data-val="," onpointerdown="event.preventDefault()">,</button>
-      <button type="button" class="numpad-key numpad-action numpad-close" data-val="close" onpointerdown="event.preventDefault()">تم</button>
-    </div>
-  </div>
 </body>
 
 </html>

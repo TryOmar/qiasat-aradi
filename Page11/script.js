@@ -1,4 +1,4 @@
-let currentInputMethod = "carats";
+﻿let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.addEventListener("input", saveAndCalc);
+      el.addEventListener("blur", saveAndCalc);
     }
   });
 });
@@ -579,19 +579,19 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()">
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="text" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" inputmode="none">
+        <input type="number" step="any" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="text" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" inputmode="none">
+        <input type="number" step="any" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
-        <input type="text" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" inputmode="none">
+        <input type="number" step="any" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()">
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
@@ -603,11 +603,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أسفل)</span>
-        <input type="text" class="partner-width-bottom" onchange="onWidthChange(this, 'bottom')" value="${botW}" inputmode="none">
+        <input type="number" step="any" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
       </div>
       <div class="col-group width-top-group">
         <span class="mobile-label">العرض الثاني (أعلى)</span>
-        <input type="text" class="partner-width-top" onchange="onWidthChange(this, 'top')" value="${topW}" inputmode="none">
+        <input type="number" step="any" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -627,11 +627,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()">
       </div>
       <div class="col-group fraction-group">
         <span class="mobile-label">النسبة / الكسر</span>
-        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" oninput="onShareInput()" inputmode="none">
+        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" onblur="onShareInput()">
       </div>
       <div class="col-group equiv-group">
         <span class="mobile-label">تعادل (س.ق.ف)</span>
@@ -2648,319 +2648,6 @@ function onShareInput() {
   isManualPartition = false;
   saveAndCalc();
 }
-
-// ===================================================
-// لوحة المفاتيح الرقمية المخصصة (Custom Virtual Numpad)
-// ===================================================
-let activeInput = null;
-
-function isNumericInput(el) {
-  if (!el || el.tagName !== "INPUT") return false;
-  if (el.type === "number") return true;
-  if (el.classList.contains("partner-shares") || 
-      el.classList.contains("partner-carats") || 
-      el.classList.contains("partner-feddans") || 
-      el.classList.contains("partner-fraction") || 
-      el.classList.contains("partner-width-bottom") || 
-      el.classList.contains("partner-width-top")) {
-    return true;
-  }
-  if (el.id === "length1" || el.id === "length2" || el.id === "width1" || el.id === "width2" || el.id === "other-carat-area") {
-    return true;
-  }
-  return false;
-}
-
-function clearAutoCloseTimer() {
-  if (autoCloseTimer) {
-    clearTimeout(autoCloseTimer);
-    autoCloseTimer = null;
-  }
-}
-
-function resetAutoCloseTimer() {
-  clearAutoCloseTimer();
-  if (isEditing && activeFieldBefore) {
-    autoCloseTimer = setTimeout(() => {
-      if (isEditing && activeFieldBefore && document.activeElement === activeFieldBefore) {
-        activeFieldBefore.blur(); // سيقوم بعمل blur تلقائي لإغلاق اللوحة وتشغيل الحسابات والتحقق والتحصيل
-      }
-    }, 800); // 800ms مهلة
-  }
-}
-
-function finishEditingField(field) {
-  if (!field) return;
-  if (!isEditing) return;
-  
-  clearAutoCloseTimer();
-  
-  isEditing = false;
-  activeFieldBefore = null;
-  
-  if (field.classList.contains("partner-width-bottom")) {
-    onWidthChangeActual(field, "bottom");
-  } else if (field.classList.contains("partner-width-top")) {
-    onWidthChangeActual(field, "top");
-  } else {
-    saveAndCalcImmediate();
-  }
-}
-
-function showCustomNumpad() {
-  const numpad = document.getElementById("custom-numpad");
-  if (!numpad) return;
-
-  numpad.classList.add("visible");
-  document.body.style.paddingBottom = "270px"; // حجز مساحة لعدم تغطية الحقول
-  
-  // إخفاء شريط التنقل السفلي لتجنب التداخل مع لوحة المفاتيح
-  const nav = document.querySelector(".nav");
-  if (nav) {
-    nav.style.setProperty("display", "none", "important");
-  }
-  
-  if (activeInput) {
-    setTimeout(() => {
-      activeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 150);
-  }
-}
-
-function hideCustomNumpad() {
-  clearAutoCloseTimer();
-  const numpad = document.getElementById("custom-numpad");
-  if (!numpad) return;
-
-  numpad.classList.remove("visible");
-  document.body.style.paddingBottom = "0px";
-  
-  // إعادة إظهار شريط التنقل السفلي
-  const nav = document.querySelector(".nav");
-  if (nav) {
-    nav.style.setProperty("display", "flex", "important");
-  }
-}
-
-function insertAtCursor(input, char) {
-  if (!input) return;
-  const start = input.selectionStart || 0;
-  const end = input.selectionEnd || 0;
-  const text = input.value;
-  
-  if (char === ",") char = ".";
-  
-  const newText = text.substring(0, start) + char + text.substring(end);
-  input.value = newText;
-  
-  const newCursorPos = start + char.length;
-  input.focus(); // إبقاء التركيز داخل الحقل
-  input.setSelectionRange(newCursorPos, newCursorPos);
-  
-  // تحديث الحسابات تلقائياً
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function handleBackspace(input) {
-  if (!input) return;
-  const start = input.selectionStart || 0;
-  const end = input.selectionEnd || 0;
-  const text = input.value;
-  
-  let newText = "";
-  let newCursorPos = 0;
-  
-  if (start === end) {
-    if (start > 0) {
-      newText = text.substring(0, start - 1) + text.substring(start);
-      newCursorPos = start - 1;
-    } else {
-      return;
-    }
-  } else {
-    newText = text.substring(0, start) + text.substring(end);
-    newCursorPos = start;
-  }
-  
-  input.value = newText;
-  input.focus(); // إبقاء التركيز داخل الحقل
-  input.setSelectionRange(newCursorPos, newCursorPos);
-  
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function moveFocus(direction) {
-  const inputs = Array.from(document.querySelectorAll("input")).filter(isNumericInput);
-  if (inputs.length === 0) return;
-  
-  let index = inputs.indexOf(activeInput);
-  if (index === -1) {
-    inputs[0].focus();
-    return;
-  }
-  
-  if (direction === "next") {
-    index = (index + 1) % inputs.length;
-  } else {
-    index = (index - 1 + inputs.length) % inputs.length;
-  }
-  
-  inputs[index].focus();
-  inputs[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-// تهيئة مستمعي الأحداث للوحة المفاتيح الافتراضية المخصصة
-document.addEventListener("DOMContentLoaded", function() {
-  // مستمعي التركيز
-  document.addEventListener("focusin", function(e) {
-    const target = e.target;
-    if (target && target.tagName === "INPUT") {
-      // إذا كنا نعدل حقلاً آخر سابقاً، ننهي تعديله أولاً لتشغيل التحقق والحساب
-      if (isEditing && activeFieldBefore && activeFieldBefore !== target) {
-        finishEditingField(activeFieldBefore);
-      }
-      
-      isEditing = true;
-      activeFieldBefore = target;
-      
-      if (isNumericInput(target)) {
-        if (target.getAttribute("inputmode") !== "none") {
-          target.setAttribute("inputmode", "none");
-        }
-        activeInput = target;
-        showCustomNumpad();
-        
-        // تحديد النص بالكامل عند التركيز (Select All)
-        setTimeout(() => {
-          if (target === activeInput) {
-            target.select();
-            target.setSelectionRange(0, target.value.length);
-          }
-        }, 50);
-      }
-    }
-  });
-
-  document.addEventListener("focusout", function(e) {
-    setTimeout(() => {
-      // إذا كان التركيز قد انتقل إلى حقل رقمي آخر أو لوحة المفاتيح المخصصة، لا نغلقها
-      if (document.activeElement && (isNumericInput(document.activeElement) || document.activeElement.closest("#custom-numpad"))) {
-        return;
-      }
-      
-      // إذا كنا نخرج من جميع حقول الإدخال، ننهي وضع التحرير ونحسب
-      if (isEditing && activeFieldBefore) {
-        const nextActive = document.activeElement;
-        const isNextInput = nextActive && nextActive.tagName === "INPUT";
-        if (!isNextInput) {
-          finishEditingField(activeFieldBefore);
-        }
-      }
-      
-      hideCustomNumpad();
-    }, 100);
-  });
-
-  // تصفير وبدء مؤقت إغلاق لوحة المفاتيح تلقائياً بمجرد الكتابة
-  document.addEventListener("input", function(e) {
-    if (isEditing && activeFieldBefore === e.target) {
-      resetAutoCloseTimer();
-    }
-  });
-
-  // منع إدخال الأحرف من لوحة المفاتيح الحقيقية (للكمبيوتر ولحماية الحقول)
-  document.addEventListener("keydown", function(e) {
-    const target = e.target;
-    if (target && target.tagName === "INPUT") {
-      if (e.key === "Enter") {
-        target.blur();
-        return;
-      }
-    }
-
-    if (isNumericInput(e.target)) {
-      const key = e.key;
-      const allowedKeys = ["Backspace", "Delete", "Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Escape"];
-      if (allowedKeys.includes(key)) {
-        return; // السماح بالتحكم والحذف
-      }
-      // السماح بنسخ ولصق واختيار الكل
-      if (e.ctrlKey || e.metaKey) {
-        return;
-      }
-      // منع أي حرف ليس رقمًا أو علامة عشرية
-      const isDigit = /^[0-9]$/.test(key);
-      const isSeparator = key === "." || key === "," || key === "،";
-      if (!isDigit && !isSeparator) {
-        e.preventDefault();
-        return;
-      }
-      // تحويل الفاصلة تلقائياً إلى نقطة
-      if (key === "," || key === "،") {
-        e.preventDefault();
-        insertAtCursor(e.target, ".");
-      }
-    }
-  });
-
-  // منع لصق نصوص تحتوي على أحرف غير رقمية وتحويل الفواصل
-  document.addEventListener("paste", function(e) {
-    if (isNumericInput(e.target)) {
-      const clipboardData = e.clipboardData || window.clipboardData;
-      const pastedData = clipboardData.getData("Text");
-      
-      let cleanData = pastedData.replace(/，|،,/g, ".");
-      cleanData = cleanData.replace(/[^0-9.]/g, "");
-      
-      e.preventDefault();
-      insertAtCursor(e.target, cleanData);
-    }
-  });
-
-  // نقرات أزرار لوحة المفاتيح
-  const numpad = document.getElementById("custom-numpad");
-  if (numpad) {
-    numpad.querySelectorAll(".numpad-key").forEach(key => {
-      let keyTriggered = false;
-      const handleKeyPress = function(e) {
-        e.preventDefault(); // يمنع blur على جميع المنصات والهواتف (بما فيها آيفون وأندرويد)
-        
-        if (keyTriggered) return;
-        keyTriggered = true;
-        setTimeout(() => { keyTriggered = false; }, 120);
-        
-        if (!activeInput) return;
-        
-        const val = key.getAttribute("data-val");
-        if (val === "close") {
-          const field = activeInput;
-          if (activeInput) {
-            activeInput.blur();
-          }
-          hideCustomNumpad();
-          if (isEditing && field) {
-            finishEditingField(field);
-          }
-        } else if (val === "backspace") {
-          handleBackspace(activeInput);
-        } else if (val === "next") {
-          moveFocus("next");
-        } else if (val === "prev") {
-          moveFocus("prev");
-        } else {
-          insertAtCursor(activeInput, val);
-        }
-      };
-
-      // ربط كافة الأحداث المسببة لسرقة التركيز لضمان التوافق المطلق
-      ["pointerdown", "touchstart", "mousedown"].forEach(evtName => {
-        key.addEventListener(evtName, handleKeyPress, { passive: false });
-      });
-    });
-  }
-});
 
 // مستمع لتغيير حجم الشاشة لإعادة رسم وتجاوب الكروكي (مثل صفحة 13)
 window.addEventListener("resize", function() {
