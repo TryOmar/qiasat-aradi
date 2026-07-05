@@ -200,3 +200,128 @@ function validateShareInput(input) {
     // alert("القيمة المدخلة أكبر من الحد المسموح به لكل قيراط (24 سهمًا كحد أقصى).");
   }
 }
+
+function printReport() {
+  const acreInput = document.getElementById("input-acre").value || 0;
+  const caratInput = document.getElementById("input-carat").value || 0;
+  const sharesInput = document.getElementById("input-shares").value || 0;
+
+  const sharesToSubtract = document.getElementById("shares-subtract-each-carat").value || 0;
+
+  const subtractedAcre = document.getElementById("subtracted-acre").textContent || 0;
+  const subtractedCarat = document.getElementById("subtracted-carat").textContent || 0;
+  const subtractedShares = document.getElementById("subtracted-shares").textContent || 0;
+
+  const remAcre = document.getElementById("acre-after-subtract").textContent || 0;
+  const remCarat = document.getElementById("carat-after-subtract").textContent || 0;
+  const remShares = document.getElementById("shares-after-subtract").textContent || 0;
+
+  const acreSold = document.getElementById("input-acre-sold").value || 0;
+  const caratSold = document.getElementById("input-carat-sold").value || 0;
+  const sharesSold = document.getElementById("input-shares-sold").value || 0;
+
+  const finalAcre = document.getElementById("acre-sold-minus-after-subtract").textContent || 0;
+  const finalCarat = document.getElementById("carat-sold-minus-after-subtract").textContent || 0;
+  const finalShares = document.getElementById("shares-sold-minus-after-subtract").textContent || 0;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('ar-EG');
+
+  const printContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تقرير نزع وطرح الأراضي - الدلال</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; padding: 20px; background: #fff; color: #333; }
+    .header { text-align: center; border-bottom: 2px solid #2e7d32; padding-bottom: 15px; margin-bottom: 25px; }
+    .header h1 { color: #2e7d32; margin: 0; font-size: 24px; }
+    .header p { margin: 5px 0 0 0; color: #666; font-size: 13px; }
+    .section-title { font-size: 16px; font-weight: bold; color: #1b5e20; margin-bottom: 15px; border-right: 4px solid #2e7d32; padding-right: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f5f5f5; color: #1b5e20; font-weight: bold; }
+    .summary-box { background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .summary-item { font-size: 14px; }
+    .summary-item strong { color: #1b5e20; font-size: 16px; }
+    .footer { text-align: center; color: #888; font-size: 11px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 30px; }
+    @media print {
+      body { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌿 تقرير نزع وطرح الأراضي - تطبيق الدَّلاَّل</h1>
+    <p>تاريخ التقرير: \${dateStr} — \${timeStr}</p>
+  </div>
+
+  <div class="summary-box">
+    <div class="section-title">بيانات الأرض الأساسية</div>
+    <div class="summary-grid">
+      <div class="summary-item">مساحة الأرض الكلية: <strong>\${acreInput} فدان، \${caratInput} قيراط، \${sharesInput} سهم</strong></div>
+      <div class="summary-item">معدل النزع لكل قيراط: <strong>\${sharesToSubtract} سهم</strong></div>
+    </div>
+  </div>
+
+  <div class="section-title">تفاصيل حسابات النزع والبيع</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:right;">البيان</th>
+        <th>فدان</th>
+        <th>قيراط</th>
+        <th>سهم</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:bold; text-align:right;">مساحة الأرض الكلية</td>
+        <td>\${acreInput}</td>
+        <td>\${caratInput}</td>
+        <td>\${sharesInput}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; text-align:right; color:#c62828;">إجمالي المساحة المنزوعة</td>
+        <td style="color:#c62828; font-weight:bold;">\${subtractedAcre}</td>
+        <td style="color:#c62828; font-weight:bold;">\${subtractedCarat}</td>
+        <td style="color:#c62828; font-weight:bold;">\${subtractedShares}</td>
+      </tr>
+      <tr style="background-color:#f9f9f9;">
+        <td style="font-weight:bold; text-align:right; color:#2e7d32;">المساحة المتبقية بعد النزع</td>
+        <td style="color:#2e7d32; font-weight:bold;">\${remAcre}</td>
+        <td style="color:#2e7d32; font-weight:bold;">\${remCarat}</td>
+        <td style="color:#2e7d32; font-weight:bold;">\${remShares}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; text-align:right; color:#e65100;">المساحة المباعة</td>
+        <td style="color:#e65100;">\${acreSold}</td>
+        <td style="color:#e65100;">\${caratSold}</td>
+        <td style="color:#e65100;">\${sharesSold}</td>
+      </tr>
+      <tr style="background-color:#fff8e1; font-weight:bold;">
+        <td style="font-weight:bold; text-align:right; color:#1b5e20;">الناتج النهائي (المتبقي الفعلي)</td>
+        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalAcre}</td>
+        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalCarat}</td>
+        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalShares}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">تم إنشاء هذا التقرير بواسطة تطبيق الدَّلاَّل - حسابات المزارع والفلاح</div>
+</body>
+</html>`;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => { printWindow.print(); }, 800);
+}

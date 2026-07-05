@@ -6,145 +6,172 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <title>Home</title>
-  <style>
-    .width1_result {
-      font-size: 20px !important;
-      padding: 0px 10px !important;
-      border: none !important;
-    }
-
-    ::placeholder {
-      opacity: 0.2;
-    }
-  </style>
+  <title>نزع وطرح الأراضي</title>
 </head>
 
 <body>
   <div class="dec1"></div>
   <div class="con">
     <div class="header-con">
-      <h1 class="header1">نزع وطرح الاراضى</h1>
+      <h1 class="header1">نزع وطرح الأراضي</h1>
     </div>
 
-    <div class="s s1">
-      <h3>أدخل عدد القراريط </h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result"><input dir="ltr" type="number" id="input-shares" placeholder="6.25"
-                oninput="calculateValues()" tabindex="3">
-            </td>
-            <td class="width1_result"><input dir="ltr" type="number" id="input-carat" placeholder="12"
-                oninput="calculateValues()" tabindex="2">
-            </td>
-            <td class="width1_result"><input dir="ltr" type="number" id="input-acre" placeholder="1"
-                oninput="calculateValues()" tabindex="1">
-            </td>
-          </tr>
-        </table>
+    <!-- المدخلات الأساسية -->
+    <div class="cards-grid">
+      <!-- Card 1: أدخل عدد القراريط -->
+      <div class="s s1">
+        <h3>مساحة الأرض الكلية</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+                <th>قيراط</th>
+                <th>فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result"><input dir="ltr" type="number" id="input-shares" placeholder="مثال: 6.25" oninput="calculateValues()" tabindex="3"></td>
+                <td class="width1_result"><input dir="ltr" type="number" id="input-carat" placeholder="مثال: 12" oninput="calculateValues()" tabindex="2"></td>
+                <td class="width1_result"><input dir="ltr" type="number" id="input-acre" placeholder="مثال: 1" oninput="calculateValues()" tabindex="1"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card 2: مقدار النزع من كل قيراط -->
+      <div class="s s2">
+        <h3>مقدار النزع من كل قيراط</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result"><input dir="ltr" tabindex="4" type="number" id="shares-subtract-each-carat" placeholder="مثال: 6.25" oninput="validateShareInput(this);calculateValues()"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
+    <!-- أزرار التحكم -->
     <div class="buttons2">
-      <button class="but1" onclick="clearAll()">احذف</button>
-      <button class="but2" onclick="calculateValues()">إحسب</button>
+      <button class="btn-clear" onclick="clearAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        حذف الكل
+      </button>
+      <button class="btn-print" onclick="printReport()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        طباعة التقرير
+      </button>
+      <button class="btn-calc" onclick="calculateValues()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        احسب
+      </button>
     </div>
 
-    <div class="s s2">
-      <h3>أدخل العدد الذي ترغب بنزعة من كل قيراط </h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-          </tr>
-          <tr>
-            <td class="width1_result"><input dir="ltr" tabindex="4" type="number" id="shares-subtract-each-carat"
-                placeholder="6.25" oninput="validateShareInput(this);calculateValues()"></td>
-          </tr>
-        </table>
+    <!-- المخرجات وحسابات النزع -->
+    <div class="cards-grid">
+      <!-- Card 3: إجمالي المساحة المنزوعة -->
+      <div class="s s3">
+        <h3>إجمالي المساحة المنزوعة</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+                <th>قيراط</th>
+                <th>فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result" id="subtracted-shares">0</td>
+                <td class="width1_result" id="subtracted-carat">0</td>
+                <td class="width1_result" id="subtracted-acre">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card 4: المساحة المتبقية بعد النزع -->
+      <div class="s s4">
+        <h3>المساحة المتبقية بعد النزع</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+                <th>قيراط</th>
+                <th>فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result" id="shares-after-subtract">0</td>
+                <td class="width1_result" id="carat-after-subtract">0</td>
+                <td class="width1_result" id="acre-after-subtract">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="s s3">
-      <h3>اجمالى عدد الأسهم والقراريط المنزوعة</h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result" id="subtracted-shares">0</td>
-            <td class="width1_result" id="subtracted-carat">0</td>
-            <td class="width1_result" id="subtracted-acre">0</td>
-          </tr>
-        </table>
+    <!-- حسابات البيع والناتج النهائي -->
+    <div class="cards-grid">
+      <!-- Card 5: مساحة الأرض المباعة -->
+      <div class="s s5">
+        <h3>مساحة الأرض المباعة</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+                <th>قيراط</th>
+                <th>فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result"><input dir="ltr" tabindex="7" type="number" id="input-shares-sold" placeholder="مثال: 6.25" oninput="calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="6" type="number" id="input-carat-sold" placeholder="مثال: 12" oninput="calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="5" type="number" id="input-acre-sold" placeholder="مثال: 1" oninput="calculateValues()"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <div class="s s4">
-      <h3>المساحة المتبقية بعد النزع </h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result" id="shares-after-subtract">0</td>
-            <td class="width1_result" id="carat-after-subtract">0</td>
-            <td class="width1_result" id="acre-after-subtract">0</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    <div class="s s5">
-      <h3>أدخل مساحة الأرض المباعة من المساحة المتبقية </h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result"><input dir="ltr" tabindex="7" type="number" id="input-shares-sold"
-                placeholder="6.25" oninput="calculateValues()"></td>
-            <td class="width1_result"><input dir="ltr" tabindex="6" type="number" id="input-carat-sold" placeholder="12"
-                oninput="calculateValues()"></td>
-            <td class="width1_result"><input dir="ltr" tabindex="5" type="number" id="input-acre-sold" placeholder="1"
-                oninput="calculateValues()"></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    <div class="s s6 last-element">
-      <h3>الناتج بين المساحة المتبقية والمساحة المباعة</h3>
-      <div>
-        <table>
-          <tr>
-            <th>سهم</th>
-            <th>قيراط</th>
-            <th>فدان</th>
-          </tr>
-          <tr>
-            <td class="width1_result" id="shares-sold-minus-after-subtract" dir="ltr">0</td>
-            <td class="width1_result" id="carat-sold-minus-after-subtract" dir="ltr">0</td>
-            <td class="width1_result" id="acre-sold-minus-after-subtract" dir="ltr">0</td>
-          </tr>
-        </table>
+      <!-- Card 6: الناتج النهائي -->
+      <div class="s s6 last-element">
+        <h3>الناتج بين المتبقية والمباعة</h3>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>سهم</th>
+                <th>قيراط</th>
+                <th>فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="width1_result" id="shares-sold-minus-after-subtract" dir="ltr">0</td>
+                <td class="width1_result" id="carat-sold-minus-after-subtract" dir="ltr">0</td>
+                <td class="width1_result" id="acre-sold-minus-after-subtract" dir="ltr">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -164,19 +191,16 @@
     </a>
     <a href="../index.html" class="nav-box">
       <img src="../imgs/nav4.png" alt="nav1" />
-      <p>الرئسية</p>
+      <p>الرئيسية</p>
     </a>
   </div>
 
   <script src="script.js"></script>
-
   <script>
-    // دالة للتحقق من المدخلات في حقل "العدد الذي ترغب بطرحه من كل قيراط"
     function validateShareInput(input) {
       const maxAllowed = 24;
       if (input.value > maxAllowed) {
-        input.value = maxAllowed;  // ضبط القيمة إلى 24 إذا كانت أكبر
-        // alert("القيمة المدخلة أكبر من الحد المسموح به لكل قيراط (24 سهمًا كحد أقصى).");
+        input.value = maxAllowed;
       }
     }
   </script>
