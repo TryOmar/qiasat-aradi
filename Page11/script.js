@@ -776,7 +776,6 @@ function saveAndCalc() {
 }
 
 function saveAndCalcImmediate() {
-  if (isEditing) return;
   saveData();
   calculateGeneral();
   
