@@ -55,7 +55,7 @@
         <h3>وحدات المساحة</h3>
         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="input-carat-area" style="font-size: 12px; font-weight: bold;">مساحة القيراط بالمتر المربع:</label>
+            <label for="input-carat-area" style="font-size: 12px; font-weight: bold;">اختار مساحة القيراط بالمتر المربع:</label>
             <div style="display: flex; gap: 5px; align-items: center;">
               <select id="input-carat-area" class="selector1" onchange="handleCaratAreaChange()" style="width: 90px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; font-size: 12px;">
                 <option value="175.035">175.035</option>
@@ -68,6 +68,39 @@
             </div>
           </div>
 
+        <h4 class="card-subtitle" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">النتائج الإجمالية للمساحة</h4>
+        <div class="results-table-wrapper" style="margin-bottom: 12px; overflow-x: auto;">
+          <table style="width: 100%; text-align: center; border-collapse: collapse; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
+            <thead style="background-color: #f5f5f5; border-bottom: 2px solid #2e7d32;">
+              <tr>
+                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">سهم</th>
+                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">قيراط</th>
+                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">فدان</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="total-area-shares-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f; border-right: 1px solid #e0e0e0;">0</td>
+                <td id="total-area-carats-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f; border-right: 1px solid #e0e0e0;">0</td>
+                <td id="total-area-feddans-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f;">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="summary-details-list">
+          <div class="detail-row">
+            <span>إجمالي الأمتار المربعة:</span>
+            <strong id="total-area-sqm-res">0.00 م²</strong>
+          </div>
+          <div class="detail-row">
+            <span>مساحة القيراط بالمتر المربع:</span>
+            <strong id="carat-area-res">0</strong>
+          </div>
+          <div class="detail-row">
+            <span>المحيط الإجمالي للأرض:</span>
+            <strong id="total-perimeter-res">0.00 م</strong>
+          </div>
+        </div>
 
         </div>
       </div>
@@ -273,42 +306,7 @@
     <!-- Bottom Summaries and Reports Grid -->
     <div class="bottom-cards-grid">
       
-      <!-- Card 1: Area Results -->
-      <div class="s summary-card-item results-card">
-        <h4 class="card-subtitle">النتائج الإجمالية للمساحة</h4>
-        <div class="results-table-wrapper" style="margin-bottom: 12px; overflow-x: auto;">
-          <table style="width: 100%; text-align: center; border-collapse: collapse; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
-            <thead style="background-color: #f5f5f5; border-bottom: 2px solid #2e7d32;">
-              <tr>
-                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">سهم</th>
-                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">قيراط</th>
-                <th style="padding: 8px 5px; font-size: 13px; color: #1b5e20;">فدان</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td id="total-area-shares-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f; border-right: 1px solid #e0e0e0;">0</td>
-                <td id="total-area-carats-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f; border-right: 1px solid #e0e0e0;">0</td>
-                <td id="total-area-feddans-res" style="padding: 10px 5px; font-size: 15px; font-weight: bold; color: #d32f2f;">0</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="summary-details-list">
-          <div class="detail-row">
-            <span>إجمالي الأمتار المربعة:</span>
-            <strong id="total-area-sqm-res">0.00 م²</strong>
-          </div>
-          <div class="detail-row">
-            <span>مساحة القيراط بالمتر المربع:</span>
-            <strong id="carat-area-res">0</strong>
-          </div>
-          <div class="detail-row">
-            <span>المحيط الإجمالي للأرض:</span>
-            <strong id="total-perimeter-res">0.00 م</strong>
-          </div>
-        </div>
-      </div>      <!-- Card 2: Division Summary -->
+      <!-- Card 2: Division Summary -->
       <div class="s summary-card-item">
         <h4 class="card-subtitle">ملخص التقسيم</h4>
         <div class="summary-details-list">
