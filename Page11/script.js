@@ -648,33 +648,39 @@ function updateRowsReadOnlyStatus() {
     const fractionInput = row.querySelector(".partner-fraction");
     const deleteBtn = row.querySelector(".delete-row-btn");
     
+    const shouldBeReadOnly = isFirst && !isManualPartition;
+    
     if (feddansInput) {
-      feddansInput.readOnly = false;
-      feddansInput.style.backgroundColor = "";
-      feddansInput.style.color = "";
-      feddansInput.style.cursor = "";
-      feddansInput.removeAttribute("title");
+      feddansInput.readOnly = shouldBeReadOnly;
+      feddansInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
+      feddansInput.style.color = shouldBeReadOnly ? "#555" : "";
+      feddansInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
+      if (shouldBeReadOnly) feddansInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
+      else feddansInput.removeAttribute("title");
     }
     if (caratsInput) {
-      caratsInput.readOnly = false;
-      caratsInput.style.backgroundColor = "";
-      caratsInput.style.color = "";
-      caratsInput.style.cursor = "";
-      caratsInput.removeAttribute("title");
+      caratsInput.readOnly = shouldBeReadOnly;
+      caratsInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
+      caratsInput.style.color = shouldBeReadOnly ? "#555" : "";
+      caratsInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
+      if (shouldBeReadOnly) caratsInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
+      else caratsInput.removeAttribute("title");
     }
     if (sharesInput) {
-      sharesInput.readOnly = false;
-      sharesInput.style.backgroundColor = "";
-      sharesInput.style.color = "";
-      sharesInput.style.cursor = "";
-      sharesInput.removeAttribute("title");
+      sharesInput.readOnly = shouldBeReadOnly;
+      sharesInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
+      sharesInput.style.color = shouldBeReadOnly ? "#555" : "";
+      sharesInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
+      if (shouldBeReadOnly) sharesInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
+      else sharesInput.removeAttribute("title");
     }
     if (fractionInput) {
-      fractionInput.readOnly = false;
-      fractionInput.style.backgroundColor = "";
-      fractionInput.style.color = "";
-      fractionInput.style.cursor = "";
-      fractionInput.removeAttribute("title");
+      fractionInput.readOnly = shouldBeReadOnly;
+      fractionInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
+      fractionInput.style.color = shouldBeReadOnly ? "#555" : "";
+      fractionInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
+      if (shouldBeReadOnly) fractionInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
+      else fractionInput.removeAttribute("title");
     }
     
     if (deleteBtn) {
@@ -819,7 +825,40 @@ function calculateGeneral() {
   
   updateRowsReadOnlyStatus();
 
-
+  // Auto-calculate the first row as the remainder of the total land area minus the sum of other rows
+  if (!isManualPartition && rows.length > 0) {
+    const firstRow = rows[0];
+    if (currentInputMethod === "carats") {
+      let otherCarats = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const f = parseFloat(rows[i].querySelector(".partner-feddans") ? rows[i].querySelector(".partner-feddans").value : 0) || 0;
+        const c = parseFloat(rows[i].querySelector(".partner-carats") ? rows[i].querySelector(".partner-carats").value : 0) || 0;
+        const s = parseFloat(rows[i].querySelector(".partner-shares") ? rows[i].querySelector(".partner-shares").value : 0) || 0;
+        otherCarats += (f * 24) + c + (s / 24);
+      }
+      const totalAvailableCarats = caratArea > 0 ? (totalAreaM2 / caratArea) : 0;
+      let firstRowCarats = totalAvailableCarats - otherCarats;
+      if (firstRowCarats < 0) firstRowCarats = 0;
+      
+      const f_rem = Math.floor(firstRowCarats / 24);
+      const c_rem = Math.floor(firstRowCarats % 24);
+      const s_rem = ((firstRowCarats - (f_rem * 24 + c_rem)) * 24);
+      
+      if (firstRow.querySelector(".partner-feddans")) firstRow.querySelector(".partner-feddans").value = f_rem;
+      if (firstRow.querySelector(".partner-carats")) firstRow.querySelector(".partner-carats").value = c_rem;
+      if (firstRow.querySelector(".partner-shares")) firstRow.querySelector(".partner-shares").value = Number(s_rem.toFixed(2));
+    } else {
+      let otherFractions = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const fracInput = rows[i].querySelector(".partner-fraction");
+        otherFractions += parseFraction(fracInput ? fracInput.value : "");
+      }
+      let firstRowFraction = 1 - otherFractions;
+      if (firstRowFraction < 0) firstRowFraction = 0;
+      
+      if (firstRow.querySelector(".partner-fraction")) firstRow.querySelector(".partner-fraction").value = Number(firstRowFraction.toFixed(4));
+    }
+  }
 
   let totalDistributedArea = 0;
   let totalFeddansEntered = 0;
