@@ -372,21 +372,9 @@ function renderHeaderAndFooter() {
   const footerContainer = document.getElementById("total");
   
   if (currentInputMethod === "carats") {
-    headerContainer.innerHTML = `
-      <p>م</p>
-      <p>الشريك</p>
-      <p>سهم</p>
-      <p>قيراط</p>
-      <p>فدان</p>
-      <p>المساحة (م²)</p>
-      <p>النسبة (%)</p>
-      <p>العرض الأول (أعلى)</p>
-      <p>العرض الثاني (أسفل)</p>
-      <p>العلامة (م)</p>
-      <p>الفاصل (م)</p>
-      <p></p>
-    `;
-    
+    headerContainer.innerHTML = '';
+    headerContainer.style.display = 'none';
+
     footerContainer.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
@@ -402,21 +390,9 @@ function renderHeaderAndFooter() {
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
     `;
   } else {
-    headerContainer.innerHTML = `
-      <p>م</p>
-      <p>الشريك</p>
-      <p>النسبة / الكسر</p>
-      <p>تعادل (س.ق.ف)</p>
-      <p style="display:none;"></p>
-      <p>المساحة (م²)</p>
-      <p>النسبة (%)</p>
-      <p>العرض الأول (أعلى)</p>
-      <p>العرض الثاني (أسفل)</p>
-      <p>العلامة (م)</p>
-      <p>الفاصل (م)</p>
-      <p></p>
-    `;
-    
+    headerContainer.innerHTML = '';
+    headerContainer.style.display = 'none';
+
     footerContainer.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
