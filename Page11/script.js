@@ -867,24 +867,6 @@ function calculateGeneral() {
   });
 
   const firstRow = rows[0];
-  if (firstRow) {
-    const nameInput = firstRow.querySelector(".partner-name");
-    if (nameInput && nameInput.value !== "المتبقي") {
-      nameInput.value = "المتبقي";
-      nameInput.readOnly = true;
-      nameInput.style.fontWeight = "bold";
-      nameInput.style.color = "#c62828";
-    }
-    firstRow.querySelectorAll(".partner-shares, .partner-carats, .partner-feddans, .partner-fraction").forEach(input => {
-      input.readOnly = true;
-      input.style.backgroundColor = "#ffebee";
-      input.style.color = "#c62828";
-      input.style.fontWeight = "bold";
-    });
-    const delBtn = firstRow.querySelector(".delete-row-btn");
-    if (delBtn) delBtn.style.display = "none";
-  }
-
   if (currentInputMethod === "carats") {
     const totalCaratsOfLand = caratArea > 0 ? (totalAreaM2 / caratArea) : 0;
     const firstPartnerCarats = Math.max(0, totalCaratsOfLand - otherCaratsSum);
@@ -1650,8 +1632,8 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // 1. رسم بطاقة الشريك (Partner Card) - فقط إذا كانت المساحة أكبر من صفر
-      if ((showCroquisNames || showCroquisMeasurements) && piece.area > 0.01) {
+      // 1. رسم بطاقة الشريك (Partner Card)
+      if (showCroquisNames || showCroquisMeasurements) {
         const cardGroup = svgEl("g");
         
         // تدوير بطاقة الشريك دائماً بزاوية -90 درجة (مثل صفحة 13)
