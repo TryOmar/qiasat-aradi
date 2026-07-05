@@ -941,7 +941,68 @@ function calculateGeneral() {
   }
 
   const remainingArea = totalAreaM2 - totalDistributedArea;
-  updateSummaryUI(totalAreaM2, totalDistributedArea, remainingArea, caratArea);
+  
+  // Update summaries
+  if (document.getElementById("summary-total-area")) {
+    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("summary-rem-area")) {
+    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("summary-status")) {
+    const statusEl = document.getElementById("summary-status");
+    if (Math.abs(remainingArea) < 0.1) {
+      statusEl.innerText = "مكتمل";
+      statusEl.style.color = "#2e7d32";
+    } else if (remainingArea > 0) {
+      statusEl.innerText = "يوجد فرق (متبقي)";
+      statusEl.style.color = "#c62828";
+    } else {
+      statusEl.innerText = "يوجد فرق (زيادة)";
+      statusEl.style.color = "#c62828";
+    }
+  }
+  if (document.getElementById("summary-total-width")) {
+    document.getElementById("summary-total-width").innerText = "-";
+  }
+
+  if (document.getElementById("info-partners-count")) {
+    document.getElementById("info-partners-count").innerText = rows.length;
+  }
+  if (document.getElementById("info-distributed-area")) {
+    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("info-distributed-percent")) {
+    const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
+    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+  }
+  if (document.getElementById("info-last-div-line")) {
+    document.getElementById("info-last-div-line").innerText = "-";
+  }
+
+  if (document.getElementById("rem-area-m2")) {
+    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
+  }
+
+  if (caratArea > 0) {
+    let remainingCarats = remainingArea / caratArea;
+    const isNegative = remainingCarats < 0;
+    const absRemaining = Math.abs(remainingCarats);
+
+    const remAcres = Math.floor(absRemaining / 24);
+    const remCarats = Math.floor(absRemaining % 24);
+    const remShares = ((absRemaining - (remAcres * 24 + remCarats)) * 24);
+
+    const prefix = isNegative ? "-" : "";
+    document.getElementById("rem-acres").innerText = prefix + remAcres;
+    document.getElementById("rem-carats").innerText = remCarats;
+    document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
+
+    const color = isNegative ? "red" : "black";
+    document.getElementById("rem-acres").style.color = color;
+    document.getElementById("rem-carats").style.color = color;
+    document.getElementById("rem-shares").style.color = color;
+  }
   
   adjustNameColumnWidth();
   updateConversionsTable();
@@ -1149,8 +1210,53 @@ function runPartition() {
     document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
-    // Call the helper function instead of repeating the block
-    updateSummaryUI(totalAreaM2, totalDistributedArea, remainingArea, caratArea);
+    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("rem-area-m2")) {
+    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
+  }
+  if (document.getElementById("summary-status")) {
+    const statusEl = document.getElementById("summary-status");
+    if (Math.abs(remainingArea) < 0.1) {
+      statusEl.innerText = "مكتمل";
+      statusEl.style.color = "#2e7d32";
+    } else if (remainingArea > 0) {
+      statusEl.innerText = "يوجد فرق (متبقي)";
+      statusEl.style.color = "#c62828";
+    } else {
+      statusEl.innerText = "يوجد فرق (زيادة)";
+      statusEl.style.color = "#c62828";
+    }
+  }
+  if (document.getElementById("info-distributed-area")) {
+    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("info-distributed-percent")) {
+    const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
+    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+  }
+
+  const remAcres = document.getElementById("rem-acres");
+  if (remAcres) {
+    const isNegative = remainingArea < -0.005;
+    const absRem = Math.abs(remainingArea);
+    
+    let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
+    
+    // round or fix
+    const remFeddans = Math.floor(totalRemCarats / 24);
+    const remCarats = Math.floor(totalRemCarats % 24);
+    const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+
+    document.getElementById("rem-m2").innerText = (isNegative ? "-" : "") + absRem.toFixed(2);
+    document.getElementById("rem-acres").innerText = (isNegative ? "-" : "") + remFeddans;
+    document.getElementById("rem-carats").innerText = (isNegative ? "-" : "") + remCarats;
+    document.getElementById("rem-shares").innerText = (isNegative ? "-" : "") + Number(remShares.toFixed(2));
+
+    const color = isNegative ? "red" : "black";
+    document.getElementById("rem-acres").style.color = color;
+    document.getElementById("rem-carats").style.color = color;
+    document.getElementById("rem-shares").style.color = color;
   }
 
   saveData();
@@ -2844,101 +2950,9 @@ function onWidthChangeActual(input, type) {
   // الانتقال إلى نمط التقسيم اليدوي وحساب المساحات هندسياً
   isManualPartition = true;
 
-function updateSummaryUI(totalAreaM2, totalDistributedArea, remainingArea, caratArea) {
-  if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
-  }
-  
-  const statusEl = document.getElementById("summary-status");
-  const remAreaRow = document.getElementById("rem-area-row");
-  const remAreaLabel = document.getElementById("rem-area-label");
-  const summaryRemArea = document.getElementById("summary-rem-area");
-  
-  const tableRemBox = document.getElementById("table-remaining-box");
-  const tableRemLabel = document.getElementById("rem-area-main-label");
-  const tableRemM2 = document.getElementById("rem-area-m2");
-  const tableRemM2Container = document.getElementById("rem-area-m2-container");
-
-  if (Math.abs(remainingArea) < 0.1) {
-    if (statusEl) {
-      statusEl.innerText = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
-      statusEl.style.color = "#2e7d32";
-    }
-    if (remAreaRow) remAreaRow.style.display = "none";
-    if (tableRemBox) tableRemBox.style.display = "none";
-  } else if (remainingArea > 0) {
-    if (statusEl) {
-      statusEl.innerText = "⚠️ توجد مساحة متبقية لم يتم توزيعها.";
-      statusEl.style.color = "#f57c00";
-    }
-    if (remAreaRow) {
-      remAreaRow.style.display = "flex";
-      if (remAreaLabel) remAreaLabel.innerText = "المتبقي من الأرض:";
-    }
-    if (summaryRemArea) summaryRemArea.innerText = Number(remainingArea.toFixed(2)) + " م²";
-    if (tableRemBox) {
-      tableRemBox.style.display = "flex";
-      tableRemBox.style.backgroundColor = "#fff3e0";
-      tableRemBox.style.borderColor = "#ffcc80";
-    }
-    if (tableRemLabel) {
-      tableRemLabel.innerText = "المتبقي من الأرض:";
-      tableRemLabel.style.color = "#ef6c00";
-    }
-    if (tableRemM2Container) tableRemM2Container.style.color = "#ef6c00";
-  } else {
-    if (statusEl) {
-      statusEl.innerText = `❌ يوجد عجز في مساحة الأرض بمقدار ${Number(Math.abs(remainingArea).toFixed(2))} م².`;
-      statusEl.style.color = "#c62828";
-    }
-    if (remAreaRow) {
-      remAreaRow.style.display = "flex";
-      if (remAreaLabel) remAreaLabel.innerText = "العجز:";
-    }
-    if (summaryRemArea) summaryRemArea.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
-    if (tableRemBox) {
-      tableRemBox.style.display = "flex";
-      tableRemBox.style.backgroundColor = "#ffebee";
-      tableRemBox.style.borderColor = "#ffcdd2";
-    }
-    if (tableRemLabel) {
-      tableRemLabel.innerText = "مقدار العجز:";
-      tableRemLabel.style.color = "#c62828";
-    }
-    if (tableRemM2Container) tableRemM2Container.style.color = "#c62828";
-  }
-
-  if (document.getElementById("info-distributed-area")) {
-    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
-  }
-  if (document.getElementById("info-distributed-percent")) {
-    const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
-  }
-
-  if (tableRemM2) {
-    tableRemM2.innerText = Number(Math.abs(remainingArea).toFixed(2));
-  }
-
-  if (caratArea > 0) {
-    let remainingCarats = remainingArea / caratArea;
-    const isNegative = remainingCarats < 0;
-    const absRemaining = Math.abs(remainingCarats);
-    const remAcres = Math.floor(absRemaining / 24);
-    const remCarats = Math.floor(absRemaining % 24);
-    const remShares = ((absRemaining - (remAcres * 24 + remCarats)) * 24);
-
-    if (document.getElementById("rem-acres")) document.getElementById("rem-acres").innerText = remAcres;
-    if (document.getElementById("rem-carats")) document.getElementById("rem-carats").innerText = remCarats;
-    if (document.getElementById("rem-shares")) document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
-
-    const color = isNegative ? "#c62828" : (remainingArea > 0 ? "#ef6c00" : "#333");
-    if (document.getElementById("rem-acres")) document.getElementById("rem-acres").style.color = color;
-    if (document.getElementById("rem-carats")) document.getElementById("rem-carats").style.color = color;
-    if (document.getElementById("rem-shares")) document.getElementById("rem-shares").style.color = color;
-  }
+  // إعادة الحساب ورسم الكروكي والخطوات
+  runPartition();
 }
-
 
 function onShareInput() {
   isManualPartition = false;
