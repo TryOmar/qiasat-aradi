@@ -435,9 +435,15 @@ function normalizeQasabaInputs(rowIndex) {
   const fracEl    = document.getElementById('conv-fraction-' + rowIndex);
   if (!qasabaEl || !qabdaEl || !fracEl) return;
 
+  let fracRaw = fracEl.value;
+  if (fracRaw && !fracRaw.includes('.')) {
+    fracRaw = "0." + fracRaw;
+    fracEl.value = fracRaw;
+  }
+  
   let qasaba  = Math.max(0, parseInt(qasabaEl.value)  || 0);
   let qabda   = Math.max(0, parseInt(qabdaEl.value)   || 0);
-  let fraction = parseFloat(fracEl.value) || 0;
+  let fraction = parseFloat(fracRaw) || 0;
 
   // Clamp fraction to [0, 0.99]
   fraction = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
