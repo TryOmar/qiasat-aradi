@@ -2645,7 +2645,7 @@ function updateConversionsTable() {
     tbody.innerHTML += `
       <tr class="conv-row" style="background-color: #fcfcfc;">
         <td class="conv-label-cell" style="font-weight: bold;">
-          <span class="conv-dim-name">واجهة القيراط العلوية</span>
+          <span class="conv-dim-name">عرض القيراط العلوي</span>
           <span class="conv-meter-badge" style="background-color: #e3f2fd; color: #1565c0;">
             <span>${topQiratWidth.toFixed(4)}</span> م
           </span>
@@ -2662,7 +2662,7 @@ function updateConversionsTable() {
       </tr>
       <tr class="conv-row" style="background-color: #fcfcfc;">
         <td class="conv-label-cell" style="font-weight: bold;">
-          <span class="conv-dim-name">واجهة القيراط السفلية</span>
+          <span class="conv-dim-name">عرض القيراط السفلي</span>
           <span class="conv-meter-badge" style="background-color: #e3f2fd; color: #1565c0;">
             <span>${botQiratWidth.toFixed(4)}</span> م
           </span>
