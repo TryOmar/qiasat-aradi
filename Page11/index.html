@@ -349,27 +349,6 @@
 
     </div>
 
-    <!-- Card: Calculation Steps (خطوات الحساب) -->
-    <div class="s summary-card-item steps-card print-visible" style="width: 100%; margin-top: 15px; grid-column: span 2; border-right: 4px solid #2e7d32; padding: 0; overflow: hidden;">
-      <!-- Accordion Header -->
-      <div class="steps-header" onclick="toggleStepsAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fbfdfb; cursor: pointer; user-select: none; transition: background 0.2s;">
-        <h4 style="display: flex; align-items: center; gap: 8px; color: #2e7d32; font-size: 15px; font-family: Cairo, Arial, sans-serif; font-weight: bold; margin: 0;">
-          <span id="steps-arrow-icon" style="color: #2e7d32; font-size: 12px; display: inline-block; transition: transform 0.2s; transform: rotate(0deg); line-height: 1;">◀</span>
-          عرض خطوات الحساب بالتفصيل
-        </h4>
-        <label style="font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; font-family: Cairo, Arial, sans-serif;" onclick="event.stopPropagation()">
-          <input type="checkbox" id="print-steps-checkbox" checked onchange="updatePrintStepsClass()" style="cursor: pointer; width: 14px; height: 14px; accent-color: #2e7d32;">
-          تضمين في الطباعة
-        </label>
-      </div>
-      <!-- Accordion Content -->
-      <div id="calculation-steps-container" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease; padding: 0 16px;">
-        <div id="calculation-steps-content" class="steps-content-area" style="font-family: Cairo, Arial, sans-serif; direction: rtl; font-size: 13px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px;">
-          <p style="text-align: center; color: #777; font-style: italic;">أدخل الأبعاد والشركاء لعرض تفاصيل الخطوات الحسابية</p>
-        </div>
-      </div>
-    </div>
-
     <!-- Card: Qirat Width Info (واجهة القيراط) -->
     <div class="s summary-card-item qirat-info-card print-visible" style="width: 100%; margin-top: 15px; grid-column: span 2; border-right: 4px solid #f57f17; padding: 0; overflow: hidden;">
       <!-- Accordion Header -->
@@ -387,6 +366,27 @@
       <div id="qirat-info-container" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease; padding: 0 16px;">
         <div id="qirat-info-content" class="qirat-info-content-area" style="font-family: Cairo, Arial, sans-serif; direction: rtl; font-size: 13px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px;">
           <p style="text-align: center; color: #777; font-style: italic;">يرجى حساب التقسيم لعرض واجهة القيراط</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Calculation Steps (خطوات الحساب) -->
+    <div class="s summary-card-item steps-card print-visible" style="width: 100%; margin-top: 15px; grid-column: span 2; border-right: 4px solid #2e7d32; padding: 0; overflow: hidden;">
+      <!-- Accordion Header -->
+      <div class="steps-header" onclick="toggleStepsAccordion()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fbfdfb; cursor: pointer; user-select: none; transition: background 0.2s;">
+        <h4 style="display: flex; align-items: center; gap: 8px; color: #2e7d32; font-size: 15px; font-family: Cairo, Arial, sans-serif; font-weight: bold; margin: 0;">
+          <span id="steps-arrow-icon" style="color: #2e7d32; font-size: 12px; display: inline-block; transition: transform 0.2s; transform: rotate(0deg); line-height: 1;">◀</span>
+          عرض خطوات الحساب بالتفصيل
+        </h4>
+        <label style="font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; font-family: Cairo, Arial, sans-serif;" onclick="event.stopPropagation()">
+          <input type="checkbox" id="print-steps-checkbox" checked onchange="updatePrintStepsClass()" style="cursor: pointer; width: 14px; height: 14px; accent-color: #2e7d32;">
+          تضمين في الطباعة
+        </label>
+      </div>
+      <!-- Accordion Content -->
+      <div id="calculation-steps-container" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease; padding: 0 16px;">
+        <div id="calculation-steps-content" class="steps-content-area" style="font-family: Cairo, Arial, sans-serif; direction: rtl; font-size: 13px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px;">
+          <p style="text-align: center; color: #777; font-style: italic;">أدخل الأبعاد والشركاء لعرض تفاصيل الخطوات الحسابية</p>
         </div>
       </div>
     </div>
