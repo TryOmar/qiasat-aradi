@@ -538,6 +538,16 @@ function handleInputMethodChange() {
 }
 
 function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-") {
+  // تصفية وضع التعديل قبل إضافة صف جديد لضمان تحديث الحسابات فوراً
+  if (!name && !feddans && !carats && !shares && !fraction) {
+    clearAutoCloseTimer();
+    isEditing = false;
+    activeFieldBefore = null;
+    if (activeInput) {
+      activeInput.blur();
+    }
+  }
+
   const list = document.getElementById("partners-list");
   const row = document.createElement("div");
   row.className = "partner-row";
@@ -664,6 +674,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
 }
 
 function deletePartnerRow(button) {
+  // إلغاء وضع التعديل وتصفير مؤقت لوحة المفاتيح لتفادي تعارض الحسابات
+  clearAutoCloseTimer();
+  isEditing = false;
+  activeFieldBefore = null;
+  if (activeInput) {
+    activeInput.blur();
+  }
+
   const row = button.parentElement;
   row.remove();
   isManualPartition = false;
