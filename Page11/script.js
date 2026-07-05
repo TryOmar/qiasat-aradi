@@ -1204,6 +1204,38 @@ function runPartition() {
 
   // update the remaining area card
   const remainingArea = totalAreaM2 - totalDistributedArea;
+  
+  // Update summaries to match actual layout partition
+  if (document.getElementById("summary-total-area")) {
+    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("summary-rem-area")) {
+    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("rem-area-m2")) {
+    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
+  }
+  if (document.getElementById("summary-status")) {
+    const statusEl = document.getElementById("summary-status");
+    if (Math.abs(remainingArea) < 0.1) {
+      statusEl.innerText = "مكتمل";
+      statusEl.style.color = "#2e7d32";
+    } else if (remainingArea > 0) {
+      statusEl.innerText = "يوجد فرق (متبقي)";
+      statusEl.style.color = "#c62828";
+    } else {
+      statusEl.innerText = "يوجد فرق (زيادة)";
+      statusEl.style.color = "#c62828";
+    }
+  }
+  if (document.getElementById("info-distributed-area")) {
+    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
+  }
+  if (document.getElementById("info-distributed-percent")) {
+    const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
+    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+  }
+
   const remAcres = document.getElementById("rem-acres");
   if (remAcres) {
     const isNegative = remainingArea < -0.005;
