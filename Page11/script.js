@@ -169,12 +169,14 @@ function fitCroquis() {
   
   const cW = container.clientWidth;
   const cH = container.clientHeight;
-  const padding = 80;
+  const padding = 30; // تقليل الحواف
   const w = (w1 + w2) / 2;
   const maxLen = Math.max(l1, l2);
   
-  const scaleX = (cW - padding * 2) / w;
-  const scaleY = (cH - padding * 2) / maxLen;
+  let scaleX = (cW - padding * 2) / w;
+  let scaleY = (cH - padding * 2) / maxLen;
+  if (scaleX <= 0) scaleX = 0.1;
+  if (scaleY <= 0) scaleY = 0.1;
   croquisScale = Math.min(scaleX, scaleY);
   
   // توسيط
@@ -223,7 +225,7 @@ function toggleFullscreenCroquis() {
     document.body.style.overflow = "";
   }
   
-  setTimeout(fitCroquis, 100);
+  setTimeout(fitCroquis, 300);
 }
 
 // خروج من الشاشة الكاملة بالضغط على Escape
