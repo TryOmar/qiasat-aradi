@@ -2471,23 +2471,49 @@ function updateCalculationSteps() {
       `;
     } else {
       qiratHtml = `
-        <p style="font-size: 11.5px; color: #555; margin-bottom: 8px; line-height: 1.6;">
+        <p style="font-size: 11.5px; color: #555; margin-bottom: 12px; line-height: 1.6;">
           تُحسب واجهة القيراط اعتماداً على المساحة الفعلية للأرض مقسومة على مساحة القيراط المحددة.<br>
           <strong style="color:#d32f2f;">ملاحظة هامة:</strong> اختلاف واجهة القيراط بين الحد السفلي والحد العلوي أمر رياضي طبيعي في الأراضي غير المنتظمة، ولا يدل على وجود أي خطأ في الحساب أو في عملية التقسيم.
         </p>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="border-right: 3px solid #ffb300; padding-right: 8px;">
-            <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد السفلي:</span><br>
-            <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-              ${w1} متر ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${botQiratWidth.toFixed(4)} متر
-            </code>
+        
+        <div style="display: flex; gap: 10px; width: 100%;">
+          
+          <!-- Top Border Card -->
+          <div style="flex: 1; background: #2c2c2e; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1px solid #444; color: #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="text-align: center; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold;">عند الحد العلوي</div>
+            <div style="text-align: center; font-size: 20px; color: #42a5f5; font-weight: bold; direction: ltr; margin-bottom: 12px;">${topQiratWidth.toFixed(4)} م</div>
+            
+            <div style="border-top: 1px solid #444; margin-bottom: 8px;"></div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+              <span style="font-weight: bold; color: #ddd;">العرض العلوي</span>
+              <span style="font-weight: bold; direction: ltr; color: #fff;">${w2} م</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="font-weight: bold; color: #ddd;">عدد القراريط</span>
+              <span style="font-weight: bold; direction: ltr; color: #fff;">${totalQirats.toFixed(4)} قيراط</span>
+            </div>
           </div>
-          <div style="border-right: 3px solid #ffa000; padding-right: 8px;">
-            <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد العلوي:</span><br>
-            <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-              ${w2} متر ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${topQiratWidth.toFixed(4)} متر
-            </code>
+
+          <!-- Bottom Border Card -->
+          <div style="flex: 1; background: #2c2c2e; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1px solid #444; color: #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="text-align: center; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold;">عند الحد السفلي</div>
+            <div style="text-align: center; font-size: 20px; color: #42a5f5; font-weight: bold; direction: ltr; margin-bottom: 12px;">${botQiratWidth.toFixed(4)} م</div>
+            
+            <div style="border-top: 1px solid #444; margin-bottom: 8px;"></div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+              <span style="font-weight: bold; color: #ddd;">العرض السفلي</span>
+              <span style="font-weight: bold; direction: ltr; color: #fff;">${w1} م</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="font-weight: bold; color: #ddd;">عدد القراريط</span>
+              <span style="font-weight: bold; direction: ltr; color: #fff;">${totalQirats.toFixed(4)} قيراط</span>
+            </div>
           </div>
+
         </div>
       `;
     }
