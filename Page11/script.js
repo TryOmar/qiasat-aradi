@@ -2448,6 +2448,62 @@ function updateCalculationSteps() {
     `;
   }
 
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+  
+  if (caratArea > 0 && isPartitioned) {
+    const totalQirats = totalAreaM2 / caratArea;
+    const botQiratWidth = w1 / totalQirats;
+    const topQiratWidth = w2 / totalQirats;
+
+    let qiratHtml = "";
+    if (Math.abs(w1 - w2) < 0.001) {
+      qiratHtml = `
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px; font-size: 14px;">عرض القيراط الواحد من المساحة</strong>
+        <div style="font-size: 13px; color: #1b5e20; font-weight: bold; margin-bottom: 6px;">
+          عرض القيراط الواحد: <span style="background: #c8e6c9; padding: 2px 6px; border-radius: 4px;">${botQiratWidth.toFixed(4)} متر</span>
+        </div>
+        <p style="font-size: 11.5px; color: #388e3c; margin: 0; line-height: 1.5; border-right: 3px solid #66bb6a; padding-right: 8px;">
+          بما أن عرض الأرض متساوٍ عند الحدين، فإن عرض القيراط يكون ثابتًا على امتداد الأرض.
+        </p>
+      `;
+    } else {
+      qiratHtml = `
+        <p style="font-size: 11.5px; color: #555; margin-bottom: 8px; line-height: 1.6;">
+          تُحسب واجهة القيراط اعتماداً على المساحة الفعلية للأرض مقسومة على مساحة القيراط المحددة.<br>
+          <strong style="color:#d32f2f;">ملاحظة هامة:</strong> اختلاف واجهة القيراط بين الحد السفلي والحد العلوي أمر رياضي طبيعي في الأراضي غير المنتظمة، ولا يدل على وجود أي خطأ في الحساب أو في عملية التقسيم.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="border-right: 3px solid #ffb300; padding-right: 8px;">
+            <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد السفلي:</span><br>
+            <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
+              ${w1} ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${botQiratWidth.toFixed(4)} متر
+            </code>
+          </div>
+          <div style="border-right: 3px solid #ffa000; padding-right: 8px;">
+            <span style="font-weight: bold; color: #333;">واجهة القيراط من الحد العلوي:</span><br>
+            <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
+              ${w2} ÷ ${totalQirats.toFixed(4)} قيراط<br>= ${topQiratWidth.toFixed(4)} متر
+            </code>
+          </div>
+        </div>
+      `;
+    }
+    const qiratContent = document.getElementById("qirat-info-content");
+    if (qiratContent) {
+      qiratContent.innerHTML = qiratHtml;
+      if (isQiratInfoOpen) {
+        const qContainer = document.getElementById("qirat-info-container");
+        if (qContainer) qContainer.style.maxHeight = qContainer.scrollHeight + "px";
+      }
+    }
+  } else {
+    const qiratContent = document.getElementById("qirat-info-content");
+    if (qiratContent) qiratContent.innerHTML = '<p style="text-align: center; color: #777; font-style: italic;">يرجى إكمال التقسيم لعرض واجهة القيراط</p>';
+  }
+
   stepsContainer.innerHTML = html;
 
   // إذا كانت اللوحة مفتوحة، نقوم بتحديث ارتفاعها المناسب لتفادي قص المحتوى
@@ -2455,6 +2511,38 @@ function updateCalculationSteps() {
     const container = document.getElementById("calculation-steps-container");
     if (container) {
       container.style.maxHeight = container.scrollHeight + "px";
+    }
+  }
+}
+
+let isQiratInfoOpen = false;
+function toggleQiratInfoAccordion() {
+  isQiratInfoOpen = !isQiratInfoOpen;
+  const container = document.getElementById("qirat-info-container");
+  const arrow = document.getElementById("qirat-info-arrow-icon");
+  if (!container || !arrow) return;
+  
+  if (isQiratInfoOpen) {
+    container.style.opacity = "1";
+    container.style.padding = "16px 16px";
+    container.style.maxHeight = container.scrollHeight + 32 + "px";
+    arrow.style.transform = "rotate(-90deg)";
+  } else {
+    container.style.opacity = "0";
+    container.style.padding = "0 16px";
+    container.style.maxHeight = "0px";
+    arrow.style.transform = "rotate(0deg)";
+  }
+}
+
+function updatePrintQiratClass() {
+  const card = document.querySelector(".qirat-info-card");
+  const chk = document.getElementById("print-qirat-checkbox");
+  if (card && chk) {
+    if (chk.checked) {
+      card.classList.add("print-visible");
+    } else {
+      card.classList.remove("print-visible");
     }
   }
 }
