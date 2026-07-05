@@ -694,6 +694,23 @@ function normalizeQasabaInputs(rowIndex) {
   return { qasaba, qabda, fraction };
 }
 
+// تصدير الكروكي كصورة مقصوصة وبدون فراغات (PNG)
+function exportCroquisAsImage() {
+  window.isExportingAsImage = true;
+  calculateAll(); // يُعيد الرسم بأبعاد متناسبة ومقصوصة بشكل مثالي
+  
+  const canvas = document.getElementById('landCanvas');
+  const dataUrl = canvas.toDataURL("image/png");
+  
+  const a = document.createElement("a");
+  a.download = "كروكي_الأرض_الدلال.png";
+  a.href = dataUrl;
+  a.click();
+  
+  window.isExportingAsImage = false;
+  calculateAll(); // إعادة الأبعاد لوضع الشاشة الطبيعي
+}
+
 let convBlurTimeout = null;
 
 // Called when user edits a cell in the conversions table
@@ -1237,27 +1254,46 @@ function drawLandCanvas(vertices) {
   
   // 2. Resolve CSS dimensions based on shape aspect ratio (clamp between 0.45 and 2.2)
   let targetWidth = 800; // Safe default for printing/fallback
-  const wrapper = canvas.parentElement;
-  if (wrapper) {
-    const rect = wrapper.getBoundingClientRect();
-    const availableWidth = rect.width - 24;
-    if (availableWidth > 100) {
-      targetWidth = availableWidth;
+  
+  let targetRatio = shapeRatio;
+  let targetHeight;
+
+  if (window.isExportingAsImage) {
+    if (shapeRatio >= 1) {
+       targetHeight = 1600;
+       targetWidth = 1600 * shapeRatio;
+    } else {
+       targetWidth = 1600;
+       targetHeight = 1600 / shapeRatio;
     }
+    // Set ratio exactly to shapeRatio so it fills perfectly
+    targetRatio = shapeRatio;
+    // Add generous padding to avoid cutoffs and leave a nice white margin for printing
+    targetWidth += 400;
+    targetHeight += 400;
+  } else {
+    const wrapper = canvas.parentElement;
+    if (wrapper) {
+      const rect = wrapper.getBoundingClientRect();
+      const availableWidth = rect.width - 24;
+      if (availableWidth > 100) {
+        targetWidth = availableWidth;
+      }
+    }
+    
+    targetRatio = Math.max(0.45, Math.min(2.2, shapeRatio));
+    targetHeight = targetWidth / targetRatio;
+    
+    // Limit height to keep it on a single printed page, and visually pleasant on screen
+    const maxHeight = isPrinting ? 800 : 650;
+    if (targetHeight > maxHeight) {
+      targetHeight = maxHeight;
+      targetWidth = targetHeight * targetRatio;
+    }
+    targetHeight = Math.max(280, targetHeight);
   }
   
-  let targetRatio = Math.max(0.45, Math.min(2.2, shapeRatio));
-  let targetHeight = targetWidth / targetRatio;
-  
-  // Limit height to keep it on a single printed page, and visually pleasant on screen
-  const maxHeight = isPrinting ? 800 : 650;
-  if (targetHeight > maxHeight) {
-    targetHeight = maxHeight;
-    targetWidth = targetHeight * targetRatio;
-  }
-  targetHeight = Math.max(280, targetHeight);
-  
-  const dpr = isPrinting ? 2.0 : (window.devicePixelRatio || 1);
+  const dpr = isPrinting || window.isExportingAsImage ? 2.0 : (window.devicePixelRatio || 1);
   const newWidth = Math.round(targetWidth);
   const newHeight = Math.round(targetHeight);
   
@@ -1275,26 +1311,13 @@ function drawLandCanvas(vertices) {
 
   // Clear canvas physical dimensions
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // Dynamic scale multiplier based on canvas CSS width (stable and doesn't scale with zoomFactor)
   const scaleMultiplier = Math.max(0.7, cssW / 600);
   
-  // 1. Draw professional Blueprint grid
-  ctx.strokeStyle = "#eaf2f8";
-  ctx.lineWidth = Math.max(1, 1 * scaleMultiplier);
-  const gridSpacing = Math.max(15, 20 * scaleMultiplier);
-  for (let x = 0; x < cssW; x += gridSpacing) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, cssH);
-    ctx.stroke();
-  }
-  for (let y = 0; y < cssH; y += gridSpacing) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(cssW, y);
-    ctx.stroke();
-  }
+  // الشبكة الخلفية تم إزالتها بناءً على طلب المستخدم
 
   if (!vertices || vertices.length < 3) {
     // Draw placeholder message

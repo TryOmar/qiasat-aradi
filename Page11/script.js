@@ -1537,17 +1537,33 @@ function renderCroquis() {
 
   const container = document.getElementById("croquis-container");
   
-  // استخدام حجم الحاوية الفعلي أو حجم التصدير العالي
   let containerW = 1600;
   let containerH = 1000;
-  if (!window.isExporting) {
-    containerW = container ? container.clientWidth || 700 : 700;
-    containerH = container ? container.clientHeight || 500 : 500;
-  }
-  
+
   const textScale = window.isExporting ? 2.2 : 1;
   const paddingH = window.isExporting ? 75 * textScale : 65;  // هامش أفقي لتفادي قص النصوص
   const paddingV = window.isExporting ? 65 * textScale : 60;  // هامش رأسي لتفادي قص النصوص
+
+  if (!window.isExporting) {
+    containerW = container ? container.clientWidth || 700 : 700;
+    containerH = container ? container.clientHeight || 500 : 500;
+  } else {
+    // حساب الأبعاد بناءً على نسبة شكل الأرض لإزالة الفراغات البيضاء
+    const shapeRatio = maxLen_virtual / (w_virtual || 1);
+    if (shapeRatio >= 1) {
+      containerH = 1600;
+      containerW = 1600 / shapeRatio;
+    } else {
+      containerW = 1600;
+      containerH = 1600 * shapeRatio;
+    }
+    // إضافة حواف إضافية لتكوين هامش أبيض كبير ومريح للطباعة
+    containerW += paddingH * 2 + 250;
+    containerH += paddingV * 2 + 250;
+    
+    window.exportWidth = containerW;
+    window.exportHeight = containerH;
+  }
 
   const scaleX = (containerW - paddingH * 2) / w_virtual;
   const scaleY = (containerH - paddingV * 2) / maxLen_virtual;
@@ -1874,8 +1890,10 @@ function exportCroquis() {
   
   // 3. استنساخ عنصر الـ SVG بدقته الكاملة
   const clonedSvg = svgNode.cloneNode(true);
-  clonedSvg.setAttribute("width", "1600");
-  clonedSvg.setAttribute("height", "1000");
+  const expW = window.exportWidth || 1600;
+  const expH = window.exportHeight || 1000;
+  clonedSvg.setAttribute("width", expW.toString());
+  clonedSvg.setAttribute("height", expH.toString());
   clonedSvg.style.backgroundColor = "white";
   
   // 4. استعادة الحالة الأصلية للشاشة وإعادة الرسم فورًا
@@ -1898,8 +1916,10 @@ function exportCroquis() {
   img.onload = function() {
     try {
       const canvas = document.createElement("canvas");
-      canvas.width = 1600; 
-      canvas.height = 1000;
+      const expW = window.exportWidth || 1600;
+      const expH = window.exportHeight || 1000;
+      canvas.width = expW; 
+      canvas.height = expH;
       const ctx = canvas.getContext("2d");
       
       // خلفية بيضاء
