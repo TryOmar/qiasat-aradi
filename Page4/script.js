@@ -256,14 +256,14 @@ function printReport() {
 <body>
   <div class="header">
     <h1>🌿 تقرير نزع وطرح الأراضي - تطبيق الدَّلاَّل</h1>
-    <p>تاريخ التقرير: \${dateStr} — \${timeStr}</p>
+    <p>تاريخ التقرير: ${dateStr} — ${timeStr}</p>
   </div>
 
   <div class="summary-box">
     <div class="section-title">بيانات الأرض الأساسية</div>
     <div class="summary-grid">
-      <div class="summary-item">مساحة الأرض الكلية: <strong>\${acreInput} فدان، \${caratInput} قيراط، \${sharesInput} سهم</strong></div>
-      <div class="summary-item">معدل النزع لكل قيراط: <strong>\${sharesToSubtract} سهم</strong></div>
+      <div class="summary-item">مساحة الأرض الكلية: <strong>${acreInput} فدان، ${caratInput} قيراط، ${sharesInput} سهم</strong></div>
+      <div class="summary-item">معدل النزع لكل قيراط: <strong>${sharesToSubtract} سهم</strong></div>
     </div>
   </div>
 
@@ -280,33 +280,33 @@ function printReport() {
     <tbody>
       <tr>
         <td style="font-weight:bold; text-align:right;">مساحة الأرض الكلية</td>
-        <td>\${acreInput}</td>
-        <td>\${caratInput}</td>
-        <td>\${sharesInput}</td>
+        <td>${acreInput}</td>
+        <td>${caratInput}</td>
+        <td>${sharesInput}</td>
       </tr>
       <tr>
         <td style="font-weight:bold; text-align:right; color:#c62828;">إجمالي المساحة المنزوعة</td>
-        <td style="color:#c62828; font-weight:bold;">\${subtractedAcre}</td>
-        <td style="color:#c62828; font-weight:bold;">\${subtractedCarat}</td>
-        <td style="color:#c62828; font-weight:bold;">\${subtractedShares}</td>
+        <td style="color:#c62828; font-weight:bold;">${subtractedAcre}</td>
+        <td style="color:#c62828; font-weight:bold;">${subtractedCarat}</td>
+        <td style="color:#c62828; font-weight:bold;">${subtractedShares}</td>
       </tr>
       <tr style="background-color:#f9f9f9;">
         <td style="font-weight:bold; text-align:right; color:#2e7d32;">المساحة المتبقية بعد النزع</td>
-        <td style="color:#2e7d32; font-weight:bold;">\${remAcre}</td>
-        <td style="color:#2e7d32; font-weight:bold;">\${remCarat}</td>
-        <td style="color:#2e7d32; font-weight:bold;">\${remShares}</td>
+        <td style="color:#2e7d32; font-weight:bold;">${remAcre}</td>
+        <td style="color:#2e7d32; font-weight:bold;">${remCarat}</td>
+        <td style="color:#2e7d32; font-weight:bold;">${remShares}</td>
       </tr>
       <tr>
         <td style="font-weight:bold; text-align:right; color:#e65100;">المساحة المباعة</td>
-        <td style="color:#e65100;">\${acreSold}</td>
-        <td style="color:#e65100;">\${caratSold}</td>
-        <td style="color:#e65100;">\${sharesSold}</td>
+        <td style="color:#e65100;">${acreSold}</td>
+        <td style="color:#e65100;">${caratSold}</td>
+        <td style="color:#e65100;">${sharesSold}</td>
       </tr>
       <tr style="background-color:#fff8e1; font-weight:bold;">
         <td style="font-weight:bold; text-align:right; color:#1b5e20;">الناتج النهائي (المتبقي الفعلي)</td>
-        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalAcre}</td>
-        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalCarat}</td>
-        <td style="color:\${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">\${finalShares}</td>
+        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalAcre}</td>
+        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalCarat}</td>
+        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalShares}</td>
       </tr>
     </tbody>
   </table>
