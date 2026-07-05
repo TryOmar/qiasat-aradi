@@ -11,6 +11,7 @@ let isPartitioned = false;
 let isManualPartition = false;
 let isEditing = false;
 let activeFieldBefore = null;
+let autoCloseTimer = null;
 
 // متغيرات Pinch-to-Zoom
 let lastTouchDist = 0;
@@ -2631,9 +2632,29 @@ function isNumericInput(el) {
   return false;
 }
 
+function clearAutoCloseTimer() {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer);
+    autoCloseTimer = null;
+  }
+}
+
+function resetAutoCloseTimer() {
+  clearAutoCloseTimer();
+  if (isEditing && activeFieldBefore) {
+    autoCloseTimer = setTimeout(() => {
+      if (isEditing && activeFieldBefore && document.activeElement === activeFieldBefore) {
+        activeFieldBefore.blur(); // سيقوم بعمل blur تلقائي لإغلاق اللوحة وتشغيل الحسابات والتحقق والتحصيل
+      }
+    }, 800); // 800ms مهلة
+  }
+}
+
 function finishEditingField(field) {
   if (!field) return;
   if (!isEditing) return;
+  
+  clearAutoCloseTimer();
   
   isEditing = false;
   activeFieldBefore = null;
@@ -2668,6 +2689,7 @@ function showCustomNumpad() {
 }
 
 function hideCustomNumpad() {
+  clearAutoCloseTimer();
   const numpad = document.getElementById("custom-numpad");
   if (!numpad) return;
 
@@ -2800,6 +2822,13 @@ document.addEventListener("DOMContentLoaded", function() {
       
       hideCustomNumpad();
     }, 100);
+  });
+
+  // تصفير وبدء مؤقت إغلاق لوحة المفاتيح تلقائياً بمجرد الكتابة
+  document.addEventListener("input", function(e) {
+    if (isEditing && activeFieldBefore === e.target) {
+      resetAutoCloseTimer();
+    }
   });
 
   // منع إدخال الأحرف من لوحة المفاتيح الحقيقية (للكمبيوتر ولحماية الحقول)
