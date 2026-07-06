@@ -962,4 +962,17 @@ body {
   }
 }
 
+input::placeholder, select::placeholder {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #888888 !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 768px) {
+  input::placeholder, select::placeholder {
+    font-size: 15px !important;
+  }
+}
+
 
