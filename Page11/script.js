@@ -2957,172 +2957,113 @@ function updateConversionsTable() {
   const container = document.getElementById("conversions-tbody");
   if (!container) return;
 
-  const activeEl = document.activeElement;
-  const isEditingConversion = activeEl && activeEl.id && activeEl.id.startsWith('conv-');
-  if (isEditingConversion) return;
-
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
   const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
-  // helper: render one field-group (label + value chip)
-  function convFieldHTML(id, value, title, chipClass) {
-    return `
-      <div class="conv-field-group">
-        <div class="conv-field-label">${title}</div>
-        <div class="conv-field-chip ${chipClass}">
-          <input type="number" inputmode="decimal"
-            id="${id}" value="${value}"
-            class="conv-chip-input"
-            title="${title}">
-        </div>
-      </div>`;
-  }
-
-  function readonlyFieldHTML(value, title, chipClass) {
-    return `
-      <div class="conv-field-group">
-        <div class="conv-field-label">${title}</div>
-        <div class="conv-field-chip ${chipClass}">
-          <input type="number" value="${value}" class="conv-chip-input" readonly tabindex="-1">
-        </div>
-      </div>`;
-  }
-
-  function buildCard({ id, label, meterValue, meterColor, isEditable, isArea, chipBase }) {
-    const qConv = toQasabaAndQabda(meterValue);
-    const meterLabel = isArea ? `${meterValue.toFixed(2)} م²` : `${meterValue} م`;
-    const meterBadgeStyle = `background:${meterColor.bg}; color:${meterColor.fg};`;
-    const cardClass = isArea ? 'conv-card conv-card-area' : 'conv-card';
-
-    const fracHTML = isEditable
-      ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', `${chipBase}-frac`)
-      : readonlyFieldHTML(qConv.fraction, 'أقل من القبضة', `${chipBase}-frac readonly`);
-
-    const qabdaHTML = isEditable
-      ? convFieldHTML(`conv-qabda-${id}`, qConv.qabda, 'قبضة', `${chipBase}-qabda`)
-      : readonlyFieldHTML(qConv.qabda, 'قبضة', `${chipBase}-qabda readonly`);
-
-    const qasabaHTML = isEditable
-      ? convFieldHTML(`conv-qasaba-${id}`, qConv.qasaba, 'قصبة', `${chipBase}-qasaba`)
-      : readonlyFieldHTML(qConv.qasaba, 'قصبة', `${chipBase}-qasaba readonly`);
-
-    const oninputAttr = isEditable
-      ? `oninput="updateSideFromQasaba(${id})" onchange="updateSideFromQasaba(${id})"` : '';
-
-    return `
-      <div class="${cardClass}">
-        <div class="conv-card-header">
-          <span class="conv-card-label">${label}</span>
-          <span class="conv-meter-badge" style="${meterBadgeStyle}">${meterLabel}</span>
-        </div>
-        <div class="conv-card-fields" ${oninputAttr}>
-          ${fracHTML}${qabdaHTML}${qasabaHTML}
-        </div>
-      </div>`;
-  }
-
   if (l1 <= 0 && l2 <= 0 && w1 <= 0 && w2 <= 0) {
     container.innerHTML = '<div class="conv-empty-state">أدخل الأبعاد أعلاه لعرض التحويلات</div>';
     return;
   }
 
-  let html = '<div class="conv-grid">';
+  // Pill badge helper
+  function pill(value, type) {
+    return `<span class="conv-pill conv-pill-${type}">${value}</span>`;
+  }
 
-  // الأبعاد الأربعة القابلة للتعديل
+  // Meter badge helper
+  function mBadge(text, type) {
+    return `<span class="conv-mbadge conv-mbadge-${type}">${text}</span>`;
+  }
+
+  // Build a table row
+  function row(labelHTML, frac, qabda, qasaba, extraClass = '') {
+    return `
+      <tr class="conv-ref-row ${extraClass}">
+        <td class="conv-ref-td conv-ref-label-td">${labelHTML}</td>
+        <td class="conv-ref-td conv-ref-val-td">${pill(frac,   'yellow')}</td>
+        <td class="conv-ref-td conv-ref-val-td">${pill(qabda,  'blue')}</td>
+        <td class="conv-ref-td conv-ref-val-td">${pill(qasaba, 'green')}</td>
+      </tr>`;
+  }
+
+  // ─── الأبعاد الأربعة ───────────────────────────────────────────
   const dims = [
-    { id: 0, field: 'width1', label: 'العرض الأول (أعلى) (C)' },
-    { id: 1, field: 'width2', label: 'العرض الثاني (أسفل) (A)' },
-    { id: 2, field: 'length1', label: 'الطول الأيمن (D)' },
-    { id: 3, field: 'length2', label: 'الطول الأيسر (B)' },
+    { field: 'width1',  label: 'العرض الأول (أعلى)' },
+    { field: 'width2',  label: 'العرض الثاني (أسفل)' },
+    { field: 'length1', label: 'الطول الأيمن (D)' },
+    { field: 'length2', label: 'الطول الأيسر (B)' },
   ];
 
+  let rows = '';
   dims.forEach(dim => {
     const val = parseFloat(document.getElementById(dim.field)?.value) || 0;
-    html += buildCard({
-      id: dim.id,
-      label: dim.label,
-      meterValue: val,
-      meterColor: { bg: '#e8f5e9', fg: '#1b5e20' },
-      isEditable: true,
-      isArea: false,
-      chipBase: 'green'
-    });
+    const q = toQasabaAndQabda(val);
+    const labelHTML = `
+      <div class="conv-label-inner">
+        <span class="conv-ref-name">${dim.label}</span>
+        ${mBadge(val + ' م', 'green')}
+      </div>`;
+    rows += row(labelHTML, q.fraction, q.qabda, q.qasaba);
   });
 
-  html += '</div>'; // end conv-grid
-
-  // عروض القيراط والمساحة المربعة في صف مستقل
+  // ─── عروض القيراط ──────────────────────────────────────────────
   let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
   if (caratArea === 0) caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
 
-  let botQiratWidth = 0, topQiratWidth = 0;
   if (caratArea > 0 && totalAreaM2 > 0) {
     const totalQirats = totalAreaM2 / caratArea;
-    topQiratWidth = w1 / totalQirats;
-    botQiratWidth = w2 / totalQirats;
+    const topQiratWidth = w1 / totalQirats;
+    const botQiratWidth = w2 / totalQirats;
+
+    const topQ = toQasabaAndQabda(topQiratWidth);
+    const botQ = toQasabaAndQabda(botQiratWidth);
+
+    const topLabel = `
+      <div class="conv-label-inner">
+        <span class="conv-ref-name conv-ref-qirat-name">عرض القيراط العلوي</span>
+        ${mBadge(topQiratWidth.toFixed(4) + ' م', 'blue')}
+      </div>`;
+    rows += row(topLabel, topQ.fraction, topQ.qabda, topQ.qasaba, 'conv-ref-qirat-row');
+
+    const botLabel = `
+      <div class="conv-label-inner">
+        <span class="conv-ref-name conv-ref-qirat-name">عرض القيراط السفلي</span>
+        ${mBadge(botQiratWidth.toFixed(4) + ' م', 'blue')}
+      </div>`;
+    rows += row(botLabel, botQ.fraction, botQ.qabda, botQ.qasaba, 'conv-ref-qirat-row');
   }
 
+  // ─── النتيجة بالقصبة المربعة ───────────────────────────────────
   const qasba_sq = totalAreaM2 / 12.60250;
   const reedValue = Math.floor(qasba_sq);
   const fistValue = Math.floor((qasba_sq - reedValue) * 24);
   const lessThanFistValue = parseFloat(((qasba_sq - reedValue - fistValue / 24)).toFixed(2));
 
-  html += '<div class="conv-extra-row">';
-
-  if (caratArea > 0 && totalAreaM2 > 0) {
-    html += buildCard({
-      id: 'topq',
-      label: 'عرض القيراط العلوي',
-      meterValue: topQiratWidth,
-      meterColor: { bg: '#e3f2fd', fg: '#0d47a1' },
-      isEditable: false,
-      isArea: false,
-      chipBase: 'blue'
-    });
-    html += buildCard({
-      id: 'botq',
-      label: 'عرض القيراط السفلي',
-      meterValue: botQiratWidth,
-      meterColor: { bg: '#e3f2fd', fg: '#0d47a1' },
-      isEditable: false,
-      isArea: false,
-      chipBase: 'blue'
-    });
-  }
-
-  // النتيجة بالقصبة المربعة - نبنيها مباشرة بقيم صحيحة
-  const areaFracHTML = readonlyFieldHTML(lessThanFistValue, 'أقل من القبضة', 'purple-frac readonly');
-  const areaQabdaHTML = readonlyFieldHTML(fistValue, 'قبضة', 'purple-qabda readonly');
-  const areaQasabaHTML = readonlyFieldHTML(reedValue, 'قصبة', 'purple-qasaba readonly');
-
-  html += `
-    <div class="conv-card conv-card-area">
-      <div class="conv-card-header">
-        <span class="conv-card-label">النتيجة بالقصبة المربعة</span>
-        <span class="conv-meter-badge" style="background:#f3e5f5; color:#6a1b9a;">${totalAreaM2.toFixed(2)} م²</span>
-      </div>
-      <div class="conv-card-fields">
-        ${areaFracHTML}${areaQabdaHTML}${areaQasabaHTML}
-      </div>
+  const areaLabel = `
+    <div class="conv-label-inner">
+      <span class="conv-ref-name">النتيجة بالقصبة المربعة</span>
+      ${mBadge(totalAreaM2.toFixed(2) + ' م²', 'purple')}
     </div>`;
+  rows += row(areaLabel, lessThanFistValue, fistValue, reedValue, 'conv-ref-area-row');
 
-  html += '</div>'; // end conv-extra-row
-
-  container.innerHTML = html;
-
-  // ربط أحداث التعديل للأبعاد الأربعة
-  dims.forEach(dim => {
-    ['conv-fraction-', 'conv-qabda-', 'conv-qasaba-'].forEach(prefix => {
-      const el = document.getElementById(prefix + dim.id);
-      if (el) {
-        el.addEventListener('input', () => updateSideFromQasaba(dim.id));
-        el.addEventListener('change', () => updateSideFromQasaba(dim.id));
-      }
-    });
-  });
+  // ─── الجدول النهائي ────────────────────────────────────────────
+  container.innerHTML = `
+    <div class="conv-table-wrap">
+      <table class="conv-ref-table">
+        <thead>
+          <tr>
+            <th class="conv-ref-th conv-ref-th-label">البعد</th>
+            <th class="conv-ref-th">أقل من القبضة</th>
+            <th class="conv-ref-th">قبضة</th>
+            <th class="conv-ref-th">قصبة</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {

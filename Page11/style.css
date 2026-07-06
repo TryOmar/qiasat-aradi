@@ -1625,3 +1625,176 @@ body {
   .conv-field-label { font-size: 10.5px; }
   .conv-card-fields { gap: 8px; }
 }
+
+/* ================================================================
+   ═══ جدول التحويل المرجعي (Pill-Table Design) ══════════════════
+   ================================================================ */
+
+/* ─── الغلاف الخارجي ────────────────────────────────────────── */
+.conv-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0 8px;
+}
+
+/* ─── الجدول الرئيسي ────────────────────────────────────────── */
+.conv-ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Cairo, Arial, sans-serif;
+  direction: rtl;
+  min-width: 340px;
+}
+
+/* ─── رأس الجدول ────────────────────────────────────────────── */
+.conv-ref-th {
+  background: #f1f8e9;
+  color: #2e7d32;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 11px 14px;
+  text-align: center;
+  border: 1px solid #c8e6c9;
+  white-space: nowrap;
+}
+
+.conv-ref-th-label {
+  text-align: right;
+  min-width: 160px;
+}
+
+/* ─── الصفوف العامة ─────────────────────────────────────────── */
+.conv-ref-row {
+  border-bottom: 1px solid #e8f5e9;
+  transition: background 0.15s ease;
+}
+
+.conv-ref-row:hover {
+  background: #f9fbe7;
+}
+
+/* ─── خلايا القيراط ─────────────────────────────────────────── */
+.conv-ref-qirat-row td {
+  background: #fafcff;
+}
+
+.conv-ref-qirat-row:hover td {
+  background: #f0f7ff !important;
+}
+
+/* ─── صف نتيجة المساحة المربعة ─────────────────────────────── */
+.conv-ref-area-row td {
+  background: #f1f8e9;
+  font-weight: 700;
+}
+
+.conv-ref-area-row:hover td {
+  background: #e8f5e9 !important;
+}
+
+/* ─── خلية البعد ────────────────────────────────────────────── */
+.conv-ref-td {
+  padding: 9px 12px;
+  border: 1px solid #e8f5e9;
+  vertical-align: middle;
+}
+
+.conv-ref-val-td {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.conv-ref-label-td {
+  text-align: right;
+}
+
+/* ─── المحتوى الداخلي لخلية البعد ──────────────────────────── */
+.conv-label-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.conv-ref-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1b5e20;
+  white-space: nowrap;
+}
+
+.conv-ref-qirat-name {
+  color: #0277bd;
+}
+
+.conv-ref-area-row .conv-ref-name {
+  color: #333;
+}
+
+/* ─── شارة المتر ────────────────────────────────────────────── */
+.conv-mbadge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.conv-mbadge-green  { background: #e8f5e9; color: #1b5e20; }
+.conv-mbadge-blue   { background: #e3f2fd; color: #0277bd; }
+.conv-mbadge-purple { background: #f3e5f5; color: #6a1b9a; }
+
+/* ─── Pill / Badge للقيم ────────────────────────────────────── */
+.conv-pill {
+  display: inline-block;
+  min-width: 44px;
+  text-align: center;
+  padding: 5px 13px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: Cairo, Arial, sans-serif;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* أصفر — أقل من القبضة */
+.conv-pill-yellow {
+  background: #fffde7;
+  color: #e65100;
+  border: 1.5px solid #ffe082;
+}
+
+/* أزرق — قبضة */
+.conv-pill-blue {
+  background: #e3f2fd;
+  color: #0277bd;
+  border: 1.5px solid #90caf9;
+}
+
+/* أخضر — قصبة */
+.conv-pill-green {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1.5px solid #a5d6a7;
+}
+
+/* ─── تجاوب الجوال ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .conv-ref-th     { font-size: 11.5px; padding: 8px 8px; }
+  .conv-ref-td     { padding: 7px 7px; }
+  .conv-ref-name   { font-size: 11.5px; }
+  .conv-mbadge     { font-size: 10px; padding: 2px 6px; }
+  .conv-pill       { font-size: 12px; padding: 4px 8px; min-width: 34px; }
+  .conv-ref-th-label { min-width: 110px; }
+}
+
+@media (max-width: 360px) {
+  .conv-ref-th     { font-size: 10.5px; padding: 7px 5px; }
+  .conv-ref-td     { padding: 6px 5px; }
+  .conv-ref-name   { font-size: 10.5px; }
+  .conv-pill       { font-size: 11px; padding: 3px 6px; min-width: 28px; border-radius: 7px; }
+  .conv-mbadge     { font-size: 9.5px; padding: 1px 5px; }
+}
