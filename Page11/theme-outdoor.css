@@ -54,6 +54,23 @@ body {
   outline: none !important;
 }
 
+/* --- نص الـ Placeholder: أصغر وأهدأ بصرياً --- */
+.input-row input::placeholder {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #888888 !important;
+  opacity: 1 !important;
+}
+
+/* الـ Placeholder في باقي الحقول */
+input::placeholder,
+select::placeholder {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: #888888 !important;
+  opacity: 1 !important;
+}
+
 .input-row label {
   font-size: 15px !important;
   color: #000000 !important;

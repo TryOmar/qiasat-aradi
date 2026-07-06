@@ -281,6 +281,14 @@ body.outdoor-mode .card:hover {
   box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
 }
 
+/* --- نص الـ Placeholder: أصغر وأهدأ بصرياً --- */
+body.outdoor-mode input::placeholder {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: #888888 !important;
+  opacity: 1 !important;
+}
+
 /* --- منع النصوص الرمادية الفاتحة --- */
 body.outdoor-mode [style*="color: gray"],
 body.outdoor-mode [style*="color: #888"],
