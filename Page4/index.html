@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
@@ -32,9 +32,9 @@
             </thead>
             <tbody>
               <tr>
-                <td class="width1_result"><input dir="ltr" type="number" id="input-shares" placeholder="مثال: 6.25" oninput="calculateValues()" tabindex="3"></td>
-                <td class="width1_result"><input dir="ltr" type="number" id="input-carat" placeholder="مثال: 12" oninput="calculateValues()" tabindex="2"></td>
-                <td class="width1_result"><input dir="ltr" type="number" id="input-acre" placeholder="مثال: 1" oninput="calculateValues()" tabindex="1"></td>
+                <td class="width1_result"><input dir="ltr" type="text" inputmode="decimal" id="input-shares" placeholder="مثال: 6.25" oninput="calculateValues()" tabindex="3"></td>
+                <td class="width1_result"><input dir="ltr" type="text" inputmode="decimal" id="input-carat" placeholder="مثال: 12" oninput="calculateValues()" tabindex="2"></td>
+                <td class="width1_result"><input dir="ltr" type="text" inputmode="decimal" id="input-acre" placeholder="مثال: 1" oninput="calculateValues()" tabindex="1"></td>
               </tr>
             </tbody>
           </table>
@@ -53,7 +53,7 @@
             </thead>
             <tbody>
               <tr>
-                <td class="width1_result"><input dir="ltr" tabindex="4" type="number" id="shares-subtract-each-carat" placeholder="مثال: 6.25" oninput="validateShareInput(this);calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="4" type="text" inputmode="decimal" id="shares-subtract-each-carat" placeholder="مثال: 6.25" oninput="validateShareInput(this);calculateValues()"></td>
               </tr>
             </tbody>
           </table>
@@ -142,9 +142,9 @@
             </thead>
             <tbody>
               <tr>
-                <td class="width1_result"><input dir="ltr" tabindex="7" type="number" id="input-shares-sold" placeholder="مثال: 6.25" oninput="calculateValues()"></td>
-                <td class="width1_result"><input dir="ltr" tabindex="6" type="number" id="input-carat-sold" placeholder="مثال: 12" oninput="calculateValues()"></td>
-                <td class="width1_result"><input dir="ltr" tabindex="5" type="number" id="input-acre-sold" placeholder="مثال: 1" oninput="calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="7" type="text" inputmode="decimal" id="input-shares-sold" placeholder="مثال: 6.25" oninput="calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="6" type="text" inputmode="decimal" id="input-carat-sold" placeholder="مثال: 12" oninput="calculateValues()"></td>
+                <td class="width1_result"><input dir="ltr" tabindex="5" type="text" inputmode="decimal" id="input-acre-sold" placeholder="مثال: 1" oninput="calculateValues()"></td>
               </tr>
             </tbody>
           </table>

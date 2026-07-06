@@ -1,4 +1,4 @@
-let currentInputMethod = "carats";
+﻿let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -540,15 +540,15 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="number" step="any" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="number" step="any" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
-        <input type="number" step="any" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()">
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
@@ -560,11 +560,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
-        <input type="number" step="any" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+        <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
       </div>
       <div class="col-group width-top-group">
         <span class="mobile-label">العرض الثاني (أسفل)</span>
-        <input type="number" step="any" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+        <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -2977,7 +2977,7 @@ function updateConversionsTable() {
       <div class="conv-field-group">
         <div class="conv-field-label">${title}</div>
         <div class="conv-field-chip ${chipClass}">
-          <input type="number" inputmode="decimal"
+          <input type="text" inputmode="decimal"
             id="${id}" value="${value}"
             class="conv-chip-input"
             title="${title}"
@@ -2994,7 +2994,7 @@ function updateConversionsTable() {
       <div class="conv-field-group">
         <div class="conv-field-label">${title}</div>
         <div class="conv-field-chip ${chipClass}">
-          <input type="number" value="${value}" class="conv-chip-input" readonly tabindex="-1">
+          <input type="text" inputmode="decimal" value="${value}" class="conv-chip-input" readonly tabindex="-1">
         </div>
       </div>`;
   }

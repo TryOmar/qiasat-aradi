@@ -1,4 +1,4 @@
-// Page 12 - Dallal Surveyor Map Builder script.js
+﻿// Page 12 - Dallal Surveyor Map Builder script.js
 
 // Graphics State
 let shapes = [];
@@ -900,15 +900,15 @@ function openModalForElement(type, id) {
       <div class="editor-form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
         <div>
           <label>فدان:</label>
-          <input type="number" id="modal-feddan" value="${s.area.feddan || 0}">
+          <input type="text" inputmode="decimal" id="modal-feddan" value="${s.area.feddan || 0}">
         </div>
         <div>
           <label>قيراط:</label>
-          <input type="number" id="modal-carat" value="${s.area.carat || 0}">
+          <input type="text" inputmode="decimal" id="modal-carat" value="${s.area.carat || 0}">
         </div>
         <div>
           <label>سهم:</label>
-          <input type="number" step="any" id="modal-shares" value="${s.area.shares || 0}">
+          <input type="text" inputmode="decimal" id="modal-shares" value="${s.area.shares || 0}">
         </div>
       </div>
       <div class="editor-form-group">
@@ -927,7 +927,7 @@ function openModalForElement(type, id) {
       </div>
       <div class="editor-form-group">
         <label>زاوية الدوران (بالدرجات):</label>
-        <input type="number" id="modal-border-angle" value="${b.angle || 0}" style="width:100%; box-sizing:border-box;">
+        <input type="text" inputmode="decimal" id="modal-border-angle" value="${b.angle || 0}" style="width:100%; box-sizing:border-box;">
       </div>
     `;
   } else if (targetType === 'splitLine' || targetType === 'splitLineLabel') {
@@ -941,7 +941,7 @@ function openModalForElement(type, id) {
       </div>
       <div class="editor-form-group">
         <label>زاوية دوران النص:</label>
-        <input type="number" id="modal-split-angle" value="${l.angle || 0}" style="width:100%; box-sizing:border-box;">
+        <input type="text" inputmode="decimal" id="modal-split-angle" value="${l.angle || 0}" style="width:100%; box-sizing:border-box;">
       </div>
     `;
   } else if (targetType === 'freeText') {
@@ -955,11 +955,11 @@ function openModalForElement(type, id) {
       </div>
       <div class="editor-form-group">
         <label>حجم الخط (بكسل):</label>
-        <input type="number" id="modal-free-size" value="${t.fontSize || 12}" style="width:100%; box-sizing:border-box;">
+        <input type="text" inputmode="decimal" id="modal-free-size" value="${t.fontSize || 12}" style="width:100%; box-sizing:border-box;">
       </div>
       <div class="editor-form-group">
         <label>زاوية الدوران:</label>
-        <input type="number" id="modal-free-angle" value="${t.angle || 0}" style="width:100%; box-sizing:border-box;">
+        <input type="text" inputmode="decimal" id="modal-free-angle" value="${t.angle || 0}" style="width:100%; box-sizing:border-box;">
       </div>
     `;
   }
@@ -1017,15 +1017,15 @@ function populateSidebarEditor() {
         <div class="editor-form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
           <div>
             <label>فدان:</label>
-            <input type="number" value="${s.area.feddan || 0}" oninput="updateSelectedShapeArea('feddan', this.value)">
+            <input type="text" inputmode="decimal" value="${s.area.feddan || 0}" oninput="updateSelectedShapeArea('feddan', this.value)">
           </div>
           <div>
             <label>قيراط:</label>
-            <input type="number" value="${s.area.carat || 0}" oninput="updateSelectedShapeArea('carat', this.value)">
+            <input type="text" inputmode="decimal" value="${s.area.carat || 0}" oninput="updateSelectedShapeArea('carat', this.value)">
           </div>
           <div>
             <label>سهم:</label>
-            <input type="number" step="any" value="${s.area.shares || 0}" oninput="updateSelectedShapeArea('shares', this.value)">
+            <input type="text" inputmode="decimal" value="${s.area.shares || 0}" oninput="updateSelectedShapeArea('shares', this.value)">
           </div>
         </div>
         <div class="editor-form-group">
@@ -1050,11 +1050,11 @@ function populateSidebarEditor() {
         </div>
         <div class="editor-form-group">
           <label>زاوية الدوران (بالدرجات):</label>
-          <input type="number" value="${b.angle || 0}" oninput="updateSelectedBorderField('angle', this.value)">
+          <input type="text" inputmode="decimal" value="${b.angle || 0}" oninput="updateSelectedBorderField('angle', this.value)">
         </div>
         <div class="editor-form-group">
           <label>حجم الخط:</label>
-          <input type="number" value="${b.fontSize || 13}" oninput="updateSelectedBorderField('fontSize', this.value)">
+          <input type="text" inputmode="decimal" value="${b.fontSize || 13}" oninput="updateSelectedBorderField('fontSize', this.value)">
         </div>
       `;
     }
@@ -1068,7 +1068,7 @@ function populateSidebarEditor() {
         </div>
         <div class="editor-form-group">
           <label>زاوية دوران النص (درجة):</label>
-          <input type="number" value="${l.angle || 0}" oninput="updateSelectedSplitField('angle', this.value)">
+          <input type="text" inputmode="decimal" value="${l.angle || 0}" oninput="updateSelectedSplitField('angle', this.value)">
         </div>
       `;
     }
@@ -1082,11 +1082,11 @@ function populateSidebarEditor() {
         </div>
         <div class="editor-form-group">
           <label>حجم الخط (بكسل):</label>
-          <input type="number" value="${t.fontSize || 12}" oninput="updateSelectedFreeTextField('fontSize', this.value)">
+          <input type="text" inputmode="decimal" value="${t.fontSize || 12}" oninput="updateSelectedFreeTextField('fontSize', this.value)">
         </div>
         <div class="editor-form-group">
           <label>زاوية الدوران:</label>
-          <input type="number" value="${t.angle || 0}" oninput="updateSelectedFreeTextField('angle', this.value)">
+          <input type="text" inputmode="decimal" value="${t.angle || 0}" oninput="updateSelectedFreeTextField('angle', this.value)">
         </div>
         <div style="display:flex; gap:10px; margin-top:8px;">
           <label style="display:flex; align-items:center; gap:4px; font-weight:bold; cursor:pointer;">
@@ -1202,7 +1202,7 @@ function promptAddFreeText(spawnX, spawnY) {
     </div>
     <div class="editor-form-group">
       <label>حجم الخط (بكسل):</label>
-      <input type="number" id="new-free-text-size" value="14" style="width:100%; padding:6px; box-sizing:border-box;">
+      <input type="text" inputmode="decimal" id="new-free-text-size" value="14" style="width:100%; padding:6px; box-sizing:border-box;">
     </div>
     <input type="hidden" id="new-free-text-x" value="${x}">
     <input type="hidden" id="new-free-text-y" value="${y}">

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -155,7 +155,7 @@
       text-align: center;
     }
 
-    input[type="number"] {
+    input[type="text" inputmode="decimal"] {
       text-align: center;
     }
 
@@ -206,13 +206,13 @@
         </tr>
         <tr>
           <td>
-            <input tabindex="1" type="number" id="txt_acre" step="1" placeholder="2" oninput="calculateShares()">
+            <input tabindex="1" type="text" inputmode="decimal" id="txt_acre" step="1" placeholder="2" oninput="calculateShares()">
           </td>
           <td>
-            <input tabindex="2" type="number" id="txt_carat" step="1" placeholder="12" oninput="calculateShares()">
+            <input tabindex="2" type="text" inputmode="decimal" id="txt_carat" step="1" placeholder="12" oninput="calculateShares()">
           </td>
           <td>
-            <input tabindex="3" type="number" id="txt_share" placeholder="23.75" oninput="calculateShares()">
+            <input tabindex="3" type="text" inputmode="decimal" id="txt_share" placeholder="23.75" oninput="calculateShares()">
           </td>
         </tr>
       </table>
@@ -244,14 +244,14 @@
 
       <br><br><br>
       <div style="float:right">
-        <input type="number" id="txt_numwives" step="1" placeholder="1" oninput="calculateShares(true)" min="0">
+        <input type="text" inputmode="decimal" id="txt_numwives" step="1" placeholder="1" oninput="calculateShares(true)" min="0">
         <label style="font-weight:bold;float: right;">ادخل عدد الزوجات</label>
         <br><br>
-        <input type="number" id="txt_numFemales" step="1" placeholder="2" oninput="calculateShares(true)" min="0"
+        <input type="text" inputmode="decimal" id="txt_numFemales" step="1" placeholder="2" oninput="calculateShares(true)" min="0"
           style="margin-right: 15px;">
         <label style="font-weight:bold;float: right;">ادخل عدد البنات</label>
         <br><br>
-        <input type="number" id="txt_numMales" step="1" placeholder="1" oninput="calculateShares(true)" min="0"
+        <input type="text" inputmode="decimal" id="txt_numMales" step="1" placeholder="1" oninput="calculateShares(true)" min="0"
           style="margin-right: 15px;">
         <label style="font-weight:bold;float: right;">ادخل عدد الذكور</label>
       </div>

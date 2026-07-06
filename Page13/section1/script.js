@@ -1,4 +1,4 @@
-// DOM Elements
+﻿// DOM Elements
 const shapeCards = document.querySelectorAll(".shape-card");
 const inputsGroups = document.querySelectorAll(".inputs-group");
 const caratSizeInput = document.getElementById("carat-size");
@@ -1056,7 +1056,7 @@ function calculateAll() {
               </span>
             </td>
             <td class="conv-input-cell">
-              <input type="number" inputmode="decimal" class="conv-input conv-fraction"
+              <input type="text" inputmode="decimal" class="conv-input conv-fraction"
                 id="conv-fraction-${i}" value="${qConv.fraction}"
                 min="0" max="0.99" step="0.01"
                 title="جزء أقل من القبضة (0 - 0.99)"
@@ -1064,7 +1064,7 @@ function calculateAll() {
                 onchange="updateSideFromQasaba('${sid}', ${i})">
             </td>
             <td class="conv-input-cell">
-              <input type="number" inputmode="decimal" class="conv-input conv-qabda"
+              <input type="text" inputmode="decimal" class="conv-input conv-qabda"
                 id="conv-qabda-${i}" value="${qConv.qabda}"
                 min="0" step="1"
                 title="عدد القبضات (24 قبضة = 1 قصبة تلقائياً)"
@@ -1072,7 +1072,7 @@ function calculateAll() {
                 onchange="updateSideFromQasaba('${sid}', ${i})">
             </td>
             <td class="conv-input-cell">
-              <input type="number" inputmode="decimal" class="conv-input conv-qasaba"
+              <input type="text" inputmode="decimal" class="conv-input conv-qasaba"
                 id="conv-qasaba-${i}" value="${qConv.qasaba}"
                 min="0" step="1"
                 title="عدد القصبات"
@@ -1098,13 +1098,13 @@ function calculateAll() {
             </span>
           </td>
           <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+            <input type="text" inputmode="decimal" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
           </td>
           <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
+            <input type="text" inputmode="decimal" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
           </td>
           <td class="conv-input-cell">
-            <input type="number" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
+            <input type="text" inputmode="decimal" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
           </td>
         </tr>
       `;
@@ -2003,16 +2003,16 @@ function renderHeirsRows() {
       // عمود واحد: الطول الثابت (colspan=2 ليتوافق مع رأس الجدول)
       sidesCells = `
         <td colspan="2" style="text-align:center;">
-          <input type="number" step="any" inputmode="decimal" class="heir-side-height" style="width:75px; background-color: #f1f3f4; cursor: default;" value="${trapHeight.toFixed(2)}" readonly />
+          <input type="text" inputmode="decimal" class="heir-side-height" style="width:75px; background-color: #f1f3f4; cursor: default;" value="${trapHeight.toFixed(2)}" readonly />
         </td>`;
     } else {
       // عمودان: يمين ويسار (الأضلاع المائلة الهندسية)
       sidesCells = `
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
+          <input type="text" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
         </td>
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
+          <input type="text" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
         </td>`;
     }
 
@@ -2022,34 +2022,34 @@ function renderHeirsRows() {
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
         </td>
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-top" style="width:65px;" value="${(heir.topW || 0).toFixed(2)}" 
+          <input type="text" inputmode="decimal" class="heir-side-top" style="width:65px;" value="${(heir.topW || 0).toFixed(2)}" 
             oninput="updateHeirSide(${idx}, 'topW', this.value)" />
         </td>
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-side-bot" style="width:65px;" value="${(heir.botW || 0).toFixed(2)}" 
+          <input type="text" inputmode="decimal" class="heir-side-bot" style="width:65px;" value="${(heir.botW || 0).toFixed(2)}" 
             oninput="updateHeirSide(${idx}, 'botW', this.value)" />
         </td>
         ${sidesCells}
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
+          <input type="text" inputmode="decimal" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
             oninput="debouncedUpdateHeirShare(${idx}, 'sqm', this.value)" 
             onblur="commitHeirShareImmediately(${idx}, 'sqm', this.value)" 
             onkeydown="if(event.key === 'Enter') { commitHeirShareImmediately(${idx}, 'sqm', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" step="any" inputmode="decimal" class="heir-share heir-share-sahm" value="${conv.shares.toFixed(2)}" 
+          <input type="text" inputmode="decimal" class="heir-share heir-share-sahm" value="${conv.shares.toFixed(2)}" 
             oninput="debouncedUpdateHeirSplitShare(${idx}, 'sahm', this.value)" 
             onblur="commitHeirSplitShareImmediately(${idx}, 'sahm', this.value)" 
             onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'sahm', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" inputmode="decimal" class="heir-share heir-share-carat" value="${conv.carats}" 
+          <input type="text" inputmode="decimal" class="heir-share heir-share-carat" value="${conv.carats}" 
             oninput="debouncedUpdateHeirSplitShare(${idx}, 'carat', this.value)" 
             onblur="commitHeirSplitShareImmediately(${idx}, 'carat', this.value)" 
             onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'carat', this.value); this.blur(); }" />
         </td>
         <td>
-          <input type="number" inputmode="decimal" class="heir-share heir-share-feddan" value="${conv.feddans}" 
+          <input type="text" inputmode="decimal" class="heir-share heir-share-feddan" value="${conv.feddans}" 
             oninput="debouncedUpdateHeirSplitShare(${idx}, 'feddan', this.value)" 
             onblur="commitHeirSplitShareImmediately(${idx}, 'feddan', this.value)" 
             onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'feddan', this.value); this.blur(); }" />

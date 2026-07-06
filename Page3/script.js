@@ -1,4 +1,4 @@
-// Select input elements and other relevant elements
+﻿// Select input elements and other relevant elements
 let shares = document.querySelector("#share-input");
 let carat = document.querySelector("#carat-input");
 let acre = document.querySelector("#acre-input");
@@ -85,10 +85,10 @@ function inputlistener() {
   last_table_inputs = document.createElement("div");
   last_table_inputs.className = "table-input";
   last_table_inputs.innerHTML = `
-          <input type="number" inputmode="decimal">
-          <input type="number" inputmode="decimal">
+          <input type="text" inputmode="decimal">
+          <input type="text" inputmode="decimal">
           <input type="text" readonly>
-          <input type="number" inputmode="decimal">
+          <input type="text" inputmode="decimal">
           <input type="text" readonly>
         `;
   document
