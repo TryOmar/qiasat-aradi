@@ -930,7 +930,10 @@ function calculateGeneral() {
   }
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
-    if (Math.abs(remainingArea) < 0.1) {
+    if (totalAreaM2 <= 0) {
+      statusEl.innerHTML = "ℹ️ يرجى إدخال أبعاد الأرض لبدء الحساب.";
+      statusEl.style.color = "#666";
+    } else if (Math.abs(remainingArea) < 0.1) {
       statusEl.innerHTML = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
       statusEl.style.color = "#2e7d32";
     } else {
@@ -1319,12 +1322,23 @@ function clearAll() {
   document.getElementById("length2").value = "";
   document.getElementById("width1").value = "";
   document.getElementById("width2").value = "";
+  document.getElementById("other-carat-area").value = "";
+  document.getElementById("input-carat-area").value = "175.035";
+  document.getElementById("share-input-method").value = "carats";
+  
+  currentInputMethod = "carats";
+  isPartitioned = false;
+  isManualPartition = false;
+  window.calculatedPieces = [];
   
   const list = document.getElementById("partners-list");
-  list.innerHTML = "";
+  if (list) list.innerHTML = "";
   addNewPartnerRow("شريك 1");
   
-  saveAndCalc();
+  renderHeaderAndFooter();
+  saveData();
+  calculateGeneral();
+  renderCroquis();
 }
 
 function onCalculateBtnClick() {

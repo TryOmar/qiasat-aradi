@@ -186,6 +186,25 @@ function runAutomatedTests() {
 
     assert(Math.abs(finalDifference) < 0.000001, "الحالة 3: اختبار التراكم (5 مراحل متتالية) نجح والفرق النهائي صفر تقريباً.", `مجموع المساحات: ${finalSum.toFixed(8)} م² | الفرق النهائي: ${finalDifference.toFixed(14)} م²`);
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 4: Reset state (clearAll) verification
+    // -------------------------------------------------------------------------
+    clearAll();
+    
+    assert(document.getElementById("length1").value === "", "الحالة 4: الطول الأول يجب أن يكون فارغاً بعد مسح الكل.", `الفعلي: "${document.getElementById("length1").value}"`);
+    assert(document.getElementById("length2").value === "", "الحالة 4: الطول الثاني يجب أن يكون فارغاً بعد مسح الكل.", `الفعلي: "${document.getElementById("length2").value}"`);
+    assert(document.getElementById("width1").value === "", "الحالة 4: العرض الأول يجب أن يكون فارغاً بعد مسح الكل.", `الفعلي: "${document.getElementById("width1").value}"`);
+    assert(document.getElementById("width2").value === "", "الحالة 4: العرض الثاني يجب أن يكون فارغاً بعد مسح الكل.", `الفعلي: "${document.getElementById("width2").value}"`);
+    assert(isPartitioned === false, "الحالة 4: متغير isPartitioned يجب أن يكون false بعد مسح الكل.");
+    assert(window.calculatedPieces.length === 0, "الحالة 4: مصفوفة window.calculatedPieces يجب أن تكون فارغة بعد مسح الكل.", `الطول الفعلي: ${window.calculatedPieces.length}`);
+    
+    const remainderRow = document.getElementById("remainder-row-table");
+    const isRemainderHidden = !remainderRow || remainderRow.style.display === "none";
+    assert(isRemainderHidden, "الحالة 4: صف المتبقي في الجدول يجب أن يكون مخفياً تماماً بعد مسح الكل.");
+
+    const statusText = document.getElementById("summary-status") ? document.getElementById("summary-status").innerText : "";
+    assert(statusText.includes("يرجى إدخال أبعاد الأرض"), "الحالة 4: رسالة الحالة يجب أن تطلب إدخال الأبعاد بعد مسح الكل.", `النص الفعلي: "${statusText}"`);
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {
