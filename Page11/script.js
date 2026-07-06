@@ -820,6 +820,12 @@ function calculateGeneral() {
     const indexInput = row.querySelector(".partner-index");
     if (indexInput) indexInput.value = index + 1;
 
+    // تعبئة اسم الشريك تلقائياً إذا كان فارغاً عند الحساب
+    const nameInput = row.querySelector(".partner-name");
+    if (nameInput && !nameInput.value.trim()) {
+      nameInput.value = `شريك ${index + 1}`;
+    }
+
     let partnerAreaM2 = 0;
     let partnerCarats = 0;
     
@@ -945,11 +951,11 @@ function calculateGeneral() {
       const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
       
       if (isNegative) {
-        statusEl.innerHTML = `❌ يوجد عجز في مساحة الأرض بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.innerHTML = `🔴 يوجد عجز في مساحة الأرض<br>المساحة: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
         statusEl.style.color = "#c62828";
       } else {
-        statusEl.innerHTML = `⚠️ المساحة المتبقية:<br><strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
-        statusEl.style.color = "#ef6c00";
+        statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.style.color = "#e65100";
       }
     }
   }
@@ -1139,11 +1145,11 @@ function runPartition() {
     totalDistributedArea += calculatedGeoArea;
 
     if (widthBotInput) {
-      widthBotInput.value = botWidth.toFixed(4);
+      widthBotInput.value = botWidth.toFixed(2);
       widthBotInput.setAttribute("data-last-val", botWidth.toFixed(4));
     }
     if (widthTopInput) {
-      widthTopInput.value = topWidth.toFixed(4);
+      widthTopInput.value = topWidth.toFixed(2);
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
     }
 
@@ -2106,7 +2112,7 @@ function getTableDataArray() {
     data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "العلامة (م)", "الفاصل (م)"]);
   }
   
-  rows.forEach(row => {
+  rows.forEach((row, idx) => {
     const rowData = [];
     rowData.push(row.querySelector(".partner-index") ? row.querySelector(".partner-index").value : "-");
     rowData.push(row.querySelector(".partner-name") ? row.querySelector(".partner-name").value : "-");
@@ -2122,12 +2128,108 @@ function getTableDataArray() {
     
     rowData.push(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : "-");
     rowData.push(row.querySelector(".partner-percent") ? row.querySelector(".partner-percent").value : "-");
-    rowData.push(row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : "-");
-    rowData.push(row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : "-");
+    
+    // دقة 4 منازل عشرية للتقرير والطباعة
+    let w1_val = "-";
+    let w2_val = "-";
+    if (window.calculatedPieces && window.calculatedPieces[idx]) {
+      w1_val = window.calculatedPieces[idx].botW.toFixed(4);
+      w2_val = window.calculatedPieces[idx].topW.toFixed(4);
+    } else {
+      w1_val = row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : "-";
+      w2_val = row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : "-";
+    }
+    rowData.push(w1_val);
+    rowData.push(w2_val);
+    
     rowData.push(row.querySelector(".partner-cum-width") ? row.querySelector(".partner-cum-width").value : "-");
     rowData.push(row.querySelector(".partner-div-line") ? row.querySelector(".partner-div-line").value : "-");
     data.push(rowData);
   });
+
+  // إضافة صف المتبقي إذا كان ظاهراً
+  const remRow = document.getElementById("remainder-row-table");
+  if (remRow && remRow.style.display !== "none") {
+    const remData = [];
+    const inputs = remRow.querySelectorAll("input");
+    if (inputs.length >= 11) {
+      remData.push(inputs[0].value);
+      remData.push(inputs[1].value);
+      if (currentInputMethod === "carats") {
+        remData.push(inputs[2].value);
+        remData.push(inputs[3].value);
+        remData.push(inputs[4].value);
+        remData.push(inputs[5].value);
+        remData.push(inputs[6].value);
+        
+        let remW1 = inputs[7].value;
+        let remW2 = inputs[8].value;
+        if (window.calculatedPieces) {
+          const remPiece = window.calculatedPieces.find(p => p.isRemainder);
+          if (remPiece) {
+            remW1 = remPiece.botW.toFixed(4);
+            remW2 = remPiece.topW.toFixed(4);
+          }
+        }
+        remData.push(remW1);
+        remData.push(remW2);
+        remData.push(inputs[9].value);
+        remData.push(inputs[10].value);
+      } else {
+        remData.push(inputs[2].value);
+        remData.push(inputs[3].value);
+        remData.push(inputs[5].value);
+        remData.push(inputs[6].value);
+        
+        let remW1 = inputs[7].value;
+        let remW2 = inputs[8].value;
+        if (window.calculatedPieces) {
+          const remPiece = window.calculatedPieces.find(p => p.isRemainder);
+          if (remPiece) {
+            remW1 = remPiece.botW.toFixed(4);
+            remW2 = remPiece.topW.toFixed(4);
+          }
+        }
+        remData.push(remW1);
+        remData.push(remW2);
+        remData.push(inputs[9].value);
+        remData.push(inputs[10].value);
+      }
+      data.push(remData);
+    }
+  }
+
+  // إضافة صف الإجمالي
+  const totalRow = document.getElementById("total");
+  if (totalRow) {
+    const totData = [];
+    const inputs = totalRow.querySelectorAll("input");
+    if (inputs.length >= 11) {
+      totData.push(inputs[0].value);
+      totData.push(inputs[1].value);
+      if (currentInputMethod === "carats") {
+        totData.push(inputs[2].value);
+        totData.push(inputs[3].value);
+        totData.push(inputs[4].value);
+        totData.push(inputs[5].value);
+        totData.push(inputs[6].value);
+        totData.push(inputs[7].value);
+        totData.push(inputs[8].value);
+        totData.push(inputs[9].value);
+        totData.push(inputs[10].value);
+      } else {
+        totData.push(inputs[2].value);
+        totData.push(inputs[3].value);
+        totData.push(inputs[5].value);
+        totData.push(inputs[6].value);
+        totData.push(inputs[7].value);
+        totData.push(inputs[8].value);
+        totData.push(inputs[9].value);
+        totData.push(inputs[10].value);
+      }
+      data.push(totData);
+    }
+  }
   
   return data;
 }
@@ -2139,10 +2241,21 @@ function printReport() {
   const w2 = document.getElementById("width2").value || "-";
   const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
   const data = getTableDataArray();
+  const numPartners = document.querySelectorAll("#partners-list .partner-row").length;
   
   const tableRows = data.slice(1).map((row, idx) => {
-    const bg = idx % 2 === 0 ? "#f9f9f9" : "#fff";
-    return `<tr style="background:${bg};">${row.map(cell => `<td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${cell}</td>`).join("")}</tr>`;
+    const isTotal = row[1] === "الإجمالي";
+    const isRem = row[1] && row[1].includes("المتبقي");
+    let bg = idx % 2 === 0 ? "#f9f9f9" : "#fff";
+    let style = "";
+    if (isTotal) {
+      bg = "#333";
+      style = "color: white; font-weight: bold;";
+    } else if (isRem) {
+      bg = "#fffde7";
+      style = "color: #e65100; font-weight: bold;";
+    }
+    return `<tr style="background:${bg};${style}">${row.map(cell => `<td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${cell}</td>`).join("")}</tr>`;
   }).join("");
   
   const headerRow = `<tr>${data[0].map(h => `<th style="padding:8px 10px;background:#1b5e20;color:white;border:1px solid #ddd;text-align:center;">${h}</th>`).join("")}</tr>`;
@@ -2183,8 +2296,8 @@ function printReport() {
   </div>
   <div class="info-grid" style="grid-template-columns: repeat(3,1fr);">
     <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
-    <div class="info-box"><label>عدد الشركاء</label><strong>${data.length - 1}</strong></div>
-    <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${document.getElementById("summary-status") ? document.getElementById("summary-status").innerText : "-"}</strong></div>
+    <div class="info-box"><label>عدد الشركاء</label><strong>${numPartners}</strong></div>
+    <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${document.getElementById("summary-status") ? document.getElementById("summary-status").innerText.replace(/\n/g, ' ') : "-"}</strong></div>
   </div>
   <h3 style="color:#1b5e20; margin: 15px 0 8px 0; font-size:15px;">جدول تفاصيل التقسيم</h3>
   <table>
@@ -2438,6 +2551,24 @@ function updateCalculationSteps() {
         </div>
       `;
     });
+
+    let totalDistributed = 0;
+    rows.forEach(row => {
+      totalDistributed += parseFloat(row.querySelector(".partner-area").value) || 0;
+    });
+    const remAreaVal = totalAreaM2 - totalDistributed;
+    if (remAreaVal > 0.05) {
+      const remPct = totalAreaM2 > 0 ? (remAreaVal / totalAreaM2) * 100 : 0;
+      html += `
+        <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
+          <span style="font-weight: bold; color: #e65100;">🟡 المتبقي:</span><br>
+          <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
+            ${remAreaVal.toFixed(2)} ÷ ${totalAreaM2.toFixed(2)} × 100<br>= ${remPct.toFixed(2)}%
+          </code>
+        </div>
+      `;
+    }
+
     html += `
         </div>
       </div>
@@ -2508,7 +2639,13 @@ function updateCalculationSteps() {
       `;
       window.calculatedPieces.forEach((piece, index) => {
         if (index > 0) {
-          const t = (piece.leftLine - l1) / (l2 - l1);
+          let t = 0;
+          if (Math.abs(l2 - l1) > 1e-9) {
+            t = (piece.leftLine - l1) / (l2 - l1);
+          } else {
+            const avgW = (w1 + w2) / 2;
+            t = avgW > 0 ? (piece.startX / avgW) : 0;
+          }
           html += `
             <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
               <span style="font-weight: bold; color: #333;">الفاصل بين قطعة ${index} وقطعة ${index + 1}:</span><br>
@@ -3179,8 +3316,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remFeddans}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -3195,8 +3332,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" style="display:none;" readonly value="-">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -3371,10 +3508,13 @@ function renderHistory() {
     history = [];
   }
 
+  const cardContainer = document.getElementById("history-card-container");
   if (history.length === 0) {
+    if (cardContainer) cardContainer.style.display = "none";
     container.innerHTML = `<p style="text-align: center; color: #888; font-style: italic; font-size: 12px; margin: 10px 0;">لا توجد مراحل مسجلة حالياً في السجل</p>`;
     return;
   }
+  if (cardContainer) cardContainer.style.display = "block";
 
   let html = "";
   history.forEach((state, index) => {
