@@ -2968,7 +2968,11 @@ function updateConversionsTable() {
   const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
   // helper: render one field-group (label + value chip)
-  function convFieldHTML(id, value, title, chipClass) {
+  function convFieldHTML(id, value, title, chipClass, min, max, step) {
+    const minAttr = min !== undefined ? `min="${min}"` : '';
+    const maxAttr = max !== undefined ? `max="${max}"` : '';
+    const stepAttr = step !== undefined ? `step="${step}"` : '';
+    
     return `
       <div class="conv-field-group">
         <div class="conv-field-label">${title}</div>
@@ -2976,7 +2980,11 @@ function updateConversionsTable() {
           <input type="number" inputmode="decimal"
             id="${id}" value="${value}"
             class="conv-chip-input"
-            title="${title}">
+            title="${title}"
+            ${minAttr} ${maxAttr} ${stepAttr}
+            oninput="updateSideFromQasaba(this.dataset.idx)"
+            onchange="updateSideFromQasaba(this.dataset.idx)"
+            data-idx="${id.split('-').pop()}">
         </div>
       </div>`;
   }
@@ -2998,19 +3006,16 @@ function updateConversionsTable() {
     const cardClass = isArea ? 'conv-card conv-card-area' : 'conv-card';
 
     const fracHTML = isEditable
-      ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', `${chipBase}-frac`)
+      ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', `${chipBase}-frac`, 0, 0.99, 0.01)
       : readonlyFieldHTML(qConv.fraction, 'أقل من القبضة', `${chipBase}-frac readonly`);
 
     const qabdaHTML = isEditable
-      ? convFieldHTML(`conv-qabda-${id}`, qConv.qabda, 'قبضة', `${chipBase}-qabda`)
+      ? convFieldHTML(`conv-qabda-${id}`, qConv.qabda, 'قبضة', `${chipBase}-qabda`, 0, undefined, 1)
       : readonlyFieldHTML(qConv.qabda, 'قبضة', `${chipBase}-qabda readonly`);
 
     const qasabaHTML = isEditable
-      ? convFieldHTML(`conv-qasaba-${id}`, qConv.qasaba, 'قصبة', `${chipBase}-qasaba`)
+      ? convFieldHTML(`conv-qasaba-${id}`, qConv.qasaba, 'قصبة', `${chipBase}-qasaba`, 0, undefined, 1)
       : readonlyFieldHTML(qConv.qasaba, 'قصبة', `${chipBase}-qasaba readonly`);
-
-    const oninputAttr = isEditable
-      ? `oninput="updateSideFromQasaba(${id})" onchange="updateSideFromQasaba(${id})"` : '';
 
     return `
       <div class="${cardClass}">
@@ -3018,7 +3023,7 @@ function updateConversionsTable() {
           <span class="conv-card-label">${label}</span>
           <span class="conv-meter-badge" style="${meterBadgeStyle}">${meterLabel}</span>
         </div>
-        <div class="conv-card-fields" ${oninputAttr}>
+        <div class="conv-card-fields">
           ${fracHTML}${qabdaHTML}${qasabaHTML}
         </div>
       </div>`;
@@ -3112,17 +3117,6 @@ function updateConversionsTable() {
   html += '</div>'; // end conv-extra-row
 
   container.innerHTML = html;
-
-  // ربط أحداث التعديل للأبعاد الأربعة
-  dims.forEach(dim => {
-    ['conv-fraction-', 'conv-qabda-', 'conv-qasaba-'].forEach(prefix => {
-      const el = document.getElementById(prefix + dim.id);
-      if (el) {
-        el.addEventListener('input', () => updateSideFromQasaba(dim.id));
-        el.addEventListener('change', () => updateSideFromQasaba(dim.id));
-      }
-    });
-  });
 }
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {
