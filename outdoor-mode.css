@@ -1,0 +1,338 @@
+/* ============================================================
+   outdoor-mode.css
+   وضع الاستخدام تحت أشعة الشمس - High Contrast Outdoor Mode
+   يُفعَّل بإضافة class="outdoor-mode" على <body>
+   ============================================================ */
+
+/* -------- زر التبديل -------- */
+#outdoor-toggle-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 15px;
+  z-index: 99999;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid #1B5E20;
+  background: #FFFFFF;
+  color: #1B5E20;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  font-family: sans-serif;
+  line-height: 1;
+  padding: 0;
+}
+
+#outdoor-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+#outdoor-toggle-btn.active {
+  background: #1B5E20;
+  color: #FFFFFF;
+  border-color: #FFF;
+  box-shadow: 0 3px 14px rgba(27,94,32,0.55);
+}
+
+/* tooltip */
+#outdoor-toggle-btn::after {
+  content: "وضع الشمس";
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  font-family: 'Cairo', Arial, sans-serif;
+}
+
+#outdoor-toggle-btn:hover::after {
+  opacity: 1;
+}
+
+/* ============================================================
+   OUTDOOR MODE STYLES
+   جميع الأنماط تحت body.outdoor-mode
+   ============================================================ */
+
+body.outdoor-mode {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* --- كل العناصر: خلفية بيضاء + نص أسود --- */
+body.outdoor-mode *:not(.outdoor-mode-exempt) {
+  color: #000000 !important;
+  text-shadow: none !important;
+  background-image: none !important;
+}
+
+/* --- إلغاء التدرجات اللونية --- */
+body.outdoor-mode [style*="linear-gradient"],
+body.outdoor-mode [style*="radial-gradient"] {
+  background-image: none !important;
+}
+
+/* --- البطاقات والحاويات --- */
+body.outdoor-mode .s,
+body.outdoor-mode .card,
+body.outdoor-mode .con,
+body.outdoor-mode .summary-card-item,
+body.outdoor-mode #report-container {
+  background-color: #FFFFFF !important;
+  border: 1.5px solid #757575 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+}
+
+/* --- عناوين البطاقات الخضراء --- */
+body.outdoor-mode .s h3,
+body.outdoor-mode .card-title {
+  background-color: #1B5E20 !important;
+  color: #FFFFFF !important;
+  font-size: 17px !important;
+  font-weight: bold !important;
+}
+
+/* --- حقول الإدخال --- */
+body.outdoor-mode input[type="text"],
+body.outdoor-mode input[type="number"],
+body.outdoor-mode input[type="input"],
+body.outdoor-mode select,
+body.outdoor-mode textarea {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #555555 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  border-radius: 7px !important;
+  min-height: 46px !important;
+}
+
+body.outdoor-mode input[readonly],
+body.outdoor-mode input[disabled] {
+  background-color: #F5F5F5 !important;
+  color: #000000 !important;
+  border-color: #BDBDBD !important;
+}
+
+/* --- الأزرار --- */
+body.outdoor-mode button,
+body.outdoor-mode input[type="button"],
+body.outdoor-mode input[type="submit"],
+body.outdoor-mode .btn,
+body.outdoor-mode .btn-action,
+body.outdoor-mode .button1,
+body.outdoor-mode .nav-btn {
+  min-height: 52px !important;
+  font-size: 17px !important;
+  font-weight: bold !important;
+  border-radius: 10px !important;
+  border: none !important;
+  padding: 0 18px !important;
+  background-image: none !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18) !important;
+  transition: none !important;
+}
+
+/* ألوان الأزرار حسب وظيفتها */
+body.outdoor-mode .btn-success,
+body.outdoor-mode [onclick*="calc"],
+body.outdoor-mode [onclick*="Calc"],
+body.outdoor-mode [value="احسب"],
+body.outdoor-mode #btn_Calculate {
+  background-color: #2E7D32 !important;
+  color: #FFFFFF !important;
+}
+
+body.outdoor-mode .btn-danger,
+body.outdoor-mode [onclick*="clear"],
+body.outdoor-mode [onclick*="Clear"],
+body.outdoor-mode [onclick*="delete"],
+body.outdoor-mode [value="حذف"],
+body.outdoor-mode #btn_Delete {
+  background-color: #C62828 !important;
+  color: #FFFFFF !important;
+}
+
+body.outdoor-mode .btn-primary,
+body.outdoor-mode [onclick*="print"],
+body.outdoor-mode [onclick*="Print"] {
+  background-color: #1565C0 !important;
+  color: #FFFFFF !important;
+}
+
+body.outdoor-mode .btn-secondary {
+  background-color: #37474F !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+/* --- الجداول --- */
+body.outdoor-mode table {
+  border-collapse: collapse !important;
+}
+
+body.outdoor-mode th {
+  background-color: #2E7D32 !important;
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  padding: 10px 6px !important;
+}
+
+body.outdoor-mode td {
+  border: 1.5px solid #BDBDBD !important;
+  padding: 10px 6px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+  background-color: #FFFFFF !important;
+}
+
+body.outdoor-mode tr:nth-child(even) td {
+  background-color: #F5F5F5 !important;
+}
+
+/* --- صف الإجمالي --- */
+body.outdoor-mode .tableFooterTotal td,
+body.outdoor-mode #total,
+body.outdoor-mode #total input,
+body.outdoor-mode tr.tableFooterTotal td {
+  background-color: #FFF8C6 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  border-color: #F9A825 !important;
+}
+
+/* --- رأس الجدول داخل Page11 --- */
+body.outdoor-mode .table-header {
+  background-color: #2E7D32 !important;
+}
+body.outdoor-mode .table-header p {
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+
+/* --- حقول الشركاء --- */
+body.outdoor-mode .partner-row input[readonly] {
+  background-color: #E8F5E9 !important;
+  color: #1B5E20 !important;
+}
+
+/* --- رسائل الحالة --- */
+body.outdoor-mode .alert-success,
+body.outdoor-mode [style*="#e8f5e9"],
+body.outdoor-mode [style*="#E8F5E9"] {
+  background-color: #C8E6C9 !important;
+  border: 2px solid #2E7D32 !important;
+  color: #1B5E20 !important;
+}
+
+body.outdoor-mode .alert-warning,
+body.outdoor-mode [style*="#fff3cd"],
+body.outdoor-mode [style*="#FFF3CD"] {
+  background-color: #FFF9C4 !important;
+  border: 2px solid #F9A825 !important;
+  color: #000000 !important;
+}
+
+body.outdoor-mode .alert-danger,
+body.outdoor-mode .table-remaining-box,
+body.outdoor-mode [style*="#ffebee"],
+body.outdoor-mode [style*="#FFEBEE"] {
+  background-color: #FFCDD2 !important;
+  border: 2px solid #C62828 !important;
+  color: #B71C1C !important;
+}
+
+/* --- شريط التنقل العلوي --- */
+body.outdoor-mode .top-nav-bar,
+body.outdoor-mode .nav,
+body.outdoor-mode .dec1 {
+  background-color: #1B5E20 !important;
+  background-image: none !important;
+}
+
+/* --- النصوص داخل الشريط العلوي تبقى بيضاء --- */
+body.outdoor-mode .top-nav-bar *,
+body.outdoor-mode .nav *,
+body.outdoor-mode .nav-btn {
+  color: #FFFFFF !important;
+}
+
+/* --- تعطيل ظلال غير ضرورية --- */
+body.outdoor-mode .s:hover,
+body.outdoor-mode .card:hover {
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+}
+
+/* --- منع النصوص الرمادية الفاتحة --- */
+body.outdoor-mode [style*="color: gray"],
+body.outdoor-mode [style*="color: #888"],
+body.outdoor-mode [style*="color: #777"],
+body.outdoor-mode [style*="color: #999"],
+body.outdoor-mode [style*="color: #aaa"],
+body.outdoor-mode [style*="color:#888"],
+body.outdoor-mode [style*="color:#777"],
+body.outdoor-mode [style*="color:#aaa"] {
+  color: #424242 !important;
+}
+
+/* --- الخط الأساسي للصفحة --- */
+body.outdoor-mode {
+  font-family: 'Cairo', Arial, sans-serif !important;
+}
+
+/* ============================================================
+   الهاتف - تكبير إضافي
+   ============================================================ */
+@media (max-width: 768px) {
+  body.outdoor-mode input[type="text"],
+  body.outdoor-mode input[type="number"],
+  body.outdoor-mode input[type="input"],
+  body.outdoor-mode select {
+    font-size: 20px !important;
+    min-height: 52px !important;
+  }
+
+  body.outdoor-mode button,
+  body.outdoor-mode input[type="button"],
+  body.outdoor-mode .btn,
+  body.outdoor-mode .btn-action {
+    min-height: 56px !important;
+    font-size: 18px !important;
+  }
+
+  body.outdoor-mode th {
+    font-size: 13px !important;
+    padding: 8px 4px !important;
+  }
+
+  body.outdoor-mode td {
+    font-size: 13px !important;
+    padding: 8px 4px !important;
+  }
+
+  #outdoor-toggle-btn {
+    bottom: 90px;
+    left: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+}
