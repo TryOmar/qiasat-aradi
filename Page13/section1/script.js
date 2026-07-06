@@ -1,4 +1,4 @@
-﻿// DOM Elements
+// DOM Elements
 const shapeCards = document.querySelectorAll(".shape-card");
 const inputsGroups = document.querySelectorAll(".inputs-group");
 const caratSizeInput = document.getElementById("carat-size");
@@ -2219,7 +2219,7 @@ function updateHeirsDistribution() {
 // Session state storage
 function saveStateToSession() {
   sessionStorage.setItem("activeShape", activeShape);
-  sessionStorage.setItem("caratSize", caratSizeInput.value);
+  localStorage.setItem("dalal-carat-area", caratSizeInput.value);
   sessionStorage.setItem("priceDisplay", caratPriceDisplay.value);
   sessionStorage.setItem("priceNumeric", caratPriceNumeric.value);
   
@@ -2258,7 +2258,7 @@ function saveStateToSession() {
 
 function loadStateFromSession() {
   activeShape = sessionStorage.getItem("activeShape") || "trapezoid";
-  caratSizeInput.value = sessionStorage.getItem("caratSize") || "168";
+  caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "175.035";
   caratPresetSelect.value = (["168", "171.388", "175", "175.035"].includes(caratSizeInput.value)) ? caratSizeInput.value : "custom";
   
   caratPriceDisplay.value = sessionStorage.getItem("priceDisplay") || "";

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
@@ -201,9 +201,8 @@
   <script src="../../nav.js"></script>
 
   <script>
-    // Save input values to sessionStorage
+    // Save input values to sessionStorage & localStorage
     function saveToSessionStorage() {
-      // Gather all inputs by their IDs
       const inputs = [
         "input-shares",
         "input-carat",
@@ -214,16 +213,21 @@
         "input-meter-price-display"
       ];
 
-      // Loop through the inputs and save their values
       inputs.forEach((id) => {
         const element = document.getElementById(id);
         if (element) {
-          sessionStorage.setItem(id, element.value || "");
+          if (id === "input-carat-area-in-meter") {
+            localStorage.setItem("dalal-carat-area", element.value || "175.035");
+          } else if (id === "other-input-field" && document.getElementById("input-carat-area-in-meter").value === "0") {
+            localStorage.setItem("dalal-carat-area", element.value || "175.035");
+          } else {
+            sessionStorage.setItem(id, element.value || "");
+          }
         }
       });
     }
 
-    // Load input values from sessionStorage
+    // Load input values from sessionStorage & localStorage
     function loadFromSessionStorage() {
       const inputs = [
         "input-shares",
@@ -235,10 +239,26 @@
         "input-meter-price-display"
       ];
 
-      // Loop through the inputs and set their values only if non-empty
       inputs.forEach((id) => {
         const element = document.getElementById(id);
-        const storedValue = sessionStorage.getItem(id);
+        let storedValue = sessionStorage.getItem(id);
+
+        if (id === "input-carat-area-in-meter") {
+          storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+          const options = Array.from(element.options).map(o => o.value.trim());
+          const match = options.find(o => parseFloat(o) === parseFloat(storedValue));
+          if (match) {
+            element.value = match;
+          } else {
+            element.value = "0";
+            document.getElementById("other-input-field").value = storedValue;
+          }
+          return;
+        }
+
+        if (id === "other-input-field" && document.getElementById("input-carat-area-in-meter").value === "0") {
+          storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+        }
 
         if (element && storedValue !== null && storedValue.trim() !== "") {
           element.value = storedValue;

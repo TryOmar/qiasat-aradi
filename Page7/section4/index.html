@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
@@ -184,7 +184,15 @@
     function saveToSession() {
       // Save input values individually
       sessionStorage.setItem("meterSquare", document.getElementById("input-meter-square").value || "");
-      sessionStorage.setItem("caratAreaInMeter", document.getElementById("input-carat-area-in-meter").value || "168");
+      
+      const caratAreaInMeterVal = document.getElementById("input-carat-area-in-meter").value;
+      if (caratAreaInMeterVal === "0") {
+        localStorage.setItem("dalal-carat-area", document.getElementById("other-input-field").value || "175.035");
+      } else {
+        localStorage.setItem("dalal-carat-area", caratAreaInMeterVal || "175.035");
+      }
+      sessionStorage.setItem("caratAreaInMeter", caratAreaInMeterVal || "168");
+      
       sessionStorage.setItem("caratPrice", document.getElementById("input-carat-price").value || "");
       sessionStorage.setItem("caratPriceDisplay", document.getElementById("input-carat-price-display").value || "");
       sessionStorage.setItem("otherInputField", document.getElementById("other-input-field").value || "");
@@ -202,10 +210,20 @@
     function loadFromSession() {
       // Load input values individually
       document.getElementById("input-meter-square").value = sessionStorage.getItem("meterSquare") || "";
-      document.getElementById("input-carat-area-in-meter").value = sessionStorage.getItem("caratAreaInMeter") || "168";
-      document.getElementById("input-carat-price").value = sessionStorage.getItem("caratPrice") || "";
-      document.getElementById("other-input-field").value = sessionStorage.getItem("otherInputField") || "";
+      
+      const storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+      const selectElement = document.getElementById("input-carat-area-in-meter");
+      const options = Array.from(selectElement.options).map(o => o.value.trim());
+      const match = options.find(o => parseFloat(o) === parseFloat(storedValue));
+      if (match) {
+        selectElement.value = match;
+      } else {
+        selectElement.value = "0";
+        document.getElementById("other-input-field").value = storedValue;
+      }
 
+      document.getElementById("input-carat-price").value = sessionStorage.getItem("caratPrice") || "";
+      
       // Load output values individually
       document.getElementById("output-shares").textContent = sessionStorage.getItem("shares") || "0.0";
       document.getElementById("output-carat").textContent = sessionStorage.getItem("carat") || "0";

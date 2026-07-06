@@ -1,4 +1,4 @@
-﻿let currentInputMethod = "carats";
+let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
 let croquisTranslateY = 0;
@@ -259,7 +259,7 @@ function saveData() {
   localStorage.setItem("p11-length2", document.getElementById("length2").value);
   localStorage.setItem("p11-width1", document.getElementById("width1").value);
   localStorage.setItem("p11-width2", document.getElementById("width2").value);
-  localStorage.setItem("p11-carat-area", document.getElementById("input-carat-area").value);
+  localStorage.setItem("dalal-carat-area", document.getElementById("input-carat-area").value);
   localStorage.setItem("p11-other-carat-area", document.getElementById("other-carat-area").value);
   localStorage.setItem("p11-input-method", document.getElementById("share-input-method").value);
   localStorage.setItem("p11-is-partitioned", isPartitioned ? "true" : "false");
@@ -311,7 +311,7 @@ function loadData() {
   document.getElementById("length2").value = localStorage.getItem("p11-length2") || "";
   document.getElementById("width1").value = localStorage.getItem("p11-width1") || "";
   document.getElementById("width2").value = localStorage.getItem("p11-width2") || "";
-  document.getElementById("input-carat-area").value = localStorage.getItem("p11-carat-area") || "175.035";
+  document.getElementById("input-carat-area").value = localStorage.getItem("dalal-carat-area") || "175.035";
   document.getElementById("other-carat-area").value = localStorage.getItem("p11-other-carat-area") || "";
   
   const savedMethod = localStorage.getItem("p11-input-method") || "carats";
