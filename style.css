@@ -56,7 +56,7 @@ body {
 /* Button styling */
 .button1 {
   background-color: var(--green);
-  color: white;
+  color: white !important;
   border-radius: 15px;
   height: 50px;
   display: flex;
@@ -74,6 +74,9 @@ body {
   width: 100%;
   max-width: 250px; /* Optional: restrict max width for larger screens */
   margin: 0 auto; /* Center-align buttons */
+}
+.button1:visited, .button1:active, .button1:hover {
+  color: white !important;
 }
 .img-con {
   display: flex;
