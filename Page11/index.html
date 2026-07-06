@@ -426,21 +426,9 @@
     <!-- Conversions table (Qasaba & Qabda) - Interactive -->
     <div class="s conversion-card" style="width: 100%; margin-top: 20px;">
       <h3>التحويل من متر طولي ومربع إلى القصبة والقبضة</h3>
-      <div class="conversion-table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>البعد</th>
-              <th>أقل من القبضة</th>
-              <th>قبضة</th>
-              <th>قصبة</th>
-            </tr>
-          </thead>
-          <tbody id="conversions-tbody">
-            <!-- Dynamic rows populated from Javascript -->
-            <tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>
-          </tbody>
-        </table>
+      <div class="conv-cards-container" id="conversions-tbody">
+        <!-- Dynamic cards populated from Javascript -->
+        <div class="conv-empty-state">أدخل الأبعاد أعلاه لعرض التحويلات</div>
       </div>
     </div>
 
