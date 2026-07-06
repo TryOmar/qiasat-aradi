@@ -3029,10 +3029,6 @@ function updateConversionsTable() {
       </div>`;
   }
 
-  if (l1 <= 0 && l2 <= 0 && w1 <= 0 && w2 <= 0) {
-    container.innerHTML = '<div class="conv-empty-state">أدخل الأبعاد أعلاه لعرض التحويلات</div>';
-    return;
-  }
 
   let html = '<div class="conv-grid">';
 
