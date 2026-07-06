@@ -705,7 +705,154 @@ function formatNum(val) {
   return Number(val.toFixed(4));
 }
 
+window.calcState = {
+  totalLandArea: 0,
+  totalTargetArea: 0,
+  distributedArea: 0,
+  remainingArea: 0,
+  deficitArea: 0,
+  hasDeficit: false,
+  activePartnersCount: 0
+};
+
+function recalculateState() {
+  const l1 = parseFloat(document.getElementById("length1") ? document.getElementById("length1").value : 0) || 0;
+  const l2 = parseFloat(document.getElementById("length2") ? document.getElementById("length2").value : 0) || 0;
+  const w1 = parseFloat(document.getElementById("width1") ? document.getElementById("width1").value : 0) || 0;
+  const w2 = parseFloat(document.getElementById("width2") ? document.getElementById("width2").value : 0) || 0;
+  const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  let totalTargetArea = 0;
+  let totalDistributedArea = 0;
+  let activeCount = 0;
+
+  rows.forEach(row => {
+    if (!isPartnerRowExcluded(row)) {
+      activeCount++;
+      totalTargetArea += getPartnerTargetArea(row);
+      if (isManualPartition) {
+        totalDistributedArea += parseFloat(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : "0") || 0;
+      } else {
+        totalDistributedArea += getPartnerTargetArea(row);
+      }
+    }
+  });
+
+  const remainingArea = totalAreaM2 - (isManualPartition ? totalDistributedArea : totalTargetArea);
+  const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+
+  window.calcState = {
+    totalLandArea: totalAreaM2,
+    totalTargetArea: totalTargetArea,
+    distributedArea: isManualPartition ? totalDistributedArea : totalTargetArea,
+    remainingArea: remainingArea,
+    deficitArea: remainingArea < -0.05 ? Math.abs(remainingArea) : 0,
+    hasDeficit: (remainingArea < -0.05 && !isKeepAreaMode),
+    activePartnersCount: activeCount
+  };
+}
+
+function isPartnerRowExcluded(row) {
+  let area = 0;
+  if (isManualPartition) {
+    const w1 = parseFloat(row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : 0) || 0;
+    const w2 = parseFloat(row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : 0) || 0;
+    area = w1 + w2; // if both widths are 0, area is 0
+  } else {
+    area = getPartnerTargetArea(row);
+  }
+  return area < 0.05;
+}
+
+function syncExclusionUI() {
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  rows.forEach((row, index) => {
+    const isExcluded = isPartnerRowExcluded(row);
+    const delBtn = row.querySelector(".delete-row-btn");
+    const nameInput = row.querySelector(".partner-name");
+    
+    const indexInput = row.querySelector(".partner-index");
+    if (indexInput) indexInput.value = index + 1;
+    
+    if (isExcluded) {
+      row.style.backgroundColor = "#eceff1";
+      row.style.opacity = "0.75";
+      if (delBtn) delBtn.style.display = "none";
+      if (nameInput) nameInput.disabled = true;
+      
+      const areaInput = row.querySelector(".partner-area");
+      if (areaInput) areaInput.value = "⚠️ مستبعد";
+      
+      const percentInput = row.querySelector(".partner-percent");
+      if (percentInput) percentInput.value = "⚠️ مستبعد";
+      
+      const equivInput = row.querySelector(".partner-equiv");
+      if (equivInput) equivInput.value = "⚠️ مستبعد";
+      
+      if (isManualPartition) {
+        const w1 = row.querySelector(".partner-width-bottom");
+        const w2 = row.querySelector(".partner-width-top");
+        if (w1) w1.disabled = false;
+        if (w2) w2.disabled = false;
+        
+        const f = row.querySelector(".partner-feddans");
+        const c = row.querySelector(".partner-carats");
+        const s = row.querySelector(".partner-shares");
+        const frac = row.querySelector(".partner-fraction");
+        if (f) f.disabled = true;
+        if (c) c.disabled = true;
+        if (s) s.disabled = true;
+        if (frac) frac.disabled = true;
+      } else {
+        const f = row.querySelector(".partner-feddans");
+        const c = row.querySelector(".partner-carats");
+        const s = row.querySelector(".partner-shares");
+        const frac = row.querySelector(".partner-fraction");
+        if (f) f.disabled = false;
+        if (c) c.disabled = false;
+        if (s) s.disabled = false;
+        if (frac) frac.disabled = false;
+        
+        const w1 = row.querySelector(".partner-width-bottom");
+        const w2 = row.querySelector(".partner-width-top");
+        if (w1) w1.disabled = true;
+        if (w2) w2.disabled = true;
+      }
+    } else {
+      row.style.backgroundColor = "";
+      row.style.opacity = "";
+      if (delBtn) delBtn.style.display = "inline-block";
+      if (nameInput) nameInput.disabled = false;
+      
+      const w1 = row.querySelector(".partner-width-bottom");
+      const w2 = row.querySelector(".partner-width-top");
+      const f = row.querySelector(".partner-feddans");
+      const c = row.querySelector(".partner-carats");
+      const s = row.querySelector(".partner-shares");
+      const frac = row.querySelector(".partner-fraction");
+      
+      if (isManualPartition) {
+        if (w1) w1.disabled = false;
+        if (w2) w2.disabled = false;
+        if (f) f.disabled = true;
+        if (c) c.disabled = true;
+        if (s) s.disabled = true;
+        if (frac) frac.disabled = true;
+      } else {
+        if (w1) w1.disabled = true;
+        if (w2) w2.disabled = true;
+        if (f) f.disabled = false;
+        if (c) c.disabled = false;
+        if (s) s.disabled = false;
+        if (frac) frac.disabled = false;
+      }
+    }
+  });
+}
+
 function calculateGeneral() {
+  recalculateState();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -746,18 +893,14 @@ function calculateGeneral() {
   }
 
   if (caratArea > 0) {
-    const totalCarats = totalAreaM2 / caratArea;
-    const acres = Math.floor(totalCarats / 24);
-    const carats = Math.floor(totalCarats % 24);
-    const shares = ((totalCarats - (acres * 24 + carats)) * 24);
-    
-    if (document.getElementById("calc-area-acre")) document.getElementById("calc-area-acre").innerText = acres;
-    if (document.getElementById("calc-area-carat")) document.getElementById("calc-area-carat").innerText = carats;
-    if (document.getElementById("calc-area-shares")) document.getElementById("calc-area-shares").innerText = shares.toFixed(2);
+    const fcs = convertSquareMetersToFCS(totalAreaM2);
+    if (document.getElementById("calc-area-acre")) document.getElementById("calc-area-acre").innerText = fcs.feddan;
+    if (document.getElementById("calc-area-carat")) document.getElementById("calc-area-carat").innerText = fcs.carat;
+    if (document.getElementById("calc-area-shares")) document.getElementById("calc-area-shares").innerText = fcs.sahm;
 
-    if (document.getElementById("total-area-feddans-res")) document.getElementById("total-area-feddans-res").innerText = acres;
-    if (document.getElementById("total-area-carats-res")) document.getElementById("total-area-carats-res").innerText = carats;
-    if (document.getElementById("total-area-shares-res")) document.getElementById("total-area-shares-res").innerText = shares.toFixed(2);
+    if (document.getElementById("total-area-feddans-res")) document.getElementById("total-area-feddans-res").innerText = fcs.feddan;
+    if (document.getElementById("total-area-carats-res")) document.getElementById("total-area-carats-res").innerText = fcs.carat;
+    if (document.getElementById("total-area-shares-res")) document.getElementById("total-area-shares-res").innerText = fcs.sahm;
   }
 
   if (document.getElementById("total-area-sqm-res")) {
@@ -777,48 +920,15 @@ function calculateGeneral() {
   }
 
   let totalDistributedArea = 0;
-  let totalFeddansEntered = 0;
-  let totalCaratsEntered = 0;
-  let totalSharesEntered = 0;
-  let totalFractionsEntered = 0;
-  
-  if (currentInputMethod === "carats") {
-    rows.forEach(row => {
-      const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-      const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-      const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-      totalFeddansEntered += f;
-      totalCaratsEntered += c;
-      totalSharesEntered += s;
-    });
-    
-    let displayTotalFeddans = totalFeddansEntered + Math.floor(totalCaratsEntered / 24);
-    let displayTotalCarats = (totalCaratsEntered % 24) + Math.floor(totalSharesEntered / 24);
-    let displayTotalShares = (totalSharesEntered % 24);
-    
-    if (displayTotalCarats >= 24) {
-      displayTotalFeddans += Math.floor(displayTotalCarats / 24);
-      displayTotalCarats = displayTotalCarats % 24;
-    }
-    
-    if (document.getElementById("total-shares-entered")) document.getElementById("total-shares-entered").value = Number(displayTotalShares.toFixed(2));
-    if (document.getElementById("total-carats-entered")) document.getElementById("total-carats-entered").value = displayTotalCarats;
-    if (document.getElementById("total-feddans-entered")) document.getElementById("total-feddans-entered").value = displayTotalFeddans;
-  } else {
-    rows.forEach(row => {
-      const fracInput = row.querySelector(".partner-fraction");
-      const fracVal = parseFraction(fracInput ? fracInput.value : "");
-      totalFractionsEntered += fracVal;
-    });
-    if (document.getElementById("total-fraction-entered")) {
-      document.getElementById("total-fraction-entered").value = Number((totalFractionsEntered * 100).toFixed(2)) + "%";
-    }
-  }
 
   rows.forEach((row, index) => {
     // 1. Update Serial Number (م)
     const indexInput = row.querySelector(".partner-index");
     if (indexInput) indexInput.value = index + 1;
+
+    if (isPartnerRowExcluded(row)) {
+      return; // Skip area calculations for excluded row
+    }
 
     // تعبئة اسم الشريك تلقائياً إذا كان فارغاً عند الحساب
     const nameInput = row.querySelector(".partner-name");
@@ -845,11 +955,9 @@ function calculateGeneral() {
     if (currentInputMethod === "fractions") {
       const equivInput = row.querySelector(".partner-equiv");
       if (equivInput) {
-        if (partnerCarats > 0) {
-          const f_eq = Math.floor(partnerCarats / 24);
-          const c_eq = Math.floor(partnerCarats % 24);
-          const s_eq = ((partnerCarats - (f_eq * 24 + c_eq)) * 24);
-          equivInput.value = `${Number(s_eq.toFixed(2))} س، ${c_eq} ق، ${f_eq} ف`;
+        if (partnerAreaM2 > 0) {
+          const fcs = convertSquareMetersToFCS(partnerAreaM2);
+          equivInput.value = `${fcs.sahm} س، ${fcs.carat} ق، ${fcs.feddan} ف`;
         } else {
           equivInput.value = "-";
         }
@@ -884,48 +992,9 @@ function calculateGeneral() {
     }
   });
 
-  // Update Footer totals for area and percentage
-  if (!isManualPartition) {
-    if (document.getElementById("total-area-distributed")) {
-      document.getElementById("total-area-distributed").value = Number(totalDistributedArea.toFixed(2));
-    }
-    if (document.getElementById("total-percent-distributed")) {
-      const totalPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-      document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
-    }
-    if (document.getElementById("total-width-bottom-calculated")) {
-      document.getElementById("total-width-bottom-calculated").value = "-";
-    }
-    if (document.getElementById("total-width-top-calculated")) {
-      document.getElementById("total-width-top-calculated").value = "-";
-    }
-  }
+  syncExclusionUI();
 
-  let theoreticalTotalArea = 0;
-  if (!isManualPartition) {
-    rows.forEach(row => {
-      if (currentInputMethod === "carats") {
-        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-        theoreticalTotalArea += ((f * 24) + c + (s / 24)) * caratArea;
-      } else {
-        const fracInput = row.querySelector(".partner-fraction");
-        theoreticalTotalArea += parseFraction(fracInput ? fracInput.value : "") * totalAreaM2;
-      }
-    });
-  }
-
-  let remainingArea = totalAreaM2 - totalDistributedArea;
-  if (!isManualPartition) {
-    if (theoreticalTotalArea > totalAreaM2 + 0.1) {
-      remainingArea = totalAreaM2 - theoreticalTotalArea;
-    } else {
-      const firstRowAreaInput = rows[0] ? rows[0].querySelector(".partner-area") : null;
-      const firstRowArea = firstRowAreaInput ? parseFloat(firstRowAreaInput.value) || 0 : 0;
-      remainingArea = firstRowArea;
-    }
-  }
+  let remainingArea = window.calcState.remainingArea;
   
   // Update summaries
   if (document.getElementById("summary-total-area")) {
@@ -939,23 +1008,27 @@ function calculateGeneral() {
     if (totalAreaM2 <= 0) {
       statusEl.innerHTML = "ℹ️ يرجى إدخال أبعاد الأرض لبدء الحساب.";
       statusEl.style.color = "#666";
-    } else if (Math.abs(remainingArea) < 0.1) {
-      statusEl.innerHTML = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
-      statusEl.style.color = "#2e7d32";
     } else {
-      const isNegative = remainingArea < -0.005;
+      const tolerance = 0.05;
       const absRem = Math.abs(remainingArea);
-      let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
-      const remFeddans = Math.floor(totalRemCarats / 24);
-      const remCarats = Math.floor(totalRemCarats % 24);
-      const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+      const fcs = convertSquareMetersToFCS(absRem);
+      const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
       
-      if (isNegative) {
-        statusEl.innerHTML = `🔴 يوجد عجز في مساحة الأرض<br>المساحة: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
-        statusEl.style.color = "#c62828";
-      } else {
-        statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+      if (absRem <= tolerance) {
+        statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
+        statusEl.style.color = "#2e7d32";
+      } else if (remainingArea > 0) {
+        statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${absRem.toFixed(2)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
         statusEl.style.color = "#e65100";
+      } else {
+        // remainingArea < 0 (deficit)
+        if (isKeepAreaMode) {
+          statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${absRem.toFixed(2)} م²</strong>، ويرجى مراجعة الحسابات.`;
+          statusEl.style.color = "#c62828";
+        } else {
+          statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong><br>قيمة العجز: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
+          statusEl.style.color = "#c62828";
+        }
       }
     }
   }
@@ -964,7 +1037,7 @@ function calculateGeneral() {
   }
 
   if (document.getElementById("info-partners-count")) {
-    document.getElementById("info-partners-count").innerText = rows.length;
+    document.getElementById("info-partners-count").innerText = window.calcState.activePartnersCount;
   }
   if (document.getElementById("info-distributed-area")) {
     document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
@@ -984,30 +1057,37 @@ function calculateGeneral() {
   if (caratArea > 0) {
     const isNegative = remainingArea < -0.005;
     const absRemaining = Math.abs(remainingArea);
-    let remainingCarats = absRemaining / caratArea;
+    const fcs = convertSquareMetersToFCS(absRemaining);
 
-    const remAcres = Math.floor(remainingCarats / 24);
-    const remCarats = Math.floor(remainingCarats % 24);
-    const remShares = ((remainingCarats - (remAcres * 24 + remCarats)) * 24);
-
-    document.getElementById("rem-acres").innerText = remAcres;
-    document.getElementById("rem-carats").innerText = remCarats;
-    document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
+    document.getElementById("rem-acres").innerText = fcs.feddan;
+    document.getElementById("rem-carats").innerText = fcs.carat;
+    document.getElementById("rem-shares").innerText = fcs.sahm;
 
     const box = document.querySelector(".table-remaining-box");
     const redistBtn = document.getElementById("btn-redistribute-remainder");
     if (box) {
       const isZero = Math.abs(remainingArea) < 0.05;
+      const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+      
       if (isZero) {
         box.style.display = "none";
         if (redistBtn) redistBtn.style.display = "none";
+      } else if (remainingArea < 0 && isKeepAreaMode) {
+        box.style.display = "flex";
+        box.classList.add("deficit-mode");
+        box.style.backgroundColor = "#ffebee";
+        box.style.borderColor = "#ffcdd2";
+        box.children[0].innerText = "🔴 خطأ داخلي (عجز):";
+        box.children[0].style.color = "#c62828";
+        box.children[1].style.color = "#c62828";
+        if (redistBtn) redistBtn.style.display = "none";
       } else {
         box.style.display = "flex";
-        if (isNegative) {
+        if (remainingArea < 0) {
           box.classList.add("deficit-mode");
           box.style.backgroundColor = "#ffebee";
           box.style.borderColor = "#ffcdd2";
-          box.children[0].innerText = "🔴 يوجد عجز في التوزيع بمقدار:";
+          box.children[0].innerText = "🔴 قيمة العجز:";
           box.children[0].style.color = "#c62828";
           box.children[1].style.color = "#c62828";
           if (redistBtn) redistBtn.style.display = "none";
@@ -1025,6 +1105,7 @@ function calculateGeneral() {
   }
   
   updateRemainderRowUI(remainingArea);
+  updateTableTotals();
   adjustNameColumnWidth();
   updateConversionsTable();
   renderCroquis();
@@ -1060,6 +1141,9 @@ function runPartition() {
   const diff = l2 - l1;
 
   rows.forEach((row, index) => {
+    if (isPartnerRowExcluded(row)) {
+      return; // Skip calculations for excluded row
+    }
     let botWidth = 0;
     let topWidth = 0;
     let tCurr_bot = 0;
@@ -1172,6 +1256,28 @@ function runPartition() {
       percentInput.value = Number(pct.toFixed(2)) + " %";
     }
     
+    // Update shares/fractions to match the calculated geometric area (only in manual partition mode)
+    if (isManualPartition) {
+      if (currentInputMethod === "carats") {
+        const fcs = convertSquareMetersToFCS(calculatedGeoArea);
+        const feddansInput = row.querySelector(".partner-feddans");
+        const caratsInput = row.querySelector(".partner-carats");
+        const sharesInput = row.querySelector(".partner-shares");
+        if (feddansInput) feddansInput.value = fcs.feddan;
+        if (caratsInput) caratsInput.value = fcs.carat;
+        if (sharesInput) sharesInput.value = fcs.sahm;
+      } else {
+        const fracInput = row.querySelector(".partner-fraction");
+        if (fracInput) fracInput.value = (calculatedGeoArea / totalAreaM2).toFixed(4);
+        
+        const equivInput = row.querySelector(".partner-equiv");
+        if (equivInput) {
+          const fcs = convertSquareMetersToFCS(calculatedGeoArea);
+          equivInput.value = `${fcs.sahm} س، ${fcs.carat} ق، ${fcs.feddan} ف`;
+        }
+      }
+    }
+    
     const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
     window.calculatedPieces.push({
         name: partnerName,
@@ -1230,7 +1336,8 @@ function runPartition() {
   }
 
   // update the remaining area card
-  let remainingArea = totalAreaM2 - totalDistributedArea;
+  recalculateState();
+  let remainingArea = window.calcState.remainingArea;
 
   // Update summaries to match actual layout partition
   if (document.getElementById("summary-total-area")) {
@@ -1244,23 +1351,25 @@ function runPartition() {
   }
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
-    if (Math.abs(remainingArea) < 0.05) {
+    const tolerance = 0.05;
+    const absRem = Math.abs(remainingArea);
+    const fcs = convertSquareMetersToFCS(absRem);
+    const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+    
+    if (absRem <= tolerance) {
       statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
       statusEl.style.color = "#2e7d32";
+    } else if (remainingArea > 0) {
+      statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${absRem.toFixed(2)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
+      statusEl.style.color = "#e65100";
     } else {
-      const isNegative = remainingArea < -0.05;
-      const absRem = Math.abs(remainingArea);
-      let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
-      const remFeddans = Math.floor(totalRemCarats / 24);
-      const remCarats = Math.floor(totalRemCarats % 24);
-      const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
-      
-      if (isNegative) {
-        statusEl.innerHTML = `🔴 يوجد عجز في التوزيع بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+      // remainingArea < 0 (deficit)
+      if (isKeepAreaMode) {
+        statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${absRem.toFixed(2)} م²</strong>، ويرجى مراجعة الحسابات.`;
         statusEl.style.color = "#c62828";
       } else {
-        statusEl.innerHTML = `⚠️ المساحة المتبقية:<br><strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
-        statusEl.style.color = "#ef6c00";
+        statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong><br>قيمة العجز: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
+        statusEl.style.color = "#c62828";
       }
     }
   }
@@ -1276,31 +1385,37 @@ function runPartition() {
   if (remAcres) {
     const isNegative = remainingArea < -0.05;
     const absRem = Math.abs(remainingArea);
-    
-    let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
-    
-    const remFeddans = Math.floor(totalRemCarats / 24);
-    const remCarats = Math.floor(totalRemCarats % 24);
-    const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+    const fcs = convertSquareMetersToFCS(absRem);
 
-    document.getElementById("rem-acres").innerText = remFeddans;
-    document.getElementById("rem-carats").innerText = remCarats;
-    document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
+    document.getElementById("rem-acres").innerText = fcs.feddan;
+    document.getElementById("rem-carats").innerText = fcs.carat;
+    document.getElementById("rem-shares").innerText = fcs.sahm;
 
     const box = document.querySelector(".table-remaining-box");
     const redistBtn = document.getElementById("btn-redistribute-remainder");
     if (box) {
       const isZero = Math.abs(remainingArea) < 0.05;
+      const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+      
       if (isZero) {
         box.style.display = "none";
         if (redistBtn) redistBtn.style.display = "none";
+      } else if (remainingArea < 0 && isKeepAreaMode) {
+        box.style.display = "flex";
+        box.classList.add("deficit-mode");
+        box.style.backgroundColor = "#ffebee";
+        box.style.borderColor = "#ffcdd2";
+        box.children[0].innerText = "🔴 خطأ داخلي (عجز):";
+        box.children[0].style.color = "#c62828";
+        box.children[1].style.color = "#c62828";
+        if (redistBtn) redistBtn.style.display = "none";
       } else {
         box.style.display = "flex";
-        if (isNegative) {
+        if (remainingArea < 0) {
           box.classList.add("deficit-mode");
           box.style.backgroundColor = "#ffebee";
           box.style.borderColor = "#ffcdd2";
-          box.children[0].innerText = "🔴 يوجد عجز في التوزيع بمقدار:";
+          box.children[0].innerText = "🔴 قيمة العجز:";
           box.children[0].style.color = "#c62828";
           box.children[1].style.color = "#c62828";
           if (redistBtn) redistBtn.style.display = "none";
@@ -1317,7 +1432,12 @@ function runPartition() {
     }
   }
 
+  syncExclusionUI();
+  if (document.getElementById("info-partners-count")) {
+    document.getElementById("info-partners-count").innerText = window.calcState.activePartnersCount;
+  }
   updateRemainderRowUI(remainingArea);
+  updateTableTotals();
   saveData();
   renderCroquis();
   updateCalculationSteps();
@@ -1986,6 +2106,10 @@ function renderCroquis() {
 }
 
 function exportCroquis() {
+  if (hasDeficit()) {
+    alert("🔴 لا يمكن اعتماد أو طباعة التقرير أو تصديره لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
+    return;
+  }
   const svgNode = document.getElementById("croquis-svg");
   if (!svgNode) return;
   
@@ -2234,14 +2358,23 @@ function getTableDataArray() {
   return data;
 }
 
+function hasDeficit() {
+  recalculateState();
+  return window.calcState.hasDeficit;
+}
+
 function printReport() {
+  if (hasDeficit()) {
+    alert("🔴 لا يمكن اعتماد أو طباعة التقرير لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
+    return;
+  }
   const l1 = document.getElementById("length1").value || "-";
   const l2 = document.getElementById("length2").value || "-";
   const w1 = document.getElementById("width1").value || "-";
   const w2 = document.getElementById("width2").value || "-";
   const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
   const data = getTableDataArray();
-  const numPartners = document.querySelectorAll("#partners-list .partner-row").length;
+  const numPartners = Array.from(document.querySelectorAll("#partners-list .partner-row")).filter(r => !isPartnerRowExcluded(r)).length;
   
   const tableRows = data.slice(1).map((row, idx) => {
     const isTotal = row[1] === "الإجمالي";
@@ -2329,6 +2462,10 @@ function exportPDF() {
 }
 
 function exportExcel() {
+  if (hasDeficit()) {
+    alert("🔴 لا يمكن اعتماد أو طباعة التقرير لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
+    return;
+  }
   const data = getTableDataArray();
   const l1 = document.getElementById("length1").value || "";
   const l2 = document.getElementById("length2").value || "";
@@ -2383,6 +2520,10 @@ function exportExcel() {
 }
 
 function copyTableToClipboard() {
+  if (hasDeficit()) {
+    alert("🔴 لا يمكن اعتماد أو طباعة التقرير لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
+    return;
+  }
   const data = getTableDataArray();
   
   // تحويل إلى نص جدول محاذى
@@ -3253,6 +3394,15 @@ function updateRemainderRowUI(remainingArea) {
 
   if (isZero || isNegative) {
     row.style.display = "none";
+    // Clear inputs inside the remainder row to prevent stale values
+    const inputs = row.querySelectorAll("input");
+    inputs.forEach(input => {
+      input.value = "-";
+    });
+    // Remove remainder piece from calculatedPieces in memory
+    if (window.calculatedPieces) {
+      window.calculatedPieces = window.calculatedPieces.filter(p => !p.isRemainder);
+    }
     return;
   }
 
@@ -3273,10 +3423,7 @@ function updateRemainderRowUI(remainingArea) {
   }
 
   const absRem = Math.abs(remainingArea);
-  let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
-  const remFeddans = Math.floor(totalRemCarats / 24);
-  const remCarats = Math.floor(totalRemCarats % 24);
-  const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+  const fcs = convertSquareMetersToFCS(absRem);
   const remPct = totalAreaM2 > 0 ? (absRem / totalAreaM2) * 100 : 0;
 
   // Try to find remainder piece in window.calculatedPieces
@@ -3311,9 +3458,9 @@ function updateRemainderRowUI(remainingArea) {
     row.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${Number(remShares.toFixed(2))}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remCarats}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remFeddans}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${fcs.sahm}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${fcs.carat}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${fcs.feddan}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -3328,7 +3475,7 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${fractionVal.toFixed(4)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${Number(remShares.toFixed(2))}س، ${remCarats}ق، ${remFeddans}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" readonly value="${fcs.sahm}س، ${fcs.carat}ق، ${fcs.feddan}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" style="display:none;" readonly value="-">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -3608,6 +3755,127 @@ function clearHistory() {
   if (confirm("🚨 هل أنت متأكد من مسح السجل بالكامل؟ لا يمكن التراجع عن هذا الإجراء.")) {
     localStorage.removeItem("p11-history");
     renderHistory();
+  }
+}
+
+function convertSquareMetersToFCS(area) {
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+  if (caratArea <= 0) {
+    return { feddan: 0, carat: 0, sahm: 0 };
+  }
+  const totalCarats = area / caratArea;
+  const feddan = Math.floor(totalCarats / 24);
+  const carat = Math.floor(totalCarats % 24);
+  const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
+  return { feddan, carat, sahm };
+}
+
+function updateTableTotals() {
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  const remRow = document.getElementById("remainder-row-table");
+  const isRemVisible = remRow && remRow.style.display !== "none" && remRow.style.display !== "";
+  
+  let totalArea = 0;
+  
+  // 1. Calculate Area Sum
+  rows.forEach(row => {
+    const areaInput = row.querySelector(".partner-area");
+    if (areaInput) {
+      totalArea += parseFloat(areaInput.value) || 0;
+    }
+  });
+  
+  if (isRemVisible) {
+    const inputs = remRow.querySelectorAll("input");
+    if (inputs.length >= 7) {
+      totalArea += parseFloat(inputs[5].value) || 0;
+    }
+  }
+  
+  // Update Area Total
+  const totalAreaEl = document.getElementById("total-area-distributed");
+  if (totalAreaEl) {
+    totalAreaEl.value = Number(totalArea.toFixed(2));
+  }
+  
+  // Calculate totalAreaM2
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  const w = (w1 + w2) / 2;
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+  
+  // Update Percentage Total
+  const totalPctEl = document.getElementById("total-percent-distributed");
+  if (totalPctEl) {
+    const totalPct = totalAreaM2 > 0 ? (totalArea / totalAreaM2) * 100 : 0;
+    totalPctEl.value = Number(totalPct.toFixed(2)) + " %";
+  }
+  
+  // 2. Calculate Shares or Fraction Sum
+  if (currentInputMethod === "carats") {
+    const fcs = convertSquareMetersToFCS(totalArea);
+    
+    const sharesEl = document.getElementById("total-shares-entered");
+    const caratsEl = document.getElementById("total-carats-entered");
+    const feddansEl = document.getElementById("total-feddans-entered");
+    
+    if (sharesEl) sharesEl.value = fcs.sahm;
+    if (caratsEl) caratsEl.value = fcs.carat;
+    if (feddansEl) feddansEl.value = fcs.feddan;
+  } else {
+    let totalFraction = 0;
+    rows.forEach(row => {
+      const fracInput = row.querySelector(".partner-fraction");
+      totalFraction += parseFraction(fracInput ? fracInput.value : "");
+    });
+    
+    if (isRemVisible) {
+      const inputs = remRow.querySelectorAll("input");
+      if (inputs.length >= 3) {
+        totalFraction += parseFloat(inputs[2].value) || 0;
+      }
+    }
+    
+    const fractionEl = document.getElementById("total-fraction-entered");
+    if (fractionEl) {
+      fractionEl.value = Number((totalFraction * 100).toFixed(2)) + "%";
+    }
+  }
+  
+  // 3. Width Totals (Bottom & Top calculated)
+  let totalBotWidth = 0;
+  let totalTopWidth = 0;
+  
+  if (isManualPartition) {
+    rows.forEach(row => {
+      totalBotWidth += parseFloat(row.querySelector(".partner-width-bottom")?.value) || 0;
+      totalTopWidth += parseFloat(row.querySelector(".partner-width-top")?.value) || 0;
+    });
+    
+    if (isRemVisible) {
+      const inputs = remRow.querySelectorAll("input");
+      if (inputs.length >= 9) {
+        totalBotWidth += parseFloat(inputs[7].value) || 0;
+        totalTopWidth += parseFloat(inputs[8].value) || 0;
+      }
+    }
+    
+    const botWidthEl = document.getElementById("total-width-bottom-calculated");
+    const topWidthEl = document.getElementById("total-width-top-calculated");
+    
+    if (botWidthEl) botWidthEl.value = totalBotWidth.toFixed(4);
+    if (topWidthEl) topWidthEl.value = totalTopWidth.toFixed(4);
+  } else {
+    const botWidthEl = document.getElementById("total-width-bottom-calculated");
+    const topWidthEl = document.getElementById("total-width-top-calculated");
+    
+    if (botWidthEl) botWidthEl.value = "-";
+    if (topWidthEl) topWidthEl.value = "-";
   }
 }
 
