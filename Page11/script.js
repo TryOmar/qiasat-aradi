@@ -311,7 +311,7 @@ function loadData() {
   document.getElementById("length2").value = localStorage.getItem("p11-length2") || "";
   document.getElementById("width1").value = localStorage.getItem("p11-width1") || "";
   document.getElementById("width2").value = localStorage.getItem("p11-width2") || "";
-  document.getElementById("input-carat-area").value = localStorage.getItem("dalal-carat-area") || "175.035";
+  document.getElementById("input-carat-area").value = localStorage.getItem("dalal-carat-area") || "168";
   document.getElementById("other-carat-area").value = localStorage.getItem("p11-other-carat-area") || "";
   
   const savedMethod = localStorage.getItem("p11-input-method") || "carats";

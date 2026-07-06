@@ -217,9 +217,9 @@
         const element = document.getElementById(id);
         if (element) {
           if (id === "input-carat-area-in-meter") {
-            localStorage.setItem("dalal-carat-area", element.value || "175.035");
+            localStorage.setItem("dalal-carat-area", element.value || "168");
           } else if (id === "other-input-field" && document.getElementById("input-carat-area-in-meter").value === "0") {
-            localStorage.setItem("dalal-carat-area", element.value || "175.035");
+            localStorage.setItem("dalal-carat-area", element.value || "168");
           } else {
             sessionStorage.setItem(id, element.value || "");
           }
@@ -244,7 +244,7 @@
         let storedValue = sessionStorage.getItem(id);
 
         if (id === "input-carat-area-in-meter") {
-          storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+          storedValue = localStorage.getItem("dalal-carat-area") || "168";
           const options = Array.from(element.options).map(o => o.value.trim());
           const match = options.find(o => parseFloat(o) === parseFloat(storedValue));
           if (match) {
@@ -257,7 +257,7 @@
         }
 
         if (id === "other-input-field" && document.getElementById("input-carat-area-in-meter").value === "0") {
-          storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+          storedValue = localStorage.getItem("dalal-carat-area") || "168";
         }
 
         if (element && storedValue !== null && storedValue.trim() !== "") {

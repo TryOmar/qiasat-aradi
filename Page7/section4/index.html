@@ -187,9 +187,9 @@
       
       const caratAreaInMeterVal = document.getElementById("input-carat-area-in-meter").value;
       if (caratAreaInMeterVal === "0") {
-        localStorage.setItem("dalal-carat-area", document.getElementById("other-input-field").value || "175.035");
+        localStorage.setItem("dalal-carat-area", document.getElementById("other-input-field").value || "168");
       } else {
-        localStorage.setItem("dalal-carat-area", caratAreaInMeterVal || "175.035");
+        localStorage.setItem("dalal-carat-area", caratAreaInMeterVal || "168");
       }
       sessionStorage.setItem("caratAreaInMeter", caratAreaInMeterVal || "168");
       
@@ -211,7 +211,7 @@
       // Load input values individually
       document.getElementById("input-meter-square").value = sessionStorage.getItem("meterSquare") || "";
       
-      const storedValue = localStorage.getItem("dalal-carat-area") || "175.035";
+      const storedValue = localStorage.getItem("dalal-carat-area") || "168";
       const selectElement = document.getElementById("input-carat-area-in-meter");
       const options = Array.from(selectElement.options).map(o => o.value.trim());
       const match = options.find(o => parseFloat(o) === parseFloat(storedValue));

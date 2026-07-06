@@ -2258,7 +2258,7 @@ function saveStateToSession() {
 
 function loadStateFromSession() {
   activeShape = sessionStorage.getItem("activeShape") || "trapezoid";
-  caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "175.035";
+  caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "168";
   caratPresetSelect.value = (["168", "171.388", "175", "175.035"].includes(caratSizeInput.value)) ? caratSizeInput.value : "custom";
   
   caratPriceDisplay.value = sessionStorage.getItem("priceDisplay") || "";
