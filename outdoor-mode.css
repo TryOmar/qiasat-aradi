@@ -259,6 +259,79 @@ body.outdoor-mode [style*="#FFEBEE"] {
   color: #B71C1C !important;
 }
 
+/* --- تضخيم مربعات الاختيار (Checkbox) --- */
+body.outdoor-mode input[type="checkbox"] {
+  width: 24px !important;
+  height: 24px !important;
+  cursor: pointer !important;
+}
+
+/* --- تضخيم أزرار التكبير والتصغير (+) و (-) --- */
+body.outdoor-mode .btn-secondary.btn-sm,
+body.outdoor-mode [onclick*="zoom"],
+body.outdoor-mode [onclick*="Zoom"] {
+  min-width: 48px !important;
+  height: 48px !important;
+  font-size: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* --- زيادة الهوامش والمسافات الرأسية بين الحقول --- */
+body.outdoor-mode .input-row,
+body.outdoor-mode .input-group,
+body.outdoor-mode .dynamic-inputs-container > div {
+  margin-bottom: 16px !important;
+}
+
+/* --- إضافة ظل خفيف للبطاقات لتمييز الأقسام --- */
+body.outdoor-mode .s,
+body.outdoor-mode .card,
+body.outdoor-mode .summary-card-item {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
+  border: 1.5px solid #9E9E9E !important;
+}
+
+/* --- ألوان الرسائل والحالات --- */
+body.outdoor-mode .alert-success,
+body.outdoor-mode [style*="#e8f5e9"],
+body.outdoor-mode [style*="#E8F5E9"] {
+  background-color: #E8F5E9 !important;
+  border: 2px solid #2E7D32 !important;
+  color: #1B5E20 !important;
+}
+
+body.outdoor-mode .alert-warning,
+body.outdoor-mode [style*="#fff3cd"],
+body.outdoor-mode [style*="#FFF3CD"] {
+  background-color: #FFF9C4 !important;
+  border: 2px solid #F9A825 !important;
+  color: #856404 !important;
+}
+
+body.outdoor-mode .alert-danger,
+body.outdoor-mode .table-remaining-box,
+body.outdoor-mode [style*="#ffebee"],
+body.outdoor-mode [style*="#FFEBEE"] {
+  background-color: #FDECEC !important;
+  border: 2px solid #C62828 !important;
+  color: #721C24 !important;
+}
+
+/* --- تكبير أرقام النتائج الهامة --- */
+body.outdoor-mode #total-area-shares-res,
+body.outdoor-mode #total-area-carats-res,
+body.outdoor-mode #total-area-feddans-res,
+body.outdoor-mode #rem-area-m2,
+body.outdoor-mode #summary-total-area,
+body.outdoor-mode #summary-rem-area,
+body.outdoor-mode #total-area-sqm-res,
+body.outdoor-mode #info-distributed-area {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+}
+
 /* --- شريط التنقل العلوي --- */
 body.outdoor-mode .top-nav-bar,
 body.outdoor-mode .nav,
@@ -278,7 +351,7 @@ body.outdoor-mode .nav-btn {
 body.outdoor-mode .s:hover,
 body.outdoor-mode .card:hover {
   transform: none !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
 }
 
 /* --- نص الـ Placeholder: أصغر وأهدأ بصرياً --- */
@@ -307,7 +380,7 @@ body.outdoor-mode {
 }
 
 /* ============================================================
-   الهاتف - تكبير إضافي
+   الهاتف - تكبير إضافي وتثبيت أزرار الإجراءات
    ============================================================ */
 @media (max-width: 768px) {
   body.outdoor-mode input[type="text"],
@@ -342,5 +415,29 @@ body.outdoor-mode {
     width: 48px;
     height: 48px;
     font-size: 22px;
+  }
+
+  /* تثبيت أزرار الإجراءات المهمة فوق القائمة السفلية للجوال */
+  body.outdoor-mode .action-buttons,
+  body.outdoor-mode .main-actions-bar .buttons-container {
+    position: fixed !important;
+    bottom: 65px !important; /* فوق شريط التنقل السفلي مباشرة */
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    background: #FFFFFF !important;
+    border-top: 2px solid #1B5E20 !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15) !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    gap: 8px !important;
+  }
+
+  /* إضافة padding أسفل الحاوية لمنع تداخل المحتوى مع الأزرار المثبتة */
+  body.outdoor-mode .con {
+    padding-bottom: 200px !important;
   }
 }
