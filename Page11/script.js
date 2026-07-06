@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Set up event listeners
   const list = document.getElementById("partners-list");
   if (list.children.length === 0) {
-    addNewPartnerRow("المتبقي");
+    addNewPartnerRow("شريك 1");
   }
   renderHeaderAndFooter();
   calculateGeneral();
@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
   // Setup SVG interactions
   setupSVGInteractions();
+  renderHistory();
 
   // Setup inputs saveAndCalc listeners
   const inputs = ["length1", "length2", "width1", "width2", "other-carat-area"];
@@ -642,54 +643,7 @@ function updateRowsReadOnlyStatus() {
   const rows = document.querySelectorAll("#partners-list .partner-row");
   rows.forEach((row, index) => {
     const isFirst = (index === 0);
-    const feddansInput = row.querySelector(".partner-feddans");
-    const caratsInput = row.querySelector(".partner-carats");
-    const sharesInput = row.querySelector(".partner-shares");
-    const fractionInput = row.querySelector(".partner-fraction");
-    const deleteBtn = row.querySelector(".delete-row-btn");
-    
-    const shouldBeReadOnly = isFirst && !isManualPartition;
-    
-    if (feddansInput) {
-      feddansInput.readOnly = shouldBeReadOnly;
-      feddansInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
-      feddansInput.style.color = shouldBeReadOnly ? "#555" : "";
-      feddansInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
-      if (shouldBeReadOnly) feddansInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
-      else feddansInput.removeAttribute("title");
-    }
-    if (caratsInput) {
-      caratsInput.readOnly = shouldBeReadOnly;
-      caratsInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
-      caratsInput.style.color = shouldBeReadOnly ? "#555" : "";
-      caratsInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
-      if (shouldBeReadOnly) caratsInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
-      else caratsInput.removeAttribute("title");
-    }
-    if (sharesInput) {
-      sharesInput.readOnly = shouldBeReadOnly;
-      sharesInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
-      sharesInput.style.color = shouldBeReadOnly ? "#555" : "";
-      sharesInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
-      if (shouldBeReadOnly) sharesInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
-      else sharesInput.removeAttribute("title");
-    }
-    if (fractionInput) {
-      fractionInput.readOnly = shouldBeReadOnly;
-      fractionInput.style.backgroundColor = shouldBeReadOnly ? "#e9ecef" : "";
-      fractionInput.style.color = shouldBeReadOnly ? "#555" : "";
-      fractionInput.style.cursor = shouldBeReadOnly ? "not-allowed" : "";
-      if (shouldBeReadOnly) fractionInput.title = "يتم حسابه تلقائياً (المتبقي من الأرض)";
-      else fractionInput.removeAttribute("title");
-    }
-    
-    if (deleteBtn) {
-      if (isFirst) {
-        deleteBtn.style.visibility = "hidden";
-      } else {
-        deleteBtn.style.visibility = "visible";
-      }
-    }
+
   });
 }
 
@@ -818,46 +772,8 @@ function calculateGeneral() {
 
   let rows = document.querySelectorAll("#partners-list .partner-row");
   if (rows.length === 0) {
-    addNewPartnerRow("المتبقي");
-    // Re-select rows
+    addNewPartnerRow("شريك 1");
     rows = document.querySelectorAll("#partners-list .partner-row");
-  }
-  
-  updateRowsReadOnlyStatus();
-
-  // Auto-calculate the first row as the remainder of the total land area minus the sum of other rows
-  if (!isManualPartition && rows.length > 0) {
-    const firstRow = rows[0];
-    if (currentInputMethod === "carats") {
-      let otherCarats = 0;
-      for (let i = 1; i < rows.length; i++) {
-        const f = parseFloat(rows[i].querySelector(".partner-feddans") ? rows[i].querySelector(".partner-feddans").value : 0) || 0;
-        const c = parseFloat(rows[i].querySelector(".partner-carats") ? rows[i].querySelector(".partner-carats").value : 0) || 0;
-        const s = parseFloat(rows[i].querySelector(".partner-shares") ? rows[i].querySelector(".partner-shares").value : 0) || 0;
-        otherCarats += (f * 24) + c + (s / 24);
-      }
-      const totalAvailableCarats = caratArea > 0 ? (totalAreaM2 / caratArea) : 0;
-      let firstRowCarats = totalAvailableCarats - otherCarats;
-      if (firstRowCarats < 0) firstRowCarats = 0;
-      
-      const f_rem = Math.floor(firstRowCarats / 24);
-      const c_rem = Math.floor(firstRowCarats % 24);
-      const s_rem = ((firstRowCarats - (f_rem * 24 + c_rem)) * 24);
-      
-      if (firstRow.querySelector(".partner-feddans")) firstRow.querySelector(".partner-feddans").value = f_rem;
-      if (firstRow.querySelector(".partner-carats")) firstRow.querySelector(".partner-carats").value = c_rem;
-      if (firstRow.querySelector(".partner-shares")) firstRow.querySelector(".partner-shares").value = Number(s_rem.toFixed(2));
-    } else {
-      let otherFractions = 0;
-      for (let i = 1; i < rows.length; i++) {
-        const fracInput = rows[i].querySelector(".partner-fraction");
-        otherFractions += parseFraction(fracInput ? fracInput.value : "");
-      }
-      let firstRowFraction = 1 - otherFractions;
-      if (firstRowFraction < 0) firstRowFraction = 0;
-      
-      if (firstRow.querySelector(".partner-fraction")) firstRow.querySelector(".partner-fraction").value = Number(firstRowFraction.toFixed(4));
-    }
   }
 
   let totalDistributedArea = 0;
@@ -1070,33 +986,36 @@ function calculateGeneral() {
     document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
 
     const box = document.querySelector(".table-remaining-box");
+    const redistBtn = document.getElementById("btn-redistribute-remainder");
     if (box) {
-      const isZero = Math.abs(remainingArea) < 0.01;
-      if (isNegative) {
-        box.classList.add("deficit-mode");
-        box.style.backgroundColor = "#ffebee";
-        box.style.borderColor = "#ffcdd2";
-        box.children[0].innerText = "احترس يوجد عجز:";
-        box.children[0].style.color = "#c62828";
-        box.children[1].style.color = "#c62828";
-      } else if (isZero) {
-        box.classList.remove("deficit-mode");
-        box.style.backgroundColor = "#e8f5e9";
-        box.style.borderColor = "#a5d6a7";
-        box.children[0].innerText = "تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
-        box.children[0].style.color = "#2e7d32";
-        box.children[1].style.color = "#2e7d32";
+      const isZero = Math.abs(remainingArea) < 0.05;
+      if (isZero) {
+        box.style.display = "none";
+        if (redistBtn) redistBtn.style.display = "none";
       } else {
-        box.classList.remove("deficit-mode");
-        box.style.backgroundColor = "#e8f5e9";
-        box.style.borderColor = "#a5d6a7";
-        box.children[0].innerText = "يوجد جزء متبقٍ من الأرض يعادل:";
-        box.children[0].style.color = "#2e7d32";
-        box.children[1].style.color = "#2e7d32";
+        box.style.display = "flex";
+        if (isNegative) {
+          box.classList.add("deficit-mode");
+          box.style.backgroundColor = "#ffebee";
+          box.style.borderColor = "#ffcdd2";
+          box.children[0].innerText = "🔴 يوجد عجز في التوزيع بمقدار:";
+          box.children[0].style.color = "#c62828";
+          box.children[1].style.color = "#c62828";
+          if (redistBtn) redistBtn.style.display = "none";
+        } else {
+          box.classList.remove("deficit-mode");
+          box.style.backgroundColor = "#fff8e1"; // Amber background
+          box.style.borderColor = "#ffe082";     // Amber border
+          box.children[0].innerText = "🟡 يوجد جزء متبقٍ من الأرض يعادل:";
+          box.children[0].style.color = "#e65100"; // Amber text
+          box.children[1].style.color = "#e65100";
+          if (redistBtn) redistBtn.style.display = "inline-flex";
+        }
       }
     }
   }
   
+  updateRemainderRowUI(remainingArea);
   adjustNameColumnWidth();
   updateConversionsTable();
   renderCroquis();
@@ -1151,15 +1070,11 @@ function runPartition() {
       tCurr_bot = lastT_bot + (botWidth / w1);
       tCurr_top = lastT_top + (topWidth / w2);
 
-      if (index === rows.length - 1) {
-        tCurr_bot = 1.0;
-        tCurr_top = 1.0;
-        botWidth = w1 * (1.0 - lastT_bot);
-        topWidth = w2 * (1.0 - lastT_top);
-      }
-
       if (tCurr_bot > 1.0) tCurr_bot = 1.0;
       if (tCurr_top > 1.0) tCurr_top = 1.0;
+
+      botWidth = w1 * (tCurr_bot - lastT_bot);
+      topWidth = w2 * (tCurr_top - lastT_top);
 
       rightLength = l1 + lastT_top * diff;
       leftLength = l1 + tCurr_top * diff;
@@ -1185,17 +1100,13 @@ function runPartition() {
       // Solves for tCurr_top and tCurr_bot to match partnerAreaM2 exactly
       const L_right = l1 + lastT_top * diff;
       let t_next = 0;
-      if (index === rows.length - 1) {
-        t_next = 1.0;
+      if (Math.abs(diff) < 1e-9) {
+        const dt = partnerAreaM2 / (w * l1);
+        t_next = lastT_top + dt;
       } else {
-        if (Math.abs(diff) < 1e-9) {
-          const dt = partnerAreaM2 / (w * l1);
-          t_next = lastT_top + dt;
-        } else {
-          const valInsideRoot = L_right * L_right + (2 * diff * partnerAreaM2) / w;
-          const dt = (-L_right + Math.sqrt(Math.max(0, valInsideRoot))) / diff;
-          t_next = lastT_top + dt;
-        }
+        const valInsideRoot = L_right * L_right + (2 * diff * partnerAreaM2) / w;
+        const dt = (-L_right + Math.sqrt(Math.max(0, valInsideRoot))) / diff;
+        t_next = lastT_top + dt;
       }
 
       if (t_next > 1.0) t_next = 1.0;
@@ -1252,7 +1163,7 @@ function runPartition() {
       percentInput.value = Number(pct.toFixed(2)) + " %";
     }
     
-    const partnerName = row.querySelector(".partner-name").value || (index === 0 ? "المتبقي" : `شريك ${index}`);
+    const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
     window.calculatedPieces.push({
         name: partnerName,
         startX: tPrev_top * w,
@@ -1268,6 +1179,29 @@ function runPartition() {
     lastT_bot = tCurr_bot;
     lastT_top = tCurr_top;
   });
+
+  // حساب وإضافة قطعة المتبقي إذا كانت المساحة الموزعة أقل من المساحة الكلية للأرض
+  const remainingFraction = 1.0 - lastT_top;
+  if (remainingFraction > 0.0005) {
+    const remBotW = w1 * (1.0 - lastT_bot);
+    const remTopW = w2 * (1.0 - lastT_top);
+    const remRightLength = l1 + lastT_top * diff; // خط الفاصل الأخير للشركاء (الجانب الأيمن للمتبقي)
+    const remLeftLength = l2; // الحد الأيسر للأرض الأصلية (الجانب الأيسر للمتبقي)
+    const remArea = Math.max(0, totalAreaM2 - totalDistributedArea);
+
+    window.calculatedPieces.push({
+      name: "المتبقي",
+      startX: lastT_top * w,
+      endX: 1.0 * w,
+      botW: remBotW,
+      topW: remTopW,
+      width: (remBotW + remTopW) / 2,
+      area: remArea,
+      divLine: remLeftLength,
+      leftLine: remRightLength,
+      isRemainder: true
+    });
+  }
 
   if (document.getElementById("total-width-bottom-calculated")) {
     document.getElementById("total-width-bottom-calculated").value = totalBotWidthCalculated.toFixed(4);
@@ -1286,42 +1220,8 @@ function runPartition() {
     document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
   }
 
-  // Also update summary totals in the footer
-  if (document.getElementById("total-area-distributed")) {
-    document.getElementById("total-area-distributed").value = Number(totalDistributedArea.toFixed(2));
-  }
-  if (document.getElementById("total-percent-distributed")) {
-    const totalPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("total-percent-distributed").value = Number(totalPct.toFixed(2)) + " %";
-  }
-
-  // update the remaining area card
-  let theoreticalTotalArea = 0;
-  if (!isManualPartition) {
-    rows.forEach(row => {
-      if (currentInputMethod === "carats") {
-        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-        theoreticalTotalArea += ((f * 24) + c + (s / 24)) * caratArea;
-      } else {
-        const fracInput = row.querySelector(".partner-fraction");
-        theoreticalTotalArea += parseFraction(fracInput ? fracInput.value : "") * totalAreaM2;
-      }
-    });
-  }
-
   // update the remaining area card
   let remainingArea = totalAreaM2 - totalDistributedArea;
-  if (!isManualPartition) {
-    if (theoreticalTotalArea > totalAreaM2 + 0.1) {
-      remainingArea = totalAreaM2 - theoreticalTotalArea;
-    } else {
-      if (window.calculatedPieces && window.calculatedPieces.length > 0) {
-        remainingArea = window.calculatedPieces[0].area;
-      }
-    }
-  }
 
   // Update summaries to match actual layout partition
   if (document.getElementById("summary-total-area")) {
@@ -1331,15 +1231,15 @@ function runPartition() {
     document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
   }
   if (document.getElementById("rem-area-m2")) {
-    document.getElementById("rem-area-m2").innerText = Number(remainingArea.toFixed(2));
+    document.getElementById("rem-area-m2").innerText = Number(Math.abs(remainingArea).toFixed(2));
   }
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
-    if (Math.abs(remainingArea) < 0.1) {
-      statusEl.innerHTML = "✅ تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
+    if (Math.abs(remainingArea) < 0.05) {
+      statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
       statusEl.style.color = "#2e7d32";
     } else {
-      const isNegative = remainingArea < -0.005;
+      const isNegative = remainingArea < -0.05;
       const absRem = Math.abs(remainingArea);
       let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
       const remFeddans = Math.floor(totalRemCarats / 24);
@@ -1347,7 +1247,7 @@ function runPartition() {
       const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
       
       if (isNegative) {
-        statusEl.innerHTML = `❌ يوجد عجز في مساحة الأرض بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
+        statusEl.innerHTML = `🔴 يوجد عجز في التوزيع بمقدار:<br><strong>${absRem.toFixed(2)} م²</strong><br>يعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
         statusEl.style.color = "#c62828";
       } else {
         statusEl.innerHTML = `⚠️ المساحة المتبقية:<br><strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${remFeddans} فدان، ${remCarats} قيراط، ${Number(remShares.toFixed(2))} سهم.`;
@@ -1365,51 +1265,50 @@ function runPartition() {
 
   const remAcres = document.getElementById("rem-acres");
   if (remAcres) {
-    const isNegative = remainingArea < -0.005;
+    const isNegative = remainingArea < -0.05;
     const absRem = Math.abs(remainingArea);
     
     let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
     
-    // round or fix
     const remFeddans = Math.floor(totalRemCarats / 24);
     const remCarats = Math.floor(totalRemCarats % 24);
     const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
 
-    if (document.getElementById("rem-area-m2")) {
-      document.getElementById("rem-area-m2").innerText = absRem.toFixed(2);
-    }
     document.getElementById("rem-acres").innerText = remFeddans;
     document.getElementById("rem-carats").innerText = remCarats;
     document.getElementById("rem-shares").innerText = Number(remShares.toFixed(2));
 
     const box = document.querySelector(".table-remaining-box");
+    const redistBtn = document.getElementById("btn-redistribute-remainder");
     if (box) {
-      const isZero = Math.abs(remainingArea) < 0.01;
-      if (isNegative) {
-        box.classList.add("deficit-mode");
-        box.style.backgroundColor = "#ffebee";
-        box.style.borderColor = "#ffcdd2";
-        box.children[0].innerText = "احترس يوجد عجز:";
-        box.children[0].style.color = "#c62828";
-        box.children[1].style.color = "#c62828";
-      } else if (isZero) {
-        box.classList.remove("deficit-mode");
-        box.style.backgroundColor = "#e8f5e9";
-        box.style.borderColor = "#a5d6a7";
-        box.children[0].innerText = "تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
-        box.children[0].style.color = "#2e7d32";
-        box.children[1].style.color = "#2e7d32";
+      const isZero = Math.abs(remainingArea) < 0.05;
+      if (isZero) {
+        box.style.display = "none";
+        if (redistBtn) redistBtn.style.display = "none";
       } else {
-        box.classList.remove("deficit-mode");
-        box.style.backgroundColor = "#e8f5e9";
-        box.style.borderColor = "#a5d6a7";
-        box.children[0].innerText = "يوجد جزء متبقٍ من الأرض يعادل:";
-        box.children[0].style.color = "#2e7d32";
-        box.children[1].style.color = "#2e7d32";
+        box.style.display = "flex";
+        if (isNegative) {
+          box.classList.add("deficit-mode");
+          box.style.backgroundColor = "#ffebee";
+          box.style.borderColor = "#ffcdd2";
+          box.children[0].innerText = "🔴 يوجد عجز في التوزيع بمقدار:";
+          box.children[0].style.color = "#c62828";
+          box.children[1].style.color = "#c62828";
+          if (redistBtn) redistBtn.style.display = "none";
+        } else {
+          box.classList.remove("deficit-mode");
+          box.style.backgroundColor = "#fff8e1"; // Amber background
+          box.style.borderColor = "#ffe082";     // Amber border
+          box.children[0].innerText = "🟡 يوجد جزء متبقٍ من الأرض يعادل:";
+          box.children[0].style.color = "#e65100"; // Amber text
+          box.children[1].style.color = "#e65100";
+          if (redistBtn) redistBtn.style.display = "inline-flex";
+        }
       }
     }
   }
 
+  updateRemainderRowUI(remainingArea);
   saveData();
   renderCroquis();
   updateCalculationSteps();
@@ -1423,7 +1322,7 @@ function clearAll() {
   
   const list = document.getElementById("partners-list");
   list.innerHTML = "";
-  addNewPartnerRow("المتبقي");
+  addNewPartnerRow("شريك 1");
   
   saveAndCalc();
 }
@@ -1694,6 +1593,8 @@ function renderCroquis() {
   const mapX = (x) => offsetX + (x * stretchX) * drawScale;
   const mapY = (y) => offsetY + (y * stretchY) * drawScale;
 
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+
   // k = معدل التغير في الطول بالنسبة للعرض
   const k = (l1 - l2) / w;
 
@@ -1723,7 +1624,11 @@ function renderCroquis() {
   // === 3. رسم القطع ===
   if (window.calculatedPieces && window.calculatedPieces.length > 0) {
     window.calculatedPieces.forEach((piece, index) => {
-      const color = PIECE_COLORS[index % PIECE_COLORS.length];
+      const isRem = piece.isRemainder;
+      const color = isRem 
+        ? { fill: "rgba(255, 193, 7, 0.11)", stroke: "#ff8f00" }
+        : PIECE_COLORS[index % PIECE_COLORS.length];
+
       const x1 = mapX(piece.startX);
       const x2 = mapX(piece.endX);
       const y1 = mapY(0);
@@ -1737,7 +1642,10 @@ function renderCroquis() {
       poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x2},${y3} ${x1},${y4}`);
       poly.setAttribute("fill", color.fill);
       poly.setAttribute("stroke", color.stroke);
-      poly.setAttribute("stroke-width", 1.5 * textScale);
+      poly.setAttribute("stroke-width", (isRem ? 2.2 : 1.5) * textScale);
+      if (isRem) {
+        poly.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
+      }
       poly.setAttribute("stroke-linejoin", "round");
       g.appendChild(poly);
 
@@ -1747,15 +1655,15 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // 1. رسم بطاقة الشريك (Partner Card)
+      // 1. رسم بطاقة الشريك التفصيلية
       if (showCroquisNames || showCroquisMeasurements) {
         const cardGroup = svgEl("g");
         
-        // تدوير بطاقة الشريك دائماً بزاوية -90 درجة (مثل صفحة 13)
+        // تدوير بطاقة الشريك دائماً بزاوية -90 درجة
         cardGroup.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
 
-        const cardWidth = 90 * textScale;
-        const cardHeight = 45 * textScale;
+        const cardWidth = 115 * textScale;
+        const cardHeight = 115 * textScale;
 
         // خلفية البطاقة (مستطيل ذو زوايا مستديرة وظل خفيف)
         const cardRect = svgEl("rect");
@@ -1763,8 +1671,8 @@ function renderCroquis() {
         cardRect.setAttribute("y", cy - cardHeight / 2);
         cardRect.setAttribute("width", cardWidth);
         cardRect.setAttribute("height", cardHeight);
-        cardRect.setAttribute("fill", "#ffffff");
-        cardRect.setAttribute("stroke", "#e0e0e0");
+        cardRect.setAttribute("fill", isRem ? "#fffde7" : "#ffffff");
+        cardRect.setAttribute("stroke", isRem ? "#ffb300" : "#e0e0e0");
         cardRect.setAttribute("stroke-width", 1.5 * textScale);
         cardRect.setAttribute("rx", 6 * textScale);
         cardRect.setAttribute("ry", 6 * textScale);
@@ -1775,28 +1683,98 @@ function renderCroquis() {
         if (showCroquisNames) {
           const nameText = svgEl("text");
           nameText.setAttribute("x", cx);
-          nameText.setAttribute("y", cy - 4 * textScale);
-          nameText.setAttribute("fill", "#263238");
+          nameText.setAttribute("y", cy - 44 * textScale);
+          nameText.setAttribute("fill", isRem ? "#e65100" : "#263238");
           nameText.setAttribute("font-size", 11 * textScale + "px");
           nameText.setAttribute("font-family", "Cairo, Arial, sans-serif");
           nameText.setAttribute("text-anchor", "middle");
           nameText.setAttribute("font-weight", "bold");
-          nameText.textContent = piece.name || (index === 0 ? "المتبقي" : `شريك ${index}`);
+          nameText.textContent = piece.name;
           cardGroup.appendChild(nameText);
         }
 
-        // المساحة (بالأزرق العريض)
+        // المساحة والنسبة والأعراض والأطوال
         if (showCroquisMeasurements) {
           const areaText = svgEl("text");
           areaText.setAttribute("x", cx);
-          areaText.setAttribute("y", cy + 13 * textScale);
-          areaText.setAttribute("fill", "#1565c0"); // أزرق داكن
-          areaText.setAttribute("font-size", 10.5 * textScale + "px");
+          areaText.setAttribute("y", cy - 31 * textScale);
+          areaText.setAttribute("fill", "#1565c0");
+          areaText.setAttribute("font-size", 10 * textScale + "px");
           areaText.setAttribute("font-family", "Cairo, Arial, sans-serif");
           areaText.setAttribute("text-anchor", "middle");
           areaText.setAttribute("font-weight", "bold");
           areaText.textContent = Number(piece.area.toFixed(2)) + " م²";
           cardGroup.appendChild(areaText);
+
+          // النسبة المئوية
+          const pct = totalAreaM2 > 0 ? (piece.area / totalAreaM2) * 100 : 0;
+          const pctText = svgEl("text");
+          pctText.setAttribute("x", cx);
+          pctText.setAttribute("y", cy - 18 * textScale);
+          pctText.setAttribute("fill", "#555");
+          pctText.setAttribute("font-size", 9 * textScale + "px");
+          pctText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          pctText.setAttribute("text-anchor", "middle");
+          pctText.textContent = `النسبة: ${pct.toFixed(2)} %`;
+          cardGroup.appendChild(pctText);
+
+          // العرض الأول (أسفل)
+          const w1Text = svgEl("text");
+          w1Text.setAttribute("x", cx);
+          w1Text.setAttribute("y", cy - 5 * textScale);
+          w1Text.setAttribute("fill", "#555");
+          w1Text.setAttribute("font-size", 9 * textScale + "px");
+          w1Text.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          w1Text.setAttribute("text-anchor", "middle");
+          w1Text.textContent = `عرض 1: ${piece.botW.toFixed(2)} م`;
+          cardGroup.appendChild(w1Text);
+
+          // العرض الثاني (أعلى)
+          const w2Text = svgEl("text");
+          w2Text.setAttribute("x", cx);
+          w2Text.setAttribute("y", cy + 8 * textScale);
+          w2Text.setAttribute("fill", "#555");
+          w2Text.setAttribute("font-size", 9 * textScale + "px");
+          w2Text.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          w2Text.setAttribute("text-anchor", "middle");
+          w2Text.textContent = `عرض 2: ${piece.topW.toFixed(2)} م`;
+          cardGroup.appendChild(w2Text);
+
+          // الطول الأيمن
+          const rLText = svgEl("text");
+          rLText.setAttribute("x", cx);
+          rLText.setAttribute("y", cy + 21 * textScale);
+          rLText.setAttribute("fill", "#555");
+          rLText.setAttribute("font-size", 9 * textScale + "px");
+          rLText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          rLText.setAttribute("text-anchor", "middle");
+          rLText.textContent = `طول أيمن: ${piece.leftLine.toFixed(2)} م`;
+          cardGroup.appendChild(rLText);
+
+          // الطول الأيسر
+          const lLText = svgEl("text");
+          lLText.setAttribute("x", cx);
+          lLText.setAttribute("y", cy + 34 * textScale);
+          lLText.setAttribute("fill", "#555");
+          lLText.setAttribute("font-size", 9 * textScale + "px");
+          lLText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          lLText.setAttribute("text-anchor", "middle");
+          lLText.textContent = `طول أيسر: ${piece.divLine.toFixed(2)} م`;
+          cardGroup.appendChild(lLText);
+
+          // طول الفاصل (إذا لم تكن القطعة الأخيرة)
+          if (index < window.calculatedPieces.length - 1) {
+            const fText = svgEl("text");
+            fText.setAttribute("x", cx);
+            fText.setAttribute("y", cy + 47 * textScale);
+            fText.setAttribute("fill", "#2e7d32");
+            fText.setAttribute("font-size", 9 * textScale + "px");
+            fText.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            fText.setAttribute("text-anchor", "middle");
+            fText.setAttribute("font-weight", "bold");
+            fText.textContent = `الفاصل: ${piece.divLine.toFixed(2)} م`;
+            cardGroup.appendChild(fText);
+          }
         }
 
         g.appendChild(cardGroup);
@@ -2413,7 +2391,7 @@ function updateCalculationSteps() {
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
     `;
     rows.forEach((row, index) => {
-      const partnerName = row.querySelector(".partner-name").value || (index === 0 ? "المتبقي" : `شريك ${index}`);
+      const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
       const partnerAreaValue = parseFloat(row.querySelector(".partner-area").value) || 0;
       html += `
         <div style="border-right: 3px solid #66bb6a; padding-right: 8px;">
@@ -2434,7 +2412,7 @@ function updateCalculationSteps() {
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
     `;
     rows.forEach((row, index) => {
-      const partnerName = row.querySelector(".partner-name").value || (index === 0 ? "المتبقي" : `شريك ${index}`);
+      const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
       const partnerAreaValue = parseFloat(row.querySelector(".partner-area").value) || 0;
       const partnerPct = totalAreaM2 > 0 ? (partnerAreaValue / totalAreaM2) * 100 : 0;
       html += `
@@ -3114,5 +3092,370 @@ function onShareInput() {
 window.addEventListener("resize", function() {
   renderCroquis();
 });
+
+function updateRemainderRowUI(remainingArea) {
+  const row = document.getElementById("remainder-row-table");
+  if (!row) return;
+
+  const isZero = Math.abs(remainingArea) < 0.05;
+  const isNegative = remainingArea < -0.05;
+
+  if (isZero || isNegative) {
+    row.style.display = "none";
+    return;
+  }
+
+  // Show it as grid
+  row.style.display = "grid";
+
+  // Calculate inputs
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  const w = (w1 + w2) / 2;
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
+
+  let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+  if (caratArea === 0) {
+    caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+
+  const absRem = Math.abs(remainingArea);
+  let totalRemCarats = caratArea > 0 ? (absRem / caratArea) : 0;
+  const remFeddans = Math.floor(totalRemCarats / 24);
+  const remCarats = Math.floor(totalRemCarats % 24);
+  const remShares = ((totalRemCarats - (remFeddans * 24 + remCarats)) * 24);
+  const remPct = totalAreaM2 > 0 ? (absRem / totalAreaM2) * 100 : 0;
+
+  // Try to find remainder piece in window.calculatedPieces
+  let remTopW = 0, remBotW = 0, remRightL = 0, remLeftL = 0;
+  let remCumWidth = "-";
+  let remLengths = "-";
+
+  if (window.calculatedPieces && window.calculatedPieces.length > 0) {
+    const remPiece = window.calculatedPieces.find(p => p.isRemainder);
+    if (remPiece) {
+      remTopW = remPiece.topW;
+      remBotW = remPiece.botW;
+      remRightL = remPiece.leftLine;
+      remLeftL = remPiece.divLine;
+      
+      // Calculate start widths (total widths of partners list)
+      let partnersBotW = 0;
+      let partnersTopW = 0;
+      window.calculatedPieces.forEach(p => {
+        if (!p.isRemainder) {
+          partnersBotW += p.botW;
+          partnersTopW += p.topW;
+        }
+      });
+
+      remCumWidth = `أسفل: ${partnersBotW.toFixed(2)} إلى ${w1.toFixed(2)} | أعلى: ${partnersTopW.toFixed(2)} إلى ${w2.toFixed(2)}`;
+      remLengths = `يمين: ${remRightL.toFixed(2)} | يسار: ${remLeftL.toFixed(2)}`;
+    }
+  }
+
+  if (currentInputMethod === "carats") {
+    row.innerHTML = `
+      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${Number(remShares.toFixed(2))}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remCarats}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remFeddans}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+    `;
+  } else {
+    const fractionVal = totalAreaM2 > 0 ? (absRem / totalAreaM2) : 0;
+    row.innerHTML = `
+      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${fractionVal.toFixed(4)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${Number(remShares.toFixed(2))}س، ${remCarats}ق، ${remFeddans}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" style="display:none;" readonly value="-">
+      <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+    `;
+  }
+}
+
+/* ================================================================
+   ═══ دوال إعادة تقسيم الجزء المتبقي ═════════════════════════════
+   ================================================================ */
+function showRedistributeModal() {
+  const modal = document.getElementById("redistribute-direction-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeRedistributeModal() {
+  const modal = document.getElementById("redistribute-direction-modal");
+  if (modal) modal.style.display = "none";
+}
+
+function redistributeRemainder(direction) {
+  if (!window.calculatedPieces) return;
+  const remPiece = window.calculatedPieces.find(p => p.isRemainder);
+  if (!remPiece) {
+    alert("لم يتم العثور على قطعة متبقية لإعادة تقسيمها.");
+    closeRedistributeModal();
+    return;
+  }
+
+  let w1 = 0, w2 = 0, l1 = 0, l2 = 0;
+
+  if (direction === "longitudinal") {
+    // تقسيم طولي: الأبعاد تبقى كما هي
+    w1 = remPiece.topW;    // العرض الأول (أعلى)
+    w2 = remPiece.botW;    // العرض الثاني (أسفل)
+    l1 = remPiece.leftLine; // الطول الأيمن
+    l2 = remPiece.divLine;  // الطول الأيسر
+  } else {
+    // تقسيم عرضي: قلب الأبعاد (العرض يصبح طولاً والعكس)
+    w1 = remPiece.leftLine; // العرض الأول (أعلى)
+    w2 = remPiece.divLine;  // العرض الثاني (أسفل)
+    l1 = remPiece.topW;     // الطول الأيمن
+    l2 = remPiece.botW;     // الطول الأيسر
+  }
+
+  // حفظ المرحلة الحالية في السجل تلقائياً قبل الانتقال
+  try {
+    const l1_old = parseFloat(document.getElementById("length1").value) || 0;
+    const w1_old = parseFloat(document.getElementById("width1").value) || 0;
+    const w = (w1_old + (parseFloat(document.getElementById("width2").value) || 0)) / 2;
+    const area = w * ((l1_old + (parseFloat(document.getElementById("length2").value) || 0)) / 2);
+    
+    let stageName = `مرحلة أساسية - مساحة ${area.toFixed(1)} م² (قبل تقسيم المتبقي)`;
+    saveCurrentStateToHistory(stageName);
+  } catch(e) {
+    console.error("Auto-history save failed:", e);
+  }
+
+  // تحديث حقول الإدخال للأرض الإجمالية بالدقة الكاملة لمنع تراكم أخطاء التقريب
+  document.getElementById("width1").value = w1;
+  document.getElementById("width2").value = w2;
+  document.getElementById("length1").value = l1;
+  document.getElementById("length2").value = l2;
+
+  // تفريغ جدول الشركاء وبدء مشروع جديد بالكامل
+  const list = document.getElementById("partners-list");
+  if (list) list.innerHTML = "";
+  window.calculatedPieces = [];
+  isPartitioned = false;
+  isManualPartition = false;
+
+  // إضافة شريك أول فارغ للمطالبة بإدخال الشركاء
+  addNewPartnerRow("شريك 1");
+
+  closeRedistributeModal();
+  saveAndCalcImmediate();
+}
+
+/* ================================================================
+   ═══ سجل مراحل عمليات التقسيم التاريخي ═════════════════════════
+   ================================================================ */
+function saveCurrentStateToHistory(description = "") {
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  
+  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) {
+    alert("لا يمكن حفظ حالة فارغة. الرجاء إدخال أبعاد الأرض أولاً.");
+    return;
+  }
+
+  // Get current partners
+  const partners = [];
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  rows.forEach(row => {
+    const name = row.querySelector(".partner-name").value;
+    const botW = row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : "-";
+    const topW = row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : "-";
+    
+    if (currentInputMethod === "carats") {
+      partners.push({
+        name: name,
+        feddans: row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : "",
+        carats: row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : "",
+        shares: row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : "",
+        fraction: "",
+        botW: botW,
+        topW: topW
+      });
+    } else {
+      partners.push({
+        name: name,
+        feddans: "",
+        carats: "",
+        shares: "",
+        fraction: row.querySelector(".partner-fraction") ? row.querySelector(".partner-fraction").value : "",
+        botW: botW,
+        topW: topW
+      });
+    }
+  });
+
+  const w = (w1 + w2) / 2;
+  const area = ((l1 + l2) / 2) * w;
+
+  if (!description) {
+    description = prompt("أدخل اسماً أو وصفاً لهذه المرحلة (مثال: تقسيم الورثة، تقسيم المتبقي طولي...):", `مرحلة تقسيم - ${area.toFixed(1)} م²`);
+    if (description === null) return; // cancel
+    if (!description.trim()) {
+      description = `مرحلة تقسيم - ${area.toFixed(1)} م²`;
+    }
+  }
+
+  const state = {
+    description: description,
+    timestamp: new Date().toLocaleString("ar-EG"),
+    width1: w1,
+    width2: w2,
+    length1: l1,
+    length2: l2,
+    caratArea: document.getElementById("input-carat-area").value,
+    otherCaratArea: document.getElementById("other-carat-area").value,
+    inputMethod: currentInputMethod,
+    isPartitioned: isPartitioned,
+    isManualPartition: isManualPartition,
+    partners: partners
+  };
+
+  let history = [];
+  try {
+    const saved = localStorage.getItem("p11-history");
+    if (saved) history = JSON.parse(saved);
+  } catch (e) {
+    history = [];
+  }
+
+  history.push(state);
+  localStorage.setItem("p11-history", JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = document.getElementById("history-stages-list");
+  if (!container) return;
+
+  let history = [];
+  try {
+    const saved = localStorage.getItem("p11-history");
+    if (saved) history = JSON.parse(saved);
+  } catch (e) {
+    history = [];
+  }
+
+  if (history.length === 0) {
+    container.innerHTML = `<p style="text-align: center; color: #888; font-style: italic; font-size: 12px; margin: 10px 0;">لا توجد مراحل مسجلة حالياً في السجل</p>`;
+    return;
+  }
+
+  let html = "";
+  history.forEach((state, index) => {
+    const totalW = (parseFloat(state.width1) + parseFloat(state.width2)) / 2;
+    const totalL = (parseFloat(state.length1) + parseFloat(state.length2)) / 2;
+    const area = totalW * totalL;
+    
+    html += `
+      <div class="history-item" style="display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; gap: 10px; font-size: 13px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="display: flex; flex-direction: column; gap: 3px; flex: 1; text-align: right;">
+          <strong style="color: #2e7d32;">${state.description}</strong>
+          <span style="font-size: 11px; color: #666;">
+            📅 ${state.timestamp} | 📐 الأبعاد: ${Number(parseFloat(state.width1).toFixed(2))} × ${Number(parseFloat(state.width2).toFixed(2))} × ${Number(parseFloat(state.length1).toFixed(2))} × ${Number(parseFloat(state.length2).toFixed(2))}
+          </span>
+          <span style="font-size: 11px; color: #1565c0; font-weight: bold;">
+            المساحة الإجمالية: ${area.toFixed(2)} م² | عدد الشركاء: ${state.partners.length}
+          </span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" onclick="restoreHistoryState(${index})" style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 4px; padding: 5px 10px; color: #2e7d32; cursor: pointer; font-family: Cairo, Arial, sans-serif; font-size: 11px; font-weight: bold; transition: all 0.2s;">
+            استعادة ↩️
+          </button>
+          <button type="button" onclick="deleteHistoryState(${index})" style="background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; padding: 5px 8px; color: #c62828; cursor: pointer; transition: all 0.2s; font-weight: bold;">
+            حذف 🗑️
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function restoreHistoryState(index) {
+  let history = [];
+  try {
+    const saved = localStorage.getItem("p11-history");
+    if (saved) history = JSON.parse(saved);
+  } catch (e) {
+    return;
+  }
+
+  const state = history[index];
+  if (!state) return;
+
+  if (!confirm(`هل أنت متأكد من استعادة هذه المرحلة؟ (سيتم استبدال البيانات الحالية بـ: ${state.description})`)) {
+    return;
+  }
+
+  // Restore main inputs
+  document.getElementById("length1").value = state.length1;
+  document.getElementById("length2").value = state.length2;
+  document.getElementById("width1").value = state.width1;
+  document.getElementById("width2").value = state.width2;
+  document.getElementById("input-carat-area").value = state.caratArea;
+  document.getElementById("other-carat-area").value = state.otherCaratArea;
+  document.getElementById("share-input-method").value = state.inputMethod;
+
+  currentInputMethod = state.inputMethod;
+  isPartitioned = state.isPartitioned;
+  isManualPartition = state.isManualPartition;
+
+  // Restore partners
+  renderHeaderAndFooter();
+  const list = document.getElementById("partners-list");
+  list.innerHTML = "";
+  
+  state.partners.forEach(p => {
+    addNewPartnerRow(p.name, p.feddans, p.carats, p.shares, p.fraction, p.botW, p.topW);
+  });
+
+  saveAndCalcImmediate();
+}
+
+function deleteHistoryState(index) {
+  let history = [];
+  try {
+    const saved = localStorage.getItem("p11-history");
+    if (saved) history = JSON.parse(saved);
+  } catch (e) {
+    return;
+  }
+
+  if (confirm("هل تريد حذف هذه المرحلة من السجل؟")) {
+    history.splice(index, 1);
+    localStorage.setItem("p11-history", JSON.stringify(history));
+    renderHistory();
+  }
+}
+
+function clearHistory() {
+  if (confirm("🚨 هل أنت متأكد من مسح السجل بالكامل؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    localStorage.removeItem("p11-history");
+    renderHistory();
+  }
+}
+
 
 

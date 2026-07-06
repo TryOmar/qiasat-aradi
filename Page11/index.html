@@ -13,10 +13,14 @@
 <body>
 
   <!-- Top premium navigation banner -->
-  <div class="top-nav-bar" style="display: flex; justify-content: center; align-items: center; text-align: center; padding: 5px 0;">
-    <div class="top-nav-center">
-      <h2 style="font-size: 15px; margin: 0;">القسمة في حال اختلاف الأطوال</h2>
+  <div class="top-nav-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; width: 100%; box-sizing: border-box;">
+    <button class="nav-btn" onclick="runAutomatedTests()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: white; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: bold; font-family: Cairo; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+      <span>🧪 تشغيل اختبارات الدقة</span>
+    </button>
+    <div class="top-nav-center" style="flex-grow: 1; text-align: center;">
+      <h2 style="font-size: 15px; margin: 0; color: white;">القسمة في حال اختلاف الأطوال</h2>
     </div>
+    <div style="width: 125px; visibility: hidden;"></div>
   </div>
 
   <div class="con">
@@ -116,10 +120,6 @@
           <div class="verification-item">
             <span class="v-lbl">متوسط الطول (م):</span>
             <strong class="v-val" id="calc-avg-length">0.00</strong>
-          </div>
-          <div class="verification-item">
-            <span class="v-lbl">المحيط الإجمالي للأرض (م):</span>
-            <strong class="v-val" id="calc-perimeter" style="color: #1b5e20;">0.00</strong>
           </div>
           
           <div class="verification-formula-box">
@@ -269,6 +269,11 @@
           <div class="table-input" id="total" style="margin-top: 5px; width: 100%;">
             <!-- Dynamic Footer -->
           </div>
+          
+          <!-- Remainder Row inside table -->
+          <div class="table-input" id="remainder-row-table" style="margin-top: 3px; width: 100%; display: none;">
+            <!-- Dynamic Remainder Row -->
+          </div>
         </div>
       </div>
 
@@ -292,6 +297,10 @@
             <span class="unit-lbl-mini" style="font-size: 10px; color: #777; font-family: Cairo, Arial, sans-serif;">الفدان</span>
           </div>
         </div>
+        <!-- زر تقسيم الجزء المتبقي -->
+        <button class="btn-action btn-redistribute" id="btn-redistribute-remainder" onclick="showRedistributeModal()" style="display:none; padding: 7px 16px; font-size: 12px; margin-top: 8px; font-weight: bold; background: linear-gradient(135deg, #ff8f00, #e65100); color: white; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 3px 6px rgba(230,81,0,0.25); font-family: Cairo, Arial, sans-serif;">
+          🔄 تقسيم الجزء المتبقي
+        </button>
       </div>
 
     </div>
@@ -390,6 +399,30 @@
         </div>
       </div>
     </div>
+
+    <!-- سجل مراحل التقسيم - تاريخي -->
+    <div class="s history-card" style="width: 100%; margin-top: 20px;">
+      <h3>📜 سجل مراحل عمليات التقسيم</h3>
+      <div style="padding: 12px; font-family: Cairo, Arial, sans-serif; direction: rtl;">
+        <p style="font-size: 12px; color: #666; margin: 0 0 12px 0;">يمكنك حفظ المرحلة الحالية للرجوع إليها لاحقاً، أو استعادة المراحل السابقة من السجل:</p>
+        
+        <!-- أزرار التحكم -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+          <button type="button" class="nav-btn" onclick="saveCurrentStateToHistory()" style="background-color: #2e7d32 !important; color: white !important; font-size: 12px; font-weight: bold; border-radius: 6px; border: none; padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+            <span>💾 حفظ الحالة الحالية كشريط/مرحلة</span>
+          </button>
+          <button type="button" class="nav-btn" onclick="clearHistory()" style="background-color: #c62828 !important; color: white !important; font-size: 12px; font-weight: bold; border-radius: 6px; border: none; padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+            <span>🗑️ مسح السجل بالكامل</span>
+          </button>
+        </div>
+
+        <!-- قائمة المراحل المسجلة -->
+        <div id="history-stages-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-left: 5px;">
+          <!-- سيتم توليدها ديناميكياً من الجافا سكريبت -->
+          <p style="text-align: center; color: #888; font-style: italic; font-size: 12px; margin: 10px 0;">لا توجد مراحل مسجلة حالياً في السجل</p>
+        </div>
+      </div>
+    </div>
     <!-- Conversions table (Qasaba & Qabda) - Interactive -->
     <div class="s conversion-card" style="width: 100%; margin-top: 20px;">
       <h3>التحويل من متر طولي ومربع إلى القصبة والقبضة</h3>
@@ -411,11 +444,31 @@
       </div>
     </div>
 
+    <!-- مودال اختيار اتجاه التقسيم -->
+    <div id="redistribute-direction-modal" class="redistribute-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 10000; direction: rtl;">
+      <div class="redistribute-modal-content" style="background: #ffffff; border: 2px solid #ffca28; border-radius: 18px; padding: 22px 20px 18px; text-align: center; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15); max-width: 360px; width: 90%; box-sizing: border-box; font-family: Cairo, Arial, sans-serif;">
+        <h4 style="color: #e65100; font-size: 17px; font-weight: bold; margin: 0 0 5px;">اختر اتجاه التقسيم الجديد</h4>
+        <p class="modal-subtitle" style="color: #888; font-size: 12px; margin: 0 0 16px;">سيتم تحميل أبعاد الجزء المتبقي كأرض جديدة مستقلة بالكامل</p>
+        <div class="direction-buttons" style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-dir-option" onclick="redistributeRemainder('longitudinal')" id="btn-dir-long" style="display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 12px 20px; background: #fff8e1; border: 2px solid #ffc107; border-radius: 12px; color: #e65100; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 110px;">
+            <span class="dir-icon" style="font-size: 24px; line-height: 1;">↕️</span>
+            <span>تقسيم طولي</span>
+          </button>
+          <button class="btn btn-dir-option" onclick="redistributeRemainder('transverse')" id="btn-dir-trans" style="display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 12px 20px; background: #fff8e1; border: 2px solid #ffc107; border-radius: 12px; color: #e65100; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 110px;">
+            <span class="dir-icon" style="font-size: 24px; line-height: 1;">↔️</span>
+            <span>تقسيم عرضي</span>
+          </button>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="closeRedistributeModal()" style="margin-top: 15px; padding: 4px 12px; font-size: 12px; font-family: Cairo, Arial, sans-serif; background: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer;">إلغاء</button>
+      </div>
+    </div>
+
   </div>
 
 
   <script src="../nav.js"></script>
   <script src="script.js"></script>
+  <script src="tests.js"></script>
 </body>
 
 </html>

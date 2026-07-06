@@ -304,7 +304,7 @@ body {
   width: 100% !important;
 }
 
-.table-header, .partner-row, #total {
+.table-header, .partner-row, #total, #remainder-row-table {
   display: grid !important;
   grid-template-columns: 40px var(--name-column-width, 140px) 70px 60px 60px 100px 80px 100px 100px 170px 100px 50px !important;
   gap: 4px !important;
@@ -337,7 +337,7 @@ body {
   display: none !important;
 }
 
-.partner-row input {
+.partner-row input, #remainder-row-table input {
   width: 100% !important;
   height: 28px !important;
   border: 1px solid #cccccc !important;
@@ -1043,7 +1043,8 @@ body {
     min-width: 44px !important;
   }
   .input-div input,
-  .partner-row input {
+  .partner-row input,
+  #remainder-row-table input {
     min-height: 40px !important;
   }
   .partner-row {
@@ -1329,6 +1330,45 @@ body {
     box-sizing: border-box !important;
   }
 }
+
+/* ================================================================
+   ═══ تنسيقات إعادة تقسيم الجزء المتبقي ══════════════════════════
+   ================================================================ */
+.btn-redistribute {
+  transition: all 0.25s ease !important;
+}
+.btn-redistribute:hover {
+  background: linear-gradient(135deg, #e65100, #bf360c) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 10px rgba(230, 81, 0, 0.4) !important;
+}
+.btn-redistribute:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(230, 81, 0, 0.2) !important;
+}
+
+@keyframes slideDownModal {
+  from { opacity: 0; transform: translateY(-15px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.redistribute-modal-content {
+  animation: slideDownModal 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-dir-option {
+  transition: all 0.22s ease !important;
+}
+.btn-dir-option:hover {
+  background: #fff3cd !important;
+  border-color: #e65100 !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 5px 12px rgba(230, 81, 0, 0.18) !important;
+}
+.btn-dir-option:active {
+  transform: translateY(-1px) !important;
+}
+
 
 
 
