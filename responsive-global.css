@@ -1,0 +1,152 @@
+﻿/* ================================================================
+   responsive-global.css
+   تجاوبية عامة لجميع صفحات برنامج الدلال
+   يغطي: 320px / 360px / 375px / 390px / 412px / 480px / 768px
+   متوافق مع: AppCreator24 WebView + Chrome + Android + iOS
+   ================================================================ */
+
+/* 1. منع التمرير الافقي */
+html { overflow-x: hidden !important; scroll-behavior: smooth; }
+body { overflow-x: hidden !important; max-width: 100vw !important; width: 100% !important; box-sizing: border-box !important; }
+*, *::before, *::after { box-sizing: border-box !important; }
+
+/* 2. منع خروج العناصر */
+img, svg, canvas, video, iframe, table { max-width: 100% !important; }
+
+/* 3. font-size: 16px لمنع تكبير iOS/Android */
+input, select, textarea {
+  font-size: 16px !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(46, 125, 50, 0.1);
+}
+
+/* 4. الجداول قابلة للتمرير */
+.table-container, .results-table-wrapper, .conversion-table-wrapper,
+.heirs-table-wrapper, .overflow-x-wrapper {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  max-width: 100% !important;
+}
+
+/* 5. الازرار بارتفاع مناسب للمس */
+button, .btn, .btn-action, .btn-divide, .nav-btn, .report-btn {
+  min-height: 44px !important;
+  touch-action: manipulation !important;
+}
+
+/* 6. الحقل النشط يبقى ظاهرا عند فتح لوحة المفاتيح */
+input:focus, select:focus, textarea:focus {
+  scroll-margin-top: 80px !important;
+  scroll-margin-bottom: 20px !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* 7. نصوص البطاقات لا تكسر التخطيط */
+.s p, .s span, .s label,
+.summary-card-item span, .detail-row span {
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+/* ================================================================
+   360px - Galaxy A12 / Xiaomi / Redmi
+   ================================================================ */
+@media screen and (max-width: 360px) {
+  .con { padding: 0 6px 100px 6px !important; }
+  .top-cards-grid, .bottom-cards-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+  .input-div input { width: 100% !important; height: 44px !important; font-size: 16px !important; }
+  .btn-action, .btn { height: 44px !important; font-size: 12px !important; }
+  .buttons-container { flex-direction: column !important; width: 100% !important; }
+}
+
+/* ================================================================
+   375px - iPhone SE / Galaxy A32
+   ================================================================ */
+@media screen and (max-width: 375px) {
+  .con { padding: 0 8px 100px 8px !important; }
+  .top-cards-grid, .bottom-cards-grid { grid-template-columns: 1fr !important; }
+  .input-div input, .input-row input { width: 100% !important; height: 44px !important; font-size: 16px !important; }
+  .input-row { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
+  .input-row label { width: 100% !important; font-size: 12px !important; }
+  .buttons-container { flex-wrap: wrap !important; gap: 6px !important; }
+}
+
+/* ================================================================
+   390px - iPhone 14 / 15
+   ================================================================ */
+@media screen and (max-width: 390px) {
+  .top-nav-bar { padding: 6px 8px !important; }
+  .top-nav-bar h2 { font-size: 12px !important; }
+  .nav-btn { padding: 4px 7px !important; font-size: 10px !important; }
+  .top-cards-grid, .bottom-cards-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ================================================================
+   412px - Galaxy S22 / A53 / Pixel 6
+   ================================================================ */
+@media screen and (max-width: 412px) {
+  .con { padding: 0 10px 110px 10px !important; }
+  .top-cards-grid, .bottom-cards-grid { grid-template-columns: 1fr !important; margin-top: 8px !important; }
+  .main-actions-bar { flex-direction: column !important; gap: 8px !important; padding: 8px !important; align-items: stretch !important; }
+  .selector-container { flex-direction: column !important; align-items: flex-start !important; width: 100% !important; }
+  .selector-container select { width: 100% !important; height: 44px !important; font-size: 16px !important; }
+  .buttons-container { flex-wrap: wrap !important; justify-content: center !important; gap: 6px !important; width: 100% !important; }
+  .btn-action { flex: 1 1 calc(50% - 6px) !important; height: 44px !important; }
+  .inputs-subgrid { grid-template-columns: 1fr !important; }
+}
+
+/* ================================================================
+   480px - الهواتف المتوسطة
+   ================================================================ */
+@media screen and (max-width: 480px) {
+  .top-cards-grid { grid-template-columns: 1fr !important; gap: 10px !important; margin-top: 10px !important; }
+  .bottom-cards-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .s { padding: 10px !important; border-radius: 10px !important; margin-top: 8px !important; }
+  .s h3 { margin: -10px -10px 10px -10px !important; font-size: 13px !important; padding: 8px 10px !important; }
+  .input-div input, .input-row input { height: 44px !important; font-size: 16px !important; width: 100% !important; border-radius: 8px !important; }
+  .input-div label, .input-row label { font-size: 12px !important; }
+  .reports-buttons-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .report-btn { min-height: 48px !important; font-size: 11px !important; padding: 8px 4px !important; }
+}
+
+/* ================================================================
+   768px - الاجهزة اللوحية الصغيرة
+   ================================================================ */
+@media screen and (max-width: 768px) {
+  .con { padding: 0 12px 110px 12px !important; }
+  .main-actions-bar { flex-wrap: wrap !important; gap: 10px !important; }
+  .buttons-container { flex-wrap: wrap !important; gap: 6px !important; }
+  .canvas-wrapper { height: 300px !important; }
+}
+
+/* ================================================================
+   AppCreator24 WebView - الشريط العلوي والسفلي
+   ================================================================ */
+.top-nav-bar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* شاشات اللمس */
+@media (pointer: coarse) {
+  button, select, input, .btn, .btn-action, .nav-btn, .report-btn,
+  .croquis-toggle-chip, .croquis-refresh-btn, .delete-row-btn, .width-step-btn {
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+  }
+  .width-step-btn { width: 36px !important; font-size: 18px !important; }
+}
+
+/* الاتجاه الافقي */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .top-nav-bar { position: relative !important; padding: 4px 12px !important; }
+  .top-nav-bar h2 { font-size: 13px !important; }
+  .top-nav-bar p { display: none !important; }
+  .con { padding-bottom: 70px !important; }
+}

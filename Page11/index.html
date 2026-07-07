@@ -1,14 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="stylesheet" href="../style.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="theme-outdoor.css" />
   <title>القسمة في حال اختلاف الأطوال</title>
+  <link rel="stylesheet" href="../responsive-global.css" />
 </head>
 
 <body>
@@ -58,10 +59,10 @@
       <!-- Card 2: Carat & Total Area -->
       <div class="s card-area">
         <h3>وحدات المساحة</h3>
-        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="card-area-inner">
+          <div class="carat-select-row">
             <label for="input-carat-area" style="font-size: 12px; font-weight: bold;">اختار مساحة القيراط بالمتر المربع:</label>
-            <div style="display: flex; gap: 5px; align-items: center;">
+            <div class="carat-select-inputs">
               <select id="input-carat-area" class="selector1" onchange="handleCaratAreaChange()" style="width: 90px; height: 28px; text-align: center; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; font-size: 12px;">
                 <option value="175.035">175.035</option>
                 <option value="175">175</option>
