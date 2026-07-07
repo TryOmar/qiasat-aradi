@@ -511,56 +511,81 @@
             </div>
           </div>
 
-          <!-- القسم الثالث: جدول المقارنة السريع -->
-          <div style="border: 2px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-top: 5px; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <div style="overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch;">
-              <table style="width: 100%; min-width: 480px; border-collapse: collapse; font-size: 15px; text-align: center; font-family: Cairo, Arial, sans-serif; color: #000000;">
-                <thead>
-                  <tr style="background: #2e7d32; color: #ffffff; border-bottom: 3px solid #1b5e20;">
-                    <th style="padding: 12px 14px; text-align: right; font-weight: bold; color: #ffffff;">العنصر</th>
-                    <th style="padding: 12px 14px; font-weight: bold; color: #ffffff;">🟢 الحفاظ على مساحة الشريك</th>
-                    <th style="padding: 12px 14px; font-weight: bold; color: #ffffff;">🟠 التعديل الحر</th>
-                  </tr>
-                </thead>
+          <!-- القسم الثالث: مقارنة تفصيلية مناسبة لشاشات الجوال (بدون تمرير) -->
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 5px;">
+            
+            <!-- بطاقة مقارنة: الحفاظ على مساحة الشريك -->
+            <div style="border: 2px solid #a5d6a7; border-radius: 12px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+              <div style="background: #2e7d32; color: #ffffff; padding: 10px 14px; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: space-between;">
+                <span>🟢 الحفاظ على مساحة الشريك</span>
+                <span style="font-size: 11px; background: #ffffff; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: bold;">⭐ موصى به</span>
+              </div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 15px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
                 <tbody>
-                  <tr style="border-bottom: 1px solid #ddd; background: #ffffff;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">المساحة</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ ثابتة</td>
-                    <td style="padding: 12px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; width: 45%; background: #f9fbf9; border-left: 1px solid #eee;">المساحة</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ ثابتة</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid #ddd; background: #fafdfa;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">النسبة</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ ثابتة</td>
-                    <td style="padding: 12px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">النسبة</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ ثابتة</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid #ddd; background: #ffffff;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">العرض الآخر</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ يحسب تلقائياً</td>
-                    <td style="padding: 12px 14px; color: #c62828; font-weight: bold;">❌ لا يحسب تلقائياً</td>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">العرض الآخر</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحسب تلقائياً</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid #ddd; background: #fafdfa;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">الكروكي</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ يُحدَّث تلقائياً</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">الكروكي</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid #ddd; background: #ffffff;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">العلامة</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ تُحدَّث</td>
-                    <td style="padding: 12px 14px; color: #e65100; font-weight: bold;">✅ تُحدَّث</td>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">العلامة والفاصل</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid #ddd; background: #fafdfa;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">الفاصل</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">✅ يُحدَّث</td>
-                    <td style="padding: 12px 14px; color: #e65100; font-weight: bold;">✅ يُحدَّث</td>
-                  </tr>
-                  <tr style="background: #ffffff;">
-                    <td style="padding: 12px 14px; text-align: right; font-weight: bold; border-left: 1px solid #ddd;">الاستخدام</td>
-                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold; border-left: 1px solid #ddd;">⭐ موصى به</td>
-                    <td style="padding: 12px 14px; color: #333333; font-weight: bold;">عند الحاجة لتغيير الأنصبة</td>
+                  <tr>
+                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">الاستخدام</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold; font-size: 14px;">أغلب أعمال التقسيم الميدانية</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
+            <!-- بطاقة مقارنة: التعديل الحر -->
+            <div style="border: 2px solid #ffcc80; border-radius: 12px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+              <div style="background: #e65100; color: #ffffff; padding: 10px 14px; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: space-between;">
+                <span>🟠 التعديل الحر</span>
+                <span style="font-size: 11px; background: #ffffff; color: #e65100; padding: 2px 6px; border-radius: 4px; font-weight: bold;">قد يغيّر الأنصبة</span>
+              </div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 15px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
+                <tbody>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; width: 45%; background: #fffdf9; border-left: 1px solid #eee;">المساحة</td>
+                    <td style="padding: 10px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">النسبة</td>
+                    <td style="padding: 10px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">العرض الآخر</td>
+                    <td style="padding: 10px 14px; color: #c62828; font-weight: bold;">❌ لا يُحسب تلقائياً</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">الكروكي</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">العلامة والفاصل</td>
+                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">الاستخدام</td>
+                    <td style="padding: 10px 14px; color: #333333; font-weight: bold; font-size: 14px;">عند الحاجة لتغيير الأنصبة</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
           </div>
 
           <!-- القسم الرابع: عند وجود عجز -->
