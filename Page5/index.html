@@ -186,29 +186,46 @@
       width: 100%;
       margin: 20px 0 40px 0;
       border-collapse: separate;
-      border-spacing: 4px 6px;
+      border-spacing: 2px 4px;
+      table-layout: fixed;
     }
+    
+    /* Set explicit widths for columns to prevent clipping of values */
+    #tbl_Results th:nth-child(1), #tbl_Results td:nth-child(1) { width: 17%; } /* النسبة */
+    #tbl_Results th:nth-child(2), #tbl_Results td:nth-child(2) { width: 12%; } /* فدان */
+    #tbl_Results th:nth-child(3), #tbl_Results td:nth-child(3) { width: 12%; } /* قيراط */
+    #tbl_Results th:nth-child(4), #tbl_Results td:nth-child(4) { width: 23%; } /* سهم */
+    #tbl_Results th:nth-child(5), #tbl_Results td:nth-child(5) { width: 26%; } /* القرابة */
+    #tbl_Results th:nth-child(6), #tbl_Results td:nth-child(6) { width: 10%; } /* اختيار */
     
     #tbl_Results th {
       background-color: #0d47a1;
       color: white;
       font-weight: 800;
-      padding: 10px 4px;
+      padding: 10px 2px;
       font-size: 12px;
       border: none;
       border-radius: 6px;
       text-align: center;
       white-space: nowrap;
     }
+
+    #tbl_Results th label, #tbl_Results td label {
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      color: inherit !important;
+    }
     
     #tbl_Results td {
       background-color: #ffffff;
       border: 2px solid #cbd5e1;
       border-radius: 8px;
-      padding: 6px 4px;
+      padding: 6px 2px;
       font-size: 13px;
       font-weight: 800;
       text-align: center;
+      overflow: hidden;
+      text-overflow: clip;
     }
 
     #tbl_Results td input {
@@ -217,8 +234,12 @@
       font-weight: 800 !important;
       color: #000000 !important;
       text-align: center;
-      width: 100%;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
       box-shadow: none !important;
+      height: auto !important;
     }
 
     #tbl_Results tr.wife td,
@@ -237,6 +258,20 @@
     
     #tbl_Results tr.tableFooterTotal td input {
       color: #d97706 !important;
+    }
+
+    @media (max-width: 480px) {
+      #tbl_Results th {
+        font-size: 11px !important;
+        padding: 6px 1px !important;
+      }
+      #tbl_Results td {
+        font-size: 11px !important;
+        padding: 4px 1px !important;
+      }
+      #tbl_Results td input {
+        font-size: 11px !important;
+      }
     }
 
     /* Responsive container for the table */

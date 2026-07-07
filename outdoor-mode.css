@@ -561,6 +561,13 @@ body.outdoor-mode table input,
 body.outdoor-mode td input {
   min-height: 36px !important;
   height: 36px !important;
-  padding: 0 4px !important;
+  padding: 0 !important;
   font-size: 13px !important;
+}
+
+@media (max-width: 480px) {
+  body.outdoor-mode table input,
+  body.outdoor-mode td input {
+    font-size: 11px !important;
+  }
 }
