@@ -1,212 +1,402 @@
-.header1 {
-  font-size: 25px;
-  font-weight: bold;
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Cairo', sans-serif;
 }
+
+.header1 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  color: rgb(149, 11, 36);
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 480px) {
+  .header1 {
+    font-size: 24px;
+  }
+}
+
 .header-con {
   display: flex;
-  margin-top: 60px;
+  margin-top: 50px;
   justify-content: center;
   align-items: center;
   width: 100%;
+  margin-bottom: 20px;
 }
+
 .header-con img {
-  width: 80px;
-  height: 55px;
-  margin-right: 10px;
+  width: 70px;
+  height: 48px;
+  margin-right: 8px;
 }
+
+/* Inputs Card */
 .input {
   width: 100%;
-  max-width: 320px;
-  border: 1px solid #cccccc;
-  height: 100px;
+  max-width: 340px;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 14px;
   align-items: center;
-  padding: 5px;
+  padding: 16px;
+  background: white;
+  margin-bottom: 16px;
 }
+
 .input div {
   display: flex;
-  margin: 3px 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
+
 .input div p {
   white-space: nowrap;
-  line-height: 19px;
-  width: 100px;
-  text-align: end;
-  margin-left: 20px;
-  font-size: 18px;
+  line-height: 1.2;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
 }
+
 .input div input {
-  height: 14px;
-  width: 128px;
-  border: none;
-  border-bottom: 1px solid #cccccc;
+  height: 42px;
+  width: 145px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
   outline: none;
   text-align: center;
-  padding: 3px;
+  padding: 6px 10px;
+  font-weight: 800;
+  color: #000000;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
+.input div input:focus {
+  border-color: #1b5e20 !important;
+  box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.25);
+}
+
 .input div input::placeholder {
-  opacity: 0.4;
+  opacity: 0.5;
+  font-weight: 400;
 }
-.buttons2 {
-  margin-top: 20px;
-  width: 100%;
+
+/* Small Buttons Row under Inputs */
+.row-buttons-small {
   display: flex;
+  flex-direction: row; /* Side-by-side always */
   justify-content: center;
-  align-items: center;
-  gap: 20px;
+  gap: 12px;
+  margin: 15px 0 20px 0;
+  width: 100%;
+  max-width: 340px;
 }
-.buttons2 button {
-  line-height: 32px;
-  width: 70px;
+
+.row-buttons-small button {
+  flex: 1;
+  max-width: 160px;
+  min-height: 44px;
+  height: 44px;
   border-radius: 10px;
   outline: none;
-  border: none;
+  border: 2px solid;
   color: white;
-  font-weight: bold;
+  font-weight: 800;
+  font-size: 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
 }
-.but1 {
+
+.btn-clear {
   background-color: rgb(149, 11, 63);
+  border-color: rgb(110, 8, 46);
 }
-.but2 {
+.btn-clear:hover {
+  background-color: rgb(110, 8, 46);
+}
+
+.btn-calc {
   background-color: #df8714;
+  border-color: #b36a0d;
 }
+.btn-calc:hover {
+  background-color: #b36a0d;
+}
+
+/* Cards Section */
 .s {
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
   display: flex;
   flex-flow: column;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 15px;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: white;
+  padding: 12px;
 }
+
 .s h3 {
   font-size: 14px;
-  background-color: var(--green);
+  font-weight: 800;
+  background-color: #1b5e20;
   color: white;
-  width: 100%;
+  width: calc(100% + 24px);
+  margin: -12px -12px 15px -12px;
+  padding: 12px 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   text-align: center;
-  font-weight: normal;
 }
+
 .s div {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-evenly;
   width: 100%;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 5px;
 }
+
 .s1 img {
   width: 24px;
   height: 24px;
 }
 
 .s1 div .selector1 {
-  width: 20px;
-  height: 32px;
+  width: 24px;
+  height: 42px;
   position: relative;
   left: 5px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
 }
+
 .s1 div input {
   position: relative;
-  width: 112px;
-  height: 32px;
+  width: 120px;
+  height: 42px;
   text-align: center;
   right: 10px;
   outline: none;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 800;
 }
+
+.s1 div input:focus {
+  border-color: #1b5e20;
+}
+
 .s2 div {
   justify-content: center;
 }
+
 .s2 input {
   position: relative;
   right: 10px;
-  width: 132px;
-  height: 32px;
+  width: 140px;
+  height: 42px;
   text-align: center;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-weight: 800;
 }
+
+.s2 input:focus {
+  border-color: #1b5e20;
+}
+
 .s2 p {
   margin-right: 20px;
+  font-weight: bold;
 }
+
+/* Intermediate Results Card (Blue Theme) */
+.s3 {
+  border-color: #90caf9;
+  background-color: #f1f8ff;
+}
+
+.s3 h3 {
+  background-color: #0d47a1;
+}
+
 .s3 table {
+  width: 100%;
   border-collapse: separate;
-  border-spacing: 40px 5px;
+  border-spacing: 8px 4px;
 }
+
+.s3 th {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 800;
+  padding-bottom: 6px;
+}
+
 .s3 td {
   text-align: center;
+  font-size: 18px;
+  font-weight: 900;
+  color: #0d47a1;
+  background: white;
+  border: 2px solid #0d47a1;
+  border-radius: 8px;
+  height: 44px;
+  vertical-align: middle;
 }
+
+/* Final Results (Orange Theme) */
+.s4 {
+  border-color: #ffcc80;
+  background-color: #fffde7;
+}
+
+.s4 h3 {
+  background-color: #e65100;
+}
+
+.s4 p {
+  font-size: 22px;
+  font-weight: 900;
+  color: #e65100;
+  background: white;
+  border: 2.5px solid #e65100;
+  border-radius: 8px;
+  padding: 8px 20px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Table conversion card */
 .s5 {
   font-size: 14px;
-  /* border: 1px solid red; */
 }
+
+.s5 h3 {
+  background-color: #37474f;
+}
+
 .s5 div table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 5px 8px;
+  border-spacing: 6px 8px;
 }
+
 .s5 div table tr th {
-  font-size: 11px;
-  font-weight: bold;
-  color: #555555;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
   text-align: center;
   padding-bottom: 4px;
 }
+
 .s5 div table tr td input {
-  width: 58px;
-  height: 26px;
+  width: 68px;
+  height: 36px;
   text-align: center;
-  font-size: 12px;
-  border: 1px solid #cccccc;
-  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #000000;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
   outline: none;
   background-color: #ffffff;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+
 .s5 div table tr td input:focus {
-  border-color: #2e7559;
-  box-shadow: 0 0 0 2px rgba(46, 117, 89, 0.2);
+  border-color: #1b5e20 !important;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
 }
+
 .s5 div table tr td:not(:first-child) {
   border: none;
   text-align: center;
-  width: 70px;
+  width: 76px;
 }
-.s5 h3 {
-  margin: 0px;
-}
+
 .s5 div table tr td {
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
   vertical-align: middle;
 }
+
 .s5 div table tr td:first-child {
   text-align: right;
-  padding-left: 8px;
-  color: #333333;
-  font-weight: 500;
+  padding-left: 6px;
+  color: #0f172a;
+  font-weight: bold;
 }
+
 .s5 th {
   white-space: nowrap;
 }
 
+/* Print Container */
+.print-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.print-container .btn-print {
+  width: 100%;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 2px solid #1b5e20;
+  background-color: #2e7d32;
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+}
+
+.print-container .btn-print:hover {
+  background-color: #1b5e20;
+}
+
 @media (max-width: 350px) {
-  .input, .s {
-    max-width: 290px;
+  .input, .s, .row-buttons-small, .print-container {
+    max-width: 300px;
   }
   .input div p {
-    font-size: 15px;
-    width: 90px;
-    margin-left: 10px;
+    font-size: 14px;
   }
   .s5 div table tr td input {
-    width: 50px;
-    font-size: 11px;
-  }
-  .s5 div table tr td:first-child {
-    font-size: 11px;
-    padding-left: 4px;
+    width: 58px;
+    font-size: 12px;
   }
 }

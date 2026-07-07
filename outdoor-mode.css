@@ -97,6 +97,8 @@ body.outdoor-mode .con {
 /* --- البطاقات والحاويات --- */
 body.outdoor-mode .s,
 body.outdoor-mode .card,
+body.outdoor-mode .con,
+body.outdoor-mode .input,
 body.outdoor-mode .summary-card-item,
 body.outdoor-mode #report-container {
   background-color: #FFFFFF !important;
