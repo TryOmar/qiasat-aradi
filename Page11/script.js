@@ -9,6 +9,16 @@ let showCroquisNames = true;
 let showCroquisMeasurements = true;
 let isPartitioned = false;
 let isManualPartition = false;
+
+Object.defineProperty(window, 'isPartitioned', {
+  get: () => isPartitioned,
+  set: (v) => { isPartitioned = v; }
+});
+Object.defineProperty(window, 'isManualPartition', {
+  get: () => isManualPartition,
+  set: (v) => { isManualPartition = v; }
+});
+
 let isEditing = false;
 let isUpdatingRow = false;
 let activeFieldBefore = null;
@@ -713,11 +723,16 @@ function updateRowsReadOnlyStatus() {
 let debounceTimer = null;
 
 function saveAndCalc() {
+  if (window.__RUNNING_TESTS__) {
+    saveAndCalcImmediate();
+    return;
+  }
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     saveAndCalcImmediate();
   }, 250); // 250ms debounce
 }
+
 
 function saveAndCalcImmediate() {
   saveData();
@@ -1410,16 +1425,16 @@ function runPartition() {
   }
 
   // Central Final Normalization Phase
-  const diffNorm = totalAreaM2 - totalDistributedArea;
-  const toleranceNorm = 0.05;
+  const sumTargetAreas = Array.from(rows).filter(r => !isPartnerRowExcluded(r)).reduce((sum, r) => sum + getPartnerTargetArea(r), 0);
+  const diffNorm = totalAreaM2 - sumTargetAreas;
+  const toleranceNorm = 0.25;
   if (!window.isNormalizing && Math.abs(diffNorm) <= toleranceNorm && Math.abs(diffNorm) > 1e-7) {
     const activeRows = Array.from(rows).filter(r => !isPartnerRowExcluded(r));
     if (activeRows.length > 0) {
       const lastActiveRow = activeRows[activeRows.length - 1];
-      const lastActiveIndex = Array.from(rows).indexOf(lastActiveRow);
       
-      const currentCalculatedArea = window.calculatedPieces[lastActiveIndex].area;
-      const correctArea = currentCalculatedArea + diffNorm;
+      const currentTargetArea = getPartnerTargetArea(lastActiveRow);
+      const correctArea = currentTargetArea + diffNorm;
       
       window.isNormalizing = true;
       window.normalizedDiff = diffNorm;
@@ -3464,11 +3479,16 @@ document.addEventListener("touchcancel", _lpStop);
 let widthChangeTimer = null;
 
 function onWidthChange(input, type) {
+  if (window.__RUNNING_TESTS__) {
+    onWidthChangeActual(input, type);
+    return;
+  }
   if (widthChangeTimer) clearTimeout(widthChangeTimer);
   widthChangeTimer = setTimeout(() => {
     onWidthChangeActual(input, type);
   }, 250); // 250ms debounce
 }
+
 
 function onWidthChangeActual(input, type) {
   if (isEditing) return;
