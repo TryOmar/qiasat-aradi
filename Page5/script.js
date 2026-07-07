@@ -466,6 +466,7 @@ function calculateShares(newCalculation = false) {
   document.getElementById("checkboxCount").innerHTML = totalChecked;
   document.getElementById("txt_Totalsacre").value = totalAcre;
   document.getElementById("txt_Totalcarat").value = totalCarat;
+  document.getElementById("txt_Totalshare").value = totalShare;
   document.getElementById("txt_TotalPercentVal").value = totalPercentVal + "%";
   saveData();
 }
@@ -707,10 +708,10 @@ function printReport() {
           </thead>
           <tbody>
             <tr>
-              <td>\${acreValue}</td>
-              <td>\${caratValue}</td>
-              <td>\${shareValue}</td>
-              <td><strong>\${totalAllShares} سهم</strong></td>
+              <td>${acreValue}</td>
+              <td>${caratValue}</td>
+              <td>${shareValue}</td>
+              <td><strong>${totalAllShares} سهم</strong></td>
             </tr>
           </tbody>
         </table>
@@ -718,7 +719,7 @@ function printReport() {
 
       <div class="section">
         <div class="section-title">الورثة المسجلون</div>
-        <p>عدد الزوجات: \${numWivesValue} | عدد البنات: \${numFemalesValue} | عدد الذكور: \${numMalesValue}</p>
+        <p>عدد الزوجات: ${numWivesValue} | عدد البنات: ${numFemalesValue} | عدد الذكور: ${numMalesValue}</p>
       </div>
 
       <div class="section">
@@ -735,17 +736,17 @@ function printReport() {
             </tr>
           </thead>
           <tbody>
-            \${rowsHtml}
+            ${rowsHtml}
           </tbody>
         </table>
       </div>
 
       <div class="result-box">
         <h3>خلاصة الورثة الذين تم جمع أنصبتهم معاً</h3>
-        <p><strong>الورثة المشمولون بالجمع:</strong> \${checkedHeirsNames.length > 0 ? checkedHeirsNames.join(" ، ") : "لا يوجد"}</p>
-        <p><strong>عدد الورثة المحددين:</strong> \${checkedCount}</p>
-        <p><strong>النسبة المئوية الإجمالية المجمعة:</strong> \${totalCheckedPercent}</p>
-        <p><strong>نصيبهم المجمع الكلي:</strong> \${totalCheckedAcre} فدان و \${totalCheckedCarat} قيراط و \${totalCheckedShare} سهم</p>
+        <p><strong>الورثة المشمولون بالجمع:</strong> ${checkedHeirsNames.length > 0 ? checkedHeirsNames.join(" ، ") : "لا يوجد"}</p>
+        <p><strong>عدد الورثة المحددين:</strong> ${checkedCount}</p>
+        <p><strong>النسبة المئوية الإجمالية المجمعة:</strong> ${totalCheckedPercent}</p>
+        <p><strong>نصيبهم المجمع الكلي:</strong> ${totalCheckedAcre} فدان و ${totalCheckedCarat} قيراط و ${totalCheckedShare} سهم</p>
       </div>
 
       <div class="footer">
@@ -759,6 +760,6 @@ function printReport() {
       </script>
     </body>
     </html>
-  \`);
+  `);
   printWindow.document.close();
 }
