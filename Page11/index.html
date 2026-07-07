@@ -244,6 +244,11 @@
           </div>
         </div>
         <div id="manual-width-mode-desc" style="text-align: center; font-size: 11.5px; color: #555; margin-top: 4px; font-weight: bold; border-top: 1px dashed #c8e6c9; padding-top: 6px; min-height: 18px;"></div>
+        <!-- مقدار التغير السريع بالزيادة والنقصان للعروض -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; border-top: 1px dashed #c8e6c9; padding-top: 6px; flex-wrap: wrap;">
+          <label for="width-step-value" style="font-weight: bold; color: #2e7d32; font-size: 12.5px;">مقدار الزيادة/النقصان السريع (م):</label>
+          <input type="number" id="width-step-value" value="0.10" step="0.05" min="0.01" style="width: 75px; padding: 4px 6px; border: 1px solid #c8e6c9; border-radius: 6px; text-align: center; font-weight: bold; font-family: Cairo, Arial, sans-serif;" onchange="saveData();">
+        </div>
       </div>
       
       <!-- Table Actions (Buttons) -->

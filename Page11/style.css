@@ -1625,3 +1625,50 @@ body {
   .conv-field-label { font-size: 10.5px; }
   .conv-card-fields { gap: 8px; }
 }
+
+/* ─── تنسيقات أزرار الزيادة والنقصان السريعة للعروض ─────────── */
+.width-input-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  width: 100% !important;
+}
+
+.width-step-btn {
+  width: 22px !important;
+  height: 28px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 4px !important;
+  background-color: #eceff1 !important;
+  color: #37474f !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  transition: all 0.2s !important;
+}
+
+.width-step-btn:hover {
+  background-color: #cfd8dc !important;
+}
+
+.width-step-btn:active {
+  background-color: #b0bec5 !important;
+  transform: scale(0.95) !important;
+}
+
+/* عند استخدام اللمس في الميدان */
+@media (pointer: coarse) {
+  .width-step-btn {
+    width: 32px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+  }
+}
+

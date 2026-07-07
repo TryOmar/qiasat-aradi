@@ -711,6 +711,62 @@ function runAutomatedTests() {
     assert(Math.abs(window.calcState.deficitArea - 0.06) < 0.01, `الحالة 13 (إدخال يدوي): يجب أن يظهر عجز حقيقي مقداره 0.06 م² للمدخلات اليدوية. الفعلي: ${window.calcState.deficitArea}`);
     assert(hasDeficit() === true, "الحالة 13 (إدخال يدوي): يجب تفعيل كاشف العجز لحماية الطباعة.");
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 14: Manual Width adjustments in "Keep Area" mode
+    // -------------------------------------------------------------------------
+    document.getElementById("length1").value = 15;
+    document.getElementById("length2").value = 16;
+    document.getElementById("width1").value = 12;
+    document.getElementById("width2").value = 10;
+    document.getElementById("share-input-method").value = "fractions";
+    window.currentInputMethod = "fractions";
+    
+    // Select Keep Area Mode
+    const modeKeepAreaEl = document.getElementById("mode-keep-area");
+    if (modeKeepAreaEl) modeKeepAreaEl.checked = true;
+
+    const list14 = document.getElementById("partners-list");
+    list14.innerHTML = "";
+    addNewPartnerRow("شريك 1", "", "", "", "1/2");
+    addNewPartnerRow("شريك 2", "", "", "", "1/2");
+    
+    window.runPartition();
+
+    const row14_1 = list14.querySelectorAll(".partner-row")[0];
+    const widthBotInput14 = row14_1.querySelector(".partner-width-bottom");
+    const widthTopInput14 = row14_1.querySelector(".partner-width-top");
+
+    // Initial automatically calculated widths
+    const initialBotW = parseFloat(widthBotInput14.value) || 0;
+    const initialTopW = parseFloat(widthTopInput14.value) || 0;
+    
+    // Simulate manual editing: change bottom width to 5.0 m
+    widthBotInput14.value = "5.0";
+    onWidthChangeActual(widthBotInput14, "bottom");
+
+    const newTopW = parseFloat(widthTopInput14.value) || 0;
+    const newBotW = parseFloat(widthBotInput14.value) || 0;
+    
+    assert(newBotW === 5.0, `الحالة 14 (تعديل يدوي): يجب أن يتغير العرض الأول (السفلي) إلى 5.0 م. الفعلي: ${newBotW}`);
+    assert(newTopW !== initialTopW, `الحالة 14 (تعديل يدوي): يجب أن يتم إعادة حساب العرض الثاني (العلوي) تلقائياً.`);
+    
+    const partnerArea14 = parseFloat(row14_1.querySelector(".partner-area").value) || 0;
+    assert(Math.abs(partnerArea14 - 85.25) < 0.1, `الحالة 14 (تعديل يدوي): يجب الحفاظ على مساحة الشريك 85.25 م² بنسبة 100%. الفعلي: ${partnerArea14} م²`);
+
+    // Test Quick Step Adjustment using adjustWidthStep (simulate click on + button)
+    const stepEl14 = document.getElementById("width-step-value");
+    if (stepEl14) stepEl14.value = "0.20"; // Change step to 0.20m
+
+    // Simulate clicking '+' button next to bottom width
+    const plusBtn = row14_1.querySelector(".width-bottom-group .width-step-btn:last-child") || { closest: () => row14_1.querySelector(".width-bottom-group .width-input-container") };
+    adjustWidthStep(plusBtn, "bottom", 1);
+
+    const stepBotW = parseFloat(widthBotInput14.value) || 0;
+    assert(Math.abs(stepBotW - 5.20) < 0.01, `الحالة 14 (أزرار الزيادة): يجب أن يزداد العرض بمقدار الخطوة (0.20 م) ليصبح 5.20 م. الفعلي: ${stepBotW}`);
+
+    const stepArea14 = parseFloat(row14_1.querySelector(".partner-area").value) || 0;
+    assert(Math.abs(stepArea14 - 85.25) < 0.1, `الحالة 14 (أزرار الزيادة): يجب أن تبقى مساحة الشريك ثابتة 85.25 م². الفعلي: ${stepArea14} م²`);
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {

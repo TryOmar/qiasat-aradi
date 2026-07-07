@@ -277,6 +277,11 @@ function saveData() {
     localStorage.setItem("p11-manual-width-mode", modeKeepArea.checked ? "keep-area" : "free");
   }
 
+  const stepValEl = document.getElementById("width-step-value");
+  if (stepValEl) {
+    localStorage.setItem("p11-width-step-value", stepValEl.value);
+  }
+
   const partners = [];
   const rows = document.querySelectorAll("#partners-list .partner-row");
   rows.forEach(row => {
@@ -349,6 +354,12 @@ function loadData() {
       modeKeepArea.checked = false;
       modeFree.checked = true;
     }
+  }
+
+  const savedStepVal = localStorage.getItem("p11-width-step-value") || "0.10";
+  const stepValEl = document.getElementById("width-step-value");
+  if (stepValEl) {
+    stepValEl.value = savedStepVal;
   }
 
   handleCaratAreaChange(false);
@@ -577,11 +588,19 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
-        <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
+        </div>
       </div>
       <div class="col-group width-top-group">
         <span class="mobile-label">العرض الثاني (أسفل)</span>
-        <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
+        </div>
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -622,11 +641,19 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
-        <input type="text" class="partner-width-bottom" onchange="onWidthChange(this, 'bottom')" value="${botW}" inputmode="none">
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
+        </div>
       </div>
       <div class="col-group width-top-group">
         <span class="mobile-label">العرض الثاني (أسفل)</span>
-        <input type="text" class="partner-width-top" onchange="onWidthChange(this, 'top')" value="${topW}" inputmode="none">
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
+        </div>
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -3275,6 +3302,27 @@ function getPartnerTargetArea(row) {
     const fracVal = parseFraction(fracInput ? fracInput.value : "");
     return fracVal * totalAreaM2;
   }
+}
+
+function adjustWidthStep(btn, type, direction) {
+  const container = btn.closest(".width-input-container");
+  if (!container) return;
+  const input = container.querySelector(type === "bottom" ? ".partner-width-bottom" : ".partner-width-top");
+  if (!input) return;
+
+  const stepEl = document.getElementById("width-step-value");
+  const step = stepEl ? (parseFloat(stepEl.value) || 0.10) : 0.10;
+
+  let currentVal = parseFloat(input.value);
+  if (isNaN(currentVal)) {
+    currentVal = parseFloat(input.getAttribute("data-last-val")) || 0;
+  }
+
+  let newVal = currentVal + direction * step;
+  if (newVal < 0) newVal = 0;
+
+  input.value = newVal.toFixed(4);
+  onWidthChangeActual(input, type);
 }
 
 let widthChangeTimer = null;
