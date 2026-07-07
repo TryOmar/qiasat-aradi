@@ -19,6 +19,31 @@ Object.defineProperty(window, 'isManualPartition', {
   set: (v) => { isManualPartition = v; }
 });
 
+function ensureDimensionsAutofill() {
+  const l1Input = document.getElementById("length1");
+  const l2Input = document.getElementById("length2");
+  const w1Input = document.getElementById("width1");
+  const w2Input = document.getElementById("width2");
+  
+  if (!l1Input || !l2Input || !w1Input || !w2Input) return;
+  
+  let l1Str = l1Input.value.trim();
+  let l2Str = l2Input.value.trim();
+  let w1Str = w1Input.value.trim();
+  let w2Str = w2Input.value.trim();
+  
+  let l1 = parseFloat(l1Str) || 0;
+  let l2 = parseFloat(l2Str) || 0;
+  let w1 = parseFloat(w1Str) || 0;
+  let w2 = parseFloat(w2Str) || 0;
+  
+  if (l1 > 0 && l2Str === "") { l2Input.value = l1; }
+  else if (l2 > 0 && l1Str === "") { l1Input.value = l2; }
+  
+  if (w1 > 0 && w2Str === "") { w2Input.value = w1; }
+  else if (w2 > 0 && w1Str === "") { w1Input.value = w2; }
+}
+
 let isEditing = false;
 let isUpdatingRow = false;
 let activeFieldBefore = null;
@@ -273,6 +298,7 @@ function refreshCroquisFromTable() {
 
 
 function saveData() {
+  ensureDimensionsAutofill();
   const longPlotView = document.getElementById("long-plot-view");
   if (longPlotView) {
     localStorage.setItem("p11-long-plot-view", longPlotView.value);
@@ -1202,6 +1228,7 @@ function calculateGeneral() {
 }
 
 function runPartition() {
+  ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -1627,6 +1654,7 @@ function clearPartners(confirmRequired = false) {
 }
 
 function onCalculateBtnClick() {
+  ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -1648,6 +1676,7 @@ function onCalculateBtnClick() {
 }
 
 function divideEqually() {
+  ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
@@ -3499,6 +3528,7 @@ function onWidthChange(input, type) {
 
 function onWidthChangeActual(input, type) {
   if (isEditing) return;
+  ensureDimensionsAutofill();
   const row = input.closest(".partner-row");
   const rows = Array.from(document.querySelectorAll("#partners-list .partner-row"));
   const rowIndex = rows.indexOf(row);
@@ -3667,6 +3697,7 @@ function updatePartnerFromInput(type, value, row) {
   window.isUpdatingRow = true;
 
   try {
+    ensureDimensionsAutofill();
     const l1 = parseFloat(document.getElementById("length1").value) || 0;
     const l2 = parseFloat(document.getElementById("length2").value) || 0;
     const w1 = parseFloat(document.getElementById("width1").value) || 0;
