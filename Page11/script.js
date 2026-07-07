@@ -1576,6 +1576,9 @@ function clearAll(confirmRequired = false) {
   const list = document.getElementById("partners-list");
   if (list) list.innerHTML = "";
   
+  // إعادة خطوة التعديل إلى القيمة الافتراضية عند مسح بيانات الأرض
+  resetStepValue();
+
   renderHeaderAndFooter();
   saveData();
   calculateGeneral();
@@ -3388,11 +3391,75 @@ function adjustWidthStep(btn, type, direction) {
   }
 
   let newVal = currentVal + direction * step;
-  if (newVal < 0) newVal = 0;
+
+  // منع القيم السالبة أو الصفرية
+  if (newVal < 0) {
+    newVal = 0;
+    btn.classList.add("step-btn-limit");
+    setTimeout(() => btn.classList.remove("step-btn-limit"), 600);
+    return;
+  }
+
+  // منع تجاوز عرض الأرض
+  const landW1 = parseFloat(document.getElementById("width1")?.value) || 0;
+  const landW2 = parseFloat(document.getElementById("width2")?.value) || 0;
+  const maxWidth = type === "bottom" ? landW1 : landW2;
+  if (maxWidth > 0 && newVal > maxWidth) {
+    btn.classList.add("step-btn-limit");
+    setTimeout(() => btn.classList.remove("step-btn-limit"), 600);
+    return;
+  }
 
   input.value = newVal.toFixed(4);
   onWidthChangeActual(input, type);
 }
+
+// ---------------------------------------------------------
+// نظام الضغط المطول على أزرار +/- (Long Press Engine)
+// ---------------------------------------------------------
+let _lpTimer = null;
+let _lpInterval = null;
+
+function _lpStart(btn, type, direction) {
+  // نفذ مرة فورية
+  adjustWidthStep(btn, type, direction);
+  // ابدأ التكرار بعد 400ms تأخير أولي
+  _lpTimer = setTimeout(() => {
+    _lpInterval = setInterval(() => {
+      adjustWidthStep(btn, type, direction);
+    }, 150);
+  }, 400);
+}
+
+function _lpStop() {
+  if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+  if (_lpInterval) { clearInterval(_lpInterval); _lpInterval = null; }
+}
+
+// ربط الضغط المطول بكل أزرار +/- عبر التفويض
+document.addEventListener("mousedown", (e) => {
+  const btn = e.target.closest(".width-step-btn");
+  if (!btn) return;
+  e.preventDefault();
+  const onclick = btn.getAttribute("onclick") || "";
+  const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
+  if (!m) return;
+  _lpStart(btn, m[1], parseInt(m[2]));
+});
+document.addEventListener("mouseup", _lpStop);
+document.addEventListener("mouseleave", _lpStop);
+
+document.addEventListener("touchstart", (e) => {
+  const btn = e.target.closest(".width-step-btn");
+  if (!btn) return;
+  e.preventDefault();
+  const onclick = btn.getAttribute("onclick") || "";
+  const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
+  if (!m) return;
+  _lpStart(btn, m[1], parseInt(m[2]));
+}, { passive: false });
+document.addEventListener("touchend", _lpStop);
+document.addEventListener("touchcancel", _lpStop);
 
 let widthChangeTimer = null;
 
