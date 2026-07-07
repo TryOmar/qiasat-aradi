@@ -587,6 +587,29 @@ body {
   border-color: #2e7d32 !important;
 }
 
+.croquis-refresh-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: white !important;
+  border: 1.5px solid #2e7d32 !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #2e7d32 !important;
+  transition: all 0.2s !important;
+  user-select: none !important;
+  font-family: Cairo, Arial, sans-serif !important;
+}
+
+.croquis-refresh-btn:hover {
+  background: #2e7d32 !important;
+  color: white !important;
+}
+
+
 /* ظ…ظ†ط·ظ‚ط© ط§ظ„ط±ط³ظ…ط§ظ„ط®ط§ط±ط¬ظٹط© */
 .canvas-wrapper {
   width: 100% !important;

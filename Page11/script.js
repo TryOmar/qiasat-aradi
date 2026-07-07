@@ -246,11 +246,21 @@ function toggleCroquisNames() {
   renderCroquis();
 }
 
-function toggleCroquisMeasurements() {
-  const chk = document.getElementById("chk-toggle-meas");
-  if (chk) showCroquisMeasurements = chk.checked;
-  renderCroquis();
+function refreshCroquisFromTable() {
+  saveAndCalcImmediate();
+  
+  const btn = document.querySelector(".croquis-refresh-btn");
+  if (btn) {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "✅ تم تحديث الخريطة";
+    btn.style.borderColor = "#2e7d32";
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.style.borderColor = "";
+    }, 1000);
+  }
 }
+
 
 function saveData() {
   const longPlotView = document.getElementById("long-plot-view");
@@ -566,19 +576,19 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
-        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()">
+        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
@@ -592,7 +602,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
@@ -600,7 +610,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الثاني (أسفل)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </div>
@@ -622,11 +632,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group fraction-group">
         <span class="mobile-label">النسبة / الكسر</span>
-        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" onblur="onShareInput()">
+        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group equiv-group">
         <span class="mobile-label">تعادل (س.ق.ف)</span>
@@ -645,7 +655,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
@@ -653,7 +663,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الثاني (أسفل)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </div>

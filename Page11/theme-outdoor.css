@@ -291,6 +291,16 @@ div[style*="f1f8e9"] {
   border: 2px solid #2E7D32 !important;
 }
 
+/* --- زر تحديث الخريطة في وضع الشمس --- */
+.croquis-refresh-btn {
+  background-color: #2E7D32 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #1B5E20 !important;
+}
+.croquis-refresh-btn:hover {
+  background-color: #1B5E20 !important;
+}
+
 /* ============================================================
    الهواتف المحمولة - تكبير كل شيء
    ============================================================ */

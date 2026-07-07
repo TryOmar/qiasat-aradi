@@ -168,13 +168,11 @@
 
       </div>
 
-      <!-- مفاتيح التبديل (القياسات / الأسماء) -->
+      <!-- مفاتيح التبديل والتحكم -->
       <div class="croquis-toggles-row" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; margin-top: 15px; margin-bottom: 10px;">
-        <label class="croquis-toggle-chip">
-          <input type="checkbox" id="chk-toggle-meas" checked onchange="toggleCroquisMeasurements()">
-          <span class="chip-dot"></span>
-          <span>اظهر التقسيم الجديد</span>
-        </label>
+        <button type="button" class="croquis-refresh-btn" onclick="refreshCroquisFromTable()">
+          🔄 تحديث الخريطة
+        </button>
         <label class="croquis-toggle-chip">
           <input type="checkbox" id="chk-toggle-names" checked onchange="toggleCroquisNames()">
           <span class="chip-dot"></span>
