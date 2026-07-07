@@ -465,49 +465,49 @@
     <!-- مودال شرح طريقة تعديل العروض يدوياً -->
     <div id="width-mode-help-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 20000; direction: rtl; font-family: Cairo, Arial, sans-serif;">
       <div style="background: white; border-radius: 16px; width: 95%; max-width: 580px; box-shadow: 0 12px 36px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 90%; overflow: hidden;">
-        <!-- عنوان النافذة (مكبر) -->
-        <div style="background: #2e7d32; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 2px solid #1b5e20;">
-          <span style="font-size: 17px; display: flex; align-items: center; gap: 8px;">ℹ️ شرح طريقة تعديل العروض يدوياً</span>
-          <button onclick="closeWidthModeHelpModal()" style="background: none; border: none; color: white; font-size: 26px; cursor: pointer; font-weight: bold; line-height: 1;">&times;</button>
+        <!-- عنوان النافذة (مكبر ومقروء بوضوح في الشمس) -->
+        <div style="background: #2e7d32; color: white; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 2px solid #1b5e20;">
+          <span style="font-size: 21px; display: flex; align-items: center; gap: 8px;">ℹ️ شرح طريقة تعديل العروض يدوياً</span>
+          <button onclick="closeWidthModeHelpModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer; font-weight: bold; line-height: 1;">&times;</button>
         </div>
-        <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; text-align: right; line-height: 1.7; color: #111;">
+        <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; text-align: right; line-height: 1.7; color: #000000;">
           
           <!-- القسم الأول: الحفاظ على مساحة الشريك (موصى به - مميز ومكبر) -->
-          <div style="border: 2px solid #81c784; background: #f9fbf9; padding: 16px; border-radius: 12px; transform: scale(1.01); box-shadow: 0 4px 10px rgba(46,125,50,0.05);">
-            <h4 style="color: #2e7d32; margin: 0 0 10px 0; font-size: 16px; display: flex; align-items: center; gap: 6px; justify-content: space-between;">
+          <div style="border: 2px solid #81c784; background: #e8f5e9; padding: 18px; border-radius: 12px; transform: scale(1.01); box-shadow: 0 4px 12px rgba(46,125,50,0.08);">
+            <h4 style="color: #1b5e20; margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 6px; justify-content: space-between; font-weight: bold;">
               <span>🟢 الحفاظ على مساحة الشريك</span>
-              <span style="font-size: 11px; background: #2e7d32; color: white; padding: 3px 8px; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;">⭐ موصى به</span>
+              <span style="font-size: 13px; background: #2e7d32; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;">⭐ موصى به</span>
             </h4>
-            <div style="font-size: 13.5px; display: flex; flex-direction: column; gap: 5px; color: #000; padding-right: 4px;">
+            <div style="font-size: 16px; display: flex; flex-direction: column; gap: 6px; color: #000000; padding-right: 4px; font-weight: bold; line-height: 1.6;">
               <div>✅ عدّل أحد العرضين فقط.</div>
               <div>✅ البرنامج يحسب العرض الآخر تلقائياً.</div>
               <div>✅ مساحة الشريك لا تتغير.</div>
               <div>✅ إعادة حساب الفواصل وتحديث العلامة.</div>
             </div>
             
-            <!-- رسم توضيحي -->
-            <div style="margin-top: 10px; background: #e8f5e9; border-radius: 6px; padding: 8px; text-align: center; font-family: monospace; font-size: 12px; color: #2e7d32; border: 1px dashed #a5d6a7; direction: ltr; font-weight: bold;">
-              15m  &larr;────── Piece ──────&rarr;  15m<br>
-              Area is Constant / المساحة ثابتة
+            <!-- رسم توضيحي معزز ومكبر للدلال -->
+            <div style="margin-top: 12px; background: #ffffff; border-radius: 8px; padding: 10px; text-align: center; font-family: Cairo, Arial, sans-serif; font-size: 16px; color: #1b5e20; border: 2px dashed #81c784; direction: rtl; font-weight: bold; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+              📐 المساحة ثابتة<br>
+              15 م &nbsp;&nbsp;&larr;────── قطعة ──────&rarr;&nbsp;&nbsp; 15 م
             </div>
           </div>
 
           <!-- القسم الثاني: التعديل الحر -->
-          <div style="border: 1px solid #ffb74d; background: #fffdf9; padding: 14px; border-radius: 10px;">
-            <h4 style="color: #e65100; margin: 0 0 10px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+          <div style="border: 1px solid #ffb74d; background: #fff3e0; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(230,81,0,0.05);">
+            <h4 style="color: #e65100; margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 6px; font-weight: bold;">
               <span>🟠 التعديل الحر</span>
-              <span style="font-size: 10px; background: #ffe0b2; color: #e65100; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ffb74d;">قد يغيّر الأنصبة</span>
+              <span style="font-size: 12px; background: #ffe0b2; color: #e65100; padding: 3px 8px; border-radius: 4px; font-weight: bold; border: 1px solid #ffb74d;">قد يغيّر الأنصبة</span>
             </h4>
-            <div style="font-size: 13px; display: flex; flex-direction: column; gap: 5px; color: #000; padding-right: 4px;">
+            <div style="font-size: 16px; display: flex; flex-direction: column; gap: 6px; color: #000000; padding-right: 4px; font-weight: bold; line-height: 1.6;">
               <div>✅ إعادة حساب المساحة والنسبة بناءً على العروض الجديدة.</div>
               <div>✅ تحديث العلامة والفاصل وإعادة رسم الكروكي.</div>
-              <div>⚠️ قد ينتج عن ذلك زيادة مساحة الشريك أو نقصها.</div>
+              <div><span style="color: #d84315; font-weight: 900;">⚠️</span> قد ينتج عن ذلك زيادة مساحة الشريك أو نقصها.</div>
             </div>
             
-            <!-- رسم توضيحي -->
-            <div style="margin-top: 10px; background: #fff3e0; border-radius: 6px; padding: 8px; text-align: center; font-family: monospace; font-size: 12px; color: #e65100; border: 1px dashed #ffe0b2; direction: ltr; font-weight: bold;">
-              13m &larr;────── Piece ──────&rarr; 17m<br>
-              Area Changes / المساحة تتغير
+            <!-- رسم توضيحي معزز ومكبر للدلال -->
+            <div style="margin-top: 12px; background: #ffffff; border-radius: 8px; padding: 10px; text-align: center; font-family: Cairo, Arial, sans-serif; font-size: 16px; color: #e65100; border: 2px dashed #ffb74d; direction: rtl; font-weight: bold; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+              📐 المساحة تتغير<br>
+              13 م &nbsp;&nbsp;&larr;────── قطعة ──────&rarr;&nbsp;&nbsp; 17 م
             </div>
           </div>
 
@@ -516,38 +516,38 @@
             
             <!-- بطاقة مقارنة: الحفاظ على مساحة الشريك -->
             <div style="border: 2px solid #81c784; border-radius: 12px; background: #ffffff; overflow: hidden; box-shadow: 0 3px 8px rgba(46,125,50,0.08);">
-              <div style="background: #2e7d32; color: #ffffff; padding: 10px 14px; font-weight: bold; font-size: 15.5px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="background: #2e7d32; color: #ffffff; padding: 12px 14px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
                 <span>🟢 الحفاظ على مساحة الشريك</span>
-                <span style="font-size: 11px; background: #ffffff; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: bold;">⭐ موصى به</span>
+                <span style="font-size: 13px; background: #ffffff; color: #2e7d32; padding: 3px 10px; border-radius: 4px; font-weight: bold;">⭐ موصى به</span>
               </div>
-              <div style="padding: 10px 14px; background: #e8f5e9; font-size: 13.5px; color: #1b5e20; border-bottom: 1px solid #c8e6c9; font-weight: bold;">
+              <div style="padding: 12px 14px; background: #e8f5e9; font-size: 15px; color: #1b5e20; border-bottom: 1px solid #c8e6c9; font-weight: bold;">
                 يحافظ على نصيب الشريك بالكامل، ويحسب العرض الآخر تلقائياً.
               </div>
-              <table style="width: 100%; border-collapse: collapse; font-size: 15px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 16px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
                 <tbody>
-                  <tr style="border-bottom: 1px solid #eee; background: #e8f5e9; font-size: 16px; font-weight: bold;">
+                  <tr style="border-bottom: 1px solid #eee; background: #e8f5e9; font-size: 17px; font-weight: bold;">
                     <td style="padding: 12px 14px; width: 45%; border-left: 1px solid #c8e6c9; color: #1b5e20;">📊 المساحة</td>
                     <td style="padding: 12px 14px; color: #2e7d32;">✅ ثابتة</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📈 النسبة</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ ثابتة</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📈 النسبة</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ ثابتة</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📐 العرض الآخر</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحسب تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📐 العرض الآخر</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحسب تلقائياً</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">🗺️ الكروكي</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">🗺️ الكروكي</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📍 العلامة والفاصل</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">📍 العلامة والفاصل</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
                   </tr>
                   <tr>
-                    <td style="padding: 10px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">💼 الاستخدام</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold; font-size: 14px;">أغلب أعمال التقسيم الميدانية</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #f9fbf9; border-left: 1px solid #eee;">💼 الاستخدام</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">أغلب أعمال التقسيم الميدانية</td>
                   </tr>
                 </tbody>
               </table>
@@ -555,38 +555,38 @@
 
             <!-- بطاقة مقارنة: التعديل الحر -->
             <div style="border: 2px solid #ffcc80; border-radius: 12px; background: #ffffff; overflow: hidden; box-shadow: 0 3px 8px rgba(230,81,0,0.05);">
-              <div style="background: #e65100; color: #ffffff; padding: 10px 14px; font-weight: bold; font-size: 15.5px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="background: #e65100; color: #ffffff; padding: 12px 14px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
                 <span>🟠 التعديل الحر</span>
-                <span style="font-size: 11px; background: #ffffff; color: #e65100; padding: 2px 6px; border-radius: 4px; font-weight: bold;">قد يغيّر الأنصبة</span>
+                <span style="font-size: 12px; background: #ffffff; color: #e65100; padding: 2px 8px; border-radius: 4px; font-weight: bold;">قد يغيّر الأنصبة</span>
               </div>
-              <div style="padding: 10px 14px; background: #fff3e0; font-size: 13.5px; color: #e65100; border-bottom: 1px solid #ffe0b2; font-weight: bold;">
+              <div style="padding: 12px 14px; background: #fff3e0; font-size: 15px; color: #e65100; border-bottom: 1px solid #ffe0b2; font-weight: bold;">
                 يسمح بتعديل العرض بحرية، وقد تتغير مساحة الشريك ونصيبه.
               </div>
-              <table style="width: 100%; border-collapse: collapse; font-size: 15px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 16px; text-align: right; font-family: Cairo, Arial, sans-serif; color: #000000;">
                 <tbody>
-                  <tr style="border-bottom: 1px solid #eee; background: #fff3e0; font-size: 16px; font-weight: bold;">
+                  <tr style="border-bottom: 1px solid #eee; background: #fff3e0; font-size: 17px; font-weight: bold;">
                     <td style="padding: 12px 14px; width: 45%; border-left: 1px solid #ffe0b2; color: #e65100;">📊 المساحة</td>
                     <td style="padding: 12px 14px; color: #e65100;">✏️ تتغير</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📈 النسبة</td>
-                    <td style="padding: 10px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📈 النسبة</td>
+                    <td style="padding: 12px 14px; color: #e65100; font-weight: bold;">✏️ تتغير</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📐 العرض الآخر</td>
-                    <td style="padding: 10px 14px; color: #c62828; font-weight: bold;">❌ لا يُحسب تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📐 العرض الآخر</td>
+                    <td style="padding: 12px 14px; color: #c62828; font-weight: bold;">❌ لا يُحسب تلقائياً</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">🗺️ الكروكي</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">🗺️ الكروكي</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّث تلقائياً</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📍 العلامة والفاصل</td>
-                    <td style="padding: 10px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">📍 العلامة والفاصل</td>
+                    <td style="padding: 12px 14px; color: #2e7d32; font-weight: bold;">✅ يُحدَّثان تلقائياً</td>
                   </tr>
                   <tr>
-                    <td style="padding: 10px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">💼 الاستخدام</td>
-                    <td style="padding: 10px 14px; color: #333333; font-weight: bold; font-size: 14px;">عند الحاجة لتغيير الأنصبة</td>
+                    <td style="padding: 12px 14px; font-weight: bold; background: #fffdf9; border-left: 1px solid #eee;">💼 الاستخدام</td>
+                    <td style="padding: 12px 14px; color: #333333; font-weight: bold;">عند الحاجة لتغيير الأنصبة</td>
                   </tr>
                 </tbody>
               </table>
@@ -595,22 +595,22 @@
           </div>
 
           <!-- القسم الرابع: عند وجود عجز -->
-          <div style="border: 1px solid #ffcdd2; background: #fffefe; padding: 12px; border-radius: 10px; border-right: 4px solid #d32f2f;">
-            <h4 style="color: #c62828; margin: 0 0 5px 0; font-size: 14px; font-weight: bold;">🔴 عند وجود عجز في الأرض</h4>
-            <div style="font-size: 12.5px; color: #333; padding-right: 4px;">
-              إذا أصبحت الأنصبة المطلوبة أكبر من مساحة الأرض الكلية، فإن البرنامج <strong>يظهر قيمة العجز ويمنع الطباعة وتصدير البيانات</strong> لحين تصحيح التوزيع.
+          <div style="border: 2px solid #ffcdd2; background: #fffefe; padding: 14px; border-radius: 12px; border-right: 6px solid #d32f2f;">
+            <h4 style="color: #c62828; margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">🔴 عند وجود عجز في الأرض</h4>
+            <div style="font-size: 15px; color: #000000; padding-right: 4px; font-weight: bold;">
+              إذا أصبحت الأنصبة المطلوبة أكبر من مساحة الأرض الكلية، فإن البرنامج <span style="color: #c62828;">يظهر قيمة العجز ويمنع الطباعة وتصدير البيانات</span> لحين تصحيح التوزيع.
             </div>
           </div>
 
           <!-- صندوق النصيحة الأصفر -->
-          <div style="border: 1px solid #ffe082; background: #fffde7; padding: 12px; border-radius: 10px; font-size: 13.5px; color: #5d4037; border-right: 4px solid #fbc02d; font-weight: bold; line-height: 1.6;">
+          <div style="border: 2px solid #ffe082; background: #fffde7; padding: 14px; border-radius: 12px; font-size: 15px; color: #5d4037; border-right: 6px solid #fbc02d; font-weight: bold; line-height: 1.6; box-shadow: 0 2px 6px rgba(251,192,45,0.05);">
             💡 <strong>نصيحة:</strong> في أغلب عمليات تقسيم الأراضي الزراعية يُنصح باستخدام <strong>"الحفاظ على مساحة الشريك"</strong> لحفظ حقوق جميع الشركاء تلقائياً.
           </div>
 
         </div>
         <!-- زر الإغلاق المطور -->
-        <div style="padding: 14px 20px; background: #f5f5f5; text-align: center; border-top: 1px solid #e0e0e0;">
-          <button onclick="closeWidthModeHelpModal()" style="background: #2e7d32; color: white; border: none; padding: 10px 40px; border-radius: 8px; font-family: Cairo; font-weight: bold; cursor: pointer; font-size: 14px; width: 100%; max-width: 250px; box-shadow: 0 2px 6px rgba(46,125,50,0.3); transition: all 0.2s;">✔ فهمت</button>
+        <div style="padding: 16px 20px; background: #f5f5f5; text-align: center; border-top: 1px solid #e0e0e0;">
+          <button onclick="closeWidthModeHelpModal()" style="background: #2e7d32; color: white; border: none; padding: 12px 40px; border-radius: 8px; font-family: Cairo; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; max-width: 280px; box-shadow: 0 2px 6px rgba(46,125,50,0.3); transition: all 0.2s;">✔ فهمت</button>
         </div>
       </div>
     </div>
