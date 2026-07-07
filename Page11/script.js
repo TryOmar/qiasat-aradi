@@ -3158,14 +3158,25 @@ function updateConversionsTable() {
   const container = document.getElementById("conversions-tbody");
   if (!container) return;
 
+  // ── حفظ حالة العنصر النشط قبل إعادة البناء ──────────────────────────────
+  // هذا يمنع فقدان التركيز، تكرار الأرقام، وتعطل الكتابة/المسح
   const activeEl = document.activeElement;
-  // Skip re-render if user is actively typing in ANY of the 4 main dimension inputs
-  // This prevents focus loss, number duplication, and write blocking
-  if (activeEl) {
-    const skipIds = ['width1', 'width2', 'length1', 'length2'];
-    if (skipIds.includes(activeEl.id)) return;
-    if (activeEl.id && activeEl.id.startsWith('conv-')) return;
+  const isInsideContainer = activeEl && container.contains(activeEl);
+
+  let savedFocusId   = null;
+  let savedValue     = null;
+  let savedCursorStart = null;
+  let savedCursorEnd   = null;
+
+  if (isInsideContainer && activeEl.id) {
+    savedFocusId = activeEl.id;
+    savedValue   = activeEl.value;
+    try {
+      savedCursorStart = activeEl.selectionStart;
+      savedCursorEnd   = activeEl.selectionEnd;
+    } catch (e) { /* inputs that don't support selection */ }
   }
+  // ──────────────────────────────────────────────────────────────────────────
 
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
@@ -3175,16 +3186,17 @@ function updateConversionsTable() {
 
   // helper: render one field-group (label + value chip)
   function convFieldHTML(id, value, title, chipClass, min, max, step) {
-    const minAttr = min !== undefined ? `min="${min}"` : '';
-    const maxAttr = max !== undefined ? `max="${max}"` : '';
+    const minAttr  = min  !== undefined ? `min="${min}"`   : '';
+    const maxAttr  = max  !== undefined ? `max="${max}"`   : '';
     const stepAttr = step !== undefined ? `step="${step}"` : '';
-    
+    // استخدام القيمة المحفوظة للحقل النشط حتى لا تُفقد أثناء إعادة البناء
+    const displayValue = (id === savedFocusId && savedValue !== null) ? savedValue : value;
     return `
       <div class="conv-field-group">
         <div class="conv-field-label">${title}</div>
         <div class="conv-field-chip ${chipClass}">
           <input type="text" inputmode="decimal"
-            id="${id}" value="${value}"
+            id="${id}" value="${displayValue}"
             class="conv-chip-input"
             title="${title}"
             ${minAttr} ${maxAttr} ${stepAttr}
@@ -3301,8 +3313,8 @@ function updateConversionsTable() {
   }
 
   // النتيجة بالقصبة المربعة - نبنيها مباشرة بقيم صحيحة
-  const areaFracHTML = readonlyFieldHTML(lessThanFistValue, 'أقل من القبضة', 'purple-frac readonly');
-  const areaQabdaHTML = readonlyFieldHTML(fistValue, 'قبضة', 'purple-qabda readonly');
+  const areaFracHTML   = readonlyFieldHTML(lessThanFistValue, 'أقل من القبضة', 'purple-frac readonly');
+  const areaQabdaHTML  = readonlyFieldHTML(fistValue, 'قبضة', 'purple-qabda readonly');
   const areaQasabaHTML = readonlyFieldHTML(reedValue, 'قصبة', 'purple-qasaba readonly');
 
   html += `
@@ -3318,8 +3330,25 @@ function updateConversionsTable() {
 
   html += '</div>'; // end conv-extra-row
 
+  // ── إعادة بناء DOM ─────────────────────────────────────────────────────────
   container.innerHTML = html;
+
+  // ── استعادة التركيز والقيمة والموضع للحقل الذي كان نشطاً ─────────────────
+  if (savedFocusId) {
+    const restoredEl = document.getElementById(savedFocusId);
+    if (restoredEl) {
+      // القيمة موجودة بالفعل في HTML (displayValue في convFieldHTML)
+      restoredEl.focus();
+      try {
+        if (savedCursorStart !== null) {
+          restoredEl.setSelectionRange(savedCursorStart, savedCursorEnd);
+        }
+      } catch (e) { /* non-text inputs */ }
+    }
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 }
+
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {
   const qasabaLength = 3.55;
