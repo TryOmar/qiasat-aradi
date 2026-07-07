@@ -328,6 +328,37 @@
       outline: none;
     }
 
+    /* Print Container */
+    .print-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 320px;
+      margin: 15px auto 25px auto;
+    }
+
+    .print-container .btn-print {
+      width: 100%;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: 2px solid #1b5e20;
+      background-color: #2e7d32;
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+    }
+
+    .print-container .btn-print:hover {
+      background-color: #1b5e20;
+    }
+
     body.outdoor-mode #tbl_landEnters,
     body.outdoor-mode .family-inputs-container,
     body.outdoor-mode #div_Totalshare {
@@ -504,8 +535,14 @@
       </table>
 
       <p id="leftSharesMessage" style="text-align: center; direction: rtl; font-size: 20px;"></p>
-      <br>
-      <br>
+      
+      <!-- أزرار الطباعة في آخر الصفحة -->
+      <div class="print-container last-element">
+        <button class="btn-print" onclick="printReport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          طباعة التقرير والنتائج
+        </button>
+      </div>
 
 
 
