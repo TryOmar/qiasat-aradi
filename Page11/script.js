@@ -776,6 +776,8 @@ function saveAndCalcImmediate() {
   if (l1 > 0 && l2 > 0 && w1 > 0 && w2 > 0) {
     runPartition();
   }
+  // Refresh conversions table AFTER user leaves field (not during typing)
+  updateConversionsTable();
 }
 
 function parseFraction(str) {
@@ -3157,8 +3159,13 @@ function updateConversionsTable() {
   if (!container) return;
 
   const activeEl = document.activeElement;
-  const isEditingConversion = activeEl && activeEl.id && activeEl.id.startsWith('conv-');
-  if (isEditingConversion) return;
+  // Skip re-render if user is actively typing in ANY of the 4 main dimension inputs
+  // This prevents focus loss, number duplication, and write blocking
+  if (activeEl) {
+    const skipIds = ['width1', 'width2', 'length1', 'length2'];
+    if (skipIds.includes(activeEl.id)) return;
+    if (activeEl.id && activeEl.id.startsWith('conv-')) return;
+  }
 
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
