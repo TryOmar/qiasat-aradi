@@ -365,3 +365,47 @@ td.width1_result:focus-within {
 .last-element {
   margin-bottom: 0; /* Handled by container padding */
 }
+
+/* Small Buttons Row under First Row */
+.row-buttons-small {
+  display: flex;
+  flex-direction: row; /* Side-by-side always */
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  width: 100%;
+}
+
+.row-buttons-small .btn-calc,
+.row-buttons-small .btn-clear {
+  flex: 1;
+  max-width: 180px;
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+}
+
+.row-buttons-small .btn-calc svg,
+.row-buttons-small .btn-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Print Container at the very bottom */
+.print-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.print-container .btn-print {
+  width: 100%;
+  max-width: 320px;
+  min-height: 52px !important;
+  height: 52px !important;
+  padding: 12px 24px !important;
+  font-size: 16px !important;
+}

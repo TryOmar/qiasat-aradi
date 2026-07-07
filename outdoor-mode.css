@@ -509,3 +509,47 @@ body.outdoor-mode [style*="color:#aaa"] {
     padding-bottom: 200px !important;
   }
 }
+
+/* --- أزرار التحكم الصغيرة وأزرار الطباعة في وضع الشمس --- */
+body.outdoor-mode .row-buttons-small {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 15px 0 20px 0 !important;
+  position: static !important;
+  width: 100% !important;
+}
+
+body.outdoor-mode .row-buttons-small button {
+  min-height: 46px !important;
+  height: 46px !important;
+  font-size: 15px !important;
+  padding: 0 16px !important;
+  flex: 1 !important;
+  max-width: 180px !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+}
+
+body.outdoor-mode .row-buttons-small button svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+body.outdoor-mode .print-container {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 30px !important;
+  position: static !important;
+}
+
+body.outdoor-mode .print-container .btn-print {
+  width: 100% !important;
+  max-width: 320px !important;
+  min-height: 56px !important;
+  height: 56px !important;
+  font-size: 18px !important;
+  padding: 0 24px !important;
+}
