@@ -235,7 +235,7 @@ function printReport() {
   <title>تقرير نزع وطرح الأراضي - الدلال</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-    body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; padding: 20px; background: #fff; color: #333; }
+    body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; padding: 20px; background: #fff; color: #333; position: relative; min-height: 96vh; }
     .header { text-align: center; border-bottom: 2px solid #2e7d32; padding-bottom: 15px; margin-bottom: 25px; }
     .header h1 { color: #2e7d32; margin: 0; font-size: 24px; }
     .header p { margin: 5px 0 0 0; color: #666; font-size: 13px; }
@@ -248,12 +248,36 @@ function printReport() {
     .summary-item { font-size: 14px; }
     .summary-item strong { color: #1b5e20; font-size: 16px; }
     .footer { text-align: center; color: #888; font-size: 11px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 30px; }
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-size: 19px;
+      color: #2e7d32;
+      opacity: 0.14;
+      font-weight: bold;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+      font-family: 'Cairo', Arial, sans-serif;
+      user-select: none;
+      text-align: center;
+      width: 100%;
+    }
     @media print {
       body { padding: 10px; }
+      .watermark {
+        color: #000 !important;
+        opacity: 0.08 !important;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Watermark Overlay -->
+  <div class="watermark">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+
   <div class="header">
     <h1>🌿 تقرير نزع وطرح الأراضي - تطبيق الدَّلاَّل</h1>
     <p>تاريخ التقرير: ${dateStr} — ${timeStr}</p>
@@ -272,46 +296,46 @@ function printReport() {
     <thead>
       <tr>
         <th style="text-align:right;">البيان</th>
-        <th>فدان</th>
-        <th>قيراط</th>
         <th>سهم</th>
+        <th>قيراط</th>
+        <th>فدان</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td style="font-weight:bold; text-align:right;">مساحة الأرض الكلية</td>
-        <td>${acreInput}</td>
-        <td>${caratInput}</td>
         <td>${sharesInput}</td>
+        <td>${caratInput}</td>
+        <td>${acreInput}</td>
       </tr>
       <tr>
         <td style="font-weight:bold; text-align:right; color:#c62828;">إجمالي المساحة المنزوعة</td>
-        <td style="color:#c62828; font-weight:bold;">${subtractedAcre}</td>
-        <td style="color:#c62828; font-weight:bold;">${subtractedCarat}</td>
         <td style="color:#c62828; font-weight:bold;">${subtractedShares}</td>
+        <td style="color:#c62828; font-weight:bold;">${subtractedCarat}</td>
+        <td style="color:#c62828; font-weight:bold;">${subtractedAcre}</td>
       </tr>
       <tr style="background-color:#f9f9f9;">
         <td style="font-weight:bold; text-align:right; color:#2e7d32;">المساحة المتبقية بعد النزع</td>
-        <td style="color:#2e7d32; font-weight:bold;">${remAcre}</td>
-        <td style="color:#2e7d32; font-weight:bold;">${remCarat}</td>
         <td style="color:#2e7d32; font-weight:bold;">${remShares}</td>
+        <td style="color:#2e7d32; font-weight:bold;">${remCarat}</td>
+        <td style="color:#2e7d32; font-weight:bold;">${remAcre}</td>
       </tr>
       <tr>
         <td style="font-weight:bold; text-align:right; color:#e65100;">المساحة المباعة</td>
-        <td style="color:#e65100;">${acreSold}</td>
-        <td style="color:#e65100;">${caratSold}</td>
         <td style="color:#e65100;">${sharesSold}</td>
+        <td style="color:#e65100;">${caratSold}</td>
+        <td style="color:#e65100;">${acreSold}</td>
       </tr>
       <tr style="background-color:#fff8e1; font-weight:bold;">
         <td style="font-weight:bold; text-align:right; color:#1b5e20;">الناتج النهائي (المتبقي الفعلي)</td>
-        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalAcre}</td>
-        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalCarat}</td>
         <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalShares}</td>
+        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalCarat}</td>
+        <td style="color:${parseFloat(finalAcre) < 0 || parseFloat(finalCarat) < 0 || parseFloat(finalShares) < 0 ? '#d32f2f' : '#1b5e20'};">${finalAcre}</td>
       </tr>
     </tbody>
   </table>
 
-  <div class="footer">تم إنشاء هذا التقرير بواسطة تطبيق الدَّلاَّل - حسابات المزارع والفلاح</div>
+  <div class="footer">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
 </body>
 </html>`;
 

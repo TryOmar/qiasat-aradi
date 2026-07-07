@@ -71,10 +71,11 @@
 body.outdoor-mode {
   background-color: #FFFFFF !important;
   color: #000000 !important;
+  font-family: 'Cairo', Arial, sans-serif !important;
 }
 
-/* --- كل العناصر: خلفية بيضاء + نص أسود --- */
-body.outdoor-mode *:not(.outdoor-mode-exempt) {
+/* --- كل العناصر: خلفية بيضاء + نص أسود (باستثناء الحقول والأزرار والعناصر المستثناة) --- */
+body.outdoor-mode *:not(.outdoor-mode-exempt):not(input):not(select):not(textarea):not(button):not(.btn):not(.btn-action):not(.button1):not(.nav-btn):not(.s h3):not(.card-title):not(.nav-box *):not(.top-nav-bar *):not(th) {
   color: #000000 !important;
   text-shadow: none !important;
   background-image: none !important;
@@ -86,15 +87,23 @@ body.outdoor-mode [style*="radial-gradient"] {
   background-image: none !important;
 }
 
+/* --- الحاوية الخارجية --- */
+body.outdoor-mode .con {
+  background-color: #FFFFFF !important;
+  border: 3px solid #000000 !important;
+  box-shadow: none !important;
+}
+
 /* --- البطاقات والحاويات --- */
 body.outdoor-mode .s,
 body.outdoor-mode .card,
-body.outdoor-mode .con,
 body.outdoor-mode .summary-card-item,
 body.outdoor-mode #report-container {
   background-color: #FFFFFF !important;
-  border: 1.5px solid #757575 !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.16) !important;
+  margin-bottom: 24px !important;
+  transition: none !important;
 }
 
 /* --- عناوين البطاقات الخضراء --- */
@@ -102,8 +111,9 @@ body.outdoor-mode .s h3,
 body.outdoor-mode .card-title {
   background-color: #1B5E20 !important;
   color: #FFFFFF !important;
-  font-size: 17px !important;
-  font-weight: bold !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  border-bottom: 3px solid #000000 !important;
 }
 
 /* --- حقول الإدخال --- */
@@ -114,18 +124,98 @@ body.outdoor-mode select,
 body.outdoor-mode textarea {
   background-color: #FFFFFF !important;
   color: #000000 !important;
-  border: 2px solid #555555 !important;
-  font-size: 18px !important;
+  border: 3px solid #000000 !important;
+  font-size: 19px !important;
   font-weight: 900 !important;
-  border-radius: 7px !important;
-  min-height: 46px !important;
+  border-radius: 8px !important;
+  min-height: 55px !important;
+  height: 55px !important;
+  padding: 10px 16px !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
 
-body.outdoor-mode input[readonly],
-body.outdoor-mode input[disabled] {
-  background-color: #F5F5F5 !important;
+/* --- تحسين حالة التركيز --- */
+body.outdoor-mode input[type="text"]:focus,
+body.outdoor-mode input[type="number"]:focus,
+body.outdoor-mode input[type="input"]:focus,
+body.outdoor-mode select:focus,
+body.outdoor-mode textarea:focus {
+  border-color: #2E7D32 !important; /* أخضر عمليات */
+  border-width: 3.5px !important;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.3) !important;
+  outline: none !important;
+}
+
+/* --- تسميات الحقول والخطوط تحت الشمس --- */
+body.outdoor-mode label,
+body.outdoor-mode p,
+body.outdoor-mode span {
+  font-weight: bold !important;
+}
+body.outdoor-mode label {
+  font-weight: 800 !important;
+  font-size: 16px !important;
+}
+
+/* --- تمييز النتائج العامة (Blue Theme) --- */
+body.outdoor-mode input[readonly]:not(#total-area-shares-res):not(#total-area-carats-res):not(#total-area-feddans-res):not(#rem-area-m2):not(#summary-total-area):not(#summary-rem-area):not(#total-area-sqm-res):not(#info-distributed-area):not([id*="after-subtract"]):not([id*="-sold-minus-after-subtract"]),
+body.outdoor-mode input[disabled]:not(#total-area-shares-res):not(#total-area-carats-res):not(#total-area-feddans-res):not(#rem-area-m2):not(#summary-total-area):not(#summary-rem-area):not(#total-area-sqm-res):not(#info-distributed-area):not([id*="after-subtract"]):not([id*="-sold-minus-after-subtract"]) {
+  background-color: #E8F0FE !important; /* أزرق نتائج فاتح */
   color: #000000 !important;
-  border-color: #BDBDBD !important;
+  border: 3px solid #1565C0 !important; /* إطار أزرق قوي */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231565C0"><path d="M19 13H5v-2h14v2zm0-4H5V7h14v2z"/></svg>') !important; /* أيقونة يساوي */
+  background-repeat: no-repeat !important;
+  background-position: left 12px center !important;
+  background-size: 20px 20px !important;
+  padding-left: 40px !important;
+}
+
+/* --- تمييز النتائج النهائية الهامة (Orange Theme) --- */
+body.outdoor-mode input#total-area-shares-res,
+body.outdoor-mode input#total-area-carats-res,
+body.outdoor-mode input#total-area-feddans-res,
+body.outdoor-mode input#rem-area-m2,
+body.outdoor-mode input#summary-total-area,
+body.outdoor-mode input#summary-rem-area,
+body.outdoor-mode input#total-area-sqm-res,
+body.outdoor-mode input#info-distributed-area,
+body.outdoor-mode input[id*="after-subtract"],
+body.outdoor-mode input[id*="-sold-minus-after-subtract"] {
+  background-color: #FFF3E0 !important; /* برتقالي فاتح */
+  color: #000000 !important;
+  border: 3px solid #EF6C00 !important; /* إطار برتقالي قوي */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23EF6C00"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>') !important; /* أيقونة نجمة */
+  background-repeat: no-repeat !important;
+  background-position: left 12px center !important;
+  background-size: 20px 20px !important;
+  padding-left: 40px !important;
+}
+
+body.outdoor-mode span#total-area-shares-res,
+body.outdoor-mode span#total-area-carats-res,
+body.outdoor-mode span#total-area-feddans-res,
+body.outdoor-mode span#rem-area-m2,
+body.outdoor-mode span#summary-total-area,
+body.outdoor-mode span#summary-rem-area,
+body.outdoor-mode span#total-area-sqm-res,
+body.outdoor-mode span#info-distributed-area,
+body.outdoor-mode td#total-area-shares-res,
+body.outdoor-mode td#total-area-carats-res,
+body.outdoor-mode td#total-area-feddans-res,
+body.outdoor-mode td#rem-area-m2,
+body.outdoor-mode td#summary-total-area,
+body.outdoor-mode td#summary-rem-area,
+body.outdoor-mode td#total-area-sqm-res,
+body.outdoor-mode td#info-distributed-area,
+body.outdoor-mode td[id*="after-subtract"],
+body.outdoor-mode td[id*="-sold-minus-after-subtract"],
+body.outdoor-mode .tableFooterTotal td,
+body.outdoor-mode #total,
+body.outdoor-mode tr.tableFooterTotal td {
+  background-color: #FFF3E0 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  border: 3px solid #EF6C00 !important;
 }
 
 /* --- الأزرار --- */
@@ -136,16 +226,30 @@ body.outdoor-mode .btn,
 body.outdoor-mode .btn-action,
 body.outdoor-mode .button1,
 body.outdoor-mode .nav-btn {
-  min-height: 52px !important;
-  font-size: 17px !important;
+  min-height: 56px !important;
+  height: 56px !important;
+  font-size: 18px !important;
   font-weight: bold !important;
   color: #FFFFFF !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   border: none !important;
-  padding: 0 18px !important;
+  padding: 0 24px !important;
   background-image: none !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18) !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.22) !important;
   transition: none !important;
+}
+
+/* تباعد الأزرار بشكل عام */
+body.outdoor-mode .buttons, 
+body.outdoor-mode .action-buttons, 
+body.outdoor-mode .buttons-container,
+body.outdoor-mode .buttons2 {
+  gap: 16px !important;
+}
+body.outdoor-mode button, 
+body.outdoor-mode .btn, 
+body.outdoor-mode .button1 {
+  margin-bottom: 12px !important;
 }
 
 /* ألوان الأزرار حسب وظيفتها */
@@ -153,9 +257,11 @@ body.outdoor-mode .btn-success,
 body.outdoor-mode [onclick*="calc"],
 body.outdoor-mode [onclick*="Calc"],
 body.outdoor-mode [value="احسب"],
-body.outdoor-mode #btn_Calculate {
-  background-color: #2E7D32 !important;
+body.outdoor-mode #btn_Calculate,
+body.outdoor-mode .btn-calc {
+  background-color: #2E7D32 !important; /* أخضر عمليات */
   color: #FFFFFF !important;
+  border: 2px solid #1B5E20 !important;
 }
 
 body.outdoor-mode .btn-danger,
@@ -163,16 +269,20 @@ body.outdoor-mode [onclick*="clear"],
 body.outdoor-mode [onclick*="Clear"],
 body.outdoor-mode [onclick*="delete"],
 body.outdoor-mode [value="حذف"],
-body.outdoor-mode #btn_Delete {
-  background-color: #C62828 !important;
+body.outdoor-mode #btn_Delete,
+body.outdoor-mode .btn-clear {
+  background-color: #C62828 !important; /* أحمر تحذيرات */
   color: #FFFFFF !important;
+  border: 2px solid #B71C1C !important;
 }
 
 body.outdoor-mode .btn-primary,
 body.outdoor-mode [onclick*="print"],
-body.outdoor-mode [onclick*="Print"] {
-  background-color: #1565C0 !important;
+body.outdoor-mode [onclick*="Print"],
+body.outdoor-mode .btn-print {
+  background-color: #1565C0 !important; /* أزرق نتائج */
   color: #FFFFFF !important;
+  border: 2px solid #0D47A1 !important;
 }
 
 body.outdoor-mode .btn-secondary {
@@ -189,42 +299,33 @@ body.outdoor-mode table {
 body.outdoor-mode th {
   background-color: #2E7D32 !important;
   color: #FFFFFF !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: bold !important;
-  padding: 10px 6px !important;
+  padding: 12px 8px !important;
+  border: 2.5px solid #000000 !important;
 }
 
 body.outdoor-mode td {
-  border: 1.5px solid #BDBDBD !important;
-  padding: 10px 6px !important;
-  font-size: 14px !important;
+  border: 2px solid #000000 !important;
+  padding: 12px 8px !important;
+  font-size: 15px !important;
   font-weight: bold !important;
   color: #000000 !important;
   background-color: #FFFFFF !important;
 }
 
 body.outdoor-mode tr:nth-child(even) td {
-  background-color: #F5F5F5 !important;
-}
-
-/* --- صف الإجمالي --- */
-body.outdoor-mode .tableFooterTotal td,
-body.outdoor-mode #total,
-body.outdoor-mode #total input,
-body.outdoor-mode tr.tableFooterTotal td {
-  background-color: #FFF8C6 !important;
-  color: #000000 !important;
-  font-weight: 900 !important;
-  border-color: #F9A825 !important;
+  background-color: #F9F9F9 !important;
 }
 
 /* --- رأس الجدول داخل Page11 --- */
 body.outdoor-mode .table-header {
   background-color: #2E7D32 !important;
+  border-bottom: 3px solid #000000 !important;
 }
 body.outdoor-mode .table-header p {
   color: #FFFFFF !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
   font-weight: bold !important;
 }
 
@@ -238,8 +339,8 @@ body.outdoor-mode .partner-row input[readonly] {
 body.outdoor-mode .alert-success,
 body.outdoor-mode [style*="#e8f5e9"],
 body.outdoor-mode [style*="#E8F5E9"] {
-  background-color: #C8E6C9 !important;
-  border: 2px solid #2E7D32 !important;
+  background-color: #E8F5E9 !important;
+  border: 3px solid #2E7D32 !important;
   color: #1B5E20 !important;
 }
 
@@ -247,7 +348,7 @@ body.outdoor-mode .alert-warning,
 body.outdoor-mode [style*="#fff3cd"],
 body.outdoor-mode [style*="#FFF3CD"] {
   background-color: #FFF9C4 !important;
-  border: 2px solid #F9A825 !important;
+  border: 3px solid #F9A825 !important;
   color: #000000 !important;
 }
 
@@ -255,15 +356,15 @@ body.outdoor-mode .alert-danger,
 body.outdoor-mode .table-remaining-box,
 body.outdoor-mode [style*="#ffebee"],
 body.outdoor-mode [style*="#FFEBEE"] {
-  background-color: #FFCDD2 !important;
-  border: 2px solid #C62828 !important;
-  color: #B71C1C !important;
+  background-color: #FDECEC !important;
+  border: 3px solid #C62828 !important;
+  color: #721C24 !important;
 }
 
 /* --- تضخيم مربعات الاختيار (Checkbox) --- */
 body.outdoor-mode input[type="checkbox"] {
-  width: 24px !important;
-  height: 24px !important;
+  width: 28px !important;
+  height: 28px !important;
   cursor: pointer !important;
 }
 
@@ -271,9 +372,9 @@ body.outdoor-mode input[type="checkbox"] {
 body.outdoor-mode .btn-secondary.btn-sm,
 body.outdoor-mode [onclick*="zoom"],
 body.outdoor-mode [onclick*="Zoom"] {
-  min-width: 48px !important;
-  height: 48px !important;
-  font-size: 20px !important;
+  min-width: 52px !important;
+  height: 52px !important;
+  font-size: 22px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -283,44 +384,10 @@ body.outdoor-mode [onclick*="Zoom"] {
 body.outdoor-mode .input-row,
 body.outdoor-mode .input-group,
 body.outdoor-mode .dynamic-inputs-container > div {
-  margin-bottom: 16px !important;
+  margin-bottom: 20px !important;
 }
 
-/* --- إضافة ظل خفيف للبطاقات لتمييز الأقسام --- */
-body.outdoor-mode .s,
-body.outdoor-mode .card,
-body.outdoor-mode .summary-card-item {
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
-  border: 1.5px solid #9E9E9E !important;
-}
-
-/* --- ألوان الرسائل والحالات --- */
-body.outdoor-mode .alert-success,
-body.outdoor-mode [style*="#e8f5e9"],
-body.outdoor-mode [style*="#E8F5E9"] {
-  background-color: #E8F5E9 !important;
-  border: 2px solid #2E7D32 !important;
-  color: #1B5E20 !important;
-}
-
-body.outdoor-mode .alert-warning,
-body.outdoor-mode [style*="#fff3cd"],
-body.outdoor-mode [style*="#FFF3CD"] {
-  background-color: #FFF9C4 !important;
-  border: 2px solid #F9A825 !important;
-  color: #856404 !important;
-}
-
-body.outdoor-mode .alert-danger,
-body.outdoor-mode .table-remaining-box,
-body.outdoor-mode [style*="#ffebee"],
-body.outdoor-mode [style*="#FFEBEE"] {
-  background-color: #FDECEC !important;
-  border: 2px solid #C62828 !important;
-  color: #721C24 !important;
-}
-
-/* --- تكبير أرقام النتائج الهامة --- */
+/* --- تكبير أرقام النتائج الهامة في العرض --- */
 body.outdoor-mode #total-area-shares-res,
 body.outdoor-mode #total-area-carats-res,
 body.outdoor-mode #total-area-feddans-res,
@@ -329,7 +396,7 @@ body.outdoor-mode #summary-total-area,
 body.outdoor-mode #summary-rem-area,
 body.outdoor-mode #total-area-sqm-res,
 body.outdoor-mode #info-distributed-area {
-  font-size: 22px !important;
+  font-size: 24px !important;
   font-weight: 900 !important;
 }
 
@@ -348,18 +415,18 @@ body.outdoor-mode .nav-btn {
   color: #FFFFFF !important;
 }
 
-/* --- تعطيل ظلال غير ضرورية --- */
+/* --- تعطيل ظلال غير ضرورية وتحولات التحليق --- */
 body.outdoor-mode .s:hover,
 body.outdoor-mode .card:hover {
   transform: none !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.16) !important;
 }
 
-/* --- نص الـ Placeholder: أصغر وأهدأ بصرياً --- */
+/* --- نص الـ Placeholder: أوضح قليلًا --- */
 body.outdoor-mode input::placeholder {
-  font-size: 15px !important;
-  font-weight: 400 !important;
-  color: #888888 !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #666666 !important;
   opacity: 1 !important;
 }
 
@@ -372,12 +439,7 @@ body.outdoor-mode [style*="color: #aaa"],
 body.outdoor-mode [style*="color:#888"],
 body.outdoor-mode [style*="color:#777"],
 body.outdoor-mode [style*="color:#aaa"] {
-  color: #424242 !important;
-}
-
-/* --- الخط الأساسي للصفحة --- */
-body.outdoor-mode {
-  font-family: 'Cairo', Arial, sans-serif !important;
+  color: #000000 !important;
 }
 
 /* ============================================================
@@ -388,26 +450,30 @@ body.outdoor-mode {
   body.outdoor-mode input[type="number"],
   body.outdoor-mode input[type="input"],
   body.outdoor-mode select {
-    font-size: 20px !important;
-    min-height: 52px !important;
+    font-size: 21px !important;
+    min-height: 56px !important;
+    height: 56px !important;
+    padding: 12px 18px !important;
   }
 
   body.outdoor-mode button,
   body.outdoor-mode input[type="button"],
   body.outdoor-mode .btn,
-  body.outdoor-mode .btn-action {
-    min-height: 56px !important;
-    font-size: 18px !important;
+  body.outdoor-mode .btn-action,
+  body.outdoor-mode .button1 {
+    min-height: 58px !important;
+    height: 58px !important;
+    font-size: 20px !important;
   }
 
   body.outdoor-mode th {
-    font-size: 13px !important;
-    padding: 8px 4px !important;
+    font-size: 15px !important;
+    padding: 10px 5px !important;
   }
 
   body.outdoor-mode td {
-    font-size: 13px !important;
-    padding: 8px 4px !important;
+    font-size: 15px !important;
+    padding: 10px 5px !important;
   }
 
   #outdoor-toggle-btn {
@@ -420,21 +486,22 @@ body.outdoor-mode {
 
   /* تثبيت أزرار الإجراءات المهمة فوق القائمة السفلية للجوال */
   body.outdoor-mode .action-buttons,
-  body.outdoor-mode .main-actions-bar .buttons-container {
+  body.outdoor-mode .main-actions-bar .buttons-container,
+  body.outdoor-mode .buttons2 {
     position: fixed !important;
     bottom: 65px !important; /* فوق شريط التنقل السفلي مباشرة */
     left: 0 !important;
     width: 100% !important;
     z-index: 9999 !important;
     background: #FFFFFF !important;
-    border-top: 2px solid #1B5E20 !important;
-    padding: 10px !important;
+    border-top: 3px solid #1B5E20 !important;
+    padding: 12px !important;
     box-sizing: border-box !important;
     margin: 0 !important;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2) !important;
     display: flex !important;
     justify-content: space-around !important;
-    gap: 8px !important;
+    gap: 12px !important;
   }
 
   /* إضافة padding أسفل الحاوية لمنع تداخل المحتوى مع الأزرار المثبتة */
