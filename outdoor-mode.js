@@ -84,12 +84,11 @@
   /* ---- التهيئة عند تحميل الصفحة ---- */
   function init() {
     injectCSS();
-    createButton();
+    // تم إلغاء الزر العائم بناءً على طلب المستخدم لتجنب تغطية المحتوى
+    // createButton(); 
 
-    // قرأ الإعداد المحفوظ
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const isActive = saved === '1';
-    applyMode(isActive);
+    // تفعيل وضع الشمس والتباين العالي تلقائياً وبشكل دائم لجميع المستخدمين
+    applyMode(true);
   }
 
   /* ---- تشغيل بعد تحميل DOM ---- */
