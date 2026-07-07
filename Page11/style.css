@@ -1743,567 +1743,406 @@ body {
 }
 
 /* ================================================================
-   ═══ تحسين شامل للتجاوبية - AppCreator24 WebView + جميع الجوالات
+   ═══ تحسين التجاوبية لصفحة Page11 فقط
    يغطي: 320px / 360px / 375px / 390px / 412px / 480px
+   قواعد مقيّدة بهذا الملف ولا تؤثر على صفحات أخرى
    ================================================================ */
 
-/* ─── 1. منع أي تمرير أفقي على مستوى الصفحة كلها ─────────────── */
-html,
-body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-  box-sizing: border-box !important;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box !important;
-  max-width: 100% !important;
-}
-
-/* ─── 2. جميع الحاويات الرئيسية - منع الـ Overflow ─────────────── */
+/* ─── حاويات Page11: منع التمرير الأفقي ─────────────────────── */
 .con,
-.s,
-.top-cards-grid,
-.bottom-cards-grid,
-.main-actions-bar,
-.table-container,
 .dynamic-inputs-container,
 .conv-cards-container,
-.canvas-card,
+.canvas-card {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* الجدول الرئيسي: يتمرر أفقياً داخل حاويه */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* الكروكي: لا نقطع overflow لأنه يؤثر على التكبير/التصغير */
 .canvas-wrapper {
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-  max-width: 100% !important;
+  max-width: 100%;
+  /* لا overflow:hidden هنا لحماية الكروكي */
 }
 
-/* ─── 3. منع التكبير عند فتح لوحة المفاتيح (WebView) ──────────── */
-input,
-select,
-textarea {
-  font-size: 16px !important; /* أدنى حد يمنع تكبير iOS/Android */
-  touch-action: manipulation !important;
-}
-
-/* لكن نسمح بتصغير الخط للحقول الصغيرة جداً مع الحفاظ على 16px للـ font-size الفعلي */
-.partner-row input,
-#remainder-row-table input,
-#total input {
-  font-size: 16px !important;
-}
-
-/* ─── 4. جميع الحقول بعرض 100% + لا خروج عن الشاشة ─────────────── */
-.input-row {
-  flex-wrap: nowrap !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.input-row input {
-  width: 100% !important;
-  min-width: 0 !important;
-  flex-shrink: 1 !important;
-  box-sizing: border-box !important;
-}
-
-/* ─── 5. القائمة المنسدلة - لا ضغط ─────────────────────────────── */
-select,
-.selector1,
-#input-carat-area {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  min-height: 44px !important;
-}
-
-/* ─── 6. جميع الأزرار - عرض مناسب + ارتفاع للمس ───────────────── */
-.btn,
-.btn-action,
-.btn-divide,
-.report-btn,
-.nav-btn,
-.croquis-refresh-btn {
-  min-height: 44px !important;
-  box-sizing: border-box !important;
-  max-width: 100% !important;
-}
-
-/* ─── 7. الجداول - منع الخروج عن الشاشة ───────────────────────── */
-table {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.results-table-wrapper {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  max-width: 100% !important;
-}
-
-/* ================================================================
-   ═══ 480px - الهواتف المتوسطة ══════════════════════════════════
-   ================================================================ */
+/* ─── 480px - الهواتف المتوسطة ─────────────────────────────── */
 @media screen and (max-width: 480px) {
 
-  /* بطاقات قسم "بيانات العرض المحسوبة" */
+  /* بطاقة "بيانات العرض المحسوبة" - كل سطر مستقل */
   .card-verifications .verification-item {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 2px !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 6px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .card-verifications .v-lbl,
   .card-verifications .v-val {
-    width: 100% !important;
-    font-size: 13px !important;
+    width: 100%;
+    font-size: 13px;
   }
 
-  /* قسم "إدخال أبعاد الأرض" - كل حقل في سطر مستقل */
+  /* بطاقة "إدخال أبعاد الأرض" - كل حقل في سطر مستقل */
   .input-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 4px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   .input-row label {
-    width: 100% !important;
-    font-size: 13px !important;
+    width: 100%;
+    font-size: 13px;
   }
 
   .input-row input {
-    width: 100% !important;
-    height: 44px !important;
-    font-size: 16px !important;
-    border-radius: 8px !important;
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
   }
 
-  /* قسم "وحدات المساحة" */
+  /* "وحدات المساحة" - القائمة المنسدلة بعرض كامل */
   .carat-select-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   .carat-select-inputs {
-    width: 100% !important;
+    width: 100%;
   }
 
   #input-carat-area {
-    width: 100% !important;
-    height: 44px !important;
-    font-size: 16px !important;
+    width: 100%;
+    height: 44px;
   }
 
   #other-carat-area {
-    width: 100% !important;
-    height: 44px !important;
-    font-size: 16px !important;
+    width: 100%;
+    height: 44px;
   }
 
   /* جدول النتائج الإجمالية */
-  .results-table-wrapper table {
-    font-size: 14px !important;
-  }
-
   .results-table-wrapper td,
   .results-table-wrapper th {
-    padding: 8px 4px !important;
-    font-size: 14px !important;
+    padding: 8px 4px;
+    font-size: 14px;
   }
 
-  /* أزرار التقارير */
+  /* أزرار التقارير: عمودان على الهاتف المتوسط */
   .reports-buttons-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
   }
 
-  /* قسم بيانات العرض المحسوبة - unit-box */
+  /* unit-box لا يتجاوز عرض الشاشة */
   .unit-box {
-    width: 100% !important;
-    min-width: unset !important;
+    min-width: unset;
+    overflow: hidden;
+    word-break: break-word;
   }
 
-  /* جميع الأزرار الرئيسية */
-  .btn-action {
-    flex: 1 1 calc(50% - 8px) !important;
-    height: 44px !important;
-    font-size: 13px !important;
+  .unit-box-mini {
+    overflow: hidden;
+    word-break: break-word;
   }
 
-  /* أزرار الزيادة/النقصان للعروض */
-  .width-input-container {
-    width: 100% !important;
-  }
-
+  /* أزرار الزيادة/النقصان */
   .width-step-btn {
-    height: 44px !important;
-    width: 36px !important;
-    font-size: 18px !important;
+    height: 44px;
+    width: 36px;
+    font-size: 18px;
   }
 
-  /* أزرار التحكم بالكروكي */
+  /* أزرار الكروكي */
   .croquis-toggles-row {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .croquis-toggle-chip {
-    flex: 1 1 auto !important;
-    justify-content: center !important;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* قسم التحقق لا يخرج عن الشاشة */
+  .table-remaining-box {
+    max-width: 100%;
+    overflow: hidden;
   }
 }
 
-/* ================================================================
-   ═══ 412px - Galaxy S22/A53 ════════════════════════════════════
-   ================================================================ */
+/* ─── 412px - Galaxy S22 / A53 ──────────────────────────────── */
 @media screen and (max-width: 412px) {
+
   .con {
-    padding: 0 8px 110px 8px !important;
+    padding: 0 8px 110px 8px;
   }
 
+  /* البطاقات الثلاث تصبح عمودية واحدة فوق الأخرى */
   .top-cards-grid {
-    grid-template-columns: 1fr !important;
-    margin-top: 8px !important;
+    grid-template-columns: 1fr;
+    margin-top: 8px;
   }
 
-  .s h3 {
-    font-size: 13px !important;
-  }
-
-  /* الجدول الرئيسي - تمرير أفقي لا تشوه */
-  .table-container {
-    overflow-x: auto !important;
-    border-radius: 6px !important;
-  }
-
-  /* شريط الإجراءات */
+  /* شريط الإجراءات عمودي */
   .main-actions-bar {
-    flex-direction: column !important;
-    gap: 8px !important;
-    padding: 8px !important;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    align-items: stretch;
   }
 
-  .buttons-container {
-    width: 100% !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-  }
-
-  /* selector */
+  /* القائمة المنسدلة بعرض كامل */
   .selector-container {
-    width: 100% !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
   }
 
   .selector-container select {
-    width: 100% !important;
-    height: 44px !important;
-    font-size: 16px !important;
+    width: 100%;
+    height: 44px;
+  }
+
+  /* الأزرار مرنة */
+  .buttons-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .btn-action {
+    flex: 1 1 calc(50% - 6px);
+    height: 44px;
   }
 }
 
-/* ================================================================
-   ═══ 390px - iPhone 14/15 ══════════════════════════════════════
-   ================================================================ */
+/* ─── 390px - iPhone 14 / 15 ─────────────────────────────────── */
 @media screen and (max-width: 390px) {
+
   .top-nav-bar {
-    padding: 6px 8px !important;
+    padding: 6px 8px;
   }
 
   .top-nav-bar h2 {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   .nav-btn {
-    padding: 4px 7px !important;
-    font-size: 10px !important;
+    padding: 4px 7px;
+    font-size: 10px;
   }
 
   .input-row label {
-    font-size: 12px !important;
-  }
-
-  .input-row input {
-    height: 44px !important;
-    font-size: 16px !important;
-  }
-
-  /* unit boxes أسفل بعضها */
-  .verification-formula-box {
-    padding: 10px 8px !important;
+    font-size: 12px;
   }
 
   .formula-text {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .btn-action {
-    font-size: 12px !important;
-    padding: 0 8px !important;
+    font-size: 12px;
+    padding: 0 8px;
   }
 }
 
-/* ================================================================
-   ═══ 375px - iPhone SE / Galaxy A32 ═══════════════════════════
-   ================================================================ */
+/* ─── 375px - iPhone SE / Galaxy A32 ────────────────────────── */
 @media screen and (max-width: 375px) {
+
   .con {
-    padding: 0 6px 100px 6px !important;
+    padding: 0 6px 100px 6px;
   }
 
   .s {
-    border-radius: 8px !important;
-    padding: 8px !important;
+    border-radius: 8px;
+    padding: 8px;
   }
 
   .s h3 {
-    margin: -8px -8px 8px -8px !important;
-    font-size: 12px !important;
-    padding: 8px 8px !important;
+    margin: -8px -8px 8px -8px;
+    font-size: 12px;
+    padding: 8px;
   }
 
-  .input-row input {
-    height: 44px !important;
-    font-size: 16px !important;
-    border-radius: 8px !important;
-  }
-
-  /* الأزرار عمودية */
+  /* الأزرار عمودية كاملة */
   .buttons-container {
-    flex-direction: column !important;
-    width: 100% !important;
+    flex-direction: column;
+    width: 100%;
   }
 
   .btn-action {
-    width: 100% !important;
-    height: 48px !important;
-    justify-content: center !important;
+    width: 100%;
+    height: 48px;
+    justify-content: center;
+  }
+
+  /* البطاقات السفلية عمود واحد */
+  .bottom-cards-grid {
+    grid-template-columns: 1fr;
   }
 
   .unit-val {
-    font-size: 15px !important;
+    font-size: 15px;
   }
 
   .unit-lbl {
-    font-size: 9px !important;
+    font-size: 9px;
   }
 }
 
-/* ================================================================
-   ═══ 360px - Galaxy A12 / Xiaomi ══════════════════════════════
-   ================================================================ */
+/* ─── 360px - Galaxy A12 / Xiaomi ───────────────────────────── */
 @media screen and (max-width: 360px) {
+
   .top-nav-bar h2 {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .nav-btn {
-    padding: 4px 5px !important;
-    font-size: 9px !important;
+    padding: 4px 5px;
+    font-size: 9px;
   }
 
   .nav-btn svg {
-    width: 13px !important;
-    height: 13px !important;
+    width: 13px;
+    height: 13px;
   }
 
   .s h3 {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .input-row label {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
-  .input-row input {
-    height: 44px !important;
-    font-size: 16px !important;
-  }
-
+  /* بطاقات التحويل عمود واحد */
   .conv-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 
   .conv-extra-row {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 }
 
-/* ================================================================
-   ═══ 320px - Galaxy S5 / iPhone 5 ══════════════════════════════
-   ================================================================ */
+/* ─── 320px - Galaxy S5 / iPhone 5 ──────────────────────────── */
 @media screen and (max-width: 320px) {
+
   .con {
-    padding: 0 4px 100px 4px !important;
+    padding: 0 4px 100px 4px;
   }
 
   .top-nav-bar {
-    padding: 5px 6px !important;
+    padding: 5px 6px;
   }
 
   .top-nav-bar h2 {
-    font-size: 10px !important;
+    font-size: 10px;
   }
 
   .nav-btn {
-    padding: 3px 4px !important;
-    font-size: 8px !important;
-    gap: 2px !important;
+    padding: 3px 4px;
+    font-size: 8px;
+    gap: 2px;
   }
 
   .s {
-    padding: 6px !important;
-    border-radius: 6px !important;
+    padding: 6px;
+    border-radius: 6px;
   }
 
   .s h3 {
-    margin: -6px -6px 6px -6px !important;
-    font-size: 10px !important;
-    padding: 7px 6px !important;
+    margin: -6px -6px 6px -6px;
+    font-size: 10px;
+    padding: 7px 6px;
   }
 
   .input-row label {
-    font-size: 10px !important;
-  }
-
-  .input-row input {
-    height: 44px !important;
-    font-size: 16px !important;
+    font-size: 10px;
   }
 
   .unit-val {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 
   .unit-lbl {
-    font-size: 8px !important;
+    font-size: 8px;
   }
 
   .unit-val-mini {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .unit-lbl-mini {
-    font-size: 8px !important;
+    font-size: 8px;
   }
 
   .btn-action {
-    font-size: 11px !important;
-    gap: 3px !important;
-    height: 44px !important;
+    font-size: 11px;
+    gap: 3px;
+    height: 44px;
   }
 
+  /* أزرار التقارير عمود واحد */
   .reports-buttons-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 
   .report-btn {
-    height: 48px !important;
-    font-size: 10px !important;
+    height: 48px;
+    font-size: 10px;
   }
 
+  /* أزرار الكروكي عمودية */
   .croquis-toggles-row {
-    flex-direction: column !important;
-    align-items: stretch !important;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .croquis-toggle-chip {
-    width: 100% !important;
-    justify-content: center !important;
-    font-size: 9px !important;
+    width: 100%;
+    justify-content: center;
+    font-size: 9px;
   }
 }
 
-/* ================================================================
-   ═══ معالجة خاصة لـ AppCreator24 WebView - لوحة المفاتيح ═══════
-   ================================================================ */
-
-/* منع إزاحة الصفحة عند فتح لوحة المفاتيح */
-body {
-  position: relative !important;
-  min-height: 100% !important;
-}
-
-/* الحفاظ على وضع الحقل النشط ظاهراً عند فتح لوحة المفاتيح */
-input:focus,
-select:focus,
-textarea:focus {
-  scroll-margin-top: 80px !important;
-  scroll-margin-bottom: 20px !important;
-}
-
-/* منع تكبير الصفحة على iOS عند التركيز على حقل */
-@supports (-webkit-overflow-scrolling: touch) {
-  input[type="text"],
-  input[type="number"],
-  input[type="decimal"],
-  select {
-    font-size: 16px !important;
-  }
-}
-
-/* ─── منع أي عنصر من الخروج خارج حدود الشاشة ──────────────────── */
-img,
-svg,
-canvas,
-video {
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-/* ─── تحسين قابلية اللمس لجميع العناصر التفاعلية ──────────────── */
+/* ─── اللمس: أزرار Page11 فقط بحجم مناسب ─────────────────── */
 @media (pointer: coarse) {
-  button,
-  select,
-  input,
-  .btn,
   .btn-action,
-  .nav-btn,
   .report-btn,
+  .delete-row-btn,
   .croquis-toggle-chip,
-  .croquis-refresh-btn,
-  .delete-row-btn {
-    min-height: 44px !important;
-    touch-action: manipulation !important;
-  }
-
-  /* منع التأخير في اللمس */
-  * {
-    -webkit-tap-highlight-color: rgba(46, 125, 50, 0.1) !important;
+  .croquis-refresh-btn {
+    min-height: 44px;
+    touch-action: manipulation;
   }
 }
 
-/* ─── منع إزاحة العناصر عند تغيير حجم نافذة WebView ──────────── */
-.top-nav-bar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 1000 !important;
-  width: 100% !important;
-  left: 0 !important;
-  right: 0 !important;
-}
-
-/* ─── التعامل مع صفوف بطاقة "بيانات العرض المحسوبة" ─────────── */
-@media screen and (max-width: 480px) {
-  /* منع تداخل النصوص في قسم الوحدات */
-  .unit-box,
-  .unit-box-mini {
-    overflow: hidden !important;
-    word-break: break-word !important;
+/* ─── الاتجاه الأفقي على الهاتف ─────────────────────────────── */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .top-nav-bar p {
+    display: none;
   }
-
-  /* إبقاء قسم التحقق واضحاً */
-  .table-remaining-box {
-    overflow: hidden !important;
-    max-width: 100% !important;
+  .top-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
-
-  /* الحقل النشط يبقى ظاهراً */
-  input:focus {
-    position: relative !important;
-    z-index: 5 !important;
+  .bottom-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .canvas-wrapper {
+    height: calc(100vh - 140px);
+    min-height: 200px;
+  }
+  .con {
+    padding-bottom: 80px;
   }
 }
 
