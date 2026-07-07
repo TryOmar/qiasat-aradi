@@ -376,6 +376,8 @@ function loadData() {
     } catch (e) {
       console.error("Error parsing saved partners", e);
     }
+  } else {
+    addNewPartnerRow("شريك 1");
   }
 
   isPartitioned = (localStorage.getItem("p11-is-partitioned") === "true");
@@ -528,7 +530,7 @@ function handleInputMethodChange() {
   saveAndCalc();
 }
 
-function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-") {
+function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-", shouldFocus = false) {
   // تصفية وضع التعديل قبل إضافة صف جديد لضمان تحديث الحسابات فوراً
   if (!name && !feddans && !carats && !shares && !fraction) {
   }
@@ -671,6 +673,13 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
   if (!name && !feddans && !carats && !shares && !fraction) {
     isManualPartition = false;
     saveAndCalcImmediate();
+  }
+
+  if (shouldFocus) {
+    const nameInput = row.querySelector(".partner-name");
+    if (nameInput) {
+      nameInput.focus();
+    }
   }
 }
 
@@ -908,6 +917,9 @@ function syncExclusionUI() {
 }
 
 function calculateGeneral() {
+  if (!window.isNormalizing) {
+    window.normalizedDiff = 0;
+  }
   recalculateState();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
@@ -970,10 +982,6 @@ function calculateGeneral() {
   }
 
   let rows = document.querySelectorAll("#partners-list .partner-row");
-  if (rows.length === 0) {
-    addNewPartnerRow("شريك 1");
-    rows = document.querySelectorAll("#partners-list .partner-row");
-  }
 
   let totalDistributedArea = 0;
 
@@ -1391,6 +1399,43 @@ function runPartition() {
     document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
   }
 
+  // Central Final Normalization Phase
+  const diffNorm = totalAreaM2 - totalDistributedArea;
+  const toleranceNorm = 0.05;
+  if (!window.isNormalizing && Math.abs(diffNorm) <= toleranceNorm && Math.abs(diffNorm) > 1e-7) {
+    const activeRows = Array.from(rows).filter(r => !isPartnerRowExcluded(r));
+    if (activeRows.length > 0) {
+      const lastActiveRow = activeRows[activeRows.length - 1];
+      const lastActiveIndex = Array.from(rows).indexOf(lastActiveRow);
+      
+      const currentCalculatedArea = window.calculatedPieces[lastActiveIndex].area;
+      const correctArea = currentCalculatedArea + diffNorm;
+      
+      window.isNormalizing = true;
+      window.normalizedDiff = diffNorm;
+      
+      if (currentInputMethod === "carats") {
+        const fcs = convertSquareMetersToFCS(correctArea);
+        const feddansInput = lastActiveRow.querySelector(".partner-feddans");
+        const caratsInput = lastActiveRow.querySelector(".partner-carats");
+        const sharesInput = lastActiveRow.querySelector(".partner-shares");
+        if (feddansInput) feddansInput.value = fcs.feddan > 0 ? fcs.feddan : "";
+        if (caratsInput) caratsInput.value = fcs.carat > 0 ? fcs.carat : "";
+        if (sharesInput) sharesInput.value = fcs.sahm > 0 ? fcs.sahm : "";
+      } else {
+        const fracInput = lastActiveRow.querySelector(".partner-fraction");
+        if (fracInput) {
+          fracInput.value = (correctArea / totalAreaM2).toFixed(6);
+        }
+      }
+      
+      calculateGeneral();
+      runPartition();
+      window.isNormalizing = false;
+      return;
+    }
+  }
+
   // update the remaining area card
   recalculateState();
   let remainingArea = window.calcState.remainingArea;
@@ -1413,7 +1458,11 @@ function runPartition() {
     const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
     
     if (absRem <= tolerance) {
-      statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
+      let normText = "";
+      if (window.normalizedDiff) {
+        normText = `<br><span style="font-size: 11.5px; font-weight: bold; color: #2e7d32;">(تمت معالجة فرق تقريب مقداره ${Math.abs(window.normalizedDiff).toFixed(3)} م²)</span>`;
+      }
+      statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية." + normText;
       statusEl.style.color = "#2e7d32";
     } else if (remainingArea > 0) {
       statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${absRem.toFixed(2)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
@@ -1499,28 +1548,54 @@ function runPartition() {
   updateCalculationSteps();
 }
 
-function clearAll() {
+function clearAll(confirmRequired = false) {
+  if (confirmRequired) {
+    if (!confirm("سيتم حذف جميع البيانات وإعادة الصفحة إلى البداية. هل تريد المتابعة؟")) {
+      return;
+    }
+  }
   document.getElementById("length1").value = "";
   document.getElementById("length2").value = "";
   document.getElementById("width1").value = "";
   document.getElementById("width2").value = "";
-  document.getElementById("other-carat-area").value = "";
-  document.getElementById("input-carat-area").value = "175.035";
-  document.getElementById("share-input-method").value = "carats";
   
-  currentInputMethod = "carats";
   isPartitioned = false;
   isManualPartition = false;
   window.calculatedPieces = [];
   
   const list = document.getElementById("partners-list");
   if (list) list.innerHTML = "";
-  addNewPartnerRow("شريك 1");
   
   renderHeaderAndFooter();
   saveData();
   calculateGeneral();
   renderCroquis();
+}
+
+function clearPartners(confirmRequired = false) {
+  if (confirmRequired) {
+    if (!confirm("سيتم حذف جميع الشركاء فقط، ولن يتم حذف أبعاد الأرض. هل تريد المتابعة؟")) {
+      return;
+    }
+  }
+  
+  isPartitioned = false;
+  isManualPartition = false;
+  window.calculatedPieces = [];
+  
+  const list = document.getElementById("partners-list");
+  if (list) list.innerHTML = "";
+  
+  renderHeaderAndFooter();
+  saveData();
+  calculateGeneral();
+  renderCroquis();
+
+  // Focus the "أضف شريك" button
+  const btnAdd = document.getElementById("btn-add-partner");
+  if (btnAdd) {
+    btnAdd.focus();
+  }
 }
 
 function onCalculateBtnClick() {
@@ -1579,31 +1654,15 @@ function divideEqually() {
     const totalCarats = totalAreaM2 / caratArea;
     const partnerCarats = totalCarats / numPartners;
     
-    // حساب قيم الشريك العادي مع تقريب الأسهم لرقمتين عشريتين
+    // حساب قيم الشريك مع تقريب الأسهم لرقمتين عشريتين
     const f = Math.floor(partnerCarats / 24);
     const c = Math.floor(partnerCarats % 24);
     const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
-    
-    // يتم تطبيق تعويض فرق التقريب على آخر شريك فقط أثناء التوزيع التلقائي، وذلك لمنع ظهور عجز وهمي ناتج عن تقريب الأسهم، ولا يُطبق مطلقاً على الإدخال اليدوي.
-    const actualPartnerCarats = f * 24 + c + s / 24;
-    
-    // حساب المتبقي للشريك الأخير لاستيعاب فروق التقريب بالكامل
-    const assignedCaratsSoFar = actualPartnerCarats * (numPartners - 1);
-    const lastPartnerCarats = Math.max(0, totalCarats - assignedCaratsSoFar);
-    
-    const lastF = Math.floor(lastPartnerCarats / 24);
-    const lastC = Math.floor(lastPartnerCarats % 24);
-    const lastS = Number(((lastPartnerCarats - (lastF * 24 + lastC)) * 24).toFixed(2));
 
     rows.forEach((row, index) => {
-      const isLast = (index === numPartners - 1);
-      const targetF = isLast ? lastF : f;
-      const targetC = isLast ? lastC : c;
-      const targetS = isLast ? lastS : s;
-      
-      if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = targetF;
-      if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = targetC;
-      if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = targetS;
+      if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f > 0 ? f : "";
+      if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c > 0 ? c : "";
+      if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s > 0 ? s : "";
     });
   } else {
     rows.forEach((row, index) => {

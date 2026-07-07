@@ -296,6 +296,9 @@ body {
 .btn-success:hover { background-color: #1b5e20 !important; }
 .btn-primary { background-color: #00796b !important; }
 .btn-primary:hover { background-color: #004d40 !important; }
+.btn-dark-gray { background-color: #555555 !important; }
+.btn-dark-gray:hover { background-color: #333333 !important; }
+
 
 /* Grid Table Styling (11 Columns) */
 .table {

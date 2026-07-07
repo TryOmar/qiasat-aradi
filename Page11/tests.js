@@ -767,6 +767,119 @@ function runAutomatedTests() {
     const stepArea14 = parseFloat(row14_1.querySelector(".partner-area").value) || 0;
     assert(Math.abs(stepArea14 - 85.25) < 0.1, `الحالة 14 (أزرار الزيادة): يجب أن تبقى مساحة الشريك ثابتة 85.25 م². الفعلي: ${stepArea14} م²`);
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 15: General Normalization verification for partner counts 2, 3, 4, 5, 7, 10
+    // -------------------------------------------------------------------------
+    const counts = [2, 3, 4, 5, 7, 10];
+    const methods = ["carats", "fractions"];
+
+    for (const count of counts) {
+      for (const method of methods) {
+        document.getElementById("length1").value = 30;
+        document.getElementById("length2").value = 35;
+        document.getElementById("width1").value = 12;
+        document.getElementById("width2").value = 14;
+        document.getElementById("input-carat-area").value = 175.035; // Default carat area
+        document.getElementById("share-input-method").value = method;
+        window.currentInputMethod = method;
+        if (method === "carats") {
+          handleCaratAreaChange(false);
+        }
+
+        const list15 = document.getElementById("partners-list");
+        list15.innerHTML = "";
+        for (let i = 0; i < count; i++) {
+          addNewPartnerRow(`شريك ${i + 1}`, "", "", "", "");
+        }
+
+        // Trigger division equally
+        divideEqually();
+
+        // Verify Normalization results
+        const totalLandArea = window.calcState.totalLandArea;
+        let sumPartnerAreas = 0;
+        let sumPartnerPercents = 0;
+        let sumPartnerBotWidths = 0;
+        let sumPartnerTopWidths = 0;
+
+        const partnerRows = list15.querySelectorAll(".partner-row");
+        partnerRows.forEach(row => {
+          sumPartnerAreas += parseFloat(row.querySelector(".partner-area").value) || 0;
+          
+          let pctStr = row.querySelector(".partner-percent").value || "0";
+          sumPartnerPercents += parseFloat(pctStr.replace("%", "")) || 0;
+          
+          sumPartnerBotWidths += parseFloat(row.querySelector(".partner-width-bottom").value) || 0;
+          sumPartnerTopWidths += parseFloat(row.querySelector(".partner-width-top").value) || 0;
+        });
+
+        // Last divider marker check
+        let lastDivider = 0;
+        if (window.calculatedPieces.length > 0) {
+          // If the remainder exists, the last piece is the remainder. The divider line of the last partner is at index count - 1.
+          lastDivider = window.calculatedPieces[count - 1].divLine;
+        }
+
+        const expectedLastDivider = parseFloat(document.getElementById("length2").value) || 0; // 35m
+
+        assert(Math.abs(sumPartnerAreas - totalLandArea) < 0.01, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب أن يتطابق مجموع مساحات الشركاء مع مساحة الأرض تماماً. مجموع المساحات: ${sumPartnerAreas.toFixed(4)} م²، المساحة الكلية: ${totalLandArea.toFixed(4)} م²`);
+        assert(Math.abs(sumPartnerPercents - 100) < 0.1, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب أن يكون مجموع النسب 100%. الفعلي: ${sumPartnerPercents.toFixed(2)}%`);
+        assert(Math.abs(sumPartnerBotWidths - 12) < 0.01, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب أن يكون مجموع العرض الأول مساوياً لعرض الأرض السفلي (12 م). الفعلي: ${sumPartnerBotWidths.toFixed(4)} م`);
+        assert(Math.abs(sumPartnerTopWidths - 14) < 0.01, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب أن يكون مجموع العرض الثاني مساوياً لعرض الأرض العلوي (14 م). الفعلي: ${sumPartnerTopWidths.toFixed(4)} م`);
+        assert(Math.abs(lastDivider - expectedLastDivider) < 0.01, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب أن تنتهي علامة الشريك الأخير عند نهاية الأرض تماماً (${expectedLastDivider} م). الفعلي: ${lastDivider.toFixed(4)} م`);
+        assert(Math.abs(window.calcState.remainingArea) < 0.01, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب ألا يتبقى أي مساحة بسبب التقريب. الفعلي: ${window.calcState.remainingArea.toFixed(4)} م²`);
+        assert(window.calcState.deficitArea === 0, `الحالة 15 (مستكشف التقريب لـ ${count} شركاء بطريقة ${method}): يجب ألا يكون هناك أي عجز تقريب. الفعلي: ${window.calcState.deficitArea.toFixed(4)} م²`);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // TEST CASE 16: Clear all partners (clearPartners) verification
+    // -------------------------------------------------------------------------
+    // 1. Set dimensions
+    document.getElementById("length1").value = 100;
+    document.getElementById("length2").value = 100;
+    document.getElementById("width1").value = 50;
+    document.getElementById("width2").value = 50;
+    
+    saveData();
+    calculateGeneral();
+    
+    // 2. Add 5 partners
+    const listEl = document.getElementById("partners-list");
+    listEl.innerHTML = "";
+    addNewPartnerRow("شريك 1", "", "4", "", "");
+    addNewPartnerRow("شريك 2", "", "4", "", "");
+    addNewPartnerRow("شريك 3", "", "4", "", "");
+    addNewPartnerRow("شريك 4", "", "4", "", "");
+    addNewPartnerRow("شريك 5", "", "8", "", ""); // Total 24 carats
+    
+    window.runPartition();
+    assert(window.isPartitioned === true, "الحالة 16: يجب تقسيم الشركاء الخمسة بنجاح قبل المسح.");
+    
+    // 3. Clear partners
+    clearPartners(false); // No prompt in test environment
+    
+    // 4. Asserts
+    assert(document.getElementById("length1").value === "100", "الحالة 16: يجب ألا يتغير الطول الأول للأرض بعد مسح الشركاء.");
+    assert(document.getElementById("length2").value === "100", "الحالة 16: يجب ألا يتغير الطول الثاني للأرض بعد مسح الشركاء.");
+    assert(document.getElementById("width1").value === "50", "الحالة 16: يجب ألا يتغير العرض الأول للأرض بعد مسح الشركاء.");
+    assert(document.getElementById("width2").value === "50", "الحالة 16: يجب ألا يتغير العرض الثاني للأرض بعد مسح الشركاء.");
+    
+    const landAreaDisplay = document.querySelector("#calc-area-m2").innerText;
+    assert(parseFloat(landAreaDisplay) === 5000, "الحالة 16: يجب أن تظل مساحة الأرض الكلية 5000 م².", `الفعلية: ${landAreaDisplay}`);
+    
+    const rowsCountAfterClear = document.querySelectorAll("#partners-list .partner-row").length;
+    assert(rowsCountAfterClear === 0, "الحالة 16: يجب أن يكون جدول الشركاء فارغاً تماماً بعد الحذف (0 صفوف).", `الفعلي: ${rowsCountAfterClear}`);
+    
+    assert(window.isPartitioned === false, "الحالة 16: يجب أن تكون حالة التقسيم isPartitioned تساوي false.");
+    assert(window.calculatedPieces.length === 0, "الحالة 16: يجب أن تكون مصفوفة التقسيم calculatedPieces فارغة.");
+    
+    // 5. Test adding new partners and partitioning again directly
+    addNewPartnerRow("شريك جديد 1", "", "12", "", "");
+    addNewPartnerRow("شريك جديد 2", "", "12", "", "");
+    window.runPartition();
+    assert(window.isPartitioned === true, "الحالة 16: يجب أن نتمكن من تقسيم شركاء جدد مباشرة بنجاح.");
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {
