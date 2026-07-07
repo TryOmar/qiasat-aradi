@@ -122,11 +122,10 @@ function updateTables(
   listOfCheckboxValues = []
 ) {
   console.log("Before: ", listOfCheckboxValues);
-  // Initialize listOfCheckboxValues with true if empty
-  if (!listOfCheckboxValues || listOfCheckboxValues.length == 0) {
-    listOfCheckboxValues = Array(
-      numWivesValue + numFemalesValue + numMalesValue + (isSharesLeft ? 1 : 0)
-    ).fill(true);
+  // Initialize and validate listOfCheckboxValues length
+  const expectedLength = numWivesValue + numFemalesValue + numMalesValue + (isSharesLeft ? 1 : 0);
+  if (!listOfCheckboxValues || listOfCheckboxValues.length !== expectedLength) {
+    listOfCheckboxValues = Array(expectedLength).fill(true);
   }
   console.log("Num: ", numWivesValue, numFemalesValue, numMalesValue);
   console.log("After: ", listOfCheckboxValues);
@@ -365,13 +364,9 @@ function calculateShares(newCalculation = false) {
   let totalSharesleft = totalAllShares - familyShares;
   isSharesLeft = totalSharesleft > 0 ? true : false;
 
-  if (newCalculation) {
-    listOfCheckboxValues = Array(
-      numWivesValue +
-        numFemalesValue +
-        numMalesValue +
-        (isSharesLeft ? 1 : 0)
-    ).fill(true);
+  const expectedLength = numWivesValue + numFemalesValue + numMalesValue + (isSharesLeft ? 1 : 0);
+  if (newCalculation || listOfCheckboxValues.length !== expectedLength) {
+    listOfCheckboxValues = Array(expectedLength).fill(true);
   }
 
   updateTables(
