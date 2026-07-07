@@ -700,18 +700,18 @@ function printReport() {
         <table>
           <thead>
             <tr>
+              <th>إجمالي المساحة بالأسهم</th>
               <th>فدان</th>
               <th>قيراط</th>
               <th>سهم</th>
-              <th>إجمالي المساحة بالأسهم</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td><strong>${totalAllShares} سهم</strong></td>
               <td>${acreValue}</td>
               <td>${caratValue}</td>
               <td>${shareValue}</td>
-              <td><strong>${totalAllShares} سهم</strong></td>
             </tr>
           </tbody>
         </table>
