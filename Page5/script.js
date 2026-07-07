@@ -585,7 +585,7 @@ function printReport() {
 
   // Let's create the print window content
   let printWindow = window.open("", "_blank");
-  printWindow.document.write(\`
+  printWindow.document.write(`
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
     <head>
