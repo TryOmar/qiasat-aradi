@@ -19,84 +19,155 @@
     }
 
     #body {
-      width: 80%;
+      width: 95%;
+      max-width: 600px;
     }
 
     #div_landEnters {
       width: 100%;
-      background-color: green;
+      background-color: #1b5e20;
+      border-radius: 10px 10px 0 0;
+      padding: 12px;
+      text-align: center;
+      margin-top: 15px;
     }
 
     #p_landtitle {
       color: white;
-      font-weight: bold;
+      font-weight: 800;
+      margin: 0;
+      font-size: 15px;
     }
 
     #tbl_landEnters {
-      width: 70%;
+      width: 100%;
+      background: white;
+      border: 2px solid #cbd5e1;
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding: 16px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    #txt_carat {
-      width: 70%;
-      font-weight: bold;
+    #txt_carat, #txt_share, #txt_acre {
+      width: 85%;
+      height: 42px;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      font-weight: 800;
+      color: #000000;
+      font-size: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
     }
 
-    #txt_share {
-      width: 70%;
-      font-weight: bold;
-    }
-
-    #txt_acre {
-      width: 70%;
-      font-weight: bold;
-
+    #txt_carat:focus, #txt_share:focus, #txt_acre:focus {
+      border-color: #1b5e20 !important;
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
     }
 
     #tbl_landEnters tr {
       display: flex;
       justify-content: space-around;
+      width: 100%;
     }
 
     #tbl_landEnters td {
       display: flex;
       justify-content: center;
+      flex: 1;
     }
 
 
-    #btn_Calculate {
-      background-color: darkgoldenrod;
+    .row-buttons-small {
+      display: flex;
+      flex-direction: row; /* Side-by-side always */
+      justify-content: center;
+      gap: 12px;
+      margin: 15px auto 25px auto;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .row-buttons-small button {
+      flex: 1;
+      min-height: 44px;
+      height: 44px;
+      border-radius: 10px;
+      outline: none;
+      border: 2px solid;
       color: white;
-      float: left;
-      /* margin-left: 90px; */
-      width: 15%;
-      border-style: none;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
     }
 
-    #btn_Delete {
-      background-color: maroon;
-      color: white;
-      float: right;
-      /* margin-right: 90px; */
-      width: 15%;
-      border-style: none;
+    .btn-clear {
+      background-color: rgb(149, 11, 63) !important;
+      border-color: rgb(110, 8, 46) !important;
+    }
+    .btn-clear:hover {
+      background-color: rgb(110, 8, 46) !important;
     }
 
-    #txt_numwives {
+    .btn-calc {
+      background-color: #df8714 !important;
+      border-color: #b36a0d !important;
+    }
+    .btn-calc:hover {
+      background-color: #b36a0d !important;
+    }
 
-      width: 30%;
+    .family-inputs-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 320px;
+      margin: 20px auto;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .family-input-row {
+      display: flex;
+      flex-direction: row-reverse; /* Align text label right and input left */
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .family-input-row label {
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 15px;
+    }
+
+    .family-input-row input {
+      width: 80px;
+      height: 42px;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      font-weight: 800;
+      color: #000000;
+      font-size: 16px;
       text-align: center;
+      transition: all 0.2s ease;
     }
 
-    #txt_numFemales {
-
-      width: 30%;
-      text-align: center;
-    }
-
-    #txt_numMales {
-
-      width: 30%;
-      text-align: center;
+    .family-input-row input:focus {
+      border-color: #1b5e20 !important;
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
     }
 
     #div_Results {
@@ -106,63 +177,73 @@
 
     #p_Resultstitle {
       color: #1b5e20;
-      font-weight: bold;
-      font-size: 16px;
+      font-weight: 800;
+      font-size: 17px;
+      margin-top: 25px;
     }
 
-    /* Table cells should wrap content */
-    #tbl_Results td,
+    #tbl_Results {
+      width: 100%;
+      margin: 20px 0 40px 0;
+      border-collapse: separate;
+      border-spacing: 4px 6px;
+    }
+    
     #tbl_Results th {
-      word-wrap: break-word;
-      /* Enable word wrapping */
+      background-color: #0d47a1;
+      color: white;
+      font-weight: 800;
+      padding: 10px 4px;
+      font-size: 12px;
+      border: none;
+      border-radius: 6px;
       text-align: center;
-      /* Center text in cells */
-      border: 1px solid #ddd;
-      padding: 8px;
-      /* Add padding for better spacing */
+      white-space: nowrap;
+    }
+    
+    #tbl_Results td {
+      background-color: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
     }
 
-    /* Adjustments for smaller screens */
-    @media (max-width: 768px) {
+    #tbl_Results td input {
+      border: none !important;
+      background: transparent !important;
+      font-weight: 800 !important;
+      color: #000000 !important;
+      text-align: center;
+      width: 100%;
+      box-shadow: none !important;
+    }
 
-      #tbl_Results td,
-      #tbl_Results th {
-        font-size: 8px;
-        /* Reduce font size */
-        padding: 6px;
-        /* Reduce padding */
-      }
+    #tbl_Results tr.wife td,
+    #tbl_Results tr.females td,
+    #tbl_Results tr.sons td {
+      border-color: #0d47a1;
+      background-color: #f1f8ff;
+      color: #0d47a1;
+    }
+
+    #tbl_Results tr.tableFooterTotal td {
+      background-color: #fffbeb !important;
+      color: #d97706 !important;
+      border: 2.5px solid #d97706 !important;
+    }
+    
+    #tbl_Results tr.tableFooterTotal td input {
+      color: #d97706 !important;
     }
 
     /* Responsive container for the table */
     .table-responsive {
       overflow-x: auto;
-      /* Allow horizontal scrolling on small screens */
       -webkit-overflow-scrolling: touch;
-      /* Smooth scrolling for iOS devices */
-    }
-
-    #tbl_Results th {
-      padding-top: 3px;
-      padding-bottom: 3px;
-      text-align: center;
-      background-color: rgb(0, 0, 0);
-      color: white;
-    }
-
-    .tableFooterTotal td {
-      background-color: #1B5E20;
-      color: white;
-      font-weight: bold;
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-
-    .tableFooterTotal input[type="input"] {
-      background-color: #1B5E20;
-      color: white;
-      font-weight: bold;
-      text-align: center;
+      width: 100%;
     }
 
     input[type="input"] {
@@ -174,18 +255,86 @@
     }
 
     ::placeholder {
-      opacity: 0.2;
-      /* Change this value to your desired opacity (0.0 to 1.0) */
+      opacity: 0.4;
     }
 
-    /* Give margin to to the bottom navigation  bar*/
-
-    /* General table styles */
-    #tbl_Results {
+    #div_Totalshare {
       width: 100%;
-      /* Make table take full width */
-      margin-bottom: 10%;
-      border-collapse: collapse;
+      max-width: 320px;
+      margin: 20px auto;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    #p_Totalshare {
+      background-color: #1b5e20 !important;
+      color: white !important;
+      font-weight: 800 !important;
+      padding: 10px !important;
+      margin: -12px -12px 12px -12px !important;
+      border-radius: 10px 10px 0 0 !important;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    #txt_TotalAllshare {
+      width: 140px;
+      height: 42px;
+      border: 2px solid #0d47a1;
+      background-color: #f1f8ff;
+      color: #0d47a1;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 18px;
+      text-align: center;
+      outline: none;
+    }
+
+    body.outdoor-mode #tbl_landEnters,
+    body.outdoor-mode .family-inputs-container,
+    body.outdoor-mode #div_Totalshare {
+      background-color: #FFFFFF !important;
+      border: 3px solid #000000 !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.16) !important;
+      margin-bottom: 24px !important;
+    }
+
+    body.outdoor-mode #div_landEnters {
+      border: 3px solid #000000 !important;
+      border-bottom: none !important;
+      background-color: #1b5e20 !important;
+    }
+
+    body.outdoor-mode #p_Totalshare {
+      background-color: #1b5e20 !important;
+      border-bottom: 3px solid #000000 !important;
+    }
+
+    body.outdoor-mode #tbl_Results th {
+      background-color: #000000 !important;
+      color: #FFFFFF !important;
+      border: 2px solid #000000 !important;
+    }
+
+    body.outdoor-mode #tbl_Results td {
+      border: 3px solid #000000 !important;
+      background-color: #FFFFFF !important;
+      color: #000000 !important;
+    }
+
+    body.outdoor-mode #tbl_Results tr.wife td,
+    body.outdoor-mode #tbl_Results tr.females td,
+    body.outdoor-mode #tbl_Results tr.sons td {
+      border-color: #0d47a1 !important;
+      background-color: #E8F0FE !important;
+    }
+
+    body.outdoor-mode #tbl_Results tr.tableFooterTotal td {
+      background-color: #FFF3E0 !important;
+      border-color: #EF6C00 !important;
     }
   </style>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -233,21 +382,19 @@
       </table>
       <!-- ---------------------------------------------------------- -->
       <br>
-      <div>
-
-        <span>
-          <input type="button" id="btn_Calculate" name="احسب" value="احسب" onclick="calculateShares(true)">
-        </span>
-        <span>
-          <input type="button" id="btn_Delete" name="حذف" value="حذف" onclick="clearInputFields()">
-        </span>
-
-
+      <div class="row-buttons-small">
+        <button class="btn-clear" onclick="clearInputFields()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          حذف
+        </button>
+        <button class="btn-calc" onclick="calculateShares(true)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          احسب
+        </button>
       </div>
       <br>
       <div id="div_Totalshare">
-        <p id="p_Totalshare" style="background-color:green;color:white;font-weight:bold">اجمالى عدد الاسهم
-        </p>
+        <p id="p_Totalshare">اجمالى عدد الاسهم</p>
         <input type="input" id="txt_TotalAllshare" placeholder="23.75" readonly>
       </div>
 
@@ -257,21 +404,20 @@
           الرجوع الى برنامج اخر</p>
       </div>
 
-      <br><br><br>
-      <div style="float:right">
-        <input type="text" inputmode="decimal" id="txt_numwives" step="1" placeholder="1" oninput="calculateShares(true)" min="0">
-        <label style="font-weight:bold;float: right;">ادخل عدد الزوجات</label>
-        <br><br>
-        <input type="text" inputmode="decimal" id="txt_numFemales" step="1" placeholder="2" oninput="calculateShares(true)" min="0"
-          style="margin-right: 15px;">
-        <label style="font-weight:bold;float: right;">ادخل عدد البنات</label>
-        <br><br>
-        <input type="text" inputmode="decimal" id="txt_numMales" step="1" placeholder="1" oninput="calculateShares(true)" min="0"
-          style="margin-right: 15px;">
-        <label style="font-weight:bold;float: right;">ادخل عدد الذكور</label>
+      <div class="family-inputs-container">
+        <div class="family-input-row">
+          <label>عدد الزوجات</label>
+          <input type="text" inputmode="decimal" id="txt_numwives" step="1" placeholder="1" oninput="calculateShares(true)" min="0">
+        </div>
+        <div class="family-input-row">
+          <label>عدد البنات</label>
+          <input type="text" inputmode="decimal" id="txt_numFemales" step="1" placeholder="2" oninput="calculateShares(true)" min="0">
+        </div>
+        <div class="family-input-row">
+          <label>عدد الذكور</label>
+          <input type="text" inputmode="decimal" id="txt_numMales" step="1" placeholder="1" oninput="calculateShares(true)" min="0">
+        </div>
       </div>
-      <br><br><br><br><br><br>
-      <br><br>
       <div id="div_Results">
         <p id="p_Resultstitle" style="margin-top: 30px;"> جدول توزيع الميراث علي الورثة
         </p>

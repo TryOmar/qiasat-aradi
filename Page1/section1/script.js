@@ -25,31 +25,24 @@ document.addEventListener("DOMContentLoaded", function () {
   calculate();
 });
 
-// Function to save input field data to sessionStorage / localStorage
+// Function to save input field data to sessionStorage
 function saveData() {
   sessionStorage.setItem("width1", width1.value);
   sessionStorage.setItem("width2", width2.value);
   sessionStorage.setItem("height", height.value);
+  sessionStorage.setItem("area1", area1.value);
+  sessionStorage.setItem("area2", area2.value);
   sessionStorage.setItem("price", price.value);
-  
-  // Persist selector values indefinitely across sessions (localStorage)
-  localStorage.setItem("dalal_area1", area1.value);
-  localStorage.setItem("dalal_area2", area2.value);
 }
 
-// Function to retrieve and set input field data from sessionStorage / localStorage
+// Function to retrieve and set input field data from sessionStorage
 function loadData() {
   width1.value = sessionStorage.getItem("width1") || "";
   width2.value = sessionStorage.getItem("width2") || "";
   height.value = sessionStorage.getItem("height") || "";
+  area1.value = sessionStorage.getItem("area1") || "";
+  area2.value = sessionStorage.getItem("area2") || "168";
   price.value = sessionStorage.getItem("price") || "";
-  
-  // Load persisted selector values or default to "168"
-  const savedArea1 = localStorage.getItem("dalal_area1");
-  const savedArea2 = localStorage.getItem("dalal_area2");
-  
-  area1.value = savedArea1 !== null ? savedArea1 : "168";
-  area2.value = savedArea2 !== null ? savedArea2 : "168";
 }
 
 // Add event listeners to save data on input change
@@ -94,8 +87,8 @@ function last(type, num) {
 }
 
 function other() {
-  if (area1.value !== "0") {
-    area2.value = area1.value;
+  if (area1.options[area1.selectedIndex].text != "اخر") {
+    area2.value = area1.options[area1.selectedIndex].text;
   } else {
     area2.value = "";
   }
