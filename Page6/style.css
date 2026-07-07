@@ -33,20 +33,30 @@ body {
 }
 
 .s {
-  width: 256px;
+  width: 95%;
+  max-width: 340px;
   display: flex;
   flex-flow: column;
   align-items: center;
-  margin-top: 5px;
+  margin-top: 15px;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: white;
+  padding: 12px;
   text-align: center;
 }
 .s h3 {
-  font-size: 16px;
-  background-color: green;
+  font-size: 14px;
+  font-weight: 800;
+  background-color: #1b5e20;
   color: white;
-  width: 100%;
+  width: calc(100% + 24px);
+  margin: -12px -12px 15px -12px;
+  padding: 12px 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   text-align: center;
-  font-weight: normal;
 }
 .s > div {
   display: flex;
@@ -54,89 +64,113 @@ body {
   justify-content: space-evenly;
   width: 100%;
   align-items: center;
-  margin-top: 10px;
 }
 
 .input-div {
-  /* background-color:gray; */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .buttons2 {
-  /* width: 100%; */
   display: flex;
-  justify-content: right;
-}
-.buttons2 button:first-child {
-  margin-left: 150px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 12px;
+  margin: 15px auto 20px auto;
+  width: 100%;
+  max-width: 320px;
 }
 .buttons2 button {
-  line-height: 30px;
-  width: 60px;
+  flex: 1;
+  max-width: 150px;
+  min-height: 44px;
+  height: 44px;
   border-radius: 10px;
   outline: none;
-  border: none;
+  border: 2px solid;
   color: white;
-  font-weight: bold;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
 }
 .but1 {
   background-color: rgb(149, 11, 63);
+  border-color: rgb(110, 8, 46);
+}
+.but1:hover {
+  background-color: rgb(110, 8, 46);
 }
 .but2 {
   background-color: #df8714;
+  border-color: #b36a0d;
+}
+.but2:hover {
+  background-color: #b36a0d;
 }
 
-.s1 div {
-  justify-content: center;
+.s1 table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px 6px;
+  table-layout: fixed;
+}
+.s1 th {
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #000000;
+  padding-bottom: 6px;
+}
+.s1 td {
+  padding: 0 !important;
+  border: none !important;
+  vertical-align: middle;
 }
 .s1 input {
-  position: relative;
-  right: 10px;
-  width: 132px;
-  height: 32px;
+  width: 100% !important;
+  height: 42px !important;
+  border: 2.5px solid #000000 !important;
+  border-radius: 8px !important;
+  outline: none;
+  font-weight: 800;
+  color: #000000 !important;
+  font-size: 16px;
   text-align: center;
+  transition: all 0.2s ease;
+  background-color: #ffffff !important;
 }
-.s1 p {
-  margin-right: 20px;
-}
-
-.s1 img {
-  width: 50px;
+.s1 input:focus {
+  border-color: #1b5e20 !important;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
 }
 
 .input1 {
+  width: 160px !important;
+  height: 42px !important;
+  border: 2.5px solid #000000 !important;
+  border-radius: 8px !important;
+  outline: none;
+  font-weight: 800;
+  color: #000000 !important;
+  font-size: 16px;
   text-align: center;
-  border: 1px solid #cccccc;
-  color: #cccccc;
-  width: 120px;
+  transition: all 0.2s ease;
+  background-color: #ffffff !important;
+}
+.input1:focus {
+  border-color: #1b5e20 !important;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
 }
 
 .opt1 {
   width: 45px;
-}
-
-.s2 div {
-  justify-content: center;
-}
-.s2 input {
-  position: relative;
-  right: 10px;
-  width: 132px;
-  height: 32px;
-  text-align: center;
-}
-.s2 p {
-  margin-right: 20px;
-}
-
-.s2 img {
-  width: 50px;
-}
-.input1 {
-  text-align: center;
-  border: 1px solid #cccccc;
 }
 
 .selector1 {
@@ -261,9 +295,16 @@ body {
 }
 
 .s3 .input2 {
-  border: 0px;
+  width: 160px;
+  height: 48px;
+  border: 2px solid #0d47a1 !important;
+  border-radius: 8px;
+  background-color: #f1f8ff !important;
+  color: #0d47a1 !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
   text-align: center;
-  font-weight: bold;
+  outline: none;
 }
 .s5 div table {
   /* border: 1px solid red; */
@@ -307,9 +348,16 @@ body {
   /* border: 1px solid red; */
 }
 .s6 .input2 {
-  border: 0px;
-  font-weight: bold;
+  width: 220px;
+  height: 52px;
+  border: 2.5px solid #d97706 !important;
+  border-radius: 10px;
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
   text-align: center;
+  outline: none;
 }
 
 .s6 img {
@@ -392,4 +440,13 @@ body {
 
 .width1_result {
   width: 80px !important;
+}
+
+.con {
+  width: 95%;
+  max-width: 600px;
+  margin: 0 auto 80px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
