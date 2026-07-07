@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -22,12 +22,9 @@
         }
 
         .greenHeader {
-            /* width: 80%; */
-            font-size: 14px;
             font-size: 14px;
             background-color: #17A20f;
             color: white;
-            /* width: 100%; */
             width: 340px;
             text-align: center;
             font-weight: normal;
@@ -37,23 +34,9 @@
             margin-block-end: 1em;
             margin-inline-start: 0px;
             margin-inline-end: 0px;
+            border-radius: 8px;
+            padding: 8px;
         }
-
-        /* h3 {
-            font-size: 14px;
-            background-color: #17a201;
-            color: white;
-            width: 100%;
-            text-align: center;
-            font-weight: normal;
-            display: block;
-            font-size: 1.17em;
-            margin-block-start: 1em;
-            margin-block-end: 1em;
-            margin-inline-start: 0px;
-            margin-inline-end: 0px;
-            font-weight: bold;
-        } */
 
         div {
             display: flex;
@@ -64,36 +47,118 @@
             margin-top: 10px;
         }
 
-        .buttons2 {
-            margin-top: 20px;
+        table {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 340px;
+            border-collapse: separate;
+            border-spacing: 4px 6px;
+            table-layout: fixed;
+            margin: 10px auto;
+        }
+        th {
+            text-align: center;
+            font-weight: 800;
+            font-size: 13px;
+            color: #000000;
+            padding-bottom: 6px;
+        }
+        td {
+            padding: 0 !important;
+            border: none !important;
+            vertical-align: middle;
+        }
+        input[type="text"] {
+            width: 100% !important;
+            height: 42px !important;
+            border: 2.5px solid #000000 !important;
+            border-radius: 8px !important;
+            outline: none;
+            font-weight: 800;
+            color: #000000 !important;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+            background-color: #ffffff !important;
+        }
+        input[type="text"]:focus {
+            border-color: #1b5e20 !important;
+            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
         }
 
-
+        .buttons2 {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px auto 20px auto;
+            width: 100%;
+            max-width: 320px;
+        }
         .buttons2 button {
-            line-height: 30px;
-            width: 70px;
+            flex: 1;
+            max-width: 150px;
+            min-height: 44px;
+            height: 44px;
             border-radius: 10px;
             outline: none;
-            border: none;
+            border: 2px solid;
             color: white;
-            font-weight: bold;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
-
-        .buttons2 button:first-child {
-            margin-left: 10px;
-        }
-
         .but1 {
             background-color: rgb(149, 11, 63);
+            border-color: rgb(110, 8, 46);
+        }
+        .but1:hover {
+            background-color: rgb(110, 8, 46);
+        }
+        .but2 {
+            background-color: #df8714;
+            border-color: #b36a0d;
+        }
+        .but2:hover {
+            background-color: #b36a0d;
         }
 
-        .but2 {
-            background-color: #DF8714;
-            margin-right: 200px;
+        #resultInMeter {
+            width: 100%;
+            max-width: 340px;
+            height: 48px;
+            border: 2px solid #0d47a1 !important;
+            border-radius: 8px;
+            background-color: #f1f8ff !important;
+            color: #0d47a1 !important;
+            font-size: 20px !important;
+            font-weight: 900 !important;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+        }
+        #resultInCM {
+            width: 100%;
+            max-width: 340px;
+            height: 48px;
+            border: 2px solid #0d47a1 !important;
+            border-radius: 8px;
+            background-color: #f1f8ff !important;
+            color: #0d47a1 !important;
+            font-size: 18px !important;
+            font-weight: 900 !important;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto 80px auto !important;
         }
     </style>
 </head>
@@ -133,13 +198,19 @@
     </div>
 
     <div class="buttons2">
-        <button class="but2" onclick="calculateFistReedToCM()">أحسب</button>
-        <button class="but1" onclick="clearFistReed()">أحذف</button>
+        <button class="but1" onclick="clearFistReed()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            احذف
+        </button>
+        <button class="but2" onclick="calculateFistReedToCM()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            أحسب
+        </button>
     </div>
     <h3 class="greenHeader">النتيجة بالمتر الطولي</h3>
     <div id="resultInMeter">Result</div>
     <h3 class="greenHeader"> النتيجة بالسنتيمتر الطولي</h3>
-    <div id="resultInCM" style="margin-bottom:200px;">Result</div>
+    <div id="resultInCM">Result</div>
 
     <script>
         function validateInput() {

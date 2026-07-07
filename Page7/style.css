@@ -1,35 +1,36 @@
-.header1{
-    font-size: 25px;
-    font-weight: bold;
-    margin-top: 100px;
-    margin-bottom: 50px;
+.header1 {
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 90px;
+    margin-bottom: 30px;
+    color: #000000;
+    text-align: center;
 }
-.s1{
-    display:flex;
-    align-items: center;
-    flex-direction: column;
-    margin-bottom: 20px;
-}
-.s1 img{
-    width: 117px;
-    height: 66px;
-    margin-bottom: 20px;
-}
-.s2{
-    display:flex;
-    align-items: center;
-    flex-direction: column;
-}
-.s2 img{
-    width: 170px;
-    height: 140px;
-    margin-bottom: 20px;
-}
-.con{
+
+.con {
     position: relative;
     height: fit-content;
     padding-bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95%;
+    max-width: 420px;
+    margin: 0 auto;
 }
-.button1{
-    margin-bottom: 15px;
-}
+
+/* Each nav button gets bigger for field use */
+.button1 {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    min-height: 56px !important;
+    margin-bottom: 14px !important;
+    border-radius: 14px !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    border: 2px solid #145a14 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
+    letter-spacing: 0.3px;
+}
