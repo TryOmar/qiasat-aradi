@@ -23,6 +23,7 @@ let isFullscreen = false;
 
 document.addEventListener("DOMContentLoaded", function () {
   loadData();
+  updateWidthModeDescription();
   
   // Set up event listeners
   const list = document.getElementById("partners-list");
@@ -4026,6 +4027,27 @@ function updateTableTotals() {
     
     if (botWidthEl) botWidthEl.value = "-";
     if (topWidthEl) topWidthEl.value = "-";
+  }
+}
+
+function openWidthModeHelpModal() {
+  const modal = document.getElementById("width-mode-help-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeWidthModeHelpModal() {
+  const modal = document.getElementById("width-mode-help-modal");
+  if (modal) modal.style.display = "none";
+}
+
+function updateWidthModeDescription() {
+  const descEl = document.getElementById("manual-width-mode-desc");
+  if (!descEl) return;
+  const isKeepArea = document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
+  if (isKeepArea) {
+    descEl.innerHTML = `<span style="color: #2e7d32;">🟢 الحفاظ على مساحة الشريك:</span> سيحسب البرنامج العرض الآخر تلقائياً مع الحفاظ على نفس المساحة.`;
+  } else {
+    descEl.innerHTML = `<span style="color: #e65100;">🟠 التعديل الحر:</span> سيتم تعديل مساحة الشريك ونسبته وإعادة حساب التقسيم.`;
   }
 }
 
