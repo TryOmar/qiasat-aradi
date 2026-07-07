@@ -447,6 +447,11 @@ function handleCaratAreaChange(triggerCalculate = true) {
 function renderHeaderAndFooter() {
   const headerContainer = document.getElementById("table-header-container");
   const footerContainer = document.getElementById("total");
+  const tableEl = document.querySelector(".table");
+  if (tableEl) {
+    tableEl.classList.remove("method-carats", "method-fractions");
+    tableEl.classList.add("method-" + currentInputMethod);
+  }
   
   if (currentInputMethod === "carats") {
     headerContainer.innerHTML = `
