@@ -4168,5 +4168,12 @@ function updateWidthModeDescription() {
   }
 }
 
+function openStepSizeHelpModal() {
+  const modal = document.getElementById("step-size-help-modal");
+  if (modal) modal.style.display = "flex";
+}
 
-
+function closeStepSizeHelpModal() {
+  const modal = document.getElementById("step-size-help-modal");
+  if (modal) modal.style.display = "none";
+}
