@@ -3425,6 +3425,12 @@ function adjustWidthStep(btn, type, direction) {
     return;
   }
 
+  const currentWidth = currentVal;
+  const newWidth = newVal;
+  console.log("Step =", step);
+  console.log("Before =", currentWidth);
+  console.log("After =", newWidth);
+
   input.value = newVal.toFixed(4);
   onWidthChangeActual(input, type);
 }
@@ -3435,9 +3441,10 @@ function adjustWidthStep(btn, type, direction) {
 let _lpTimer = null;
 let _lpInterval = null;
 
-function _lpStart(btn, type, direction) {
-  // نفذ مرة فورية
-  adjustWidthStep(btn, type, direction);
+function _lpStart(btn, type, direction, immediate = true) {
+  if (immediate) {
+    adjustWidthStep(btn, type, direction);
+  }
   // ابدأ التكرار بعد 400ms تأخير أولي
   _lpTimer = setTimeout(() => {
     _lpInterval = setInterval(() => {
@@ -3459,7 +3466,7 @@ document.addEventListener("mousedown", (e) => {
   const onclick = btn.getAttribute("onclick") || "";
   const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
   if (!m) return;
-  _lpStart(btn, m[1], parseInt(m[2]));
+  _lpStart(btn, m[1], parseInt(m[2]), false); // لا نستدعيها فوراً لأن الـ onclick سيستدعيها
 });
 document.addEventListener("mouseup", _lpStop);
 document.addEventListener("mouseleave", _lpStop);
@@ -3471,7 +3478,7 @@ document.addEventListener("touchstart", (e) => {
   const onclick = btn.getAttribute("onclick") || "";
   const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
   if (!m) return;
-  _lpStart(btn, m[1], parseInt(m[2]));
+  _lpStart(btn, m[1], parseInt(m[2]), true); // نستدعيها فوراً لمنع التباطؤ على اللمس
 }, { passive: false });
 document.addEventListener("touchend", _lpStop);
 document.addEventListener("touchcancel", _lpStop);
