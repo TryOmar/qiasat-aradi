@@ -4177,3 +4177,29 @@ function closeStepSizeHelpModal() {
   const modal = document.getElementById("step-size-help-modal");
   if (modal) modal.style.display = "none";
 }
+
+function onStepValueChange(input) {
+  const val = parseFloat(input.value);
+  if (isNaN(val) || val <= 0) {
+    input.value = "0.10";
+  } else if (val > 5) {
+    alert("⚠️ خطوة التعديل كبيرة جداً (أكثر من 5 م) وقد تؤدي إلى نتائج غير متوقعة.\nتم تصحيح القيمة إلى 5.00 م.");
+    input.value = "5.00";
+  }
+  saveData();
+}
+
+function resetStepValue() {
+  const input = document.getElementById("width-step-value");
+  if (input) {
+    input.value = "0.10";
+    saveData();
+    // تأثير بصري مرتد
+    input.style.borderColor = "#2e7d32";
+    input.style.boxShadow = "0 0 0 2px rgba(46,125,50,0.25)";
+    setTimeout(() => {
+      input.style.borderColor = "";
+      input.style.boxShadow = "";
+    }, 800);
+  }
+}
