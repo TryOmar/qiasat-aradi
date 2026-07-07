@@ -125,7 +125,7 @@ function updateTables(
   // Initialize listOfCheckboxValues with true if empty
   if (!listOfCheckboxValues || listOfCheckboxValues.length == 0) {
     listOfCheckboxValues = Array(
-      numWivesValue + numFemalesValue + numMalesValue
+      numWivesValue + numFemalesValue + numMalesValue + (isSharesLeft ? 1 : 0)
     ).fill(true);
   }
   console.log("Num: ", numWivesValue, numFemalesValue, numMalesValue);
@@ -357,24 +357,22 @@ function calculateShares(newCalculation = false) {
   numFemalesValue = Number(numFemalesValue);
   numMalesValue = Number(numMalesValue);
 
+  const familyShares =
+    numWivesValue * nasebZwga +
+    numFemalesValue * nasebBnat +
+    numMalesValue * nasebAbn;
+
+  let totalSharesleft = totalAllShares - familyShares;
+  isSharesLeft = totalSharesleft > 0 ? true : false;
+
   if (newCalculation) {
     listOfCheckboxValues = Array(
       numWivesValue +
         numFemalesValue +
         numMalesValue +
-        (numWivesValue > 0 ? 1 : 0)
+        (isSharesLeft ? 1 : 0)
     ).fill(true);
   }
-
-  const familyShares =
-    numWivesValue * nasebZwga +
-    numFemalesValue * nasebBnat +
-    numMalesValue * nasebAbn;
-  // console.log("nasebAbn:", nasebAbn);
-
-  // console.log("----------------------------------------------");
-  let totalSharesleft = totalAllShares - familyShares;
-  isSharesLeft = totalSharesleft > 0 ? true : false;
 
   updateTables(
     numWivesValue,
