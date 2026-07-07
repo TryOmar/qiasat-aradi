@@ -376,7 +376,7 @@ function loadData() {
     }
   }
 
-  const savedStepVal = localStorage.getItem("p11-width-step-value") || "0.10";
+  const savedStepVal = localStorage.getItem("p11-width-step-value") || "0.50";
   const stepValEl = document.getElementById("width-step-value");
   if (stepValEl) {
     stepValEl.value = savedStepVal;
@@ -4268,7 +4268,7 @@ function closeStepSizeHelpModal() {
 function onStepValueChange(input) {
   const val = parseFloat(input.value);
   if (isNaN(val) || val <= 0) {
-    input.value = "0.10";
+    input.value = "0.50";
   } else if (val > 5) {
     alert("⚠️ خطوة التعديل كبيرة جداً (أكثر من 5 م) وقد تؤدي إلى نتائج غير متوقعة.\nتم تصحيح القيمة إلى 5.00 م.");
     input.value = "5.00";
@@ -4279,7 +4279,7 @@ function onStepValueChange(input) {
 function resetStepValue() {
   const input = document.getElementById("width-step-value");
   if (input) {
-    input.value = "0.10";
+    input.value = "0.50";
     saveData();
     // تأثير بصري مرتد
     input.style.borderColor = "#2e7d32";

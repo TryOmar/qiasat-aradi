@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
@@ -247,20 +247,20 @@
         <div style="margin-top: 6px; border-top: 1px dashed #c8e6c9; padding-top: 8px;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
             <label for="width-step-value" style="font-weight: bold; color: #2e7d32; font-size: 12.5px;">خطوة التعديل السريع (م):</label>
-            <input type="number" id="width-step-value" value="0.10" step="0.05" min="0.01" max="5"
+            <input type="number" id="width-step-value" value="0.50" step="0.5" min="0.5" max="5"
               list="step-size-suggestions"
               style="width: 75px; padding: 4px 6px; border: 1.5px solid #c8e6c9; border-radius: 6px; text-align: center; font-weight: bold; font-family: Cairo, Arial, sans-serif;"
-              onchange="onStepValueChange(this);">
+              oninput="onStepValueChange(this);">
             <datalist id="step-size-suggestions">
               <option value="0.05">0.05 م</option>
-              <option value="0.10">0.10 م ⭐</option>
+              <option value="0.10">0.10 م</option>
               <option value="0.25">0.25 م</option>
-              <option value="0.50">0.50 م</option>
+              <option value="0.50">0.50 م ⭐</option>
               <option value="1.00">1.00 م</option>
             </datalist>
-            <button type="button" onclick="resetStepValue()" title="إعادة إلى القيمة الافتراضية 0.10 م"
+            <button type="button" onclick="resetStepValue()" title="إعادة إلى القيمة الافتراضية 0.50 م"
               style="background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 6px; color: #2e7d32; font-size: 11px; font-weight: bold; padding: 3px 8px; cursor: pointer; font-family: Cairo, Arial, sans-serif; white-space: nowrap;">
-              ↺ 0.10
+              ↺ 0.50
             </button>
             <button type="button" onclick="openStepSizeHelpModal()" title="شرح خطوة التعديل السريع"
               style="background: none; border: none; cursor: pointer; color: #1565c0; font-size: 17px; padding: 0 2px; line-height: 1; display: inline-flex; align-items: center;">ℹ️</button>
