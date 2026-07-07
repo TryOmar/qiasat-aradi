@@ -303,11 +303,11 @@
 .s5 div table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 6px 8px;
+  border-spacing: 3px 6px;
 }
 
 .s5 div table tr th {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   color: #0f172a;
   text-align: center;
@@ -315,10 +315,10 @@
 }
 
 .s5 div table tr td input {
-  width: 68px;
+  width: 50px;
   height: 36px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #000000;
   border: 2px solid #cbd5e1;
@@ -326,6 +326,7 @@
   outline: none;
   background-color: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 0 2px !important;
 }
 
 .s5 div table tr td input:focus {
@@ -336,20 +337,21 @@
 .s5 div table tr td:not(:first-child) {
   border: none;
   text-align: center;
-  width: 76px;
+  width: 56px;
 }
 
 .s5 div table tr td {
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
   vertical-align: middle;
 }
 
 .s5 div table tr td:first-child {
   text-align: right;
-  padding-left: 6px;
+  padding-left: 2px;
   color: #0f172a;
   font-weight: bold;
+  font-size: 11px;
 }
 
 .s5 th {

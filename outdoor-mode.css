@@ -555,3 +555,12 @@ body.outdoor-mode .print-container .btn-print {
   font-size: 18px !important;
   padding: 0 24px !important;
 }
+
+/* --- منع تمدد حقول الإدخال داخل الجداول في وضع الشمس --- */
+body.outdoor-mode table input,
+body.outdoor-mode td input {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 4px !important;
+  font-size: 13px !important;
+}
