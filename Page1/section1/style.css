@@ -73,7 +73,7 @@
 .input div input {
   height: 42px;
   width: 145px;
-  border: 2px solid #cbd5e1;
+  border: 2.5px solid #000000;
   border-radius: 8px;
   outline: none;
   text-align: center;
@@ -187,7 +187,7 @@
   height: 42px;
   position: relative;
   left: 5px;
-  border: 2px solid #cbd5e1;
+  border: 2.5px solid #000000;
   border-radius: 8px;
   outline: none;
 }
@@ -199,7 +199,7 @@
   text-align: center;
   right: 10px;
   outline: none;
-  border: 2px solid #cbd5e1;
+  border: 2.5px solid #000000;
   border-radius: 8px;
   font-weight: 800;
 }
@@ -218,7 +218,7 @@
   width: 140px;
   height: 42px;
   text-align: center;
-  border: 2px solid #cbd5e1;
+  border: 2.5px solid #000000;
   border-radius: 8px;
   outline: none;
   font-weight: 800;
@@ -321,7 +321,7 @@
   font-size: 13px;
   font-weight: 800;
   color: #000000;
-  border: 2px solid #cbd5e1;
+  border: 2px solid #000000;
   border-radius: 8px;
   outline: none;
   background-color: #ffffff;

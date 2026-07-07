@@ -409,3 +409,10 @@ td.width1_result:focus-within {
   padding: 12px 24px !important;
   font-size: 16px !important;
 }
+
+/* --- حقول الإدخال ذات إطار أسود صريح --- */
+.s1 td.width1_result,
+.s2 td.width1_result,
+.s5 td.width1_result {
+  border: 2.5px solid #000000 !important;
+}
