@@ -1825,9 +1825,13 @@ function renderCroquis() {
   if (!isPartitioned) {
     if (placeholder) {
       placeholder.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e65100" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <p style="font-weight: bold; color: #e65100; margin-top: 10px;">الرجاء الضغط على زر (أحسب / تقسيم)</p>
-        <p style="font-size: 12px; color: #666; margin-top: 5px;">لبدء تقسيم الأرض ورسم الكروكي</p>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef6c00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <p style="font-weight: bold; color: #e65100; font-size: 15px; margin: 0 0 10px 0; font-family: Cairo, sans-serif; text-align: center;">لا توجد بيانات تقسيم لعرضها.</p>
+        <div style="text-align: right; display: inline-block; font-size: 13px; color: #555; line-height: 1.8; font-family: Cairo, sans-serif; direction: rtl;">
+          <div style="margin-bottom: 4px;"><strong>1.</strong> أضف الشركاء.</div>
+          <div style="margin-bottom: 4px;"><strong>2.</strong> أدخل أنصبة كل شريك.</div>
+          <div><strong>3.</strong> اضغط <strong style="color: #2e7d32; background-color: #e8f5e9; padding: 2px 8px; border-radius: 4px; border: 1px solid #c8e6c9; white-space: nowrap; font-weight: bold;">«تحديث الخريطة»</strong> لإنشاء الكروكي وعرض التقسيم.</div>
+        </div>
       `;
       placeholder.style.display = "flex";
     }
