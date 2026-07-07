@@ -10,6 +10,7 @@ let showCroquisMeasurements = true;
 let isPartitioned = false;
 let isManualPartition = false;
 let isEditing = false;
+let isUpdatingRow = false;
 let activeFieldBefore = null;
 let autoCloseTimer = null;
 
@@ -567,11 +568,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
-        <input type="text" class="partner-area" readonly value="-">
+        <input type="text" inputmode="decimal" class="partner-area" value="-" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group percent-group">
         <span class="mobile-label">نسبة (%)</span>
-        <input type="text" class="partner-percent" readonly value="-">
+        <input type="text" inputmode="decimal" class="partner-percent" value="-" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
@@ -612,11 +613,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <div class="col-group" style="display:none;"><input type="hidden"></div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
-        <input type="text" class="partner-area" readonly value="-">
+        <input type="text" inputmode="decimal" class="partner-area" value="-" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group percent-group">
         <span class="mobile-label">نسبة (%)</span>
-        <input type="text" class="partner-percent" readonly value="-">
+        <input type="text" inputmode="decimal" class="partner-percent" value="-" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
@@ -797,10 +798,16 @@ function syncExclusionUI() {
       if (nameInput) nameInput.disabled = true;
       
       const areaInput = row.querySelector(".partner-area");
-      if (areaInput) areaInput.value = "⚠️ مستبعد";
+      if (areaInput) {
+        areaInput.value = "⚠️ مستبعد";
+        areaInput.disabled = true;
+      }
       
       const percentInput = row.querySelector(".partner-percent");
-      if (percentInput) percentInput.value = "⚠️ مستبعد";
+      if (percentInput) {
+        percentInput.value = "⚠️ مستبعد";
+        percentInput.disabled = true;
+      }
       
       const equivInput = row.querySelector(".partner-equiv");
       if (equivInput) equivInput.value = "⚠️ مستبعد";
@@ -839,6 +846,12 @@ function syncExclusionUI() {
       row.style.opacity = "";
       if (delBtn) delBtn.style.display = "inline-block";
       if (nameInput) nameInput.disabled = false;
+      
+      const areaInput = row.querySelector(".partner-area");
+      if (areaInput) areaInput.disabled = false;
+      
+      const percentInput = row.querySelector(".partner-percent");
+      if (percentInput) percentInput.disabled = false;
       
       const w1 = row.querySelector(".partner-width-bottom");
       const w2 = row.querySelector(".partner-width-top");
@@ -1537,14 +1550,32 @@ function divideEqually() {
   if (currentInputMethod === "carats") {
     const totalCarats = totalAreaM2 / caratArea;
     const partnerCarats = totalCarats / numPartners;
+    
+    // حساب قيم الشريك العادي مع تقريب الأسهم لرقمتين عشريتين
     const f = Math.floor(partnerCarats / 24);
     const c = Math.floor(partnerCarats % 24);
     const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
     
+    // يتم تطبيق تعويض فرق التقريب على آخر شريك فقط أثناء التوزيع التلقائي، وذلك لمنع ظهور عجز وهمي ناتج عن تقريب الأسهم، ولا يُطبق مطلقاً على الإدخال اليدوي.
+    const actualPartnerCarats = f * 24 + c + s / 24;
+    
+    // حساب المتبقي للشريك الأخير لاستيعاب فروق التقريب بالكامل
+    const assignedCaratsSoFar = actualPartnerCarats * (numPartners - 1);
+    const lastPartnerCarats = Math.max(0, totalCarats - assignedCaratsSoFar);
+    
+    const lastF = Math.floor(lastPartnerCarats / 24);
+    const lastC = Math.floor(lastPartnerCarats % 24);
+    const lastS = Number(((lastPartnerCarats - (lastF * 24 + lastC)) * 24).toFixed(2));
+
     rows.forEach((row, index) => {
-      if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f;
-      if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c;
-      if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s;
+      const isLast = (index === numPartners - 1);
+      const targetF = isLast ? lastF : f;
+      const targetC = isLast ? lastC : c;
+      const targetS = isLast ? lastS : s;
+      
+      if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = targetF;
+      if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = targetC;
+      if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = targetS;
     });
   } else {
     rows.forEach((row, index) => {
@@ -3419,6 +3450,86 @@ function onShareInput() {
   saveAndCalc();
 }
 
+function updatePartnerFromInput(type, value, row) {
+  if (window.isUpdatingRow) return;
+  window.isUpdatingRow = true;
+
+  try {
+    const l1 = parseFloat(document.getElementById("length1").value) || 0;
+    const l2 = parseFloat(document.getElementById("length2").value) || 0;
+    const w1 = parseFloat(document.getElementById("width1").value) || 0;
+    const w2 = parseFloat(document.getElementById("width2").value) || 0;
+    const w = (w1 + w2) / 2;
+    const totalAreaM2 = ((l1 + l2) / 2) * w;
+
+    if (totalAreaM2 <= 0) {
+      alert("الرجاء إدخال أبعاد الأرض الإجمالية أولاً.");
+      saveAndCalcImmediate();
+      return;
+    }
+
+    let caratArea = parseFloat(document.getElementById("input-carat-area").value);
+    if (caratArea === 0) {
+      caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+    }
+
+    let areaVal = 0;
+
+    if (type === "area") {
+      const cleanVal = String(value).replace(/[^\d.]/g, '');
+      areaVal = parseFloat(cleanVal) || 0;
+    } else if (type === "percent") {
+      const cleanVal = String(value).replace(/[^\d.]/g, '');
+      const pctVal = parseFloat(cleanVal) || 0;
+      areaVal = (pctVal / 100) * totalAreaM2;
+    }
+
+    if (areaVal < 0) areaVal = 0;
+
+    // تحديث المصادر الأساسية للحساب (FCS أو الكسر)
+    if (currentInputMethod === "carats") {
+      if (caratArea > 0) {
+        const totalCarats = areaVal / caratArea;
+        const feddan = Math.floor(totalCarats / 24);
+        const carat = Math.floor(totalCarats % 24);
+        const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(4));
+        
+        const feddansInput = row.querySelector(".partner-feddans");
+        const caratsInput = row.querySelector(".partner-carats");
+        const sharesInput = row.querySelector(".partner-shares");
+        
+        if (feddansInput) feddansInput.value = feddan;
+        if (caratsInput) caratsInput.value = carat;
+        if (sharesInput) sharesInput.value = sahm;
+      }
+    } else {
+      const fracVal = areaVal / totalAreaM2;
+      const fractionInput = row.querySelector(".partner-fraction");
+      if (fractionInput) {
+        fractionInput.value = Number(fracVal.toFixed(6));
+      }
+    }
+
+    // إعادة الحساب ورسم الكروكي والخطوات عبر المسار الموحد
+    isManualPartition = false;
+    saveAndCalc();
+  } finally {
+    window.isUpdatingRow = false;
+  }
+}
+
+function onAreaInput(input) {
+  const row = input.closest(".partner-row");
+  if (!row) return;
+  updatePartnerFromInput("area", input.value, row);
+}
+
+function onPercentInput(input) {
+  const row = input.closest(".partner-row");
+  if (!row) return;
+  updatePartnerFromInput("percent", input.value, row);
+}
+
 // مستمع لتغيير حجم الشاشة لإعادة رسم وتجاوب الكروكي (مثل صفحة 13)
 window.addEventListener("resize", function() {
   renderCroquis();
@@ -3428,8 +3539,8 @@ function updateRemainderRowUI(remainingArea) {
   const row = document.getElementById("remainder-row-table");
   if (!row) return;
 
-  const isZero = Math.abs(remainingArea) < 0.05;
-  const isNegative = remainingArea < -0.05;
+  const isZero = Math.abs(remainingArea) < 0.15;
+  const isNegative = remainingArea < -0.15;
 
   if (isZero || isNegative) {
     row.style.display = "none";

@@ -568,6 +568,149 @@ function runAutomatedTests() {
     const finalStatusText10 = document.getElementById("summary-status") ? document.getElementById("summary-status").innerText : "";
     assert(finalStatusText10.includes("تم التقسيم بالكامل"), "الحالة 10: يجب أن يعود النص التنبيهي إلى التقسيم الكامل والأخضر بعد التصحيح.", finalStatusText10);
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 11: Manual editing of Area input & reverse check to Feddan
+    // -------------------------------------------------------------------------
+    document.getElementById("length1").value = 100;
+    document.getElementById("length2").value = 100;
+    document.getElementById("width1").value = 100;
+    document.getElementById("width2").value = 100;
+    document.getElementById("input-carat-area").value = 168; // Carat area = 168
+    document.getElementById("share-input-method").value = "carats";
+    window.currentInputMethod = "carats";
+    handleCaratAreaChange(false);
+
+    const list11 = document.getElementById("partners-list");
+    list11.innerHTML = "";
+    addNewPartnerRow("شريك 1", 0, 0, 0, ""); // empty row
+    
+    // 1. Simulate user typing area = 336 sqm
+    const row11 = list11.querySelector(".partner-row");
+    const areaInput11 = row11.querySelector(".partner-area");
+    areaInput11.value = "336";
+    // Call the event handler
+    onAreaInput(areaInput11);
+
+    // Verify FCS and percentage
+    let feddans11 = parseFloat(row11.querySelector(".partner-feddans").value) || 0;
+    let carats11 = parseFloat(row11.querySelector(".partner-carats").value) || 0;
+    let shares11 = parseFloat(row11.querySelector(".partner-shares").value) || 0;
+    
+    // 336 / 168 = 2 carats. So feddans = 0, carats = 2, shares = 0.
+    assert(feddans11 === 0 && carats11 === 2 && shares11 === 0, "الحالة 11: يجب أن يتم تحويل المساحة 336 م² إلى 2 قيراط.");
+    
+    // Check that percent is calculated as 3.36% (since total area is 10000 sqm)
+    let percentVal11 = parseFloat(row11.querySelector(".partner-percent").value) || 0;
+    assert(Math.abs(percentVal11 - 3.36) < 0.05, `الحالة 11: يجب أن تكون النسبة المحسوبة 3.36%. الفعلي: ${percentVal11}%`);
+    assert(window.isUpdatingRow === false, "الحالة 11: يجب ألا يعلق التطبيق في حلقة لانهائية (isUpdatingRow = false).");
+
+    // 2. Reverse Check: Change Feddans to 1 (Add 1 Feddan = 168 * 24 = 4032 sqm, total target 4368 sqm)
+    const feddansInput11 = row11.querySelector(".partner-feddans");
+    feddansInput11.value = "1";
+    onShareInput(); // Trigger default flow
+
+    // Verify Area and Percentage updated back
+    const areaVal11_rev = parseFloat(row11.querySelector(".partner-area").value) || 0;
+    const percentVal11_rev = parseFloat(row11.querySelector(".partner-percent").value) || 0;
+    assert(Math.abs(areaVal11_rev - 4368) < 0.1, `الحالة 11 (عكسي): يجب تحديث المساحة إلى 4368 م² بعد تعديل الفدان. الفعلي: ${areaVal11_rev}`);
+    assert(Math.abs(percentVal11_rev - 43.68) < 0.1, `الحالة 11 (عكسي): يجب تحديث النسبة إلى 43.68%. الفعلي: ${percentVal11_rev}%`);
+
+    // 3. Deficit detection via Area Input
+    areaInput11.value = "12000"; // Exceeds total area (10000 sqm)
+    onAreaInput(areaInput11);
+    assert(window.calcState.deficitArea === 2000, `الحالة 11 (العجز): يجب أن يكون العجز 2000 م². الفعلي: ${window.calcState.deficitArea}`);
+    assert(hasDeficit() === true, "الحالة 11 (العجز): يجب أن يرجع كاشف العجز القيمة true.");
+
+    // -------------------------------------------------------------------------
+    // TEST CASE 12: Manual editing of Percentage input & reverse check to Fraction
+    // -------------------------------------------------------------------------
+    document.getElementById("length1").value = 100;
+    document.getElementById("length2").value = 100;
+    document.getElementById("width1").value = 100;
+    document.getElementById("width2").value = 100;
+    document.getElementById("input-carat-area").value = 168; // Carat area = 168
+    document.getElementById("share-input-method").value = "fractions"; // Use fraction mode
+    window.currentInputMethod = "fractions";
+    handleCaratAreaChange(false);
+
+    const list12 = document.getElementById("partners-list");
+    list12.innerHTML = "";
+    addNewPartnerRow("شريك 1", 0, 0, 0, ""); // empty row
+    
+    // 1. Simulate user typing percent = 10%
+    const row12 = list12.querySelector(".partner-row");
+    const percentInput12 = row12.querySelector(".partner-percent");
+    percentInput12.value = "10 %";
+    
+    // Call the event handler
+    onPercentInput(percentInput12);
+
+    // Verify Fraction and Area
+    const fraction12 = parseFloat(row12.querySelector(".partner-fraction").value) || 0;
+    const areaVal12 = parseFloat(row12.querySelector(".partner-area").value) || 0;
+
+    assert(Math.abs(fraction12 - 0.1) < 0.001, `الحالة 12: يجب تحويل النسبة 10% إلى كسر يعادل 0.1. الفعلي: ${fraction12}`);
+    assert(Math.abs(areaVal12 - 1000) < 1.0, `الحالة 12: يجب أن تكون المساحة المحسوبة 1000 م². الفعلي: ${areaVal12} م²`);
+    assert(window.isUpdatingRow === false, "الحالة 12: يجب ألا يعلق التطبيق في حلقة لانهائية (isUpdatingRow = false).");
+
+    // 2. Reverse Check: Change Fraction to 0.2 (20% = 2000 sqm)
+    const fractionInput12 = row12.querySelector(".partner-fraction");
+    fractionInput12.value = "0.2";
+    onShareInput(); // Trigger default flow
+
+    // Verify Area and Percentage updated back
+    const areaVal12_rev = parseFloat(row12.querySelector(".partner-area").value) || 0;
+    const percentVal12_rev = parseFloat(row12.querySelector(".partner-percent").value) || 0;
+    assert(Math.abs(areaVal12_rev - 2000) < 0.1, `الحالة 12 (عكسي): يجب تحديث المساحة إلى 2000 م² بعد تعديل الكسر. الفعلي: ${areaVal12_rev}`);
+    assert(Math.abs(percentVal12_rev - 20.0) < 0.1, `الحالة 12 (عكسي): يجب تحديث النسبة إلى 20%. الفعلي: ${percentVal12_rev}%`);
+
+    // -------------------------------------------------------------------------
+    // TEST CASE 13: Auto-correction of tiny rounding discrepancies (Absorbing to last row)
+    // -------------------------------------------------------------------------
+    document.getElementById("length1").value = 30;
+    document.getElementById("length2").value = 30;
+    document.getElementById("width1").value = 30;
+    document.getElementById("width2").value = 30;
+    document.getElementById("input-carat-area").value = 168; // Carat area = 168
+    document.getElementById("share-input-method").value = "carats";
+    window.currentInputMethod = "carats";
+    handleCaratAreaChange(false);
+
+    const list13 = document.getElementById("partners-list");
+    list13.innerHTML = "";
+    // 1. Add two empty partners
+    addNewPartnerRow("شريك 1", "", "", "", "");
+    addNewPartnerRow("شريك 2", "", "", "", "");
+    
+    // 2. Trigger automatic division equally
+    divideEqually();
+    
+    // Partner 2 is the last partner. Verify that partner 1 gets 16.29 and partner 2 gets 16.28
+    const row13_1 = list13.querySelectorAll(".partner-row")[0];
+    const row13_2 = list13.querySelectorAll(".partner-row")[1];
+    const shares13_1 = parseFloat(row13_1.querySelector(".partner-shares").value) || 0;
+    const shares13_2 = parseFloat(row13_2.querySelector(".partner-shares").value) || 0;
+
+    assert(shares13_1 === 16.29, `الحالة 13 (توزيع تلقائي): الشريك الأول يجب أن يحصل على 16.29 سهم. الفعلي: ${shares13_1}`);
+    assert(shares13_2 === 16.28, `الحالة 13 (توزيع تلقائي): الشريك الثاني (الأخير) يجب أن يتم تعويض نصيبه إلى 16.28 سهم. الفعلي: ${shares13_2}`);
+
+    // Verify that the state has no deficit and total target area matches land area exactly
+    assert(window.calcState.deficitArea === 0, `الحالة 13 (توزيع تلقائي): يجب أن يكون العجز مساوياً لـ 0 م². الفعلي: ${window.calcState.deficitArea}`);
+    assert(hasDeficit() === false, "الحالة 13 (توزيع تلقائي): يجب ألا يوجد عجز بعد التقسيم بالتساوي.");
+    assert(Math.abs(window.calcState.remainingArea) < 0.01, `الحالة 13 (توزيع تلقائي): يجب أن تكون المساحة المتبقية صفر. الفعلي: ${window.calcState.remainingArea}`);
+
+    // 3. Verify Manual inputs: If user manually changes Partner 2's share back to 16.29, the program MUST NOT alter it.
+    row13_2.querySelector(".partner-shares").value = "16.29";
+    // Trigger calculation
+    calculateGeneral();
+    
+    const shares13_2_manual = parseFloat(row13_2.querySelector(".partner-shares").value) || 0;
+    assert(shares13_2_manual === 16.29, `الحالة 13 (إدخال يدوي): يجب ألا يقوم البرنامج بتعديل المدخل اليدوي 16.29 للشريك الثاني. الفعلي: ${shares13_2_manual}`);
+    
+    // Verify that a deficit of 0.06 sqm is reported
+    assert(Math.abs(window.calcState.deficitArea - 0.06) < 0.01, `الحالة 13 (إدخال يدوي): يجب أن يظهر عجز حقيقي مقداره 0.06 م² للمدخلات اليدوية. الفعلي: ${window.calcState.deficitArea}`);
+    assert(hasDeficit() === true, "الحالة 13 (إدخال يدوي): يجب تفعيل كاشف العجز لحماية الطباعة.");
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {
