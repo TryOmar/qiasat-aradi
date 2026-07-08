@@ -1723,7 +1723,7 @@ function drawLandCanvas(vertices) {
         
         ctx.font = `bold ${unitFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText("متر", 0, 7 * scaleMultiplier);
+        ctx.fillText("م²", 0, 7 * scaleMultiplier);
         
         ctx.restore();
       }

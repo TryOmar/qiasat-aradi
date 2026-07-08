@@ -2088,7 +2088,7 @@ function renderCroquis() {
             tAreaUnit.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tAreaUnit.setAttribute("text-anchor", "middle");
             tAreaUnit.setAttribute("font-weight", "bold");
-            tAreaUnit.textContent = "متر";
+            tAreaUnit.textContent = "م²";
             areaGroup.appendChild(tAreaUnit);
             
             labelGroup.appendChild(areaGroup);
