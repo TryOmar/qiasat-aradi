@@ -1681,9 +1681,11 @@ function drawLandCanvas(vertices) {
         ctx.restore();
       }
 
-      // Slice Centroid for info badge
+      // Slice Centroid for horizontal alignment
       const centroidX = (cpTopPrev.x + cpTopCurr.x + cpBottomPrev.x + cpBottomCurr.x) / 4;
-      const centroidY = (cpTopPrev.y + cpTopCurr.y + cpBottomPrev.y + cpBottomCurr.y) / 4;
+      const avgTopY = (cpTopPrev.y + cpTopCurr.y) / 2;
+      const avgBottomY = (cpBottomPrev.y + cpBottomCurr.y) / 2;
+      const y_label = avgTopY + 0.35 * (avgBottomY - avgTopY); // موضع الثلث العلوي لتفادي المقابض الخضراء بالمنتصف
 
       const heirConv = convertSqmToFeddans(heir.share, caratSize);
       
@@ -1695,23 +1697,23 @@ function drawLandCanvas(vertices) {
       ctx.textBaseline = "middle";
 
       if (pieceWidth < Math.max(50, 60 * scaleMultiplier)) {
-        // Narrow piece: just draw index number (centered slightly higher)
+        // Narrow piece: just draw index number (centered in upper third)
         const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
         ctx.font = `bold ${fontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText((i + 1).toString(), centroidX, centroidY + 1.5 * scaleMultiplier);
+        ctx.fillText((i + 1).toString(), centroidX, y_label + 1.5 * scaleMultiplier);
       } else {
-        // Stack name and area horizontally (raised slightly)
+        // Stack name and area horizontally
         const nameFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
         const areaFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
         
         ctx.font = `bold ${nameFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(nameToShow, centroidX, centroidY - 11 * scaleMultiplier); // تم الرفع من -7 إلى -11
+        ctx.fillText(nameToShow, centroidX, y_label - 8 * scaleMultiplier); // متمركزة في الثلث العلوي مع إزاحة للأعلى
         
         ctx.font = `bold ${areaFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, centroidY + 5 * scaleMultiplier); // تم الرفع من +9 إلى +5
+        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, y_label + 8 * scaleMultiplier); // متمركزة في الثلث العلوي مع إزاحة للأسفل
       }
 
       // Draw side length labels on the edges
