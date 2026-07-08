@@ -255,6 +255,44 @@
       <h3>كروكي الأرض التفاعلي</h3>
       <div class="canvas-wrapper">
         <canvas id="landCanvas" width="600" height="400"></canvas>
+        
+        <!-- مفتش تفاصيل القطعة التفاعلي العائم -->
+        <div id="croquis-inspector" class="croquis-inspector" style="display: none;">
+          <div class="inspector-header">
+            <span class="inspector-title" id="inspector-partner-name">تفاصيل القطعة</span>
+            <button class="inspector-close" onclick="closeInspector(event)">×</button>
+          </div>
+          <div class="inspector-body">
+            <div class="inspector-row">
+              <span class="ins-lbl">المساحة:</span>
+              <strong class="ins-val" id="ins-area">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">النسبة من الأرض:</span>
+              <strong class="ins-val" id="ins-percent">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">العرض الأول (أعلى):</span>
+              <strong class="ins-val" id="ins-w-bottom">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">العرض الثاني (أسفل):</span>
+              <strong class="ins-val" id="ins-w-top">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">الطول الأيمن:</span>
+              <strong class="ins-val" id="ins-length-right">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">الطول الأيسر:</span>
+              <strong class="ins-val" id="ins-length-left">-</strong>
+            </div>
+            <div class="inspector-row" id="ins-divider-row">
+              <span class="ins-lbl">طول الفاصل:</span>
+              <strong class="ins-val" id="ins-divider">-</strong>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="canvas-controls">
         <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%;">

@@ -78,6 +78,15 @@ function setupSVGInteractions() {
   if(!container) return;
   
   // تم إيقاف خاصية السحب والتكبير بناءً على طلب المستخدم
+  
+  // إلغاء تحديد القطع عند النقر على الفراغ
+  const svg = document.getElementById("croquis-svg");
+  if (svg) {
+    svg.addEventListener("click", () => {
+      window.selectedSegmentIndex = null;
+      removeHighlight();
+    });
+  }
 }
 
 function getTouchDistance(t1, t2) {
@@ -958,6 +967,20 @@ function syncExclusionUI() {
         if (s) s.disabled = false;
         if (frac) frac.disabled = false;
       }
+
+      row.setAttribute("data-index", index);
+      
+      // إعداد التظليل التبادلي عند تمرير الماوس فوق الصف في الجدول
+      row.onmouseenter = () => {
+        if (isPartitioned) {
+          highlightSegment(index);
+        }
+      };
+      row.onmouseleave = () => {
+        if (isPartitioned) {
+          removeHighlight();
+        }
+      };
     }
   });
 }
@@ -1741,15 +1764,16 @@ function divideEqually() {
 // ===================================================
 
 // لوحة ألوان للقطع المختلفة
+// لوحة ألوان للقطع المختلفة (ألوان باستيلية مشبعة ومتباينة للقراءة تحت أشعة الشمس)
 const PIECE_COLORS = [
-  { fill: "#e8f5e9", stroke: "#2e7d32", text: "#1b5e20" },
-  { fill: "#e3f2fd", stroke: "#1565c0", text: "#0d47a1" },
-  { fill: "#fff3e0", stroke: "#e65100", text: "#bf360c" },
-  { fill: "#fce4ec", stroke: "#880e4f", text: "#6a1b4d" },
-  { fill: "#e8eaf6", stroke: "#283593", text: "#1a237e" },
-  { fill: "#e0f2f1", stroke: "#00695c", text: "#004d40" },
-  { fill: "#f3e5f5", stroke: "#6a1b9a", text: "#4a148c" },
-  { fill: "#fbe9e7", stroke: "#bf360c", text: "#870000" },
+  { fill: "#DCEFD9", stroke: "#2E7D32", text: "#111111" }, // شريك 1: أخضر فاتح / أخضر غامق
+  { fill: "#D7E9FF", stroke: "#1565C0", text: "#111111" }, // شريك 2: أزرق فاتح / أزرق غامق
+  { fill: "#FFF0C9", stroke: "#EF6C00", text: "#111111" }, // شريك 3: أصفر فاتح / برتقالي غامق
+  { fill: "#F8DDE8", stroke: "#C2185B", text: "#111111" }, // شريك 4: وردي فاتح / وردي داكن
+  { fill: "#E9DDF8", stroke: "#6A1B9A", text: "#111111" }, // شريك 5: بنفسجي فاتح / بنفسجي غامق
+  { fill: "#D8F3EF", stroke: "#00796B", text: "#111111" }, // شريك 6: تركواز فاتح / تركواز غامق
+  { fill: "#FBE9E7", stroke: "#D84315", text: "#111111" }, // شريك 7: برتقالي خفيف / بني غامق
+  { fill: "#F1F8E9", stroke: "#558B2F", text: "#111111" }  // شريك 8: ليموني خفيف / زيتي غامق
 ];
 
 function svgEl(tag) {
@@ -1951,7 +1975,7 @@ function renderCroquis() {
   mainPoly.setAttribute("points",
     `${mapX(0)},${mapY(0)} ${mapX(w)},${mapY(0)} ${mapX(w)},${mapY(l1)} ${mapX(0)},${mapY(l2)}`
   );
-  mainPoly.setAttribute("fill", "#f8fdf8");
+  mainPoly.setAttribute("fill", "#FDFBF2");
   mainPoly.setAttribute("stroke", "#1b5e20");
   mainPoly.setAttribute("stroke-width", 2.5 * textScale);
   mainPoly.setAttribute("stroke-linejoin", "round");
@@ -1979,11 +2003,21 @@ function renderCroquis() {
       poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x2},${y3} ${x1},${y4}`);
       poly.setAttribute("fill", color.fill);
       poly.setAttribute("stroke", color.stroke);
-      poly.setAttribute("stroke-width", (isRem ? 2.2 : 1.5) * textScale);
+      poly.setAttribute("stroke-width", (isRem ? 3 : 2.5) * textScale); // حدود سميكة واضحة تحت الشمس
       if (isRem) {
         poly.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
       }
       poly.setAttribute("stroke-linejoin", "round");
+      poly.setAttribute("class", "polygon-segment");
+      poly.setAttribute("id", `croquis-poly-${index}`);
+      poly.style.pointerEvents = "auto";
+      poly.style.cursor = "pointer";
+      
+      // ربط أحداث التفاعل ثنائي الاتجاه
+      poly.addEventListener("mouseenter", () => highlightSegment(index));
+      poly.addEventListener("mouseleave", () => removeHighlight());
+      poly.addEventListener("click", (e) => selectSegment(index, e));
+      
       g.appendChild(poly);
 
       // مركز القطعة
@@ -1992,129 +2026,78 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // 1. رسم بطاقة الشريك التفصيلية
+      // 1. رسم النصوص الأفقية المبسطة داخل القطعة باللون الأسود وحجم خط واضح جداً
       if (showCroquisNames || showCroquisMeasurements) {
-        const cardGroup = svgEl("g");
+        const labelGroup = svgEl("g");
+        labelGroup.setAttribute("style", "pointer-events: none;"); // حتى لا تعيق التفاعل مع المضلع
         
-        // تدوير بطاقة الشريك دائماً بزاوية -90 درجة
-        cardGroup.setAttribute("transform", `rotate(-90, ${cx}, ${cy})`);
-
-        const cardWidth = 115 * textScale;
-        const cardHeight = 115 * textScale;
-
-        // خلفية البطاقة (مستطيل ذو زوايا مستديرة وظل خفيف)
-        const cardRect = svgEl("rect");
-        cardRect.setAttribute("x", cx - cardWidth / 2);
-        cardRect.setAttribute("y", cy - cardHeight / 2);
-        cardRect.setAttribute("width", cardWidth);
-        cardRect.setAttribute("height", cardHeight);
-        cardRect.setAttribute("fill", isRem ? "#fffde7" : "#ffffff");
-        cardRect.setAttribute("stroke", isRem ? "#ffb300" : "#e0e0e0");
-        cardRect.setAttribute("stroke-width", 1.5 * textScale);
-        cardRect.setAttribute("rx", 6 * textScale);
-        cardRect.setAttribute("ry", 6 * textScale);
-        cardRect.setAttribute("filter", "url(#shadow-filter)");
-        cardGroup.appendChild(cardRect);
-
-        // اسم الشريك (بالأسود العريض)
-        if (showCroquisNames) {
-          const nameText = svgEl("text");
-          nameText.setAttribute("x", cx);
-          nameText.setAttribute("y", cy - 44 * textScale);
-          nameText.setAttribute("fill", isRem ? "#e65100" : "#263238");
-          nameText.setAttribute("font-size", 11 * textScale + "px");
-          nameText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          nameText.setAttribute("text-anchor", "middle");
-          nameText.setAttribute("font-weight", "bold");
-          nameText.textContent = piece.name;
-          cardGroup.appendChild(nameText);
-        }
-
-        // المساحة والنسبة والأعراض والأطوال
-        if (showCroquisMeasurements) {
-          const areaText = svgEl("text");
-          areaText.setAttribute("x", cx);
-          areaText.setAttribute("y", cy - 31 * textScale);
-          areaText.setAttribute("fill", "#1565c0");
-          areaText.setAttribute("font-size", 10 * textScale + "px");
-          areaText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          areaText.setAttribute("text-anchor", "middle");
-          areaText.setAttribute("font-weight", "bold");
-          areaText.textContent = Number(piece.area.toFixed(2)) + " م²";
-          cardGroup.appendChild(areaText);
-
-          // النسبة المئوية
-          const pct = totalAreaM2 > 0 ? (piece.area / totalAreaM2) * 100 : 0;
-          const pctText = svgEl("text");
-          pctText.setAttribute("x", cx);
-          pctText.setAttribute("y", cy - 18 * textScale);
-          pctText.setAttribute("fill", "#555");
-          pctText.setAttribute("font-size", 9 * textScale + "px");
-          pctText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          pctText.setAttribute("text-anchor", "middle");
-          pctText.textContent = `النسبة: ${pct.toFixed(2)} %`;
-          cardGroup.appendChild(pctText);
-
-          // العرض الأول (أسفل)
-          const w1Text = svgEl("text");
-          w1Text.setAttribute("x", cx);
-          w1Text.setAttribute("y", cy - 5 * textScale);
-          w1Text.setAttribute("fill", "#555");
-          w1Text.setAttribute("font-size", 9 * textScale + "px");
-          w1Text.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          w1Text.setAttribute("text-anchor", "middle");
-          w1Text.textContent = `عرض 1: ${piece.botW.toFixed(2)} م`;
-          cardGroup.appendChild(w1Text);
-
-          // العرض الثاني (أعلى)
-          const w2Text = svgEl("text");
-          w2Text.setAttribute("x", cx);
-          w2Text.setAttribute("y", cy + 8 * textScale);
-          w2Text.setAttribute("fill", "#555");
-          w2Text.setAttribute("font-size", 9 * textScale + "px");
-          w2Text.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          w2Text.setAttribute("text-anchor", "middle");
-          w2Text.textContent = `عرض 2: ${piece.topW.toFixed(2)} م`;
-          cardGroup.appendChild(w2Text);
-
-          // الطول الأيمن
-          const rLText = svgEl("text");
-          rLText.setAttribute("x", cx);
-          rLText.setAttribute("y", cy + 21 * textScale);
-          rLText.setAttribute("fill", "#555");
-          rLText.setAttribute("font-size", 9 * textScale + "px");
-          rLText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          rLText.setAttribute("text-anchor", "middle");
-          rLText.textContent = `طول أيمن: ${piece.leftLine.toFixed(2)} م`;
-          cardGroup.appendChild(rLText);
-
-          // الطول الأيسر
-          const lLText = svgEl("text");
-          lLText.setAttribute("x", cx);
-          lLText.setAttribute("y", cy + 34 * textScale);
-          lLText.setAttribute("fill", "#555");
-          lLText.setAttribute("font-size", 9 * textScale + "px");
-          lLText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          lLText.setAttribute("text-anchor", "middle");
-          lLText.textContent = `طول أيسر: ${piece.divLine.toFixed(2)} م`;
-          cardGroup.appendChild(lLText);
-
-          // طول الفاصل (إذا لم تكن القطعة الأخيرة)
-          if (index < window.calculatedPieces.length - 1) {
-            const fText = svgEl("text");
-            fText.setAttribute("x", cx);
-            fText.setAttribute("y", cy + 47 * textScale);
-            fText.setAttribute("fill", "#2e7d32");
-            fText.setAttribute("font-size", 9 * textScale + "px");
-            fText.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            fText.setAttribute("text-anchor", "middle");
-            fText.setAttribute("font-weight", "bold");
-            fText.textContent = `الفاصل: ${piece.divLine.toFixed(2)} م`;
-            cardGroup.appendChild(fText);
+        const pieceWidth = Math.abs(x2 - x1);
+        const nameToShow = piece.name || `شريك ${index + 1}`;
+        
+        if (pieceWidth < 50 && !window.isExporting) {
+          // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
+          const tIdx = svgEl("text");
+          tIdx.setAttribute("x", cx);
+          tIdx.setAttribute("y", cy + 4 * textScale);
+          tIdx.setAttribute("fill", isRem ? "#e65100" : "#111111"); // لون داكن عالي التباين
+          tIdx.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
+          tIdx.setAttribute("font-family", "Cairo, Arial, sans-serif");
+          tIdx.setAttribute("text-anchor", "middle");
+          tIdx.setAttribute("font-weight", "bold");
+          tIdx.textContent = (index + 1).toString();
+          labelGroup.appendChild(tIdx);
+        } else {
+          // نصوص أفقية متباينة
+          if (showCroquisNames && showCroquisMeasurements && pieceWidth >= 90) {
+            // عرض الاسم والمساحة مكدسين رأسياً
+            const tName = svgEl("text");
+            tName.setAttribute("x", cx);
+            tName.setAttribute("y", cy - 5 * textScale);
+            tName.setAttribute("fill", isRem ? "#e65100" : "#111111"); // أسود داكن
+            tName.setAttribute("font-size", (12 * textScale) + "px"); // خط 12
+            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tName.setAttribute("text-anchor", "middle");
+            tName.setAttribute("font-weight", "bold");
+            tName.textContent = nameToShow;
+            labelGroup.appendChild(tName);
+            
+            const tArea = svgEl("text");
+            tArea.setAttribute("x", cx);
+            tArea.setAttribute("y", cy + 11 * textScale);
+            tArea.setAttribute("fill", "#111111"); // أسود داكن
+            tArea.setAttribute("font-size", (11 * textScale) + "px"); // خط 11
+            tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tArea.setAttribute("text-anchor", "middle");
+            tArea.setAttribute("font-weight", "bold");
+            tArea.textContent = Number(piece.area.toFixed(2)) + " م²";
+            labelGroup.appendChild(tArea);
+          } else if (showCroquisNames) {
+            // عرض الاسم فقط
+            const tName = svgEl("text");
+            tName.setAttribute("x", cx);
+            tName.setAttribute("y", cy + 4 * textScale);
+            tName.setAttribute("fill", isRem ? "#e65100" : "#111111");
+            tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
+            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tName.setAttribute("text-anchor", "middle");
+            tName.setAttribute("font-weight", "bold");
+            tName.textContent = nameToShow;
+            labelGroup.appendChild(tName);
+          } else if (showCroquisMeasurements) {
+            // عرض المساحة فقط
+            const tArea = svgEl("text");
+            tArea.setAttribute("x", cx);
+            tArea.setAttribute("y", cy + 4 * textScale);
+            tArea.setAttribute("fill", "#111111");
+            tArea.setAttribute("font-size", (11.5 * textScale) + "px");
+            tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tArea.setAttribute("text-anchor", "middle");
+            tArea.setAttribute("font-weight", "bold");
+            tArea.textContent = Number(piece.area.toFixed(2)) + " م²";
+            labelGroup.appendChild(tArea);
           }
         }
-
-        g.appendChild(cardGroup);
+        g.appendChild(labelGroup);
       }
 
       // 2. عرض عروض القطع باللون الأحمر مباشرة على الحدود العليا والسفلى لكل قطعة
@@ -2194,17 +2177,17 @@ function renderCroquis() {
     g.appendChild(svgLine(lX, lY2, lX - dimOffset, lY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
-    g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#2e7d32", width: "1.5" }));
+    g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#1b5e20", width: "2" }));
     
     // شُرط الحصر المتعامدة
-    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY1, lX - dimOffset + 4 * textScale, lY1, { stroke: "#2e7d32", width: "2" }));
-    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY1, lX - dimOffset + 4 * textScale, lY1, { stroke: "#1b5e20", width: "2" }));
+    g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#1b5e20", width: "2" }));
     
     const lMidY = (lY1 + lY2) / 2;
     g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, l2 + " م", {
       anchor: "start",
-      fill: "#2e7d32",
-      size: "13",
+      fill: "#111111", // أسود داكن للقراءة تحت الشمس
+      size: "13.5",
       weight: "bold",
       bg: true,
       transform: `rotate(-90, ${lX - dimOffset - 4 * textScale}, ${lMidY})`,
@@ -2220,17 +2203,17 @@ function renderCroquis() {
     g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
-    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#2e7d32", width: "1.5" }));
+    g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#1b5e20", width: "2" }));
     
     // شُرط الحصر المتعامدة
-    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY1, rX + dimOffset + 4 * textScale, rY1, { stroke: "#2e7d32", width: "2" }));
-    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY1, rX + dimOffset + 4 * textScale, rY1, { stroke: "#1b5e20", width: "2" }));
+    g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#1b5e20", width: "2" }));
     
     const rMidY = (rY1 + rY2) / 2;
     g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, l1 + " م", {
       anchor: "start",
-      fill: "#2e7d32",
-      size: "13",
+      fill: "#111111", // أسود داكن لقراءة عالية التباين
+      size: "13.5",
       weight: "bold",
       bg: true,
       transform: `rotate(-90, ${rX + dimOffset + 4 * textScale}, ${rMidY})`,
@@ -2246,15 +2229,15 @@ function renderCroquis() {
     g.appendChild(svgLine(bX2, mapY(0), bX2, bY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
-    g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#2e7d32", width: "1.5" }));
+    g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#1b5e20", width: "2" }));
     
     // شُرط الحصر المتعامدة
-    g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
-    g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
+    g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
     g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w1 + " م", {
-      fill: "#2e7d32",
-      size: "13",
+      fill: "#111111", // أسود داكن
+      size: "13.5",
       weight: "bold",
       bg: true,
     }));
@@ -2270,15 +2253,15 @@ function renderCroquis() {
     g.appendChild(svgLine(topX2, mapY(l1), topX2, topEdgeY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
-    g.appendChild(svgLine(topX1, topEdgeY, topX2, topEdgeY, { stroke: "#2e7d32", width: "1.5" }));
+    g.appendChild(svgLine(topX1, topEdgeY, topX2, topEdgeY, { stroke: "#1b5e20", width: "2" }));
     
     // شُرط الحصر
-    g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
-    g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#2e7d32", width: "2" }));
+    g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
+    g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
     g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w2 + " م", {
-      fill: "#2e7d32",
-      size: "13",
+      fill: "#111111", // أسود داكن
+      size: "13.5",
       weight: "bold",
       bg: true,
     }));
@@ -4369,3 +4352,157 @@ function resetStepValue() {
     }, 800);
   }
 }
+
+// ============================================================
+// INTERACTIVE CAD INSPECTOR & BI-DIRECTIONAL HIGHLIGHTS HELPERS
+// ============================================================
+
+window.selectedSegmentIndex = null;
+
+function highlightSegment(index) {
+  // 1. تسليط الضوء على المضلع في SVG
+  const poly = document.getElementById(`croquis-poly-${index}`);
+  if (poly) {
+    poly.classList.add("polygon-highlight");
+  }
+  
+  // 2. تسليط الضوء على صف الشريك المقابل في الجدول
+  const row = document.querySelector(`#partners-list .partner-row[data-index="${index}"]`);
+  if (row) {
+    row.classList.add("partner-row-highlighted");
+  }
+  
+  // 3. تحديث المفتش التفاعلي بالبيانات الكاملة للقطعة
+  updateInspector(index);
+}
+
+function removeHighlight() {
+  // 1. إزالة التوهج من جميع المضلعات
+  document.querySelectorAll(".polygon-segment").forEach(p => {
+    p.classList.remove("polygon-highlight");
+  });
+  
+  // 2. إزالة الإضاءة من جميع صفوف الجدول
+  document.querySelectorAll("#partners-list .partner-row").forEach(r => {
+    r.classList.remove("partner-row-highlighted");
+  });
+  
+  // 3. إذا كان هناك شريك محدد مسبقاً بالنقر، نعيد تحديث المفتش لعرض بياناته
+  if (window.selectedSegmentIndex !== null) {
+    updateInspector(window.selectedSegmentIndex);
+    
+    // إعادة التوهج للقطعة المحددة والصف المحدد
+    const poly = document.getElementById(`croquis-poly-${window.selectedSegmentIndex}`);
+    if (poly) poly.classList.add("polygon-highlight");
+    
+    const row = document.querySelector(`#partners-list .partner-row[data-index="${window.selectedSegmentIndex}"]`);
+    if (row) row.classList.add("partner-row-highlighted");
+  } else {
+    // إذا لم يكن هناك تحديد، نخفي المفتش
+    const inspector = document.getElementById("croquis-inspector");
+    if (inspector) inspector.style.display = "none";
+  }
+}
+
+function selectSegment(index, event) {
+  if (event) {
+    event.stopPropagation();
+  }
+  
+  // إذا كان القطعة المحددة هي نفسها، نقوم بإلغاء التحديد عند النقر الثاني
+  if (window.selectedSegmentIndex === index) {
+    window.selectedSegmentIndex = null;
+    removeHighlight();
+    return;
+  }
+  
+  window.selectedSegmentIndex = index;
+  highlightSegment(index);
+  
+  // تمرير صف الجدول ليكون مرئياً للمستخدم
+  const row = document.querySelector(`#partners-list .partner-row[data-index="${index}"]`);
+  if (row) {
+    row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+function closeInspector(event) {
+  if (event) {
+    event.stopPropagation();
+  }
+  window.selectedSegmentIndex = null;
+  removeHighlight();
+}
+
+function updateInspector(index) {
+  if (!window.calculatedPieces || !window.calculatedPieces[index]) return;
+  
+  const piece = window.calculatedPieces[index];
+  const isRem = piece.isRemainder;
+  
+  const inspector = document.getElementById("croquis-inspector");
+  const partnerNameEl = document.getElementById("inspector-partner-name");
+  const insAreaEl = document.getElementById("ins-area");
+  const insPercentEl = document.getElementById("ins-percent");
+  const insWBottomEl = document.getElementById("ins-w-bottom");
+  const insWTopEl = document.getElementById("ins-w-top");
+  const insLengthRightEl = document.getElementById("ins-length-right");
+  const insLengthLeftEl = document.getElementById("ins-length-left");
+  const insDividerRow = document.getElementById("ins-divider-row");
+  const insDividerEl = document.getElementById("ins-divider");
+  
+  if (!inspector) return;
+  
+  // تعبئة البيانات
+  if (partnerNameEl) {
+    partnerNameEl.innerText = isRem ? "القطعة المتبقية" : `قطعة الشريك: ${piece.name}`;
+    partnerNameEl.style.color = isRem ? "#ffb300" : "#ffffff";
+  }
+  
+  // المساحة الكلية للأرض
+  const l1 = parseFloat(document.getElementById("length1").value) || 0;
+  const l2 = parseFloat(document.getElementById("length2").value) || 0;
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+  const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+  const pct = totalAreaM2 > 0 ? (piece.area / totalAreaM2) * 100 : 0;
+  
+  const fcs = convertSquareMetersToFCS(piece.area);
+  
+  if (insAreaEl) {
+    insAreaEl.innerHTML = `${Number(piece.area.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
+  }
+  
+  if (insPercentEl) {
+    insPercentEl.innerText = `${pct.toFixed(2)} %`;
+  }
+  
+  // العرض الأول يمثل botW والعلوي يمثل topW
+  if (insWBottomEl) {
+    insWBottomEl.innerText = `${piece.botW.toFixed(2)} م`;
+  }
+  
+  if (insWTopEl) {
+    insWTopEl.innerText = `${piece.topW.toFixed(2)} م`;
+  }
+  
+  if (insLengthRightEl) {
+    insLengthRightEl.innerText = `${piece.leftLine.toFixed(2)} م`; // leftLine in data represents right border length of piece
+  }
+  
+  if (insLengthLeftEl) {
+    insLengthLeftEl.innerText = `${piece.divLine.toFixed(2)} م`; // divLine represents left border length of piece
+  }
+  
+  // طول الفاصل (إذا لم تكن القطعة الأخيرة)
+  if (index < window.calculatedPieces.length - 1 && !isRem) {
+    if (insDividerRow) insDividerRow.style.display = "flex";
+    if (insDividerEl) insDividerEl.innerText = `${piece.divLine.toFixed(2)} م`;
+  } else {
+    if (insDividerRow) insDividerRow.style.display = "none";
+  }
+  
+  // إظهار المفتش
+  inspector.style.display = "block";
+}
+

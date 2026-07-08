@@ -63,6 +63,19 @@ let isDivisionActive = false;
 let showActualDims = false; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
+const PIECE_COLORS = [
+  { fill: "#DCEFD9", stroke: "#2E7D32" }, // شريك 1: أخضر فاتح / أخضر غامق
+  { fill: "#D7E9FF", stroke: "#1565C0" }, // شريك 2: أزرق فاتح / أزرق غامق
+  { fill: "#FFF0C9", stroke: "#EF6C00" }, // شريك 3: أصفر فاتح / برتقالي غامق
+  { fill: "#F8DDE8", stroke: "#C2185B" }, // شريك 4: وردي فاتح / وردي داكن
+  { fill: "#E9DDF8", stroke: "#6A1B9A" }, // شريك 5: بنفسجي فاتح / بنفسجي غامق
+  { fill: "#D8F3EF", stroke: "#00796B" }, // شريك 6: تركواز فاتح / تركواز غامق
+  { fill: "#FBE9E7", stroke: "#D84315" }, // شريك 7: برتقالي خفيف / بني غامق
+  { fill: "#F1F8E9", stroke: "#558B2F" }  // شريك 8: ليموني خفيف / زيتي غامق
+];
+window.hoveredPieceIndex = null;
+window.selectedPieceIndex = null;
+window.canvasPiecesGeometry = [];
 let oldZoomFactor = 1.0;
 let isPrinting = false;
 
@@ -1400,8 +1413,8 @@ function drawLandCanvas(vertices) {
   currentCanvasPoints = canvasPoints;
 
   // 3. Draw Polygon shape
-  ctx.fillStyle = "rgba(46, 125, 50, 0.06)";
-  ctx.strokeStyle = "#2e7d32";
+  ctx.fillStyle = "#FDFBF2"; // كريمي فاتح جداً لتسهيل القراءة تحت الشمس
+  ctx.strokeStyle = "#1b5e20";
   ctx.lineWidth = Math.max(3, 4.5 * scaleMultiplier);
   ctx.lineJoin = "round";
 
@@ -1490,8 +1503,8 @@ function drawLandCanvas(vertices) {
     ctx.setLineDash([]);
 
     // Draw the dimension line itself
-    ctx.strokeStyle = "#2e7d32";
-    ctx.lineWidth = Math.max(1.2, 1.6 * scaleMultiplier);
+    ctx.strokeStyle = "#1b5e20";
+    ctx.lineWidth = Math.max(2, 2 * scaleMultiplier);
     ctx.beginPath();
     ctx.moveTo(dlX1, dlY1);
     ctx.lineTo(dlX2, dlY2);
@@ -1536,7 +1549,7 @@ function drawLandCanvas(vertices) {
     ctx.fillRect(-tw / 2 - 4 * scaleMultiplier, -fontSize / 2 - 2, tw + 8 * scaleMultiplier, fontSize + 4);
 
     // Draw text
-    ctx.fillStyle = "#1b5e20";
+    ctx.fillStyle = "#111111"; // أسود داكن عالي التباين
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(labelText, 0, 1);
@@ -1605,6 +1618,9 @@ function drawLandCanvas(vertices) {
     });
     splitTsBot[splitTsBot.length - 1] = 1.0;
 
+    // Reset geometry check array
+    window.canvasPiecesGeometry = [];
+
     // Draw each piece
     for (let i = 0; i < heirsData.length; i++) {
       const tPrevTop = splitTsTop[i];
@@ -1621,6 +1637,10 @@ function drawLandCanvas(vertices) {
       const cpTopCurr    = { x: cpD.x + tCurrTop * (cpC.x - cpD.x), y: cpD.y + tCurrTop * (cpC.y - cpD.y) };
       const cpBottomCurr = { x: cpA.x + tCurrBot * (cpB.x - cpA.x), y: cpA.y + tCurrBot * (cpB.y - cpA.y) };
 
+      // Save geometry for click/hover checking
+      const geom = [cpTopPrev, cpTopCurr, cpBottomCurr, cpBottomPrev];
+      window.canvasPiecesGeometry.push(geom);
+
       // Use exact physical side lengths
       const pieceTopW = heir.topW || 0;
       const pieceBotW = heir.botW || 0;
@@ -1632,7 +1652,8 @@ function drawLandCanvas(vertices) {
       heir.rightL = pieceRightL;
 
       // Draw slice background fill
-      ctx.fillStyle = (i % 2 === 0) ? "rgba(46, 125, 50, 0.08)" : "rgba(46, 125, 50, 0.02)";
+      const color = PIECE_COLORS[i % PIECE_COLORS.length];
+      ctx.fillStyle = color.fill;
       ctx.beginPath();
       ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
       ctx.lineTo(cpTopCurr.x, cpTopCurr.y);
@@ -1641,16 +1662,23 @@ function drawLandCanvas(vertices) {
       ctx.closePath();
       ctx.fill();
 
-      // Draw dashed divider line (between pieces, not at start/end)
-      if (i > 0) {
-        ctx.strokeStyle = "#0288d1";
-        ctx.lineWidth = Math.max(2, 3.5 * scaleMultiplier);
-        ctx.setLineDash([6, 4]);
-        ctx.beginPath();
-        ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
-        ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+      // Draw matching outer border of segment or AutoCAD blue glow highlight
+      if (i === window.hoveredPieceIndex || i === window.selectedPieceIndex) {
+        ctx.save();
+        ctx.strokeStyle = "#00b0ff"; // أزرق ساطع
+        ctx.lineWidth = Math.max(3.5, 4.5 * scaleMultiplier);
+        ctx.shadowColor = "rgba(0, 176, 255, 0.8)";
+        ctx.shadowBlur = 10;
+        ctx.lineJoin = "round";
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.strokeStyle = color.stroke;
+        ctx.lineWidth = Math.max(2.5, 3 * scaleMultiplier);
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.restore();
       }
 
       // Slice Centroid for info badge
@@ -1659,51 +1687,38 @@ function drawLandCanvas(vertices) {
 
       const heirConv = convertSqmToFeddans(heir.share, caratSize);
       
-      ctx.save();
-      ctx.translate(centroidX, centroidY);
-      ctx.rotate(-Math.PI / 2);
-
-      const badgeFontSize = Math.round(Math.max(10, 13 * scaleMultiplier));
-      ctx.font = `bold ${badgeFontSize}px Cairo`;
-
-      const labelName = `${i + 1}- ${heir.name}`;
-      const labelArea = `${heir.share.toFixed(2)} م²`;
+      // Draw label text horizontally (no rotation) with high contrast black color
+      const pieceWidth = Math.abs(cpTopCurr.x - cpTopPrev.x);
+      const nameToShow = heir.name || `شريك ${i + 1}`;
       
-      const nameW = ctx.measureText(labelName).width;
-      const areaW = ctx.measureText(labelArea).width;
-      const maxW = Math.max(nameW, areaW);
-      
-      const boxW = maxW + 12 * scaleMultiplier;
-      const boxH = Math.max(36, 42 * scaleMultiplier);
-
-      // White background box for readability
-      ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
-      ctx.strokeStyle = "rgba(46, 125, 50, 0.25)";
-      ctx.lineWidth = Math.max(1, 1.5 * scaleMultiplier);
-      
-      ctx.beginPath();
-      ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, 4 * scaleMultiplier);
-      ctx.fill();
-      ctx.stroke();
-
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // Line 1: Piece name
-      ctx.fillStyle = "#333";
-      ctx.fillText(labelName, 0, -9 * scaleMultiplier);
-      
-      // Line 2: Area
-      ctx.fillStyle = "#01579b";
-      ctx.fillText(labelArea, 0, 9 * scaleMultiplier);
-
-      ctx.restore();
+      if (pieceWidth < Math.max(50, 60 * scaleMultiplier)) {
+        // Narrow piece: just draw index number
+        const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
+        ctx.font = `bold ${fontSize}px Cairo`;
+        ctx.fillStyle = "#111111";
+        ctx.fillText((i + 1).toString(), centroidX, centroidY);
+      } else {
+        // Stack name and area horizontally
+        const nameFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
+        const areaFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
+        
+        ctx.font = `bold ${nameFontSize}px Cairo`;
+        ctx.fillStyle = "#111111";
+        ctx.fillText(nameToShow, centroidX, centroidY - 7 * scaleMultiplier);
+        
+        ctx.font = `bold ${areaFontSize}px Cairo`;
+        ctx.fillStyle = "#111111";
+        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, centroidY + 9 * scaleMultiplier);
+      }
 
       // Draw side length labels on the edges
       ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier)) + "px Cairo";
       
-      // Top width of piece
-      ctx.fillStyle = "#d32f2f";
+      // Top width of piece (Black color for sun readability)
+      ctx.fillStyle = "#111111";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
@@ -1726,7 +1741,7 @@ function drawLandCanvas(vertices) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
         ctx.fillRect(lx + 4 * scaleMultiplier, ly - 8 * scaleMultiplier, twLeft + 6 * scaleMultiplier, 16 * scaleMultiplier);
         
-        ctx.fillStyle = "#1b5e20";
+        ctx.fillStyle = "#111111";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillText(labelTextLeft, lx + 7 * scaleMultiplier, ly);
@@ -1747,7 +1762,7 @@ function drawLandCanvas(vertices) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
         ctx.fillRect(rx - 4 * scaleMultiplier - twRight - 6 * scaleMultiplier, ry - 8 * scaleMultiplier, twRight + 6 * scaleMultiplier, 16 * scaleMultiplier);
         
-        ctx.fillStyle = "#1b5e20";
+        ctx.fillStyle = "#111111";
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.fillText(labelTextRight, rx - 7 * scaleMultiplier, ry);
@@ -2598,3 +2613,254 @@ function printCroquis() {
   printWin.document.write(printHTML);
   printWin.document.close();
 }
+
+// ============================================================
+// INTERACTIVE CAD INSPECTOR & BI-DIRECTIONAL HIGHLIGHTS HELPERS
+// ============================================================
+
+function isPointInPolygon(px, py, polygon) {
+  let isInside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    const intersect = ((yi > py) !== (yj > py))
+        && (px < (xj - xi) * (py - yi) / (yj - yi || 1) + xi);
+    if (intersect) isInside = !isInside;
+  }
+  return isInside;
+}
+
+function closeInspector(event) {
+  if (event) event.stopPropagation();
+  window.selectedPieceIndex = null;
+  window.hoveredPieceIndex = null;
+  drawLandCanvas(vertices);
+  document.querySelectorAll("#heirs-list tr").forEach(row => {
+    row.classList.remove("partner-row-highlighted");
+  });
+  const inspector = document.getElementById("croquis-inspector");
+  if (inspector) inspector.style.display = "none";
+}
+
+function updateInspector(index) {
+  if (!heirsData || !heirsData[index]) return;
+  const heir = heirsData[index];
+  
+  const inspector = document.getElementById("croquis-inspector");
+  const partnerNameEl = document.getElementById("inspector-partner-name");
+  const insAreaEl = document.getElementById("ins-area");
+  const insPercentEl = document.getElementById("ins-percent");
+  const insWBottomEl = document.getElementById("ins-w-bottom");
+  const insWTopEl = document.getElementById("ins-w-top");
+  const insLengthRightEl = document.getElementById("ins-length-right");
+  const insLengthLeftEl = document.getElementById("ins-length-left");
+  const insDividerRow = document.getElementById("ins-divider-row");
+  const insDividerEl = document.getElementById("ins-divider");
+  
+  if (!inspector) return;
+  
+  // Set partner/heir name
+  if (partnerNameEl) {
+    partnerNameEl.innerText = `قطعة الشريك: ${heir.name}`;
+    partnerNameEl.style.color = "#ffffff";
+  }
+  
+  // Area and conversion to feddan/carat/sahm
+  const caratSize = parseFloat(caratSizeInput.value) || 168;
+  const pct = calculatedArea > 0 ? (heir.share / calculatedArea) * 100 : 0;
+  const conv = convertSqmToFeddans(heir.share, caratSize);
+  
+  if (insAreaEl) {
+    insAreaEl.innerHTML = `${Number(heir.share.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)</span>`;
+  }
+  
+  if (insPercentEl) {
+    insPercentEl.innerText = `${pct.toFixed(2)} %`;
+  }
+  
+  if (insWBottomEl) {
+    insWBottomEl.innerText = `${(heir.botW || 0).toFixed(2)} م`;
+  }
+  
+  if (insWTopEl) {
+    insWTopEl.innerText = `${(heir.topW || 0).toFixed(2)} م`;
+  }
+  
+  // In division geometry: heir.rightL represents left bound line of piece, heir.leftL represents right divider line of piece
+  if (insLengthRightEl) {
+    insLengthRightEl.innerText = `${(heir.rightL || 0).toFixed(2)} م`;
+  }
+  
+  if (insLengthLeftEl) {
+    insLengthLeftEl.innerText = `${(heir.leftL || 0).toFixed(2)} م`;
+  }
+  
+  // Divider length (if not the last piece)
+  if (index < heirsData.length - 1) {
+    if (insDividerRow) insDividerRow.style.display = "flex";
+    if (insDividerEl) insDividerEl.innerText = `${(heir.leftL || 0).toFixed(2)} م`;
+  } else {
+    if (insDividerRow) insDividerRow.style.display = "none";
+  }
+  
+  inspector.style.display = "block";
+}
+
+function selectPiece(index) {
+  if (window.selectedPieceIndex === index) {
+    // Unselect on second click
+    window.selectedPieceIndex = null;
+    window.hoveredPieceIndex = null;
+    drawLandCanvas(vertices);
+    document.querySelectorAll("#heirs-list tr").forEach(row => {
+      row.classList.remove("partner-row-highlighted");
+    });
+    const inspector = document.getElementById("croquis-inspector");
+    if (inspector) inspector.style.display = "none";
+    return;
+  }
+
+  window.selectedPieceIndex = index;
+  drawLandCanvas(vertices);
+
+  // Sync table scroll
+  document.querySelectorAll("#heirs-list tr").forEach(row => {
+    row.classList.remove("partner-row-highlighted");
+  });
+  const row = document.querySelector(`#heirs-list tr[data-index="${index}"]`);
+  if (row) {
+    row.classList.add("partner-row-highlighted");
+    row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  updateInspector(index);
+}
+
+function setupCanvasInteractions() {
+  const canvas = document.getElementById("landCanvas");
+  if (!canvas) return;
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!isDivisionActive || heirsData.length === 0 || !window.canvasPiecesGeometry) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let foundIndex = null;
+    for (let i = 0; i < window.canvasPiecesGeometry.length; i++) {
+      if (isPointInPolygon(x, y, window.canvasPiecesGeometry[i])) {
+        foundIndex = i;
+        break;
+      }
+    }
+
+    if (window.hoveredPieceIndex !== foundIndex) {
+      window.hoveredPieceIndex = foundIndex;
+      drawLandCanvas(vertices);
+
+      // Highlight corresponding row in heirs table
+      document.querySelectorAll("#heirs-list tr").forEach(row => {
+        row.classList.remove("partner-row-highlighted");
+      });
+      if (foundIndex !== null) {
+        const row = document.querySelector(`#heirs-list tr[data-index="${foundIndex}"]`);
+        if (row) row.classList.add("partner-row-highlighted");
+        updateInspector(foundIndex);
+      } else if (window.selectedPieceIndex !== null) {
+        updateInspector(window.selectedPieceIndex);
+        const row = document.querySelector(`#heirs-list tr[data-index="${window.selectedPieceIndex}"]`);
+        if (row) row.classList.add("partner-row-highlighted");
+      } else {
+        const inspector = document.getElementById("croquis-inspector");
+        if (inspector) inspector.style.display = "none";
+      }
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    window.hoveredPieceIndex = null;
+    drawLandCanvas(vertices);
+    document.querySelectorAll("#heirs-list tr").forEach(row => {
+      row.classList.remove("partner-row-highlighted");
+    });
+    if (window.selectedPieceIndex !== null) {
+      const row = document.querySelector(`#heirs-list tr[data-index="${window.selectedPieceIndex}"]`);
+      if (row) row.classList.add("partner-row-highlighted");
+      updateInspector(window.selectedPieceIndex);
+    } else {
+      const inspector = document.getElementById("croquis-inspector");
+      if (inspector) inspector.style.display = "none";
+    }
+  });
+
+  canvas.addEventListener("click", (e) => {
+    if (!isDivisionActive || heirsData.length === 0 || !window.canvasPiecesGeometry) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let foundIndex = null;
+    for (let i = 0; i < window.canvasPiecesGeometry.length; i++) {
+      if (isPointInPolygon(x, y, window.canvasPiecesGeometry[i])) {
+        foundIndex = i;
+        break;
+      }
+    }
+
+    if (foundIndex !== null) {
+      selectPiece(foundIndex);
+    } else {
+      window.selectedPieceIndex = null;
+      window.hoveredPieceIndex = null;
+      drawLandCanvas(vertices);
+      document.querySelectorAll("#heirs-list tr").forEach(row => {
+        row.classList.remove("partner-row-highlighted");
+      });
+      const inspector = document.getElementById("croquis-inspector");
+      if (inspector) inspector.style.display = "none";
+    }
+  });
+}
+
+// Bind delegates for heirs list table rows
+document.addEventListener("DOMContentLoaded", () => {
+  setupCanvasInteractions();
+  
+  const heirsList = document.getElementById("heirs-list");
+  if (heirsList) {
+    heirsList.addEventListener("mouseenter", (e) => {
+      const row = e.target.closest("tr");
+      if (row && row.hasAttribute("data-index")) {
+        const idx = parseInt(row.getAttribute("data-index"));
+        window.hoveredPieceIndex = idx;
+        drawLandCanvas(vertices);
+        row.classList.add("partner-row-highlighted");
+      }
+    }, true);
+    
+    heirsList.addEventListener("mouseleave", (e) => {
+      const row = e.target.closest("tr");
+      if (row && row.hasAttribute("data-index")) {
+        window.hoveredPieceIndex = null;
+        drawLandCanvas(vertices);
+        row.classList.remove("partner-row-highlighted");
+        
+        // Re-apply select highlight if any
+        if (window.selectedPieceIndex !== null) {
+          const selRow = document.querySelector(`#heirs-list tr[data-index="${window.selectedPieceIndex}"]`);
+          if (selRow) selRow.classList.add("partner-row-highlighted");
+        }
+      }
+    }, true);
+    
+    heirsList.addEventListener("click", (e) => {
+      const row = e.target.closest("tr");
+      if (row && row.hasAttribute("data-index")) {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+        const idx = parseInt(row.getAttribute("data-index"));
+        selectPiece(idx);
+      }
+    }, true);
+  }
+});
+

@@ -335,6 +335,7 @@ body {
   display: flex;
   justify-content: center;
   background-color: #eaeff2;
+  position: relative !important;
 }
 
 .canvas-wrapper canvas {
@@ -974,5 +975,110 @@ input::placeholder, select::placeholder {
     font-size: 15px !important;
   }
 }
+
+/* ============================================================
+   INTERACTIVE INSPECTOR & CAD HIGHLIGHTS
+   ============================================================ */
+
+/* مفتش تفاصيل القطعة التفاعلي العائم */
+.croquis-inspector {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important; /* في التنسيق العربي يثبت يميناً */
+  width: 250px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 2px solid #2e7d32 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  z-index: 10 !important;
+  font-family: Cairo, Arial, sans-serif !important;
+  direction: rtl !important;
+  overflow: hidden !important;
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out !important;
+  animation: fadeInInspector 0.25s ease-out !important;
+}
+
+@keyframes fadeInInspector {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.inspector-header {
+  background-color: #2e7d32 !important;
+  color: white !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+}
+
+.inspector-title {
+  flex-grow: 1 !important;
+  text-align: right !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.1) !important;
+}
+
+.inspector-close {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  padding: 0 4px !important;
+  line-height: 1 !important;
+  transition: color 0.2s !important;
+}
+.inspector-close:hover {
+  color: #ffcdd2 !important;
+}
+
+.inspector-body {
+  padding: 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.inspector-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 12px !important;
+  border-bottom: 1px dashed #eceff1 !important;
+  padding-bottom: 6px !important;
+}
+
+.inspector-row:last-child {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.ins-lbl {
+  color: #546e7a !important;
+  font-weight: 600 !important;
+}
+
+.ins-val {
+  color: #263238 !important;
+  font-weight: 700 !important;
+}
+
+/* تسليط الضوء على صف الشريك في الجدول */
+.partner-row-highlighted {
+  background-color: #f1f8e9 !important; /* خلفية خضراء خفيفة */
+  border: 1.5px solid #2e7d32 !important;
+  box-shadow: 0 0 10px rgba(46, 125, 50, 0.15) !important;
+  transition: all 0.2s ease-in-out !important;
+  transform: scale(1.005) !important;
+}
+.partner-row-highlighted td input {
+  background-color: #e8f5e9 !important;
+}
+
 
 
