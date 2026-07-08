@@ -1741,10 +1741,10 @@ function drawLandCanvas(vertices) {
       // Bottom width
       ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
       
-      // Left side length (only first piece shows left edge label, drawn at 0.25 from top with white bg and left alignment)
+      // Left side length (only first piece shows left edge label, drawn at 0.75 from top with white bg and left alignment)
       if (i === 0) {
-        const lx = cpTopPrev.x + 0.25 * (cpBottomPrev.x - cpTopPrev.x);
-        const ly = cpTopPrev.y + 0.25 * (cpBottomPrev.y - cpTopPrev.y);
+        const lx = cpTopPrev.x + 0.75 * (cpBottomPrev.x - cpTopPrev.x);
+        const ly = cpTopPrev.y + 0.75 * (cpBottomPrev.y - cpTopPrev.y);
         // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
         const leftLabelVal = (activeShape === 'trapezoid' && !showActualDims)
           ? landLeft  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
@@ -1762,10 +1762,10 @@ function drawLandCanvas(vertices) {
         ctx.fillText(labelTextLeft, lx + 7 * scaleMultiplier, ly);
       }
       
-      // Right side length (drawn at 0.25 from top with white bg and right alignment next to divider)
+      // Right side length (drawn at 0.75 from top with white bg and right alignment next to divider)
       {
-        const rx = cpTopCurr.x + 0.25 * (cpBottomCurr.x - cpTopCurr.x);
-        const ry = cpTopCurr.y + 0.25 * (cpBottomCurr.y - cpTopCurr.y);
+        const rx = cpTopCurr.x + 0.75 * (cpBottomCurr.x - cpTopCurr.x);
+        const ry = cpTopCurr.y + 0.75 * (cpBottomCurr.y - cpTopCurr.y);
         // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
         const rightLabelVal = (activeShape === 'trapezoid' && !showActualDims)
           ? landRight  // الطول الثابت (الارتفاع) الذي أدخله المستخدم

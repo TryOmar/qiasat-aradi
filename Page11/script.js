@@ -2136,8 +2136,8 @@ function renderCroquis() {
           const midFasil = (y1 + y4) / 2;
 
 
-          // موضع طول الفاصل في الثلث العلوي عند 0.25 من الأعلى (مثل صفحة 13)
-          const y_fasil_pos = y4 + 0.25 * (y1 - y4);
+          // موضع طول الفاصل في الثلث السفلي عند 0.75 من الأعلى لمنع التداخل
+          const y_fasil_pos = y4 + 0.75 * (y1 - y4);
           const fasilText = svgText(x1 - 10 * textScale, y_fasil_pos, piece.leftLine.toFixed(2) + " م", {
             fill: "#1b5e20", // أخضر داكن مثل صفحة 13
             size: "10.5",
@@ -2155,7 +2155,7 @@ function renderCroquis() {
         if (index === window.calculatedPieces.length - 1) {
           const midFasil = (y2 + y3) / 2;
           
-          const y_fasil_pos = y3 + 0.25 * (y2 - y3);
+          const y_fasil_pos = y3 + 0.75 * (y2 - y3);
           const fasilText = svgText(x2 - 10 * textScale, y_fasil_pos, l1.toFixed(2) + " م", { // l1 هو الارتفاع الأيمن للأرض
             fill: "#1b5e20",
             size: "10.5",
@@ -2170,7 +2170,7 @@ function renderCroquis() {
         if (index === 0) {
           const midFasil = (y1 + y4) / 2;
           
-          const y_fasil_pos = y4 + 0.25 * (y1 - y4);
+          const y_fasil_pos = y4 + 0.75 * (y1 - y4);
           const fasilText = svgText(x1 + 10 * textScale, y_fasil_pos, l2.toFixed(2) + " م", { // l2 هو الارتفاع الأيسر للأرض
             fill: "#1b5e20",
             size: "10.5",
