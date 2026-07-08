@@ -20,28 +20,7 @@ Object.defineProperty(window, 'isManualPartition', {
 });
 
 function ensureDimensionsAutofill() {
-  const l1Input = document.getElementById("length1");
-  const l2Input = document.getElementById("length2");
-  const w1Input = document.getElementById("width1");
-  const w2Input = document.getElementById("width2");
-  
-  if (!l1Input || !l2Input || !w1Input || !w2Input) return;
-  
-  let l1Str = l1Input.value.trim();
-  let l2Str = l2Input.value.trim();
-  let w1Str = w1Input.value.trim();
-  let w2Str = w2Input.value.trim();
-  
-  let l1 = parseFloat(l1Str) || 0;
-  let l2 = parseFloat(l2Str) || 0;
-  let w1 = parseFloat(w1Str) || 0;
-  let w2 = parseFloat(w2Str) || 0;
-  
-  if (l1 > 0 && l2Str === "") { l2Input.value = l1; }
-  else if (l2 > 0 && l1Str === "") { l1Input.value = l2; }
-  
-  if (w1 > 0 && w2Str === "") { w2Input.value = w1; }
-  else if (w2 > 0 && w1Str === "") { w1Input.value = w2; }
+  // Autofill behavior removed to allow manual entry of all 4 dimensions.
 }
 
 let isEditing = false;
@@ -81,6 +60,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("blur", saveAndCalc);
+      el.addEventListener("input", () => {
+        const l1 = parseFloat(document.getElementById("length1").value) || 0;
+        const l2 = parseFloat(document.getElementById("length2").value) || 0;
+        const w1 = parseFloat(document.getElementById("width1").value) || 0;
+        const w2 = parseFloat(document.getElementById("width2").value) || 0;
+        if (l1 > 0 && l2 > 0 && w1 > 0 && w2 > 0) {
+          saveAndCalc();
+        }
+      });
     }
   });
 });
@@ -617,33 +605,33 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group share-group">
         <span class="mobile-label">سهم</span>
-        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group carat-group">
         <span class="mobile-label">قيراط</span>
-        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group feddan-group">
         <span class="mobile-label">فدان</span>
-        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
-        <input type="text" inputmode="decimal" class="partner-area" value="-" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-area" value="-" oninput="onAreaInput(this)" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group percent-group">
         <span class="mobile-label">نسبة (%)</span>
-        <input type="text" inputmode="decimal" class="partner-percent" value="-" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
@@ -651,7 +639,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الثاني (أسفل)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </div>
@@ -673,11 +661,11 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group name-group">
         <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group fraction-group">
         <span class="mobile-label">النسبة / الكسر</span>
-        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group equiv-group">
         <span class="mobile-label">تعادل (س.ق.ف)</span>
@@ -686,17 +674,17 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <div class="col-group" style="display:none;"><input type="hidden"></div>
       <div class="col-group area-group">
         <span class="mobile-label">المساحة (م²)</span>
-        <input type="text" inputmode="decimal" class="partner-area" value="-" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-area" value="-" oninput="onAreaInput(this)" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group percent-group">
         <span class="mobile-label">نسبة (%)</span>
-        <input type="text" inputmode="decimal" class="partner-percent" value="-" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
       <div class="col-group width-bottom-group">
         <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
@@ -704,7 +692,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">العرض الثاني (أسفل)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </div>
@@ -1089,11 +1077,13 @@ function calculateGeneral() {
     // 2. Update Area (المساحة)
     if (!isManualPartition) {
       const areaInput = row.querySelector(".partner-area");
-      if (areaInput) areaInput.value = Number(partnerAreaM2.toFixed(2));
+      if (areaInput && document.activeElement !== areaInput) {
+        areaInput.value = Number(partnerAreaM2.toFixed(2));
+      }
 
       // 3. Update Percentage (النسبة)
       const percentInput = row.querySelector(".partner-percent");
-      if (percentInput) {
+      if (percentInput && document.activeElement !== percentInput) {
         const pct = totalAreaM2 > 0 ? (partnerAreaM2 / totalAreaM2) * 100 : 0;
         percentInput.value = Number(pct.toFixed(2)) + " %";
       }
@@ -1351,12 +1341,16 @@ function runPartition() {
     totalTopWidthCalculated += topWidth;
     totalDistributedArea += calculatedGeoArea;
 
-    if (widthBotInput) {
+    if (widthBotInput && document.activeElement !== widthBotInput) {
       widthBotInput.value = botWidth.toFixed(2);
       widthBotInput.setAttribute("data-last-val", botWidth.toFixed(4));
+    } else if (widthBotInput) {
+      widthBotInput.setAttribute("data-last-val", botWidth.toFixed(4));
     }
-    if (widthTopInput) {
+    if (widthTopInput && document.activeElement !== widthTopInput) {
       widthTopInput.value = topWidth.toFixed(2);
+      widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
+    } else if (widthTopInput) {
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
     }
 
@@ -1371,10 +1365,12 @@ function runPartition() {
     }
     
     const areaInput = row.querySelector(".partner-area");
-    if (areaInput) areaInput.value = Number(calculatedGeoArea.toFixed(2));
+    if (areaInput && document.activeElement !== areaInput) {
+      areaInput.value = Number(calculatedGeoArea.toFixed(2));
+    }
 
     const percentInput = row.querySelector(".partner-percent");
-    if (percentInput) {
+    if (percentInput && document.activeElement !== percentInput) {
       const pct = totalAreaM2 > 0 ? (calculatedGeoArea / totalAreaM2) * 100 : 0;
       percentInput.value = Number(pct.toFixed(2)) + " %";
     }
@@ -1386,12 +1382,12 @@ function runPartition() {
         const feddansInput = row.querySelector(".partner-feddans");
         const caratsInput = row.querySelector(".partner-carats");
         const sharesInput = row.querySelector(".partner-shares");
-        if (feddansInput) feddansInput.value = fcs.feddan;
-        if (caratsInput) caratsInput.value = fcs.carat;
-        if (sharesInput) sharesInput.value = fcs.sahm;
+        if (feddansInput && document.activeElement !== feddansInput) feddansInput.value = fcs.feddan;
+        if (caratsInput && document.activeElement !== caratsInput) caratsInput.value = fcs.carat;
+        if (sharesInput && document.activeElement !== sharesInput) sharesInput.value = fcs.sahm;
       } else {
         const fracInput = row.querySelector(".partner-fraction");
-        if (fracInput) fracInput.value = (calculatedGeoArea / totalAreaM2).toFixed(4);
+        if (fracInput && document.activeElement !== fracInput) fracInput.value = (calculatedGeoArea / totalAreaM2).toFixed(4);
         
         const equivInput = row.querySelector(".partner-equiv");
         if (equivInput) {
@@ -1478,12 +1474,12 @@ function runPartition() {
         const feddansInput = lastActiveRow.querySelector(".partner-feddans");
         const caratsInput = lastActiveRow.querySelector(".partner-carats");
         const sharesInput = lastActiveRow.querySelector(".partner-shares");
-        if (feddansInput) feddansInput.value = fcs.feddan > 0 ? fcs.feddan : "";
-        if (caratsInput) caratsInput.value = fcs.carat > 0 ? fcs.carat : "";
-        if (sharesInput) sharesInput.value = fcs.sahm > 0 ? fcs.sahm : "";
+        if (feddansInput && document.activeElement !== feddansInput) feddansInput.value = fcs.feddan > 0 ? fcs.feddan : "";
+        if (caratsInput && document.activeElement !== caratsInput) caratsInput.value = fcs.carat > 0 ? fcs.carat : "";
+        if (sharesInput && document.activeElement !== sharesInput) sharesInput.value = fcs.sahm > 0 ? fcs.sahm : "";
       } else {
         const fracInput = lastActiveRow.querySelector(".partner-fraction");
-        if (fracInput) {
+        if (fracInput && document.activeElement !== fracInput) {
           fracInput.value = (correctArea / totalAreaM2).toFixed(6);
         }
       }
@@ -3786,14 +3782,14 @@ function updatePartnerFromInput(type, value, row) {
         const caratsInput = row.querySelector(".partner-carats");
         const sharesInput = row.querySelector(".partner-shares");
         
-        if (feddansInput) feddansInput.value = feddan;
-        if (caratsInput) caratsInput.value = carat;
-        if (sharesInput) sharesInput.value = sahm;
+        if (feddansInput && document.activeElement !== feddansInput) feddansInput.value = feddan;
+        if (caratsInput && document.activeElement !== caratsInput) caratsInput.value = carat;
+        if (sharesInput && document.activeElement !== sharesInput) sharesInput.value = sahm;
       }
     } else {
       const fracVal = areaVal / totalAreaM2;
       const fractionInput = row.querySelector(".partner-fraction");
-      if (fractionInput) {
+      if (fractionInput && document.activeElement !== fractionInput) {
         fractionInput.value = Number(fracVal.toFixed(6));
       }
     }
