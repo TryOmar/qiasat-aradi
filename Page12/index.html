@@ -88,15 +88,15 @@
       <div class="sidebar-card no-print">
         <h3>قوالب جاهزة سريعة</h3>
         <div class="preset-grid">
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('rectangle')">🔳 مستطيل / مربع</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('square')">⏹️ مربع</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('trapezoid')">📐 شبه منحرف زراعي (مبسط)</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('quadrilateral')">⏢ رباعي غير منتظم</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('v_split')">📊 تقسيم رأسي</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('h_split')">🥞 تقسيم أفقي</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط بمجرى مائي</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')">🗺️ تقسيم مختلط بين مجرى مائي</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('rectangle')" ontouchstart="loadTemplate('rectangle')">🔳 مستطيل / مربع</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('square')" ontouchstart="loadTemplate('square')">⏹️ مربع</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('trapezoid')" ontouchstart="loadTemplate('trapezoid')">📐 شبه منحرف زراعي (مبسط)</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('quadrilateral')" ontouchstart="loadTemplate('quadrilateral')">⏢ رباعي غير منتظم</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('v_split')" ontouchstart="loadTemplate('v_split')">📊 تقسيم رأسي</button>
+          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('h_split')" ontouchstart="loadTemplate('h_split')">🥞 تقسيم أفقي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')" ontouchstart="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')" ontouchstart="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط بمجرى مائي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')" ontouchstart="loadTemplate('mixed_split_image')">🗺️ تقسيم مختلط بين مجرى مائي</button>
         </div>
 
         <h3 style="margin-top: 20px;">أدوات الإضافة</h3>
@@ -207,8 +207,8 @@
         </div>
       </div>
       <div class="modal-actions" style="margin-top: 15px;">
-        <button type="button" class="modal-save-btn" onclick="generateCustomLand()">رسم الأرض</button>
-        <button type="button" class="modal-cancel-btn" onclick="closeStartModal()">إلغاء</button>
+        <button type="button" class="modal-save-btn" onclick="generateCustomLand()" ontouchstart="generateCustomLand()">رسم الأرض</button>
+        <button type="button" class="modal-cancel-btn" onclick="closeStartModal()" ontouchstart="closeStartModal()">إلغاء</button>
       </div>
     </div>
   </div>

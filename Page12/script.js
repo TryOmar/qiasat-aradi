@@ -1,4 +1,22 @@
-// Page 12 - Dallal Professional Surveyor Map Builder script.js
+// Arabic/Eastern digits converter and parser helper
+function parseArabicFloat(str) {
+  if (!str) return 0;
+  const converted = str.toString()
+                       .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632)
+                       .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776);
+  const clean = converted.replace(/٫/g, '.').replace(/,/g, '.').trim();
+  return parseFloat(clean) || 0;
+}
+
+let lastActionTime = 0;
+function preventDoubleTap() {
+  const now = Date.now();
+  if (now - lastActionTime < 300) {
+    return true;
+  }
+  lastActionTime = now;
+  return false;
+}
 
 // Graphics State
 let shapes = [];
@@ -270,14 +288,15 @@ function sqmToFeddanCaratShares(sqm) {
 // ----------------------------------------------------
 function generateCustomLand() {
   try {
-    const w1 = parseFloat(document.getElementById("start-w1").value) || 0;
-  const w1Dir = document.getElementById("start-w1-dir").value.trim() || "بحري";
-  const w2 = parseFloat(document.getElementById("start-w2").value) || 0;
-  const w2Dir = document.getElementById("start-w2-dir").value.trim() || "قبلي";
-  const l2 = parseFloat(document.getElementById("start-l2").value) || 0;
-  const l2Dir = document.getElementById("start-l2-dir").value.trim() || "شرقي";
-  const l1 = parseFloat(document.getElementById("start-l1").value) || 0;
-  const l1Dir = document.getElementById("start-l1-dir").value.trim() || "غربي";
+    if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
+    const w1 = parseArabicFloat(document.getElementById("start-w1").value);
+    const w1Dir = document.getElementById("start-w1-dir").value.trim() || "بحري";
+    const w2 = parseArabicFloat(document.getElementById("start-w2").value);
+    const w2Dir = document.getElementById("start-w2-dir").value.trim() || "قبلي";
+    const l2 = parseArabicFloat(document.getElementById("start-l2").value);
+    const l2Dir = document.getElementById("start-l2-dir").value.trim() || "شرقي";
+    const l1 = parseArabicFloat(document.getElementById("start-l1").value);
+    const l1Dir = document.getElementById("start-l1-dir").value.trim() || "غربي";
 
   if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0) {
     alert("الرجاء إدخال أبعاد صحيحة أكبر من الصفر للأضلاع الأربعة!");
@@ -1770,58 +1789,63 @@ function resetCanvasToDefault() {
 
 // Templates wrapper for Sidebar Card
 function loadTemplate(type) {
-  activeTemplateType = type;
+  try {
+    if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
+    activeTemplateType = type;
 
-  // Pre-populate input fields based on the selected template style
-  const w1Input = document.getElementById("start-w1");
-  const w2Input = document.getElementById("start-w2");
-  const l2Input = document.getElementById("start-l2");
-  const l1Input = document.getElementById("start-l1");
+    // Pre-populate input fields based on the selected template style
+    const w1Input = document.getElementById("start-w1");
+    const w2Input = document.getElementById("start-w2");
+    const l2Input = document.getElementById("start-l2");
+    const l1Input = document.getElementById("start-l1");
 
-  if (type === 'rectangle') {
-    w1Input.value = "30";
-    w2Input.value = "30";
-    l2Input.value = "60";
-    l1Input.value = "60";
-  } else if (type === 'square') {
-    w1Input.value = "30";
-    w2Input.value = "30";
-    l2Input.value = "30";
-    l1Input.value = "30";
-  } else if (type === 'trapezoid') {
-    w1Input.value = "30";
-    w2Input.value = "45";
-    l2Input.value = "40";
-    l1Input.value = "35";
-  } else if (type === 'quadrilateral') {
-    w1Input.value = "30";
-    w2Input.value = "32.5";
-    l2Input.value = "60";
-    l1Input.value = "58";
-  } else if (type === 'quad_diagonal') {
-    w1Input.value = "45";
-    w2Input.value = "50";
-    l2Input.value = "35";
-    l1Input.value = "40";
-  } else if (type === 'mixed_waterway_new') {
-    w1Input.value = "150";
-    w2Input.value = "150";
-    l2Input.value = "200";
-    l1Input.value = "200";
-  } else if (type === 'mixed_split_image') {
-    w1Input.value = "227.5";
-    w2Input.value = "209.45";
-    l2Input.value = "436.95";
-    l1Input.value = "436.95";
-  } else if (type === 'v_split' || type === 'h_split') {
-    w1Input.value = "30";
-    w2Input.value = "30";
-    l2Input.value = "60";
-    l1Input.value = "60";
+    if (type === 'rectangle') {
+      w1Input.value = "30";
+      w2Input.value = "30";
+      l2Input.value = "60";
+      l1Input.value = "60";
+    } else if (type === 'square') {
+      w1Input.value = "30";
+      w2Input.value = "30";
+      l2Input.value = "30";
+      l1Input.value = "30";
+    } else if (type === 'trapezoid') {
+      w1Input.value = "30";
+      w2Input.value = "45";
+      l2Input.value = "40";
+      l1Input.value = "35";
+    } else if (type === 'quadrilateral') {
+      w1Input.value = "30";
+      w2Input.value = "32.5";
+      l2Input.value = "60";
+      l1Input.value = "58";
+    } else if (type === 'quad_diagonal') {
+      w1Input.value = "45";
+      w2Input.value = "50";
+      l2Input.value = "35";
+      l1Input.value = "40";
+    } else if (type === 'mixed_waterway_new') {
+      w1Input.value = "150";
+      w2Input.value = "150";
+      l2Input.value = "200";
+      l1Input.value = "200";
+    } else if (type === 'mixed_split_image') {
+      w1Input.value = "227.5";
+      w2Input.value = "209.45";
+      l2Input.value = "436.95";
+      l1Input.value = "436.95";
+    } else if (type === 'v_split' || type === 'h_split') {
+      w1Input.value = "30";
+      w2Input.value = "30";
+      l2Input.value = "60";
+      l1Input.value = "60";
+    }
+
+    // Open the Start Screen modal to confirm or modify values
+    openStartModal();
+  } catch (err) {
+    alert("حدث خطأ أثناء تحميل القالب: " + err.message);
   }
-
-  // Open the Start Screen modal to confirm or modify values
-  openStartModal();
 }
 
 // ----------------------------------------------------
