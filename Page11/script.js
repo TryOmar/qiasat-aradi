@@ -3278,7 +3278,6 @@ function updateConversionsTable() {
   if (!container) return;
 
   // ── حفظ حالة العنصر النشط قبل إعادة البناء ──────────────────────────────
-  // هذا يمنع فقدان التركيز، تكرار الأرقام، وتعطل الكتابة/المسح
   const activeEl = document.activeElement;
   const isInsideContainer = activeEl && container.contains(activeEl);
 
@@ -3303,71 +3302,74 @@ function updateConversionsTable() {
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
   const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
-  // helper: render one field-group (label + value chip)
-  function convFieldHTML(id, value, title, chipClass, min, max, step) {
+  // helper: render one field input
+  function convFieldHTML(id, value, title, min, max, step) {
     const minAttr  = min  !== undefined ? `min="${min}"`   : '';
     const maxAttr  = max  !== undefined ? `max="${max}"`   : '';
     const stepAttr = step !== undefined ? `step="${step}"` : '';
-    // استخدام القيمة المحفوظة للحقل النشط حتى لا تُفقد أثناء إعادة البناء
     const displayValue = (id === savedFocusId && savedValue !== null) ? savedValue : value;
     return `
-      <div class="conv-field-group">
-        <div class="conv-field-label">${title}</div>
-        <div class="conv-field-chip ${chipClass}">
-          <input type="text" inputmode="decimal"
-            id="${id}" value="${displayValue}"
-            class="conv-chip-input"
-            title="${title}"
-            ${minAttr} ${maxAttr} ${stepAttr}
-            oninput="updateSideFromQasaba(this.dataset.idx)"
-            onchange="updateSideFromQasaba(this.dataset.idx)"
-            data-idx="${id.split('-').pop()}">
-        </div>
-      </div>`;
+      <input type="text" inputmode="decimal"
+        id="${id}" value="${displayValue}"
+        class="conv-chip-input"
+        title="${title}"
+        ${minAttr} ${maxAttr} ${stepAttr}
+        oninput="updateSideFromQasaba(this.dataset.idx)"
+        onchange="updateSideFromQasaba(this.dataset.idx)"
+        data-idx="${id.split('-').pop()}">`;
   }
 
-  function readonlyFieldHTML(value, title, chipClass) {
+  function readonlyFieldHTML(value, title) {
     return `
-      <div class="conv-field-group">
-        <div class="conv-field-label">${title}</div>
-        <div class="conv-field-chip ${chipClass}">
-          <input type="text" inputmode="decimal" value="${value}" class="conv-chip-input" readonly tabindex="-1">
-        </div>
-      </div>`;
+      <input type="text" inputmode="decimal" value="${value}" class="conv-chip-input" readonly tabindex="-1">`;
   }
 
-  function buildCard({ id, label, meterValue, meterColor, isEditable, isArea, chipBase }) {
+  function buildCard({ id, label, meterValue, isEditable, isArea }) {
     const qConv = toQasabaAndQabda(meterValue);
-    const meterLabel = isArea ? `${meterValue.toFixed(2)} م²` : `${meterValue} م`;
-    const meterBadgeStyle = `background:${meterColor.bg}; color:${meterColor.fg};`;
-    const cardClass = isArea ? 'conv-card conv-card-area' : 'conv-card';
+    const meterLabel = isArea ? `${meterValue.toFixed(2)} م²` : `${meterValue.toFixed(2)} م`;
 
     const fracHTML = isEditable
-      ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', `${chipBase}-frac`, 0, 0.99, 0.01)
-      : readonlyFieldHTML(qConv.fraction, 'أقل من القبضة', `${chipBase}-frac readonly`);
+      ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', 0, 0.99, 0.01)
+      : readonlyFieldHTML(qConv.fraction, 'أقل من القبضة');
 
     const qabdaHTML = isEditable
-      ? convFieldHTML(`conv-qabda-${id}`, qConv.qabda, 'قبضة', `${chipBase}-qabda`, 0, undefined, 1)
-      : readonlyFieldHTML(qConv.qabda, 'قبضة', `${chipBase}-qabda readonly`);
+      ? convFieldHTML(`conv-qabda-${id}`, qConv.qabda, 'قبضة', 0, undefined, 1)
+      : readonlyFieldHTML(qConv.qabda, 'قبضة');
 
     const qasabaHTML = isEditable
-      ? convFieldHTML(`conv-qasaba-${id}`, qConv.qasaba, 'قصبة', `${chipBase}-qasaba`, 0, undefined, 1)
-      : readonlyFieldHTML(qConv.qasaba, 'قصبة', `${chipBase}-qasaba readonly`);
+      ? convFieldHTML(`conv-qasaba-${id}`, qConv.qasaba, 'قصبة', 0, undefined, 1)
+      : readonlyFieldHTML(qConv.qasaba, 'قصبة');
 
     return `
-      <div class="${cardClass}">
-        <div class="conv-card-header">
-          <span class="conv-card-label">${label}</span>
-          <span class="conv-meter-badge" style="${meterBadgeStyle}">${meterLabel}</span>
-        </div>
-        <div class="conv-card-fields">
-          ${fracHTML}${qabdaHTML}${qasabaHTML}
-        </div>
+      <div class="conv-card">
+        <div class="conv-card-title">${label}</div>
+        <div class="conv-card-main-val">${meterLabel}</div>
+        <table class="conv-card-table">
+          <thead>
+            <tr>
+              <th>الوحدة</th>
+              <th>القيمة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>قصبة</td>
+              <td>${qasabaHTML}</td>
+            </tr>
+            <tr>
+              <td>قبضة</td>
+              <td>${qabdaHTML}</td>
+            </tr>
+            <tr>
+              <td>أقل من القبضة</td>
+              <td>${fracHTML}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>`;
   }
 
-
-  let html = '<div class="conv-grid">';
+  let html = '';
 
   // الأبعاد الأربعة القابلة للتعديل
   const dims = [
@@ -3383,14 +3385,10 @@ function updateConversionsTable() {
       id: dim.id,
       label: dim.label,
       meterValue: val,
-      meterColor: { bg: '#e8f5e9', fg: '#1b5e20' },
       isEditable: true,
-      isArea: false,
-      chipBase: 'green'
+      isArea: false
     });
   });
-
-  html += '</div>'; // end conv-grid
 
   // عروض القيراط والمساحة المربعة في صف مستقل
   let caratArea = parseFloat(document.getElementById("input-carat-area").value) || 0;
@@ -3403,51 +3401,60 @@ function updateConversionsTable() {
     botQiratWidth = w2 / totalQirats;
   }
 
-  const qasba_sq = totalAreaM2 / 12.60250;
-  const reedValue = Math.floor(qasba_sq);
-  const fistValue = Math.floor((qasba_sq - reedValue) * 24);
-  const lessThanFistValue = parseFloat(((qasba_sq - reedValue - fistValue / 24)).toFixed(2));
-
-  html += '<div class="conv-extra-row">';
-
   if (caratArea > 0 && totalAreaM2 > 0) {
     html += buildCard({
       id: 'topq',
       label: 'عرض القيراط العلوي',
       meterValue: topQiratWidth,
-      meterColor: { bg: '#e3f2fd', fg: '#0d47a1' },
       isEditable: false,
-      isArea: false,
-      chipBase: 'blue'
+      isArea: false
     });
     html += buildCard({
       id: 'botq',
       label: 'عرض القيراط السفلي',
       meterValue: botQiratWidth,
-      meterColor: { bg: '#e3f2fd', fg: '#0d47a1' },
       isEditable: false,
-      isArea: false,
-      chipBase: 'blue'
+      isArea: false
     });
   }
 
   // النتيجة بالقصبة المربعة - نبنيها مباشرة بقيم صحيحة
-  const areaFracHTML   = readonlyFieldHTML(lessThanFistValue, 'أقل من القبضة', 'purple-frac readonly');
-  const areaQabdaHTML  = readonlyFieldHTML(fistValue, 'قبضة', 'purple-qabda readonly');
-  const areaQasabaHTML = readonlyFieldHTML(reedValue, 'قصبة', 'purple-qasaba readonly');
+  const qasba_sq = totalAreaM2 / 12.60250;
+  const reedValue = Math.floor(qasba_sq);
+  const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+  const lessThanFistValue = parseFloat(((qasba_sq - reedValue - fistValue / 24)).toFixed(2));
+
+  const areaFracHTML   = readonlyFieldHTML(lessThanFistValue, 'أقل من القبضة');
+  const areaQabdaHTML  = readonlyFieldHTML(fistValue, 'قبضة');
+  const areaQasabaHTML = readonlyFieldHTML(reedValue, 'قصبة');
 
   html += `
-    <div class="conv-card conv-card-area">
-      <div class="conv-card-header">
-        <span class="conv-card-label">النتيجة بالقصبة المربعة</span>
-        <span class="conv-meter-badge" style="background:#f3e5f5; color:#6a1b9a;">${totalAreaM2.toFixed(2)} م²</span>
-      </div>
-      <div class="conv-card-fields">
-        ${areaFracHTML}${areaQabdaHTML}${areaQasabaHTML}
-      </div>
+    <div class="conv-card">
+      <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
+      <div class="conv-card-main-val">${totalAreaM2.toFixed(2)} م²</div>
+      <table class="conv-card-table">
+        <thead>
+          <tr>
+            <th>الوحدة</th>
+            <th>القيمة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>قصبة</td>
+            <td>${areaQasabaHTML}</td>
+          </tr>
+          <tr>
+            <td>قبضة</td>
+            <td>${areaQabdaHTML}</td>
+          </tr>
+          <tr>
+            <td>أقل من القبضة</td>
+            <td>${areaFracHTML}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>`;
-
-  html += '</div>'; // end conv-extra-row
 
   // ── إعادة بناء DOM ─────────────────────────────────────────────────────────
   container.innerHTML = html;
@@ -3456,7 +3463,6 @@ function updateConversionsTable() {
   if (savedFocusId) {
     const restoredEl = document.getElementById(savedFocusId);
     if (restoredEl) {
-      // القيمة موجودة بالفعل في HTML (displayValue في convFieldHTML)
       restoredEl.focus();
       try {
         if (savedCursorStart !== null) {

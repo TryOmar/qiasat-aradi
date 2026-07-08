@@ -486,3 +486,31 @@ body {
     padding: 14px;
   }
 }
+
+/* ==========================================================================
+   توحيد جميع حقول الإدخال - إطار أسود سميك، حواف مستديرة، خطوط أكبر
+   ========================================================================== */
+.input-div input,
+.conv-inputs input,
+.inputs-subgrid input {
+  border: 2px solid #000000 !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease-in-out !important;
+  text-align: center !important;
+}
+
+.input-div input:focus,
+.conv-inputs input:focus,
+.inputs-subgrid input:focus {
+  border-color: #000000 !important;
+  border-width: 2.5px !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2) !important;
+  background-color: #ffffff !important;
+}
+

@@ -2570,5 +2570,167 @@ body {
   border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
 
+/* ==========================================================================
+   إعادة تصميم بطاقات التحويل (القصبة والقبضة) - Outdoor/Sunlight High Contrast
+   ========================================================================== */
+.conv-cards-container {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+@media (min-width: 550px) {
+  .conv-cards-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 850px) {
+  .conv-cards-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+.conv-card {
+  background: #ffffff !important;
+  border: 2.5px solid #000000 !important; /* إطار أسود واضح */
+  border-radius: 12px !important; /* زوايا مستديرة */
+  padding: 16px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important; /* ظل خفيف */
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.conv-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+.conv-card-title {
+  font-size: 15px !important;
+  font-weight: bold !important;
+  color: #333333 !important;
+  font-family: Cairo, Arial, sans-serif !important;
+  text-align: center !important;
+}
+
+.conv-card-main-val {
+  font-size: 26px !important; /* الأرقام أكبر من النصوص */
+  font-weight: 900 !important;
+  color: #000000 !important; /* لون أسود صريح */
+  font-family: Cairo, Arial, sans-serif !important;
+  text-align: center !important;
+  margin: 4px 0 !important;
+}
+
+.conv-card-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-top: 8px !important;
+  font-family: Cairo, Arial, sans-serif !important;
+}
+
+.conv-card-table th {
+  font-size: 13px !important;
+  color: #555555 !important;
+  border-bottom: 2px solid #000000 !important;
+  padding: 6px 4px !important;
+  font-weight: bold !important;
+}
+
+.conv-card-table td {
+  font-size: 14px !important;
+  color: #000000 !important;
+  padding: 8px 4px !important;
+  border-bottom: 1px solid #eeeeee !important;
+  vertical-align: middle !important;
+}
+
+.conv-card-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.conv-card-table th:first-child,
+.conv-card-table td:first-child {
+  text-align: right !important; /* الوحدة */
+}
+
+.conv-card-table th:last-child,
+.conv-card-table td:last-child {
+  text-align: left !important; /* القيمة */
+}
+
+
+/* ==========================================================================
+   توحيد جميع حقول الإدخال في التطبيق - إطار أسود سميك، حواف مستديرة، خطوط أكبر
+   ========================================================================== */
+.input-row input,
+.carat-select-inputs input,
+.partner-row input,
+#remainder-row-table input,
+#width-step-value,
+#other-carat-area,
+.conv-chip-input:not([readonly]) {
+  border: 2px solid #000000 !important; /* إطار أسود صريح */
+  border-radius: 8px !important; /* حواف مستديرة */
+  font-size: 16px !important; /* أرقام أكبر وأسهل في القراءة */
+  font-weight: bold !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease-in-out !important;
+  padding: 6px 10px !important;
+  height: 38px !important; /* سمك مناسب وسهل للمس الميداني */
+  text-align: center !important;
+}
+
+/* تمييز الحقل النشط بإطار أوضح عند التركيز */
+.input-row input:focus,
+.carat-select-inputs input:focus,
+.partner-row input:focus,
+#remainder-row-table input:focus,
+#width-step-value:focus,
+#other-carat-area:focus,
+.conv-chip-input:not([readonly]):focus {
+  border-color: #000000 !important;
+  border-width: 2.5px !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2) !important; /* تمييز أوضح */
+  background-color: #ffffff !important;
+}
+
+/* استثناءات وتعديلات خاصة */
+.partner-row input.partner-name {
+  text-align: right !important;
+}
+
+.partner-row input[readonly],
+#remainder-row-table input[readonly] {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border-color: #777777 !important;
+}
+
+/* الحقول التي للقراءة فقط في بطاقات التحويل */
+.conv-chip-input[readonly] {
+  border: none !important;
+  background: transparent !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  text-align: left !important;
+  width: 100% !important;
+  color: #000000 !important;
+  height: auto !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
 
 

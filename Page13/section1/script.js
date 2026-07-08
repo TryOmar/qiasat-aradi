@@ -1092,72 +1092,89 @@ function calculateAll() {
   if (!isEditingConversion) {
     conversionsTbody.innerHTML = "";
     if (dimensionInputs.length > 0) {
+
+      // دالة لبناء بطاقة تحويل واحدة
+      function buildConvCard(label, meterValue, qConv, sideId, index, isEditable) {
+        const meterLabel = `${parseFloat(meterValue || 0).toFixed(2)} م`;
+
+        const qasabaInput = isEditable
+          ? `<input type="text" inputmode="decimal" class="conv-input conv-qasaba"
+               id="conv-qasaba-${index}" value="${qConv.qasaba}"
+               min="0" step="1" title="عدد القصبات"
+               oninput="updateSideFromQasaba('${sideId}', ${index})"
+               onchange="updateSideFromQasaba('${sideId}', ${index})">`
+          : `<input type="text" inputmode="decimal" class="conv-input conv-qasaba" value="${qConv.qasaba}" readonly>`;
+
+        const qabdaInput = isEditable
+          ? `<input type="text" inputmode="decimal" class="conv-input conv-qabda"
+               id="conv-qabda-${index}" value="${qConv.qabda}"
+               min="0" step="1" title="عدد القبضات"
+               oninput="updateSideFromQasaba('${sideId}', ${index})"
+               onchange="updateSideFromQasaba('${sideId}', ${index})">`
+          : `<input type="text" inputmode="decimal" class="conv-input conv-qabda" value="${qConv.qabda}" readonly>`;
+
+        const fracInput = isEditable
+          ? `<input type="text" inputmode="decimal" class="conv-input conv-fraction"
+               id="conv-fraction-${index}" value="${qConv.fraction}"
+               min="0" max="0.99" step="0.01" title="جزء أقل من القبضة (0 - 0.99)"
+               oninput="updateSideFromQasaba('${sideId}', ${index})"
+               onchange="updateSideFromQasaba('${sideId}', ${index})">`
+          : `<input type="text" inputmode="decimal" class="conv-input conv-fraction" value="${qConv.fraction}" readonly>`;
+
+        return `
+          <div class="conv-card">
+            <div class="conv-card-title">${label}</div>
+            <div class="conv-card-main-val">${meterLabel}</div>
+            <table class="conv-card-table">
+              <thead>
+                <tr>
+                  <th>الوحدة</th>
+                  <th>القيمة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>قصبة</td><td>${qasabaInput}</td></tr>
+                <tr><td>قبضة</td><td>${qabdaInput}</td></tr>
+                <tr><td>أقل من القبضة</td><td>${fracInput}</td></tr>
+              </tbody>
+            </table>
+          </div>`;
+      }
+
       dimensionInputs.forEach((dim, i) => {
         const qConv = toQasabaAndQabda(dim.value);
         const sid = activeSideIds[i] || "";
-        conversionsTbody.innerHTML += `
-          <tr class="conv-row">
-            <td class="conv-label-cell">
-              <span class="conv-dim-name">${dim.name}</span>
-              <span class="conv-meter-badge">
-                <span id="conv-meter-${i}">${dim.value || 0}</span> م
-              </span>
-            </td>
-            <td class="conv-input-cell">
-              <input type="text" inputmode="decimal" class="conv-input conv-fraction"
-                id="conv-fraction-${i}" value="${qConv.fraction}"
-                min="0" max="0.99" step="0.01"
-                title="جزء أقل من القبضة (0 - 0.99)"
-                oninput="updateSideFromQasaba('${sid}', ${i})"
-                onchange="updateSideFromQasaba('${sid}', ${i})">
-            </td>
-            <td class="conv-input-cell">
-              <input type="text" inputmode="decimal" class="conv-input conv-qabda"
-                id="conv-qabda-${i}" value="${qConv.qabda}"
-                min="0" step="1"
-                title="عدد القبضات (24 قبضة = 1 قصبة تلقائياً)"
-                oninput="updateSideFromQasaba('${sid}', ${i})"
-                onchange="updateSideFromQasaba('${sid}', ${i})">
-            </td>
-            <td class="conv-input-cell">
-              <input type="text" inputmode="decimal" class="conv-input conv-qasaba"
-                id="conv-qasaba-${i}" value="${qConv.qasaba}"
-                min="0" step="1"
-                title="عدد القصبات"
-                oninput="updateSideFromQasaba('${sid}', ${i})"
-                onchange="updateSideFromQasaba('${sid}', ${i})">
-            </td>
-          </tr>
-        `;
+        conversionsTbody.innerHTML += buildConvCard(dim.name, dim.value, qConv, sid, i, true);
       });
 
-      // Add square qasba row
+      // Add square qasba card
       const qasba_sq = area / 12.60250;
       const reedValue = Math.floor(qasba_sq);
       const fistValue = Math.floor((qasba_sq - reedValue) * 24);
-      const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24)).toFixed(2);
+      const lessThanFistValue = parseFloat((qasba_sq - reedValue - (fistValue / 24)).toFixed(2));
 
-      conversionsTbody.innerHTML += `
-        <tr class="conv-row" style="background-color: #fcfcfc;">
-          <td class="conv-label-cell" style="font-weight: bold;">
-            <span class="conv-dim-name">النتيجة بالقصبة المربعة</span>
-            <span class="conv-meter-badge" style="background-color: #e8f5e9; color: #2e7d32;">
-              <span>${area.toFixed(2)}</span> م²
-            </span>
-          </td>
-          <td class="conv-input-cell">
-            <input type="text" inputmode="decimal" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-          <td class="conv-input-cell">
-            <input type="text" inputmode="decimal" class="conv-input conv-qabda" value="${fistValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-          <td class="conv-input-cell">
-            <input type="text" inputmode="decimal" class="conv-input conv-qasaba" value="${reedValue}" readonly style="background-color: #f5f5f5; color: #555;">
-          </td>
-        </tr>
-      `;
+      const areaCardHtml = `
+        <div class="conv-card">
+          <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
+          <div class="conv-card-main-val">${area.toFixed(2)} م²</div>
+          <table class="conv-card-table">
+            <thead>
+              <tr>
+                <th>الوحدة</th>
+                <th>القيمة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>قصبة</td><td><input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly></td></tr>
+              <tr><td>قبضة</td><td><input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly></td></tr>
+              <tr><td>أقل من القبضة</td><td><input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly></td></tr>
+            </tbody>
+          </table>
+        </div>`;
+      conversionsTbody.innerHTML += areaCardHtml;
+
     } else {
-      conversionsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888; padding:12px;">أدخل الأبعاد أعلاه لعرض التحويلات</td></tr>`;
+      conversionsTbody.innerHTML = `<p style="text-align:center;color:#888;padding:12px;font-family:Cairo,Arial,sans-serif;">أدخل الأبعاد أعلاه لعرض التحويلات</p>`;
     }
   }
 
