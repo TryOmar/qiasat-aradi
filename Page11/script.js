@@ -4705,7 +4705,7 @@ function updateInspector(index) {
     insPercentEl.innerText = `${pct.toFixed(2)} %`;
   }
   
-  // العرض الأول يمثل botW والعلوي يمثل topW
+  // العرض الأول (أعلى) يمثل topW والعرض الثاني (أسفل) يمثل botW
   if (insWBottomEl) {
     insWBottomEl.innerText = `${piece.botW.toFixed(2)} م`;
   }
