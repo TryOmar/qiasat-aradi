@@ -2177,7 +2177,7 @@ function renderCroquis() {
           g.appendChild(cDot);
 
           const y_fasil_pos = y3 + 0.25 * (y2 - y3);
-          const fasilText = svgText(x2 - 10 * textScale, y_fasil_pos, piece.divLine.toFixed(2) + " م", {
+          const fasilText = svgText(x2 - 10 * textScale, y_fasil_pos, l1.toFixed(2) + " م", { // l1 هو الارتفاع الأيمن للأرض
             fill: "#1b5e20",
             size: "10.5",
             weight: "bold",
@@ -2201,7 +2201,7 @@ function renderCroquis() {
           g.appendChild(cDot);
 
           const y_fasil_pos = y4 + 0.25 * (y1 - y4);
-          const fasilText = svgText(x1 + 10 * textScale, y_fasil_pos, piece.leftLine.toFixed(2) + " م", {
+          const fasilText = svgText(x1 + 10 * textScale, y_fasil_pos, l2.toFixed(2) + " م", { // l2 هو الارتفاع الأيسر للأرض
             fill: "#1b5e20",
             size: "10.5",
             weight: "bold",
@@ -2333,6 +2333,41 @@ function renderCroquis() {
       c.setAttribute("fill", "#1b5e20");
       g.appendChild(c);
     });
+  }
+
+  // تحديث قائمة مساحات الشركاء أعلى الخريطة
+  const legendDiv = document.getElementById("croquis-legend");
+  if (legendDiv) {
+    if (window.calculatedPieces && window.calculatedPieces.length > 0 && !window.isExporting) {
+      legendDiv.innerHTML = "";
+      window.calculatedPieces.forEach((piece, index) => {
+        const isRem = piece.isRemainder;
+        const color = isRem 
+          ? { fill: "#fffde7", stroke: "#ff8f00" }
+          : PIECE_COLORS[index % PIECE_COLORS.length];
+        
+        const chip = document.createElement("div");
+        chip.className = "legend-chip";
+        chip.setAttribute("title", `انقر لتحديد قطعة الشريك: ${piece.name || "مجهول"}`);
+        chip.addEventListener("mouseenter", () => highlightSegment(index));
+        chip.addEventListener("mouseleave", () => removeHighlight());
+        chip.addEventListener("click", (e) => selectSegment(index, e));
+
+        const dot = document.createElement("span");
+        dot.className = "legend-color-dot";
+        dot.style.backgroundColor = color.stroke;
+        
+        const text = document.createElement("span");
+        text.innerText = `${piece.name || `شريك ${index + 1}`}: ${Number(piece.area.toFixed(2))} م²`;
+        
+        chip.appendChild(dot);
+        chip.appendChild(text);
+        legendDiv.appendChild(chip);
+      });
+      legendDiv.style.display = "flex";
+    } else {
+      legendDiv.style.display = "none";
+    }
   }
 }
 
