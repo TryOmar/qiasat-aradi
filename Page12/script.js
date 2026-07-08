@@ -269,7 +269,8 @@ function sqmToFeddanCaratShares(sqm) {
 // Quad Generation Algorithm (Handles all template styles dynamically)
 // ----------------------------------------------------
 function generateCustomLand() {
-  const w1 = parseFloat(document.getElementById("start-w1").value) || 0;
+  try {
+    const w1 = parseFloat(document.getElementById("start-w1").value) || 0;
   const w1Dir = document.getElementById("start-w1-dir").value.trim() || "بحري";
   const w2 = parseFloat(document.getElementById("start-w2").value) || 0;
   const w2Dir = document.getElementById("start-w2-dir").value.trim() || "قبلي";
@@ -699,6 +700,10 @@ function generateCustomLand() {
   closeStartModal();
   renderSVG();
   saveState();
+  } catch (err) {
+    alert("حدث خطأ أثناء رسم الأرض: " + err.message);
+    console.error(err);
+  }
 }
 
 // ----------------------------------------------------
@@ -728,6 +733,10 @@ function renderSVG() {
     polygon.setAttribute("data-id", w.id);
     polygon.setAttribute("data-type", "waterway");
     polygon.onclick = (e) => onElementClick(e, 'waterway', w.id);
+    polygon.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'waterway', w.id);
+    });
     waterwaysGroup.appendChild(polygon);
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -764,6 +773,10 @@ function renderSVG() {
     polygon.setAttribute("stroke-width", "6");
     polygon.setAttribute("vector-effect", "non-scaling-stroke");
     polygon.onclick = (e) => onElementClick(e, 'shape', s.id);
+    polygon.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'shape', s.id);
+    });
     shapesGroup.appendChild(polygon);
 
     // Parcel inner Text (Owner, Area and Notes)
@@ -772,6 +785,10 @@ function renderSVG() {
     textGroup.setAttribute("data-id", s.id);
     textGroup.setAttribute("data-type", "shapeText");
     textGroup.onclick = (e) => onElementClick(e, 'shape', s.id);
+    textGroup.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'shape', s.id);
+    });
 
     // Owner text line
     const tSpanOwner = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -834,6 +851,10 @@ function renderSVG() {
     line.setAttribute("stroke-width", "4");
     line.setAttribute("vector-effect", "non-scaling-stroke");
     line.onclick = (e) => onElementClick(e, 'splitLine', l.id);
+    line.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'splitLine', l.id);
+    });
     splitLinesGroup.appendChild(line);
 
     // Helper handles for endpoints (only when selected)
@@ -878,6 +899,10 @@ function renderSVG() {
       }
       text.textContent = l.label;
       text.onclick = (e) => onElementClick(e, 'splitLine', l.id);
+      text.addEventListener("touchstart", (e) => {
+        e.stopPropagation();
+        onElementClick(e, 'splitLine', l.id);
+      });
       splitLinesGroup.appendChild(text);
     }
   });
@@ -899,6 +924,10 @@ function renderSVG() {
     }
     text.textContent = b.text;
     text.onclick = (e) => onElementClick(e, 'borderLabel', b.id);
+    text.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'borderLabel', b.id);
+    });
     borderLabelsGroup.appendChild(text);
   });
 
@@ -919,6 +948,10 @@ function renderSVG() {
     }
     text.textContent = t.text;
     text.onclick = (e) => onElementClick(e, 'freeText', t.id);
+    text.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'freeText', t.id);
+    });
     notesGroup.appendChild(text);
   });
 }
