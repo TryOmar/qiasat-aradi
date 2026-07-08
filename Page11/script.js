@@ -2026,7 +2026,7 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // 1. رسم النصوص الأفقية المبسطة داخل القطعة باللون الأسود وحجم خط واضح جداً
+      // 1. رسم النصوص داخل القطعة (الاسم أفقي في المنتصف، والمساحة رأسية في النصف العلوي)
       if (showCroquisNames || showCroquisMeasurements) {
         const labelGroup = svgEl("g");
         labelGroup.setAttribute("style", "pointer-events: none;"); // حتى لا تعيق التفاعل مع المضلع
@@ -2047,54 +2047,51 @@ function renderCroquis() {
           tIdx.textContent = (index + 1).toString();
           labelGroup.appendChild(tIdx);
         } else {
-          // نصوص أفقية متباينة
-          if (showCroquisNames && showCroquisMeasurements && pieceWidth >= 90) {
-            // عرض الاسم والمساحة مكدسين رأسياً
-            const tName = svgEl("text");
-            tName.setAttribute("x", cx);
-            tName.setAttribute("y", cy - 5 * textScale);
-            tName.setAttribute("fill", isRem ? "#e65100" : "#111111"); // أسود داكن
-            tName.setAttribute("font-size", (12 * textScale) + "px"); // خط 12
-            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tName.setAttribute("text-anchor", "middle");
-            tName.setAttribute("font-weight", "bold");
-            tName.textContent = nameToShow;
-            labelGroup.appendChild(tName);
-            
-            const tArea = svgEl("text");
-            tArea.setAttribute("x", cx);
-            tArea.setAttribute("y", cy + 11 * textScale);
-            tArea.setAttribute("fill", "#111111"); // أسود داكن
-            tArea.setAttribute("font-size", (11 * textScale) + "px"); // خط 11
-            tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tArea.setAttribute("text-anchor", "middle");
-            tArea.setAttribute("font-weight", "bold");
-            tArea.textContent = Number(piece.area.toFixed(2)) + " م²";
-            labelGroup.appendChild(tArea);
-          } else if (showCroquisNames) {
-            // عرض الاسم فقط
+          // 1. عرض الاسم أفقي في المنتصف
+          if (showCroquisNames) {
             const tName = svgEl("text");
             tName.setAttribute("x", cx);
             tName.setAttribute("y", cy + 4 * textScale);
-            tName.setAttribute("fill", isRem ? "#e65100" : "#111111");
-            tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
+            tName.setAttribute("fill", isRem ? "#e65100" : "#111111"); // أسود داكن
+            tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط 12.5
             tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tName.setAttribute("text-anchor", "middle");
             tName.setAttribute("font-weight", "bold");
             tName.textContent = nameToShow;
             labelGroup.appendChild(tName);
-          } else if (showCroquisMeasurements) {
-            // عرض المساحة فقط
-            const tArea = svgEl("text");
-            tArea.setAttribute("x", cx);
-            tArea.setAttribute("y", cy + 4 * textScale);
-            tArea.setAttribute("fill", "#111111");
-            tArea.setAttribute("font-size", (11.5 * textScale) + "px");
-            tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tArea.setAttribute("text-anchor", "middle");
-            tArea.setAttribute("font-weight", "bold");
-            tArea.textContent = Number(piece.area.toFixed(2)) + " م²";
-            labelGroup.appendChild(tArea);
+          }
+          
+          // 2. عرض المساحة رأسي (دوران -90 درجة) في النصف العلوي
+          if (showCroquisMeasurements) {
+            const areaVal = Number(piece.area.toFixed(2));
+            const yArea = cy - 45 * textScale; // النصف العلوي للقطعة
+            
+            const areaGroup = svgEl("g");
+            areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);
+            
+            const tAreaVal = svgEl("text");
+            tAreaVal.setAttribute("x", cx);
+            tAreaVal.setAttribute("y", yArea - 5 * textScale);
+            tAreaVal.setAttribute("fill", "#111111"); // أسود داكن
+            tAreaVal.setAttribute("font-size", (12 * textScale) + "px");
+            tAreaVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tAreaVal.setAttribute("text-anchor", "middle");
+            tAreaVal.setAttribute("font-weight", "bold");
+            tAreaVal.textContent = areaVal;
+            areaGroup.appendChild(tAreaVal);
+            
+            const tAreaUnit = svgEl("text");
+            tAreaUnit.setAttribute("x", cx);
+            tAreaUnit.setAttribute("y", yArea + 7 * textScale);
+            tAreaUnit.setAttribute("fill", "#111111");
+            tAreaUnit.setAttribute("font-size", (11 * textScale) + "px");
+            tAreaUnit.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tAreaUnit.setAttribute("text-anchor", "middle");
+            tAreaUnit.setAttribute("font-weight", "bold");
+            tAreaUnit.textContent = "متر";
+            areaGroup.appendChild(tAreaUnit);
+            
+            labelGroup.appendChild(areaGroup);
           }
         }
         g.appendChild(labelGroup);

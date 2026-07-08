@@ -1701,17 +1701,31 @@ function drawLandCanvas(vertices) {
         ctx.fillStyle = "#111111";
         ctx.fillText((i + 1).toString(), centroidX, centroidY);
       } else {
-        // Stack name and area horizontally
-        const nameFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
-        const areaFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
+        // Stack name horizontally and area vertically (rotated -90 deg) in the upper half
+        const nameFontSize = Math.round(Math.max(12, 13.5 * scaleMultiplier));
+        const areaFontSize = Math.round(Math.max(11.5, 12.5 * scaleMultiplier));
+        const unitFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
         
+        // 1. الاسم أفقي في المنتصف
         ctx.font = `bold ${nameFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(nameToShow, centroidX, centroidY - 7 * scaleMultiplier);
+        ctx.fillText(nameToShow, centroidX, centroidY + 4 * scaleMultiplier);
+        
+        // 2. المساحة رأسية في النصف العلوي
+        ctx.save();
+        const yArea = centroidY - 45 * scaleMultiplier;
+        ctx.translate(centroidX, yArea);
+        ctx.rotate(-Math.PI / 2);
         
         ctx.font = `bold ${areaFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, centroidY + 9 * scaleMultiplier);
+        ctx.fillText(heir.share.toFixed(2), 0, -5 * scaleMultiplier);
+        
+        ctx.font = `bold ${unitFontSize}px Cairo`;
+        ctx.fillStyle = "#111111";
+        ctx.fillText("متر", 0, 7 * scaleMultiplier);
+        
+        ctx.restore();
       }
 
       // Draw side length labels on the edges
