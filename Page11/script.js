@@ -474,8 +474,8 @@ function renderHeaderAndFooter() {
       <input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
@@ -504,8 +504,8 @@ function renderHeaderAndFooter() {
       <input type="text" style="display:none;" readonly value="-">
       <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
@@ -636,20 +636,20 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">نسبة (%)</span>
         <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
-      <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الأول (أعلى)</span>
-        <div class="width-input-container">
-          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
-          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
-        </div>
-      </div>
       <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الثاني (أسفل)</span>
+        <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
+        </div>
+      </div>
+      <div class="col-group width-bottom-group">
+        <span class="mobile-label">العرض الثاني (أسفل)</span>
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
       <div class="col-group cum-group">
@@ -689,20 +689,20 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <span class="mobile-label">نسبة (%)</span>
         <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </div>
-      <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الأول (أعلى)</span>
-        <div class="width-input-container">
-          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
-          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
-        </div>
-      </div>
       <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الثاني (أسفل)</span>
+        <span class="mobile-label">العرض الأول (أعلى)</span>
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
+        </div>
+      </div>
+      <div class="col-group width-bottom-group">
+        <span class="mobile-label">العرض الثاني (أسفل)</span>
+        <div class="width-input-container">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
       <div class="col-group cum-group">
@@ -1021,7 +1021,7 @@ function calculateGeneral() {
 
   // Update formula text:
   if (document.getElementById("formula-details")) {
-    document.getElementById("formula-details").innerText = `${w1.toFixed(4)} + ${w2.toFixed(4)} = 2 × ${w.toFixed(4)}`;
+    document.getElementById("formula-details").innerText = `${w2.toFixed(4)} + ${w1.toFixed(4)} = 2 × ${w.toFixed(4)}`;
   }
 
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
@@ -2583,8 +2583,8 @@ function getTableDataArray() {
       w1_val = row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : "-";
       w2_val = row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : "-";
     }
-    rowData.push(w1_val);
-    rowData.push(w2_val);
+    rowData.push(w2_val); // top width (العرض الأول (أعلى))
+    rowData.push(w1_val); // bottom width (العرض الثاني (أسفل))
     
     rowData.push(row.querySelector(".partner-cum-width") ? row.querySelector(".partner-cum-width").value : "-");
     rowData.push(row.querySelector(".partner-div-line") ? row.querySelector(".partner-div-line").value : "-");
@@ -2606,13 +2606,13 @@ function getTableDataArray() {
         remData.push(inputs[5].value);
         remData.push(inputs[6].value);
         
-        let remW1 = inputs[7].value;
-        let remW2 = inputs[8].value;
+        let remW1 = inputs[7].value; // top (العرض الأول)
+        let remW2 = inputs[8].value; // bottom (العرض الثاني)
         if (window.calculatedPieces) {
           const remPiece = window.calculatedPieces.find(p => p.isRemainder);
           if (remPiece) {
-            remW1 = remPiece.botW.toFixed(4);
-            remW2 = remPiece.topW.toFixed(4);
+            remW1 = remPiece.topW.toFixed(4); // top
+            remW2 = remPiece.botW.toFixed(4); // bottom
           }
         }
         remData.push(remW1);
@@ -2625,13 +2625,13 @@ function getTableDataArray() {
         remData.push(inputs[5].value);
         remData.push(inputs[6].value);
         
-        let remW1 = inputs[7].value;
-        let remW2 = inputs[8].value;
+        let remW1 = inputs[7].value; // top (العرض الأول)
+        let remW2 = inputs[8].value; // bottom (العرض الثاني)
         if (window.calculatedPieces) {
           const remPiece = window.calculatedPieces.find(p => p.isRemainder);
           if (remPiece) {
-            remW1 = remPiece.botW.toFixed(4);
-            remW2 = remPiece.topW.toFixed(4);
+            remW1 = remPiece.topW.toFixed(4); // top
+            remW2 = remPiece.botW.toFixed(4); // bottom
           }
         }
         remData.push(remW1);
@@ -2806,8 +2806,8 @@ function printReport() {
   <div class="section page-break-inside-avoid">
     <div class="section-title">1. بيانات الأرض الأساسية</div>
     <div class="info-grid-4">
-      <div class="info-box"><label>العرض الأول (أعلى)</label><strong>${w1} م</strong></div>
-      <div class="info-box"><label>العرض الثاني (أسفل)</label><strong>${w2} م</strong></div>
+      <div class="info-box"><label>العرض الأول (أعلى)</label><strong>${w2} م</strong></div>
+      <div class="info-box"><label>العرض الثاني (أسفل)</label><strong>${w1} م</strong></div>
       <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
       <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
     </div>
@@ -3467,8 +3467,8 @@ function updateConversionsTable() {
 
   // الأبعاد الأربعة القابلة للتعديل
   const dims = [
-    { id: 0, field: 'width1', label: 'العرض الأول (أعلى) (C)' },
-    { id: 1, field: 'width2', label: 'العرض الثاني (أسفل) (A)' },
+    { id: 0, field: 'width2', label: 'العرض الأول (أعلى) (C)' },
+    { id: 1, field: 'width1', label: 'العرض الثاني (أسفل) (A)' },
     { id: 2, field: 'length1', label: 'الطول الأيمن (D)' },
     { id: 3, field: 'length2', label: 'الطول الأيسر (B)' },
   ];
@@ -3491,8 +3491,8 @@ function updateConversionsTable() {
   let botQiratWidth = 0, topQiratWidth = 0;
   if (caratArea > 0 && totalAreaM2 > 0) {
     const totalQirats = totalAreaM2 / caratArea;
-    topQiratWidth = w1 / totalQirats;
-    botQiratWidth = w2 / totalQirats;
+    topQiratWidth = w2 / totalQirats;
+    botQiratWidth = w1 / totalQirats;
   }
 
   if (caratArea > 0 && totalAreaM2 > 0) {
@@ -4108,8 +4108,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${fcs.feddan}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -4124,8 +4124,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" style="display:none;" readonly value="-">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
