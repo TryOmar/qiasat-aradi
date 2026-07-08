@@ -88,12 +88,7 @@
       <div class="sidebar-card no-print">
         <h3>قوالب جاهزة سريعة</h3>
         <div class="preset-grid">
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('rectangle')" ontouchstart="loadTemplate('rectangle')">🔳 مستطيل / مربع</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('square')" ontouchstart="loadTemplate('square')">⏹️ مربع</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('trapezoid')" ontouchstart="loadTemplate('trapezoid')">📐 شبه منحرف زراعي (مبسط)</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('quadrilateral')" ontouchstart="loadTemplate('quadrilateral')">⏢ رباعي غير منتظم</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('v_split')" ontouchstart="loadTemplate('v_split')">📊 تقسيم رأسي</button>
-          <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('h_split')" ontouchstart="loadTemplate('h_split')">🥞 تقسيم أفقي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2; background: #e8f5e9; font-weight: bold; font-size: 14px;" onclick="loadTemplate('generic_shape')" ontouchstart="loadTemplate('generic_shape')">🔳 كروكي مرن (رباعي/تقسيم حسب الأبعاد)</button>
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')" ontouchstart="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')" ontouchstart="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط بمجرى مائي</button>
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')" ontouchstart="loadTemplate('mixed_split_image')">🗺️ تقسيم مختلط بين مجرى مائي</button>
@@ -180,29 +175,35 @@
         <div class="editor-form-group">
           <label>العرض الأول (أعلى):</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-w1" placeholder="مثال: 30" style="flex: 2;">
+            <input type="text" inputmode="decimal" id="start-w1" value="30" placeholder="مثال: 30" style="flex: 2;">
             <input type="text" id="start-w1-dir" value="بحري" style="flex: 1; text-align: center;">
           </div>
         </div>
         <div class="editor-form-group">
           <label>العرض الثاني (أسفل):</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-w2" placeholder="مثال: 28.5" style="flex: 2;">
+            <input type="text" inputmode="decimal" id="start-w2" value="30" placeholder="مثال: 30" style="flex: 2;">
             <input type="text" id="start-w2-dir" value="قبلي" style="flex: 1; text-align: center;">
           </div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيمن (شرقي):</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-l2" placeholder="مثال: 60" style="flex: 2;">
+            <input type="text" inputmode="decimal" id="start-l2" value="60" placeholder="مثال: 60" style="flex: 2;">
             <input type="text" id="start-l2-dir" value="شرقي" style="flex: 1; text-align: center;">
           </div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيسر (غربي):</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-l1" placeholder="مثال: 59.8" style="flex: 2;">
+            <input type="text" inputmode="decimal" id="start-l1" value="60" placeholder="مثال: 60" style="flex: 2;">
             <input type="text" id="start-l1-dir" value="غربي" style="flex: 1; text-align: center;">
+          </div>
+        </div>
+        <div class="editor-form-group">
+          <label>عدد الشركاء:</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="number" id="start-partners" value="1" min="1" style="flex: 1; text-align: center; font-weight: bold;">
           </div>
         </div>
       </div>

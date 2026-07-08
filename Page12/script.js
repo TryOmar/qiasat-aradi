@@ -297,8 +297,9 @@ function generateCustomLand() {
     const l2Dir = document.getElementById("start-l2-dir").value.trim() || "شرقي";
     const l1 = parseArabicFloat(document.getElementById("start-l1").value);
     const l1Dir = document.getElementById("start-l1-dir").value.trim() || "غربي";
+    const numPartners = parseInt(document.getElementById("start-partners")?.value) || 1;
 
-  if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0) {
+  if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0 || numPartners < 1) {
     alert("الرجاء إدخال أبعاد صحيحة أكبر من الصفر للأضلاع الأربعة!");
     return;
   }
@@ -356,7 +357,56 @@ function generateCustomLand() {
   const totalArea = ((w1 + w2) / 2) * ((l1 + l2) / 2);
   const detailedArea = sqmToFeddanCaratShares(totalArea);
 
-  if (activeTemplateType === 'rectangle' || activeTemplateType === 'square' || activeTemplateType === 'trapezoid' || activeTemplateType === 'quadrilateral') {
+  const excludedTemplates = ['quad_diagonal', 'mixed_waterway_new', 'mixed_split_image'];
+  if (numPartners > 1 && !excludedTemplates.includes(activeTemplateType)) {
+    const partArea = totalArea / numPartners;
+    const partDetailed = sqmToFeddanCaratShares(partArea);
+
+    for (let i = 0; i < numPartners; i++) {
+      const p_tl = {
+        x: p1.x + (p2.x - p1.x) * (i / numPartners),
+        y: p1.y + (p2.y - p1.y) * (i / numPartners)
+      };
+      const p_tr = {
+        x: p1.x + (p2.x - p1.x) * ((i + 1) / numPartners),
+        y: p1.y + (p2.y - p1.y) * ((i + 1) / numPartners)
+      };
+      const p_br = {
+        x: p4.x + (p3.x - p4.x) * ((i + 1) / numPartners),
+        y: p4.y + (p3.y - p4.y) * ((i + 1) / numPartners)
+      };
+      const p_bl = {
+        x: p4.x + (p3.x - p4.x) * (i / numPartners),
+        y: p4.y + (p3.y - p4.y) * (i / numPartners)
+      };
+
+      const colorIndex = (i + 1) % colorsList.length;
+      shapes.push({
+        id: "shape_" + (i + 1),
+        points: [p_tl, p_tr, p_br, p_bl],
+        owner: "الشريك " + (i + 1),
+        area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
+        notes: "نصيب الشريك " + (i + 1),
+        color: colorsList[colorIndex].value,
+        textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
+        textY: (p_tl.y + p_tr.y + p_br.y + p_bl.y) / 4
+      });
+
+      if (i > 0) {
+        const splitLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
+        splitLines.push({
+          id: "split_" + i,
+          x1: p_tl.x, y1: p_tl.y,
+          x2: p_bl.x, y2: p_bl.y,
+          label: `حد مشترك ${splitLen.toFixed(2)} م`,
+          labelX: p_tl.x - 20,
+          labelY: (p_tl.y + p_bl.y) / 2,
+          angle: 90,
+          isDashed: true
+        });
+      }
+    }
+  } else if (activeTemplateType === 'generic_shape' || activeTemplateType === 'rectangle' || activeTemplateType === 'square' || activeTemplateType === 'trapezoid' || activeTemplateType === 'quadrilateral') {
     // Single parcel shape
     shapes.push({
       id: "shape_1",
@@ -597,9 +647,9 @@ function generateCustomLand() {
       owner: "الشريك الأول (بحري غربي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة البحرية الغربية",
-      color: "#e8f5e9",
-      textX: p1.x - 130,
-      textY: (p1.y + y_mid_left) / 2 - 10
+      color: "#ffffff",
+      textX: (p1.x + x_water_left) / 2,
+      textY: (p1.y + y_mid_left) / 2
     });
 
     shapes.push({
@@ -608,9 +658,9 @@ function generateCustomLand() {
       owner: "الشريك الثاني (قبلي غربي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة القبلية الغربية",
-      color: "#f1f8e9",
-      textX: p4.x - 130,
-      textY: (y_mid_left + p4.y) / 2 + 20
+      color: "#ffffff",
+      textX: (p4.x + x_water_left) / 2,
+      textY: (y_mid_left + p4.y) / 2
     });
 
     const splitLeftVal = (effW1 * 0.45).toFixed(1);
@@ -618,7 +668,7 @@ function generateCustomLand() {
       id: "split_left",
       x1: x_mid_left_outer, y1: y_mid_left,
       x2: x_water_left, y2: y_mid_left,
-      label: `حد مشترك ${splitLeftVal} م`,
+      label: "",
       labelX: p1.x - 130,
       labelY: y_mid_left + 4,
       angle: 0,
@@ -635,9 +685,9 @@ function generateCustomLand() {
       owner: "الشريك الثالث (بحري شرقي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة البحرية الشرقية",
-      color: "#e8f5e9",
-      textX: p2.x + 130,
-      textY: (p2.y + y_mid_right) / 2 - 10
+      color: "#ffffff",
+      textX: (x_water_right + p2.x) / 2,
+      textY: (p2.y + y_mid_right) / 2
     });
 
     shapes.push({
@@ -646,9 +696,9 @@ function generateCustomLand() {
       owner: "الشريك الرابع (قبلي شرقي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة القبلية الشرقية",
-      color: "#f1f8e9",
-      textX: p3.x + 130,
-      textY: (y_mid_right + p3.y) / 2 + 20
+      color: "#ffffff",
+      textX: (x_water_right + p3.x) / 2,
+      textY: (y_mid_right + p3.y) / 2
     });
 
     const splitRightVal = (effW2 * 0.45).toFixed(1);
@@ -656,7 +706,7 @@ function generateCustomLand() {
       id: "split_right",
       x1: x_water_right, y1: y_mid_right,
       x2: x_mid_right_outer, y2: y_mid_right,
-      label: `حد مشترك ${splitRightVal} م`,
+      label: "",
       labelX: p2.x + 130,
       labelY: y_mid_right + 4,
       angle: 0,
@@ -1799,7 +1849,7 @@ function loadTemplate(type) {
     const l2Input = document.getElementById("start-l2");
     const l1Input = document.getElementById("start-l1");
 
-    if (type === 'rectangle') {
+    if (type === 'generic_shape' || type === 'rectangle') {
       w1Input.value = "30";
       w2Input.value = "30";
       l2Input.value = "60";
@@ -1966,55 +2016,42 @@ function loadDemoDataPreset(promptConfirm = true) {
     return;
   }
 
-  // Dimension values: 30, 28.5, 60, 59.8
-  const w1 = 30.00;
-  const w2 = 28.50;
-  const l1 = 59.80;
-  const l2 = 60.00;
+  const drawW = 60.00;
+  const drawL = 30.00;
 
   const centerX = 450;
   const centerY = 325;
-  const scale = 6.5; // fit factor
+  const scale = 12.33; // fit factor
 
-  const drawW1 = w1 * scale;
-  const drawW2 = w2 * scale;
-  const drawL1 = l1 * scale;
-  const drawL2 = l2 * scale;
-  const avgHeight = (drawL1 + drawL2) / 2;
+  const scaledW = drawW * scale;
+  const scaledL = drawL * scale;
 
-  const p1 = { x: centerX - drawW1 / 2, y: centerY - avgHeight / 2 };
-  const p2 = { x: centerX + drawW1 / 2, y: centerY - avgHeight / 2 };
-  const p3 = { x: centerX + drawW2 / 2, y: centerY + avgHeight / 2 };
-  const p4 = { x: centerX - drawW2 / 2, y: centerY + avgHeight / 2 };
+  const p1 = { x: centerX - scaledW / 2, y: centerY - scaledL / 2 };
+  const p2 = { x: centerX + scaledW / 2, y: centerY - scaledL / 2 };
+  const p3 = { x: centerX + scaledW / 2, y: centerY + scaledL / 2 };
+  const p4 = { x: centerX - scaledW / 2, y: centerY + scaledL / 2 };
 
-  const totalArea = 1779.35; // calculation average
+  const totalArea = 1800; // 30 * 60
 
   shapes = [{
     id: "shape_1",
     points: [p1, p2, p3, p4],
-    owner: "اسم المالك: ورثة أحمد عبد اللطيف",
-    area: { feddan: 0, carat: 10, shares: 4, sqm: totalArea },
-    notes: "كروكي تقسيم الميراث الزراعي",
-    color: "#f1f8e9",
+    owner: "اسم المالك: ................",
+    area: { feddan: 0, carat: 10, shares: 6.81, sqm: totalArea },
+    notes: "كروكي زراعي",
+    color: "#ffffff",
     textX: centerX,
     textY: centerY
   }];
 
   borderLabels = [
-    { id: "border_1", text: "بحري 30.00 م", x: centerX, y: p1.y - 18, fontSize: 13, angle: 0 },
-    { id: "border_2", text: "قبلي 28.50 م", x: centerX, y: p4.y + 22, fontSize: 13, angle: 0 },
-    { id: "border_3", text: "غربي 59.80 م", x: p1.x - 22, y: centerY, fontSize: 13, angle: -90 },
-    { id: "border_4", text: "شرقي 60.00 م", x: p2.x + 22, y: centerY, fontSize: 13, angle: 90 }
+    { id: "border_1", text: "غربي 60.00 م", x: centerX, y: p1.y - 18, fontSize: 13, angle: 0 },
+    { id: "border_2", text: "شرقي 60.00 م", x: centerX, y: p4.y + 22, fontSize: 13, angle: 0 },
+    { id: "border_3", text: "قبلي 30.00 م", x: p1.x - 22, y: centerY, fontSize: 13, angle: -90 },
+    { id: "border_4", text: "بحري 30.00 م", x: p2.x + 22, y: centerY, fontSize: 13, angle: 90 }
   ];
 
-  freeTexts = [
-    { id: "demo_1", text: "جار بحري: طريق زراعي ترابي", x: centerX, y: p1.y - 42, fontSize: 13, isBold: true, color: "#1b5e20" },
-    { id: "demo_2", text: "جار قبلي: ورثة حسن العشري", x: centerX, y: p4.y + 46, fontSize: 13, isBold: true, color: "#1b5e20" },
-    { id: "demo_3", text: "جار شرقي: ملك محمد فوزي", x: p2.x + 55, y: centerY, fontSize: 13, isBold: true, angle: 90, color: "#1b5e20" },
-    { id: "demo_4", text: "جار غربي: مصرف ري خاص", x: p1.x - 55, y: centerY, fontSize: 13, isBold: true, angle: -90, color: "#1b5e20" },
-    { id: "demo_5", text: "رقم الحوض: 12 (حوض الرز)", x: 340, y: 220, fontSize: 12, isBold: false, color: "#333333" },
-    { id: "demo_6", text: "رقم القطعة: 95 مكرر", x: 560, y: 220, fontSize: 12, isBold: false, color: "#333333" }
-  ];
+  freeTexts = [];
 
   splitLines = [];
   waterways = [];
