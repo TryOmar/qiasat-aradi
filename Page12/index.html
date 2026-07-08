@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
 <head>
@@ -63,12 +63,14 @@
             <rect width="100%" height="100%" fill="url(#blueprintGrid)" stroke="#ccc" stroke-width="1" />
             
             <!-- Graphic content layers -->
-            <g id="waterwaysGroup"></g>
-            <g id="shapesGroup"></g>
-            <g id="splitLinesGroup"></g>
-            <g id="borderLabelsGroup"></g>
-            <g id="dimensionLabelsGroup"></g>
-            <g id="notesGroup"></g>
+            <g id="viewportGroup">
+              <g id="waterwaysGroup"></g>
+              <g id="shapesGroup"></g>
+              <g id="splitLinesGroup"></g>
+              <g id="borderLabelsGroup"></g>
+              <g id="dimensionLabelsGroup"></g>
+              <g id="notesGroup"></g>
+            </g>
           </svg>
         </div>
         
@@ -92,9 +94,9 @@
           <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('quadrilateral')">⏢ رباعي غير منتظم</button>
           <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('v_split')">📊 تقسيم رأسي</button>
           <button type="button" class="sidebar-btn preset-btn" onclick="loadTemplate('h_split')">🥞 تقسيم أفقي</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطر</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط جديد (مجرى مائي)</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')">🗺️ التقسيم المختلط (من الصورة)</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط بمجرى مائي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')">🗺️ تقسيم مختلط بين مجرى مائي</button>
         </div>
 
         <h3 style="margin-top: 20px;">أدوات الإضافة</h3>
@@ -126,17 +128,218 @@
 
   <!-- Popups / Modals for quick overlay editing -->
   <div id="editModal" class="modal no-print">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 440px;">
       <span class="modal-close" onclick="closeModal()">&times;</span>
       <h3 id="modalTitle">تعديل البيانات</h3>
-      <div id="modalForm">
+      <div id="modalForm" style="max-height: 50vh; overflow-y: auto; padding: 5px;">
         <!-- Dynamic Form Fields -->
       </div>
-      <div class="modal-actions">
+      
+      <!-- Quick editing utilities for styling (font size, color, rotation) -->
+      <div id="text-edit-utilities" style="display: none; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
+        <h4 style="font-size: 12.5px; color: #1b5e20; margin-bottom: 8px; font-weight: 800;">تعديل التنسيق والخصائص:</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #555; display: block; margin-bottom: 2px;">حجم الخط (بكسل):</label>
+            <input type="text" inputmode="decimal" id="util-font-size" value="14" style="width: 100%; box-sizing: border-box; padding: 6px; font-size: 12px;" oninput="updateUtilityField('fontSize', this.value)">
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #555; display: block; margin-bottom: 2px;">زاوية الدوران (درجة):</label>
+            <input type="text" inputmode="decimal" id="util-angle" value="0" style="width: 100%; box-sizing: border-box; padding: 6px; font-size: 12px;" oninput="updateUtilityField('angle', this.value)">
+          </div>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center; margin-top: 6px;">
+          <label style="font-size: 12px; font-weight: bold; color: #555; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <input type="checkbox" id="util-bold" onchange="updateUtilityField('isBold', this.checked)"> خط عريض
+          </label>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <label style="font-size: 12px; font-weight: bold; color: #555;">اللون:</label>
+            <input type="color" id="util-color" onchange="updateUtilityField('color', this.value)" style="width: 32px; height: 24px; border: none; padding: 0; cursor: pointer; background: none;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 15px;">
         <button type="button" class="modal-save-btn" onclick="saveModalData()">حفظ التعديلات</button>
         <button type="button" class="modal-cancel-btn" onclick="closeModal()">إلغاء</button>
       </div>
+
+      <!-- Quick Action Utilities: Copy & Delete -->
+      <div id="element-quick-actions" style="display: none; display: flex; gap: 8px; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+        <button type="button" class="action-btn" onclick="copySelectedElement()" style="flex: 1; background: #e0f2f1; color: #00796b; border: 1.5px solid #80cbc4; height: 36px; font-size: 12px;">📋 نسخ العنصر</button>
+        <button type="button" class="action-btn" onclick="deleteSelectedElement()" style="flex: 1; background: #ffebee; color: #c62828; border: 1.5px solid #ffb7b2; height: 36px; font-size: 12px;">🗑️ حذف العنصر</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Start Modal for Custom Land Dimensions -->
+  <div id="startModal" class="modal no-print">
+    <div class="modal-content" style="max-width: 480px;">
+      <h3 style="margin-bottom: 15px; color: #1b5e20; font-weight: 800;">📐 إدخال أبعاد الأرض لتوليد الكروكي</h3>
+      <div class="modal-body-scroll" style="max-height: 60vh; overflow-y: auto; padding: 5px;">
+        <div class="editor-form-group">
+          <label>العرض الأول (أعلى):</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" inputmode="decimal" id="start-w1" placeholder="مثال: 30" style="flex: 2;">
+            <input type="text" id="start-w1-dir" value="بحري" style="flex: 1; text-align: center;">
+          </div>
+        </div>
+        <div class="editor-form-group">
+          <label>العرض الثاني (أسفل):</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" inputmode="decimal" id="start-w2" placeholder="مثال: 28.5" style="flex: 2;">
+            <input type="text" id="start-w2-dir" value="قبلي" style="flex: 1; text-align: center;">
+          </div>
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيمن (شرقي):</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" inputmode="decimal" id="start-l2" placeholder="مثال: 60" style="flex: 2;">
+            <input type="text" id="start-l2-dir" value="شرقي" style="flex: 1; text-align: center;">
+          </div>
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيسر (غربي):</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" inputmode="decimal" id="start-l1" placeholder="مثال: 59.8" style="flex: 2;">
+            <input type="text" id="start-l1-dir" value="غربي" style="flex: 1; text-align: center;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top: 15px;">
+        <button type="button" class="modal-save-btn" onclick="generateCustomLand()">رسم الأرض</button>
+        <button type="button" class="modal-cancel-btn" onclick="closeStartModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Data Modal -->
+  <div id="addDataModal" class="modal no-print">
+    <div class="modal-content" style="max-width: 480px;">
+      <span class="modal-close" onclick="closeAddDataModal()">&times;</span>
+      <h3 style="color: #1b5e20; margin-bottom: 15px; font-weight: 800;">➕ إضافة بيانات إلى الخريطة</h3>
+      <div class="modal-body-scroll" style="max-height: 65vh; overflow-y: auto; padding: 5px;">
+        
+        <h4 style="margin-top: 10px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات الملكية</h4>
+        <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم المالك: ................')">اسم المالك</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('مباعة إلى: ................')">مباعة إلى</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('مشتراة من: ................')">مشتراة من</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم الدَّلاَّل: ................')">اسم الدَّلاَّل</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('رقم العقد: ................')">رقم العقد</button>
+        </div>
+
+        <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات الحدود والجار</h4>
+        <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('جار بحري: ................')">جار بحري</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('جار قبلي: ................')">جار قبلي</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('جار شرقي: ................')">جار شرقي</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('جار غربي: ................')">جار غربي</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('طريق: ................')">طريق</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('ترعة: ................')">ترعة</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('مصرف: ................')">مصرف</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('سكة: ................')">سكة</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('أرض فضاء: ................')">أرض فضاء</button>
+        </div>
+
+        <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات الحوض والأرض</h4>
+        <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('رقم الحوض: ................')">رقم الحوض</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم الحوض: ................')">اسم الحوض</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('رقم القطعة: ................')">رقم القطعة</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('الزمام: ................')">الزمام</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('الناحية: ................')">الناحية</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('المركز: ................')">المركز</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('المحافظة: ................')">المحافظة</button>
+        </div>
+
+        <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات المساحة الذكية</h4>
+        <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <button type="button" class="sidebar-btn" style="grid-column: span 2; background: #e0f2f1; color: #00796b;" onclick="openSmartAreaModal()">📐 حساب وتحويل المساحة الذكية</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .... م²')">المساحة بالمتر</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .. فدان و .. قيراط و .. سهم')">المساحة بالتفصيل</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('إجمالي القراريط: .... قيراط')">إجمالي القراريط</button>
+        </div>
+
+        <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات إضافية</h4>
+        <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('ملاحظات: ................')">ملاحظات</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('تاريخ المعاينة: ................')">تاريخ المعاينة</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('رقم الهاتف: ................')">رقم الهاتف</button>
+          <button type="button" class="sidebar-btn" onclick="promptAddFreeText()">➕ نص حر مخصص</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Area Calculator Modal -->
+  <div id="smartAreaModal" class="modal no-print">
+    <div class="modal-content" style="max-width: 440px;">
+      <span class="modal-close" onclick="closeSmartAreaModal()">&times;</span>
+      <h3 style="color: #1b5e20; margin-bottom: 15px; font-weight: 800;">📐 حساب وتحويل المساحة الذكية</h3>
+      
+      <div style="display: flex; margin-bottom: 15px; border-bottom: 1.5px solid #ccc; font-weight: bold;">
+        <div id="tab-sqm-btn" style="flex: 1; text-align: center; padding: 10px; cursor: pointer; border-bottom: 3px solid #2e7d32; color: #2e7d32;" onclick="switchSmartAreaTab('sqm')">من متر مربع</div>
+        <div id="tab-fed-btn" style="flex: 1; text-align: center; padding: 10px; cursor: pointer;" onclick="switchSmartAreaTab('fed')">من فدان/قيراط/سهم</div>
+      </div>
+
+      <!-- Tab 1: Sqm to others -->
+      <div id="tab-sqm-content">
+        <div class="editor-form-group">
+          <label>المساحة بالمتر المربع (م²):</label>
+          <input type="text" inputmode="decimal" id="smart-sqm-input" placeholder="مثال: 4200.83" oninput="calcSmartArea('sqm')">
+        </div>
+      </div>
+
+      <!-- Tab 2: Fed/Car/Sahm to others -->
+      <div id="tab-fed-content" style="display: none;">
+        <div class="editor-form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+          <div>
+            <label>فدان:</label>
+            <input type="text" inputmode="decimal" id="smart-fed" value="0" oninput="calcSmartArea('fed')">
+          </div>
+          <div>
+            <label>قيراط:</label>
+            <input type="text" inputmode="decimal" id="smart-car" value="0" oninput="calcSmartArea('fed')">
+          </div>
+          <div>
+            <label>سهم:</label>
+            <input type="text" inputmode="decimal" id="smart-sahm" value="0" oninput="calcSmartArea('fed')">
+          </div>
+        </div>
+      </div>
+
+      <!-- Output results -->
+      <div style="background: #f1f8e9; border: 1.5px solid #a5d6a7; border-radius: 8px; padding: 12px; margin-top: 15px;">
+        <h4 style="color: #1b5e20; margin-bottom: 8px; font-weight: bold;">نتائج التحويل المحسوبة:</h4>
+        <p style="font-size: 13px; margin: 4px 0;">المساحة الإجمالية: <strong id="smart-res-sqm" style="color: #1b5e20;">0</strong> م²</p>
+        <p style="font-size: 13px; margin: 4px 0;">التفصيل الشرعي: <strong id="smart-res-detailed" style="color: #1b5e20;">0 فدان و 0 قيراط و 0 سهم</strong></p>
+        <p style="font-size: 13px; margin: 4px 0;">إجمالي القراريط: <strong id="smart-res-carats" style="color: #1b5e20;">0</strong> قيراط</p>
+        <p style="font-size: 13px; margin: 4px 0;">إجمالي الأسهم: <strong id="smart-res-shares" style="color: #1b5e20;">0</strong> سهم</p>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 15px;">
+        <button type="button" class="modal-save-btn" onclick="insertSmartAreaToMap()">إدراج في الخريطة</button>
+        <button type="button" class="modal-cancel-btn" onclick="closeSmartAreaModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Action Button (FAB) -->
+  <div class="fab-container no-print" id="fabContainer">
+    <div class="fab-menu" id="fabMenu">
+      <button type="button" onclick="openStartModal()" class="fab-item" style="--i:1; background: #e8f5e9; color: #1b5e20; border-color: #a5d6a7;" title="أبعاد الأرض">📐 أبعاد الأرض</button>
+      <button type="button" onclick="openAddDataModal()" class="fab-item" style="--i:2; background: #e0f2f1; color: #004d40; border-color: #80cbc4;" title="إضافة بيانات">➕ إضافة بيانات</button>
+      <button type="button" onclick="saveProjectToLocalStorage()" class="fab-item" style="--i:3; background: #fffde7; color: #f57f17; border-color: #fff59d;" title="حفظ المشروع">💾 حفظ المشروع</button>
+      <button type="button" onclick="printDallalMap()" class="fab-item" style="--i:4; background: #e3f2fd; color: #0d47a1; border-color: #90caf9;" title="طباعة">🖨️ طباعة</button>
+      <button type="button" onclick="exportMapImage()" class="fab-item" style="--i:5; background: #fce4ec; color: #880e4f; border-color: #f48fb1;" title="حفظ صورة">🖼️ حفظ صورة</button>
+      <button type="button" onclick="restoreDemoDataPreset()" class="fab-item" style="--i:6; background: #efebe9; color: #4e342e; border-color: #bcaaa4;" title="البيانات التجريبية">🔄 البيانات التجريبية</button>
+      <button type="button" onclick="resetCanvasToDefault()" class="fab-item" style="--i:7; background: #ffebee; color: #b71c1c; border-color: #ffcdd2;" title="مسح اللوحة">🗑️ مسح اللوحة</button>
+    </div>
+    <button type="button" class="fab-main-btn" onclick="toggleFabMenu()" id="fabMainBtn">
+      <span>+</span>
+    </button>
   </div>
 
   <!-- Navigation Bar -->

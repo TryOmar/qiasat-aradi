@@ -325,7 +325,7 @@ svg .split-line:hover {
 svg .waterway {
   fill: url(#waterPattern);
   stroke: #00838f;
-  stroke-width: 2px;
+  stroke-width: 3.5px;
   stroke-dasharray: 6, 4;
 }
 
@@ -544,3 +544,153 @@ svg .waterway {
     min-height: 40px !important;
   }
 }
+
+/* ============================================================
+   FLOATING ACTION BUTTON (FAB) & MENU
+   ============================================================ */
+.fab-container {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.fab-main-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #2e7d32;
+  color: white;
+  border: 2px solid #ffffff;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  transition: transform 0.2s ease, background-color 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-main-btn:hover {
+  background-color: #1b5e20;
+}
+
+.fab-main-btn span {
+  transition: transform 0.2s ease;
+  display: inline-block;
+  line-height: 1;
+}
+
+.fab-container.open .fab-main-btn {
+  transform: scale(0.95);
+  background-color: #c62828;
+}
+
+.fab-container.open .fab-main-btn span {
+  transform: rotate(45deg);
+}
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fab-container.open .fab-menu {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.fab-item {
+  font-family: 'Cairo', sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #2e7d32;
+  background-color: white;
+  color: #2e7d32;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s, color 0.2s;
+  opacity: 0;
+  transform: scale(0.8);
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-container.open .fab-item {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: calc(var(--i) * 0.03s);
+}
+
+.fab-item:hover {
+  background-color: #2e7d32;
+  color: white;
+}
+
+/* ============================================================
+   SCROLLABLE MODAL BODIES & SCROLLBAR STYLING
+   ============================================================ */
+.modal-body-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 8px;
+  direction: ltr;
+}
+
+.modal-body-scroll > * {
+  direction: rtl;
+}
+
+.modal-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body-scroll::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.modal-body-scroll::-webkit-scrollbar-thumb {
+  background: #a5d6a7;
+  border-radius: 3px;
+}
+
+.modal-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: #2e7d32;
+}
+
+/* Utility quick editing options */
+#text-edit-utilities input[type="color"] {
+  border: 1.5px solid #ccc;
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Map interacting cursor modes */
+.canvas-wrapper.panning {
+  cursor: grab !important;
+}
+
+.canvas-wrapper.panning:active {
+  cursor: grabbing !important;
+}
+
