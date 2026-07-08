@@ -60,7 +60,7 @@ let calculatedArea = 0;
 let calculatedPerimeter = 0;
 let heirsData = [];
 let isDivisionActive = false;
-let showActualDims = false; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
+let showActualDims = true; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
 const PIECE_COLORS = [
@@ -272,7 +272,8 @@ function setupEventListeners() {
     // Trapezoid
     'trap-base-minor': { lines: ['#svg-card-trap-top'], texts: ['#svg-card-trap-label-c'] },
     'trap-base-major': { lines: ['#svg-card-trap-bottom'], texts: ['#svg-card-trap-label-a'] },
-    'trap-height': { lines: ['#svg-card-trap-height'], texts: ['#svg-card-trap-label-h'] },
+    'trap-length-right': { lines: ['#svg-card-trap-right'] },
+    'trap-length-left': { lines: ['#svg-card-trap-left'] },
     
     // Quadrilateral
     'quad-side-c': { lines: ['#svg-card-quad-c'], texts: ['#svg-card-quad-label-c'] },
@@ -866,35 +867,35 @@ function calculateAll() {
   } else if (activeShape === "trapezoid") {
     const a = parseFloat(document.getElementById("trap-base-major").value) || 0; // major base (القاعدة السفلية)
     const c = parseFloat(document.getElementById("trap-base-minor").value) || 0; // minor base (القاعدة العلوية)
-    const h = parseFloat(document.getElementById("trap-height").value) || 0; // height (الطول)
+    const l1 = parseFloat(document.getElementById("trap-length-right")?.value) || 0; // right height (الطول الأيمن)
+    const l2 = parseFloat(document.getElementById("trap-length-left")?.value) || 0; // left height (الطول الأيسر)
 
     dimensionInputs = [
-      { name: "العرض الأول (أعلى)", value: c },
-      { name: "العرض الثاني (أسفل)", value: a },
-      { name: "الطول", value: h }
+      { name: "العرض العلوي (C)", value: c },
+      { name: "العرض السفلي (A)", value: a },
+      { name: "الطول الأيمن (D)", value: l1 },
+      { name: "الطول الأيسر (B)", value: l2 }
     ];
 
-    if (a > 0 && c > 0 && h > 0) {
-      area = 0.5 * (a + c) * h;
+    if (a > 0 && c > 0 && l1 > 0 && l2 > 0) {
+      area = 0.5 * (a + c) * 0.5 * (l1 + l2);
       
-      // Calculate missing sides assuming symmetric isosceles trapezoid
-      const dxHalf = Math.abs(a - c) / 2;
-      const calculatedSide = Math.sqrt(h * h + dxHalf * dxHalf);
+      const w_coord = 0.5 * (a + c);
+      const calculatedSide = Math.hypot(w_coord, l1 - l2); // الضلع المائل العلوي
+      perimeter = a + l1 + l2 + calculatedSide;
       
-      perimeter = a + c + 2 * calculatedSide;
-
       stepsText = `الشكل المختار: شبه منحرف زراعي (مبسط)\n` +
-                  `المعادلة: المساحة = 0.5 × (العرض الثاني (أسفل) + العرض الأول (أعلى)) × الطول\n` +
-                  `الحساب: 0.5 × (${a} + ${c}) × ${h} = ${area.toFixed(2)} متر مربع\n` +
-                  `المحيط (تقريبي) = مجموع الأبعاد الأربعة = ${a} + ${c} + ${calculatedSide.toFixed(2)} (طول أيمن) + ${calculatedSide.toFixed(2)} (طول أيسر) = ${perimeter.toFixed(2)} متر`;
+                  `المعادلة: المساحة = متوسط العرض × متوسط الطول\n` +
+                  `المعادلة: المساحة = 0.5 × (العرض العلوي + العرض السفلي) × 0.5 × (الطول الأيمن + الطول الأيسر)\n` +
+                  `الحساب: 0.5 × (${c} + ${a}) × 0.5 × (${l2} + ${l1}) = ${area.toFixed(2)} متر مربع\n` +
+                  `المحيط = مجموع الأبعاد الأربعة = ${a} + ${l1} (طول أيمن) + ${l2} (طول أيسر) + ${calculatedSide.toFixed(2)} (الضلع المائل) = ${perimeter.toFixed(2)} متر`;
 
-      // Coordinates (Centered top base)
-      const dxLeft = (a - c) / 2;
+      // Coordinates (Flat bottom base, vertical left/right heights, exactly like Page 11!)
       vertices = [
         { x: 0, y: 0 },
-        { x: a, y: 0 },
-        { x: a - dxLeft, y: h },
-        { x: dxLeft, y: h }
+        { x: w_coord, y: 0 },
+        { x: w_coord, y: l1 },
+        { x: 0, y: l2 }
       ];
     }
 
@@ -1042,12 +1043,12 @@ function calculateAll() {
   // Map dimensionInputs index to the corresponding side input ID
   const sideIds = ["quad-side-a", "quad-side-b", "quad-side-c", "quad-side-d",
                    "rect-length", "rect-width",
-                   "trap-base-major", "trap-base-minor", "trap-height"];
+                   "trap-base-major", "trap-base-minor", "trap-length-right", "trap-length-left"];
   // Build a lookup from dim.name to sideId using the order they come in
   const activeSideIds = (() => {
     if (activeShape === "quadrilateral") return ["quad-side-c", "quad-side-a", "quad-side-d", "quad-side-b"];
     if (activeShape === "rectangle") return ["rect-width", "rect-length"];
-    if (activeShape === "trapezoid") return ["trap-base-minor", "trap-base-major", "trap-height"];
+    if (activeShape === "trapezoid") return ["trap-base-minor", "trap-base-major", "trap-length-right", "trap-length-left"];
     return [];
   })();
 
@@ -1447,8 +1448,10 @@ function drawLandCanvas(vertices) {
     // Compute real side length in meters
     let len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
     if (activeShape === 'trapezoid' && !showActualDims) {
-      if (i === 1 || i === 3) {
-        len = parseFloat(document.getElementById('trap-height')?.value) || 0;
+      if (i === 1) {
+        len = parseFloat(document.getElementById('trap-length-right')?.value) || 0;
+      } else if (i === 3) {
+        len = parseFloat(document.getElementById('trap-length-left')?.value) || 0;
       }
     }
 
@@ -1575,8 +1578,8 @@ function drawLandCanvas(vertices) {
     } else if (activeShape === 'trapezoid') {
       landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
       landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
-      let h = parseFloat(document.getElementById('trap-height')?.value) || 0;
-      landLeft = h; landRight = h;
+      landLeft = parseFloat(document.getElementById('trap-length-left')?.value) || 0;
+      landRight = parseFloat(document.getElementById('trap-length-right')?.value) || 0;
     } else if (activeShape === 'quadrilateral') {
       landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
       landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
@@ -1941,7 +1944,7 @@ function updateHeirsUI() {
   const caratSize = parseFloat(caratSizeInput.value) || 168;
   const showHeightOnly = (activeShape === 'trapezoid' && !showActualDims);
   const trapHeight = showHeightOnly
-    ? (parseFloat(document.getElementById('trap-height')?.value) || 0)
+    ? (parseFloat(document.getElementById('trap-length-right')?.value) || 0)
     : 0;
   
   heirsData.forEach((heir, idx) => {
@@ -1997,7 +2000,7 @@ function renderHeirsRows() {
   const showHeightOnly = (activeShape === 'trapezoid' && !showActualDims);
   // الطول الثابت الذي أدخله المستخدم
   const trapHeight = showHeightOnly
-    ? (parseFloat(document.getElementById('trap-height')?.value) || 0)
+    ? (parseFloat(document.getElementById('trap-length-right')?.value) || 0)
     : 0;
 
   heirsListTbody.innerHTML = "";
@@ -2249,7 +2252,8 @@ function saveStateToSession() {
   // Trap
   sessionStorage.setItem("trapBaseMajor", document.getElementById("trap-base-major").value);
   sessionStorage.setItem("trapBaseMinor", document.getElementById("trap-base-minor").value);
-  sessionStorage.setItem("trapHeight", document.getElementById("trap-height").value);
+  sessionStorage.setItem("trapLengthRight", document.getElementById("trap-length-right").value);
+  sessionStorage.setItem("trapLengthLeft", document.getElementById("trap-length-left").value);
 
   // Quad
   sessionStorage.setItem("quadSideA", document.getElementById("quad-side-a").value);
@@ -2306,7 +2310,8 @@ function loadStateFromSession() {
 
   document.getElementById("trap-base-major").value = sessionStorage.getItem("trapBaseMajor") || "";
   document.getElementById("trap-base-minor").value = sessionStorage.getItem("trapBaseMinor") || "";
-  document.getElementById("trap-height").value = sessionStorage.getItem("trapHeight") || "";
+  document.getElementById("trap-length-right").value = sessionStorage.getItem("trapLengthRight") || "";
+  document.getElementById("trap-length-left").value = sessionStorage.getItem("trapLengthLeft") || "";
 
   document.getElementById("quad-side-a").value = sessionStorage.getItem("quadSideA") || "";
   document.getElementById("quad-side-b").value = sessionStorage.getItem("quadSideB") || "";
