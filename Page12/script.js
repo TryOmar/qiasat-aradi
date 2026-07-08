@@ -1,4 +1,4 @@
-﻿// Page 12 - Dallal Surveyor Map Builder script.js
+// Page 12 - Dallal Surveyor Map Builder script.js
 
 // Graphics State
 let shapes = [];
@@ -1367,13 +1367,77 @@ function printDallalMap() {
   const now = new Date();
   const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
   const timeStr = now.toLocaleTimeString("ar-EG");
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   const printOverlay = document.getElementById("printOverlay");
   printOverlay.innerHTML = `
-      <div class="print-overlay-content" style="background: white; min-height: 100vh; display: flex; flex-direction: column;">
-        <div class="header" style="text-align: center; border-bottom: 2px dashed #004d40; padding-bottom: 5px; margin: 10px 15px;">
-          <h1 style="margin: 0; color: #004d40; font-size: 20px; font-weight: bold; font-family: 'Cairo';">كروكي الأراضي الهندسية - الدَّلاَّل</h1>
-          <p style="margin: 2px 0 0; color: #666; font-size: 11px; font-family: 'Cairo';">تاريخ الاستخراج: ${dateStr} | الساعة: ${timeStr}</p>
+      <style>
+        .watermark-container-print {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-25deg);
+          font-size: 24pt;
+          font-weight: 800;
+          color: #000000;
+          opacity: 0.05;
+          white-space: nowrap;
+          pointer-events: none;
+          z-index: -100;
+          font-family: 'Cairo', Arial, sans-serif;
+          text-align: center;
+          width: 100%;
+          display: none;
+        }
+        .report-footer-print {
+          display: none;
+          width: 100%;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          font-size: 8pt;
+          color: #444;
+          border-top: 1.5px solid #1b5e20;
+          padding: 4px 10px 3px;
+          background: white;
+          gap: 1px;
+          margin-top: auto;
+          font-family: 'Cairo', sans-serif;
+        }
+        .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
+        .footer-sub-text { font-size: 7.5pt; color: #888; }
+        
+        @media print {
+          .watermark-container-print { display: block !important; }
+          .report-footer-print { display: flex !important; position: fixed; bottom: 0; left: 0; }
+          .print-overlay-content { padding-bottom: 50px !important; }
+        }
+      </style>
+
+      <div class="watermark-container-print">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+
+      <div class="print-overlay-content" style="background: white; min-height: 100vh; display: flex; flex-direction: column; position: relative;">
+        
+        <!-- Professional Header -->
+        <div class="report-header" style="border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin: 10px 15px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+          <div style="text-align: right;">
+            <h1 style="font-size: 18pt; color: #1b5e20; font-weight: 800; margin: 0; font-family: 'Cairo';">الدَّلاَّل</h1>
+            <p style="font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; font-family: 'Cairo';">تطبيق قياس وتقسيم الأراضي</p>
+          </div>
+          <div style="text-align: center;">
+            <h2 style="font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; font-family: 'Cairo';">تقرير رسم كروكي الأراضي الهندسية</h2>
+          </div>
+          <div style="text-align: left; font-size: 8pt; color: #333; line-height: 1.5; font-family: 'Cairo';">
+            <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+            <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+            <div><strong>رقم التقرير:</strong> ${reportId}</div>
+          </div>
+        </div>
+
+        <!-- Owner Info -->
+        <div class="owner-info" style="margin: 5px 15px 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; font-family: 'Cairo';">
+          <strong>اسم المالك / المستخدم:</strong>
+          <span class="placeholder-line" style="color: #aaa; letter-spacing: 1px;">................................................................................................</span>
         </div>
 
         <div class="canvas-container" style="flex: 1; width: 100%; max-width: 1000px; margin: 15px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 10px;">
@@ -1388,6 +1452,17 @@ function printDallalMap() {
           <p style="margin: 15px 0 5px; font-weight: bold; color: #1b5e20; font-size: 13px;">يمكنك التقاط صورة للشاشة (سكرين شوت) الآن!</p>
           <p style="margin: 5px 0; font-weight: bold; color: #1b5e20; font-size: 12px;">جميع الحقوق محفوظة © تطبيق الدلال لقياسات الأراضي</p>
         </div>
+
+        <!-- Professional Footer for print -->
+        <div class="report-footer-print">
+          <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+          <div class="footer-sub-text">
+            <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+            <span> | تاريخ الاستخراج: ${dateStr} - ${timeStr}</span>
+            <span> | إصدار التطبيق: v2.4</span>
+          </div>
+        </div>
+
       </div>
   `;
   

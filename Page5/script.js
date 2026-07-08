@@ -584,182 +584,179 @@ function printReport() {
   let checkedCount = document.getElementById("checkboxCount") ? document.getElementById("checkboxCount").innerHTML : "0";
 
   // Let's create the print window content
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+  const timeStr = now.toLocaleTimeString("ar-EG");
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
   let printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html dir="rtl" lang="ar">
-    <head>
-      <meta charset="UTF-8">
-      <title>تقرير تقسيم ميراث الأرض</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-        body {
-          font-family: 'Cairo', sans-serif;
-          margin: 40px 20px;
-          color: #000;
-          background: #fff;
-          position: relative;
-        }
-        .watermark {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-25deg);
-          font-size: 26px;
-          font-weight: 800;
-          color: rgba(0, 0, 0, 0.05);
-          width: 80%;
-          text-align: center;
-          pointer-events: none;
-          z-index: -1;
-          line-height: 1.6;
-          direction: rtl;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-          border-bottom: 3px double #1b5e20;
-          padding-bottom: 15px;
-        }
-        .header h1 {
-          font-size: 24px;
-          color: rgb(149, 11, 36);
-          margin: 0 0 10px 0;
-        }
-        .section {
-          margin-bottom: 25px;
-        }
-        .section-title {
-          font-size: 16px;
-          font-weight: 800;
-          color: #1b5e20;
-          border-right: 4px solid #1b5e20;
-          padding-right: 8px;
-          margin-bottom: 15px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 20px;
-        }
-        th, td {
-          border: 1px solid #000;
-          padding: 8px;
-          text-align: center;
-          font-size: 14px;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: 800;
-        }
-        .result-box {
-          background-color: #fffbeb;
-          border: 2px solid #d97706;
-          border-radius: 8px;
-          padding: 15px;
-          margin-top: 20px;
-        }
-        .result-box h3 {
-          margin: 0 0 10px 0;
-          color: #d97706;
-          font-size: 16px;
-          font-weight: 800;
-        }
-        .result-box p {
-          margin: 5px 0;
-          font-size: 15px;
-          font-weight: 700;
-        }
-        .footer {
-          margin-top: 50px;
-          text-align: center;
-          font-size: 12px;
-          font-weight: 700;
-          border-top: 1px solid #ccc;
-          padding-top: 15px;
-          color: #333;
-        }
-        @media print {
-          button { display: none; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="watermark">
-        تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.<br>
-        تقسيم ميراث الأراضي الزراعية
-      </div>
-      
-      <div class="header">
-        <h1>تقرير تقسيم ميراث الأرض الزراعية</h1>
-        <p>تطبيق الدَّلاَّل لقياسات الأراضي</p>
-      </div>
+  if (!printWindow) {
+    window.print();
+    return;
+  }
 
-      <div class="section">
-        <div class="section-title">بيانات الأرض الإجمالية</div>
-        <table>
-          <thead>
-            <tr>
-              <th>إجمالي المساحة بالأسهم</th>
-              <th>فدان</th>
-              <th>قيراط</th>
-              <th>سهم</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>${totalAllShares} سهم</strong></td>
-              <td>${acreValue}</td>
-              <td>${caratValue}</td>
-              <td>${shareValue}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  const printContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تقرير تقسيم ميراث الأرض - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+    body { font-family: 'Cairo', sans-serif; background: #ffffff; color: #222222; direction: rtl; font-size: 9.5pt; line-height: 1.4; padding-bottom: 45px; position: relative; }
+    
+    .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .report-header-right { text-align: right; }
+    .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
+    .report-header-right p { font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; }
+    .report-header-center { text-align: center; padding: 0 10px; }
+    .report-header-center h2 { font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; }
+    .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.5; }
+    
+    .owner-info { margin-bottom: 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; }
+    .placeholder-line { color: #aaa; letter-spacing: 1px; }
+    
+    .section { margin-bottom: 15px; }
+    .section-title { background: #1b5e20; color: white; font-weight: 700; font-size: 10.5pt; padding: 5px 12px; border-right: 5px solid #2e7d32; margin-bottom: 8px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    
+    .summary-box { border: 2px solid #d97706; border-radius: 8px; background: #fffbeb; padding: 12px 15px; display: flex; flex-direction: column; gap: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin-bottom: 15px; }
+    .summary-box h3 { font-size: 11pt; font-weight: 800; color: #d97706; margin-bottom: 4px; }
+    .summary-box p { font-size: 9.5pt; color: #222; }
+    .summary-box strong { color: #b45309; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 8px; }
+    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #1b5e20; padding: 6px 4px; text-align: center; white-space: nowrap; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    td { border: 1px solid #a5d6a7; padding: 5px 4px; text-align: center; vertical-align: middle; }
+    tr:nth-child(even) td { background: #f9fbe7; }
+    
+    .watermark-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 26pt; font-weight: 800; color: #000000; opacity: 0.06; white-space: nowrap; pointer-events: none; z-index: -1000; font-family: 'Cairo', Arial, sans-serif; text-align: center; width: 100%; }
+    .report-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 8pt; color: #444; border-top: 1.5px solid #1b5e20; padding: 4px 10px 3px; background: white; gap: 1px; }
+    .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
+    .footer-sub-text { font-size: 7.5pt; color: #888; }
+    
+    .page-break-inside-avoid { page-break-inside: avoid; }
+    .no-print-btn { margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-family: 'Cairo', sans-serif; }
+    
+    @media print {
+      body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      .report-header { border-color: #000 !important; background: #fcfcfc !important; }
+      .section-title { background: #000 !important; color: #fff !important; border-right-color: #333 !important; }
+      th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
+      td { border-color: #ccc !important; }
+      .summary-box { border-color: #000 !important; background: #fff !important; }
+      .report-footer { border-top-color: #000 !important; }
+      .watermark-container { opacity: 0.05 !important; }
+    }
+  </style>
+</head>
+<body>
 
-      <div class="section">
-        <div class="section-title">الورثة المسجلون</div>
-        <p>عدد الزوجات: ${numWivesValue} | عدد البنات: ${numFemalesValue} | عدد الذكور: ${numMalesValue}</p>
-      </div>
+  <!-- Watermark -->
+  <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
 
-      <div class="section">
-        <div class="section-title">جدول توزيع الميراث</div>
-        <table>
-          <thead>
-            <tr>
-              <th>النسبة</th>
-              <th>فدان</th>
-              <th>قيراط</th>
-              <th>سهم</th>
-              <th>القرابة</th>
-              <th>حالة التحديد</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-      </div>
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-header-right">
+      <h1>الدَّلاَّل</h1>
+      <p>تطبيق قياس وتقسيم الأراضي</p>
+    </div>
+    <div class="report-header-center">
+      <h2>تقرير تقسيم ميراث الأرض الزراعية</h2>
+    </div>
+    <div class="report-header-left">
+      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+      <div><strong>رقم التقرير:</strong> ${reportId}</div>
+    </div>
+  </div>
 
-      <div class="result-box">
-        <h3>خلاصة الورثة الذين تم جمع أنصبتهم معاً</h3>
-        <p><strong>الورثة المشمولون بالجمع:</strong> ${checkedHeirsNames.length > 0 ? checkedHeirsNames.join(" ، ") : "لا يوجد"}</p>
-        <p><strong>عدد الورثة المحددين:</strong> ${checkedCount}</p>
-        <p><strong>النسبة المئوية الإجمالية المجمعة:</strong> ${totalCheckedPercent}</p>
-        <p><strong>نصيبهم المجمع الكلي:</strong> ${totalCheckedAcre} فدان و ${totalCheckedCarat} قيراط و ${totalCheckedShare} سهم</p>
-      </div>
+  <!-- Owner Info -->
+  <div class="owner-info">
+    <strong>اسم المورث / المالك:</strong>
+    <span class="placeholder-line">................................................................................................</span>
+  </div>
 
-      <div class="footer">
-        تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.
-      </div>
-      
-      <script>
-        window.onload = function() {
-          window.print();
-        }
-      </script>
-    </body>
-    </html>
-  `);
+  <!-- 1. بيانات الأرض الإجمالية -->
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">1. مساحة تركة الأرض الإجمالية</div>
+    <table>
+      <thead>
+        <tr>
+          <th>إجمالي المساحة بالأسهم</th>
+          <th>فدان</th>
+          <th>قيراط</th>
+          <th>سهم</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: bold; color: #1b5e20;">${totalAllShares} سهم</td>
+          <td style="font-weight: bold;">${acreValue}</td>
+          <td style="font-weight: bold;">${caratValue}</td>
+          <td style="font-weight: bold;">${shareValue}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. الورثة المسجلون -->
+  <div class="section page-break-inside-avoid" style="background: #fcfcfc; border: 1.5px solid #a5d6a7; border-radius: 6px; padding: 8px 12px; margin-bottom: 15px;">
+    <div style="font-weight: bold; color: #1b5e20; font-size: 9.5pt; margin-bottom: 4px;">الورثة المسجلون وتفاصيلهم:</div>
+    <div style="font-size: 9pt; color: #333;">
+      عدد الزوجات: <strong>${numWivesValue}</strong> | عدد البنات: <strong>${numFemalesValue}</strong> | عدد الذكور (الأبناء): <strong>${numMalesValue}</strong>
+    </div>
+  </div>
+
+  <!-- 3. جدول توزيع الميراث -->
+  <div class="section">
+    <div class="section-title">2. جدول توزيع أنصبة الورثة الشرعيين</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 15%;">النسبة الشرعية</th>
+          <th>فدان</th>
+          <th>قيراط</th>
+          <th>سهم</th>
+          <th style="text-align: right; padding-right: 15px; width: 25%;">القرابة</th>
+          <th>حالة الجمع</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. خلاصة المجمع -->
+  <div class="section page-break-inside-avoid">
+    <div class="summary-box">
+      <h3>خلاصة الورثة الذين تم جمع أنصبتهم معاً</h3>
+      <p>الورثة المشمولون بالجمع: <strong>${checkedHeirsNames.length > 0 ? checkedHeirsNames.join(" ، ") : "لا يوجد"}</strong></p>
+      <p>عدد الورثة المحددين: <strong>${checkedCount}</strong></p>
+      <p>النسبة المئوية الإجمالية المجمعة: <strong>${totalCheckedPercent}</strong></p>
+      <p>نصيبهم المجمع الكلي: <strong>${totalCheckedAcre} فدان و ${totalCheckedCarat} قيراط و ${totalCheckedShare} سهم</strong></p>
+    </div>
+  </div>
+
+  <div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button class="no-print-btn" onclick="window.print()">بدء طباعة التقرير</button>
+  </div>
+
+  <!-- Fixed Footer -->
+  <div class="report-footer">
+    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+    <div class="footer-sub-text">
+      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
+      <span> | إصدار التطبيق: v2.4</span>
+    </div>
+  </div>
+
+</body>
+</html>`;
+
+  printWindow.document.write(printContent);
   printWindow.document.close();
 }

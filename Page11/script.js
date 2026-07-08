@@ -2696,68 +2696,174 @@ function printReport() {
   const data = getTableDataArray();
   const numPartners = Array.from(document.querySelectorAll("#partners-list .partner-row")).filter(r => !isPartnerRowExcluded(r)).length;
   
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('ar-EG');
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  // حساب متوسط العرض ومتوسط الطول
+  const avgWidth = ((parseFloat(w1) || 0) + (parseFloat(w2) || 0)) / 2;
+  const avgLength = ((parseFloat(l1) || 0) + (parseFloat(l2) || 0)) / 2;
+
   const tableRows = data.slice(1).map((row, idx) => {
     const isTotal = row[1] === "الإجمالي";
     const isRem = row[1] && row[1].includes("المتبقي");
-    let bg = idx % 2 === 0 ? "#f9f9f9" : "#fff";
-    let style = "";
-    if (isTotal) {
-      bg = "#333";
-      style = "color: white; font-weight: bold;";
-    } else if (isRem) {
-      bg = "#fffde7";
-      style = "color: #e65100; font-weight: bold;";
-    }
-    return `<tr style="background:${bg};${style}">${row.map(cell => `<td style="padding:6px 10px;border:1px solid #ddd;text-align:center;">${cell}</td>`).join("")}</tr>`;
+    let trClass = '';
+    if (isTotal) trClass = 'row-total';
+    else if (isRem) trClass = 'row-remainder';
+    else if (idx % 2 === 1) trClass = 'row-even';
+    return `<tr class="${trClass}">${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`;
   }).join("");
-  
-  const headerRow = `<tr>${data[0].map(h => `<th style="padding:8px 10px;background:#1b5e20;color:white;border:1px solid #ddd;text-align:center;">${h}</th>`).join("")}</tr>`;
-  
+
+  const headerRow = `<tr>${data[0].map(h => `<th>${h}</th>`).join("")}</tr>`;
+
+  // حالة التقسيم
+  const statusEl = document.getElementById("summary-status");
+  const divisionStatus = statusEl ? statusEl.innerText.replace(/\n/g, ' ').trim() : "-";
+
   const printContent = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="UTF-8">
   <title>تقرير تقسيم الأراضي - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-    * { font-family: 'Cairo', Arial, sans-serif; }
-    body { margin: 20px; color: #222; }
-    .header { text-align: center; border-bottom: 3px solid #1b5e20; padding-bottom: 10px; margin-bottom: 20px; }
-    .header h1 { color: #1b5e20; margin: 0; font-size: 22px; }
-    .header p { color: #666; margin: 5px 0 0; font-size: 13px; }
-    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-    .info-box { background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 10px; text-align: center; }
-    .info-box label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
-    .info-box strong { font-size: 16px; color: #1b5e20; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-    .croquis-section { text-align: center; margin-top: 20px; }
-    .croquis-section h3 { color: #1b5e20; font-size: 16px; margin-bottom: 10px; }
-    .footer { text-align: center; color: #888; font-size: 11px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 20px; }
-    @media print { body { margin: 10px; } }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+    body { font-family: 'Cairo', sans-serif; background: #fff; color: #222; font-size: 9.5pt; direction: rtl; padding-bottom: 35px; position: relative; }
+    .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .report-header-right { text-align: right; }
+    .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
+    .report-header-right p { font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; }
+    .report-header-center { text-align: center; padding: 0 10px; }
+    .report-header-center h2 { font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; }
+    .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.5; }
+    .owner-info { margin-bottom: 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; }
+    .placeholder-line { color: #aaa; letter-spacing: 1px; }
+    .section { margin-bottom: 15px; }
+    .section-title { background: #1b5e20; color: white; font-weight: 700; font-size: 10.5pt; padding: 5px 12px; border-right: 5px solid #2e7d32; margin-bottom: 8px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 8px; }
+    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #1b5e20; padding: 6px 4px; text-align: center; white-space: nowrap; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    td { border: 1px solid #a5d6a7; padding: 5px 4px; text-align: center; vertical-align: middle; }
+    tr.row-even td { background: #f9fbe7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.row-total td { background: #1b5e20 !important; color: white !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.row-remainder td { background: #fffde7 !important; color: #e65100 !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .info-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+    .info-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+    .info-box { background: #f1f8e9; border: 1.5px solid #1b5e20; border-radius: 6px; padding: 7px 8px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .info-box label { font-size: 8pt; color: #555; display: block; margin-bottom: 2px; }
+    .info-box strong { font-size: 11pt; color: #1b5e20; font-weight: 700; }
+    .summary-box { border: 2px solid #1b5e20; border-radius: 8px; background: #f1f8e9; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .summary-box-row { display: flex; justify-content: space-between; gap: 20px; }
+    .summary-box-cell { flex: 1; font-size: 9.5pt; color: #222; }
+    .summary-box-cell strong { color: #1b5e20; }
+    .status-badge { display: inline-block; padding: 1px 8px; background-color: #c8e6c9; color: #2e7d32; border-radius: 4px; font-weight: bold; font-size: 9pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .watermark-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 26pt; font-weight: 800; color: #000000; opacity: 0.06; white-space: nowrap; pointer-events: none; z-index: -1000; font-family: 'Cairo', Arial, sans-serif; text-align: center; width: 100%; }
+    .report-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 8pt; color: #444; border-top: 1.5px solid #1b5e20; padding: 4px 10px 3px; background: white; gap: 1px; }
+    .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
+    .footer-sub-text { font-size: 7.5pt; color: #888; }
+    .page-break-inside-avoid { page-break-inside: avoid; }
+    @media print {
+      body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .report-header { border-color: #000 !important; background: #fcfcfc !important; }
+      .section-title { background: #000 !important; color: #fff !important; border-right-color: #333 !important; }
+      th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
+      td { border-color: #ccc !important; }
+      .info-box { border-color: #000 !important; background: #fff !important; }
+      .summary-box { border-color: #000 !important; background: #fff !important; }
+      .report-footer { border-top-color: #000 !important; }
+      .status-badge { background: #eee !important; color: #000 !important; border: 1px solid #aaa !important; }
+      .watermark-container { opacity: 0.05 !important; }
+      tr.row-total td { background: #222 !important; color: #fff !important; }
+      tr.row-remainder td { background: #fff9e6 !important; color: #b34000 !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🌿 تقرير القسمة في حال اختلاف الأطوال - الدَّلاَّل</h1>
-    <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+
+  <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+
+  <div class="report-header">
+    <div class="report-header-right">
+      <h1>الدَّلاَّل</h1>
+      <p>تطبيق قياس وتقسيم الأراضي</p>
+    </div>
+    <div class="report-header-center">
+      <h2>تقرير القسمة في حال اختلاف الأطوال</h2>
+    </div>
+    <div class="report-header-left">
+      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+      <div><strong>رقم التقرير:</strong> ${reportId}</div>
+    </div>
   </div>
-  <div class="info-grid">
-    <div class="info-box"><label>العرض الأول</label><strong>${w1} م</strong></div>
-    <div class="info-box"><label>العرض الثاني</label><strong>${w2} م</strong></div>
-    <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
-    <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
+
+  <div class="owner-info">
+    <strong>اسم المالك / المستخدم:</strong>
+    <span class="placeholder-line">................................................................................................</span>
   </div>
-  <div class="info-grid" style="grid-template-columns: repeat(3,1fr);">
-    <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
-    <div class="info-box"><label>عدد الشركاء</label><strong>${numPartners}</strong></div>
-    <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${document.getElementById("summary-status") ? document.getElementById("summary-status").innerText.replace(/\n/g, ' ') : "-"}</strong></div>
+
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">1. بيانات الأرض الأساسية</div>
+    <div class="info-grid-4">
+      <div class="info-box"><label>العرض الأول (أعلى)</label><strong>${w1} م</strong></div>
+      <div class="info-box"><label>العرض الثاني (أسفل)</label><strong>${w2} م</strong></div>
+      <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
+      <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
+    </div>
   </div>
-  <h3 style="color:#1b5e20; margin: 15px 0 8px 0; font-size:15px;">جدول تفاصيل التقسيم</h3>
-  <table>
-    ${headerRow}
-    ${tableRows}
-  </table>
-  <div class="footer">تم إنشاء هذا التقرير بواسطة تطبيق الدَّلاَّل - حسابات المزارع والفلاح</div>
+
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">2. النتائج الإجمالية للمساحة</div>
+    <div class="info-grid-3">
+      <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
+      <div class="info-box"><label>عدد الشركاء</label><strong>${numPartners} شركاء</strong></div>
+      <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${divisionStatus}</strong></div>
+    </div>
+  </div>
+
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">3. بيانات العرض والارتفاع المحسوبة</div>
+    <table>
+      <thead><tr><th>البيان المحسوب</th><th>القيمة بالمتـر</th></tr></thead>
+      <tbody>
+        <tr><td style="text-align:right;padding-right:15px;">معدل العرض (متوسط الأعراض)</td><td style="font-weight:bold;color:#1b5e20;">${avgWidth.toFixed(4)} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;">متوسط الطول (متوسط الأطوال)</td><td style="font-weight:bold;color:#1b5e20;">${avgLength.toFixed(4)} م</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">4. جدول تفاصيل التقسيم على الشركاء</div>
+    <table><thead>${headerRow}</thead><tbody>${tableRows}</tbody></table>
+  </div>
+
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">5. ملخص نهائي لعملية التقسيم</div>
+    <div class="summary-box">
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>المساحة الإجمالية للأرض:</strong> <span>${totalArea} م²</span></div>
+        <div class="summary-box-cell"><strong>عدد الشركاء:</strong> <span>${numPartners} شركاء</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>متوسط العرض:</strong> <span>${avgWidth.toFixed(4)} م</span></div>
+        <div class="summary-box-cell"><strong>متوسط الطول:</strong> <span>${avgLength.toFixed(4)} م</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell" style="flex:2;"><strong>حالة التقسيم:</strong> <span class="status-badge">${divisionStatus}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+    <div class="footer-sub-text">
+      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
+      <span> | إصدار التطبيق: v2.4</span>
+    </div>
+  </div>
+
 </body>
 </html>`;
   

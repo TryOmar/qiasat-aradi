@@ -571,228 +571,264 @@ function printCroquis() {
 
   const imgURL = canvas.toDataURL("image/png");
 
+  // Get conversion inputs
+  const w1_results = document.querySelectorAll(".width1_result");
+  const w1_less = w1_results[0]?.value || "0";
+  const w1_fist = w1_results[1]?.value || "0";
+  const w1_reed = w1_results[2]?.value || "0";
+
+  const w2_results = document.querySelectorAll(".width2_result");
+  const w2_less = w2_results[0]?.value || "0";
+  const w2_fist = w2_results[1]?.value || "0";
+  const w2_reed = w2_results[2]?.value || "0";
+
+  const h_results = document.querySelectorAll(".height_result");
+  const h_less = h_results[0]?.value || "0";
+  const h_fist = h_results[1]?.value || "0";
+  const h_reed = h_results[2]?.value || "0";
+
+  const a_results = document.querySelectorAll(".area_qasba_result");
+  const a_less = a_results[0]?.value || "0";
+  const a_fist = a_results[1]?.value || "0";
+  const a_reed = a_results[2]?.value || "0";
+
   const now = new Date();
   const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
   const timeStr = now.toLocaleTimeString("ar-EG");
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const printContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>كروكي الأرض والنتائج - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+    body { font-family: 'Cairo', sans-serif; background: #ffffff; color: #222222; direction: rtl; font-size: 9.5pt; line-height: 1.4; padding-bottom: 45px; position: relative; }
+    
+    .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .report-header-right { text-align: right; }
+    .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
+    .report-header-right p { font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; }
+    .report-header-center { text-align: center; padding: 0 10px; }
+    .report-header-center h2 { font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; }
+    .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.5; }
+    
+    .owner-info { margin-bottom: 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; }
+    .placeholder-line { color: #aaa; letter-spacing: 1px; }
+    
+    .section { margin-bottom: 15px; }
+    .section-title { background: #1b5e20; color: white; font-weight: 700; font-size: 10.5pt; padding: 5px 12px; border-right: 5px solid #2e7d32; margin-bottom: 8px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    
+    .sketch-box { text-align: center; border: 2px solid #1b5e20; border-radius: 8px; padding: 8px; background: #ffffff; display: block; margin: 0 auto 12px; max-width: 480px; page-break-inside: avoid; }
+    .sketch-box img { max-width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 8px; }
+    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #1b5e20; padding: 6px 4px; text-align: center; white-space: nowrap; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    td { border: 1px solid #a5d6a7; padding: 5px 4px; text-align: center; vertical-align: middle; }
+    tr:nth-child(even) td { background: #f9fbe7; }
+    
+    .watermark-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 26pt; font-weight: 800; color: #000000; opacity: 0.06; white-space: nowrap; pointer-events: none; z-index: -1000; font-family: 'Cairo', Arial, sans-serif; text-align: center; width: 100%; }
+    .report-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 8pt; color: #444; border-top: 1.5px solid #1b5e20; padding: 4px 10px 3px; background: white; gap: 1px; }
+    .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
+    .footer-sub-text { font-size: 7.5pt; color: #888; }
+    
+    .page-break-inside-avoid { page-break-inside: avoid; }
+    .no-print-btn { margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-family: 'Cairo', sans-serif; }
+    
+    @media print {
+      body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      .report-header { border-color: #000 !important; background: #fcfcfc !important; }
+      .section-title { background: #000 !important; color: #fff !important; border-right-color: #333 !important; }
+      th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
+      td { border-color: #ccc !important; }
+      .sketch-box { border-color: #000 !important; }
+      .report-footer { border-top-color: #000 !important; }
+      .watermark-container { opacity: 0.05 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Watermark -->
+  <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-header-right">
+      <h1>الدَّلاَّل</h1>
+      <p>تطبيق قياس وتقسيم الأراضي</p>
+    </div>
+    <div class="report-header-center">
+      <h2>تقرير كروكي الأرض والنتائج العامة</h2>
+    </div>
+    <div class="report-header-left">
+      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+      <div><strong>رقم التقرير:</strong> ${reportId}</div>
+    </div>
+  </div>
+
+  <!-- Owner Info -->
+  <div class="owner-info">
+    <strong>اسم المالك / المستخدم:</strong>
+    <span class="placeholder-line">................................................................................................</span>
+  </div>
+
+  <!-- 1. الرسم الكروكي -->
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">1. الرسم الكروكي للأرض الزراعية</div>
+    <div class="sketch-box">
+      <img src="${imgURL}" alt="كروكي الأرض">
+    </div>
+  </div>
+
+  <!-- 2. النتائج الإجمالية بالامتار -->
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">2. نتائج قياس ومساحة الأرض بالامتار</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40%; text-align: right; padding-right: 15px;">البيان المقاس</th>
+          <th>القيمة والوحدة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: right; padding-right: 15px;">العرض الأول (أعلى)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w1} متر</td>
+        </tr>
+        <tr>
+          <td style="text-align: right; padding-right: 15px;">العرض الآخر (أسفل)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w2} متر</td>
+        </tr>
+        <tr>
+          <td style="text-align: right; padding-right: 15px;">الطول (الارتفاع)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${h} متر</td>
+        </tr>
+        <tr>
+          <td style="text-align: right; padding-right: 15px;">المساحة الإجمالية بالمتـر المربع</td>
+          <td style="font-weight: bold; color: #1b5e20; font-size: 11pt;">${totalArea} م²</td>
+        </tr>
+        <tr>
+          <td style="text-align: right; padding-right: 15px;">المساحة بالفدان والقيراط والسهم</td>
+          <td style="font-weight: bold; color: #1b5e20;">${feddan} فدان و ${carat} قيراط و ${shares_val} سهم</td>
+        </tr>
+        ${priceVal && priceVal !== "0" ? `
+        <tr>
+          <td style="text-align: right; padding-right: 15px; color: #b71c1c;">إجمالي سعر قطعة الأرض</td>
+          <td style="font-weight: bold; color: #b71c1c; font-size: 11pt;">${priceVal} جنيه</td>
+        </tr>` : ""}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. تحويل الأبعاد والمساحة إلى القصبة والقبضة -->
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">3. تحويل الأبعاد والمساحة إلى القصبة والقبضة</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40%; text-align: right; padding-right: 15px;">البعد / المساحة المحولة</th>
+          <th>أقل من القبضة</th>
+          <th>قبضة</th>
+          <th>قصبة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: bold; text-align: right; padding-right: 15px;">ناتج العرض الأول (${w1} م)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w1_less}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w1_fist}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w1_reed}</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold; text-align: right; padding-right: 15px;">ناتج العرض الآخر (${w2} م)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w2_less}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w2_fist}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${w2_reed}</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold; text-align: right; padding-right: 15px;">ناتج الطول (${h} م)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${h_less}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${h_fist}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${h_reed}</td>
+        </tr>
+        <tr style="background-color: #f1f8e9;">
+          <td style="font-weight: bold; text-align: right; padding-right: 15px;">النتيجة بالقصبة المربعة (${totalArea} م²)</td>
+          <td style="font-weight: bold; color: #1b5e20;">${a_less}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${a_fist}</td>
+          <td style="font-weight: bold; color: #1b5e20;">${a_reed}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button class="no-print-btn" onclick="window.print()">بدء طباعة التقرير</button>
+  </div>
+
+  <!-- Fixed Footer -->
+  <div class="report-footer">
+    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+    <div class="footer-sub-text">
+      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
+      <span> | إصدار التطبيق: v2.4</span>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      const imgs = document.getElementsByTagName('img');
+      let loadedCount = 0;
+      if (imgs.length === 0) {
+        window.print();
+      } else {
+        for (let i = 0; i < imgs.length; i++) {
+          if (imgs[i].complete) {
+            loadedCount++;
+            if (loadedCount === imgs.length) {
+              window.print();
+            }
+          } else {
+            imgs[i].onload = function() {
+              loadedCount++;
+              if (loadedCount === imgs.length) {
+                window.print();
+              }
+            };
+            imgs[i].onerror = function() {
+              loadedCount++;
+              if (loadedCount === imgs.length) {
+                window.print();
+              }
+            };
+          }
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>`;
 
   const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html dir="rtl" lang="ar">
-    <head>
-      <meta charset="UTF-8">
-      <title>كروكي الأرض والنتائج - الدلال</title>
-      <style>
-        body {
-          font-family: 'Cairo', Arial, sans-serif;
-          margin: 10px;
-          color: #333;
-          direction: rtl;
-          position: relative;
-          min-height: 96vh;
-        }
-        .header {
-          text-align: center;
-          border-bottom: 2px solid #2e7d32;
-          padding-bottom: 5px;
-          margin-bottom: 10px;
-        }
-        .header h1 {
-          margin: 0;
-          color: #1b5e20;
-          font-size: 20px;
-        }
-        .header p {
-          margin: 3px 0 0;
-          color: #666;
-          font-size: 12px;
-        }
-        .container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-        .sketch {
-          border: 2px solid #2e7d32;
-          border-radius: 10px;
-          padding: 5px;
-          background: #f9f9f9;
-          max-width: 600px;
-          width: 100%;
-        }
-        .sketch img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-        .results-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 5px;
-        }
-        .results-table th, .results-table td {
-          border: 1px solid #ddd;
-          padding: 6px 10px;
-          text-align: center;
-          font-size: 13px;
-        }
-        .results-table th {
-          background-color: #e8f5e9;
-          color: #2e7d32;
-          font-weight: bold;
-        }
-        .footer {
-          margin-top: 20px;
-          text-align: center;
-          font-size: 11px;
-          color: #888;
-          border-top: 1px solid #ddd;
-          padding-top: 10px;
-        }
-        @media print {
-          .no-print {
-            display: none !important;
-          }
-          body {
-            color: #000000 !important;
-            background: #ffffff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          h1, h2, h3, p, span, td, th {
-            color: #000000 !important;
-          }
-          .header {
-            border-bottom: 2px solid #000000 !important;
-          }
-          .header h1 {
-            color: #000000 !important;
-          }
-          .sketch {
-            border: 2px solid #000000 !important;
-          }
-          .sketch img {
-            filter: grayscale(100%) contrast(110%) !important;
-          }
-          .results-table th {
-            background-color: #f2f2f2 !important;
-            color: #000000 !important;
-            border: 1px solid #000000 !important;
-          }
-          .results-table td {
-            border: 1px solid #000000 !important;
-            color: #000000 !important;
-          }
-          .watermark {
-            color: #000000 !important;
-            opacity: 0.08 !important;
-          }
-          .footer {
-            border-top: 1px solid #000000 !important;
-          }
-        }
-        .watermark {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-25deg);
-          font-size: 19px;
-          color: #2e7d32; 
-          opacity: 0.14;
-          font-weight: bold;
-          white-space: nowrap;
-          pointer-events: none;
-          z-index: 9999;
-          font-family: 'Cairo', Arial, sans-serif;
-          user-select: none;
-          text-align: center;
-          width: 100%;
-        }
-      </style>
-    </head>
-    <body>
-      <!-- Watermark Overlay -->
-      <div class="watermark">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
-      <div class="header">
-        <h1>تقرير كروكي الأرض الزراعية</h1>
-        <p>تاريخ الطباعة: ${dateStr} - الساعة: ${timeStr}</p>
-      </div>
-
-      <div class="container">
-        <div class="sketch">
-          <img src="${imgURL}" alt="كروكي الأرض">
-        </div>
-
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>البيان</th>
-              <th>القياس / الناتج</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>العرض الأول</td>
-              <td>${w1} متر</td>
-            </tr>
-            <tr>
-              <td>العرض الآخر</td>
-              <td>${w2} متر</td>
-            </tr>
-            <tr>
-              <td>الطول</td>
-              <td>${h} متر</td>
-            </tr>
-            <tr>
-              <td>المساحة الإجمالية</td>
-              <td><strong>${totalArea} متر مربع</strong></td>
-            </tr>
-            <tr>
-              <td>المساحة بالفدان والقيراط والسهم</td>
-              <td>${feddan} فدان و ${carat} قيراط و ${shares_val} سهم</td>
-            </tr>
-            <tr>
-              <td>النتيجة بالقصبة المربعة</td>
-              <td>${q_reed} قصبة و ${q_fist} قبضة و ${q_less} أقل من القبضة</td>
-            </tr>
-            ${priceVal && priceVal !== "0" ? '<tr><td>إجمالي السعر</td><td><strong>' + priceVal + ' جنيه</strong></td></tr>' : ""}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Navigation Bar at the bottom (Hidden when printing) -->
-      <div class="no-print" style="margin-top: 30px; margin-bottom: 20px; width: 100%; display: flex; justify-content: center; direction: rtl;">
-        <div style="display: flex; justify-content: space-around; align-items: center; background-color: #a5f2a2; width: 100%; max-width: 500px; padding: 12px 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <a href="help2/index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
-            <img src="../../imgs/nav1.png" alt="كسور" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
-            <span style="font-family: 'Cairo', Arial, sans-serif;">كسور</span>
-          </a>
-          <a href="#" onclick="window.close(); return false;" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
-            <img src="../../imgs/nav2.png" alt="رجوع" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
-            <span style="font-family: 'Cairo', Arial, sans-serif;">رجوع</span>
-          </a>
-          <a href="help/index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
-            <img src="../../imgs/nav3.png" alt="مساعدة" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
-            <span style="font-family: 'Cairo', Arial, sans-serif;">مساعدة</span>
-          </a>
-          <a href="../../index.html" style="text-decoration: none; text-align: center; color: #1b5e20; font-weight: bold; font-size: 13px; flex: 1;">
-            <img src="../../imgs/nav4.png" alt="الرئيسية" style="width: 26px; height: 26px; display: block; margin: 0 auto 4px;">
-            <span style="font-family: 'Cairo', Arial, sans-serif;">الرئيسية</span>
-          </a>
-        </div>
-      </div>
-
-      <div class="footer">
-        <p style="margin: 5px 0; font-size: 13px; color: #333; font-weight: bold;">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</p>
-        <p style="margin: 5px 0; font-size: 11px; color: #777;">تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
-        <button class="no-print" onclick="window.print()" style="margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">بدء الطباعة</button>
-      </div>
-    </body>
-    </html>
-  `);
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+  printWindow.document.write(printContent);
   printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    try {
+      printWindow.print();
+    } catch (e) {
+      console.log("Auto print failed, user can print manually.");
+    }
+  }, 1000);
 }

@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // جمع وطرح الأراضي الزراعية - script.js
 // ==========================================
 
@@ -665,7 +665,7 @@ function updateReport(totalAreaSahms, totalDiscountSahms, remainingSahms, indivi
 
   // ===== Footer =====
   html += `
-  <div style="text-align: center; margin-top: 12px; padding: 10px 0 4px; border-top: 2px solid #e0e0e0;">
+  <div class="old-footer-to-hide" style="text-align: center; margin-top: 12px; padding: 10px 0 4px; border-top: 2px solid #e0e0e0;">
     <div style="font-size: 12px; color: #1b5e20; font-weight: bold;">
       تم الحساب بواسطة برنامج جمع وطرح الأراضي الزراعية
     </div>
@@ -774,7 +774,113 @@ function copyReportToClipboard() {
 // ==========================================
 
 function printReport() {
-  window.print();
+  const reportContent = document.getElementById("report-content");
+  if (!reportContent) return;
+  const reportHTML = reportContent.innerHTML;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+  const timeStr = now.toLocaleTimeString("ar-EG");
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const printContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تقرير جمع وطرح الأراضي - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+    body { font-family: 'Cairo', sans-serif; background: #ffffff; color: #222222; direction: rtl; font-size: 9.5pt; line-height: 1.4; padding-bottom: 45px; position: relative; }
+    
+    .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .report-header-right { text-align: right; }
+    .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
+    .report-header-right p { font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; }
+    .report-header-center { text-align: center; padding: 0 10px; }
+    .report-header-center h2 { font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; }
+    .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.5; }
+    
+    .owner-info { margin-bottom: 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; }
+    .placeholder-line { color: #aaa; letter-spacing: 1px; }
+    
+    .watermark-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 26pt; font-weight: 800; color: #000000; opacity: 0.06; white-space: nowrap; pointer-events: none; z-index: -1000; font-family: 'Cairo', Arial, sans-serif; text-align: center; width: 100%; }
+    .report-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 8pt; color: #444; border-top: 1.5px solid #1b5e20; padding: 4px 10px 3px; background: white; gap: 1px; }
+    .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
+    .footer-sub-text { font-size: 7.5pt; color: #888; }
+    
+    .page-break-inside-avoid { page-break-inside: avoid; }
+    .no-print-btn { margin-top: 15px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-family: 'Cairo', sans-serif; }
+    .old-footer-to-hide { display: none !important; }
+    
+    @media print {
+      body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      .report-header { border-color: #000 !important; background: #fcfcfc !important; }
+      th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
+      td { border-color: #ccc !important; }
+      .report-footer { border-top-color: #000 !important; }
+      .watermark-container { opacity: 0.05 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Watermark -->
+  <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-header-right">
+      <h1>الدَّلاَّل</h1>
+      <p>تطبيق قياس وتقسيم الأراضي</p>
+    </div>
+    <div class="report-header-center">
+      <h2>تقرير حساب وجمع وطرح الأراضي الزراعية</h2>
+    </div>
+    <div class="report-header-left">
+      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+      <div><strong>رقم التقرير:</strong> ${reportId}</div>
+    </div>
+  </div>
+
+  <!-- Owner Info -->
+  <div class="owner-info">
+    <strong>اسم المالك / المستخدم:</strong>
+    <span class="placeholder-line">................................................................................................</span>
+  </div>
+
+  <!-- Content -->
+  <div class="report-main-content">
+    ${reportHTML}
+  </div>
+
+  <div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button class="no-print-btn" onclick="window.print()">بدء طباعة التقرير</button>
+  </div>
+
+  <!-- Fixed Footer -->
+  <div class="report-footer">
+    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+    <div class="footer-sub-text">
+      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
+      <span> | إصدار التطبيق: v2.4</span>
+    </div>
+  </div>
+
+</body>
+</html>`;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+  printWindow.document.write(printContent);
+  printWindow.document.close();
 }
 
 // ==========================================

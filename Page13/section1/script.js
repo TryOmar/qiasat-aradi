@@ -2494,15 +2494,34 @@ function printCroquis() {
   const distributedArea = document.getElementById('distributed-area')?.innerText || '0';
   const totalLimitArea = document.getElementById('total-limit-area')?.innerText || '0';
 
-  // Gather conversions table if exists
+  // Gather conversions table
+  let convRowsHTML = '';
   const convBody = document.getElementById('conversions-tbody');
-  syncInputValues(convBody);
-  const convRows = convBody ? convBody.innerHTML : '';
+  if (convBody) {
+    const cards = convBody.querySelectorAll('.conv-card');
+    cards.forEach(card => {
+      const title = card.querySelector('.conv-card-title')?.innerText || '';
+      const meterVal = card.querySelector('.conv-card-main-val')?.innerText || '';
+      
+      const valLess = card.querySelector('.conv-fraction')?.value || '';
+      const valFist = card.querySelector('.conv-qabda')?.value || '';
+      const valReed = card.querySelector('.conv-qasaba')?.value || '';
+      
+      convRowsHTML += `
+        <tr>
+          <td style="font-weight: bold; text-align: right; background-color: #fcfcfc;">${title} (${meterVal})</td>
+          <td style="font-weight: bold;">${valLess || '0'}</td>
+          <td style="font-weight: bold;">${valFist || '0'}</td>
+          <td style="font-weight: bold;">${valReed || '0'}</td>
+        </tr>
+      `;
+    });
+  }
 
   // Summary values
-  const totalSqm = document.getElementById('total-sqm')?.innerText || '';
-  const totalPerimeter = document.getElementById('total-perimeter')?.innerText || '';
-  const totalPrice = document.getElementById('total-price')?.innerText || '';
+  const totalSqm = document.getElementById('total-sqm')?.innerText || '0';
+  const totalPerimeter = document.getElementById('total-perimeter')?.innerText || '0';
+  const totalPrice = document.getElementById('total-price')?.innerText || '0';
   const areaShares = document.getElementById('area-shares')?.innerText || '0';
   const areaCarats = document.getElementById('area-carats')?.innerText || '0';
   const areaFeddans = document.getElementById('area-feddans')?.innerText || '0';
@@ -2510,38 +2529,242 @@ function printCroquis() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('ar-EG');
+  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const summarySection = (totalSqm || totalPerimeter || totalPrice) ? `
-    <div class="section">
-      <div class="section-title">ملخص نتائج المساحة</div>
+  // 1. بيانات الأرض الأساسية
+  let shapeNameAr = '';
+  let paramsList = [];
+  
+  if (activeShape === 'rectangle') {
+    shapeNameAr = 'مستطيل';
+    paramsList = [
+      { label: 'الطول (م)', value: document.getElementById('rect-length').value || '0' },
+      { label: 'العرض (م)', value: document.getElementById('rect-width').value || '0' }
+    ];
+  } else if (activeShape === 'square') {
+    shapeNameAr = 'مربع';
+    paramsList = [
+      { label: 'طول الضلع (م)', value: document.getElementById('square-side').value || '0' }
+    ];
+  } else if (activeShape === 'trapezoid') {
+    shapeNameAr = 'شبه منحرف زراعي';
+    paramsList = [
+      { label: 'القاعدة الكبرى - العرض السفلي A (م)', value: document.getElementById('trap-base-major').value || '0' },
+      { label: 'القاعدة الصغرى - العرض العلوي C (م)', value: document.getElementById('trap-base-minor').value || '0' },
+      { label: 'الطول الأيمن D (م)', value: document.getElementById('trap-length-right').value || '0' },
+      { label: 'الطول الأيسر B (م)', value: document.getElementById('trap-length-left').value || '0' }
+    ];
+  } else if (activeShape === 'quadrilateral') {
+    shapeNameAr = 'شكل رباعي غير منتظم';
+    paramsList = [
+      { label: 'الضلع أ - العرض السفلي (م)', value: document.getElementById('quad-side-a').value || '0' },
+      { label: 'الضلع ب - الطول الأيسر (م)', value: document.getElementById('quad-side-b').value || '0' },
+      { label: 'الضلع ج - العرض العلوي (م)', value: document.getElementById('quad-side-c').value || '0' },
+      { label: 'الضلع د - الطول الأيمن (م)', value: document.getElementById('quad-side-d').value || '0' },
+      { label: 'الوتر أ-ج (AC) (م)', value: document.getElementById('quad-diag-ac').value || '0' },
+      { label: 'الوتر ب-د (BD) (م)', value: document.getElementById('quad-diag-bd').value || '0' }
+    ];
+  }
+
+  const landParamsHTML = `
+    <div class="section page-break-inside-avoid">
+      <div class="section-title">1. بيانات الأرض الأساسية</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th style="width: 35%;">نوع الشكل</th>
+            <th>البيان</th>
+            <th style="width: 35%;">القيمة المقاسة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="${paramsList.length + 1}" style="font-weight: bold; font-size: 11pt; background-color: #f9fbe7; color: #1b5e20; vertical-align: middle;">${shapeNameAr}</td>
+          </tr>
+          ${paramsList.map(p => `
+            <tr>
+              <td style="text-align: right; padding-right: 15px;">${p.label}</td>
+              <td style="font-weight: bold; color: #1b5e20;">${p.value} م</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // 2. النتائج الإجمالية للمساحة
+  const areaResultsHTML = `
+    <div class="section page-break-inside-avoid">
+      <div class="section-title">2. النتائج الإجمالية للمساحة</div>
+      <table class="report-table" style="margin-bottom: 15px;">
+        <thead>
+          <tr>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="font-size: 11pt; font-weight: bold; background-color: #f1f8e9;">
+            <td>${areaShares}</td>
+            <td>${areaCarats}</td>
+            <td>${areaFeddans}</td>
+          </tr>
+        </tbody>
+      </table>
       <div class="summary-grid">
-        ${totalSqm ? `<div class="summary-card"><span class="label">إجمالي الأمتار المربعة</span><span class="value">${totalSqm} م²</span></div>` : ''}
-        ${totalPerimeter ? `<div class="summary-card"><span class="label">المحيط الإجمالي</span><span class="value">${totalPerimeter} م</span></div>` : ''}
-        ${totalPrice ? `<div class="summary-card"><span class="label">إجمالي سعر الأرض</span><span class="value">${totalPrice} ج</span></div>` : ''}
+        <div class="summary-card">
+          <span class="label">إجمالي الأمتار المربعة</span>
+          <span class="value">${totalSqm} م²</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">المحيط الإجمالي للأرض</span>
+          <span class="value">${totalPerimeter} م</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">إجمالي سعر قطعة الأرض</span>
+          <span class="value">${totalPrice} ج</span>
+        </div>
       </div>
-    </div>` : '';
+    </div>
+  `;
 
-  const areaSection = (areaFeddans !== '0' || areaCarats !== '0') ? `
-    <div class="section">
-      <div class="section-title">المساحة بالوحدات الزراعية</div>
-      <table>
-        <thead><tr><th>سهم</th><th>قيراط</th><th>فدان</th></tr></thead>
-        <tbody><tr>
-          <td><strong>${areaShares}</strong></td>
-          <td><strong>${areaCarats}</strong></td>
-          <td><strong>${areaFeddans}</strong></td>
-        </tr></tbody>
-      </table>
-    </div>` : '';
+  // 3. بيانات العرض المحسوبة
+  let avgWidth = 0;
+  let avgLength = 0;
+  if (activeShape === 'rectangle') {
+    avgWidth = parseFloat(document.getElementById("rect-width").value) || 0;
+    avgLength = parseFloat(document.getElementById("rect-length").value) || 0;
+  } else if (activeShape === 'square') {
+    avgWidth = parseFloat(document.getElementById("square-side").value) || 0;
+    avgLength = avgWidth;
+  } else if (activeShape === 'trapezoid') {
+    const a = parseFloat(document.getElementById("trap-base-major").value) || 0;
+    const c = parseFloat(document.getElementById("trap-base-minor").value) || 0;
+    const l1 = parseFloat(document.getElementById("trap-length-right")?.value) || 0;
+    const l2 = parseFloat(document.getElementById("trap-length-left")?.value) || 0;
+    avgWidth = 0.5 * (a + c);
+    avgLength = 0.5 * (l1 + l2);
+  } else if (activeShape === 'quadrilateral') {
+    const aVal = parseFloat(document.getElementById("quad-side-a").value) || 0;
+    const bVal = parseFloat(document.getElementById("quad-side-b").value) || 0;
+    const cVal = parseFloat(document.getElementById("quad-side-c").value) || 0;
+    const dVal = parseFloat(document.getElementById("quad-side-d").value) || 0;
+    avgWidth = 0.5 * (aVal + cVal);
+    avgLength = 0.5 * (bVal + dVal);
+  }
 
-  const convSection = convRows ? `
-    <div class="section">
-      <div class="section-title">تحويل من متر طولي ومربع إلى القصبة والقبضة</div>
-      <table>
-        <thead><tr><th>البعد</th><th>أقل من القبضة</th><th>قبضة</th><th>قصبة</th></tr></thead>
-        <tbody>${convRows}</tbody>
+  const calculatedWidthsHTML = `
+    <div class="section page-break-inside-avoid">
+      <div class="section-title">3. بيانات العرض والارتفاع المحسوبة</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>البيان المحسوب</th>
+            <th>القيمة بالمتـر</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: right; padding-right: 15px;">معدل العرض (متوسط القواعد الأفقي)</td>
+            <td style="font-weight: bold; color: #1b5e20;">${avgWidth.toFixed(4)} م</td>
+          </tr>
+          <tr>
+            <td style="text-align: right; padding-right: 15px;">متوسط الطول (متوسط الارتفاعات الرأسي)</td>
+            <td style="font-weight: bold; color: #1b5e20;">${avgLength.toFixed(4)} م</td>
+          </tr>
+        </tbody>
       </table>
-    </div>` : '';
+    </div>
+  `;
+
+  // 4. الكروكي التفاعلي
+  const croquisHTML = `
+    <div class="section page-break-inside-avoid" style="text-align: center;">
+      <div class="section-title">4. الكروكي التفاعلي ومخطط الأرض</div>
+      <div class="croquis-box">
+        <img src="${canvasDataURL}" alt="كروكي الأرض"/>
+      </div>
+    </div>
+  `;
+
+  // 5. جدول توزيع الشركاء
+  const hasPartners = heirsRows.trim() !== '';
+  const partnersTableHTML = hasPartners ? `
+    <div class="section">
+      <div class="section-title">5. جدول توزيع الأنصبة على الشركاء</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>العرض العلوي (م)</th>
+            <th>العرض السفلي (م)</th>
+            ${(activeShape === 'trapezoid' && !showActualDims)
+              ? '<th colspan="2">الطول (م)</th>'
+              : '<th>الطول الأيمن (م)</th><th>الطول الأيسر (م)</th>'
+            }
+            <th>النصيب (م²)</th>
+            <th>سهم</th>
+            <th>قيراط</th>
+            <th>فدان</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${heirsRows}
+        </tbody>
+      </table>
+    </div>
+  ` : '';
+
+  // 6. ملخص التقسيم
+  const totalAreaVal = parseFloat(totalLimitArea.replace(/,/g, '')) || parseFloat(totalSqm.replace(/,/g, '')) || 0;
+  const distAreaVal = parseFloat(distributedArea.replace(/,/g, '')) || 0;
+  const remAreaVal = Math.max(0, totalAreaVal - distAreaVal);
+  const distPercent = totalAreaVal > 0 ? ((distAreaVal / totalAreaVal) * 100).toFixed(2) : '0.00';
+  const heirsListRows = heirsBody ? heirsBody.querySelectorAll('.heir-row') : [];
+  const numPartners = heirsListRows.length || heirsData.length || 0;
+  const statusEl = document.getElementById('distribution-status');
+  const divisionStatusText = statusEl ? statusEl.innerText.trim() : (totalAreaVal === distAreaVal ? 'التوزيع متطابق 100%' : 'توجد مساحة غير موزعة');
+
+  const summaryBoxHTML = `
+    <div class="section page-break-inside-avoid">
+      <div class="section-title">6. ملخص نهائي لعملية التقسيم</div>
+      <div class="summary-box">
+        <div class="summary-box-row">
+          <div class="summary-box-cell"><strong>المساحة الإجمالية للأرض:</strong> <span>${totalAreaVal.toFixed(2)} م²</span></div>
+          <div class="summary-box-cell"><strong>عدد الشركاء:</strong> <span>${numPartners} شركاء</span></div>
+        </div>
+        <div class="summary-box-row">
+          <div class="summary-box-cell"><strong>مجموع المساحات الموزعة:</strong> <span>${distAreaVal.toFixed(2)} م²</span></div>
+          <div class="summary-box-cell"><strong>نسبة التوزيع:</strong> <span>${distPercent}%</span></div>
+        </div>
+        <div class="summary-box-row">
+          <div class="summary-box-cell"><strong>حالة التقسيم:</strong> <span class="status-badge">${divisionStatusText}</span></div>
+          <div class="summary-box-cell"><strong>المساحة المتبقية (إن وجدت):</strong> <span>${remAreaVal.toFixed(2)} م²</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 7. التحويل من متر طولي ومربع إلى القصبة والقبضة
+  const conversionsSectionHTML = convRowsHTML ? `
+    <div class="section page-break-inside-avoid">
+      <div class="section-title">7. التحويل من متر طولي ومربع إلى القصبة والقبضة</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>البعد / المساحة المحولة</th>
+            <th>أقل من القبضة</th>
+            <th>قبضة</th>
+            <th>قصبة</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${convRowsHTML}
+        </tbody>
+      </table>
+    </div>
+  ` : '';
 
   const printHTML = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -2551,8 +2774,270 @@ function printCroquis() {
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    @page { size: A4 portrait; margin: 10mm 8mm 10mm 8mm; }
-    body { font-family: 'Cairo', sans-serif; background: #fff; color: #222; font-size: 10pt; direction: rtl; position: relative; min-height: 96vh; }
+    @page {
+      size: A4 portrait;
+      margin: 15mm 12mm 15mm 12mm;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #fff;
+      color: #222;
+      font-size: 9.5pt;
+      direction: rtl;
+      padding-bottom: 35px;
+      position: relative;
+    }
+    
+    /* ── رأس التقرير ──────────────────────────── */
+    .report-header {
+      border: 2px solid #1b5e20;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1.2fr 2fr 1.2fr;
+      align-items: center;
+      background: #f1f8e9;
+    }
+    .report-header-right {
+      text-align: right;
+    }
+    .report-header-right h1 {
+      font-size: 20pt;
+      color: #1b5e20;
+      font-weight: 800;
+      margin: 0;
+    }
+    .report-header-right p {
+      font-size: 9pt;
+      color: #388e3c;
+      margin: 2px 0 0;
+      font-weight: 600;
+    }
+    .report-header-center {
+      text-align: center;
+      padding: 0 10px;
+    }
+    .report-header-center h2 {
+      font-size: 12.5pt;
+      color: #1b5e20;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .report-header-left {
+      text-align: left;
+      font-size: 8pt;
+      color: #333;
+      line-height: 1.5;
+    }
+    .owner-info {
+      margin-bottom: 15px;
+      font-size: 10pt;
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 6px;
+      display: flex;
+      gap: 10px;
+    }
+    .placeholder-line {
+      color: #aaa;
+      letter-spacing: 1px;
+    }
+
+    /* ── الأقسام والعناصر ─────────────────────── */
+    .section {
+      margin-bottom: 15px;
+    }
+    .section-title {
+      background: #1b5e20;
+      color: white;
+      font-weight: 700;
+      font-size: 10.5pt;
+      padding: 5px 12px;
+      border-right: 5px solid #2e7d32;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    /* ── الجداول ────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin-bottom: 8px;
+    }
+    th {
+      background: #e8f5e9;
+      color: #1b5e20;
+      font-weight: 700;
+      border: 1px solid #1b5e20;
+      padding: 6px 4px;
+      text-align: center;
+      white-space: nowrap;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    td {
+      border: 1px solid #a5d6a7;
+      padding: 5px 4px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    tr:nth-child(even) td {
+      background: #f9fbe7;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    /* إزالة حدود حقول الإدخال لتظهر كنصوص عادية */
+    td input {
+      border: none !important;
+      background: transparent !important;
+      text-align: center !important;
+      font-family: 'Cairo', sans-serif !important;
+      font-size: 9pt !important;
+      font-weight: bold !important;
+      width: 100% !important;
+      color: #000000 !important;
+      pointer-events: none !important;
+    }
+    td select {
+      display: none !important;
+    }
+
+    /* ── الكروكي ────────────────────────────── */
+    .croquis-box {
+      border: 2px solid #1b5e20;
+      border-radius: 8px;
+      padding: 8px;
+      background: #ffffff;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    .croquis-box img {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── خلاصة المساحة ───────────────────────── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .summary-card {
+      border: 1.5px solid #1b5e20;
+      border-radius: 6px;
+      padding: 6px 8px;
+      text-align: center;
+      background: #f1f8e9;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .summary-card .label {
+      font-size: 8pt;
+      color: #555;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .summary-card .value {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1b5e20;
+    }
+
+    /* ── ملخص التقسيم ───────────────────────── */
+    .summary-box {
+      border: 2px solid #1b5e20;
+      border-radius: 8px;
+      background: #f1f8e9;
+      padding: 10px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .summary-box-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .summary-box-cell {
+      flex: 1;
+      font-size: 9.5pt;
+      color: #222;
+    }
+    .summary-box-cell strong {
+      color: #1b5e20;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 1px 8px;
+      background-color: #c8e6c9;
+      color: #2e7d32;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 9pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ── العلامة المائية ──────────────────────── */
+    .watermark-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-size: 26pt;
+      font-weight: 800;
+      color: #000000;
+      opacity: 0.06;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: -1000;
+      font-family: 'Cairo', Arial, sans-serif;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ── تذييل الصفحة ────────────────────────── */
+    .report-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-size: 8pt;
+      color: #444;
+      border-top: 1.5px solid #1b5e20;
+      padding: 4px 10px 3px;
+      background: white;
+      gap: 1px;
+    }
+    .footer-main-text {
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #222;
+    }
+    .footer-sub-text {
+      font-size: 7.5pt;
+      color: #888;
+    }
+
+    /* ── تحسينات الطباعة والصفحات ─────────────── */
+    .page-break-inside-avoid {
+      page-break-inside: avoid;
+    }
     @media print {
       body {
         background: #fff !important;
@@ -2560,162 +3045,147 @@ function printCroquis() {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      h1, h2, .header h1, .header h2, .date-line, .box-title, .section-title, .summary-card .label, .summary-card .value, th, td, td input, .footer {
-        color: #000 !important;
+      .no-print {
+        display: none !important;
       }
-      .header {
-        border-bottom: 2px solid #000 !important;
-      }
-      .croquis-box {
-        border: 1.5px solid #000 !important;
-        background: #fff !important;
-      }
-      .croquis-box img {
-        filter: grayscale(100%) contrast(110%) !important;
+      .report-header {
+        border-color: #000 !important;
+        background: #fcfcfc !important;
       }
       .section-title {
-        background: #f2f2f2 !important;
-        color: #000 !important;
-        border-right: 4px solid #000 !important;
-      }
-      .summary-card {
-        border: 1px solid #000 !important;
-        background: #fff !important;
+        background: #000 !important;
+        color: #fff !important;
+        border-right-color: #333 !important;
       }
       th {
         background: #f2f2f2 !important;
         color: #000 !important;
-        border: 1px solid #000 !important;
+        border-color: #000 !important;
       }
       td {
-        border: 1px solid #000 !important;
+        border-color: #ccc !important;
       }
-      tr:nth-child(even) td {
+      .summary-card {
+        border-color: #000 !important;
         background: #fff !important;
       }
-      .summary-bar {
-        background: #f2f2f2 !important;
-        border: 1px solid #000 !important;
-        color: #000 !important;
+      .summary-box {
+        border-color: #000 !important;
+        background: #fff !important;
       }
-      .watermark {
-        color: #000 !important;
-        opacity: 0.08 !important;
+      .report-footer {
+        border-top-color: #000 !important;
       }
-      .footer {
-        border-top: 1px solid #000 !important;
+      .croquis-box {
+        border-color: #000 !important;
+      }
+      .status-badge {
+        background: #eee !important;
+        color: #000 !important;
+        border: 1px solid #aaa !important;
+      }
+      .watermark-container {
+        opacity: 0.05 !important;
       }
     }
-    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 19px; color: #2e7d32; opacity: 0.14; font-weight: bold; white-space: nowrap; pointer-events: none; z-index: 9999; font-family: 'Cairo', Arial, sans-serif; user-select: none; text-align: center; width: 100%; }
-    .page { width: 100%; }
-    .header { text-align: center; padding: 6px 0 4px; border-bottom: 3px solid #2e7d32; margin-bottom: 6px; }
-    .header h1 { font-size: 18pt; color: #1b5e20; font-weight: 800; margin-bottom: 1px; }
-    .header h2 { font-size: 11pt; color: #388e3c; font-weight: 600; margin-bottom: 2px; }
-    .header .date-line { font-size: 8pt; color: #666; }
-    .croquis-box { text-align: center; margin: 4px 0; border: 1.5px solid #c8e6c9; border-radius: 6px; padding: 4px; background: #f9fbe7; page-break-inside: avoid; }
-    .croquis-box .box-title { font-size: 10pt; color: #2e7d32; font-weight: 700; margin-bottom: 3px; text-align: right; padding: 0 4px; }
-    .croquis-box img { max-width: 100%; max-height: 230px; object-fit: contain; display: block; margin: 0 auto; }
-    .section { margin-bottom: 6px; page-break-inside: avoid; }
-    .section-title { background: #e8f5e9; color: #1b5e20; font-weight: 700; font-size: 9.5pt; padding: 3px 8px; border-right: 4px solid #2e7d32; margin-bottom: 4px; border-radius: 2px; }
-    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
-    .summary-card { border: 1px solid #c8e6c9; border-radius: 4px; padding: 4px 6px; text-align: center; background: #f1f8e9; }
-    .summary-card .label { font-size: 7.5pt; color: #555; display: block; margin-bottom: 1px; }
-    .summary-card .value { font-size: 10pt; font-weight: 700; color: #1b5e20; }
-    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #c8e6c9; padding: 3px 5px; text-align: center; }
-    td { border: 1px solid #e0e0e0; padding: 3px 5px; text-align: center; }
-    tr:nth-child(even) td { background: #f9fbe7; }
-    .summary-bar { background: #f1f8e9; border: 1px solid #c8e6c9; border-radius: 3px; padding: 3px 8px; margin-top: 4px; font-size: 8.5pt; color: #333; }
-    .footer { text-align: center; margin-top: 6px; padding-top: 4px; border-top: 1px solid #ccc; font-size: 7.5pt; color: #888; }
-    td select { display: none; }
-    td input { border: none; background: transparent; text-align: center; font-family: 'Cairo', sans-serif; font-size: 8.5pt; font-weight: 600; width: 100%; }
   </style>
 </head>
 <body>
-<!-- Watermark Overlay -->
-<div class="watermark">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
-<div class="page">
-  <div class="header">
-    <h1>الدَّلاَّل</h1>
-    <h2>تقرير تقسيم الأرض على الشركاء</h2>
-    <div class="date-line">تاريخ الطباعة: ${dateStr} — ${timeStr}</div>
+
+  <!-- Watermark -->
+  <div class="watermark-container">
+    تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.
   </div>
 
-  <div class="croquis-box">
-    <div class="box-title">الرسم الكروكي للأرض مع التقسيم</div>
-    <img src="${canvasDataURL}" alt="كروكي الأرض"/>
-  </div>
-
-  ${summarySection}
-  ${areaSection}
-
-  <div class="section">
-    <div class="section-title">توزيع الأنصبة على الشركاء</div>
-    <table>
-      <thead>
-        <tr>
-          <th>الاسم</th>
-          <th>العرض العلوي (م)</th>
-          <th>العرض السفلي (م)</th>
-          ${(activeShape === 'trapezoid' && !showActualDims)
-            ? '<th colspan="2">الطول (م)</th>'
-            : '<th>الطول الأيمن (م)</th><th>الطول الأيسر (م)</th>'
-          }
-          <th>النصيب (م²)</th>
-          <th>سهم</th>
-          <th>قيراط</th>
-          <th>فدان</th>
-        </tr>
-      </thead>
-      <tbody>${heirsRows}</tbody>
-    </table>
-    <div class="summary-bar">
-      المساحة الموزعة: <strong>${distributedArea}</strong> م² من إجمالي <strong>${totalLimitArea}</strong> م²
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-header-right">
+      <h1>الدَّلاَّل</h1>
+      <p>تطبيق قياس وتقسيم الأراضي</p>
+    </div>
+    <div class="report-header-center">
+      <h2>تقرير حساب ورسم وتقسيم الأراضي الزراعية</h2>
+    </div>
+    <div class="report-header-left">
+      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
+      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
+      <div><strong>رقم التقرير:</strong> ${reportId}</div>
     </div>
   </div>
 
-
-  ${convSection}
-
-  <div class="footer">
-    <p style="margin: 3px 0; font-size: 13px; color: #333; font-weight: bold;">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</p>
-    <p style="margin: 3px 0; font-size: 11px; color: #777;">تطبيق الدلال لحساب ورسم وتقسيم الأراضي الزراعية © ${now.getFullYear()}</p>
+  <!-- Owner Info -->
+  <div class="owner-info">
+    <strong>اسم المالك / المستخدم:</strong>
+    <span class="placeholder-line">................................................................................................</span>
   </div>
-</div>
-<script>
-  window.onload = function() {
-    const imgs = document.getElementsByTagName('img');
-    let loadedCount = 0;
-    function triggerPrint() {
-      setTimeout(function() { window.print(); window.close(); }, 350);
-    }
-    if (imgs.length === 0) {
-      triggerPrint();
-    } else {
-      for (let i = 0; i < imgs.length; i++) {
-        if (imgs[i].complete) {
-          loadedCount++;
-          if (loadedCount === imgs.length) {
-            triggerPrint();
+
+  <!-- Sections ordered according to requirements -->
+  
+  <!-- 1. بيانات الأرض -->
+  ${landParamsHTML}
+
+  <!-- 2. النتائج الإجمالية للمساحة -->
+  ${areaResultsHTML}
+
+  <!-- 3. بيانات العرض المحسوبة -->
+  ${calculatedWidthsHTML}
+
+  <!-- 4. الكروكي التفاعلي -->
+  ${croquisHTML}
+
+  <!-- 5. جدول توزيع الشركاء -->
+  ${partnersTableHTML}
+
+  <!-- 6. ملخص التقسيم -->
+  ${summaryBoxHTML}
+
+  <!-- 7. التحويل من متر طولي ومربع إلى القصبة والقبضة -->
+  ${conversionsSectionHTML}
+
+  <!-- Fixed Footer -->
+  <div class="report-footer">
+    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+    <div class="footer-sub-text">
+      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
+      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
+      <span> | إصدار التطبيق: v2.4</span>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      const imgs = document.getElementsByTagName('img');
+      let loadedCount = 0;
+      function triggerPrint() {
+        setTimeout(function() { window.print(); window.close(); }, 350);
+      }
+      if (imgs.length === 0) {
+        triggerPrint();
+      } else {
+        for (let i = 0; i < imgs.length; i++) {
+          if (imgs[i].complete) {
+            loadedCount++;
+            if (loadedCount === imgs.length) {
+              triggerPrint();
+            }
+          } else {
+            imgs[i].onload = function() {
+              loadedCount++;
+              if (loadedCount === imgs.length) {
+                triggerPrint();
+              }
+            };
+            imgs[i].onerror = function() {
+              loadedCount++;
+              if (loadedCount === imgs.length) {
+                triggerPrint();
+              }
+            };
           }
-        } else {
-          imgs[i].onload = function() {
-            loadedCount++;
-            if (loadedCount === imgs.length) {
-              triggerPrint();
-            }
-          };
-          imgs[i].onerror = function() {
-            loadedCount++;
-            if (loadedCount === imgs.length) {
-              triggerPrint();
-            }
-          };
         }
       }
     }
-  }
-</script>
+  </script>
 </body>
 </html>`;
 
