@@ -2340,7 +2340,7 @@ function renderCroquis() {
     g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w1 + " م", {
+    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w2 + " م", {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
@@ -2364,7 +2364,7 @@ function renderCroquis() {
     g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w2 + " م", {
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w1 + " م", {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
