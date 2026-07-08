@@ -577,7 +577,7 @@ function generateCustomLand() {
       owner: "الشريك الأول (بحري غربي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة البحرية الغربية",
-      color: "#ffffff",
+      color: "#e8f5e9",
       textX: p1.x - 130,
       textY: (p1.y + y_mid_left) / 2 - 10
     });
@@ -588,7 +588,7 @@ function generateCustomLand() {
       owner: "الشريك الثاني (قبلي غربي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة القبلية الغربية",
-      color: "#ffffff",
+      color: "#f1f8e9",
       textX: p4.x - 130,
       textY: (y_mid_left + p4.y) / 2 + 20
     });
@@ -615,7 +615,7 @@ function generateCustomLand() {
       owner: "الشريك الثالث (بحري شرقي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة البحرية الشرقية",
-      color: "#ffffff",
+      color: "#e8f5e9",
       textX: p2.x + 130,
       textY: (p2.y + y_mid_right) / 2 - 10
     });
@@ -626,7 +626,7 @@ function generateCustomLand() {
       owner: "الشريك الرابع (قبلي شرقي)",
       area: { feddan: quarterDetailed.feddan, carat: quarterDetailed.carat, shares: quarterDetailed.shares, sqm: quarterArea },
       notes: "القطعة القبلية الشرقية",
-      color: "#ffffff",
+      color: "#f1f8e9",
       textX: p3.x + 130,
       textY: (y_mid_right + p3.y) / 2 + 20
     });
@@ -724,6 +724,7 @@ function renderSVG() {
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", pointsStr);
     polygon.setAttribute("class", "waterway");
+    polygon.setAttribute("vector-effect", "non-scaling-stroke");
     polygon.setAttribute("data-id", w.id);
     polygon.setAttribute("data-type", "waterway");
     polygon.onclick = (e) => onElementClick(e, 'waterway', w.id);
@@ -760,7 +761,8 @@ function renderSVG() {
     polygon.setAttribute("class", activeClass);
     polygon.setAttribute("fill", s.color || "#ffffff");
     polygon.setAttribute("stroke", "#000000");
-    polygon.setAttribute("stroke-width", "50");
+    polygon.setAttribute("stroke-width", "6");
+    polygon.setAttribute("vector-effect", "non-scaling-stroke");
     polygon.onclick = (e) => onElementClick(e, 'shape', s.id);
     shapesGroup.appendChild(polygon);
 
@@ -829,7 +831,8 @@ function renderSVG() {
       line.setAttribute("stroke-dasharray", "6, 4");
     }
     line.setAttribute("stroke", l.color || "#000000");
-    line.setAttribute("stroke-width", "3.5");
+    line.setAttribute("stroke-width", "4");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
     line.onclick = (e) => onElementClick(e, 'splitLine', l.id);
     splitLinesGroup.appendChild(line);
 
