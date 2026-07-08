@@ -1782,13 +1782,12 @@ function drawLandCanvas(vertices) {
         ctx.textBaseline = "middle";
         ctx.fillText(labelTextRight, rx - 7 * scaleMultiplier, ry);
       }
-
-
         // Draw handle for dragging vertical dividers (between slices) - Visually removed as requested
-        const hX = (cpTopPrev.x + cpBottomPrev.x) / 2;
-        const hY = (cpTopPrev.y + cpBottomPrev.y) / 2;
-        
-        dividerHandles.push({
+        if (i > 0) {
+          const hX = (cpTopPrev.x + cpBottomPrev.x) / 2;
+          const hY = (cpTopPrev.y + cpBottomPrev.y) / 2;
+          
+          dividerHandles.push({
           index: i,
           x: hX,
           y: hY,
