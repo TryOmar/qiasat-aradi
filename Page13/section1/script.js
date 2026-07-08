@@ -1125,19 +1125,16 @@ function calculateAll() {
           <div class="conv-card">
             <div class="conv-card-title">${label}</div>
             <div class="conv-card-main-val">${meterLabel}</div>
-            <table class="conv-card-table">
-              <thead>
-                <tr>
-                  <th>الوحدة</th>
-                  <th>القيمة</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>قصبة</td><td>${qasabaInput}</td></tr>
-                <tr><td>قبضة</td><td>${qabdaInput}</td></tr>
-                <tr><td>أقل من القبضة</td><td>${fracInput}</td></tr>
-              </tbody>
-            </table>
+            <div class="conv-card-row-header">
+              <span>أقل من القبضة</span>
+              <span>قبضة</span>
+              <span>قصبة</span>
+            </div>
+            <div class="conv-card-row-values">
+              <div>${fracInput}</div>
+              <div>${qabdaInput}</div>
+              <div>${qasabaInput}</div>
+            </div>
           </div>`;
       }
 
@@ -1157,19 +1154,16 @@ function calculateAll() {
         <div class="conv-card">
           <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
           <div class="conv-card-main-val">${area.toFixed(2)} م²</div>
-          <table class="conv-card-table">
-            <thead>
-              <tr>
-                <th>الوحدة</th>
-                <th>القيمة</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>قصبة</td><td><input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly></td></tr>
-              <tr><td>قبضة</td><td><input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly></td></tr>
-              <tr><td>أقل من القبضة</td><td><input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly></td></tr>
-            </tbody>
-          </table>
+          <div class="conv-card-row-header">
+            <span>أقل من القبضة</span>
+            <span>قبضة</span>
+            <span>قصبة</span>
+          </div>
+          <div class="conv-card-row-values">
+            <div><input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly></div>
+            <div><input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly></div>
+            <div><input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly></div>
+          </div>
         </div>`;
       conversionsTbody.innerHTML += areaCardHtml;
 

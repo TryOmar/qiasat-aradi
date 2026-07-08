@@ -481,6 +481,40 @@ body {
   text-align: left;
 }
 
+/* ── صف أفقي لعناوين وقيم التحويل ──────────────────────────── */
+.conv-card-row-header,
+.conv-card-row-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.conv-card-row-header {
+  padding: 4px 0;
+  border-bottom: 2px solid #000000;
+}
+
+.conv-card-row-header > span {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555555;
+  font-family: Cairo, Arial, sans-serif;
+}
+
+.conv-card-row-values {
+  padding: 4px 0;
+}
+
+.conv-card-row-values > div {
+  flex: 1;
+  text-align: center;
+}
+
 /* Editable inputs inside conversion table */
 .conv-row td {
   padding: 8px 4px;

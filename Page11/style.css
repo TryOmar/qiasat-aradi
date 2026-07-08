@@ -2666,6 +2666,40 @@ body {
   text-align: left !important; /* القيمة */
 }
 
+/* ── صف أفقي لعناوين وقيم التحويل ──────────────────────────── */
+.conv-card-row-header,
+.conv-card-row-values {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.conv-card-row-header {
+  padding: 4px 0 !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+.conv-card-row-header > span {
+  flex: 1 !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #555555 !important;
+  font-family: Cairo, Arial, sans-serif !important;
+}
+
+.conv-card-row-values {
+  padding: 4px 0 !important;
+}
+
+.conv-card-row-values > div {
+  flex: 1 !important;
+  text-align: center !important;
+}
+
 
 /* ==========================================================================
    توحيد جميع حقول الإدخال في التطبيق - إطار أسود سميك، حواف مستديرة، خطوط أكبر

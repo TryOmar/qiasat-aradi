@@ -177,20 +177,19 @@
             <table>
                 <tbody>
                     <tr>
-                        <th>قصبة</th>
-                        <th>قبضة</th>
                         <th>أقل من القبضة</th>
+                        <th>قبضة</th>
+                        <th>قصبة</th>
                     </tr>
                     <tr>
-                        <td><input type="text" inputmode="decimal" id="input_reed" oninput="calculateFistReedToCM()"
-                                style="width: 70px;text-align: center;"></td>
-                        <td><input type="text" inputmode="decimal" id="input_fist" oninput="calculateFistReedToCM()"
-                                style="width: 70px;text-align: center;"></td>
                         <td> <input type="text" inputmode="decimal" id="input_lessThanFist"
                                 oninput="validateInput(); calculateFistReedToCM();"
                                 style="width: 70px; text-align: center;" step="any">
                         </td>
-
+                        <td><input type="text" inputmode="decimal" id="input_fist" oninput="calculateFistReedToCM()"
+                                style="width: 70px;text-align: center;"></td>
+                        <td><input type="text" inputmode="decimal" id="input_reed" oninput="calculateFistReedToCM()"
+                                style="width: 70px;text-align: center;"></td>
                     </tr>
                 </tbody>
             </table>

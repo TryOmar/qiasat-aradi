@@ -3344,28 +3344,16 @@ function updateConversionsTable() {
       <div class="conv-card">
         <div class="conv-card-title">${label}</div>
         <div class="conv-card-main-val">${meterLabel}</div>
-        <table class="conv-card-table">
-          <thead>
-            <tr>
-              <th>الوحدة</th>
-              <th>القيمة</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>قصبة</td>
-              <td>${qasabaHTML}</td>
-            </tr>
-            <tr>
-              <td>قبضة</td>
-              <td>${qabdaHTML}</td>
-            </tr>
-            <tr>
-              <td>أقل من القبضة</td>
-              <td>${fracHTML}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="conv-card-row-header">
+          <span>أقل من القبضة</span>
+          <span>قبضة</span>
+          <span>قصبة</span>
+        </div>
+        <div class="conv-card-row-values">
+          <div>${fracHTML}</div>
+          <div>${qabdaHTML}</div>
+          <div>${qasabaHTML}</div>
+        </div>
       </div>`;
   }
 
@@ -3432,28 +3420,16 @@ function updateConversionsTable() {
     <div class="conv-card">
       <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
       <div class="conv-card-main-val">${totalAreaM2.toFixed(2)} م²</div>
-      <table class="conv-card-table">
-        <thead>
-          <tr>
-            <th>الوحدة</th>
-            <th>القيمة</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>قصبة</td>
-            <td>${areaQasabaHTML}</td>
-          </tr>
-          <tr>
-            <td>قبضة</td>
-            <td>${areaQabdaHTML}</td>
-          </tr>
-          <tr>
-            <td>أقل من القبضة</td>
-            <td>${areaFracHTML}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="conv-card-row-header">
+        <span>أقل من القبضة</span>
+        <span>قبضة</span>
+        <span>قصبة</span>
+      </div>
+      <div class="conv-card-row-values">
+        <div>${areaFracHTML}</div>
+        <div>${areaQabdaHTML}</div>
+        <div>${areaQasabaHTML}</div>
+      </div>
     </div>`;
 
   // ── إعادة بناء DOM ─────────────────────────────────────────────────────────
