@@ -2071,25 +2071,14 @@ function renderCroquis() {
             
             const tAreaVal = svgEl("text");
             tAreaVal.setAttribute("x", cx);
-            tAreaVal.setAttribute("y", yArea - 5 * textScale);
+            tAreaVal.setAttribute("y", yArea + 4 * textScale);
             tAreaVal.setAttribute("fill", "#111111"); // أسود داكن
             tAreaVal.setAttribute("font-size", (12 * textScale) + "px");
             tAreaVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tAreaVal.setAttribute("text-anchor", "middle");
             tAreaVal.setAttribute("font-weight", "bold");
-            tAreaVal.textContent = areaVal;
+            tAreaVal.textContent = areaVal + " م²";
             areaGroup.appendChild(tAreaVal);
-            
-            const tAreaUnit = svgEl("text");
-            tAreaUnit.setAttribute("x", cx);
-            tAreaUnit.setAttribute("y", yArea + 7 * textScale);
-            tAreaUnit.setAttribute("fill", "#111111");
-            tAreaUnit.setAttribute("font-size", (11 * textScale) + "px");
-            tAreaUnit.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tAreaUnit.setAttribute("text-anchor", "middle");
-            tAreaUnit.setAttribute("font-weight", "bold");
-            tAreaUnit.textContent = "م²";
-            areaGroup.appendChild(tAreaUnit);
             
             labelGroup.appendChild(areaGroup);
           }

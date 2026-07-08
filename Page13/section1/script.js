@@ -1720,11 +1720,7 @@ function drawLandCanvas(vertices) {
         
         ctx.font = `bold ${areaFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(heir.share.toFixed(2), 0, -5 * scaleMultiplier);
-        
-        ctx.font = `bold ${unitFontSize}px Cairo`;
-        ctx.fillStyle = "#111111";
-        ctx.fillText("م²", 0, 7 * scaleMultiplier);
+        ctx.fillText(`${heir.share.toFixed(2)} م²`, 0, 0);
         
         ctx.restore();
       }
