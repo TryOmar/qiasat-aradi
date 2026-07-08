@@ -256,7 +256,14 @@
 
     <!-- Visual Canvas Card -->
     <div class="s canvas-card" id="canvas-container">
-      <h3>كروكي الأرض التفاعلي</h3>
+      <h3 style="color: #2e7d32; font-family: Cairo, sans-serif; font-weight: bold; font-size: 16px; border-bottom: 2px solid #c8e6c9; padding-bottom: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+        <span>كروكي الأرض التفاعلي</span>
+        <span style="font-size: 11px; font-weight: normal; color: #666; background: #e8f5e9; padding: 2px 8px; border-radius: 12px; border: 1px dashed #81c784;">تفاعلي: اضغط على أي شريك لتحديده</span>
+      </h3>
+      
+      <!-- شريط مفاتيح الشركاء التفاعلي ملون مع المساحات لتسهيل القراءة السريعة -->
+      <div id="croquis-legend" class="croquis-legend" style="display: none;"></div>
+
       <div class="canvas-wrapper">
         <canvas id="landCanvas" width="600" height="400"></canvas>
         
@@ -298,10 +305,33 @@
           </div>
         </div>
       </div>
+      <!-- مفاتيح التبديل والتحكم -->
+      <div class="croquis-toggles-row" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; margin-top: 15px; margin-bottom: 10px;">
+        <button type="button" class="croquis-refresh-btn" onclick="calculateAll()" style="display: none;">
+          🔄 تحديث الخريطة
+        </button>
+        <label class="croquis-toggle-chip">
+          <input type="checkbox" id="chk-toggle-names" checked onchange="toggleCroquisNames()">
+          <span class="chip-dot"></span>
+          <span>الأسماء والمقاسات</span>
+        </label>
+        <div style="display: none; align-items: center; gap: 8px; font-family: Cairo, Arial, sans-serif;">
+          <label for="long-plot-view" style="font-size: 11px; font-weight: bold; color: #2e7d32; white-space: nowrap;">عرض الأراضي الزراعية الطويلة:</label>
+          <select id="long-plot-view" onchange="calculateAll();" style="height: 28px; border-radius: 5px; border: 1.5px solid #a5d6a7; font-weight: bold; font-size: 11px; color: #2e7d32; cursor: pointer; padding: 0 5px; background: white; font-family: Cairo, sans-serif;">
+            <option value="agricultural" selected>عرض محسّن للأراضي الزراعية (بصري)</option>
+            <option value="real">عرض بمقياس حقيقي (متناسق)</option>
+          </select>
+        </div>
+      </div>
+
       <div class="canvas-controls">
         <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%;">
           <button class="btn btn-secondary btn-sm" onclick="zoomIn()" style="font-weight: bold; font-size: 16px; padding: 0 12px;">+</button>
           <button class="btn btn-secondary btn-sm" onclick="zoomOut()" style="font-weight: bold; font-size: 16px; padding: 0 12px;">-</button>
+          <button class="btn btn-secondary btn-sm" onclick="toggleFullscreenCroquis()" id="btn-fullscreen-toggle" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 13px; padding: 4px 12px; height: 32px;" title="ملء الشاشة">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            <span id="btn-fullscreen-text">ملء الشاشة</span>
+          </button>
           <button class="btn btn-secondary btn-sm" onclick="exportCroquisAsImage()" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 14px; padding: 4px 12px; height: 32px;" title="تحميل صورة الكروكي">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             تحميل الصورة

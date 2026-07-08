@@ -63,6 +63,7 @@ let isDivisionActive = false;
 let showActualDims = true; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
+let showCroquisNames = true;
 const PIECE_COLORS = [
   { fill: "#DCEFD9", stroke: "#2E7D32" }, // شريك 1: أخضر فاتح / أخضر غامق
   { fill: "#D7E9FF", stroke: "#1565C0" }, // شريك 2: أزرق فاتح / أزرق غامق
@@ -167,6 +168,39 @@ function fillScreen() {
   }
   
   zoomFactor = 1.0;
+  calculateAll();
+}
+
+function toggleFullscreenCroquis() {
+  const container = document.getElementById("canvas-container");
+  const btnText = document.getElementById("btn-fullscreen-text");
+  if (!container) return;
+  
+  isCanvasFullscreen = !isCanvasFullscreen;
+  
+  if (isCanvasFullscreen) {
+    container.classList.add("canvas-fullscreen-mode");
+    if (btnText) btnText.innerText = "إنهاء ملء الشاشة";
+    document.body.style.overflow = "hidden";
+  } else {
+    container.classList.remove("canvas-fullscreen-mode");
+    if (btnText) btnText.innerText = "ملء الشاشة";
+    document.body.style.overflow = "";
+  }
+  
+  zoomFactor = 1.0;
+  calculateAll();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && isCanvasFullscreen) {
+    toggleFullscreenCroquis();
+  }
+});
+
+function toggleCroquisNames() {
+  const chk = document.getElementById("chk-toggle-names");
+  if (chk) showCroquisNames = chk.checked;
   calculateAll();
 }
 
@@ -1673,14 +1707,57 @@ function drawLandCanvas(vertices) {
         ctx.shadowColor = "rgba(0, 176, 255, 0.8)";
         ctx.shadowBlur = 10;
         ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+        ctx.lineTo(cpTopCurr.x, cpTopCurr.y);
+        ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
+        ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+        ctx.closePath();
         ctx.stroke();
         ctx.restore();
       } else {
+        // رسم حدود القطعة يدوياً للحصول على سمك مختلف بين الحدود الخارجية والداخلية
         ctx.save();
         ctx.strokeStyle = color.stroke;
-        ctx.lineWidth = Math.max(2.5, 3 * scaleMultiplier);
         ctx.lineJoin = "round";
+
+        // 1. الحد العلوي (سميك)
+        ctx.lineWidth = Math.max(3.5, 4.5 * scaleMultiplier);
+        ctx.beginPath();
+        ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+        ctx.lineTo(cpTopCurr.x, cpTopCurr.y);
         ctx.stroke();
+
+        // 2. الحد السفلي (سميك)
+        ctx.beginPath();
+        ctx.moveTo(cpBottomPrev.x, cpBottomPrev.y);
+        ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
+        ctx.stroke();
+
+        // 3. الحد الأيسر الخارجي (لأول شريك فقط، سميك)
+        if (i === 0) {
+          ctx.beginPath();
+          ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+          ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+          ctx.stroke();
+        }
+
+        // 4. الحد الأيمن الخارجي (لآخر شريك فقط، سميك)
+        if (i === heirsData.length - 1) {
+          ctx.beginPath();
+          ctx.moveTo(cpTopCurr.x, cpTopCurr.y);
+          ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
+          ctx.stroke();
+        }
+
+        // 5. الفواصل الداخلية (تكون أقل سماكة)
+        if (i > 0) {
+          ctx.lineWidth = Math.max(2, 2.5 * scaleMultiplier);
+          ctx.beginPath();
+          ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
+          ctx.lineTo(cpBottomPrev.x, cpBottomPrev.y);
+          ctx.stroke();
+        }
         ctx.restore();
       }
 
@@ -1694,92 +1771,113 @@ function drawLandCanvas(vertices) {
       const pieceWidth = Math.abs(cpTopCurr.x - cpTopPrev.x);
       const nameToShow = heir.name || `شريك ${i + 1}`;
       
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      if (pieceWidth < Math.max(50, 60 * scaleMultiplier)) {
-        // Narrow piece: just draw index number
-        const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
-        ctx.font = `bold ${fontSize}px Cairo`;
-        ctx.fillStyle = "#111111";
-        ctx.fillText((i + 1).toString(), centroidX, centroidY);
-      } else {
-        // Stack name horizontally and area vertically (rotated -90 deg) in the upper half
-        const nameFontSize = Math.round(Math.max(12, 13.5 * scaleMultiplier));
-        const areaFontSize = Math.round(Math.max(11.5, 12.5 * scaleMultiplier));
-        const unitFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
-        
-        // 1. الاسم أفقي في المنتصف
-        ctx.font = `bold ${nameFontSize}px Cairo`;
-        ctx.fillStyle = "#111111";
-        ctx.fillText(nameToShow, centroidX, centroidY + 4 * scaleMultiplier);
-        
-        // 2. المساحة رأسية في النصف العلوي (منتصف النصف العلوي تماماً لمنع التداخل ديناميكياً)
-        ctx.save();
-        const sliceTopY = (cpTopPrev.y + cpTopCurr.y) / 2;
-        const yArea = (sliceTopY + centroidY) / 2;
-        ctx.translate(centroidX, yArea);
-        ctx.rotate(-Math.PI / 2);
-        
-        ctx.font = `bold ${areaFontSize}px Cairo`;
-        ctx.fillStyle = "#111111";
-        ctx.fillText(`${heir.share.toFixed(2)} م²`, 0, 0);
-        
-        ctx.restore();
-      }
-
-      // Draw side length labels on the edges
-      ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier)) + "px Cairo";
-      
-      // Top width of piece (Black color for sun readability)
-      ctx.fillStyle = "#111111";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
-      
-      // Bottom width
-      ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
-      
-      // Left side length (only first piece shows left edge label, drawn at 0.75 from top with white bg and left alignment)
-      if (i === 0) {
-        const lx = cpTopPrev.x + 0.75 * (cpBottomPrev.x - cpTopPrev.x);
-        const ly = cpTopPrev.y + 0.75 * (cpBottomPrev.y - cpTopPrev.y);
-        // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
-        const leftLabelVal = (activeShape === 'trapezoid' && !showActualDims)
-          ? landLeft  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
-          : pieceLeftL;
-        const labelTextLeft = `${leftLabelVal.toFixed(2)} م`;
-        ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
-        const twLeft = ctx.measureText(labelTextLeft).width;
-        
-        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
-        ctx.fillRect(lx + 4 * scaleMultiplier, ly - 8 * scaleMultiplier, twLeft + 6 * scaleMultiplier, 16 * scaleMultiplier);
-        
-        ctx.fillStyle = "#111111";
-        ctx.textAlign = "left";
+      if (showCroquisNames) {
+        ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(labelTextLeft, lx + 7 * scaleMultiplier, ly);
-      }
-      
-      // Right side length (drawn at 0.75 from top with white bg and right alignment next to divider)
-      {
-        const rx = cpTopCurr.x + 0.75 * (cpBottomCurr.x - cpTopCurr.x);
-        const ry = cpTopCurr.y + 0.75 * (cpBottomCurr.y - cpTopCurr.y);
-        // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
-        const rightLabelVal = (activeShape === 'trapezoid' && !showActualDims)
-          ? landRight  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
-          : pieceRightL;
-        const labelTextRight = `${rightLabelVal.toFixed(2)} م`;
-        ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
-        const twRight = ctx.measureText(labelTextRight).width;
+
+        if (pieceWidth < Math.max(50, 60 * scaleMultiplier)) {
+          // Narrow piece: just draw index number
+          const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
+          ctx.font = `bold ${fontSize}px Cairo`;
+          ctx.fillStyle = "#000000";
+          ctx.fillText((i + 1).toString(), centroidX, centroidY);
+        } else {
+          // Stack name horizontally and area vertically (rotated -90 deg) in the upper half
+          const nameFontSize = Math.round(Math.max(12, 13.5 * scaleMultiplier));
+          const areaFontSize = Math.round(Math.max(11.5, 12.5 * scaleMultiplier));
+          
+          // 1. الاسم أفقي في المنتصف
+          ctx.font = `bold ${nameFontSize}px Cairo`;
+          ctx.fillStyle = "#000000";
+          ctx.fillText(nameToShow, centroidX, centroidY + 4 * scaleMultiplier);
+          
+          // 2. المساحة رأسية في النصف العلوي (منتصف النصف العلوي تماماً لمنع التداخل ديناميكياً)
+          ctx.save();
+          const sliceTopY = (cpTopPrev.y + cpTopCurr.y) / 2;
+          const yArea = (sliceTopY + centroidY) / 2;
+          ctx.translate(centroidX, yArea);
+          ctx.rotate(-Math.PI / 2);
+          
+          ctx.font = `bold ${areaFontSize}px Cairo`;
+          ctx.fillStyle = "#000000";
+          ctx.fillText(`${heir.share.toFixed(2)} م²`, 0, 0);
+          
+          ctx.restore();
+        }
+
+        // Draw side length labels on the edges
+        ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier)) + "px Cairo";
         
-        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
-        ctx.fillRect(rx - 4 * scaleMultiplier - twRight - 6 * scaleMultiplier, ry - 8 * scaleMultiplier, twRight + 6 * scaleMultiplier, 16 * scaleMultiplier);
-        
-        ctx.fillStyle = "#111111";
-        ctx.textAlign = "right";
+        // Top width of piece (Black color for sun readability)
+        ctx.fillStyle = "#000000";
+        ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(labelTextRight, rx - 7 * scaleMultiplier, ry);
+        ctx.fillText(`${pieceTopW.toFixed(2)}`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
+        
+        // Bottom width
+        ctx.fillText(`${pieceBotW.toFixed(2)}`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
+        
+        // Left side length (only first piece shows left edge label, drawn at 0.75 from top inside a white box)
+        if (i === 0) {
+          const lx = cpTopPrev.x + 0.75 * (cpBottomPrev.x - cpTopPrev.x);
+          const ly = cpTopPrev.y + 0.75 * (cpBottomPrev.y - cpTopPrev.y);
+          // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
+          const leftLabelVal = (activeShape === 'trapezoid' && !showActualDims)
+            ? landLeft  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
+            : pieceLeftL;
+          const labelTextLeft = `${leftLabelVal.toFixed(2)} م`;
+          ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
+          const twLeft = ctx.measureText(labelTextLeft).width;
+          
+          const rectW = twLeft + 10 * scaleMultiplier;
+          const rectH = 16 * scaleMultiplier;
+          const rx = lx + 4 * scaleMultiplier;
+          const ry = ly - rectH / 2;
+
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "#b0bec5";
+          ctx.lineWidth = 1 * scaleMultiplier;
+          ctx.beginPath();
+          ctx.roundRect(rx, ry, rectW, rectH, 2 * scaleMultiplier);
+          ctx.fill();
+          ctx.stroke();
+          
+          ctx.fillStyle = "#000000";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(labelTextLeft, rx + rectW / 2, ly + 1 * scaleMultiplier);
+        }
+        
+        // Right side length (drawn at 0.75 from top inside a white box next to divider/right edge)
+        {
+          const rx = cpTopCurr.x + 0.75 * (cpBottomCurr.x - cpTopCurr.x);
+          const ry = cpTopCurr.y + 0.75 * (cpBottomCurr.y - cpTopCurr.y);
+          // إذا كان شبه منحرف مبسط بدون خيار الأبعاد الهندسية: أظهر الطول الثابت
+          const rightLabelVal = (activeShape === 'trapezoid' && !showActualDims)
+            ? landRight  // الطول الثابت (الارتفاع) الذي أدخله المستخدم
+            : pieceRightL;
+          const labelTextRight = `${rightLabelVal.toFixed(2)} م`;
+          ctx.font = "bold " + Math.round(Math.max(9, 11 * scaleMultiplier)) + "px Cairo";
+          const twRight = ctx.measureText(labelTextRight).width;
+          
+          const rectW = twRight + 10 * scaleMultiplier;
+          const rectH = 16 * scaleMultiplier;
+          const rXPos = rx - 4 * scaleMultiplier - rectW;
+          const rYPos = ry - rectH / 2;
+
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "#b0bec5";
+          ctx.lineWidth = 1 * scaleMultiplier;
+          ctx.beginPath();
+          ctx.roundRect(rXPos, rYPos, rectW, rectH, 2 * scaleMultiplier);
+          ctx.fill();
+          ctx.stroke();
+          
+          ctx.fillStyle = "#000000";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(labelTextRight, rXPos + rectW / 2, ry + 1 * scaleMultiplier);
+        }
       }
         // Draw handle for dragging vertical dividers (between slices) - Visually removed as requested
         if (i > 0) {

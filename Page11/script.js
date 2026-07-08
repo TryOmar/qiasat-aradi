@@ -2002,12 +2002,7 @@ function renderCroquis() {
       const poly = svgEl("polygon");
       poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x2},${y3} ${x1},${y4}`);
       poly.setAttribute("fill", color.fill);
-      poly.setAttribute("stroke", color.stroke);
-      poly.setAttribute("stroke-width", (isRem ? 3 : 2.5) * textScale); // حدود سميكة واضحة تحت الشمس
-      if (isRem) {
-        poly.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
-      }
-      poly.setAttribute("stroke-linejoin", "round");
+      poly.setAttribute("stroke", "none"); // بدون حدود مدمجة بالمضلع لتمكين تحكم كامل بالسمك واللون
       poly.setAttribute("class", "polygon-segment");
       poly.setAttribute("id", `croquis-poly-${index}`);
       poly.style.pointerEvents = "auto";
@@ -2019,6 +2014,80 @@ function renderCroquis() {
       poly.addEventListener("click", (e) => selectSegment(index, e));
       
       g.appendChild(poly);
+
+      // رسم حدود القطعة يدوياً للحصول على سمك مختلف بين الحدود الخارجية والداخلية
+      const dash = isRem ? (window.isExporting ? "13,6" : "6,3") : null;
+
+      // 1. الحد العلوي (سميك)
+      const topBorder = svgEl("line");
+      topBorder.setAttribute("x1", x1);
+      topBorder.setAttribute("y1", y1);
+      topBorder.setAttribute("x2", x2);
+      topBorder.setAttribute("y2", y2);
+      topBorder.setAttribute("stroke", color.stroke);
+      topBorder.setAttribute("stroke-width", 3.5 * textScale);
+      topBorder.setAttribute("stroke-linejoin", "round");
+      topBorder.setAttribute("style", "pointer-events: none;");
+      if (dash) topBorder.setAttribute("stroke-dasharray", dash);
+      g.appendChild(topBorder);
+
+      // 2. الحد السفلي (سميك)
+      const botBorder = svgEl("line");
+      botBorder.setAttribute("x1", x1);
+      botBorder.setAttribute("y1", y4);
+      botBorder.setAttribute("x2", x2);
+      botBorder.setAttribute("y2", y3);
+      botBorder.setAttribute("stroke", color.stroke);
+      botBorder.setAttribute("stroke-width", 3.5 * textScale);
+      botBorder.setAttribute("stroke-linejoin", "round");
+      botBorder.setAttribute("style", "pointer-events: none;");
+      if (dash) botBorder.setAttribute("stroke-dasharray", dash);
+      g.appendChild(botBorder);
+
+      // 3. الحد الأيسر الخارجي (لأول شريك فقط، سميك)
+      if (index === 0) {
+        const leftBorder = svgEl("line");
+        leftBorder.setAttribute("x1", x1);
+        leftBorder.setAttribute("y1", y1);
+        leftBorder.setAttribute("x2", x1);
+        leftBorder.setAttribute("y2", y4);
+        leftBorder.setAttribute("stroke", color.stroke);
+        leftBorder.setAttribute("stroke-width", 3.5 * textScale);
+        leftBorder.setAttribute("stroke-linejoin", "round");
+        leftBorder.setAttribute("style", "pointer-events: none;");
+        if (dash) leftBorder.setAttribute("stroke-dasharray", dash);
+        g.appendChild(leftBorder);
+      }
+
+      // 4. الحد الأيمن الخارجي (لآخر شريك فقط، سميك)
+      if (index === window.calculatedPieces.length - 1) {
+        const rightBorder = svgEl("line");
+        rightBorder.setAttribute("x1", x2);
+        rightBorder.setAttribute("y1", y2);
+        rightBorder.setAttribute("x2", x2);
+        rightBorder.setAttribute("y2", y3);
+        rightBorder.setAttribute("stroke", color.stroke);
+        rightBorder.setAttribute("stroke-width", 3.5 * textScale);
+        rightBorder.setAttribute("stroke-linejoin", "round");
+        rightBorder.setAttribute("style", "pointer-events: none;");
+        if (dash) rightBorder.setAttribute("stroke-dasharray", dash);
+        g.appendChild(rightBorder);
+      }
+
+      // 5. الفواصل الداخلية (تكون أقل سماكة)
+      if (index > 0) {
+        const dividerLine = svgEl("line");
+        dividerLine.setAttribute("x1", x1);
+        dividerLine.setAttribute("y1", y1);
+        dividerLine.setAttribute("x2", x1);
+        dividerLine.setAttribute("y2", y4);
+        dividerLine.setAttribute("stroke", color.stroke); // لون الشريك الحالي
+        dividerLine.setAttribute("stroke-width", 2.5 * textScale);
+        dividerLine.setAttribute("stroke-linejoin", "round");
+        dividerLine.setAttribute("style", "pointer-events: none;");
+        if (dash) dividerLine.setAttribute("stroke-dasharray", dash);
+        g.appendChild(dividerLine);
+      }
 
       // مركز القطعة
       const cx = (x1 + x2) / 2;
@@ -2039,7 +2108,7 @@ function renderCroquis() {
           const tIdx = svgEl("text");
           tIdx.setAttribute("x", cx);
           tIdx.setAttribute("y", cy + 4 * textScale);
-          tIdx.setAttribute("fill", isRem ? "#e65100" : "#111111"); // لون داكن عالي التباين
+          tIdx.setAttribute("fill", isRem ? "#e65100" : "#000000"); // لون داكن عالي التباين
           tIdx.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
           tIdx.setAttribute("font-family", "Cairo, Arial, sans-serif");
           tIdx.setAttribute("text-anchor", "middle");
@@ -2052,7 +2121,7 @@ function renderCroquis() {
             const tName = svgEl("text");
             tName.setAttribute("x", cx);
             tName.setAttribute("y", cy + 4 * textScale);
-            tName.setAttribute("fill", isRem ? "#e65100" : "#111111"); // أسود داكن
+            tName.setAttribute("fill", isRem ? "#e65100" : "#000000"); // أسود
             tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط 12.5
             tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tName.setAttribute("text-anchor", "middle");
@@ -2072,7 +2141,7 @@ function renderCroquis() {
             const tAreaVal = svgEl("text");
             tAreaVal.setAttribute("x", cx);
             tAreaVal.setAttribute("y", yArea + 4 * textScale);
-            tAreaVal.setAttribute("fill", "#111111"); // أسود داكن
+            tAreaVal.setAttribute("fill", "#000000"); // أسود
             tAreaVal.setAttribute("font-size", (12 * textScale) + "px");
             tAreaVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tAreaVal.setAttribute("text-anchor", "middle");
@@ -2086,86 +2155,112 @@ function renderCroquis() {
         g.appendChild(labelGroup);
       }
 
-      // 2. عرض عروض القطع باللون الأحمر مباشرة على الحدود العليا والسفلى لكل قطعة
+      // 2. عرض عروض القطع باللون الأسود مباشرة على الحدود العليا والسفلى لكل قطعة
       if (showCroquisMeasurements) {
-        // العرض السفلي للقطعة (أعلى الحدود السفلية)
-        const botWText = svgText(cx, mapY(0) - 8 * textScale, piece.botW.toFixed(2), {
-          fill: "#c62828", // أحمر
+        // العرض العلوي للقطعة (أعلى الحدود العليا)
+        const topWText = svgText(cx, mapY(0) - 8 * textScale, piece.topW.toFixed(2), {
+          fill: "#000000", // أسود
           size: "11",
           weight: "bold",
-          bg: true,
-        });
-        g.appendChild(botWText);
-
-        // العرض العلوي للقطعة (أسفل الحدود العليا)
-        const y_top_mid = (y3 + y4) / 2;
-        const topWText = svgText(cx, y_top_mid + 14 * textScale, piece.topW.toFixed(2), {
-          fill: "#c62828", // أحمر
-          size: "11",
-          weight: "bold",
-          bg: true,
+          bg: false,
         });
         g.appendChild(topWText);
+
+        // العرض السفلي للقطعة (أسفل الحدود السفلى)
+        const y_top_mid = (y3 + y4) / 2;
+        const botWText = svgText(cx, y_top_mid + 14 * textScale, piece.botW.toFixed(2), {
+          fill: "#000000", // أسود
+          size: "11",
+          weight: "bold",
+          bg: false,
+        });
+        g.appendChild(botWText);
       }
 
-      // 3. خطوط القسمة والفواصل الداخلية مع القيم والنقاط الخضراء
-      if (index > 0) {
-        // خط الفاصل العمودي (بالأزرق المقطع)
-        const divLine = svgEl("line");
-        divLine.setAttribute("x1", x1);
-        divLine.setAttribute("y1", y1);
-        divLine.setAttribute("x2", x1);
-        divLine.setAttribute("y2", y4);
-        divLine.setAttribute("stroke", "#1976d2"); // أزرق
-        divLine.setAttribute("stroke-width", 2 * textScale);
-        divLine.setAttribute("stroke-dasharray", window.isExporting ? "13,6" : "6,3");
-        g.appendChild(divLine);
-
-        if (showCroquisMeasurements) {
-          const midFasil = (y1 + y4) / 2;
-
-
-          // موضع طول الفاصل في الثلث السفلي عند 0.75 من الأعلى لمنع التداخل
-          const y_fasil_pos = y4 + 0.75 * (y1 - y4);
-          const fasilText = svgText(x1 - 10 * textScale, y_fasil_pos, piece.leftLine.toFixed(2) + " م", {
-            fill: "#1b5e20", // أخضر داكن مثل صفحة 13
-            size: "10.5",
-            weight: "bold",
-            bg: true,
-            transform: `rotate(-90, ${x1 - 10 * textScale}, ${y_fasil_pos})`,
-          });
-          g.appendChild(fasilText);
-        }
-      }
-
-      // إظهار البعد الخارجي الأيمن للشريك الخامس (والأيسر للشريك الأول) بنفس تنسيق الفواصل
+      // 3. خطوط الفواصل والحدود مع القيم
       if (showCroquisMeasurements) {
-        // الحد الأيمن للشريك الخامس (الحد الأيمن للأرض X = w)
-        if (index === window.calculatedPieces.length - 1) {
-          const midFasil = (y2 + y3) / 2;
-          
-          const y_fasil_pos = y3 + 0.75 * (y2 - y3);
-          const fasilText = svgText(x2 - 10 * textScale, y_fasil_pos, l1.toFixed(2) + " م", { // l1 هو الارتفاع الأيمن للأرض
-            fill: "#1b5e20",
+        const y_fasil_pos = y1 + 0.75 * (y4 - y1);
+        
+        // الفواصل الداخلية (بين قطعتين)
+        if (index > 0) {
+          const boxW = 54 * textScale;
+          const boxH = 18 * textScale;
+          const boxX = x1 - boxW - 5 * textScale;
+          const boxY = y_fasil_pos - boxH / 2;
+
+          // صندوق أبيض صغير
+          const rect = svgEl("rect");
+          rect.setAttribute("x", boxX);
+          rect.setAttribute("y", boxY);
+          rect.setAttribute("width", boxW);
+          rect.setAttribute("height", boxH);
+          rect.setAttribute("fill", "white");
+          rect.setAttribute("stroke", "#b0bec5");
+          rect.setAttribute("stroke-width", 1 * textScale);
+          rect.setAttribute("rx", 2 * textScale);
+          g.appendChild(rect);
+
+          // نص طول الفاصل باللون الأسود
+          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos + 4 * textScale, piece.leftLine.toFixed(2) + " م", {
+            fill: "#000000",
             size: "10.5",
             weight: "bold",
-            bg: true,
-            transform: `rotate(-90, ${x2 - 10 * textScale}, ${y_fasil_pos})`,
+            bg: false,
           });
           g.appendChild(fasilText);
         }
-        
+
         // الحد الأيسر للشريك الأول (الحد الأيسر للأرض X = 0)
         if (index === 0) {
-          const midFasil = (y1 + y4) / 2;
-          
-          const y_fasil_pos = y4 + 0.75 * (y1 - y4);
-          const fasilText = svgText(x1 + 10 * textScale, y_fasil_pos, l2.toFixed(2) + " م", { // l2 هو الارتفاع الأيسر للأرض
-            fill: "#1b5e20",
+          const boxW = 54 * textScale;
+          const boxH = 18 * textScale;
+          const boxX = x1 + 5 * textScale; // للداخل (يمين الخط)
+          const boxY = y_fasil_pos - boxH / 2;
+
+          const rect = svgEl("rect");
+          rect.setAttribute("x", boxX);
+          rect.setAttribute("y", boxY);
+          rect.setAttribute("width", boxW);
+          rect.setAttribute("height", boxH);
+          rect.setAttribute("fill", "white");
+          rect.setAttribute("stroke", "#b0bec5");
+          rect.setAttribute("stroke-width", 1 * textScale);
+          rect.setAttribute("rx", 2 * textScale);
+          g.appendChild(rect);
+
+          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos + 4 * textScale, l2.toFixed(2) + " م", {
+            fill: "#000000",
             size: "10.5",
             weight: "bold",
-            bg: true,
-            transform: `rotate(-90, ${x1 + 10 * textScale}, ${y_fasil_pos})`,
+            bg: false,
+          });
+          g.appendChild(fasilText);
+        }
+
+        // الحد الأيمن للشريك الأخير (الحد الأيمن للأرض X = w)
+        if (index === window.calculatedPieces.length - 1) {
+          const y_fasil_pos_right = y2 + 0.75 * (y3 - y2);
+          const boxW = 54 * textScale;
+          const boxH = 18 * textScale;
+          const boxX = x2 - boxW - 5 * textScale; // للداخل (يسار الخط)
+          const boxY = y_fasil_pos_right - boxH / 2;
+
+          const rect = svgEl("rect");
+          rect.setAttribute("x", boxX);
+          rect.setAttribute("y", boxY);
+          rect.setAttribute("width", boxW);
+          rect.setAttribute("height", boxH);
+          rect.setAttribute("fill", "white");
+          rect.setAttribute("stroke", "#b0bec5");
+          rect.setAttribute("stroke-width", 1 * textScale);
+          rect.setAttribute("rx", 2 * textScale);
+          g.appendChild(rect);
+
+          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos_right + 4 * textScale, l1.toFixed(2) + " م", {
+            fill: "#000000",
+            size: "10.5",
+            weight: "bold",
+            bg: false,
           });
           g.appendChild(fasilText);
         }
