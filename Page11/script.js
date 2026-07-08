@@ -2160,6 +2160,57 @@ function renderCroquis() {
           g.appendChild(fasilText);
         }
       }
+
+      // إظهار البعد الخارجي الأيمن للشريك الخامس (والأيسر للشريك الأول) بنفس تنسيق الفواصل
+      if (showCroquisMeasurements) {
+        // الحد الأيمن للشريك الخامس (الحد الأيمن للأرض X = w)
+        if (index === window.calculatedPieces.length - 1) {
+          const midFasil = (y2 + y3) / 2;
+          
+          const cDot = svgEl("circle");
+          cDot.setAttribute("cx", x2);
+          cDot.setAttribute("cy", midFasil);
+          cDot.setAttribute("r", 6 * textScale);
+          cDot.setAttribute("fill", "#388e3c");
+          cDot.setAttribute("stroke", "#ffffff");
+          cDot.setAttribute("stroke-width", 1.5 * textScale);
+          g.appendChild(cDot);
+
+          const y_fasil_pos = y3 + 0.25 * (y2 - y3);
+          const fasilText = svgText(x2 - 10 * textScale, y_fasil_pos, piece.divLine.toFixed(2) + " م", {
+            fill: "#1b5e20",
+            size: "10.5",
+            weight: "bold",
+            bg: true,
+            transform: `rotate(-90, ${x2 - 10 * textScale}, ${y_fasil_pos})`,
+          });
+          g.appendChild(fasilText);
+        }
+        
+        // الحد الأيسر للشريك الأول (الحد الأيسر للأرض X = 0)
+        if (index === 0) {
+          const midFasil = (y1 + y4) / 2;
+          
+          const cDot = svgEl("circle");
+          cDot.setAttribute("cx", x1);
+          cDot.setAttribute("cy", midFasil);
+          cDot.setAttribute("r", 6 * textScale);
+          cDot.setAttribute("fill", "#388e3c");
+          cDot.setAttribute("stroke", "#ffffff");
+          cDot.setAttribute("stroke-width", 1.5 * textScale);
+          g.appendChild(cDot);
+
+          const y_fasil_pos = y4 + 0.25 * (y1 - y4);
+          const fasilText = svgText(x1 + 10 * textScale, y_fasil_pos, piece.leftLine.toFixed(2) + " م", {
+            fill: "#1b5e20",
+            size: "10.5",
+            weight: "bold",
+            bg: true,
+            transform: `rotate(-90, ${x1 + 10 * textScale}, ${y_fasil_pos})`,
+          });
+          g.appendChild(fasilText);
+        }
+      }
     });
   }
 
