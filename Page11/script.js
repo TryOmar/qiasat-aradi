@@ -2038,7 +2038,7 @@ function renderCroquis() {
           // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
           const tIdx = svgEl("text");
           tIdx.setAttribute("x", cx);
-          tIdx.setAttribute("y", cy + 4 * textScale);
+          tIdx.setAttribute("y", cy + 1.5 * textScale); // تم رفعها للأعلى قليلاً لتتوسط تماماً
           tIdx.setAttribute("fill", isRem ? "#e65100" : "#111111"); // لون داكن عالي التباين
           tIdx.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
           tIdx.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2047,12 +2047,12 @@ function renderCroquis() {
           tIdx.textContent = (index + 1).toString();
           labelGroup.appendChild(tIdx);
         } else {
-          // نصوص أفقية متباينة
+          // نصوص أفقية متباينة مرفوعة للأعلى قليلاً
           if (showCroquisNames && showCroquisMeasurements && pieceWidth >= 90) {
-            // عرض الاسم والمساحة مكدسين رأسياً
+            // عرض الاسم والمساحة مكدسين رأسياً (مرفوعين للأعلى)
             const tName = svgEl("text");
             tName.setAttribute("x", cx);
-            tName.setAttribute("y", cy - 5 * textScale);
+            tName.setAttribute("y", cy - 9 * textScale); // تم الرفع من -5 إلى -9
             tName.setAttribute("fill", isRem ? "#e65100" : "#111111"); // أسود داكن
             tName.setAttribute("font-size", (12 * textScale) + "px"); // خط 12
             tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2063,7 +2063,7 @@ function renderCroquis() {
             
             const tArea = svgEl("text");
             tArea.setAttribute("x", cx);
-            tArea.setAttribute("y", cy + 11 * textScale);
+            tArea.setAttribute("y", cy + 7 * textScale); // تم الرفع من +11 إلى +7
             tArea.setAttribute("fill", "#111111"); // أسود داكن
             tArea.setAttribute("font-size", (11 * textScale) + "px"); // خط 11
             tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2072,10 +2072,10 @@ function renderCroquis() {
             tArea.textContent = Number(piece.area.toFixed(2)) + " م²";
             labelGroup.appendChild(tArea);
           } else if (showCroquisNames) {
-            // عرض الاسم فقط
+            // عرض الاسم فقط (مرفوع للأعلى قليلاً)
             const tName = svgEl("text");
             tName.setAttribute("x", cx);
-            tName.setAttribute("y", cy + 4 * textScale);
+            tName.setAttribute("y", cy - 1 * textScale); // تم الرفع من +4 إلى -1
             tName.setAttribute("fill", isRem ? "#e65100" : "#111111");
             tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
             tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2084,10 +2084,10 @@ function renderCroquis() {
             tName.textContent = nameToShow;
             labelGroup.appendChild(tName);
           } else if (showCroquisMeasurements) {
-            // عرض المساحة فقط
+            // عرض المساحة فقط (مرفوع للأعلى قليلاً)
             const tArea = svgEl("text");
             tArea.setAttribute("x", cx);
-            tArea.setAttribute("y", cy + 4 * textScale);
+            tArea.setAttribute("y", cy - 1 * textScale); // تم الرفع من +4 إلى -1
             tArea.setAttribute("fill", "#111111");
             tArea.setAttribute("font-size", (11.5 * textScale) + "px");
             tArea.setAttribute("font-family", "Cairo, Arial, sans-serif");

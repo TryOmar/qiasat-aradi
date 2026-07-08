@@ -1695,23 +1695,23 @@ function drawLandCanvas(vertices) {
       ctx.textBaseline = "middle";
 
       if (pieceWidth < Math.max(50, 60 * scaleMultiplier)) {
-        // Narrow piece: just draw index number
+        // Narrow piece: just draw index number (centered slightly higher)
         const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
         ctx.font = `bold ${fontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText((i + 1).toString(), centroidX, centroidY);
+        ctx.fillText((i + 1).toString(), centroidX, centroidY + 1.5 * scaleMultiplier);
       } else {
-        // Stack name and area horizontally
+        // Stack name and area horizontally (raised slightly)
         const nameFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
         const areaFontSize = Math.round(Math.max(10, 11 * scaleMultiplier));
         
         ctx.font = `bold ${nameFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(nameToShow, centroidX, centroidY - 7 * scaleMultiplier);
+        ctx.fillText(nameToShow, centroidX, centroidY - 11 * scaleMultiplier); // تم الرفع من -7 إلى -11
         
         ctx.font = `bold ${areaFontSize}px Cairo`;
         ctx.fillStyle = "#111111";
-        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, centroidY + 9 * scaleMultiplier);
+        ctx.fillText(`${heir.share.toFixed(2)} م²`, centroidX, centroidY + 5 * scaleMultiplier); // تم الرفع من +9 إلى +5
       }
 
       // Draw side length labels on the edges
