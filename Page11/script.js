@@ -2064,7 +2064,7 @@ function renderCroquis() {
           // 2. عرض المساحة رأسي (دوران -90 درجة) في النصف العلوي
           if (showCroquisMeasurements) {
             const areaVal = Number(piece.area.toFixed(2));
-            const yArea = cy - 45 * textScale; // النصف العلوي للقطعة
+            const yArea = (topY + cy) / 2; // منتصف النصف العلوي للقطعة تماماً لمنع التداخل ديناميكياً مع اسم الشريك
             
             const areaGroup = svgEl("g");
             areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);

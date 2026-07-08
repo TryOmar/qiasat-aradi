@@ -1711,9 +1711,10 @@ function drawLandCanvas(vertices) {
         ctx.fillStyle = "#111111";
         ctx.fillText(nameToShow, centroidX, centroidY + 4 * scaleMultiplier);
         
-        // 2. المساحة رأسية في النصف العلوي
+        // 2. المساحة رأسية في النصف العلوي (منتصف النصف العلوي تماماً لمنع التداخل ديناميكياً)
         ctx.save();
-        const yArea = centroidY - 45 * scaleMultiplier;
+        const sliceTopY = (cpTopPrev.y + cpTopCurr.y) / 2;
+        const yArea = (sliceTopY + centroidY) / 2;
         ctx.translate(centroidX, yArea);
         ctx.rotate(-Math.PI / 2);
         
