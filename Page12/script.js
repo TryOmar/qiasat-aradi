@@ -1119,7 +1119,6 @@ function renderSVG() {
         };
         btnGroup.addEventListener("touchstart", (e) => {
           e.stopPropagation();
-          showCaratConversionModal();
         });
 
         textGroup.appendChild(btnGroup);
@@ -1176,7 +1175,6 @@ function renderSVG() {
         };
         btnGroup.addEventListener("touchstart", (e) => {
           e.stopPropagation();
-          showCaratConversionModal();
         });
 
         textGroup.appendChild(btnGroup);
