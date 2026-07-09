@@ -284,6 +284,10 @@ body {
 svg text {
   font-family: 'Cairo', sans-serif;
   user-select: none;
+  stroke: #ffffff;
+  stroke-width: 3px;
+  paint-order: stroke fill;
+  stroke-linejoin: round;
 }
 
 svg .draggable-label {
@@ -294,8 +298,6 @@ svg .clickable-shape {
   cursor: pointer;
   stroke: #1b5e20;
   stroke-width: 2px;
-  fill: #ffffff;
-  fill-opacity: 0.8;
   transition: fill-opacity 0.2s, stroke 0.2s;
 }
 
