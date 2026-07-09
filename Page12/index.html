@@ -80,6 +80,7 @@
         
         <!-- Action Buttons Under Canvas -->
         <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="action-btn" id="pinCroquiBtn" onclick="togglePinCroqui()" style="padding: 12px 20px; font-size: 16px; background-color: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">📌 إلغاء تثبيت الكروكي</button>
           <button type="button" class="action-btn generate-btn" onclick="printDallalMap()" style="padding: 12px 30px; font-size: 16px;">🖨️ إنشاء الخريطة والطباعة</button>
         </div>
       </div>
@@ -223,7 +224,7 @@
         
         <h4 style="margin-top: 10px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات الملكية</h4>
         <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
-          <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم المالك: ................')">اسم المالك</button>
+          <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم المالك')">اسم المالك</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('مباعة إلى: ................')">مباعة إلى</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('مشتراة من: ................')">مشتراة من</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('اسم الدَّلاَّل: ................')">اسم الدَّلاَّل</button>

@@ -36,6 +36,7 @@ let panY = 0;
 let isPanning = false;
 let startPanPoint = { x: 0, y: 0 };
 let lastTouchDist = 0; // For pinch to zoom
+let isCroquiPinned = true;
 
 // Active Template Tracker
 let activeTemplateType = 'rectangle';
@@ -392,6 +393,31 @@ function generateCustomLand() {
         textY: (p_tl.y + p_tr.y + p_br.y + p_bl.y) / 4
       });
 
+      const partW1 = effW1 / numPartners;
+      const partW2 = effW2 / numPartners;
+
+      freeTexts.push({
+        id: "note_top_" + Date.now() + "_" + i,
+        text: partW1.toFixed(2) + " م",
+        x: (p_tl.x + p_tr.x) / 2,
+        y: (p_tl.y + p_tr.y) / 2 + 20,
+        fontSize: 12,
+        isBold: true,
+        angle: 0,
+        color: "#555"
+      });
+
+      freeTexts.push({
+        id: "note_bot_" + Date.now() + "_" + i,
+        text: partW2.toFixed(2) + " م",
+        x: (p_bl.x + p_br.x) / 2,
+        y: (p_bl.y + p_br.y) / 2 - 20,
+        fontSize: 12,
+        isBold: true,
+        angle: 0,
+        color: "#555"
+      });
+
       if (i > 0) {
         const splitLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
         splitLines.push({
@@ -411,9 +437,9 @@ function generateCustomLand() {
     shapes.push({
       id: "shape_1",
       points: [p1, p2, p3, p4],
-      owner: "اسم المالك: ................",
+      owner: "اسم المالك",
       area: { feddan: detailedArea.feddan, carat: detailedArea.carat, shares: detailedArea.shares, sqm: totalArea },
-      notes: "كروكي زراعي",
+      notes: "خريطة ارض",
       color: "#f1f8e9",
       textX: centerX,
       textY: centerY
@@ -506,7 +532,7 @@ function generateCustomLand() {
     shapes.push({
       id: "shape_1",
       points: [p1, p2, p3, p4],
-      owner: "اسم المالك: ................",
+      owner: "اسم المالك",
       area: { feddan: detailedArea.feddan, carat: detailedArea.carat, shares: detailedArea.shares, sqm: totalArea },
       notes: "رباعي مقاس بالقطرين",
       color: "#f1f8e9",
@@ -862,7 +888,7 @@ function renderSVG() {
     // Owner text line
     const tSpanOwner = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tSpanOwner.setAttribute("x", s.textX);
-    tSpanOwner.setAttribute("y", s.textY - 14);
+    tSpanOwner.setAttribute("y", s.textY - 22);
     tSpanOwner.setAttribute("fill", "#000000");
     tSpanOwner.setAttribute("font-size", "14");
     tSpanOwner.setAttribute("font-weight", "bold");
@@ -873,17 +899,18 @@ function renderSVG() {
     // Area text line
     const tSpanArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tSpanArea.setAttribute("x", s.textX);
-    tSpanArea.setAttribute("y", s.textY + 6);
+    tSpanArea.setAttribute("y", s.textY + 8);
     tSpanArea.setAttribute("fill", "#1b5e20");
     tSpanArea.setAttribute("font-size", "13");
     tSpanArea.setAttribute("font-weight", "bold");
     tSpanArea.setAttribute("text-anchor", "middle");
     
-    const fed = s.area.feddan ? `${s.area.feddan} فدان` : "";
-    const car = s.area.carat ? `${s.area.carat} قيراط` : "";
-    const sh = s.area.shares ? `${s.area.shares} سهم` : "";
-    const areaParts = [fed, car, sh].filter(Boolean).join(" و");
-    tSpanArea.textContent = areaParts ? `المساحة: ${areaParts}` : "";
+    if (s.area && s.area.sqm) {
+      const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+      tSpanArea.textContent = `المساحة: ${sqmFormatted} متر مربع`;
+    } else {
+      tSpanArea.textContent = "";
+    }
     textGroup.appendChild(tSpanArea);
 
     // Notes line
@@ -892,7 +919,7 @@ function renderSVG() {
       lines.forEach((lineText, idx) => {
         const tSpanNote = document.createElementNS("http://www.w3.org/2000/svg", "text");
         tSpanNote.setAttribute("x", s.textX);
-        tSpanNote.setAttribute("y", s.textY + 24 + (idx * 15));
+        tSpanNote.setAttribute("y", s.textY + 38 + (idx * 20));
         tSpanNote.setAttribute("fill", "#555555");
         tSpanNote.setAttribute("font-size", "11.5");
         tSpanNote.setAttribute("text-anchor", "middle");
@@ -1072,12 +1099,14 @@ function onSvgMouseDown(e) {
     e.stopPropagation();
   } else {
     // PAN CANVAS MODE
-    isPanning = true;
-    document.querySelector(".canvas-wrapper").classList.add("panning");
-    if (e.touches && e.touches.length === 1) {
-      startPanPoint = { x: e.touches[0].clientX - panX, y: e.touches[0].clientY - panY };
-    } else {
-      startPanPoint = { x: e.clientX - panX, y: e.clientY - panY };
+    if (!isCroquiPinned) {
+      isPanning = true;
+      document.querySelector(".canvas-wrapper").classList.add("panning");
+      if (e.touches && e.touches.length === 1) {
+        startPanPoint = { x: e.touches[0].clientX - panX, y: e.touches[0].clientY - panY };
+      } else {
+        startPanPoint = { x: e.clientX - panX, y: e.clientY - panY };
+      }
     }
   }
 }
@@ -1158,12 +1187,14 @@ function onSvgTouchMove(e) {
   } else if (e.touches.length === 2) {
     // Pinch to Zoom gesture
     e.preventDefault();
-    const dist = getTouchDistance(e);
-    const factor = dist / lastTouchDist;
-    if (Math.abs(1 - factor) > 0.01) {
-      zoomScale = Math.min(Math.max(0.4, zoomScale * factor), 4.0);
-      lastTouchDist = dist;
-      applyViewportTransform();
+    if (!isCroquiPinned) {
+      const dist = getTouchDistance(e);
+      const factor = dist / lastTouchDist;
+      if (Math.abs(1 - factor) > 0.01) {
+        zoomScale = Math.min(Math.max(0.4, zoomScale * factor), 4.0);
+        lastTouchDist = dist;
+        applyViewportTransform();
+      }
     }
   }
 }
@@ -1180,11 +1211,25 @@ function getTouchDistance(e) {
 
 // Wheel zoom handling
 function onSvgWheel(e) {
+  if (isCroquiPinned) return;
   e.preventDefault();
   const factor = e.deltaY > 0 ? 0.9 : 1.1;
   zoomScale = Math.min(Math.max(0.4, zoomScale * factor), 4.0);
   applyViewportTransform();
 }
+
+function togglePinCroqui() {
+  isCroquiPinned = !isCroquiPinned;
+  const btn = document.getElementById("pinCroquiBtn");
+  if (isCroquiPinned) {
+    btn.innerHTML = "📌 إلغاء تثبيت الكروكي";
+    btn.style.backgroundColor = "#4caf50";
+  } else {
+    btn.innerHTML = "📌 تثبيت الكروكي";
+    btn.style.backgroundColor = "#ff9800";
+  }
+}
+
 
 // ----------------------------------------------------
 // UI Click & Editing Popups
@@ -1266,19 +1311,9 @@ function openModalForElement(type, id) {
         <label>اسم المالك:</label>
         <input type="text" id="modal-owner" value="${s.owner || ''}">
       </div>
-      <div class="editor-form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-        <div>
-          <label>فدان:</label>
-          <input type="text" inputmode="decimal" id="modal-feddan" value="${s.area.feddan || 0}">
-        </div>
-        <div>
-          <label>قيراط:</label>
-          <input type="text" inputmode="decimal" id="modal-carat" value="${s.area.carat || 0}">
-        </div>
-        <div>
-          <label>سهم:</label>
-          <input type="text" inputmode="decimal" id="modal-shares" value="${s.area.shares || 0}">
-        </div>
+      <div class="editor-form-group">
+        <label>المساحة (بالمتر المربع):</label>
+        <input type="text" inputmode="decimal" id="modal-sqm" value="${s.area.sqm || 0}">
       </div>
       <div class="editor-form-group">
         <label>ملاحظات القطعة:</label>
@@ -1388,9 +1423,7 @@ function saveModalData() {
     const s = shapes.find(x => x.id === id);
     if (s) {
       s.owner = document.getElementById("modal-owner").value;
-      s.area.feddan = parseInt(document.getElementById("modal-feddan").value) || 0;
-      s.area.carat = parseInt(document.getElementById("modal-carat").value) || 0;
-      s.area.shares = parseFloat(document.getElementById("modal-shares").value) || 0;
+      s.area.sqm = parseFloat(document.getElementById("modal-sqm").value) || 0;
       s.notes = document.getElementById("modal-notes").value;
       s.color = document.getElementById("modal-color").value;
     }
@@ -1455,19 +1488,9 @@ function populateSidebarEditor() {
           <label>اسم المالك:</label>
           <input type="text" value="${s.owner || ''}" oninput="updateSelectedShapeField('owner', this.value)">
         </div>
-        <div class="editor-form-group" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
-          <div>
-            <label>فدان:</label>
-            <input type="text" inputmode="decimal" value="${s.area.feddan || 0}" oninput="updateSelectedShapeArea('feddan', this.value)">
-          </div>
-          <div>
-            <label>قيراط:</label>
-            <input type="text" inputmode="decimal" value="${s.area.carat || 0}" oninput="updateSelectedShapeArea('carat', this.value)">
-          </div>
-          <div>
-            <label>سهم:</label>
-            <input type="text" inputmode="decimal" value="${s.area.shares || 0}" oninput="updateSelectedShapeArea('shares', this.value)">
-          </div>
+        <div class="editor-form-group">
+          <label>المساحة (بالمتر المربع):</label>
+          <input type="text" inputmode="decimal" value="${s.area.sqm || 0}" oninput="updateSelectedShapeArea('sqm', this.value)">
         </div>
         <div class="editor-form-group">
           <label>ملاحظات القطعة:</label>
@@ -2036,9 +2059,9 @@ function loadDemoDataPreset(promptConfirm = true) {
   shapes = [{
     id: "shape_1",
     points: [p1, p2, p3, p4],
-    owner: "اسم المالك: ................",
+    owner: "اسم المالك",
     area: { feddan: 0, carat: 10, shares: 6.81, sqm: totalArea },
-    notes: "كروكي زراعي",
+    notes: "خريطة ارض",
     color: "#ffffff",
     textX: centerX,
     textY: centerY
