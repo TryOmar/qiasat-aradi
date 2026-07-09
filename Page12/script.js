@@ -2282,11 +2282,28 @@ function printDallalMap() {
           <span class="placeholder-line" style="color: #aaa; letter-spacing: 1px;">................................................................................................</span>
         </div>
 
-        <div class="canvas-container" style="flex: 1; width: 100%; max-width: 100%; margin: 5px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 5px;">
+        <div class="canvas-container" style="flex: 1; width: 100%; max-width: 100%; margin: 5px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 5px; overflow: hidden;">
           ${svgHTML}
         </div>
 
-        <div class="footer no-print" style="text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #eee; padding-top: 15px; margin: 20px 15px 50px 15px; font-family: 'Cairo';">
+        <!-- Controls (No Print) -->
+        <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; padding: 15px; background: #f9f9f9; border-top: 1px solid #eee; font-family: 'Cairo', sans-serif;">
+          <button onclick="let svg=document.querySelector('#printOverlay .canvas-container svg'); let curr=parseFloat(svg.style.width||100); svg.style.width=(curr*1.25)+'%'; svg.style.height='auto';" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">+</button>
+          
+          <button onclick="let svg=document.querySelector('#printOverlay .canvas-container svg'); let curr=parseFloat(svg.style.width||100); svg.style.width=(curr*0.8)+'%'; svg.style.height='auto';" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">-</button>
+          
+          <button onclick="let el=document.getElementById('printOverlay'); if(!document.fullscreenElement){ if(el.requestFullscreen) el.requestFullscreen(); else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen(); } else { if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 13px; padding: 4px 12px; height: 35px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f;" title="ملء الشاشة">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            <span>ملء الشاشة</span>
+          </button>
+          
+          <button onclick="exportMapImage()" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 14px; padding: 4px 12px; height: 35px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f;" title="تحميل صورة الكروكي">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            تحميل الصورة
+          </button>
+        </div>
+
+        <div class="footer no-print" style="text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #eee; padding-top: 15px; margin: 10px 15px 50px 15px; font-family: 'Cairo';">
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <button onclick="window.print()" style="padding: 12px 25px; background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🖨️ طباعة عبر النظام</button>
             <button onclick="document.getElementById('printOverlay').style.display='none'" style="padding: 12px 25px; background: #c62828; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">❌ إغلاق / العودة</button>
