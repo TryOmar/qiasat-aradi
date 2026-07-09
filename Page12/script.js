@@ -112,7 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   updateUndoRedoButtons();
-  updateGlobalCaratUI();
 });
 
 // ----------------------------------------------------
@@ -976,8 +975,12 @@ function renderSVG() {
       // Unscaled box dimensions
       const baseCharWidth = 8.5;
       const baseLineHeight = 23;
-      const unscaledBoxW = Math.max(140, maxChars * baseCharWidth + 24);
-      const unscaledBoxH = lines.length * baseLineHeight + 12;
+      const buttonHeight = showFeddanConversion ? 20 : 24;
+      const buttonWidth = showFeddanConversion ? 110 : 160;
+      const buttonMargin = showFeddanConversion ? 26 : 30;
+
+      const unscaledBoxW = Math.max(buttonWidth + 16, maxChars * baseCharWidth + 24);
+      const unscaledBoxH = lines.length * baseLineHeight + 12 + buttonMargin;
 
       // Bounding box of the shape
       let minX = Infinity, maxX = -Infinity;
@@ -1054,6 +1057,46 @@ function renderSVG() {
         tSpan.textContent = line.text;
         textGroup.appendChild(tSpan);
       });
+
+      // Draw the SVG click button inside the card
+      const btnW = buttonWidth * scaleFactor;
+      const btnH = buttonHeight * scaleFactor;
+      const btnY = boxY + (lines.length * 23 + (showFeddanConversion ? 6 : 8)) * scaleFactor;
+      const btnX = s.textX;
+
+      const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      btnGroup.setAttribute("style", "cursor: pointer;");
+      
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", btnX - btnW / 2);
+      rect.setAttribute("y", btnY);
+      rect.setAttribute("width", btnW);
+      rect.setAttribute("height", btnH);
+      rect.setAttribute("fill", "#2e7d32");
+      rect.setAttribute("rx", 4 * scaleFactor);
+      rect.setAttribute("ry", 4 * scaleFactor);
+      btnGroup.appendChild(rect);
+
+      const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      txt.setAttribute("x", btnX);
+      txt.setAttribute("y", btnY + btnH / 2 + (4 * scaleFactor));
+      txt.setAttribute("fill", "#ffffff");
+      txt.setAttribute("font-size", (showFeddanConversion ? 10 : 11) * scaleFactor);
+      txt.setAttribute("font-weight", "bold");
+      txt.setAttribute("text-anchor", "middle");
+      txt.textContent = showFeddanConversion ? "⚙️ خيارات التحويل" : "⚖️ تحويل لفدان/قيراط/سهم";
+      btnGroup.appendChild(txt);
+
+      btnGroup.onclick = (e) => {
+        e.stopPropagation();
+        showCaratConversionModal();
+      };
+      btnGroup.addEventListener("touchstart", (e) => {
+        e.stopPropagation();
+        showCaratConversionModal();
+      });
+
+      textGroup.appendChild(btnGroup);
     }
 
     shapesGroup.appendChild(textGroup);
@@ -1501,28 +1544,6 @@ function openModalForElement(type, id) {
         <label>المساحة (بالمتر المربع):</label>
         <input type="text" inputmode="decimal" id="modal-sqm" value="${s.area.sqm || 0}">
       </div>
-      <div class="editor-form-group" style="background: #e8f5e9; padding: 10px; border-radius: 6px; border: 1.5px solid #a5d6a7; margin-top: 10px; margin-bottom: 10px; font-family: 'Cairo';">
-        ${showFeddanConversion ? `
-          <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">تعادل تقريباً:</div>
-          <div style="display: flex; justify-content: space-around; text-align: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #c8e6c9;">
-            <div>
-              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).feddan}</span>
-              <div style="font-size: 11px; color: #555;">فدان</div>
-            </div>
-            <div style="border-right: 1px solid #eee; border-left: 1px solid #eee; padding: 0 10px;">
-              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).carat}</span>
-              <div style="font-size: 11px; color: #555;">قيراط</div>
-            </div>
-            <div>
-              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).shares}</span>
-              <div style="font-size: 11px; color: #555;">سهم</div>
-            </div>
-          </div>
-          <button type="button" onclick="showCaratConversionModal(); closeModal();" style="margin-top: 8px; width: 100%; height: 30px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
-        ` : `
-          <button type="button" onclick="showCaratConversionModal(); closeModal();" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
-        `}
-      </div>
       <div class="editor-form-group">
         <label>اكتب ما تريد:</label>
         <textarea id="modal-notes" rows="3" style="width:100%; box-sizing:border-box; font-family:'Cairo'; font-size:12px;">${s.notes || ''}</textarea>
@@ -1700,28 +1721,7 @@ function populateSidebarEditor() {
           <label>المساحة (بالمتر المربع):</label>
           <input type="text" inputmode="decimal" value="${s.area.sqm || 0}" oninput="updateSelectedShapeArea('sqm', this.value)">
         </div>
-        <div class="editor-form-group" style="background: #e8f5e9; padding: 10px; border-radius: 6px; border: 1.5px solid #a5d6a7; margin-top: 10px; margin-bottom: 10px; font-family: 'Cairo';">
-          ${showFeddanConversion ? `
-            <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">تعادل تقريباً:</div>
-            <div style="display: flex; justify-content: space-around; text-align: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #c8e6c9;">
-              <div>
-                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).feddan}</span>
-                <div style="font-size: 11px; color: #555;">فدان</div>
-              </div>
-              <div style="border-right: 1px solid #eee; border-left: 1px solid #eee; padding: 0 10px;">
-                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).carat}</span>
-                <div style="font-size: 11px; color: #555;">قيراط</div>
-              </div>
-              <div>
-                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).shares}</span>
-                <div style="font-size: 11px; color: #555;">سهم</div>
-              </div>
-            </div>
-            <button type="button" onclick="showCaratConversionModal()" style="margin-top: 8px; width: 100%; height: 30px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
-          ` : `
-            <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
-          `}
-        </div>
+
         <div class="editor-form-group">
           <label>اكتب ما تريد:</label>
           <textarea rows="3" oninput="updateSelectedShapeField('notes', this.value)">${s.notes || ''}</textarea>
@@ -2640,7 +2640,6 @@ function applyCaratConversion() {
 
   // Re-render
   renderSVG();
-  updateGlobalCaratUI();
   
   // Re-populate editor panel if an element is selected
   if (selectedElement && selectedElement.type === 'shape') {
@@ -2656,7 +2655,6 @@ function disableCaratConversion() {
 
   // Re-render
   renderSVG();
-  updateGlobalCaratUI();
 
   // Re-populate editor panel if an element is selected
   if (selectedElement && selectedElement.type === 'shape') {
@@ -2664,20 +2662,4 @@ function disableCaratConversion() {
   }
 
   closeCaratConversionModal();
-}
-
-function updateGlobalCaratUI() {
-  const container = document.getElementById("sidebar-global-carat-container");
-  if (!container) return;
-
-  if (showFeddanConversion) {
-    container.innerHTML = `
-      <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">نظام تحويل الفدان: مفعّل (${caratSize} م²)</div>
-      <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 32px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
-    `;
-  } else {
-    container.innerHTML = `
-      <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
-    `;
-  }
 }
