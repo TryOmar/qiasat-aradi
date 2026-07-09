@@ -835,17 +835,17 @@ function renderSVG() {
   if (chk) showBg = chk.checked;
   const printChk = document.getElementById("chkPrintAgriBackground");
   if (printChk && document.getElementById("printOverlay").style.display === "block") {
-    showBg = printChk.checked;
+    showBg = !printChk.checked;
   }
 
   const bgImg = document.getElementById("agriBgImage");
   if (bgImg) {
     if (typeof AGRI_BG_BASE64 !== "undefined" && showBg) {
       bgImg.setAttribute("href", AGRI_BG_BASE64);
-      bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+      bgImg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", AGRI_BG_BASE64);
     } else {
       bgImg.setAttribute("href", "");
-      bgImg.setAttribute("xlink:href", "");
+      bgImg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "");
     }
   }
 
@@ -889,6 +889,8 @@ function renderSVG() {
     
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", pointsStr);
+    polygon.setAttribute("data-id", s.id);
+    polygon.setAttribute("data-color", s.color || "#ffffff");
     
     let activeClass = "clickable-shape";
     if (selectedElement && selectedElement.type === 'shape' && selectedElement.id === s.id) {
@@ -903,10 +905,10 @@ function renderSVG() {
     // Check if we are inside print overlay and if it has its own toggle
     const printChk = document.getElementById("chkPrintAgriBackground");
     if (printChk && document.getElementById("printOverlay").style.display === "block") {
-      showBg = printChk.checked;
+      showBg = !printChk.checked;
     }
 
-    if (showBg && (!s.color || s.color === "#ffffff")) {
+    if (showBg && (!s.color || s.color === "#ffffff" || s.color === "#f1f8e9" || s.color === "#e8f5e9")) {
       polygon.style.fill = "url(#agriPattern)";
       polygon.style.fillOpacity = "1";
     } else {
@@ -2393,8 +2395,8 @@ function printDallalMap() {
         
         <div class="no-print" style="display: flex; justify-content: center; width: 100%; padding: 5px 15px; background: #f9f9f9; font-family: 'Cairo', sans-serif;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: bold; color: #1b5e20;">
-            <input type="checkbox" id="chkPrintAgriBackground" checked onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
-            تضمين الخلفية الزراعية في الطباعة
+            <input type="checkbox" id="chkPrintAgriBackground" onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
+            إخفاء صورة الخلفية عند الطباعة
           </label>
         </div>
 
@@ -2466,7 +2468,8 @@ function toggleAgriBackground() {
 
 function togglePrintAgriBackground() {
   // Checkbox in print overlay toggled, update the SVG in the overlay directly
-  const showBg = document.getElementById("chkPrintAgriBackground").checked;
+  const hideBg = document.getElementById("chkPrintAgriBackground").checked;
+  const showBg = !hideBg;
   const overlaySvg = document.querySelector("#printOverlay .canvas-container svg");
   
   if (overlaySvg) {
@@ -2474,19 +2477,18 @@ function togglePrintAgriBackground() {
     if (bgImg) {
       if (typeof AGRI_BG_BASE64 !== "undefined" && showBg) {
         bgImg.setAttribute("href", AGRI_BG_BASE64);
-        bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+        bgImg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", AGRI_BG_BASE64);
       } else {
         bgImg.setAttribute("href", "");
-        bgImg.setAttribute("xlink:href", "");
+        bgImg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "");
       }
     }
     
     const polygons = overlaySvg.querySelectorAll("polygon.clickable-shape");
     polygons.forEach(p => {
-      // Check if it's supposed to be white/bg and not a specific color like waterways
-      const currentFill = p.style.fill || p.getAttribute("fill");
-      if (currentFill === "transparent" || currentFill === "rgba(255, 255, 255, 0.6)" || currentFill === "#ffffff" || currentFill === "rgba(255, 255, 255, 0.15)" || currentFill === "url(#agriPattern)") {
-        p.style.fill = showBg ? "url(#agriPattern)" : "#ffffff";
+      const origColor = p.getAttribute("data-color") || "#ffffff";
+      if (origColor === "#ffffff" || origColor === "#f1f8e9" || origColor === "#e8f5e9") {
+        p.style.fill = showBg ? "url(#agriPattern)" : origColor;
         p.style.fillOpacity = "1";
       }
     });
