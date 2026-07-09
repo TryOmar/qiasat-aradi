@@ -331,6 +331,8 @@ function generateCustomLand() {
   if (avgL > avgW) {
     // Portrait Mode
     svgElement.setAttribute("viewBox", "0 0 650 900");
+    const bgImg = document.getElementById("agriBgImage");
+    if (bgImg) { bgImg.setAttribute("width", "650"); bgImg.setAttribute("height", "900"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
     setDynamicPrintPage("portrait");
     centerX = 325;
@@ -339,6 +341,8 @@ function generateCustomLand() {
   } else {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
+    const bgImg = document.getElementById("agriBgImage");
+    if (bgImg) { bgImg.setAttribute("width", "900"); bgImg.setAttribute("height", "650"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
     setDynamicPrintPage("landscape");
     centerX = 450;
@@ -867,7 +871,23 @@ function renderSVG() {
       activeClass += " active";
     }
     polygon.setAttribute("class", activeClass);
-    polygon.setAttribute("fill", s.color || "#ffffff");
+    
+    let showBg = true;
+    const chk = document.getElementById("chkAgriBackground");
+    if (chk) showBg = chk.checked;
+    
+    // Check if we are inside print overlay and if it has its own toggle
+    const printChk = document.getElementById("chkPrintAgriBackground");
+    if (printChk && document.getElementById("printOverlay").style.display === "block") {
+      showBg = printChk.checked;
+    }
+
+    if (showBg && (!s.color || s.color === "#ffffff")) {
+      polygon.setAttribute("fill", "url(#agriPattern)");
+    } else {
+      polygon.setAttribute("fill", s.color || "#ffffff");
+    }
+    
     polygon.setAttribute("stroke", "#000000");
     polygon.setAttribute("stroke-width", "6");
     polygon.setAttribute("vector-effect", "non-scaling-stroke");
@@ -2302,6 +2322,13 @@ function printDallalMap() {
             تحميل الصورة
           </button>
         </div>
+        
+        <div class="no-print" style="display: flex; justify-content: center; width: 100%; padding: 5px 15px; background: #f9f9f9; font-family: 'Cairo', sans-serif;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: bold; color: #1b5e20;">
+            <input type="checkbox" id="chkPrintAgriBackground" checked onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
+            تضمين الخلفية الزراعية في الطباعة
+          </label>
+        </div>
 
         <div class="footer no-print" style="text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #eee; padding-top: 15px; margin: 10px 15px 50px 15px; font-family: 'Cairo';">
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
@@ -2361,5 +2388,26 @@ function setDynamicPrintPage(orientation) {
         @page { size: A4 landscape !important; margin: 5mm; }
       }
     `;
+  }
+}
+
+// Global functions for agricultural background toggles
+function toggleAgriBackground() {
+  renderSVG();
+}
+
+function togglePrintAgriBackground() {
+  // Checkbox in print overlay toggled, update the SVG in the overlay directly
+  const showBg = document.getElementById("chkPrintAgriBackground").checked;
+  const overlaySvg = document.querySelector("#printOverlay .canvas-container svg");
+  if (overlaySvg) {
+    const polygons = overlaySvg.querySelectorAll("polygon.clickable-shape");
+    polygons.forEach(p => {
+      // Check if it's supposed to be white/bg and not a specific color like waterways
+      const currentFill = p.getAttribute("fill");
+      if (currentFill === "url(#agriPattern)" || currentFill === "#ffffff") {
+        p.setAttribute("fill", showBg ? "url(#agriPattern)" : "#ffffff");
+      }
+    });
   }
 }
