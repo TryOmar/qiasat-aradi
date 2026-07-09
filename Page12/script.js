@@ -959,10 +959,55 @@ function renderSVG() {
         maxChars = Math.max(maxChars, l.text.length);
       });
 
-      const boxW = Math.max(140, maxChars * 8.5 + 24);
-      const boxH = lines.length * 23 + 12;
+      // Unscaled box dimensions
+      const baseCharWidth = 8.5;
+      const baseLineHeight = 23;
+      const unscaledBoxW = Math.max(140, maxChars * baseCharWidth + 24);
+      const unscaledBoxH = lines.length * baseLineHeight + 12;
+
+      // Bounding box of the shape
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      s.points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      });
+      const shapeW = maxX - minX;
+      const shapeH = maxY - minY;
+
+      // Calculate scale factors
+      const hScaleX = (shapeW * 0.85) / unscaledBoxW;
+      const hScaleY = (shapeH * 0.85) / unscaledBoxH;
+      const hScale = Math.min(1.0, hScaleX, hScaleY);
+
+      const vScaleX = (shapeH * 0.85) / unscaledBoxW;
+      const vScaleY = (shapeW * 0.85) / unscaledBoxH;
+      const vScale = Math.min(1.0, vScaleX, vScaleY);
+
+      let scaleFactor = hScale;
+      let rotateAngle = 0;
+
+      // If vertical orientation is significantly better, rotate the text
+      if (vScale > hScale + 0.15) {
+        scaleFactor = vScale;
+        rotateAngle = -90;
+      }
+
+      // Limit scale factor to a minimum to keep text readable
+      scaleFactor = Math.max(0.45, scaleFactor);
+
+      // Scaled dimensions
+      const boxW = unscaledBoxW * scaleFactor;
+      const boxH = unscaledBoxH * scaleFactor;
       const boxX = s.textX - boxW / 2;
       const boxY = s.textY - boxH / 2;
+
+      // Rotate group if needed
+      if (rotateAngle !== 0) {
+        textGroup.setAttribute("transform", `rotate(${rotateAngle}, ${s.textX}, ${s.textY})`);
+      }
 
       if (showBg) {
         const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -985,9 +1030,9 @@ function renderSVG() {
       lines.forEach((line, idx) => {
         const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
         tSpan.setAttribute("x", s.textX);
-        tSpan.setAttribute("y", boxY + 22 + (idx * 23));
+        tSpan.setAttribute("y", boxY + (22 * scaleFactor) + (idx * 23 * scaleFactor));
         tSpan.setAttribute("fill", line.color);
-        tSpan.setAttribute("font-size", line.fontSize);
+        tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
         if (line.isBold) {
           tSpan.setAttribute("font-weight", "bold");
         }
