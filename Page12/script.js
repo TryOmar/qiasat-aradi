@@ -967,12 +967,10 @@ function renderSVG() {
       bgRect.setAttribute("y", boxY);
       bgRect.setAttribute("width", boxW);
       bgRect.setAttribute("height", boxH);
-      bgRect.setAttribute("fill", "#ffffff");
-      bgRect.setAttribute("fill-opacity", "0.85");
-      bgRect.setAttribute("stroke", "#1b5e20");
+      bgRect.setAttribute("fill", "white");
+      bgRect.setAttribute("stroke", "#b0bec5");
       bgRect.setAttribute("stroke-width", "1.5");
-      bgRect.setAttribute("rx", "6");
-      bgRect.setAttribute("ry", "6");
+      bgRect.setAttribute("rx", "3");
       bgRect.setAttribute("pointer-events", "none");
       textGroup.appendChild(bgRect);
     }
