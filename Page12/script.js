@@ -332,7 +332,9 @@ function generateCustomLand() {
     // Portrait Mode
     svgElement.setAttribute("viewBox", "0 0 650 900");
     const bgImg = document.getElementById("agriBgImage");
+    const agriPattern = document.getElementById("agriPattern");
     if (bgImg) { bgImg.setAttribute("width", "650"); bgImg.setAttribute("height", "900"); }
+    if (agriPattern) { agriPattern.setAttribute("width", "650"); agriPattern.setAttribute("height", "900"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
     setDynamicPrintPage("portrait");
     centerX = 325;
@@ -342,7 +344,9 @@ function generateCustomLand() {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
     const bgImg = document.getElementById("agriBgImage");
+    const agriPattern = document.getElementById("agriPattern");
     if (bgImg) { bgImg.setAttribute("width", "900"); bgImg.setAttribute("height", "650"); }
+    if (agriPattern) { agriPattern.setAttribute("width", "900"); agriPattern.setAttribute("height", "650"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
     setDynamicPrintPage("landscape");
     centerX = 450;
@@ -836,16 +840,13 @@ function renderSVG() {
 
   const bgImg = document.getElementById("agriBgImage");
   if (bgImg) {
-    if (typeof AGRI_BG_BASE64 !== "undefined") {
+    if (typeof AGRI_BG_BASE64 !== "undefined" && showBg) {
       bgImg.setAttribute("href", AGRI_BG_BASE64);
       bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+    } else {
+      bgImg.setAttribute("href", "");
+      bgImg.setAttribute("xlink:href", "");
     }
-    bgImg.setAttribute("display", showBg ? "" : "none");
-  }
-
-  const landClip = document.getElementById("landClip");
-  if (landClip) {
-    landClip.innerHTML = "";
   }
 
   // 1. Draw Waterways
@@ -905,15 +906,9 @@ function renderSVG() {
       showBg = printChk.checked;
     }
 
-    if (landClip) {
-      const clipPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      clipPolygon.setAttribute("points", pointsStr);
-      landClip.appendChild(clipPolygon);
-    }
-
     if (showBg && (!s.color || s.color === "#ffffff")) {
-      polygon.style.fill = "transparent";
-      polygon.style.fillOpacity = "0";
+      polygon.style.fill = "url(#agriPattern)";
+      polygon.style.fillOpacity = "1";
     } else {
       polygon.style.fill = s.color || "#ffffff";
       polygon.style.fillOpacity = "1";
@@ -2435,11 +2430,13 @@ function togglePrintAgriBackground() {
   if (overlaySvg) {
     const bgImg = overlaySvg.querySelector("#agriBgImage");
     if (bgImg) {
-      if (typeof AGRI_BG_BASE64 !== "undefined") {
+      if (typeof AGRI_BG_BASE64 !== "undefined" && showBg) {
         bgImg.setAttribute("href", AGRI_BG_BASE64);
         bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+      } else {
+        bgImg.setAttribute("href", "");
+        bgImg.setAttribute("xlink:href", "");
       }
-      bgImg.setAttribute("display", showBg ? "" : "none");
     }
     
     const polygons = overlaySvg.querySelectorAll("polygon.clickable-shape");
@@ -2447,8 +2444,8 @@ function togglePrintAgriBackground() {
       // Check if it's supposed to be white/bg and not a specific color like waterways
       const currentFill = p.style.fill || p.getAttribute("fill");
       if (currentFill === "transparent" || currentFill === "rgba(255, 255, 255, 0.6)" || currentFill === "#ffffff" || currentFill === "rgba(255, 255, 255, 0.15)" || currentFill === "url(#agriPattern)") {
-        p.style.fill = showBg ? "transparent" : "#ffffff";
-        p.style.fillOpacity = showBg ? "0" : "1";
+        p.style.fill = showBg ? "url(#agriPattern)" : "#ffffff";
+        p.style.fillOpacity = "1";
       }
     });
   }
