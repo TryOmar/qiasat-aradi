@@ -944,43 +944,45 @@ function renderSVG() {
     });
 
     // Background card for readability on top of image
-    const lines = [];
+    const mainLines = [];
     if (s.owner) {
-      lines.push({ text: s.owner, isBold: true, fontSize: "14", color: "#000000" });
+      mainLines.push({ text: s.owner, isBold: true, fontSize: "14", color: "#000000" });
     }
     if (s.area && s.area.sqm) {
       const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
-      lines.push({ text: `المساحة: ${sqmFormatted} متر مربع`, isBold: true, fontSize: "13", color: "#1b5e20" });
-      if (showFeddanConversion) {
-        const detail = sqmToFeddanCaratShares(s.area.sqm);
-        lines.push({ text: `تعادل:`, isBold: false, fontSize: "11", color: "#555555" });
-        lines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        lines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        lines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-      }
+      mainLines.push({ text: `المساحة: ${sqmFormatted} متر مربع`, isBold: true, fontSize: "13", color: "#1b5e20" });
     }
     if (s.notes) {
       const noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       noteLines.forEach(lineText => {
-        lines.push({ text: lineText, isBold: false, fontSize: "11.5", color: "#555555" });
+        mainLines.push({ text: lineText, isBold: false, fontSize: "11.5", color: "#555555" });
       });
     }
 
-    if (lines.length > 0) {
+    const conversionLines = [];
+    if (s.area && s.area.sqm && showFeddanConversion) {
+      const detail = sqmToFeddanCaratShares(s.area.sqm);
+      conversionLines.push({ text: `تعادل:`, isBold: false, fontSize: "11", color: "#555555" });
+      conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+      conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+      conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+    }
+
+    if (mainLines.length > 0 || conversionLines.length > 0 || showFeddanConversion === false) {
       let maxChars = 0;
-      lines.forEach(l => {
-        maxChars = Math.max(maxChars, l.text.length);
-      });
+      mainLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
+      conversionLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
 
       // Unscaled box dimensions
       const baseCharWidth = 8.5;
       const baseLineHeight = 23;
-      const buttonHeight = showFeddanConversion ? 20 : 24;
-      const buttonWidth = showFeddanConversion ? 110 : 160;
-      const buttonMargin = showFeddanConversion ? 26 : 30;
+      
+      const bottomFieldPadding = 8;
+      const bottomFieldH = showFeddanConversion ? (4 * baseLineHeight + 20 + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
+      const bottomFieldW = showFeddanConversion ? 120 : 170;
 
-      const unscaledBoxW = Math.max(buttonWidth + 16, maxChars * baseCharWidth + 24);
-      const unscaledBoxH = lines.length * baseLineHeight + 12 + buttonMargin;
+      const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
+      const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
 
       // Bounding box of the shape
       let minX = Infinity, maxX = -Infinity;
@@ -1043,11 +1045,12 @@ function renderSVG() {
         textGroup.appendChild(bgRect);
       }
 
-      // Draw all text lines
-      lines.forEach((line, idx) => {
+      // Draw all main text lines
+      let currentY = boxY + 12 * scaleFactor;
+      mainLines.forEach((line, idx) => {
         const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
         tSpan.setAttribute("x", s.textX);
-        tSpan.setAttribute("y", boxY + (22 * scaleFactor) + (idx * 23 * scaleFactor));
+        tSpan.setAttribute("y", currentY + 16 * scaleFactor);
         tSpan.setAttribute("fill", line.color);
         tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
         if (line.isBold) {
@@ -1056,47 +1059,128 @@ function renderSVG() {
         tSpan.setAttribute("text-anchor", "middle");
         tSpan.textContent = line.text;
         textGroup.appendChild(tSpan);
+        currentY += baseLineHeight * scaleFactor;
       });
 
-      // Draw the SVG click button inside the card
-      const btnW = buttonWidth * scaleFactor;
-      const btnH = buttonHeight * scaleFactor;
-      const btnY = boxY + (lines.length * 23 + (showFeddanConversion ? 6 : 8)) * scaleFactor;
-      const btnX = s.textX;
+      // Spacer and bottom field container
+      currentY += 6 * scaleFactor;
 
-      const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      btnGroup.setAttribute("style", "cursor: pointer;");
-      
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", btnX - btnW / 2);
-      rect.setAttribute("y", btnY);
-      rect.setAttribute("width", btnW);
-      rect.setAttribute("height", btnH);
-      rect.setAttribute("fill", "#2e7d32");
-      rect.setAttribute("rx", 4 * scaleFactor);
-      rect.setAttribute("ry", 4 * scaleFactor);
-      btnGroup.appendChild(rect);
+      const fieldW = boxW - 16 * scaleFactor;
+      const fieldH = bottomFieldH * scaleFactor;
+      const fieldX = s.textX - fieldW / 2;
+      const fieldY = currentY;
 
-      const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      txt.setAttribute("x", btnX);
-      txt.setAttribute("y", btnY + btnH / 2 + (4 * scaleFactor));
-      txt.setAttribute("fill", "#ffffff");
-      txt.setAttribute("font-size", (showFeddanConversion ? 10 : 11) * scaleFactor);
-      txt.setAttribute("font-weight", "bold");
-      txt.setAttribute("text-anchor", "middle");
-      txt.textContent = showFeddanConversion ? "⚙️ خيارات التحويل" : "⚖️ تحويل لفدان/قيراط/سهم";
-      btnGroup.appendChild(txt);
+      // Draw the bottom field container
+      const fieldRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      fieldRect.setAttribute("x", fieldX);
+      fieldRect.setAttribute("y", fieldY);
+      fieldRect.setAttribute("width", fieldW);
+      fieldRect.setAttribute("height", fieldH);
+      fieldRect.setAttribute("fill", showFeddanConversion ? "#e8f5e9" : "#f1f8e9");
+      fieldRect.setAttribute("stroke", showFeddanConversion ? "#c8e6c9" : "#d8eed8");
+      fieldRect.setAttribute("stroke-width", "1");
+      fieldRect.setAttribute("rx", 5 * scaleFactor);
+      fieldRect.setAttribute("ry", 5 * scaleFactor);
+      fieldRect.setAttribute("pointer-events", "none");
+      textGroup.appendChild(fieldRect);
 
-      btnGroup.onclick = (e) => {
-        e.stopPropagation();
-        showCaratConversionModal();
-      };
-      btnGroup.addEventListener("touchstart", (e) => {
-        e.stopPropagation();
-        showCaratConversionModal();
-      });
+      if (showFeddanConversion) {
+        let convY = fieldY + bottomFieldPadding * scaleFactor;
+        conversionLines.forEach((line, idx) => {
+          const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tSpan.setAttribute("x", s.textX);
+          tSpan.setAttribute("y", convY + 14 * scaleFactor);
+          tSpan.setAttribute("fill", line.color);
+          tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
+          if (line.isBold) {
+            tSpan.setAttribute("font-weight", "bold");
+          }
+          tSpan.setAttribute("text-anchor", "middle");
+          tSpan.textContent = line.text;
+          textGroup.appendChild(tSpan);
+          convY += baseLineHeight * scaleFactor;
+        });
 
-      textGroup.appendChild(btnGroup);
+        // Draw smaller button at bottom of this box
+        const btnW = 100 * scaleFactor;
+        const btnH = 20 * scaleFactor;
+        const btnX = s.textX;
+        const btnY = convY + 2 * scaleFactor;
+
+        const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        btnGroup.setAttribute("style", "cursor: pointer;");
+
+        const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        btnRect.setAttribute("x", btnX - btnW / 2);
+        btnRect.setAttribute("y", btnY);
+        btnRect.setAttribute("width", btnW);
+        btnRect.setAttribute("height", btnH);
+        btnRect.setAttribute("fill", "#2e7d32");
+        btnRect.setAttribute("rx", 3 * scaleFactor);
+        btnRect.setAttribute("ry", 3 * scaleFactor);
+        btnGroup.appendChild(btnRect);
+
+        const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        btnTxt.setAttribute("x", btnX);
+        btnTxt.setAttribute("y", btnY + btnH / 2 + 3.5 * scaleFactor);
+        btnTxt.setAttribute("fill", "#ffffff");
+        btnTxt.setAttribute("font-size", 9.5 * scaleFactor);
+        btnTxt.setAttribute("font-weight", "bold");
+        btnTxt.setAttribute("text-anchor", "middle");
+        btnTxt.textContent = "⚙️ خيارات التحويل";
+        btnGroup.appendChild(btnTxt);
+
+        btnGroup.onclick = (e) => {
+          e.stopPropagation();
+          showCaratConversionModal();
+        };
+        btnGroup.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          showCaratConversionModal();
+        });
+
+        textGroup.appendChild(btnGroup);
+      } else {
+        // Draw big button inside the box
+        const btnW = 150 * scaleFactor;
+        const btnH = 24 * scaleFactor;
+        const btnX = s.textX;
+        const btnY = fieldY + bottomFieldPadding * scaleFactor;
+
+        const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        btnGroup.setAttribute("style", "cursor: pointer;");
+
+        const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        btnRect.setAttribute("x", btnX - btnW / 2);
+        btnRect.setAttribute("y", btnY);
+        btnRect.setAttribute("width", btnW);
+        btnRect.setAttribute("height", btnH);
+        btnRect.setAttribute("fill", "#2e7d32");
+        btnRect.setAttribute("rx", 4 * scaleFactor);
+        btnRect.setAttribute("ry", 4 * scaleFactor);
+        btnGroup.appendChild(btnRect);
+
+        const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        btnTxt.setAttribute("x", btnX);
+        btnTxt.setAttribute("y", btnY + btnH / 2 + 4 * scaleFactor);
+        btnTxt.setAttribute("fill", "#ffffff");
+        btnTxt.setAttribute("font-size", 10.5 * scaleFactor);
+        btnTxt.setAttribute("font-weight", "bold");
+        btnTxt.setAttribute("text-anchor", "middle");
+        btnTxt.textContent = "⚖️ تحويل لفدان/قيراط/سهم";
+        btnGroup.appendChild(btnTxt);
+
+        btnGroup.onclick = (e) => {
+          e.stopPropagation();
+          showCaratConversionModal();
+        };
+        btnGroup.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          showCaratConversionModal();
+        });
+
+        textGroup.appendChild(btnGroup);
+      }
     }
 
     shapesGroup.appendChild(textGroup);
