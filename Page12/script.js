@@ -962,7 +962,6 @@ function renderSVG() {
     const conversionLines = [];
     if (s.area && s.area.sqm && showFeddanConversion) {
       const detail = sqmToFeddanCaratShares(s.area.sqm);
-      conversionLines.push({ text: `تعادل:`, isBold: false, fontSize: "11", color: "#555555" });
       conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
       conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
       conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
@@ -978,8 +977,8 @@ function renderSVG() {
       const baseLineHeight = 23;
       
       const bottomFieldPadding = 8;
-      const bottomFieldH = showFeddanConversion ? (4 * baseLineHeight + 20 + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
-      const bottomFieldW = showFeddanConversion ? 120 : 170;
+      const bottomFieldH = showFeddanConversion ? (20 + 8 + 3 * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
+      const bottomFieldW = showFeddanConversion ? 130 : 170;
 
       const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
       const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
@@ -1085,27 +1084,11 @@ function renderSVG() {
       textGroup.appendChild(fieldRect);
 
       if (showFeddanConversion) {
-        let convY = fieldY + bottomFieldPadding * scaleFactor;
-        conversionLines.forEach((line, idx) => {
-          const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tSpan.setAttribute("x", s.textX);
-          tSpan.setAttribute("y", convY + 14 * scaleFactor);
-          tSpan.setAttribute("fill", line.color);
-          tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
-          if (line.isBold) {
-            tSpan.setAttribute("font-weight", "bold");
-          }
-          tSpan.setAttribute("text-anchor", "middle");
-          tSpan.textContent = line.text;
-          textGroup.appendChild(tSpan);
-          convY += baseLineHeight * scaleFactor;
-        });
-
-        // Draw smaller button at bottom of this box
+        // 1. Draw button at the top of the box
         const btnW = 100 * scaleFactor;
         const btnH = 20 * scaleFactor;
         const btnX = s.textX;
-        const btnY = convY + 2 * scaleFactor;
+        const btnY = fieldY + bottomFieldPadding * scaleFactor;
 
         const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         btnGroup.setAttribute("style", "cursor: pointer;");
@@ -1140,6 +1123,23 @@ function renderSVG() {
         });
 
         textGroup.appendChild(btnGroup);
+
+        // 2. Draw conversion lines below the button
+        let convY = btnY + btnH + 6 * scaleFactor;
+        conversionLines.forEach((line, idx) => {
+          const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tSpan.setAttribute("x", s.textX);
+          tSpan.setAttribute("y", convY + 14 * scaleFactor);
+          tSpan.setAttribute("fill", line.color);
+          tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
+          if (line.isBold) {
+            tSpan.setAttribute("font-weight", "bold");
+          }
+          tSpan.setAttribute("text-anchor", "middle");
+          tSpan.textContent = line.text;
+          textGroup.appendChild(tSpan);
+          convY += baseLineHeight * scaleFactor;
+        });
       } else {
         // Draw big button inside the box
         const btnW = 150 * scaleFactor;
