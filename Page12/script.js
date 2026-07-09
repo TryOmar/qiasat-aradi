@@ -1591,6 +1591,10 @@ function onSvgDoubleClick(e) {
 
 function onElementClick(e, type, id) {
   if (e) e.stopPropagation();
+  if (type === 'borderLabel' || type === 'splitLine' || (type === 'freeText' && id && id.startsWith('note_'))) {
+    openStartModal();
+    return;
+  }
   selectedElement = { type, id };
   renderSVG();
   populateSidebarEditor();
@@ -2236,7 +2240,61 @@ function loadTemplate(type) {
 // ----------------------------------------------------
 // Start Modal Trigger Actions
 // ----------------------------------------------------
+function populateStartModalFromCurrentBorders() {
+  const b1 = borderLabels.find(b => b.id === "border_1");
+  const b2 = borderLabels.find(b => b.id === "border_2");
+  const b3 = borderLabels.find(b => b.id === "border_3");
+  const b4 = borderLabels.find(b => b.id === "border_4");
+
+  if (b1) {
+    const parts = b1.text.split(" ");
+    if (parts.length >= 2) {
+      const val = parseFloat(parts[1]);
+      if (!isNaN(val)) {
+        document.getElementById("start-w1").value = val;
+        document.getElementById("start-w1-dir").value = parts[0];
+      }
+    }
+  }
+  if (b2) {
+    const parts = b2.text.split(" ");
+    if (parts.length >= 2) {
+      const val = parseFloat(parts[1]);
+      if (!isNaN(val)) {
+        document.getElementById("start-w2").value = val;
+        document.getElementById("start-w2-dir").value = parts[0];
+      }
+    }
+  }
+  if (b3) {
+    const parts = b3.text.split(" ");
+    if (parts.length >= 2) {
+      const val = parseFloat(parts[1]);
+      if (!isNaN(val)) {
+        document.getElementById("start-l1").value = val;
+        document.getElementById("start-l1-dir").value = parts[0];
+      }
+    }
+  }
+  if (b4) {
+    const parts = b4.text.split(" ");
+    if (parts.length >= 2) {
+      const val = parseFloat(parts[1]);
+      if (!isNaN(val)) {
+        document.getElementById("start-l2").value = val;
+        document.getElementById("start-l2-dir").value = parts[0];
+      }
+    }
+  }
+
+  const numPartnersInput = document.getElementById("start-partners");
+  if (numPartnersInput) {
+    numPartnersInput.value = shapes.length || 1;
+  }
+}
+
 function openStartModal() {
+  populateStartModalFromCurrentBorders();
   document.getElementById("startModal").style.display = "flex";
 }
 
