@@ -836,7 +836,11 @@ function renderSVG() {
 
   const bgImg = document.getElementById("agriBgImage");
   if (bgImg) {
-    bgImg.setAttribute("display", showBg ? "block" : "none");
+    if (typeof AGRI_BG_BASE64 !== "undefined") {
+      bgImg.setAttribute("href", AGRI_BG_BASE64);
+      bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+    }
+    bgImg.setAttribute("display", showBg ? "" : "none");
   }
 
   const landClip = document.getElementById("landClip");
@@ -2429,7 +2433,11 @@ function togglePrintAgriBackground() {
   if (overlaySvg) {
     const bgImg = overlaySvg.querySelector("#agriBgImage");
     if (bgImg) {
-      bgImg.setAttribute("display", showBg ? "block" : "none");
+      if (typeof AGRI_BG_BASE64 !== "undefined") {
+        bgImg.setAttribute("href", AGRI_BG_BASE64);
+        bgImg.setAttribute("xlink:href", AGRI_BG_BASE64);
+      }
+      bgImg.setAttribute("display", showBg ? "" : "none");
     }
     
     const polygons = overlaySvg.querySelectorAll("polygon.clickable-shape");
