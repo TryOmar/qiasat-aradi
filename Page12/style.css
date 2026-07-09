@@ -284,10 +284,6 @@ body {
 svg text {
   font-family: 'Cairo', sans-serif;
   user-select: none;
-  stroke: #ffffff;
-  stroke-width: 3px;
-  paint-order: stroke fill;
-  stroke-linejoin: round;
 }
 
 svg .draggable-label {

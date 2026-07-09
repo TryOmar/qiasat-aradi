@@ -935,6 +935,48 @@ function renderSVG() {
       onElementClick(e, 'shape', s.id);
     });
 
+    // Background card for readability on top of image
+    let maxChars = 0;
+    let lineCount = 0;
+    if (s.owner) { maxChars = Math.max(maxChars, s.owner.length); lineCount++; }
+    let areaText = "";
+    if (s.area && s.area.sqm) {
+      const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+      areaText = `المساحة: ${sqmFormatted} متر مربع`;
+      maxChars = Math.max(maxChars, areaText.length);
+      lineCount++;
+    }
+    let noteLines = [];
+    if (s.notes) {
+      noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      noteLines.forEach(lineText => {
+        maxChars = Math.max(maxChars, lineText.length);
+        lineCount++;
+      });
+    }
+
+    if (lineCount > 0 && showBg) {
+      const boxW = Math.max(120, maxChars * 8 + 20);
+      const boxH = lineCount * 22 + 10;
+      const boxX = s.textX - boxW / 2;
+      const boxY = s.textY - 36;
+
+      const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      bgRect.setAttribute("class", "text-bg-card");
+      bgRect.setAttribute("x", boxX);
+      bgRect.setAttribute("y", boxY);
+      bgRect.setAttribute("width", boxW);
+      bgRect.setAttribute("height", boxH);
+      bgRect.setAttribute("fill", "#ffffff");
+      bgRect.setAttribute("fill-opacity", "0.85");
+      bgRect.setAttribute("stroke", "#1b5e20");
+      bgRect.setAttribute("stroke-width", "1.5");
+      bgRect.setAttribute("rx", "6");
+      bgRect.setAttribute("ry", "6");
+      bgRect.setAttribute("pointer-events", "none");
+      textGroup.appendChild(bgRect);
+    }
+
     // Owner text line
     const tSpanOwner = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tSpanOwner.setAttribute("x", s.textX);
@@ -2447,6 +2489,11 @@ function togglePrintAgriBackground() {
         p.style.fill = showBg ? "url(#agriPattern)" : "#ffffff";
         p.style.fillOpacity = "1";
       }
+    });
+
+    const textBgs = overlaySvg.querySelectorAll(".text-bg-card");
+    textBgs.forEach(r => {
+      r.style.display = showBg ? "block" : "none";
     });
   }
 }
