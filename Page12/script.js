@@ -325,16 +325,7 @@ function generateCustomLand() {
   const avgL = (l1 + l2) / 2;
 
   if (avgL > avgW) {
-    isRotated = true;
-    effW1 = l1;
-    effW2 = l2;
-    effL1 = w2;
-    effL2 = w1;
-
-    effW1Dir = l1Dir; // West (غربي) -> Top
-    effW2Dir = l2Dir; // East (شرقي) -> Bottom
-    effL1Dir = w2Dir; // South (قبلي) -> Left
-    effL2Dir = w1Dir; // North (بحري) -> Right
+    // Rotation logic has been removed to respect explicit input orientation
   }
 
   // Scale calculations to fit a max boundary of 740 pixels horizontally or 500 pixels vertically
