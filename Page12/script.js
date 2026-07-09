@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   updateUndoRedoButtons();
+  updateGlobalCaratUI();
 });
 
 // ----------------------------------------------------
@@ -2639,6 +2640,7 @@ function applyCaratConversion() {
 
   // Re-render
   renderSVG();
+  updateGlobalCaratUI();
   
   // Re-populate editor panel if an element is selected
   if (selectedElement && selectedElement.type === 'shape') {
@@ -2654,6 +2656,7 @@ function disableCaratConversion() {
 
   // Re-render
   renderSVG();
+  updateGlobalCaratUI();
 
   // Re-populate editor panel if an element is selected
   if (selectedElement && selectedElement.type === 'shape') {
@@ -2661,4 +2664,20 @@ function disableCaratConversion() {
   }
 
   closeCaratConversionModal();
+}
+
+function updateGlobalCaratUI() {
+  const container = document.getElementById("sidebar-global-carat-container");
+  if (!container) return;
+
+  if (showFeddanConversion) {
+    container.innerHTML = `
+      <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">نظام تحويل الفدان: مفعّل (${caratSize} م²)</div>
+      <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 32px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 5px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
+    `;
+  }
 }
