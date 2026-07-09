@@ -331,6 +331,8 @@ function generateCustomLand() {
   if (avgL > avgW) {
     // Portrait Mode
     svgElement.setAttribute("viewBox", "0 0 650 900");
+    const bgImg = document.getElementById("agriBgImage");
+    if (bgImg) { bgImg.setAttribute("width", "650"); bgImg.setAttribute("height", "900"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
     setDynamicPrintPage("portrait");
     centerX = 325;
@@ -339,6 +341,8 @@ function generateCustomLand() {
   } else {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
+    const bgImg = document.getElementById("agriBgImage");
+    if (bgImg) { bgImg.setAttribute("width", "900"); bgImg.setAttribute("height", "650"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
     setDynamicPrintPage("landscape");
     centerX = 450;
@@ -821,6 +825,34 @@ function renderSVG() {
   borderLabelsGroup.innerHTML = "";
   notesGroup.innerHTML = "";
 
+  const wrapper = document.querySelector(".canvas-wrapper");
+  const bgRect = document.querySelector("#dallalSvg > rect");
+  let showBg = true;
+  const chk = document.getElementById("chkAgriBackground");
+  if (chk) showBg = chk.checked;
+  const printChk = document.getElementById("chkPrintAgriBackground");
+  if (printChk && document.getElementById("printOverlay").style.display === "block") {
+    showBg = printChk.checked;
+  }
+
+  if (showBg) {
+    if (wrapper) {
+      wrapper.style.backgroundImage = "url('../imgs/agri_bg.jpg')";
+      wrapper.style.backgroundSize = "cover";
+      wrapper.style.backgroundPosition = "center top";
+    }
+    if (bgRect) {
+      bgRect.setAttribute("fill", "rgba(255, 255, 255, 0.4)");
+    }
+  } else {
+    if (wrapper) {
+      wrapper.style.backgroundImage = "none";
+    }
+    if (bgRect) {
+      bgRect.setAttribute("fill", "url(#blueprintGrid)");
+    }
+  }
+
   // 1. Draw Waterways
   waterways.forEach(w => {
     const pointsStr = w.points.map(p => `${p.x},${p.y}`).join(" ");
@@ -879,7 +911,7 @@ function renderSVG() {
     }
 
     if (showBg && (!s.color || s.color === "#ffffff")) {
-      polygon.setAttribute("fill", "url(#agriPattern)");
+      polygon.setAttribute("fill", "rgba(255, 255, 255, 0.15)");
     } else {
       polygon.setAttribute("fill", s.color || "#ffffff");
     }
@@ -2396,13 +2428,30 @@ function togglePrintAgriBackground() {
   // Checkbox in print overlay toggled, update the SVG in the overlay directly
   const showBg = document.getElementById("chkPrintAgriBackground").checked;
   const overlaySvg = document.querySelector("#printOverlay .canvas-container svg");
+  const overlayContainer = document.querySelector("#printOverlay .canvas-container");
+  
+  if (overlayContainer) {
+    if (showBg) {
+      overlayContainer.style.backgroundImage = "url('../imgs/agri_bg.jpg')";
+      overlayContainer.style.backgroundSize = "cover";
+      overlayContainer.style.backgroundPosition = "center top";
+    } else {
+      overlayContainer.style.backgroundImage = "none";
+    }
+  }
+
   if (overlaySvg) {
+    const bgRect = overlaySvg.querySelector("rect");
+    if (bgRect) {
+      bgRect.setAttribute("fill", showBg ? "rgba(255, 255, 255, 0.4)" : "url(#blueprintGrid)");
+    }
+    
     const polygons = overlaySvg.querySelectorAll("polygon.clickable-shape");
     polygons.forEach(p => {
       // Check if it's supposed to be white/bg and not a specific color like waterways
       const currentFill = p.getAttribute("fill");
-      if (currentFill === "url(#agriPattern)" || currentFill === "#ffffff") {
-        p.setAttribute("fill", showBg ? "url(#agriPattern)" : "#ffffff");
+      if (currentFill === "rgba(255, 255, 255, 0.15)" || currentFill === "#ffffff" || currentFill === "url(#agriPattern)") {
+        p.setAttribute("fill", showBg ? "rgba(255, 255, 255, 0.15)" : "#ffffff");
       }
     });
   }
