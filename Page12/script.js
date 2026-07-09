@@ -971,6 +971,26 @@ function renderSVG() {
 
     // Split Line Label
     if (l.label) {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("class", "draggable-label");
+      g.setAttribute("data-id", l.id);
+      g.setAttribute("data-type", "splitLineLabel");
+      if (l.angle) {
+        g.setAttribute("transform", `rotate(${l.angle}, ${l.labelX}, ${l.labelY})`);
+      }
+
+      const boxW = l.label.length * 7 + 10;
+      const boxH = 20;
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", l.labelX - boxW / 2);
+      rect.setAttribute("y", l.labelY - boxH / 1.5 + 1);
+      rect.setAttribute("width", boxW);
+      rect.setAttribute("height", boxH);
+      rect.setAttribute("fill", "white");
+      rect.setAttribute("stroke", "#b0bec5");
+      rect.setAttribute("stroke-width", "1.5");
+      rect.setAttribute("rx", "3");
+
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", l.labelX);
       text.setAttribute("y", l.labelY);
@@ -978,24 +998,44 @@ function renderSVG() {
       text.setAttribute("font-size", "12");
       text.setAttribute("font-weight", "bold");
       text.setAttribute("text-anchor", "middle");
-      text.setAttribute("class", "draggable-label");
-      text.setAttribute("data-id", l.id);
-      text.setAttribute("data-type", "splitLineLabel");
-      if (l.angle) {
-        text.setAttribute("transform", `rotate(${l.angle}, ${l.labelX}, ${l.labelY})`);
-      }
       text.textContent = l.label;
-      text.onclick = (e) => onElementClick(e, 'splitLine', l.id);
-      text.addEventListener("touchstart", (e) => {
+
+      g.appendChild(rect);
+      g.appendChild(text);
+
+      g.onclick = (e) => onElementClick(e, 'splitLine', l.id);
+      g.addEventListener("touchstart", (e) => {
         e.stopPropagation();
         onElementClick(e, 'splitLine', l.id);
       });
-      splitLinesGroup.appendChild(text);
+      splitLinesGroup.appendChild(g);
     }
   });
 
   // 4. Draw Outer Border Labels
   borderLabels.forEach(b => {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "draggable-label");
+    g.setAttribute("data-id", b.id);
+    g.setAttribute("data-type", "borderLabel");
+    if (b.angle) {
+      g.setAttribute("transform", `rotate(${b.angle}, ${b.x}, ${b.y})`);
+    }
+
+    const fontSize = parseFloat(b.fontSize || "13.5");
+    const boxW = b.text.length * (fontSize * 0.6) + 12;
+    const boxH = fontSize * 1.6;
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", b.x - boxW / 2);
+    rect.setAttribute("y", b.y - boxH / 1.5 + 2);
+    rect.setAttribute("width", boxW);
+    rect.setAttribute("height", boxH);
+    rect.setAttribute("fill", "white");
+    rect.setAttribute("stroke", "#b0bec5");
+    rect.setAttribute("stroke-width", "1.5");
+    rect.setAttribute("rx", "3");
+
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", b.x);
     text.setAttribute("y", b.y);
@@ -1003,23 +1043,43 @@ function renderSVG() {
     text.setAttribute("font-size", b.fontSize || "13.5");
     text.setAttribute("font-weight", b.isBold !== false ? "bold" : "normal");
     text.setAttribute("text-anchor", "middle");
-    text.setAttribute("class", "draggable-label");
-    text.setAttribute("data-id", b.id);
-    text.setAttribute("data-type", "borderLabel");
-    if (b.angle) {
-      text.setAttribute("transform", `rotate(${b.angle}, ${b.x}, ${b.y})`);
-    }
     text.textContent = b.text;
-    text.onclick = (e) => onElementClick(e, 'borderLabel', b.id);
-    text.addEventListener("touchstart", (e) => {
+
+    g.appendChild(rect);
+    g.appendChild(text);
+
+    g.onclick = (e) => onElementClick(e, 'borderLabel', b.id);
+    g.addEventListener("touchstart", (e) => {
       e.stopPropagation();
       onElementClick(e, 'borderLabel', b.id);
     });
-    borderLabelsGroup.appendChild(text);
+    borderLabelsGroup.appendChild(g);
   });
 
   // 5. Draw Free Custom Texts
   freeTexts.forEach(t => {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "draggable-label");
+    g.setAttribute("data-id", t.id);
+    g.setAttribute("data-type", "freeText");
+    if (t.angle) {
+      g.setAttribute("transform", `rotate(${t.angle}, ${t.x}, ${t.y})`);
+    }
+
+    const fontSize = parseFloat(t.fontSize || "13");
+    const boxW = t.text.length * (fontSize * 0.6) + 12;
+    const boxH = fontSize * 1.6;
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", t.x - boxW / 2);
+    rect.setAttribute("y", t.y - boxH / 1.5 + 2);
+    rect.setAttribute("width", boxW);
+    rect.setAttribute("height", boxH);
+    rect.setAttribute("fill", "white");
+    rect.setAttribute("stroke", "#b0bec5");
+    rect.setAttribute("stroke-width", "1.5");
+    rect.setAttribute("rx", "3");
+
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", t.x);
     text.setAttribute("y", t.y);
@@ -1027,19 +1087,17 @@ function renderSVG() {
     text.setAttribute("font-size", t.fontSize || "13");
     text.setAttribute("font-weight", t.isBold ? "bold" : "normal");
     text.setAttribute("text-anchor", "middle");
-    text.setAttribute("class", "draggable-label");
-    text.setAttribute("data-id", t.id);
-    text.setAttribute("data-type", "freeText");
-    if (t.angle) {
-      text.setAttribute("transform", `rotate(${t.angle}, ${t.x}, ${t.y})`);
-    }
     text.textContent = t.text;
-    text.onclick = (e) => onElementClick(e, 'freeText', t.id);
-    text.addEventListener("touchstart", (e) => {
+
+    g.appendChild(rect);
+    g.appendChild(text);
+
+    g.onclick = (e) => onElementClick(e, 'freeText', t.id);
+    g.addEventListener("touchstart", (e) => {
       e.stopPropagation();
       onElementClick(e, 'freeText', t.id);
     });
-    notesGroup.appendChild(text);
+    notesGroup.appendChild(g);
   });
 }
 
