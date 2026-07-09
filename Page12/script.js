@@ -908,7 +908,7 @@ function renderSVG() {
     }
 
     if (showBg && (!s.color || s.color === "#ffffff")) {
-      polygon.setAttribute("fill", "rgba(255, 255, 255, 0.6)");
+      polygon.setAttribute("fill", "transparent");
     } else {
       polygon.setAttribute("fill", s.color || "#ffffff");
     }
@@ -2436,8 +2436,8 @@ function togglePrintAgriBackground() {
     polygons.forEach(p => {
       // Check if it's supposed to be white/bg and not a specific color like waterways
       const currentFill = p.getAttribute("fill");
-      if (currentFill === "rgba(255, 255, 255, 0.6)" || currentFill === "#ffffff" || currentFill === "rgba(255, 255, 255, 0.15)" || currentFill === "url(#agriPattern)") {
-        p.setAttribute("fill", showBg ? "rgba(255, 255, 255, 0.6)" : "#ffffff");
+      if (currentFill === "transparent" || currentFill === "rgba(255, 255, 255, 0.6)" || currentFill === "#ffffff" || currentFill === "rgba(255, 255, 255, 0.15)" || currentFill === "url(#agriPattern)") {
+        p.setAttribute("fill", showBg ? "transparent" : "#ffffff");
       }
     });
   }
