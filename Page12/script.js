@@ -330,6 +330,7 @@ function generateCustomLand() {
   const avgL = (l1 + l2) / 2;
   const maxW = Math.max(w1, w2);
   const maxL = Math.max(l1, l2);
+  const isRotated = avgL > avgW;
 
   const svgElement = document.getElementById("dallalSvg");
   const wrapperElement = document.querySelector(".canvas-wrapper");
