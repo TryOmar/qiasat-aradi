@@ -331,8 +331,6 @@ function generateCustomLand() {
   if (avgL > avgW) {
     // Portrait Mode
     svgElement.setAttribute("viewBox", "0 0 650 900");
-    const bgImg = document.getElementById("agriBgImage");
-    if (bgImg) { bgImg.setAttribute("width", "650"); bgImg.setAttribute("height", "900"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
     setDynamicPrintPage("portrait");
     centerX = 325;
@@ -341,8 +339,6 @@ function generateCustomLand() {
   } else {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
-    const bgImg = document.getElementById("agriBgImage");
-    if (bgImg) { bgImg.setAttribute("width", "900"); bgImg.setAttribute("height", "650"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
     setDynamicPrintPage("landscape");
     centerX = 450;
