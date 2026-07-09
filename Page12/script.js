@@ -935,22 +935,89 @@ function renderSVG() {
       onElementClick(e, 'shape', s.id);
     });
 
-    // Owner text line
-    addTextLineWithBg(textGroup, s.owner, s.textX, s.textY - 22, "#000000", 14, true, showBg);
-
-    // Area text line
+    // Background card for readability on top of image
+    let maxChars = 0;
+    let lineCount = 0;
+    if (s.owner) { maxChars = Math.max(maxChars, s.owner.length); lineCount++; }
     let areaText = "";
     if (s.area && s.area.sqm) {
       const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
       areaText = `المساحة: ${sqmFormatted} متر مربع`;
+      maxChars = Math.max(maxChars, areaText.length);
+      lineCount++;
     }
-    addTextLineWithBg(textGroup, areaText, s.textX, s.textY + 8, "#1b5e20", 13, true, showBg);
+    let noteLines = [];
+    if (s.notes) {
+      noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      noteLines.forEach(lineText => {
+        maxChars = Math.max(maxChars, lineText.length);
+        lineCount++;
+      });
+    }
+
+    if (lineCount > 0 && showBg) {
+      const boxW = Math.max(120, maxChars * 8 + 20);
+      const boxH = lineCount * 22 + 10;
+      const boxX = s.textX - boxW / 2;
+      const boxY = s.textY - 36;
+
+      const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      bgRect.setAttribute("class", "text-bg-card");
+      bgRect.setAttribute("x", boxX);
+      bgRect.setAttribute("y", boxY);
+      bgRect.setAttribute("width", boxW);
+      bgRect.setAttribute("height", boxH);
+      bgRect.setAttribute("fill", "#ffffff");
+      bgRect.setAttribute("fill-opacity", "0.85");
+      bgRect.setAttribute("stroke", "#1b5e20");
+      bgRect.setAttribute("stroke-width", "1.5");
+      bgRect.setAttribute("rx", "6");
+      bgRect.setAttribute("ry", "6");
+      bgRect.setAttribute("pointer-events", "none");
+      textGroup.appendChild(bgRect);
+    }
+
+    // Owner text line
+    const tSpanOwner = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    tSpanOwner.setAttribute("x", s.textX);
+    tSpanOwner.setAttribute("y", s.textY - 22);
+    tSpanOwner.setAttribute("fill", "#000000");
+    tSpanOwner.setAttribute("font-size", "14");
+    tSpanOwner.setAttribute("font-weight", "bold");
+    tSpanOwner.setAttribute("text-anchor", "middle");
+    tSpanOwner.textContent = s.owner || "";
+    textGroup.appendChild(tSpanOwner);
+
+    // Area text line
+    const tSpanArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    tSpanArea.setAttribute("x", s.textX);
+    tSpanArea.setAttribute("y", s.textY + 8);
+    tSpanArea.setAttribute("fill", "#1b5e20");
+    tSpanArea.setAttribute("font-size", "13");
+    tSpanArea.setAttribute("font-weight", "bold");
+    tSpanArea.setAttribute("text-anchor", "middle");
+    
+    if (s.area && s.area.sqm) {
+      const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+      tSpanArea.textContent = `المساحة: ${sqmFormatted} متر مربع`;
+    } else {
+      tSpanArea.textContent = "";
+    }
+    textGroup.appendChild(tSpanArea);
 
     // Notes line
     if (s.notes) {
-      const lines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      const lines = s.notes.split("\n");
       lines.forEach((lineText, idx) => {
-        addTextLineWithBg(textGroup, lineText, s.textX, s.textY + 38 + (idx * 20), "#555555", 11.5, false, showBg);
+        const tSpanNote = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tSpanNote.setAttribute("x", s.textX);
+        tSpanNote.setAttribute("y", s.textY + 38 + (idx * 20));
+        tSpanNote.setAttribute("fill", "#555555");
+        tSpanNote.setAttribute("font-size", "11.5");
+        tSpanNote.setAttribute("text-anchor", "middle");
+        tSpanNote.textContent = lineText.trim();
+        textGroup.appendChild(tSpanNote);
+      });
     }
 
     shapesGroup.appendChild(textGroup);
@@ -2429,39 +2496,4 @@ function togglePrintAgriBackground() {
       r.style.display = showBg ? "block" : "none";
     });
   }
-}
-
-// Helper function to render text line with its own background rect
-function addTextLineWithBg(textGroup, textContent, x, y, color, fontSize, isBold, showBg) {
-  if (!textContent) return;
-
-  if (showBg) {
-    const boxW = textContent.length * (fontSize * 0.6) + 12;
-    const boxH = fontSize * 1.6;
-    const boxX = x - boxW / 2;
-    const boxY = y - boxH / 1.5 + 2;
-
-    const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    bgRect.setAttribute("class", "text-bg-card");
-    bgRect.setAttribute("x", boxX);
-    bgRect.setAttribute("y", boxY);
-    bgRect.setAttribute("width", boxW);
-    bgRect.setAttribute("height", boxH);
-    bgRect.setAttribute("fill", "white");
-    bgRect.setAttribute("stroke", "#b0bec5");
-    bgRect.setAttribute("stroke-width", "1.5");
-    bgRect.setAttribute("rx", "3");
-    bgRect.setAttribute("pointer-events", "none");
-    textGroup.appendChild(bgRect);
-  }
-
-  const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  textNode.setAttribute("x", x);
-  textNode.setAttribute("y", y);
-  textNode.setAttribute("fill", color);
-  textNode.setAttribute("font-size", fontSize);
-  textNode.setAttribute("font-weight", isBold ? "bold" : "normal");
-  textNode.setAttribute("text-anchor", "middle");
-  textNode.textContent = textContent;
-  textGroup.appendChild(textNode);
 }
