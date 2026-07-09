@@ -313,30 +313,40 @@ function generateCustomLand() {
   waterways = [];
   selectedElement = null;
 
-  const centerX = 450;
-  const centerY = 325;
-
-  // Let's check if the height is greater than width, so we swap them (rotate 90 degrees) to fit landscape A4 perfectly!
-  let isRotated = false;
-  let effW1 = w1, effW2 = w2, effL1 = l1, effL2 = l2;
-  let effW1Dir = w1Dir, effW2Dir = w2Dir, effL1Dir = l1Dir, effL2Dir = l2Dir;
+  let centerX = 450;
+  let centerY = 325;
+  let scale = 1;
 
   const avgW = (w1 + w2) / 2;
   const avgL = (l1 + l2) / 2;
+  const maxW = Math.max(w1, w2);
+  const maxL = Math.max(l1, l2);
+
+  const svgElement = document.getElementById("dallalSvg");
+  const wrapperElement = document.querySelector(".canvas-wrapper");
 
   if (avgL > avgW) {
-    // Rotation logic has been removed to respect explicit input orientation
+    // Portrait Mode
+    svgElement.setAttribute("viewBox", "0 0 650 900");
+    if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
+    setDynamicPrintPage("portrait");
+    centerX = 325;
+    centerY = 450;
+    scale = Math.min(500 / maxW, 740 / maxL);
+  } else {
+    // Landscape Mode
+    svgElement.setAttribute("viewBox", "0 0 900 650");
+    if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
+    setDynamicPrintPage("landscape");
+    centerX = 450;
+    centerY = 325;
+    scale = Math.min(740 / maxW, 500 / maxL);
   }
 
-  // Scale calculations to fit a max boundary of 740 pixels horizontally or 500 pixels vertically
-  const maxW = Math.max(effW1, effW2);
-  const maxL = Math.max(effL1, effL2);
-  const scale = Math.min(740 / maxW, 500 / maxL);
-
-  const drawW1 = effW1 * scale;
-  const drawW2 = effW2 * scale;
-  const drawL1 = effL1 * scale;
-  const drawL2 = effL2 * scale;
+  const drawW1 = w1 * scale;
+  const drawW2 = w2 * scale;
+  const drawL1 = l1 * scale;
+  const drawL2 = l2 * scale;
   const avgHeight = (drawL1 + drawL2) / 2;
 
   // Vertices of the main quadrilateral shape
@@ -2308,4 +2318,28 @@ function printDallalMap() {
 
   const fab = document.getElementById("fabContainer");
   if (fab) fab.classList.remove("open");
+}
+
+// Function to dynamically set print page orientation based on land dimensions
+function setDynamicPrintPage(orientation) {
+  let styleTag = document.getElementById("dynamic-print-style");
+  if (!styleTag) {
+    styleTag = document.createElement("style");
+    styleTag.id = "dynamic-print-style";
+    document.head.appendChild(styleTag);
+  }
+  
+  if (orientation === "portrait") {
+    styleTag.innerHTML = `
+      @media print {
+        @page { size: A4 portrait !important; margin: 5mm; }
+      }
+    `;
+  } else {
+    styleTag.innerHTML = `
+      @media print {
+        @page { size: A4 landscape !important; margin: 5mm; }
+      }
+    `;
+  }
 }
