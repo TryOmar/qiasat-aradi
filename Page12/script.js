@@ -48,6 +48,8 @@ let saveStateTimeout = null;
 
 // Smart Area Tabs
 let activeSmartAreaTab = 'sqm';
+let showFeddanConversion = localStorage.getItem("dallal_show_feddan") === "true";
+let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 175.0347;
 
 // Color Palette for Shapes
 const colorsList = [
@@ -263,10 +265,14 @@ function applyViewportTransform() {
 // Smart Area Math Conversion Helpers
 // ----------------------------------------------------
 function sqmToFeddanCaratShares(sqm) {
-  const feddan = Math.floor(sqm / 4200.833);
-  const remSqm = sqm - (feddan * 4200.833);
-  const carat = Math.floor(remSqm / 175.0347);
-  let shares = Math.round((remSqm - (carat * 175.0347)) / 7.293 * 100) / 100;
+  const cSize = caratSize;
+  const fSize = cSize * 24;
+  const sSize = cSize / 24;
+
+  const feddan = Math.floor(sqm / fSize);
+  const remSqm = sqm - (feddan * fSize);
+  const carat = Math.floor(remSqm / cSize);
+  let shares = Math.round((remSqm - (carat * cSize)) / sSize * 100) / 100;
   
   let finalCarat = carat;
   let finalFeddan = feddan;
@@ -835,7 +841,7 @@ function renderSVG() {
   if (chk) showBg = chk.checked;
   const printChk = document.getElementById("chkPrintAgriBackground");
   if (printChk && document.getElementById("printOverlay").style.display === "block") {
-    showBg = !printChk.checked;
+    showBg = printChk.checked;
   }
 
   const bgImg = document.getElementById("agriBgImage");
@@ -905,7 +911,7 @@ function renderSVG() {
     // Check if we are inside print overlay and if it has its own toggle
     const printChk = document.getElementById("chkPrintAgriBackground");
     if (printChk && document.getElementById("printOverlay").style.display === "block") {
-      showBg = !printChk.checked;
+      showBg = printChk.checked;
     }
 
     if (showBg && (!s.color || s.color === "#ffffff" || s.color === "#f1f8e9" || s.color === "#e8f5e9")) {
@@ -945,6 +951,13 @@ function renderSVG() {
     if (s.area && s.area.sqm) {
       const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
       lines.push({ text: `المساحة: ${sqmFormatted} متر مربع`, isBold: true, fontSize: "13", color: "#1b5e20" });
+      if (showFeddanConversion) {
+        const detail = sqmToFeddanCaratShares(s.area.sqm);
+        lines.push({ text: `تعادل:`, isBold: false, fontSize: "11", color: "#555555" });
+        lines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        lines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        lines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+      }
     }
     if (s.notes) {
       const noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
@@ -1487,6 +1500,28 @@ function openModalForElement(type, id) {
         <label>المساحة (بالمتر المربع):</label>
         <input type="text" inputmode="decimal" id="modal-sqm" value="${s.area.sqm || 0}">
       </div>
+      <div class="editor-form-group" style="background: #e8f5e9; padding: 10px; border-radius: 6px; border: 1.5px solid #a5d6a7; margin-top: 10px; margin-bottom: 10px; font-family: 'Cairo';">
+        ${showFeddanConversion ? `
+          <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">تعادل تقريباً:</div>
+          <div style="display: flex; justify-content: space-around; text-align: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #c8e6c9;">
+            <div>
+              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).feddan}</span>
+              <div style="font-size: 11px; color: #555;">فدان</div>
+            </div>
+            <div style="border-right: 1px solid #eee; border-left: 1px solid #eee; padding: 0 10px;">
+              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).carat}</span>
+              <div style="font-size: 11px; color: #555;">قيراط</div>
+            </div>
+            <div>
+              <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).shares}</span>
+              <div style="font-size: 11px; color: #555;">سهم</div>
+            </div>
+          </div>
+          <button type="button" onclick="showCaratConversionModal(); closeModal();" style="margin-top: 8px; width: 100%; height: 30px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
+        ` : `
+          <button type="button" onclick="showCaratConversionModal(); closeModal();" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
+        `}
+      </div>
       <div class="editor-form-group">
         <label>اكتب ما تريد:</label>
         <textarea id="modal-notes" rows="3" style="width:100%; box-sizing:border-box; font-family:'Cairo'; font-size:12px;">${s.notes || ''}</textarea>
@@ -1663,6 +1698,28 @@ function populateSidebarEditor() {
         <div class="editor-form-group">
           <label>المساحة (بالمتر المربع):</label>
           <input type="text" inputmode="decimal" value="${s.area.sqm || 0}" oninput="updateSelectedShapeArea('sqm', this.value)">
+        </div>
+        <div class="editor-form-group" style="background: #e8f5e9; padding: 10px; border-radius: 6px; border: 1.5px solid #a5d6a7; margin-top: 10px; margin-bottom: 10px; font-family: 'Cairo';">
+          ${showFeddanConversion ? `
+            <div style="font-weight: bold; font-size: 13px; color: #1b5e20; margin-bottom: 5px; text-align: right;">تعادل تقريباً:</div>
+            <div style="display: flex; justify-content: space-around; text-align: center; background: white; padding: 5px; border-radius: 4px; border: 1px solid #c8e6c9;">
+              <div>
+                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).feddan}</span>
+                <div style="font-size: 11px; color: #555;">فدان</div>
+              </div>
+              <div style="border-right: 1px solid #eee; border-left: 1px solid #eee; padding: 0 10px;">
+                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).carat}</span>
+                <div style="font-size: 11px; color: #555;">قيراط</div>
+              </div>
+              <div>
+                <span style="font-weight: 800; color: #c62828; font-size: 15px;">${sqmToFeddanCaratShares(s.area.sqm).shares}</span>
+                <div style="font-size: 11px; color: #555;">سهم</div>
+              </div>
+            </div>
+            <button type="button" onclick="showCaratConversionModal()" style="margin-top: 8px; width: 100%; height: 30px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer;">⚙️ تعديل خيارات التحويل</button>
+          ` : `
+            <button type="button" onclick="showCaratConversionModal()" style="width: 100%; height: 35px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">⚖️ تحويل إلى فدان/قيراط/سهم</button>
+          `}
         </div>
         <div class="editor-form-group">
           <label>اكتب ما تريد:</label>
@@ -2415,8 +2472,8 @@ function printDallalMap() {
         
         <div class="no-print" style="display: flex; justify-content: center; width: 100%; padding: 5px 15px; background: #f9f9f9; font-family: 'Cairo', sans-serif;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: bold; color: #1b5e20;">
-            <input type="checkbox" id="chkPrintAgriBackground" onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
-            إخفاء صورة الخلفية عند الطباعة
+            <input type="checkbox" id="chkPrintAgriBackground" checked onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
+            تضمين الخلفية في الطباعة
           </label>
         </div>
 
@@ -2488,8 +2545,7 @@ function toggleAgriBackground() {
 
 function togglePrintAgriBackground() {
   // Checkbox in print overlay toggled, update the SVG in the overlay directly
-  const hideBg = document.getElementById("chkPrintAgriBackground").checked;
-  const showBg = !hideBg;
+  const showBg = document.getElementById("chkPrintAgriBackground").checked;
   const overlaySvg = document.querySelector("#printOverlay .canvas-container svg");
   
   if (overlaySvg) {
@@ -2518,4 +2574,91 @@ function togglePrintAgriBackground() {
       r.style.display = showBg ? "block" : "none";
     });
   }
+}
+
+// ----------------------------------------------------
+// Carat Conversion Dialog Functions
+// ----------------------------------------------------
+function showCaratConversionModal() {
+  const modal = document.getElementById("caratConversionModal");
+  if (!modal) return;
+  modal.style.display = "block";
+
+  // Pre-fill selection based on current caratSize
+  const select = document.getElementById("modal-carat-select");
+  const customInput = document.getElementById("modal-carat-custom");
+
+  const valStr = caratSize.toString();
+  if (["175.035", "175", "171.388", "168"].includes(valStr)) {
+    select.value = valStr;
+    customInput.style.display = "none";
+  } else {
+    select.value = "custom";
+    customInput.value = caratSize;
+    customInput.style.display = "inline-block";
+  }
+}
+
+function closeCaratConversionModal() {
+  const modal = document.getElementById("caratConversionModal");
+  if (modal) modal.style.display = "none";
+}
+
+function handleModalCaratSelectChange() {
+  const select = document.getElementById("modal-carat-select");
+  const customInput = document.getElementById("modal-carat-custom");
+  if (select.value === "custom") {
+    customInput.style.display = "inline-block";
+    customInput.focus();
+  } else {
+    customInput.style.display = "none";
+  }
+}
+
+function applyCaratConversion() {
+  const select = document.getElementById("modal-carat-select");
+  const customInput = document.getElementById("modal-carat-custom");
+  
+  let selectedVal = 175.0347;
+  if (select.value === "custom") {
+    const customVal = parseFloat(customInput.value);
+    if (isNaN(customVal) || customVal <= 0) {
+      alert("الرجاء إدخال مساحة صحيحة للقيراط");
+      return;
+    }
+    selectedVal = customVal;
+  } else {
+    selectedVal = parseFloat(select.value);
+  }
+
+  caratSize = selectedVal;
+  showFeddanConversion = true;
+
+  localStorage.setItem("dallal_carat_size", caratSize);
+  localStorage.setItem("dallal_show_feddan", "true");
+
+  // Re-render
+  renderSVG();
+  
+  // Re-populate editor panel if an element is selected
+  if (selectedElement && selectedElement.type === 'shape') {
+    populateSidebarEditor();
+  }
+
+  closeCaratConversionModal();
+}
+
+function disableCaratConversion() {
+  showFeddanConversion = false;
+  localStorage.setItem("dallal_show_feddan", "false");
+
+  // Re-render
+  renderSVG();
+
+  // Re-populate editor panel if an element is selected
+  if (selectedElement && selectedElement.type === 'shape') {
+    populateSidebarEditor();
+  }
+
+  closeCaratConversionModal();
 }

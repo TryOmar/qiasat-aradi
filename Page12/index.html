@@ -283,6 +283,31 @@
     </div>
   </div>
 
+  <!-- Carat Conversion Modal -->
+  <div id="caratConversionModal" class="modal no-print">
+    <div class="modal-content" style="max-width: 400px; font-family: 'Cairo', sans-serif; direction: rtl;">
+      <span class="modal-close" onclick="closeCaratConversionModal()">&times;</span>
+      <h3 style="color: #1b5e20; margin-bottom: 15px; font-weight: 800; text-align: center;">⚖️ تحويل المساحة إلى فدان وقيراط وسهم</h3>
+      <div style="padding: 10px 0;">
+        <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px;">اختر مساحة القيراط بالمتر المربع:</label>
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 15px;">
+          <select id="modal-carat-select" onchange="handleModalCaratSelectChange()" style="flex: 1; height: 38px; border-radius: 6px; border: 1.5px solid #ccc; font-weight: bold; font-family: 'Cairo'; padding: 5px;">
+            <option value="175.035">175.035 متر²</option>
+            <option value="175">175 متر²</option>
+            <option value="171.388">171.388 متر²</option>
+            <option value="168">168 متر²</option>
+            <option value="custom">أخرى (مساحة مخصصة)...</option>
+          </select>
+          <input type="text" inputmode="decimal" id="modal-carat-custom" placeholder="مثال: 170" style="display: none; width: 100px; height: 38px; border-radius: 6px; border: 1.5px solid #ccc; font-weight: bold; text-align: center; font-family: 'Cairo';">
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top: 15px; display: flex; gap: 10px;">
+        <button type="button" class="modal-save-btn" onclick="applyCaratConversion()" style="flex: 2; padding: 12px; font-size: 15px;">حل وتفعيل</button>
+        <button type="button" class="modal-cancel-btn" onclick="disableCaratConversion()" style="flex: 1; padding: 12px; font-size: 13px; background-color: #c62828;">إيقاف التحويل</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Smart Area Calculator Modal -->
   <div id="smartAreaModal" class="modal no-print">
     <div class="modal-content" style="max-width: 440px;">
