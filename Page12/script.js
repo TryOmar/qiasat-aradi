@@ -1488,7 +1488,7 @@ function openModalForElement(type, id) {
         <input type="text" inputmode="decimal" id="modal-sqm" value="${s.area.sqm || 0}">
       </div>
       <div class="editor-form-group">
-        <label>ملاحظات القطعة:</label>
+        <label>اكتب ما تريد:</label>
         <textarea id="modal-notes" rows="3" style="width:100%; box-sizing:border-box; font-family:'Cairo'; font-size:12px;">${s.notes || ''}</textarea>
       </div>
       <div class="editor-form-group">
@@ -1665,7 +1665,7 @@ function populateSidebarEditor() {
           <input type="text" inputmode="decimal" value="${s.area.sqm || 0}" oninput="updateSelectedShapeArea('sqm', this.value)">
         </div>
         <div class="editor-form-group">
-          <label>ملاحظات القطعة:</label>
+          <label>اكتب ما تريد:</label>
           <textarea rows="3" oninput="updateSelectedShapeField('notes', this.value)">${s.notes || ''}</textarea>
         </div>
         <div class="editor-form-group">
