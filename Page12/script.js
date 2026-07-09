@@ -2288,11 +2288,11 @@ function printDallalMap() {
 
         <!-- Controls (No Print) -->
         <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; padding: 15px; background: #f9f9f9; border-top: 1px solid #eee; font-family: 'Cairo', sans-serif;">
-          <button onclick="let svg=document.querySelector('#printOverlay .canvas-container svg'); let curr=parseFloat(svg.style.width||100); svg.style.width=(curr*1.25)+'%'; svg.style.height='auto';" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">+</button>
+          <button onclick="zoomPrintOverlay(1.25)" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">+</button>
           
-          <button onclick="let svg=document.querySelector('#printOverlay .canvas-container svg'); let curr=parseFloat(svg.style.width||100); svg.style.width=(curr*0.8)+'%'; svg.style.height='auto';" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">-</button>
+          <button onclick="zoomPrintOverlay(0.8)" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">-</button>
           
-          <button onclick="let el=document.getElementById('printOverlay'); if(!document.fullscreenElement){ if(el.requestFullscreen) el.requestFullscreen(); else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen(); } else { if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 13px; padding: 4px 12px; height: 35px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f;" title="ملء الشاشة">
+          <button onclick="toggleFullscreenPrintOverlay()" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 13px; padding: 4px 12px; height: 35px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f;" title="ملء الشاشة">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
             <span>ملء الشاشة</span>
           </button>
@@ -2363,3 +2363,27 @@ function setDynamicPrintPage(orientation) {
     `;
   }
 }
+
+ w i n d o w . p r i n t O v e r l a y Z o o m   =   1 . 0 ; 
+ f u n c t i o n   z o o m P r i n t O v e r l a y ( f a c t o r )   { 
+     w i n d o w . p r i n t O v e r l a y Z o o m   * =   f a c t o r ; 
+     c o n s t   s v g   =   d o c u m e n t . q u e r y S e l e c t o r ( ' # p r i n t O v e r l a y   . c a n v a s - c o n t a i n e r   s v g ' ) ; 
+     i f   ( s v g )   { 
+         s v g . s t y l e . t r a n s f o r m   =   \ s c a l e ( \ ) \ ; 
+         s v g . s t y l e . t r a n s f o r m O r i g i n   =   ' c e n t e r   c e n t e r ' ; 
+         s v g . s t y l e . t r a n s i t i o n   =   ' t r a n s f o r m   0 . 2 s ' ; 
+     } 
+ } 
+ 
+ f u n c t i o n   t o g g l e F u l l s c r e e n P r i n t O v e r l a y ( )   { 
+     c o n s t   e l   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' p r i n t O v e r l a y ' ) ; 
+     i f   ( ! d o c u m e n t . f u l l s c r e e n E l e m e n t )   { 
+         i f   ( e l . r e q u e s t F u l l s c r e e n )   e l . r e q u e s t F u l l s c r e e n ( ) ; 
+         e l s e   i f   ( e l . w e b k i t R e q u e s t F u l l s c r e e n )   e l . w e b k i t R e q u e s t F u l l s c r e e n ( ) ; 
+     }   e l s e   { 
+         i f   ( d o c u m e n t . e x i t F u l l s c r e e n )   d o c u m e n t . e x i t F u l l s c r e e n ( ) ; 
+         e l s e   i f   ( d o c u m e n t . w e b k i t E x i t F u l l s c r e e n )   d o c u m e n t . w e b k i t E x i t F u l l s c r e e n ( ) ; 
+     } 
+ } 
+  
+ 
