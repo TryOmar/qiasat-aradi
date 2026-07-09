@@ -317,6 +317,9 @@ function generateCustomLand() {
   let centerY = 325;
   let scale = 1;
 
+  let effW1 = w1, effW2 = w2, effL1 = l1, effL2 = l2;
+  let effW1Dir = w1Dir, effW2Dir = w2Dir, effL1Dir = l1Dir, effL2Dir = l2Dir;
+
   const avgW = (w1 + w2) / 2;
   const avgL = (l1 + l2) / 2;
   const maxW = Math.max(w1, w2);
