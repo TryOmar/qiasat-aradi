@@ -913,22 +913,24 @@ function generateCustomLand(useCustomWidths = false) {
         textY: (p_tl.y + p_tr.y) / 2 + ( (p_bl.y + p_br.y) / 2 - (p_tl.y + p_tr.y) / 2 ) * 0.25,
         subShapes: [
           {
-            name: "الجزء العلوي - " + ownerName,
+            name: "القطعة الغربية",
             points: [p_tl, p_tr, p_w_tr, p_w_tl],
             area: upperArea,
             topWidth: calcDist(p_tl, p_tr),
             botWidth: calcDist(p_w_tl, p_w_tr),
             leftLen: calcDist(p_tl, p_w_tl),
-            rightLen: calcDist(p_tr, p_w_tr)
+            rightLen: calcDist(p_tr, p_w_tr),
+            perimeter: calcDist(p_tl, p_tr) + calcDist(p_w_tl, p_w_tr) + calcDist(p_tl, p_w_tl) + calcDist(p_tr, p_w_tr)
           },
           {
-            name: "الجزء السفلي - " + ownerName,
+            name: "القطعة الشرقية",
             points: [p_w_bl, p_w_br, p_br, p_bl],
             area: lowerArea,
             topWidth: calcDist(p_w_bl, p_w_br),
             botWidth: calcDist(p_bl, p_br),
             leftLen: calcDist(p_w_bl, p_bl),
-            rightLen: calcDist(p_w_br, p_br)
+            rightLen: calcDist(p_w_br, p_br),
+            perimeter: calcDist(p_w_bl, p_w_br) + calcDist(p_bl, p_br) + calcDist(p_w_bl, p_bl) + calcDist(p_w_br, p_br)
           }
         ]
       });
@@ -2213,6 +2215,7 @@ function showInspectorTooltip(e, data) {
     html += `<p><span class="label">العرض السفلي:</span> <span class="value">${data.botWidth.toFixed(2)} م</span></p>`;
     html += `<p><span class="label">الطول الأيمن:</span> <span class="value">${data.rightLen.toFixed(2)} م</span></p>`;
     html += `<p><span class="label">الطول الأيسر:</span> <span class="value">${data.leftLen.toFixed(2)} م</span></p>`;
+    html += `<p><span class="label">المحيط:</span> <span class="value">${data.perimeter.toFixed(2)} م</span></p>`;
   }
   html += `<p><span class="label">النسبة من الإجمالي:</span> <span class="value" style="color: #64b5f6;">%${pct}</span></p>`;
   
@@ -3190,6 +3193,55 @@ function printDallalMap() {
   const timeStr = now.toLocaleTimeString("ar-EG");
   const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+  let detailedReportHTML = "";
+  if (activeTemplateType === 'mixed_waterway_new') {
+    detailedReportHTML += `<div class="mixed-report-container" style="padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl; width: 100%; max-width: 900px; margin: 20px auto; page-break-inside: auto;">`;
+    detailedReportHTML += `<h2 style="color: #1b5e20; text-align: center; border-bottom: 2px solid #1b5e20; padding-bottom: 10px; margin-bottom: 20px; page-break-after: avoid;">التقرير التفصيلي لقطع الأراضي</h2>`;
+    
+    shapes.forEach(s => {
+      detailedReportHTML += `<div style="background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 8px; padding: 15px; margin-bottom: 20px; page-break-inside: avoid;">`;
+      detailedReportHTML += `<h3 style="color: #2e7d32; margin-top: 0; margin-bottom: 10px;">👤 ${s.owner || s.notes || 'شريك'}</h3>`;
+      detailedReportHTML += `<p style="font-weight: bold; font-size: 14px; margin-bottom: 15px; color: #333; padding-right: 5px;">إجمالي المساحة: ${s.area.sqm.toFixed(2)} م² (${s.area.feddan} فدان، ${s.area.carat} قيراط، ${s.area.shares} سهم)</p>`;
+      
+      if (s.subShapes && s.subShapes.length > 0) {
+        detailedReportHTML += `<div style="display: flex; gap: 15px; flex-wrap: wrap;">`;
+        s.subShapes.forEach(sub => {
+          detailedReportHTML += `<div style="flex: 1; min-width: 250px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">`;
+          detailedReportHTML += `<h4 style="color: #1565c0; margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed #bbdefb; padding-bottom: 5px;">📍 ${sub.name}</h4>`;
+          detailedReportHTML += `<table style="width: 100%; font-size: 13px; border-collapse: collapse;">`;
+          const addRowStr = (label, valStr) => `<tr><td style="padding: 4px 0; color: #555;">${label}</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${valStr}</td></tr>`;
+          
+          detailedReportHTML += addRowStr("المساحة:", `${sub.area.toFixed(2)} م²`);
+          detailedReportHTML += addRowStr("العرض العلوي:", `${sub.topWidth.toFixed(2)} م`);
+          detailedReportHTML += addRowStr("العرض السفلي:", `${sub.botWidth.toFixed(2)} م`);
+          detailedReportHTML += addRowStr("الطول الأيمن:", `${sub.rightLen.toFixed(2)} م`);
+          detailedReportHTML += addRowStr("الطول الأيسر:", `${sub.leftLen.toFixed(2)} م`);
+          detailedReportHTML += addRowStr("المحيط الكلي:", `${sub.perimeter.toFixed(2)} م`);
+          
+          detailedReportHTML += `</table></div>`;
+        });
+        detailedReportHTML += `</div>`;
+      }
+      detailedReportHTML += `</div>`;
+    });
+
+    if (waterways && waterways.length > 0) {
+       detailedReportHTML += `<div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 15px; margin-bottom: 20px; page-break-inside: avoid;">`;
+       detailedReportHTML += `<h3 style="color: #0d47a1; margin-top: 0; margin-bottom: 10px;">💧 تفاصيل المجرى المائي</h3>`;
+       waterways.forEach(w => {
+         if (w.stats) {
+            detailedReportHTML += `<table style="width: 100%; font-size: 13px; border-collapse: collapse; max-width: 400px; margin-right: 10px;">`;
+            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">المساحة الإجمالية:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.area.toFixed(2)} م²</td></tr>`;
+            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">الطول الإجمالي:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.length.toFixed(2)} م</td></tr>`;
+            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">العرض التقريبي:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.width.toFixed(2)} م</td></tr>`;
+            detailedReportHTML += `</table>`;
+         }
+       });
+       detailedReportHTML += `</div>`;
+    }
+    detailedReportHTML += `</div>`;
+  }
+
   const printOverlay = document.getElementById("printOverlay");
   printOverlay.innerHTML = `
       <style>
@@ -3244,6 +3296,8 @@ function printDallalMap() {
         <div class="canvas-container" style="flex: 1; width: 100%; max-width: 100%; margin: 5px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 5px; overflow: hidden;">
           ${svgHTML}
         </div>
+
+        ${detailedReportHTML}
 
         <!-- Controls (No Print) -->
         <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; padding: 15px; background: #f9f9f9; border-top: 1px solid #eee; font-family: 'Cairo', sans-serif;">
