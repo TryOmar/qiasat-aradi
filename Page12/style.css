@@ -43,13 +43,66 @@ body {
 .instruction-card {
   width: 100%;
   box-sizing: border-box;
-  background: #e0f2f1;
-  border-right: 5px solid #004d40;
-  border-radius: 8px;
-  color: #004d40;
-  padding: 12px 18px;
-  font-size: 13px;
   margin-bottom: 15px;
+}
+
+.high-contrast-bar {
+  background-color: #1a1a2e !important;
+  color: #ffffff !important;
+  border-right: 8px solid #ffeb3b !important;
+  border-radius: 8px;
+  padding: 15px !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  font-family: 'Cairo', sans-serif;
+}
+
+.hc-header {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffeb3b;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px dashed rgba(255,235,59,0.3);
+  padding-bottom: 8px;
+}
+
+.hc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.hc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.2s;
+}
+.hc-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.hc-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.hc-text {
+  color: #e0e0e0;
+}
+
+.hc-text strong {
+  color: #ffeb3b;
+  font-weight: bold;
 }
 
 /* Workspace Grid/Flex */
@@ -103,10 +156,16 @@ body {
 }
 
 .canvas-hint {
-  font-size: 11px;
-  color: #666;
-  margin-top: 8px;
-  font-weight: bold;
+  font-size: 13px;
+  color: #000;
+  background-color: #ffeb3b;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-weight: 900;
+  display: inline-block;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  border: 1px solid #fbc02d;
 }
 
 /* Sidebar Card */
