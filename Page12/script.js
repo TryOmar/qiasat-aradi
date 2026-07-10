@@ -167,7 +167,9 @@ function saveState() {
     zoomScale: zoomScale,
     panX: panX,
     panY: panY,
-    activeTemplateType: activeTemplateType
+    activeTemplateType: activeTemplateType,
+    customPartnerWidths: customPartnerWidths ? JSON.parse(JSON.stringify(customPartnerWidths)) : null,
+    customWaterwayData: customWaterwayData ? JSON.parse(JSON.stringify(customWaterwayData)) : null
   };
 
   if (undoStack.length > 0) {
@@ -226,6 +228,8 @@ function restoreState(state) {
   panX = state.panX || 0;
   panY = state.panY || 0;
   activeTemplateType = state.activeTemplateType || 'rectangle';
+  customPartnerWidths = state.customPartnerWidths ? JSON.parse(JSON.stringify(state.customPartnerWidths)) : null;
+  customWaterwayData = state.customWaterwayData ? JSON.parse(JSON.stringify(state.customWaterwayData)) : null;
 
   selectedElement = null;
   applyViewportTransform();
@@ -253,7 +257,8 @@ function autoSaveCurrentState() {
       d1: document.getElementById("start-d1")?.value || "",
       d2: document.getElementById("start-d2")?.value || "",
       partners: document.getElementById("start-partners")?.value || "1"
-    }
+    },
+    customPartnerWidths, customWaterwayData
   };
   localStorage.setItem("dallal_autosave", JSON.stringify(state));
 }
@@ -314,10 +319,12 @@ function sqmToFeddanCaratShares(sqm) {
 // Quad Generation Algorithm (Handles all template styles dynamically)
 // ----------------------------------------------------
 let customPartnerWidths = null;
+let customWaterwayData = null;
 
 function generateCustomLand(useCustomWidths = false) {
   if (useCustomWidths !== true) {
     customPartnerWidths = null;
+    customWaterwayData = null;
   }
   try {
     if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
@@ -779,17 +786,31 @@ function generateCustomLand(useCustomWidths = false) {
     });
 
   } else if (activeTemplateType === 'mixed_waterway_new') {
-    // Horizontally split waterway in the middle
-    const h_total = p4.y - p1.y;
-    const y_mid = (p1.y + p4.y) / 2;
-    const water_h = 24; // Waterway height in pixels
-    const y_water_top = y_mid - water_h / 2;
-    const y_water_bot = y_mid + water_h / 2;
+    if (!customWaterwayData) {
+      customWaterwayData = {
+        leftTopMeters: (effL1 / 2) - 3.6,
+        rightTopMeters: (effL2 / 2) - 3.6,
+        leftWaterMeters: 7.20,
+        rightWaterMeters: 7.20
+      };
+    }
 
-    const x_water_top_left = p1.x + (p4.x - p1.x) * ((y_water_top - p1.y) / h_total);
-    const x_water_bot_left = p1.x + (p4.x - p1.x) * ((y_water_bot - p1.y) / h_total);
-    const x_water_top_right = p2.x + (p3.x - p2.x) * ((y_water_top - p2.y) / h_total);
-    const x_water_bot_right = p2.x + (p3.x - p2.x) * ((y_water_bot - p2.y) / h_total);
+    const t_left_top = Math.max(0, Math.min(1, customWaterwayData.leftTopMeters / effL1));
+    const t_left_bot = Math.max(0, Math.min(1, (customWaterwayData.leftTopMeters + customWaterwayData.leftWaterMeters) / effL1));
+    const t_right_top = Math.max(0, Math.min(1, customWaterwayData.rightTopMeters / effL2));
+    const t_right_bot = Math.max(0, Math.min(1, (customWaterwayData.rightTopMeters + customWaterwayData.rightWaterMeters) / effL2));
+
+    const x_water_top_left = p1.x + (p4.x - p1.x) * t_left_top;
+    const y_water_top_left = p1.y + (p4.y - p1.y) * t_left_top;
+    
+    const x_water_bot_left = p1.x + (p4.x - p1.x) * t_left_bot;
+    const y_water_bot_left = p1.y + (p4.y - p1.y) * t_left_bot;
+
+    const x_water_top_right = p2.x + (p3.x - p2.x) * t_right_top;
+    const y_water_top_right = p2.y + (p3.y - p2.y) * t_right_top;
+
+    const x_water_bot_right = p2.x + (p3.x - p2.x) * t_right_bot;
+    const y_water_bot_right = p2.y + (p3.y - p2.y) * t_right_bot;
 
     function calcDist(pa, pb) {
       return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
@@ -889,15 +910,11 @@ function generateCustomLand(useCustomWidths = false) {
          notesName = i === 0 ? "القطعة الغربية" : "القطعة الشرقية";
       }
 
-      let t_left_top = (y_water_top - p_tl.y) / (p_bl.y - p_tl.y);
-      let t_right_top = (y_water_top - p_tr.y) / (p_br.y - p_tr.y);
-      let p_w_tl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_top, y: y_water_top };
-      let p_w_tr = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_top, y: y_water_top };
+      let p_w_tl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_top, y: p_tl.y + (p_bl.y - p_tl.y) * t_left_top };
+      let p_w_tr = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_top, y: p_tr.y + (p_br.y - p_tr.y) * t_right_top };
 
-      let t_left_bot = (y_water_bot - p_tl.y) / (p_bl.y - p_tl.y);
-      let t_right_bot = (y_water_bot - p_tr.y) / (p_br.y - p_tr.y);
-      let p_w_bl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_bot, y: y_water_bot };
-      let p_w_br = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_bot, y: y_water_bot };
+      let p_w_bl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_bot, y: p_tl.y + (p_bl.y - p_tl.y) * t_left_bot };
+      let p_w_br = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_bot, y: p_tr.y + (p_br.y - p_tr.y) * t_right_bot };
 
       let upperArea = calcQuadArea(p_tl, p_tr, p_w_tr, p_w_tl);
       let lowerArea = calcQuadArea(p_w_bl, p_w_br, p_br, p_bl);
@@ -1642,7 +1659,11 @@ function renderSVG() {
           });
         };
         subPoly.onmouseleave = hideInspectorTooltip;
-        subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
+        if (sub.name === "القطعة الغربية") {
+          subPoly.onclick = (e) => onElementClick(e, 'waterway_west', s.id);
+        } else {
+          subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
+        }
         
         shapesGroup.appendChild(subPoly);
       });
@@ -2351,6 +2372,40 @@ function openModalForElement(type, id) {
     document.getElementById("util-angle").value = t.angle || 0;
     document.getElementById("util-bold").checked = t.isBold !== false;
     document.getElementById("util-color").value = t.color || "#000000";
+  } else if (targetType === 'waterway_west' || targetType === 'waterway') {
+    if (!customWaterwayData) {
+      customWaterwayData = {
+        leftTopMeters: (effL1 / 2) - 3.6,
+        rightTopMeters: (effL2 / 2) - 3.6,
+        leftWaterMeters: 7.20,
+        rightWaterMeters: 7.20
+      };
+    }
+    modalTitle.textContent = targetType === 'waterway' ? "أبعاد المجرى المائي" : "أبعاد القطعة الغربية";
+    
+    if (targetType === 'waterway') {
+      modalForm.innerHTML = `
+        <div class="editor-form-group">
+          <label>عرض المجرى الأيسر (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-water-left" value="${customWaterwayData.leftWaterMeters.toFixed(2)}">
+        </div>
+        <div class="editor-form-group">
+          <label>عرض المجرى الأيمن (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-water-right" value="${customWaterwayData.rightWaterMeters.toFixed(2)}">
+        </div>
+      `;
+    } else {
+      modalForm.innerHTML = `
+        <div class="editor-form-group">
+          <label>الطول الأيسر للقطعة الغربية (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-west-left" value="${customWaterwayData.leftTopMeters.toFixed(2)}">
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيمن للقطعة الغربية (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-west-right" value="${customWaterwayData.rightTopMeters.toFixed(2)}">
+        </div>
+      `;
+    }
   }
 
   modal.style.display = "flex";
@@ -2423,6 +2478,18 @@ function saveModalData() {
       t.angle = parseFloat(document.getElementById("util-angle").value) || 0;
       t.isBold = document.getElementById("util-bold").checked;
       t.color = document.getElementById("util-color").value;
+    }
+  } else if (targetType === 'waterway') {
+    if (customWaterwayData) {
+      customWaterwayData.leftWaterMeters = parseFloat(document.getElementById("modal-water-left").value) || 7.20;
+      customWaterwayData.rightWaterMeters = parseFloat(document.getElementById("modal-water-right").value) || 7.20;
+      generateShapes();
+    }
+  } else if (targetType === 'waterway_west') {
+    if (customWaterwayData) {
+      customWaterwayData.leftTopMeters = parseFloat(document.getElementById("modal-west-left").value) || ((effL1 / 2) - 3.6);
+      customWaterwayData.rightTopMeters = parseFloat(document.getElementById("modal-west-right").value) || ((effL2 / 2) - 3.6);
+      generateShapes();
     }
   }
 
