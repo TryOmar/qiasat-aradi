@@ -2355,14 +2355,68 @@ function hideInspectorTooltip() {
 
 function onElementClick(e, type, id) {
   if (e) e.stopPropagation();
-  if (type === 'borderLabel' || type === 'splitLine' || (type === 'freeText' && id && id.startsWith('note_'))) {
+
+  let targetType = type;
+  let targetId = id;
+
+  // فحص ما إذا كان النقر على تسمية بعد أو طول ونقوم بتحويله للقطعة المناسبة
+  if (activeTemplateType === 'mixed_waterway_new') {
+    if (type === 'borderLabel') {
+      if (id === 'border_3' || id === 'border_1') {
+        targetType = 'shape';
+        targetId = 'west_0';
+      } else if (id === 'border_4' || id === 'border_2') {
+        targetType = 'shape';
+        targetId = 'east_0';
+      }
+    } else if (type === 'freeText' && id) {
+      if (id === 'note_l_t' || id === 'note_r_t') {
+        targetType = 'shape';
+        targetId = 'west_0';
+      } else if (id === 'note_l_b' || id === 'note_r_b') {
+        targetType = 'shape';
+        targetId = 'east_0';
+      } else if (id.startsWith('note_top_west_') || id.startsWith('note_bot_west_')) {
+        const idx = id.split('_').pop();
+        targetType = 'shape';
+        targetId = 'west_' + idx;
+      } else if (id.startsWith('note_top_east_') || id.startsWith('note_bot_east_')) {
+        const idx = id.split('_').pop();
+        targetType = 'shape';
+        targetId = 'east_' + idx;
+      }
+    }
+  } else {
+    // التقسيمات العادية
+    if (type === 'freeText' && id) {
+      if (id.startsWith('note_top_') || id.startsWith('note_bot_') || id.startsWith('note_left_') || id.startsWith('note_right_')) {
+        const idx = parseInt(id.split('_').pop());
+        if (!isNaN(idx)) {
+          targetType = 'shape';
+          targetId = 'shape_' + (idx + 1);
+        }
+      }
+    } else if (type === 'borderLabel') {
+      if (id === 'border_3') {
+        targetType = 'shape';
+        targetId = 'shape_1';
+      } else if (id === 'border_4') {
+        targetType = 'shape';
+        targetId = 'shape_' + (customPartnerWidths ? customPartnerWidths.length : 1);
+      }
+    }
+  }
+
+  // إذا لم يتم تحويل العنصر لـ shape وظل عبارة عن تسمية حد أو خط تقسيم عام،
+  // نقوم بفتح المودال الإدخال العام للأبعاد الكلية للأرض.
+  if (targetType === 'borderLabel' || targetType === 'splitLine' || (targetType === 'freeText' && targetId && targetId.startsWith('note_'))) {
     openStartModal();
     return;
   }
-  selectedElement = { type, id };
+
+  selectedElement = { type: targetType, id: targetId };
   renderSVG();
   populateSidebarEditor();
-  openModalForElement(type, id);
 }
 
 function openModalForElement(type, id) {
