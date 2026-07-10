@@ -31,6 +31,7 @@ let visualYFactor = 1.0;
 let visualCenterX = 450;
 let visualCenterY = 325;
 let scale = 1.0;
+let partnerEditMode = 'keep_area'; // 'keep_area' or 'free_edit'
 
 function getVisualX(x) {
   return visualCenterX + (x - visualCenterX) * visualXFactor;
@@ -2738,6 +2739,40 @@ function updateTotalDimension(dimension, value) {
   }
 }
 
+function setPartnerEditMode(mode) {
+  partnerEditMode = mode;
+  populateSidebarEditor();
+}
+
+function applyTotalDimensions() {
+  const w1 = parseFloat(document.getElementById("sidebar-total-width-top").value) || 0;
+  const w2 = parseFloat(document.getElementById("sidebar-total-width-bot").value) || 0;
+  const l2 = parseFloat(document.getElementById("sidebar-total-len-right").value) || 0;
+  const l1 = parseFloat(document.getElementById("sidebar-total-len-left").value) || 0;
+
+  if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0) {
+    alert("الرجاء إدخال قيم صحيحة أكبر من الصفر لجميع الأضلاع الأربعة!");
+    return;
+  }
+
+  // تحديث القيم في مدخلات البداية
+  const inpW1 = document.getElementById("start-w1");
+  const inpW2 = document.getElementById("start-w2");
+  const inpL2 = document.getElementById("start-l2");
+  const inpL1 = document.getElementById("start-l1");
+
+  if (inpW1) inpW1.value = w1;
+  if (inpW2) inpW2.value = w2;
+  if (inpL2) inpL2.value = l2;
+  if (inpL1) inpL1.value = l1;
+
+  // إعادة بناء ورسم الأرض
+  generateCustomLand(true);
+  renderSVG();
+  saveStateDebounced();
+  populateSidebarEditor();
+}
+
 // ----------------------------------------------------
 // Sidebar Properties Editor Panel
 // ----------------------------------------------------
@@ -2795,22 +2830,25 @@ function populateSidebarEditor() {
                 
                 <div class="editor-form-group">
                   <label>العرض العلوي (متر):</label>
-                  <input type="number" step="0.01" id="sidebar-total-width-top" value="${customW.top.toFixed(2)}" oninput="updateTotalDimension('w1', this.value)">
+                  <input type="number" step="0.01" id="sidebar-total-width-top" value="${customW.top.toFixed(2)}">
                 </div>
                 <div class="editor-form-group">
                   <label>العرض السفلي (متر):</label>
-                  <input type="number" step="0.01" id="sidebar-total-width-bot" value="${customW.bot.toFixed(2)}" oninput="updateTotalDimension('w2', this.value)">
+                  <input type="number" step="0.01" id="sidebar-total-width-bot" value="${customW.bot.toFixed(2)}">
                 </div>
                 <div class="editor-form-group">
                   <label>الطول الأيمن (متر):</label>
-                  <input type="number" step="0.01" id="sidebar-total-len-right" value="${sideLengths.right.toFixed(2)}" oninput="updateTotalDimension('l2', this.value)">
+                  <input type="number" step="0.01" id="sidebar-total-len-right" value="${sideLengths.right.toFixed(2)}">
                 </div>
                 <div class="editor-form-group">
                   <label>الطول الأيسر (متر):</label>
-                  <input type="number" step="0.01" id="sidebar-total-len-left" value="${sideLengths.left.toFixed(2)}" oninput="updateTotalDimension('l1', this.value)">
+                  <input type="number" step="0.01" id="sidebar-total-len-left" value="${sideLengths.left.toFixed(2)}">
                 </div>
-                <p style="font-size: 11px; color: #1565c0; margin: 8px 0; line-height: 1.4; font-weight: bold; background: #e3f2fd; padding: 6px; border-radius: 4px; border: 1px dashed #90caf9;">
-                  💡 تعديل أي قيمة هنا سيحدث أبعاد الأرض الكروكي بالكامل! لتقسيم الأرض وتعديل أبعاد الشركاء، زد عدد الشركاء بالأسفل.
+                <div class="editor-form-group" style="margin-top: 10px; margin-bottom: 8px;">
+                  <button type="button" onclick="applyTotalDimensions()" style="width: 100%; padding: 8px; background: #2e7d32; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 13px;">⚙️ تطبيق الأبعاد ورسم الكروكي</button>
+                </div>
+                <p style="font-size: 11px; color: #555; margin: 4px 0; line-height: 1.4; font-weight: bold; background: #fff3e0; padding: 6px; border-radius: 4px; border: 1px dashed #ffe082;">
+                  💡 قم بتعديل القيم ثم اضغط على زر التطبيق أعلاه لإعادة رسم الكروكي. لتقسيم الأرض وتعديل أبعاد الشركاء، زد عدد الشركاء بالأسفل.
                 </p>
             `;
           } else {
@@ -2818,6 +2856,17 @@ function populateSidebarEditor() {
               <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
                 <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
                 
+                <div style="display: flex; gap: 15px; margin-bottom: 12px; background: #fff; padding: 6px; border-radius: 4px; border: 1px solid #90caf9; justify-content: center;">
+                  <label style="font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="radio" name="piece-edit-mode" value="keep_area" ${partnerEditMode === 'keep_area' ? 'checked' : ''} onchange="setPartnerEditMode('keep_area')">
+                    🟢 حفظ المساحة
+                  </label>
+                  <label style="font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="radio" name="piece-edit-mode" value="free_edit" ${partnerEditMode === 'free_edit' ? 'checked' : ''} onchange="setPartnerEditMode('free_edit')">
+                    🟠 تعديل حر
+                  </label>
+                </div>
+
                 <div class="editor-form-group">
                   <label>العرض العلوي (متر):</label>
                   <input type="number" step="0.01" id="sidebar-piece-width-top" value="${customW.top.toFixed(2)}" oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'top', this.value)">
@@ -3051,23 +3100,39 @@ function updateSubPieceWidth(groupId, pIndex, field, value) {
   }
 
   if (targetIdx >= 0 && targetIdx < widthsArr.length) {
-    const neighborOldVal = widthsArr[targetIdx][field] || 0;
-    const neighborNewVal = neighborOldVal - diff;
+    if (partnerEditMode === 'keep_area') {
+      // وضع الحفاظ على المساحة: نعدل الحقل المقابل للقطعة والجار
+      const oppField = field === 'top' ? 'bot' : 'top';
+      const oppVal = (widthsArr[pIndex][oppField] || 0) - diff;
+      
+      const neighborFieldNew = (widthsArr[targetIdx][field] || 0) - diff;
+      const neighborOppNew = (widthsArr[targetIdx][oppField] || 0) + diff;
 
-    // التحقق من أن القيمتين صالحتين ولا تجعلان الأبعاد سالبة
-    if (val >= 0 && neighborNewVal >= 0) {
-      widthsArr[pIndex][field] = val;
-      widthsArr[targetIdx][field] = neighborNewVal;
+      // نتحقق من صلاحية القيم الأربع
+      if (val >= 0 && oppVal >= 0 && neighborFieldNew >= 0 && neighborOppNew >= 0) {
+        widthsArr[pIndex][field] = val;
+        widthsArr[pIndex][oppField] = oppVal;
+        widthsArr[targetIdx][field] = neighborFieldNew;
+        widthsArr[targetIdx][oppField] = neighborOppNew;
+      }
     } else {
-      // إذا تجاوز التعديل الحد المسموح، نقوم بالحد منه لكي لا يصبح الجار سالباً
-      if (neighborNewVal < 0) {
-        const maxAllowedVal = oldVal + neighborOldVal;
-        widthsArr[pIndex][field] = maxAllowedVal;
-        widthsArr[targetIdx][field] = 0;
+      // وضع التعديل الحر
+      const neighborOldVal = widthsArr[targetIdx][field] || 0;
+      const neighborNewVal = neighborOldVal - diff;
+
+      if (val >= 0 && neighborNewVal >= 0) {
+        widthsArr[pIndex][field] = val;
+        widthsArr[targetIdx][field] = neighborNewVal;
+      } else {
+        if (neighborNewVal < 0) {
+          const maxAllowedVal = oldVal + neighborOldVal;
+          widthsArr[pIndex][field] = maxAllowedVal;
+          widthsArr[targetIdx][field] = 0;
+        }
       }
     }
   } else {
-    // إذا لم يكن هناك جار (قطعة وحيدة)، نقوم بالتحديث مباشرة
+    // إذا لم يكن هناك جار، نقوم بالتحديث مباشرة
     widthsArr[pIndex][field] = val;
   }
 
