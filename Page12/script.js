@@ -334,7 +334,6 @@ function generateCustomLand(useCustomWidths = false) {
     customWaterwayData = null;
   }
   try {
-    if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
     const w1 = parseArabicFloat(document.getElementById("start-w1").value);
     const w1Dir = document.getElementById("start-w1-dir").value.trim() || "بحري";
     const w2 = parseArabicFloat(document.getElementById("start-w2").value);
@@ -795,29 +794,61 @@ function generateCustomLand(useCustomWidths = false) {
   } else if (activeTemplateType === 'mixed_waterway_new') {
     if (!customWaterwayData) {
       customWaterwayData = {
+        userWidthMeters: 7.20,        // العرض الموحد للمجرى - يتحكم فيه المستخدم
         leftTopMeters: (effL1 / 2) - 3.6,
         rightTopMeters: (effL2 / 2) - 3.6,
         leftWaterMeters: 7.20,
         rightWaterMeters: 7.20
       };
+    } else {
+      // إذا كانت بيانات قديمة (قبل إضافة userWidthMeters)، نحسبه من المتوسط
+      if (customWaterwayData.userWidthMeters === undefined) {
+        customWaterwayData.userWidthMeters = (customWaterwayData.leftWaterMeters + customWaterwayData.rightWaterMeters) / 2;
+      }
     }
 
+    const uw = customWaterwayData.userWidthMeters;
+    customWaterwayData.leftWaterMeters = uw;
+    customWaterwayData.rightWaterMeters = uw;
+    customWaterwayData.leftTopMeters = (effL1 - uw) / 2;
+    customWaterwayData.rightTopMeters = (effL2 - uw) / 2;
+
+    // حساب العرض البصري للرسم فقط (إذا كان العرض الحقيقي 0 يظهر بعرض 4 أمتار بصرياً)
+    const uw_visual = uw === 0 ? 4.00 : uw;
+    const visual_left_top = (effL1 - uw_visual) / 2;
+    const visual_right_top = (effL2 - uw_visual) / 2;
+
+    // 1. حساب النسب الحقيقية للحسابات (تعتمد على uw الحقيقي)
     const t_left_top = Math.max(0, Math.min(1, customWaterwayData.leftTopMeters / effL1));
     const t_left_bot = Math.max(0, Math.min(1, (customWaterwayData.leftTopMeters + customWaterwayData.leftWaterMeters) / effL1));
     const t_right_top = Math.max(0, Math.min(1, customWaterwayData.rightTopMeters / effL2));
     const t_right_bot = Math.max(0, Math.min(1, (customWaterwayData.rightTopMeters + customWaterwayData.rightWaterMeters) / effL2));
 
+    // 2. حساب النسب البصرية للرسم (تعتمد على uw_visual البصري)
+    const t_left_top_vis = Math.max(0, Math.min(1, visual_left_top / effL1));
+    const t_left_bot_vis = Math.max(0, Math.min(1, (visual_left_top + uw_visual) / effL1));
+    const t_right_top_vis = Math.max(0, Math.min(1, visual_right_top / effL2));
+    const t_right_bot_vis = Math.max(0, Math.min(1, (visual_right_top + uw_visual) / effL2));
+
+    // إحداثيات الحدود الحقيقية (للحسابات والتقسيم)
     const x_water_top_left = p1.x + (p4.x - p1.x) * t_left_top;
     const y_water_top_left = p1.y + (p4.y - p1.y) * t_left_top;
-    
     const x_water_bot_left = p1.x + (p4.x - p1.x) * t_left_bot;
     const y_water_bot_left = p1.y + (p4.y - p1.y) * t_left_bot;
-
     const x_water_top_right = p2.x + (p3.x - p2.x) * t_right_top;
     const y_water_top_right = p2.y + (p3.y - p2.y) * t_right_top;
-
     const x_water_bot_right = p2.x + (p3.x - p2.x) * t_right_bot;
     const y_water_bot_right = p2.y + (p3.y - p2.y) * t_right_bot;
+
+    // إحداثيات الحدود البصرية (للرسم فقط)
+    const x_water_top_left_vis = p1.x + (p4.x - p1.x) * t_left_top_vis;
+    const y_water_top_left_vis = p1.y + (p4.y - p1.y) * t_left_top_vis;
+    const x_water_bot_left_vis = p1.x + (p4.x - p1.x) * t_left_bot_vis;
+    const y_water_bot_left_vis = p1.y + (p4.y - p1.y) * t_left_bot_vis;
+    const x_water_top_right_vis = p2.x + (p3.x - p2.x) * t_right_top_vis;
+    const y_water_top_right_vis = p2.y + (p3.y - p2.y) * t_right_top_vis;
+    const x_water_bot_right_vis = p2.x + (p3.x - p2.x) * t_right_bot_vis;
+    const y_water_bot_right_vis = p2.y + (p3.y - p2.y) * t_right_bot_vis;
 
     function calcDist(pa, pb) {
       return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
@@ -835,22 +866,29 @@ function generateCustomLand(useCustomWidths = false) {
       return area1 + area2;
     }
 
+    // الحدود الحقيقية
     const w_tl = { x: x_water_top_left, y: y_water_top_left };
     const w_tr = { x: x_water_top_right, y: y_water_top_right };
     const w_br = { x: x_water_bot_right, y: y_water_bot_right };
     const w_bl = { x: x_water_bot_left, y: y_water_bot_left };
 
+    // الحدود البصرية
+    const w_tl_vis = { x: x_water_top_left_vis, y: y_water_top_left_vis };
+    const w_tr_vis = { x: x_water_top_right_vis, y: y_water_top_right_vis };
+    const w_br_vis = { x: x_water_bot_right_vis, y: y_water_bot_right_vis };
+    const w_bl_vis = { x: x_water_bot_left_vis, y: y_water_bot_left_vis };
+
     waterways.push({
       id: "water_new",
-      points: [w_tl, w_tr, w_br, w_bl],
+      points: [w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis],
       label: "مجرى مائي (ترعة)",
       labelX: centerX,
-      labelY: (y_water_top_left + y_water_bot_left) / 2 + 4,
+      labelY: (y_water_top_left_vis + y_water_bot_left_vis) / 2 + 4,
       angle: 0,
       stats: {
-        area: calcQuadArea(w_tl, w_tr, w_br, w_bl),
-        width: calcDist(w_tl, w_bl), // average width would be better but this is fine
-        length: calcDist(w_tl, w_tr)
+        area: uw === 0 ? 0 : calcQuadArea(w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis),
+        width: uw,
+        length: calcDist(w_tl_vis, w_tr_vis)
       }
     });
 
@@ -2293,7 +2331,38 @@ function openModalForElement(type, id) {
     const s = shapes.find(x => x.id === id);
     if (!s) return;
     modalTitle.textContent = "تعديل بيانات قطعة الأرض";
+    
+    let subPieceHtml = "";
+    if (s.isSubPiece) {
+      const pIndex = parseInt(s.id.split('_')[1]);
+      const customW = mixedPiecesTree[s.groupId].customWidths[pIndex];
+      const numPartners = mixedPiecesTree[s.groupId].partners;
+      
+      subPieceHtml = `
+        <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة وتقسيمها</h4>
+          <div class="editor-form-group">
+            <label>العرض العلوي (متر):</label>
+            <input type="number" step="0.01" value="${customW.top}" oninput="updateSubPieceWidth('${s.groupId}', ${pIndex}, 'top', this.value)">
+          </div>
+          <div class="editor-form-group">
+            <label>العرض السفلي (متر):</label>
+            <input type="number" step="0.01" value="${customW.bot}" oninput="updateSubPieceWidth('${s.groupId}', ${pIndex}, 'bot', this.value)">
+          </div>
+          <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
+          <div class="editor-form-group" style="margin-bottom: 0;">
+            <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
+              <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     modalForm.innerHTML = `
+      ${subPieceHtml}
       <div class="editor-form-group">
         <label>اسم المالك:</label>
         <input type="text" id="modal-owner" value="${s.owner || ''}">
@@ -2369,38 +2438,41 @@ function openModalForElement(type, id) {
     document.getElementById("util-color").value = t.color || "#000000";
   } else if (targetType === 'waterway_west' || targetType === 'waterway') {
     if (!customWaterwayData) {
-      customWaterwayData = {
-        leftTopMeters: (effL1 / 2) - 3.6,
-        rightTopMeters: (effL2 / 2) - 3.6,
-        leftWaterMeters: 7.20,
-        rightWaterMeters: 7.20
-      };
+      const _l1 = parseFloat(document.getElementById('start-l1') ? document.getElementById('start-l1').value : 50) || 50;
+      const _l2 = parseFloat(document.getElementById('start-l2') ? document.getElementById('start-l2').value : 50) || 50;
+      customWaterwayData = { userWidthMeters: 7.20, leftTopMeters: (_l1/2)-3.6, rightTopMeters: (_l2/2)-3.6, leftWaterMeters: 7.20, rightWaterMeters: 7.20 };
     }
-    modalTitle.textContent = targetType === 'waterway' ? "أبعاد المجرى المائي" : "أبعاد القطعة الغربية";
-    
-    if (targetType === 'waterway') {
-      modalForm.innerHTML = `
-        <div class="editor-form-group">
-          <label>عرض المجرى الأيسر (بالمتر):</label>
-          <input type="text" inputmode="decimal" id="modal-water-left" value="${customWaterwayData.leftWaterMeters.toFixed(2)}">
-        </div>
-        <div class="editor-form-group">
-          <label>عرض المجرى الأيمن (بالمتر):</label>
-          <input type="text" inputmode="decimal" id="modal-water-right" value="${customWaterwayData.rightWaterMeters.toFixed(2)}">
-        </div>
-      `;
-    } else {
-      modalForm.innerHTML = `
-        <div class="editor-form-group">
-          <label>الطول الأيسر للقطعة الغربية (بالمتر):</label>
-          <input type="text" inputmode="decimal" id="modal-west-left" value="${customWaterwayData.leftTopMeters.toFixed(2)}">
-        </div>
-        <div class="editor-form-group">
-          <label>الطول الأيمن للقطعة الغربية (بالمتر):</label>
-          <input type="text" inputmode="decimal" id="modal-west-right" value="${customWaterwayData.rightTopMeters.toFixed(2)}">
-        </div>
-      `;
+    if (customWaterwayData.userWidthMeters === undefined) {
+      customWaterwayData.userWidthMeters = (customWaterwayData.leftWaterMeters + customWaterwayData.rightWaterMeters) / 2;
     }
+
+    modalTitle.textContent = "💧 تعديل المجرى المائي";
+
+    const wStats = getWaterwayStats();
+    const statsHtml = wStats ? `
+      <div style="background:#e3f2fd; border:1px solid #90caf9; border-radius:8px; padding:10px; margin-bottom:14px; font-size:13px;">
+        <div style="font-weight:bold; color:#0d47a1; margin-bottom:6px;">📊 البيانات الحالية للمجرى</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <span style="color:#555;">العرض الحالي:</span><span style="font-weight:bold;">${(wStats.width||0).toFixed(2)} م</span>
+          <span style="color:#555;">الطول:</span><span style="font-weight:bold;">${(wStats.length||0).toFixed(2)} م</span>
+          <span style="color:#555;">المساحة:</span><span style="font-weight:bold;">${(wStats.area||0).toFixed(2)} م²</span>
+          <span style="color:#555;">النسبة من الإجمالي:</span><span style="font-weight:bold; color:#c62828;">${wStats.pct}%</span>
+        </div>
+      </div>` : '';
+
+    modalForm.innerHTML = `
+      ${statsHtml}
+      <div class="editor-form-group">
+        <label style="font-weight:bold; color:#1565c0;">⚙️ تعديل عرض المجرى (بالمتر):</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" inputmode="decimal" id="modal-water-width" value="${(customWaterwayData.userWidthMeters||7.20).toFixed(2)}" style="flex:1; font-size:15px; font-weight:bold; text-align:center;">
+        </div>
+        <small style="color:#888; margin-top:4px; display:block;">💡 المجرى يُمركَز تلقائياً في منتصف الأرض</small>
+      </div>
+      <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32;">
+        ✅ بعد التطبيق سيتم إعادة توزيع مساحة القطعتين الغربية والشرقية تلقائياً
+      </div>
+    `;
   }
 
   modal.style.display = "flex";
@@ -2474,17 +2546,24 @@ function saveModalData() {
       t.isBold = document.getElementById("util-bold").checked;
       t.color = document.getElementById("util-color").value;
     }
-  } else if (targetType === 'waterway') {
-    if (customWaterwayData) {
-      customWaterwayData.leftWaterMeters = parseFloat(document.getElementById("modal-water-left").value) || 7.20;
-      customWaterwayData.rightWaterMeters = parseFloat(document.getElementById("modal-water-right").value) || 7.20;
-      generateShapes();
-    }
-  } else if (targetType === 'waterway_west') {
-    if (customWaterwayData) {
-      customWaterwayData.leftTopMeters = parseFloat(document.getElementById("modal-west-left").value) || ((effL1 / 2) - 3.6);
-      customWaterwayData.rightTopMeters = parseFloat(document.getElementById("modal-west-right").value) || ((effL2 / 2) - 3.6);
-      generateShapes();
+  } else if (targetType === 'waterway' || targetType === 'waterway_west') {
+    // يستخدم applyWaterwayWidthChange للتعامل مع العرض الموحد
+    const widthInput = document.getElementById('modal-water-width');
+    if (widthInput) {
+      modalEditTarget = null;
+      closeModal();
+      const newWidth = parseArabicFloat(widthInput.value);
+      customWaterwayData.userWidthMeters = newWidth >= 0 ? newWidth : 7.20;
+      if (mixedPiecesTree) {
+        mixedPiecesTree.west.customWidths = [];
+        mixedPiecesTree.east.customWidths = [];
+      }
+      generateCustomLand(true);
+      renderSVG();
+      saveState();
+      selectedElement = { type: 'waterway', id: 'water_new' };
+      populateSidebarEditor();
+      return; // نخرج مبكراً لأننا أغلقنا المودال يدوياً
     }
   }
 
@@ -2628,6 +2707,43 @@ function populateSidebarEditor() {
         </div>
       `;
     }
+  } else if (selectedElement.type === 'waterway') {
+    // بطاقة بيانات المجرى المائي في السايدبار
+    const ws = getWaterwayStats();
+    if (ws) {
+      const curWidth = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null) ? customWaterwayData.userWidthMeters.toFixed(2) : ws.width.toFixed(2);
+      html = `
+        <div style="background:#e3f2fd; padding:12px; border-radius:8px; border:1px solid #90caf9; margin-bottom:14px;">
+          <div style="font-weight:bold; color:#0d47a1; font-size:14px; margin-bottom:10px;">💧 بيانات المجرى المائي</div>
+          <table style="width:100%; font-size:13px; border-collapse:collapse;">
+            <tr><td style="padding:3px 0; color:#555;">العرض:</td><td style="font-weight:bold; color:#1565c0;">${ws.width.toFixed(2)} م</td></tr>
+            <tr><td style="padding:3px 0; color:#555;">الطول:</td><td style="font-weight:bold;">${ws.length.toFixed(2)} م</td></tr>
+            <tr><td style="padding:3px 0; color:#555;">المساحة:</td><td style="font-weight:bold;">${ws.area.toFixed(2)} م²</td></tr>
+            <tr><td style="padding:3px 0; color:#555;">نسبة من الإجمالي:</td><td style="font-weight:bold; color:#c62828;">${ws.pct}%</td></tr>
+            <tr style="border-top:1px dashed #90caf9;"><td style="padding:5px 0 3px; color:#555;">المساحة الكلية:</td><td style="font-weight:bold;">${ws.totalArea.toFixed(2)} م²</td></tr>
+          </table>
+        </div>
+
+        <div style="background:#f9fbe7; padding:10px; border-radius:8px; border:1px solid #dce775; margin-bottom:10px;">
+          <div style="font-weight:bold; color:#558b2f; font-size:13px; margin-bottom:8px;">⚡ تعديل عرض المجرى مباشرة</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" inputmode="decimal" id="sidebar-water-width"
+              value="${curWidth}"
+              style="flex:1; padding:8px; border:2px solid #aed581; border-radius:6px; font-size:15px; font-weight:bold; text-align:center; font-family:'Cairo';"
+              placeholder="مثال: 3.50">
+            <button type="button" onclick="applyWaterwayWidthChange('sidebar-water-width')"
+              style="background:#558b2f; color:white; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; font-family:'Cairo'; font-size:13px; white-space:nowrap;">
+              ✔ تطبيق
+            </button>
+          </div>
+          <small style="color:#888; display:block; margin-top:5px;">💡 المجرى يبقى في منتصف الأرض تلقائياً</small>
+        </div>
+
+        <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32;">
+          ✅ مساحة الإجمالي = غربية ${ws.westArea.toFixed(1)} م² + مجرى ${ws.area.toFixed(1)} م² + شرقية ${ws.eastArea.toFixed(1)} م²
+        </div>
+      `;
+    }
   }
 
   html += `
@@ -2647,6 +2763,7 @@ function getElementTypeName() {
     case 'borderLabel': return "تسمية الحد";
     case 'splitLine': return "خط تقسيم";
     case 'freeText': return "نص حر";
+    case 'waterway': return "مجرى مائي";
     default: return "";
   }
 }
@@ -2691,13 +2808,78 @@ function updateSubPieceWidth(groupId, pIndex, field, value) {
   mixedPiecesTree[groupId].customWidths[pIndex][field] = val;
   
   // Re-generate shapes to apply the new subdivision widths
-  generateShapes(); 
+  generateCustomLand(true); 
   renderSVG();
   saveStateDebounced();
 }
 
-function applySubdivision(groupId) {
-  const input = document.getElementById(`subdivide-${groupId}`);
+// ----------------------------------------------------
+// Waterway Width Control - تحكم عرض المجرى المائي
+// ----------------------------------------------------
+function applyWaterwayWidthChange(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  let newWidth = parseArabicFloat(input.value);
+  if (newWidth < 0) {
+    alert('الرجاء إدخال عرض صحيح أكبر من أو يساوي الصفر.');
+    return;
+  }
+
+  // الحد الأقصى: لا يزيد عن 90% من أصغر طول
+  const l1Val = parseArabicFloat(document.getElementById('start-l1') ? document.getElementById('start-l1').value : "9999");
+  const l2Val = parseArabicFloat(document.getElementById('start-l2') ? document.getElementById('start-l2').value : "9999");
+  const maxAllowed = Math.min(l1Val > 0 ? l1Val : 9999, l2Val > 0 ? l2Val : 9999) * 0.9;
+  if (newWidth >= maxAllowed) {
+    alert('عرض المجرى كبير جداً! الحد الأقصى المسموح به: ' + maxAllowed.toFixed(2) + ' م');
+    return;
+  }
+
+  if (!customWaterwayData) customWaterwayData = {};
+  customWaterwayData.userWidthMeters = newWidth;
+
+  // مسح customWidths لإعادة توزيعها بالتساوي
+  if (mixedPiecesTree) {
+    mixedPiecesTree.west.customWidths = [];
+    mixedPiecesTree.east.customWidths = [];
+  }
+
+  generateCustomLand(true);
+  renderSVG();
+  saveState();
+
+  // تحديث السايدبار ليعكس البيانات الجديدة
+  selectedElement = { type: 'waterway', id: 'water_new' };
+  populateSidebarEditor();
+}
+
+function getWaterwayStats() {
+  if (!customWaterwayData || activeTemplateType !== 'mixed_waterway_new') return null;
+  const w = waterways.find(function(x) { return x.id === 'water_new'; });
+  if (!w || !w.stats) return null;
+
+  const shapesArea = shapes.reduce(function(sum, s) { return sum + (s.area ? s.area.sqm : 0); }, 0);
+  const totalArea = shapesArea + w.stats.area;
+  const pct = totalArea > 0 ? ((w.stats.area / totalArea) * 100).toFixed(2) : '0.00';
+
+  const westArea = shapes.filter(function(s) { return s.groupId === 'west'; })
+                         .reduce(function(sum, s) { return sum + (s.area ? s.area.sqm : 0); }, 0);
+  const eastArea = shapes.filter(function(s) { return s.groupId === 'east'; })
+                         .reduce(function(sum, s) { return sum + (s.area ? s.area.sqm : 0); }, 0);
+
+  return {
+    width: (customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null) ? customWaterwayData.userWidthMeters : w.stats.width,
+    length: w.stats.length,
+    area: w.stats.area,
+    pct: pct,
+    totalArea: totalArea,
+    westArea: westArea,
+    eastArea: eastArea
+  };
+}
+
+function applySubdivision(groupId, isModal = false) {
+  const inputId = isModal ? `modal-subdivide-${groupId}` : `subdivide-${groupId}`;
+  const input = document.getElementById(inputId);
   if (!input) return;
   let newPartners = parseInt(input.value);
   if (isNaN(newPartners) || newPartners < 1) newPartners = 1;
@@ -2705,10 +2887,10 @@ function applySubdivision(groupId) {
   if (!mixedPiecesTree) return;
   
   mixedPiecesTree[groupId].partners = newPartners;
-  // Clear customWidths so they get regenerated evenly in generateShapes
+  // Clear customWidths so they get regenerated evenly in generateCustomLand
   mixedPiecesTree[groupId].customWidths = [];
   
-  generateShapes();
+  generateCustomLand(true);
   renderSVG();
   saveState();
   
@@ -3372,21 +3554,42 @@ function printDallalMap() {
     });
 
     if (waterways && waterways.length > 0) {
-       detailedReportHTML += `<div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 15px; margin-bottom: 20px; page-break-inside: avoid;">`;
-       detailedReportHTML += `<h3 style="color: #0d47a1; margin-top: 0; margin-bottom: 10px;">💧 تفاصيل المجرى المائي</h3>`;
-       waterways.forEach(w => {
-         if (w.stats) {
-            detailedReportHTML += `<table style="width: 100%; font-size: 13px; border-collapse: collapse; max-width: 400px; margin-right: 10px;">`;
-            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">المساحة الإجمالية:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.area.toFixed(2)} م²</td></tr>`;
-            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">الطول الإجمالي:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.length.toFixed(2)} م</td></tr>`;
-            detailedReportHTML += `<tr><td style="padding: 4px 0; color: #555;">العرض التقريبي:</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${w.stats.width.toFixed(2)} م</td></tr>`;
-            detailedReportHTML += `</table>`;
-         }
-       });
-       detailedReportHTML += `</div>`;
+       const ws = getWaterwayStats();
+       if (ws) {
+         const wUserWidth = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null)
+           ? customWaterwayData.userWidthMeters.toFixed(2)
+           : ws.width.toFixed(2);
+
+         // ----- قسم المجرى المائي المستقل -----
+         detailedReportHTML += `<div style="background: #e3f2fd; border: 2px solid #42a5f5; border-radius: 10px; padding: 18px; margin-bottom: 20px; page-break-inside: avoid;">`;
+         detailedReportHTML += `<h3 style="color: #0d47a1; margin-top: 0; margin-bottom: 14px; display:flex; align-items:center; gap:8px;">💧 تفاصيل المجرى المائي</h3>`;
+         detailedReportHTML += `<table style="width: 100%; font-size: 14px; border-collapse: collapse;">`;
+         detailedReportHTML += `<tr style="background:#bbdefb;"><td style="padding:8px 10px; color:#0d47a1; font-weight:bold; border:1px solid #90caf9;">البيان</td><td style="padding:8px 10px; font-weight:bold; border:1px solid #90caf9; color:#0d47a1;">القيمة</td></tr>`;
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e3f2fd; color:#555;">عرض المجرى</td><td style="padding:7px 10px; border:1px solid #e3f2fd; font-weight:bold;">${wUserWidth} م</td></tr>`;
+         detailedReportHTML += `<tr style="background:#f8fbff;"><td style="padding:7px 10px; border:1px solid #e3f2fd; color:#555;">طول المجرى</td><td style="padding:7px 10px; border:1px solid #e3f2fd; font-weight:bold;">${ws.length.toFixed(2)} م</td></tr>`;
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e3f2fd; color:#555;">مساحة المجرى</td><td style="padding:7px 10px; border:1px solid #e3f2fd; font-weight:bold;">${ws.area.toFixed(2)} م²</td></tr>`;
+         detailedReportHTML += `<tr style="background:#f8fbff;"><td style="padding:7px 10px; border:1px solid #e3f2fd; color:#555;">نسبة المجرى من الإجمالي</td><td style="padding:7px 10px; border:1px solid #e3f2fd; font-weight:bold; color:#c62828;">${ws.pct}%</td></tr>`;
+         detailedReportHTML += `</table></div>`;
+
+         // ----- ملخص المساحات الإجمالي -----
+         detailedReportHTML += `<div style="background:#e8f5e9; border:2px solid #66bb6a; border-radius:10px; padding:18px; margin-bottom:20px; page-break-inside:avoid;">`;
+         detailedReportHTML += `<h3 style="color:#1b5e20; margin-top:0; margin-bottom:14px;">📊 ملخص المساحات الإجمالي</h3>`;
+         detailedReportHTML += `<table style="width:100%; font-size:14px; border-collapse:collapse;">`;
+         detailedReportHTML += `<tr style="background:#c8e6c9;"><td style="padding:8px 10px; font-weight:bold; border:1px solid #a5d6a7;">البيان</td><td style="padding:8px 10px; font-weight:bold; border:1px solid #a5d6a7;">المساحة (م²)</td><td style="padding:8px 10px; font-weight:bold; border:1px solid #a5d6a7;">النسبة %</td></tr>`;
+         const wPct = parseFloat(ws.pct);
+         const totalA = ws.totalArea;
+         const westPct = totalA > 0 ? ((ws.westArea / totalA) * 100).toFixed(2) : '0.00';
+         const eastPct = totalA > 0 ? ((ws.eastArea / totalA) * 100).toFixed(2) : '0.00';
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">القطعة الغربية</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.westArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${westPct}%</td></tr>`;
+         detailedReportHTML += `<tr style="background:#f1f8e9;"><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1565c0;">المجرى المائي</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.area.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#c62828;">${ws.pct}%</td></tr>`;
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">القطعة الشرقية</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.eastArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${eastPct}%</td></tr>`;
+         detailedReportHTML += `<tr style="background:#c8e6c9; font-weight:bold;"><td style="padding:8px 10px; border:1px solid #a5d6a7;">الإجمالي</td><td style="padding:8px 10px; border:1px solid #a5d6a7;">${ws.totalArea.toFixed(2)}</td><td style="padding:8px 10px; border:1px solid #a5d6a7;">100%</td></tr>`;
+         detailedReportHTML += `</table></div>`;
+       }
     }
     detailedReportHTML += `</div>`;
   }
+
 
   const printOverlay = document.getElementById("printOverlay");
   printOverlay.innerHTML = `
