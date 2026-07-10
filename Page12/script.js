@@ -990,6 +990,8 @@ function generateCustomLand(useCustomWidths = false) {
   panY = 0;
   applyViewportTransform();
 
+  preventLabelOverlap(); // Auto layout to prevent overlapping text boxes
+
   closeStartModal();
   renderSVG();
   saveState();
@@ -997,6 +999,81 @@ function generateCustomLand(useCustomWidths = false) {
     alert("حدث خطأ أثناء رسم الأرض: " + err.message);
     console.error(err);
   }
+}
+
+// ----------------------------------------------------
+// Smart Label Overlap Prevention (Collision Detection)
+// ----------------------------------------------------
+function preventLabelOverlap() {
+  let placed = [];
+  
+  // Combine all labels we want to process
+  let checkList = [
+      ...splitLines.map(l => ({ ref: l, type: 'splitLine', x: l.labelX, y: l.labelY, angle: l.angle || 0 })),
+      ...borderLabels.map(b => ({ ref: b, type: 'borderLabel', x: b.x, y: b.y, angle: b.angle || 0 })),
+      ...freeTexts.map(t => ({ ref: t, type: 'freeText', x: t.x, y: t.y, angle: t.angle || 0 }))
+  ];
+  
+  checkList.forEach(item => {
+      let text = item.ref.label || item.ref.text;
+      if (!text) return; 
+      
+      // We only apply this to perfectly horizontal labels to simplify AABB and avoid messing up angled labels
+      if (item.angle !== 0) return;
+      
+      let fontSize = parseFloat(item.ref.fontSize || "13");
+      let w = 0, h = 0;
+      if (item.type === 'splitLine') {
+          w = text.length * 7 + 10;
+          h = 20;
+      } else {
+          w = text.length * (fontSize * 0.6) + 12;
+          h = fontSize * 1.6;
+      }
+      
+      let cx = item.x;
+      let cy = item.y;
+      
+      let hw = w / 2;
+      let hh = h / 2;
+      
+      let shiftY = 0;
+      let stepCount = 0;
+      let hasCollision = true;
+      
+      while (hasCollision && stepCount < 20) {
+          hasCollision = false;
+          let testY = cy + shiftY;
+          for (let p of placed) {
+              // Add a small padding to prevent touching
+              if (Math.abs(cx - p.x) < (hw + p.hw + 4) && 
+                  Math.abs(testY - p.y) < (hh + p.hh + 4)) {
+                  hasCollision = true;
+                  break;
+              }
+          }
+          if (hasCollision) {
+              stepCount++;
+              let sign = stepCount % 2 === 1 ? -1 : 1;
+              let mult = Math.ceil(stepCount / 2);
+              shiftY = sign * mult * 28; // 28px vertical steps
+          }
+      }
+      
+      if (shiftY !== 0) {
+          if (item.type === 'splitLine') {
+              item.ref.originalLabelY = item.ref.labelY;
+              item.ref.originalLabelX = item.ref.labelX;
+              item.ref.labelY += shiftY;
+          } else {
+              item.ref.originalY = item.ref.y;
+              item.ref.originalX = item.ref.x;
+              item.ref.y += shiftY;
+          }
+      }
+      
+      placed.push({ x: cx, y: cy + shiftY, hw: hw, hh: hh });
+  });
 }
 
 // ----------------------------------------------------
@@ -1464,6 +1541,18 @@ function renderSVG() {
       text.setAttribute("text-anchor", "middle");
       text.textContent = l.label;
 
+      if (l.originalLabelX !== undefined && l.originalLabelY !== undefined) {
+        const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        guideLine.setAttribute("x1", l.originalLabelX);
+        guideLine.setAttribute("y1", l.originalLabelY);
+        guideLine.setAttribute("x2", l.labelX);
+        guideLine.setAttribute("y2", l.labelY);
+        guideLine.setAttribute("stroke", "#999999");
+        guideLine.setAttribute("stroke-width", "1.2");
+        guideLine.setAttribute("stroke-dasharray", "4, 4");
+        g.appendChild(guideLine);
+      }
+
       g.appendChild(rect);
       g.appendChild(text);
 
@@ -1509,6 +1598,18 @@ function renderSVG() {
     text.setAttribute("text-anchor", "middle");
     text.textContent = b.text;
 
+    if (b.originalX !== undefined && b.originalY !== undefined) {
+      const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      guideLine.setAttribute("x1", b.originalX);
+      guideLine.setAttribute("y1", b.originalY);
+      guideLine.setAttribute("x2", b.x);
+      guideLine.setAttribute("y2", b.y);
+      guideLine.setAttribute("stroke", "#999999");
+      guideLine.setAttribute("stroke-width", "1.2");
+      guideLine.setAttribute("stroke-dasharray", "4, 4");
+      g.appendChild(guideLine);
+    }
+
     g.appendChild(rect);
     g.appendChild(text);
 
@@ -1552,6 +1653,18 @@ function renderSVG() {
     text.setAttribute("font-weight", t.isBold ? "bold" : "normal");
     text.setAttribute("text-anchor", "middle");
     text.textContent = t.text;
+
+    if (t.originalX !== undefined && t.originalY !== undefined) {
+      const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      guideLine.setAttribute("x1", t.originalX);
+      guideLine.setAttribute("y1", t.originalY);
+      guideLine.setAttribute("x2", t.x);
+      guideLine.setAttribute("y2", t.y);
+      guideLine.setAttribute("stroke", "#999999");
+      guideLine.setAttribute("stroke-width", "1.2");
+      guideLine.setAttribute("stroke-dasharray", "4, 4");
+      g.appendChild(guideLine);
+    }
 
     g.appendChild(rect);
     g.appendChild(text);
