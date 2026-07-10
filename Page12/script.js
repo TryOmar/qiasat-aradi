@@ -313,7 +313,12 @@ function sqmToFeddanCaratShares(sqm) {
 // ----------------------------------------------------
 // Quad Generation Algorithm (Handles all template styles dynamically)
 // ----------------------------------------------------
-function generateCustomLand() {
+let customPartnerWidths = null;
+
+function generateCustomLand(useCustomWidths = false) {
+  if (useCustomWidths !== true) {
+    customPartnerWidths = null;
+  }
   try {
     if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
     const w1 = parseArabicFloat(document.getElementById("start-w1").value);
@@ -499,26 +504,68 @@ function generateCustomLand() {
 
   const excludedTemplates = ['quad_diagonal', 'mixed_waterway_new', 'mixed_split_image'];
   if (numPartners > 1 && !excludedTemplates.includes(activeTemplateType)) {
-    const partArea = totalArea / numPartners;
-    const partDetailed = sqmToFeddanCaratShares(partArea);
+    
+    // Initialize customPartnerWidths if not set
+    if (!customPartnerWidths || customPartnerWidths.length !== numPartners) {
+      customPartnerWidths = [];
+      for (let i = 0; i < numPartners; i++) {
+        customPartnerWidths.push({
+          top: effW1 / numPartners,
+          bot: effW2 / numPartners
+        });
+      }
+    }
 
     for (let i = 0; i < numPartners; i++) {
+      let ratioTop1 = 0;
+      for (let j = 0; j < i; j++) ratioTop1 += customPartnerWidths[j].top;
+      ratioTop1 /= effW1;
+
+      let ratioTop2 = ratioTop1 + (customPartnerWidths[i].top / effW1);
+
+      let ratioBot1 = 0;
+      for (let j = 0; j < i; j++) ratioBot1 += customPartnerWidths[j].bot;
+      ratioBot1 /= effW2;
+
+      let ratioBot2 = ratioBot1 + (customPartnerWidths[i].bot / effW2);
+
+      // Handle precision issues
+      if (ratioTop1 < 0) ratioTop1 = 0; if (ratioTop1 > 1) ratioTop1 = 1;
+      if (ratioTop2 < 0) ratioTop2 = 0; if (ratioTop2 > 1) ratioTop2 = 1;
+      if (ratioBot1 < 0) ratioBot1 = 0; if (ratioBot1 > 1) ratioBot1 = 1;
+      if (ratioBot2 < 0) ratioBot2 = 0; if (ratioBot2 > 1) ratioBot2 = 1;
+
       const p_tl = {
-        x: p1.x + (p2.x - p1.x) * (i / numPartners),
-        y: p1.y + (p2.y - p1.y) * (i / numPartners)
+        x: p1.x + (p2.x - p1.x) * ratioTop1,
+        y: p1.y + (p2.y - p1.y) * ratioTop1
       };
       const p_tr = {
-        x: p1.x + (p2.x - p1.x) * ((i + 1) / numPartners),
-        y: p1.y + (p2.y - p1.y) * ((i + 1) / numPartners)
+        x: p1.x + (p2.x - p1.x) * ratioTop2,
+        y: p1.y + (p2.y - p1.y) * ratioTop2
       };
       const p_br = {
-        x: p4.x + (p3.x - p4.x) * ((i + 1) / numPartners),
-        y: p4.y + (p3.y - p4.y) * ((i + 1) / numPartners)
+        x: p4.x + (p3.x - p4.x) * ratioBot2,
+        y: p4.y + (p3.y - p4.y) * ratioBot2
       };
       const p_bl = {
-        x: p4.x + (p3.x - p4.x) * (i / numPartners),
-        y: p4.y + (p3.y - p4.y) * (i / numPartners)
+        x: p4.x + (p3.x - p4.x) * ratioBot1,
+        y: p4.y + (p3.y - p4.y) * ratioBot1
       };
+
+      // Calculate area of this custom piece
+      let A = Math.sqrt(Math.pow(p_tr.x - p_tl.x, 2) + Math.pow(p_tr.y - p_tl.y, 2)) / scale;
+      let B = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
+      let C = Math.sqrt(Math.pow(p_br.x - p_bl.x, 2) + Math.pow(p_br.y - p_bl.y, 2)) / scale;
+      let D = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
+      let diag = Math.sqrt(Math.pow(p_br.x - p_tl.x, 2) + Math.pow(p_br.y - p_tl.y, 2)) / scale;
+      
+      let s1 = (A + D + diag) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
+      let s2 = (C + B + diag) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
+      let partArea = area1 + area2;
+      const partDetailed = sqmToFeddanCaratShares(partArea);
+
 
       const colorIndex = (i + 1) % colorsList.length;
       shapes.push({
@@ -534,8 +581,8 @@ function generateCustomLand() {
       
       addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
 
-      const partW1 = effW1 / numPartners;
-      const partW2 = effW2 / numPartners;
+      const partW1 = customPartnerWidths[i].top;
+      const partW2 = customPartnerWidths[i].bot;
 
       freeTexts.push({
         id: "note_top_" + Date.now() + "_" + i,
@@ -1696,6 +1743,111 @@ function togglePinCroqui() {
   }
 }
 
+
+// ----------------------------------------------------
+// Free Edit Modal Logic
+// ----------------------------------------------------
+function openFreeEditModal() {
+  const numPartners = parseInt(document.getElementById("start-partners")?.value || "1");
+  const excludedTemplates = ['quad_diagonal', 'mixed_waterway_new', 'mixed_split_image'];
+  
+  if (numPartners === 1 || excludedTemplates.includes(activeTemplateType)) {
+    // Single shape or non-applicable template => open startModal to edit main dims
+    openStartModal();
+    return;
+  }
+
+  // Ensure customPartnerWidths is initialized
+  if (!customPartnerWidths || customPartnerWidths.length !== numPartners) {
+    const w1 = parseArabicFloat(document.getElementById("start-w1").value);
+    const w2 = parseArabicFloat(document.getElementById("start-w2").value);
+    customPartnerWidths = [];
+    for (let i = 0; i < numPartners; i++) {
+      customPartnerWidths.push({
+        top: w1 / numPartners,
+        bot: w2 / numPartners
+      });
+    }
+  }
+
+  renderFreeEditTable();
+  document.getElementById("freeEditModal").style.display = "block";
+}
+
+function closeFreeEditModal() {
+  document.getElementById("freeEditModal").style.display = "none";
+}
+
+function renderFreeEditTable() {
+  const tbody = document.getElementById("freeEditTableBody");
+  tbody.innerHTML = "";
+  
+  customPartnerWidths.forEach((cw, i) => {
+    const shape = shapes.find(s => s.id === "shape_" + (i + 1));
+    const areaStr = shape && shape.area ? shape.area.sqm.toFixed(2) : "-";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1}</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">
+        <input type="number" step="0.01" class="free-edit-input" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+      </td>
+      <td style="padding: 10px; border: 1px solid #ddd;">
+        <input type="number" step="0.01" class="free-edit-input" data-index="${i}" data-side="bot" value="${cw.bot.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+      </td>
+      <td style="padding: 10px; border: 1px solid #ddd; color: #1b5e20; font-weight: bold;">
+        ${areaStr}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll(".free-edit-input").forEach(inp => {
+    inp.addEventListener("change", (e) => {
+      const idx = parseInt(e.target.getAttribute("data-index"));
+      const side = e.target.getAttribute("data-side");
+      const newVal = parseArabicFloat(e.target.value);
+      onFreeEditWidthChange(idx, side, newVal, e.target);
+    });
+  });
+}
+
+function onFreeEditWidthChange(idx, side, newVal, inputEl) {
+  const oldVal = customPartnerWidths[idx][side];
+  const diff = newVal - oldVal;
+
+  // Determine neighbor to absorb the difference (try next, else previous)
+  let targetIdx = idx + 1;
+  if (idx === customPartnerWidths.length - 1) {
+    targetIdx = idx - 1;
+  }
+
+  if (targetIdx < 0 || targetIdx >= customPartnerWidths.length) {
+    alert("لا توجد قطعة مجاورة لتعديلها.");
+    inputEl.value = oldVal.toFixed(4);
+    return;
+  }
+
+  const neighborOldVal = customPartnerWidths[targetIdx][side];
+  const neighborNewVal = neighborOldVal - diff;
+
+  if (newVal < 0 || neighborNewVal < 0) {
+    alert("التعديل غير ممكن لأن العرض سيصبح أقل من الصفر للحفاظ على المساحة الكلية.");
+    inputEl.value = oldVal.toFixed(4);
+    return;
+  }
+
+  customPartnerWidths[idx][side] = newVal;
+  customPartnerWidths[targetIdx][side] = neighborNewVal;
+  
+  // Re-render table to reflect neighbor changes (areas will update upon applying)
+  renderFreeEditTable();
+}
+
+function applyFreeEdit() {
+  closeFreeEditModal();
+  generateCustomLand(true); // Pass true to use the customWidths!
+}
 
 // ----------------------------------------------------
 // UI Click & Editing Popups
