@@ -49,7 +49,7 @@ let saveStateTimeout = null;
 // Smart Area Tabs
 let activeSmartAreaTab = 'sqm';
 let showFeddanConversion = localStorage.getItem("dallal_show_feddan") === "true";
-let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 175.0347;
+let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
 
 // Color Palette for Shapes
 const colorsList = [
@@ -3178,7 +3178,7 @@ function applyCaratConversion() {
   const select = document.getElementById("modal-carat-select");
   const customInput = document.getElementById("modal-carat-custom");
   
-  let selectedVal = 175.0347;
+  let selectedVal = 168;
   if (select.value === "custom") {
     const customVal = parseFloat(customInput.value);
     if (isNaN(customVal) || customVal <= 0) {
