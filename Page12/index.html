@@ -574,13 +574,14 @@
       <p>إعادة</p>
     </button>
 
-    <button type="button" class="nav-box nav-btn" onclick="openStartModal()">
+    <button type="button" class="nav-box nav-btn" onclick="resetCanvasToDefault()">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
       </svg>
-      <p>أبعاد الأرض</p>
+      <p>مسح اللوحة</p>
     </button>
-    
+
     <button type="button" class="nav-box nav-btn" onclick="openAddDataModal()">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
@@ -606,22 +607,6 @@
         <polyline points="21 15 16 10 5 21"></polyline>
       </svg>
       <p>حفظ صورة</p>
-    </button>
-
-    <button type="button" class="nav-box nav-btn" onclick="restoreDemoDataPreset()">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2.5 2v6h6M21.5 22v-6h-6"/>
-        <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/>
-      </svg>
-      <p>تجريبي</p>
-    </button>
-
-    <button type="button" class="nav-box nav-btn" onclick="resetCanvasToDefault()">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-      </svg>
-      <p>مسح اللوحة</p>
     </button>
   </div>
 

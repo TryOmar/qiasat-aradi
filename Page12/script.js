@@ -26,24 +26,26 @@ let freeTexts = [];
 let waterways = [];
 
 // Visual Scaling & Stretch Variables - متغيرات التمدد البصري والـ Auto Fit
-let visualXFactor = 1.0;
-let visualYFactor = 1.0;
+let scaleX = 1.0;
+let scaleY = 1.0;
+let centerRx = 0.0;
+let centerRy = 0.0;
 let visualCenterX = 450;
 let visualCenterY = 325;
 let scale = 1.0;
 let partnerEditMode = 'keep_area'; // 'keep_area' or 'free_edit'
 
-function getVisualX(x) {
-  return visualCenterX + (x - visualCenterX) * visualXFactor;
+function getVisualX(rx) {
+  return visualCenterX + (rx - centerRx) * scaleX;
 }
-function getVisualY(y) {
-  return visualCenterY + (y - visualCenterY) * visualYFactor;
+function getVisualY(ry) {
+  return visualCenterY + (ry - centerRy) * scaleY;
 }
 function getRealCoords(coords) {
   if (!coords) return { x: 0, y: 0 };
   return {
-    x: visualCenterX + (coords.x - visualCenterX) / visualXFactor,
-    y: visualCenterY + (coords.y - visualCenterY) / visualYFactor
+    x: centerRx + (coords.x - visualCenterX) / scaleX,
+    y: centerRy + (coords.y - visualCenterY) / scaleY
   };
 }
 
@@ -379,8 +381,8 @@ function generateCustomLand(useCustomWidths = false) {
   waterways = [];
   selectedElement = null;
 
-  let centerX = 450;
-  let centerY = 325;
+  let centerX = 0;
+  let centerY = 0;
   scale = 1;
 
   let effW1 = w1, effW2 = w2, effL1 = l1, effL2 = l2;
@@ -404,10 +406,6 @@ function generateCustomLand(useCustomWidths = false) {
     if (agriPattern) { agriPattern.setAttribute("width", "650"); agriPattern.setAttribute("height", "900"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "650 / 900";
     setDynamicPrintPage("portrait");
-    centerX = 325;
-    centerY = 450;
-    // Auto Fit (الهامش البصري 5%): width = 650 * 0.9 = 585, height = 900 * 0.9 = 810
-    scale = Math.min(585 / maxW, 810 / maxL);
   } else {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
@@ -417,47 +415,25 @@ function generateCustomLand(useCustomWidths = false) {
     if (agriPattern) { agriPattern.setAttribute("width", "900"); agriPattern.setAttribute("height", "650"); }
     if (wrapperElement) wrapperElement.style.aspectRatio = "900 / 650";
     setDynamicPrintPage("landscape");
-    centerX = 450;
-    centerY = 325;
-    // Auto Fit (الهامش البصري 5%): width = 900 * 0.9 = 810, height = 650 * 0.9 = 585
-    scale = Math.min(810 / maxW, 585 / maxL);
-  }
-
-  // تحديث المراكز وعوامل التمديد البصري لتكبير عرض/طول الأراضي الطولية والعريضة
-  visualCenterX = centerX;
-  visualCenterY = centerY;
-  visualXFactor = 1.0;
-  visualYFactor = 1.0;
-
-  if (avgW > 0 && avgL > 0) {
-    const ratioLtoW = avgL / avgW;
-    const ratioWtoL = avgW / avgL;
-    if (ratioLtoW > 6.0) {
-      // أرض طولية جداً ورأسية: نمدد المحور الأفقي بصرياً
-      visualXFactor = Math.min(3.0, ratioLtoW / 4.0);
-    } else if (ratioWtoL > 6.0) {
-      // أرض عريضة جداً وأفقية: نمدد المحور الرأسي بصرياً
-      visualYFactor = Math.min(3.0, ratioWtoL / 4.0);
-    }
   }
 
   function addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, idx) {
-    const leftLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
+    const leftLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2));
     freeTexts.push({
       id: "note_left_" + Date.now() + "_" + idx,
       text: leftLen.toFixed(2) + " م",
-      x: p_tl.x + (p_bl.x - p_tl.x) * 0.75 + 28,
+      x: p_tl.x + (p_bl.x - p_tl.x) * 0.75 + 1.8,
       y: p_tl.y + (p_bl.y - p_tl.y) * 0.75,
       fontSize: 12,
       isBold: true,
       angle: 0,
       color: "#555"
     });
-    const rightLen = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
+    const rightLen = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2));
     freeTexts.push({
       id: "note_right_" + Date.now() + "_" + idx,
       text: rightLen.toFixed(2) + " م",
-      x: p_tr.x + (p_br.x - p_tr.x) * 0.75 - 28,
+      x: p_tr.x + (p_br.x - p_tr.x) * 0.75 - 1.8,
       y: p_tr.y + (p_br.y - p_tr.y) * 0.75,
       fontSize: 12,
       isBold: true,
@@ -527,31 +503,25 @@ function generateCustomLand(useCustomWidths = false) {
     let shapeW = maxX - minX;
     let shapeH = maxY - minY;
 
-    let rawScale = Math.min(740 / shapeW, 500 / shapeH);
-    if (avgL > avgW) {
-       rawScale = Math.min(500 / shapeW, 740 / shapeH);
-    }
-    scale = rawScale;
-
     let boxCenterX = minX + shapeW / 2;
     let boxCenterY = minY + shapeH / 2;
 
-    p1 = { x: centerX + (tempP1.x - boxCenterX) * scale, y: centerY + (tempP1.y - boxCenterY) * scale };
-    p2 = { x: centerX + (tempP2.x - boxCenterX) * scale, y: centerY + (tempP2.y - boxCenterY) * scale };
-    p3 = { x: centerX + (tempP3.x - boxCenterX) * scale, y: centerY + (tempP3.y - boxCenterY) * scale };
-    p4 = { x: centerX + (tempP4.x - boxCenterX) * scale, y: centerY + (tempP4.y - boxCenterY) * scale };
+    p1 = { x: tempP1.x - boxCenterX, y: tempP1.y - boxCenterY };
+    p2 = { x: tempP2.x - boxCenterX, y: tempP2.y - boxCenterY };
+    p3 = { x: tempP3.x - boxCenterX, y: tempP3.y - boxCenterY };
+    p4 = { x: tempP4.x - boxCenterX, y: tempP4.y - boxCenterY };
 
   } else {
-    const drawW1 = w1 * scale;
-    const drawW2 = w2 * scale;
-    const drawL1 = l1 * scale;
-    const drawL2 = l2 * scale;
+    const drawW1 = w1;
+    const drawW2 = w2;
+    const drawL1 = l1;
+    const drawL2 = l2;
     const avgHeight = (drawL1 + drawL2) / 2;
 
-    p1 = { x: centerX - drawW1 / 2, y: centerY - avgHeight / 2 };
-    p2 = { x: centerX + drawW1 / 2, y: centerY - avgHeight / 2 };
-    p3 = { x: centerX + drawW2 / 2, y: centerY + avgHeight / 2 };
-    p4 = { x: centerX - drawW2 / 2, y: centerY + avgHeight / 2 };
+    p1 = { x: -drawW1 / 2, y: -avgHeight / 2 };
+    p2 = { x: drawW1 / 2, y: -avgHeight / 2 };
+    p3 = { x: drawW2 / 2, y: avgHeight / 2 };
+    p4 = { x: -drawW2 / 2, y: avgHeight / 2 };
 
     totalArea = ((w1 + w2) / 2) * ((l1 + l2) / 2);
   }
@@ -608,11 +578,11 @@ function generateCustomLand(useCustomWidths = false) {
       };
 
       // Calculate area of this custom piece
-      let A = Math.sqrt(Math.pow(p_tr.x - p_tl.x, 2) + Math.pow(p_tr.y - p_tl.y, 2)) / scale;
-      let B = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
-      let C = Math.sqrt(Math.pow(p_br.x - p_bl.x, 2) + Math.pow(p_br.y - p_bl.y, 2)) / scale;
-      let D = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
-      let diag = Math.sqrt(Math.pow(p_br.x - p_tl.x, 2) + Math.pow(p_br.y - p_tl.y, 2)) / scale;
+      let A = Math.sqrt(Math.pow(p_tr.x - p_tl.x, 2) + Math.pow(p_tr.y - p_tl.y, 2));
+      let B = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2));
+      let C = Math.sqrt(Math.pow(p_br.x - p_bl.x, 2) + Math.pow(p_br.y - p_bl.y, 2));
+      let D = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2));
+      let diag = Math.sqrt(Math.pow(p_br.x - p_tl.x, 2) + Math.pow(p_br.y - p_tl.y, 2));
       
       let s1 = (A + D + diag) / 2;
       let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
@@ -643,7 +613,7 @@ function generateCustomLand(useCustomWidths = false) {
         id: "note_top_" + Date.now() + "_" + i,
         text: partW1.toFixed(2) + " م",
         x: (p_tl.x + p_tr.x) / 2,
-        y: (p_tl.y + p_tr.y) / 2 + 20,
+        y: (p_tl.y + p_tr.y) / 2 + 1.5,
         fontSize: 12,
         isBold: true,
         angle: 0,
@@ -654,7 +624,7 @@ function generateCustomLand(useCustomWidths = false) {
         id: "note_bot_" + Date.now() + "_" + i,
         text: partW2.toFixed(2) + " م",
         x: (p_bl.x + p_br.x) / 2,
-        y: (p_bl.y + p_br.y) / 2 - 20,
+        y: (p_bl.y + p_br.y) / 2 - 1.5,
         fontSize: 12,
         isBold: true,
         angle: 0,
@@ -662,13 +632,12 @@ function generateCustomLand(useCustomWidths = false) {
       });
 
       if (i > 0) {
-        const splitLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
         splitLines.push({
           id: "split_" + i,
           x1: p_tl.x, y1: p_tl.y,
           x2: p_bl.x, y2: p_bl.y,
           label: "",
-          labelX: p_tl.x - 20,
+          labelX: p_tl.x - 1.5,
           labelY: (p_tl.y + p_bl.y) / 2,
           angle: 90,
           isDashed: true
@@ -729,7 +698,7 @@ function generateCustomLand(useCustomWidths = false) {
       x1: p_top_mid.x, y1: p_top_mid.y,
       x2: p_bot_mid.x, y2: p_bot_mid.y,
       label: "",
-      labelX: p_top_mid.x - 20,
+      labelX: p_top_mid.x - 1.5,
       labelY: centerY,
       angle: 90,
       isDashed: true
@@ -750,7 +719,7 @@ function generateCustomLand(useCustomWidths = false) {
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب بحري" : "نصيب شرقي",
       color: "#f1f8e9",
-      textX: centerX,
+      textX: (p1.x + p2.x) / 2,
       textY: (p1.y + p_left_mid.y) / 2
     });
     
@@ -763,7 +732,7 @@ function generateCustomLand(useCustomWidths = false) {
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب قبلي" : "نصيب غربي",
       color: "#fffde7",
-      textX: centerX,
+      textX: (p_left_mid.x + p_right_mid.x) / 2,
       textY: (p_left_mid.y + p4.y) / 2
     });
     
@@ -775,7 +744,7 @@ function generateCustomLand(useCustomWidths = false) {
       x2: p_right_mid.x, y2: p_right_mid.y,
       label: "",
       labelX: centerX,
-      labelY: p_left_mid.y - 12,
+      labelY: p_left_mid.y - 1.0,
       angle: 0,
       isDashed: true
     });
@@ -790,11 +759,11 @@ function generateCustomLand(useCustomWidths = false) {
       notes: "رباعي مقاس بالقطرين",
       color: "#f1f8e9",
       textX: centerX,
-      textY: centerY + 55
+      textY: centerY + 3.5
     });
 
-    const lenAC = Math.sqrt(Math.pow(p3.x - p1.x, 2) + Math.pow(p3.y - p1.y, 2)) / scale;
-    const lenBD = Math.sqrt(Math.pow(p2.x - p4.x, 2) + Math.pow(p2.y - p4.y, 2)) / scale;
+    const lenAC = Math.sqrt(Math.pow(p3.x - p1.x, 2) + Math.pow(p3.y - p1.y, 2));
+    const lenBD = Math.sqrt(Math.pow(p2.x - p4.x, 2) + Math.pow(p2.y - p4.y, 2));
 
     // Draw diagonal AC
     splitLines.push({
@@ -802,8 +771,8 @@ function generateCustomLand(useCustomWidths = false) {
       x1: p1.x, y1: p1.y,
       x2: p3.x, y2: p3.y,
       label: `القطر الأول (AC) ${lenAC.toFixed(2)} م`,
-      labelX: (p1.x + p3.x) / 2 + 35,
-      labelY: (p1.y + p3.y) / 2 - 20,
+      labelX: (p1.x + p3.x) / 2 + 2.5,
+      labelY: (p1.y + p3.y) / 2 - 1.5,
       angle: Math.round(Math.atan2(p3.y - p1.y, p3.x - p1.x) * 180 / Math.PI),
       isDashed: true,
       color: "#0288d1"
@@ -815,8 +784,8 @@ function generateCustomLand(useCustomWidths = false) {
       x1: p4.x, y1: p4.y,
       x2: p2.x, y2: p2.y,
       label: `القطر الثاني (BD) ${lenBD.toFixed(2)} م`,
-      labelX: (p4.x + p2.x) / 2 - 35,
-      labelY: (p4.y + p2.y) / 2 - 20,
+      labelX: (p4.x + p2.x) / 2 - 2.5,
+      labelY: (p4.y + p2.y) / 2 - 1.5,
       angle: Math.round(Math.atan2(p2.y - p4.y, p2.x - p4.x) * 180 / Math.PI),
       isDashed: true,
       color: "#0288d1"
@@ -893,7 +862,7 @@ function generateCustomLand(useCustomWidths = false) {
     const y_water_bot_right_vis = p2.y + (p3.y - p2.y) * t_right_bot_vis;
 
     function calcDist(pa, pb) {
-      return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
+      return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2));
     }
     function calcQuadArea(pa, pb, pc, pd) {
       let A = calcDist(pa, pb);
@@ -925,7 +894,7 @@ function generateCustomLand(useCustomWidths = false) {
       points: [w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis],
       label: "مجرى مائي (ترعة)",
       labelX: centerX,
-      labelY: (y_water_top_left_vis + y_water_bot_left_vis) / 2 + 4,
+      labelY: (y_water_top_left_vis + y_water_bot_left_vis) / 2,
       angle: 0,
       stats: {
         area: uw === 0 ? 0 : calcQuadArea(w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis),
@@ -1031,7 +1000,7 @@ function generateCustomLand(useCustomWidths = false) {
           id: "note_top_" + pieceIdPrefix + "_" + i,
           text: partW1.toFixed(2) + " م",
           x: (sub_tl.x + sub_tr.x) / 2,
-          y: (sub_tl.y + sub_tr.y) / 2 + (pieceIdPrefix === 'east' ? 20 : -20),
+          y: (sub_tl.y + sub_tr.y) / 2 + (pieceIdPrefix === 'east' ? 1.5 : -1.5),
           fontSize: 12,
           isBold: true,
           angle: 0,
@@ -1042,7 +1011,7 @@ function generateCustomLand(useCustomWidths = false) {
           id: "note_bot_" + pieceIdPrefix + "_" + i,
           text: partW2.toFixed(2) + " م",
           x: (sub_bl.x + sub_br.x) / 2,
-          y: (sub_bl.y + sub_br.y) / 2 + (pieceIdPrefix === 'west' ? -20 : 20),
+          y: (sub_bl.y + sub_br.y) / 2 + (pieceIdPrefix === 'west' ? -1.5 : 1.5),
           fontSize: 12,
           isBold: true,
           angle: 0,
@@ -1055,7 +1024,7 @@ function generateCustomLand(useCustomWidths = false) {
             x1: sub_tl.x, y1: sub_tl.y,
             x2: sub_bl.x, y2: sub_bl.y,
             label: "",
-            labelX: sub_tl.x - 20,
+            labelX: sub_tl.x - 1.5,
             labelY: (sub_tl.y + sub_bl.y) / 2,
             angle: 90,
             isDashed: true
@@ -1070,7 +1039,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   } else if (activeTemplateType === 'mixed_split_image') {
     // Vertical waterway in the middle, splitting into Left/Right, then horizontally split.
-    const water_w = 26; // Waterway width in pixels
+    const water_w = 2.0; // Waterway width in meters
     const x_water_left = centerX - water_w / 2;
     const x_water_right = centerX + water_w / 2;
 
@@ -1120,14 +1089,13 @@ function generateCustomLand(useCustomWidths = false) {
       textY: (y_mid_left + p4.y) / 2
     });
 
-    const splitLeftVal = (effW1 * 0.45).toFixed(1);
     splitLines.push({
       id: "split_left",
       x1: x_mid_left_outer, y1: y_mid_left,
       x2: x_water_left, y2: y_mid_left,
       label: "",
-      labelX: p1.x - 130,
-      labelY: y_mid_left + 4,
+      labelX: p1.x - 6.5,
+      labelY: y_mid_left,
       angle: 0,
       isDashed: true
     });
@@ -1158,14 +1126,13 @@ function generateCustomLand(useCustomWidths = false) {
       textY: (y_mid_right + p3.y) / 2
     });
 
-    const splitRightVal = (effW2 * 0.45).toFixed(1);
     splitLines.push({
       id: "split_right",
       x1: x_water_right, y1: y_mid_right,
       x2: x_mid_right_outer, y2: y_mid_right,
       label: "",
-      labelX: p2.x + 130,
-      labelY: y_mid_right + 4,
+      labelX: p2.x + 6.5,
+      labelY: y_mid_right,
       angle: 0,
       isDashed: true
     });
@@ -1174,10 +1141,10 @@ function generateCustomLand(useCustomWidths = false) {
     const hValLeft = ((effL1 - 17.50) / 2).toFixed(1);
     const hValRight = ((effL2 - 17.50) / 2).toFixed(1);
 
-    freeTexts.push({ id: "note_l_t", text: `${hValLeft} م`, x: p1.x + 18, y: (p1.y + y_mid_left) / 2, fontSize: 12, isBold: true, angle: -90 });
-    freeTexts.push({ id: "note_l_b", text: `${hValLeft} م`, x: p4.x + 18, y: (p4.y + y_mid_left) / 2, fontSize: 12, isBold: true, angle: -90 });
-    freeTexts.push({ id: "note_r_t", text: `${hValRight} م`, x: p2.x - 18, y: (p2.y + y_mid_right) / 2, fontSize: 12, isBold: true, angle: 90 });
-    freeTexts.push({ id: "note_r_b", text: `${hValRight} م`, x: p3.x - 18, y: (y_mid_right + p3.y) / 2, fontSize: 12, isBold: true, angle: 90 });
+    freeTexts.push({ id: "note_l_t", text: `${hValLeft} م`, x: p1.x + 1.2, y: (p1.y + y_mid_left) / 2, fontSize: 12, isBold: true, angle: -90 });
+    freeTexts.push({ id: "note_l_b", text: `${hValLeft} م`, x: p4.x + 1.2, y: (p4.y + y_mid_left) / 2, fontSize: 12, isBold: true, angle: -90 });
+    freeTexts.push({ id: "note_r_t", text: `${hValRight} م`, x: p2.x - 1.2, y: (p2.y + y_mid_right) / 2, fontSize: 12, isBold: true, angle: 90 });
+    freeTexts.push({ id: "note_r_b", text: `${hValRight} م`, x: p3.x - 1.2, y: (y_mid_right + p3.y) / 2, fontSize: 12, isBold: true, angle: 90 });
   }
 
   // Draw external border labels
@@ -1223,7 +1190,7 @@ function generateCustomLand(useCustomWidths = false) {
   panY = 0;
   applyViewportTransform();
 
-  preventLabelOverlap(); // Auto layout to prevent overlapping text boxes
+
 
   closeStartModal();
   renderSVG();
@@ -1237,75 +1204,212 @@ function generateCustomLand(useCustomWidths = false) {
 // ----------------------------------------------------
 // Smart Label Overlap Prevention (Collision Detection)
 // ----------------------------------------------------
-function preventLabelOverlap() {
+// A map to store visual offsets for labels so they don't overlap, resolved dynamically at render time.
+let resolvedVisualOffsets = {};
+
+function updateDynamicTransform() {
+  if (shapes.length === 0) {
+    scaleX = 1.0;
+    scaleY = 1.0;
+    centerRx = 0.0;
+    centerRy = 0.0;
+    scale = 1.0;
+    return;
+  }
+
+  // 1. Get real bounding box of all shapes in meters
+  let minRx = Infinity, maxRx = -Infinity;
+  let minRy = Infinity, maxRy = -Infinity;
+
+  shapes.forEach(s => {
+    s.points.forEach(p => {
+      if (p.x < minRx) minRx = p.x;
+      if (p.x > maxRx) maxRx = p.x;
+      if (p.y < minRy) minRy = p.y;
+      if (p.y > maxRy) maxRy = p.y;
+    });
+  });
+
+  if (minRx === Infinity || minRy === Infinity) {
+    minRx = -30; maxRx = 30;
+    minRy = -15; maxRy = 15;
+  }
+
+  centerRx = (minRx + maxRx) / 2;
+  centerRy = (minRy + maxRy) / 2;
+
+  const rw = maxRx - minRx || 1;
+  const rh = maxRy - minRy || 1;
+
+  const margin = 50; // Safety margin in pixels
+  let targetW, targetH;
+
+  const avgW = rw;
+  const avgL = rh;
+  const isRotated = avgL > avgW;
+
+  if (isRotated) {
+    targetW = 650 - 2 * margin;
+    targetH = 900 - 2 * margin;
+    visualCenterX = 325;
+    visualCenterY = 450;
+  } else {
+    targetW = 900 - 2 * margin;
+    targetH = 650 - 2 * margin;
+    visualCenterX = 450;
+    visualCenterY = 325;
+  }
+
+  const uniformScale = Math.min(targetW / rw, targetH / rh);
+  const aspectRatio = rw / rh;
+  const screenRatio = targetW / targetH;
+
+  scaleX = uniformScale;
+  scaleY = uniformScale;
+
+  if (aspectRatio > screenRatio) {
+    // Wide land. Stretch Y axis.
+    const ratioOfRatios = aspectRatio / screenRatio;
+    let stretchY = Math.pow(ratioOfRatios, 0.45);
+
+    if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
+      stretchY *= 1.25;
+    }
+    if (shapes.length > 2) {
+      stretchY *= (1.0 + (shapes.length - 1) * 0.08);
+    }
+
+    scaleX = targetW / rw;
+    scaleY = Math.min(targetH / rh, scaleX * stretchY);
+  } else {
+    // Tall land. Stretch X axis.
+    const ratioOfRatios = screenRatio / aspectRatio;
+    let stretchX = Math.pow(ratioOfRatios, 0.45);
+
+    if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
+      stretchX *= 1.25;
+    }
+    if (shapes.length > 2) {
+      stretchX *= (1.0 + (shapes.length - 1) * 0.08);
+    }
+
+    scaleY = targetH / rh;
+    scaleX = Math.min(targetW / rw, scaleY * stretchX);
+  }
+
+  scale = Math.min(scaleX, scaleY);
+}
+
+function resolveVisualLabelOverlap() {
+  resolvedVisualOffsets = {};
   let placed = [];
-  
-  // Combine all labels we want to process
-  let checkList = [
-      ...splitLines.map(l => ({ ref: l, type: 'splitLine', x: l.labelX, y: l.labelY, angle: l.angle || 0 })),
-      ...borderLabels.map(b => ({ ref: b, type: 'borderLabel', x: b.x, y: b.y, angle: b.angle || 0 })),
-      ...freeTexts.map(t => ({ ref: t, type: 'freeText', x: t.x, y: t.y, angle: t.angle || 0 }))
-  ];
-  
+  let checkList = [];
+
+  // 1. Waterways
+  waterways.forEach(w => {
+    if (w.label) {
+      checkList.push({
+        id: w.id,
+        type: 'waterwayLabel',
+        x: getVisualX(w.labelX),
+        y: getVisualY(w.labelY),
+        angle: w.angle || 0,
+        text: w.label,
+        fontSize: 14
+      });
+    }
+  });
+
+  // 2. Split lines
+  splitLines.forEach(l => {
+    if (l.label) {
+      checkList.push({
+        id: l.id,
+        type: 'splitLineLabel',
+        x: getVisualX(l.labelX),
+        y: getVisualY(l.labelY),
+        angle: l.angle || 0,
+        text: l.label,
+        fontSize: 12
+      });
+    }
+  });
+
+  // 3. Border labels
+  borderLabels.forEach(b => {
+    if (b.text) {
+      checkList.push({
+        id: b.id,
+        type: 'borderLabel',
+        x: getVisualX(b.x),
+        y: getVisualY(b.y),
+        angle: b.angle || 0,
+        text: b.text,
+        fontSize: parseFloat(b.fontSize || "13.5")
+      });
+    }
+  });
+
+  // 4. Free texts
+  freeTexts.forEach(t => {
+    if (t.text) {
+      checkList.push({
+        id: t.id,
+        type: 'freeText',
+        x: getVisualX(t.x),
+        y: getVisualY(t.y),
+        angle: t.angle || 0,
+        text: t.text,
+        fontSize: parseFloat(t.fontSize || "13")
+      });
+    }
+  });
+
   checkList.forEach(item => {
-      let text = item.ref.label || item.ref.text;
-      if (!text) return; 
-      
-      // We only apply this to perfectly horizontal labels to simplify AABB and avoid messing up angled labels
-      if (item.angle !== 0) return;
-      
-      let fontSize = parseFloat(item.ref.fontSize || "13");
-      let w = 0, h = 0;
-      if (item.type === 'splitLine') {
-          w = text.length * 7 + 10;
-          h = 20;
-      } else {
-          w = text.length * (fontSize * 0.6) + 12;
-          h = fontSize * 1.6;
+    if (item.angle !== 0) {
+      resolvedVisualOffsets[item.id] = { dx: 0, dy: 0 };
+      return;
+    }
+
+    const fontSize = item.fontSize;
+    let w = 0, h = 0;
+    if (item.type === 'splitLineLabel') {
+      w = item.text.length * 7 + 10;
+      h = 20;
+    } else {
+      w = item.text.length * (fontSize * 0.6) + 12;
+      h = fontSize * 1.6;
+    }
+
+    let cx = item.x;
+    let cy = item.y;
+    let hw = w / 2;
+    let hh = h / 2;
+
+    let shiftY = 0;
+    let stepCount = 0;
+    let hasCollision = true;
+
+    while (hasCollision && stepCount < 20) {
+      hasCollision = false;
+      let testY = cy + shiftY;
+      for (let p of placed) {
+        if (Math.abs(cx - p.x) < (hw + p.hw + 6) &&
+            Math.abs(testY - p.y) < (hh + p.hh + 6)) {
+          hasCollision = true;
+          break;
+        }
       }
-      
-      let cx = item.x;
-      let cy = item.y;
-      
-      let hw = w / 2;
-      let hh = h / 2;
-      
-      let shiftY = 0;
-      let stepCount = 0;
-      let hasCollision = true;
-      
-      while (hasCollision && stepCount < 20) {
-          hasCollision = false;
-          let testY = cy + shiftY;
-          for (let p of placed) {
-              // Add a small padding to prevent touching
-              if (Math.abs(cx - p.x) < (hw + p.hw + 4) && 
-                  Math.abs(testY - p.y) < (hh + p.hh + 4)) {
-                  hasCollision = true;
-                  break;
-              }
-          }
-          if (hasCollision) {
-              stepCount++;
-              let sign = stepCount % 2 === 1 ? -1 : 1;
-              let mult = Math.ceil(stepCount / 2);
-              shiftY = sign * mult * 28; // 28px vertical steps
-          }
+      if (hasCollision) {
+        stepCount++;
+        let sign = stepCount % 2 === 1 ? -1 : 1;
+        let mult = Math.ceil(stepCount / 2);
+        shiftY = sign * mult * 26;
       }
-      
-      if (shiftY !== 0) {
-          if (item.type === 'splitLine') {
-              item.ref.originalLabelY = item.ref.labelY;
-              item.ref.originalLabelX = item.ref.labelX;
-              item.ref.labelY += shiftY;
-          } else {
-              item.ref.originalY = item.ref.y;
-              item.ref.originalX = item.ref.x;
-              item.ref.y += shiftY;
-          }
-      }
-      
-      placed.push({ x: cx, y: cy + shiftY, hw: hw, hh: hh });
+    }
+
+    resolvedVisualOffsets[item.id] = { dx: 0, dy: shiftY };
+    placed.push({ x: cx, y: cy + shiftY, hw: hw, hh: hh });
   });
 }
 
@@ -1313,6 +1417,9 @@ function preventLabelOverlap() {
 // Rendering Engine
 // ----------------------------------------------------
 function renderSVG() {
+  updateDynamicTransform();
+  resolveVisualLabelOverlap();
+
   const shapesGroup = document.getElementById("shapesGroup");
   const waterwaysGroup = document.getElementById("waterwaysGroup");
   const splitLinesGroup = document.getElementById("splitLinesGroup");
@@ -1376,9 +1483,24 @@ function renderSVG() {
     });
     waterwaysGroup.appendChild(polygon);
 
+    const offset = resolvedVisualOffsets[w.id] || { dx: 0, dy: 0 };
+    const visualLabelX = getVisualX(w.labelX) + offset.dx;
+    const visualLabelY = getVisualY(w.labelY) + offset.dy;
+
+    if (offset.dy !== 0) {
+      const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      guideLine.setAttribute("x1", getVisualX(w.labelX));
+      guideLine.setAttribute("y1", getVisualY(w.labelY));
+      guideLine.setAttribute("x2", visualLabelX);
+      guideLine.setAttribute("y2", visualLabelY);
+      guideLine.setAttribute("stroke", "#006064");
+      guideLine.setAttribute("stroke-width", "1");
+      guideLine.setAttribute("stroke-dasharray", "3, 3");
+      guideLine.style.opacity = "0.7";
+      waterwaysGroup.appendChild(guideLine);
+    }
+
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    const visualLabelX = getVisualX(w.labelX);
-    const visualLabelY = getVisualY(w.labelY);
     text.setAttribute("x", visualLabelX);
     text.setAttribute("y", visualLabelY);
     text.setAttribute("fill", "#006064");
@@ -1458,16 +1580,18 @@ function renderSVG() {
       if (p.y < minY) minY = p.y;
       if (p.y > maxY) maxY = p.y;
     });
-    const shapeW = maxX - minX;
-    const shapeH = maxY - minY;
+    
+    // Visual width and height on screen
+    const visualShapeW = (maxX - minX) * scaleX;
+    const visualShapeH = (maxY - minY) * scaleY;
 
     // 1. Draw standalone Area text (rotated -90) at 25% height
     if (s.area && s.area.sqm) {
       const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
       const areaX = getVisualX(s.textX);
-      let areaY = minY + shapeH * 0.25;
+      let areaY = minY + (maxY - minY) * 0.25;
       if (activeTemplateType === 'mixed_waterway_new') {
-        areaY = minY + shapeH * 0.85; // Move to bottom to avoid waterway and text box
+        areaY = minY + (maxY - minY) * 0.85; // Move to bottom to avoid waterway and text box
       }
       const visualAreaY = getVisualY(areaY);
       
@@ -1528,12 +1652,12 @@ function renderSVG() {
       const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
 
       // Calculate scale factors
-      const hScaleX = (shapeW * 0.85) / unscaledBoxW;
-      const hScaleY = (shapeH * 0.85) / unscaledBoxH;
+      const hScaleX = (visualShapeW * 0.85) / unscaledBoxW;
+      const hScaleY = (visualShapeH * 0.85) / unscaledBoxH;
       const hScale = Math.min(1.0, hScaleX, hScaleY);
 
-      const vScaleX = (shapeH * 0.85) / unscaledBoxW;
-      const vScaleY = (shapeW * 0.85) / unscaledBoxH;
+      const vScaleX = (visualShapeH * 0.85) / unscaledBoxW;
+      const vScaleY = (visualShapeW * 0.85) / unscaledBoxH;
       const vScale = Math.min(1.0, vScaleX, vScaleY);
 
       let scaleFactor = hScale;
@@ -1551,15 +1675,16 @@ function renderSVG() {
       // Scaled dimensions
       const boxW = unscaledBoxW * scaleFactor;
       const boxH = unscaledBoxH * scaleFactor;
-      const boxX = s.textX - boxW / 2;
-      const boxY = s.textY - boxH / 2;
+      
+      const visualTextX = getVisualX(s.textX);
+      const visualTextY = getVisualY(s.textY);
+      
+      const boxX = visualTextX - boxW / 2;
+      const boxY = visualTextY - boxH / 2;
 
-      // Rotate and Translate group to apply visual scaling translation
-      const dx = getVisualX(s.textX) - s.textX;
-      const dy = getVisualY(s.textY) - s.textY;
-      let transformStr = `translate(${dx}, ${dy})`;
+      let transformStr = "";
       if (rotateAngle !== 0) {
-        transformStr += ` rotate(${rotateAngle}, ${s.textX}, ${s.textY})`;
+        transformStr = `rotate(${rotateAngle}, ${visualTextX}, ${visualTextY})`;
       }
       textGroup.setAttribute("transform", transformStr);
 
@@ -1584,7 +1709,7 @@ function renderSVG() {
       let currentY = boxY + 12 * scaleFactor;
       mainLines.forEach((line, idx) => {
         const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        tSpan.setAttribute("x", s.textX);
+        tSpan.setAttribute("x", visualTextX);
         tSpan.setAttribute("y", currentY + 16 * scaleFactor);
         tSpan.setAttribute("fill", line.color);
         tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
@@ -1602,7 +1727,7 @@ function renderSVG() {
 
       const fieldW = boxW - 16 * scaleFactor;
       const fieldH = bottomFieldH * scaleFactor;
-      const fieldX = s.textX - fieldW / 2;
+      const fieldX = visualTextX - fieldW / 2;
       const fieldY = currentY;
 
       // Draw the bottom field container
@@ -1623,7 +1748,7 @@ function renderSVG() {
         // 1. Draw button at the top of the box
         const btnW = 100 * scaleFactor;
         const btnH = 20 * scaleFactor;
-        const btnX = s.textX;
+        const btnX = visualTextX;
         const btnY = fieldY + bottomFieldPadding * scaleFactor;
 
         const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1663,7 +1788,7 @@ function renderSVG() {
         let convY = btnY + btnH + 6 * scaleFactor;
         conversionLines.forEach((line, idx) => {
           const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tSpan.setAttribute("x", s.textX);
+          tSpan.setAttribute("x", visualTextX);
           tSpan.setAttribute("y", convY + 14 * scaleFactor);
           tSpan.setAttribute("fill", line.color);
           tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
@@ -1679,7 +1804,7 @@ function renderSVG() {
         // Draw big button inside the box
         const btnW = 150 * scaleFactor;
         const btnH = 24 * scaleFactor;
-        const btnX = s.textX;
+        const btnX = visualTextX;
         const btnY = fieldY + bottomFieldPadding * scaleFactor;
 
         const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1802,8 +1927,9 @@ function renderSVG() {
     // Split Line Label
     if (l.label) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      const visualLabelX = getVisualX(l.labelX);
-      const visualLabelY = getVisualY(l.labelY);
+      const offset = resolvedVisualOffsets[l.id] || { dx: 0, dy: 0 };
+      const visualLabelX = getVisualX(l.labelX) + offset.dx;
+      const visualLabelY = getVisualY(l.labelY) + offset.dy;
       g.setAttribute("class", "draggable-label");
       g.setAttribute("data-id", l.id);
       g.setAttribute("data-type", "splitLineLabel");
@@ -1832,10 +1958,10 @@ function renderSVG() {
       text.setAttribute("text-anchor", "middle");
       text.textContent = l.label;
 
-      if (l.originalLabelX !== undefined && l.originalLabelY !== undefined) {
+      if (offset.dy !== 0) {
         const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        guideLine.setAttribute("x1", getVisualX(l.originalLabelX));
-        guideLine.setAttribute("y1", getVisualY(l.originalLabelY));
+        guideLine.setAttribute("x1", getVisualX(l.labelX));
+        guideLine.setAttribute("y1", getVisualY(l.labelY));
         guideLine.setAttribute("x2", visualLabelX);
         guideLine.setAttribute("y2", visualLabelY);
         guideLine.setAttribute("stroke", "#999999");
@@ -1859,8 +1985,9 @@ function renderSVG() {
   // 4. Draw Outer Border Labels
   borderLabels.forEach(b => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    const visualX = getVisualX(b.x);
-    const visualY = getVisualY(b.y);
+    const offset = resolvedVisualOffsets[b.id] || { dx: 0, dy: 0 };
+    const visualX = getVisualX(b.x) + offset.dx;
+    const visualY = getVisualY(b.y) + offset.dy;
     g.setAttribute("class", "draggable-label");
     g.setAttribute("data-id", b.id);
     g.setAttribute("data-type", "borderLabel");
@@ -1891,10 +2018,10 @@ function renderSVG() {
     text.setAttribute("text-anchor", "middle");
     text.textContent = b.text;
 
-    if (b.originalX !== undefined && b.originalY !== undefined) {
+    if (offset.dy !== 0) {
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      guideLine.setAttribute("x1", getVisualX(b.originalX));
-      guideLine.setAttribute("y1", getVisualY(b.originalY));
+      guideLine.setAttribute("x1", getVisualX(b.x));
+      guideLine.setAttribute("y1", getVisualY(b.y));
       guideLine.setAttribute("x2", visualX);
       guideLine.setAttribute("y2", visualY);
       guideLine.setAttribute("stroke", "#999999");
@@ -1917,8 +2044,9 @@ function renderSVG() {
   // 5. Draw Free Custom Texts
   freeTexts.forEach(t => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    const visualX = getVisualX(t.x);
-    const visualY = getVisualY(t.y);
+    const offset = resolvedVisualOffsets[t.id] || { dx: 0, dy: 0 };
+    const visualX = getVisualX(t.x) + offset.dx;
+    const visualY = getVisualY(t.y) + offset.dy;
     g.setAttribute("class", "draggable-label");
     g.setAttribute("data-id", t.id);
     g.setAttribute("data-type", "freeText");
@@ -1949,10 +2077,10 @@ function renderSVG() {
     text.setAttribute("text-anchor", "middle");
     text.textContent = t.text;
 
-    if (t.originalX !== undefined && t.originalY !== undefined) {
+    if (offset.dy !== 0) {
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      guideLine.setAttribute("x1", getVisualX(t.originalX));
-      guideLine.setAttribute("y1", getVisualY(t.originalY));
+      guideLine.setAttribute("x1", getVisualX(t.x));
+      guideLine.setAttribute("y1", getVisualY(t.y));
       guideLine.setAttribute("x2", visualX);
       guideLine.setAttribute("y2", visualY);
       guideLine.setAttribute("stroke", "#999999");
@@ -2035,8 +2163,8 @@ function onSvgMouseDown(e) {
 function onSvgMouseMove(e) {
   if (activeDrag) {
     const coords = getRealCoords(getSvgCoords(e));
-    const newX = Math.round(coords.x - activeDrag.offset.x);
-    const newY = Math.round(coords.y - activeDrag.offset.y);
+    const newX = Math.round((coords.x - activeDrag.offset.x) * 100) / 100;
+    const newY = Math.round((coords.y - activeDrag.offset.y) * 100) / 100;
 
     if (activeDrag.type === 'freeText') {
       const t = freeTexts.find(x => x.id === activeDrag.id);
@@ -2157,24 +2285,29 @@ function togglePinCroqui() {
 // ----------------------------------------------------
 function openFreeEditModal() {
   const numPartners = parseInt(document.getElementById("start-partners")?.value || "1");
-  const excludedTemplates = ['quad_diagonal', 'mixed_waterway_new', 'mixed_split_image'];
+  const excludedTemplates = ['quad_diagonal'];
   
-  if (numPartners === 1 || excludedTemplates.includes(activeTemplateType)) {
-    // Single shape or non-applicable template => open startModal to edit main dims
+  if (activeTemplateType === 'quad_diagonal') {
     openStartModal();
     return;
   }
 
-  // Ensure customPartnerWidths is initialized
-  if (!customPartnerWidths || customPartnerWidths.length !== numPartners) {
-    const w1 = parseArabicFloat(document.getElementById("start-w1").value);
-    const w2 = parseArabicFloat(document.getElementById("start-w2").value);
-    customPartnerWidths = [];
-    for (let i = 0; i < numPartners; i++) {
-      customPartnerWidths.push({
-        top: w1 / numPartners,
-        bot: w2 / numPartners
-      });
+  if (numPartners === 1 && activeTemplateType !== 'mixed_waterway_new' && activeTemplateType !== 'mixed_split_image') {
+    openStartModal();
+    return;
+  }
+
+  if (activeTemplateType !== 'mixed_waterway_new' && activeTemplateType !== 'mixed_split_image') {
+    if (!customPartnerWidths || customPartnerWidths.length !== numPartners) {
+      const w1 = parseArabicFloat(document.getElementById("start-w1").value);
+      const w2 = parseArabicFloat(document.getElementById("start-w2").value);
+      customPartnerWidths = [];
+      for (let i = 0; i < numPartners; i++) {
+        customPartnerWidths.push({
+          top: w1 / numPartners,
+          bot: w2 / numPartners
+        });
+      }
     }
   }
 
@@ -2190,53 +2323,111 @@ function renderFreeEditTable() {
   const tbody = document.getElementById("freeEditTableBody");
   tbody.innerHTML = "";
   
-  customPartnerWidths.forEach((cw, i) => {
-    const shape = shapes.find(s => s.id === "shape_" + (i + 1));
-    const areaStr = shape && shape.area ? shape.area.sqm.toFixed(2) : "-";
+  if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
+    if (!mixedPiecesTree) return;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1}</td>
-      <td style="padding: 10px; border: 1px solid #ddd;">
-        <input type="number" step="0.01" class="free-edit-input" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
-      </td>
-      <td style="padding: 10px; border: 1px solid #ddd;">
-        <input type="number" step="0.01" class="free-edit-input" data-index="${i}" data-side="bot" value="${cw.bot.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
-      </td>
-      <td style="padding: 10px; border: 1px solid #ddd; color: #1b5e20; font-weight: bold;">
-        ${areaStr}
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+    // West partners
+    const westWidths = mixedPiecesTree.west.customWidths || [];
+    westWidths.forEach((cw, i) => {
+      const shape = shapes.find(s => s.id === "west_" + i);
+      const areaStr = shape && shape.area ? shape.area.sqm.toFixed(2) : "-";
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (الغربي)</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="west" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="west" data-index="${i}" data-side="bot" value="${cw.bot.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd; color: #1b5e20; font-weight: bold;">
+          ${areaStr}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // East partners
+    const eastWidths = mixedPiecesTree.east.customWidths || [];
+    eastWidths.forEach((cw, i) => {
+      const shape = shapes.find(s => s.id === "east_" + i);
+      const areaStr = shape && shape.area ? shape.area.sqm.toFixed(2) : "-";
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (الشرقي)</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="east" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="east" data-index="${i}" data-side="bot" value="${cw.bot.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd; color: #1b5e20; font-weight: bold;">
+          ${areaStr}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } else {
+    customPartnerWidths.forEach((cw, i) => {
+      const shape = shapes.find(s => s.id === "shape_" + (i + 1));
+      const areaStr = shape && shape.area ? shape.area.sqm.toFixed(2) : "-";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1}</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="standard" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <input type="number" step="0.01" class="free-edit-input" data-group="standard" data-index="${i}" data-side="bot" value="${cw.bot.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd; color: #1b5e20; font-weight: bold;">
+          ${areaStr}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
   document.querySelectorAll(".free-edit-input").forEach(inp => {
     inp.addEventListener("change", (e) => {
+      const group = e.target.getAttribute("data-group");
       const idx = parseInt(e.target.getAttribute("data-index"));
       const side = e.target.getAttribute("data-side");
       const newVal = parseArabicFloat(e.target.value);
-      onFreeEditWidthChange(idx, side, newVal, e.target);
+      onFreeEditWidthChange(group, idx, side, newVal, e.target);
     });
   });
 }
 
-function onFreeEditWidthChange(idx, side, newVal, inputEl) {
-  const oldVal = customPartnerWidths[idx][side];
+function onFreeEditWidthChange(group, idx, side, newVal, inputEl) {
+  let widthsArray = [];
+  if (group === 'west') {
+    widthsArray = mixedPiecesTree.west.customWidths;
+  } else if (group === 'east') {
+    widthsArray = mixedPiecesTree.east.customWidths;
+  } else {
+    widthsArray = customPartnerWidths;
+  }
+
+  const oldVal = widthsArray[idx][side];
   const diff = newVal - oldVal;
 
-  // Determine neighbor to absorb the difference (try next, else previous)
   let targetIdx = idx + 1;
-  if (idx === customPartnerWidths.length - 1) {
+  if (idx === widthsArray.length - 1) {
     targetIdx = idx - 1;
   }
 
-  if (targetIdx < 0 || targetIdx >= customPartnerWidths.length) {
+  if (targetIdx < 0 || targetIdx >= widthsArray.length) {
     alert("لا توجد قطعة مجاورة لتعديلها.");
     inputEl.value = oldVal.toFixed(4);
     return;
   }
 
-  const neighborOldVal = customPartnerWidths[targetIdx][side];
+  const neighborOldVal = widthsArray[targetIdx][side];
   const neighborNewVal = neighborOldVal - diff;
 
   if (newVal < 0 || neighborNewVal < 0) {
@@ -2245,16 +2436,17 @@ function onFreeEditWidthChange(idx, side, newVal, inputEl) {
     return;
   }
 
-  customPartnerWidths[idx][side] = newVal;
-  customPartnerWidths[targetIdx][side] = neighborNewVal;
+  widthsArray[idx][side] = newVal;
+  widthsArray[targetIdx][side] = neighborNewVal;
   
-  // Re-render table to reflect neighbor changes (areas will update upon applying)
   renderFreeEditTable();
 }
 
 function applyFreeEdit() {
   closeFreeEditModal();
-  generateCustomLand(true); // Pass true to use the customWidths!
+  generateCustomLand(true);
+  renderSVG();
+  saveState();
 }
 
 // ----------------------------------------------------
@@ -2295,7 +2487,7 @@ function onSvgDoubleClick(e) {
       panY = 0;
     } else {
       zoomScale = 1.6;
-      const coords = getRealCoords(getSvgCoords(e));
+      const coords = getSvgCoords(e);
       panX = 450 - coords.x * 1.6;
       panY = 280 - coords.y * 1.6;
     }
@@ -2693,7 +2885,7 @@ function getShapeSideLengths(s) {
   }
   const [p_tl, p_tr, p_br, p_bl] = s.points;
   const dist = (pa, pb) => {
-    return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
+    return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2));
   };
   return {
     top: dist(p_tl, p_tr),
@@ -3327,8 +3519,9 @@ function promptAddFreeText(spawnX, spawnY) {
   quickActions.style.display = "none";
   modalTitle.textContent = "إضافة ملاحظة أو نص حر جديد";
   
-  const x = spawnX !== undefined ? spawnX : 450 - panX;
-  const y = spawnY !== undefined ? spawnY : 280 - panY;
+  const centerMeters = getRealCoords({ x: 450, y: 280 });
+  const x = spawnX !== undefined ? spawnX : centerMeters.x;
+  const y = spawnY !== undefined ? spawnY : centerMeters.y;
 
   modalForm.innerHTML = `
     <div class="editor-form-group">
@@ -3354,8 +3547,9 @@ function promptAddFreeText(spawnX, spawnY) {
 
 function addMapLabel(text) {
   const id = "free_" + Date.now() + "_" + Math.floor(Math.random() * 100);
-  const x = 450 - panX;
-  const y = 280 - panY;
+  const centerMeters = getRealCoords({ x: 450, y: 280 });
+  const x = centerMeters.x;
+  const y = centerMeters.y;
 
   freeTexts.push({
     id: id,
@@ -3380,12 +3574,16 @@ function addMapLabel(text) {
 
 function addNewSplitLine() {
   const id = "split_" + Date.now();
+  const p_start = getRealCoords({ x: 250, y: 325 });
+  const p_end = getRealCoords({ x: 650, y: 325 });
+  const p_label = getRealCoords({ x: 450, y: 310 });
+
   splitLines.push({
     id: id,
-    x1: 250, y1: 325,
-    x2: 650, y2: 325,
+    x1: p_start.x, y1: p_start.y,
+    x2: p_end.x, y2: p_end.y,
     label: "حد فاصل جديد",
-    labelX: 450, labelY: 310,
+    labelX: p_label.x, labelY: p_label.y,
     angle: 0,
     isDashed: false
   });
@@ -3407,8 +3605,8 @@ function copySelectedElement() {
       freeTexts.push({
         ...JSON.parse(JSON.stringify(t)),
         id: newId,
-        x: t.x + 25,
-        y: t.y + 25
+        x: t.x + 2,
+        y: t.y + 2
       });
       selectedElement = { type: 'freeText', id: newId };
     }
@@ -3418,8 +3616,8 @@ function copySelectedElement() {
       borderLabels.push({
         ...JSON.parse(JSON.stringify(b)),
         id: newId,
-        x: b.x + 25,
-        y: b.y + 25
+        x: b.x + 2,
+        y: b.y + 2
       });
       selectedElement = { type: 'borderLabel', id: newId };
     }
@@ -3429,9 +3627,9 @@ function copySelectedElement() {
       splitLines.push({
         ...JSON.parse(JSON.stringify(l)),
         id: newId,
-        x1: l.x1 + 25, y1: l.y1 + 25,
-        x2: l.x2 + 25, y2: l.y2 + 25,
-        labelX: l.labelX + 25, labelY: l.labelY + 25
+        x1: l.x1 + 2, y1: l.y1 + 2,
+        x2: l.x2 + 2, y2: l.y2 + 2,
+        labelX: l.labelX + 2, labelY: l.labelY + 2
       });
       selectedElement = { type: 'splitLine', id: newId };
     }
@@ -3753,17 +3951,10 @@ function loadDemoDataPreset(promptConfirm = true) {
   const drawW = 60.00;
   const drawL = 30.00;
 
-  const centerX = 450;
-  const centerY = 325;
-  const scale = 12.33; // fit factor
-
-  const scaledW = drawW * scale;
-  const scaledL = drawL * scale;
-
-  const p1 = { x: centerX - scaledW / 2, y: centerY - scaledL / 2 };
-  const p2 = { x: centerX + scaledW / 2, y: centerY - scaledL / 2 };
-  const p3 = { x: centerX + scaledW / 2, y: centerY + scaledL / 2 };
-  const p4 = { x: centerX - scaledW / 2, y: centerY + scaledL / 2 };
+  const p1 = { x: -drawW / 2, y: -drawL / 2 };
+  const p2 = { x: drawW / 2, y: -drawL / 2 };
+  const p3 = { x: drawW / 2, y: drawL / 2 };
+  const p4 = { x: -drawW / 2, y: drawL / 2 };
 
   const totalArea = 1800; // 30 * 60
 
@@ -3774,15 +3965,15 @@ function loadDemoDataPreset(promptConfirm = true) {
     area: { feddan: 0, carat: 10, shares: 6.81, sqm: totalArea },
     notes: "خريطة ارض",
     color: "#ffffff",
-    textX: centerX,
-    textY: centerY
+    textX: 0,
+    textY: 0
   }];
 
   borderLabels = [
-    { id: "border_1", text: "غربي 60.00 م", x: centerX, y: p1.y - 18, fontSize: 13, angle: 0 },
-    { id: "border_2", text: "شرقي 60.00 م", x: centerX, y: p4.y + 22, fontSize: 13, angle: 0 },
-    { id: "border_3", text: "قبلي 30.00 م", x: p1.x - 22, y: centerY, fontSize: 13, angle: -90 },
-    { id: "border_4", text: "بحري 30.00 م", x: p2.x + 22, y: centerY, fontSize: 13, angle: 90 }
+    { id: "border_1", text: "غربي 60.00 م", x: 0, y: p1.y - 1.5, fontSize: 13, angle: 0 },
+    { id: "border_2", text: "شرقي 60.00 م", x: 0, y: p4.y + 1.5, fontSize: 13, angle: 0 },
+    { id: "border_3", text: "قبلي 30.00 م", x: p1.x - 1.5, y: 0, fontSize: 13, angle: -90 },
+    { id: "border_4", text: "بحري 30.00 م", x: p2.x + 1.5, y: 0, fontSize: 13, angle: 90 }
   ];
 
   freeTexts = [];
