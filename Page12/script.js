@@ -949,16 +949,70 @@ function generateCustomLand(useCustomWidths = false) {
     }
 
     // الحدود الحقيقية
-    const w_tl = { x: x_water_top_left, y: y_water_top_left };
-    const w_tr = { x: x_water_top_right, y: y_water_top_right };
-    const w_br = { x: x_water_bot_right, y: y_water_bot_right };
-    const w_bl = { x: x_water_bot_left, y: y_water_bot_left };
+    let w_tl = { x: x_water_top_left, y: y_water_top_left };
+    let w_tr = { x: x_water_top_right, y: y_water_top_right };
+    let w_br = { x: x_water_bot_right, y: y_water_bot_right };
+    let w_bl = { x: x_water_bot_left, y: y_water_bot_left };
 
     // الحدود البصرية
-    const w_tl_vis = { x: x_water_top_left_vis, y: y_water_top_left_vis };
-    const w_tr_vis = { x: x_water_top_right_vis, y: y_water_top_right_vis };
-    const w_br_vis = { x: x_water_bot_right_vis, y: y_water_bot_right_vis };
-    const w_bl_vis = { x: x_water_bot_left_vis, y: y_water_bot_left_vis };
+    let w_tl_vis = { x: x_water_top_left_vis, y: y_water_top_left_vis };
+    let w_tr_vis = { x: x_water_top_right_vis, y: y_water_top_right_vis };
+    let w_br_vis = { x: x_water_bot_right_vis, y: y_water_bot_right_vis };
+    let w_bl_vis = { x: x_water_bot_left_vis, y: y_water_bot_left_vis };
+
+    // Initialize custom widths at waterway to original geometric widths if not present
+    const orig_top_len = calcDist(w_tl, w_tr);
+    const orig_bot_len = calcDist(w_bl, w_br);
+
+    if (customWaterwayData.westWidthAtWaterway === undefined) {
+      customWaterwayData.westWidthAtWaterway = orig_top_len;
+    }
+    if (customWaterwayData.eastWidthAtWaterway === undefined) {
+      customWaterwayData.eastWidthAtWaterway = orig_bot_len;
+    }
+
+    const target_west_w = customWaterwayData.westWidthAtWaterway;
+    const target_east_w = customWaterwayData.eastWidthAtWaterway;
+
+    // Adjust real top segment (w_tl -> w_tr)
+    const c_top = { x: (w_tl.x + w_tr.x) / 2, y: (w_tl.y + w_tr.y) / 2 };
+    const dx_top = w_tr.x - w_tl.x;
+    const dy_top = w_tr.y - w_tl.y;
+    const len_top = Math.sqrt(dx_top * dx_top + dy_top * dy_top) || 1;
+    const ux_top = dx_top / len_top;
+    const uy_top = dy_top / len_top;
+    w_tl = { x: c_top.x - ux_top * (target_west_w / 2), y: c_top.y - uy_top * (target_west_w / 2) };
+    w_tr = { x: c_top.x + ux_top * (target_west_w / 2), y: c_top.y + uy_top * (target_west_w / 2) };
+
+    // Adjust real bottom segment (w_bl -> w_br)
+    const c_bot = { x: (w_bl.x + w_br.x) / 2, y: (w_bl.y + w_br.y) / 2 };
+    const dx_bot = w_br.x - w_bl.x;
+    const dy_bot = w_br.y - w_bl.y;
+    const len_bot = Math.sqrt(dx_bot * dx_bot + dy_bot * dy_bot) || 1;
+    const ux_bot = dx_bot / len_bot;
+    const uy_bot = dy_bot / len_bot;
+    w_bl = { x: c_bot.x - ux_bot * (target_east_w / 2), y: c_bot.y - uy_bot * (target_east_w / 2) };
+    w_br = { x: c_bot.x + ux_bot * (target_east_w / 2), y: c_bot.y + uy_bot * (target_east_w / 2) };
+
+    // Adjust visual top segment (w_tl_vis -> w_tr_vis)
+    const c_top_vis = { x: (w_tl_vis.x + w_tr_vis.x) / 2, y: (w_tl_vis.y + w_tr_vis.y) / 2 };
+    const dx_top_vis = w_tr_vis.x - w_tl_vis.x;
+    const dy_top_vis = w_tr_vis.y - w_tl_vis.y;
+    const len_top_vis = Math.sqrt(dx_top_vis * dx_top_vis + dy_top_vis * dy_top_vis) || 1;
+    const ux_top_vis = dx_top_vis / len_top_vis;
+    const uy_top_vis = dy_top_vis / len_top_vis;
+    w_tl_vis = { x: c_top_vis.x - ux_top_vis * (target_west_w / 2), y: c_top_vis.y - uy_top_vis * (target_west_w / 2) };
+    w_tr_vis = { x: c_top_vis.x + ux_top_vis * (target_west_w / 2), y: c_top_vis.y + uy_top_vis * (target_west_w / 2) };
+
+    // Adjust visual bottom segment (w_bl_vis -> w_br_vis)
+    const c_bot_vis = { x: (w_bl_vis.x + w_br_vis.x) / 2, y: (w_bl_vis.y + w_br_vis.y) / 2 };
+    const dx_bot_vis = w_br_vis.x - w_bl_vis.x;
+    const dy_bot_vis = w_br_vis.y - w_bl_vis.y;
+    const len_bot_vis = Math.sqrt(dx_bot_vis * dx_bot_vis + dy_bot_vis * dy_bot_vis) || 1;
+    const ux_bot_vis = dx_bot_vis / len_bot_vis;
+    const uy_bot_vis = dy_bot_vis / len_bot_vis;
+    w_bl_vis = { x: c_bot_vis.x - ux_bot_vis * (target_east_w / 2), y: c_bot_vis.y - uy_bot_vis * (target_east_w / 2) };
+    w_br_vis = { x: c_bot_vis.x + ux_bot_vis * (target_east_w / 2), y: c_bot_vis.y + uy_bot_vis * (target_east_w / 2) };
 
     waterways.push({
       id: "water_new",
@@ -2891,6 +2945,18 @@ function openModalForElement(type, id) {
         <label style="font-weight:bold; color:#1565c0;">النسبة المئوية للموقع (0 - 100):</label>
         <input type="text" inputmode="decimal" id="modal-water-pos-pct" value="${(customWaterwayData && customWaterwayData.positionPct !== undefined) ? customWaterwayData.positionPct : 50}" style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1.5px solid #ccc; text-align:center; font-weight:bold;">
       </div>
+
+      <div class="editor-form-group" style="border: 1px solid #c5e1a5; padding: 10px; border-radius: 6px; background: #f1f8e9; margin-top:10px;">
+        <label style="font-weight:bold; color:#2e7d32; display:block; margin-bottom:6px;">📐 عروض القطع عند المجرى المائي:</label>
+        <div class="editor-form-group">
+          <label style="font-size:12px; color:#555;">عرض القطعة الغربية عند المجرى (متر):</label>
+          <input type="text" inputmode="decimal" id="modal-west-width-at-waterway" value="${((customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : (wStats ? wStats.width : 150.00)).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-weight:bold; text-align:center; border-radius:6px; border:1.5px solid #ccc;">
+        </div>
+        <div class="editor-form-group" style="margin-top:6px;">
+          <label style="font-size:12px; color:#555;">عرض القطعة الشرقية عند المجرى (متر):</label>
+          <input type="text" inputmode="decimal" id="modal-east-width-at-waterway" value="${((customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : (wStats ? wStats.width : 150.00)).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-weight:bold; text-align:center; border-radius:6px; border:1.5px solid #ccc;">
+        </div>
+      </div>
       
       <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32; margin-top:10px;">
         ✅ بعد التطبيق سيتم إعادة توزيع مساحة وأطوال وعروض القطع تلقائياً
@@ -2986,6 +3052,18 @@ function saveModalData() {
       if (!isNaN(pct) && pct >= 0 && pct <= 100) {
         customWaterwayData.positionPct = pct;
       }
+    }
+
+    const westWidthInput = document.getElementById('modal-west-width-at-waterway');
+    const eastWidthInput = document.getElementById('modal-east-width-at-waterway');
+
+    if (westWidthInput) {
+      const w = parseArabicFloat(westWidthInput.value);
+      if (!isNaN(w) && w >= 0) customWaterwayData.westWidthAtWaterway = w;
+    }
+    if (eastWidthInput) {
+      const w = parseArabicFloat(eastWidthInput.value);
+      if (!isNaN(w) && w >= 0) customWaterwayData.eastWidthAtWaterway = w;
     }
 
     modalEditTarget = null;
@@ -3411,6 +3489,21 @@ function populateSidebarEditor() {
           </div>
         </div>
 
+        <div style="background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #a5d6a7; margin-bottom:10px;">
+          <div style="font-weight:bold; color:#2e7d32; font-size:13px; margin-bottom:8px;">📐 تعديل عروض القطع عند المجرى</div>
+          <div class="editor-form-group">
+            <label>عرض القطعة الغربية عند المجرى (متر):</label>
+            <input type="text" inputmode="decimal" id="sidebar-west-width-at-waterway" value="${((customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : ws.width).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-size:14px; font-weight:bold; text-align:center; font-family:'Cairo'; border:2px solid #a5d6a7; border-radius:6px;">
+          </div>
+          <div class="editor-form-group" style="margin-top:8px;">
+            <label>عرض القطعة الشرقية عند المجرى (متر):</label>
+            <input type="text" inputmode="decimal" id="sidebar-east-width-at-waterway" value="${((customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : ws.width).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-size:14px; font-weight:bold; text-align:center; font-family:'Cairo'; border:2px solid #a5d6a7; border-radius:6px;">
+          </div>
+          <div class="editor-form-group" style="margin-top:10px; margin-bottom:4px;">
+            <button type="button" onclick="applyWidthsAtWaterway()" style="width:100%; padding:8px; background:#2e7d32; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family:'Cairo'; font-size:13px;">⚙️ تطبيق العرض الجديد</button>
+          </div>
+        </div>
+
         <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32;">
           ✅ مساحة الإجمالي = غربية ${ws.westArea.toFixed(1)} م² + مجرى ${ws.area.toFixed(1)} م² + شرقية ${ws.eastArea.toFixed(1)} م²
         </div>
@@ -3647,6 +3740,38 @@ function applyMixedPieceLengths(groupId) {
   } else if (rightDiff > 0.001) {
     updateMixedPieceLength(groupId, 'right', newRight);
   }
+}
+
+function applyWidthsAtWaterway() {
+  const westInput = document.getElementById("sidebar-west-width-at-waterway");
+  const eastInput = document.getElementById("sidebar-east-width-at-waterway");
+  if (!westInput || !eastInput) return;
+
+  let westW = parseArabicFloat(westInput.value);
+  let eastW = parseArabicFloat(eastInput.value);
+
+  if (isNaN(westW) || isNaN(eastW) || westW < 0 || eastW < 0) {
+    alert("الرجاء إدخال قيم عروض صحيحة أكبر من الصفر.");
+    return;
+  }
+
+  if (!customWaterwayData) {
+    customWaterwayData = {
+      userWidthMeters: 7.20,
+      positionType: 'middle',
+      positionPct: 50.0,
+      leftWaterMeters: 7.20,
+      rightWaterMeters: 7.20
+    };
+  }
+
+  customWaterwayData.westWidthAtWaterway = westW;
+  customWaterwayData.eastWidthAtWaterway = eastW;
+
+  generateCustomLand(true);
+  renderSVG();
+  saveState();
+  populateSidebarEditor();
 }
 
 // ----------------------------------------------------
