@@ -817,3 +817,39 @@ svg .waterway {
   transform: translateY(-2px);
   opacity: 1;
 }
+
+/* Interactive Inspector Tooltip */
+.inspector-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.2);
+  direction: rtl;
+  min-width: 180px;
+}
+.inspector-tooltip h4 {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  color: #aed581;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 4px;
+}
+.inspector-tooltip p {
+  margin: 4px 0;
+  display: flex;
+  justify-content: space-between;
+}
+.inspector-tooltip span.label {
+  color: #b0bec5;
+}
+.inspector-tooltip span.value {
+  font-weight: bold;
+}

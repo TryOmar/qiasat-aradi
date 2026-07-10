@@ -791,18 +791,39 @@ function generateCustomLand(useCustomWidths = false) {
     const x_water_top_right = p2.x + (p3.x - p2.x) * ((y_water_top - p2.y) / h_total);
     const x_water_bot_right = p2.x + (p3.x - p2.x) * ((y_water_bot - p2.y) / h_total);
 
+    function calcDist(pa, pb) {
+      return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
+    }
+    function calcQuadArea(pa, pb, pc, pd) {
+      let A = calcDist(pa, pb);
+      let B = calcDist(pa, pd);
+      let C = calcDist(pc, pd);
+      let D = calcDist(pc, pb);
+      let diag = calcDist(pa, pc);
+      let s1 = (A + D + diag) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
+      let s2 = (C + B + diag) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
+      return area1 + area2;
+    }
+
+    const w_tl = { x: x_water_top_left, y: y_water_top };
+    const w_tr = { x: x_water_top_right, y: y_water_top };
+    const w_br = { x: x_water_bot_right, y: y_water_bot };
+    const w_bl = { x: x_water_bot_left, y: y_water_bot };
+
     waterways.push({
       id: "water_new",
-      points: [
-        { x: x_water_top_left, y: y_water_top },
-        { x: x_water_top_right, y: y_water_top },
-        { x: x_water_bot_right, y: y_water_bot },
-        { x: x_water_bot_left, y: y_water_bot }
-      ],
+      points: [w_tl, w_tr, w_br, w_bl],
       label: "مجرى مائي (ترعة)",
       labelX: centerX,
       labelY: y_mid + 4,
-      angle: 0
+      angle: 0,
+      stats: {
+        area: calcQuadArea(w_tl, w_tr, w_br, w_bl),
+        width: calcDist(w_tl, w_bl), // average width would be better but this is fine
+        length: calcDist(w_tl, w_tr)
+      }
     });
 
     const N = numPartners;
@@ -852,18 +873,8 @@ function generateCustomLand(useCustomWidths = false) {
         y: p4.y + (p3.y - p4.y) * ratioBot1
       };
 
-      let A = Math.sqrt(Math.pow(p_tr.x - p_tl.x, 2) + Math.pow(p_tr.y - p_tl.y, 2)) / scale;
-      let B = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
-      let C = Math.sqrt(Math.pow(p_br.x - p_bl.x, 2) + Math.pow(p_br.y - p_bl.y, 2)) / scale;
-      let D = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
-      let diag = Math.sqrt(Math.pow(p_br.x - p_tl.x, 2) + Math.pow(p_br.y - p_tl.y, 2)) / scale;
-      
-      let s1 = (A + D + diag) / 2;
-      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
-      let s2 = (C + B + diag) / 2;
-      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
-      
-      let partArea = (area1 + area2) * 0.9; // Subtract ~10% for waterway
+      let partAreaTotal = calcQuadArea(p_tl, p_tr, p_br, p_bl);
+      let partArea = partAreaTotal * 0.9; // Subtract ~10% for waterway
       const partDetailed = sqmToFeddanCaratShares(partArea);
 
       const colorIndex = (i + 1) % colorsList.length;
@@ -878,6 +889,19 @@ function generateCustomLand(useCustomWidths = false) {
          notesName = i === 0 ? "القطعة الغربية" : "القطعة الشرقية";
       }
 
+      let t_left_top = (y_water_top - p_tl.y) / (p_bl.y - p_tl.y);
+      let t_right_top = (y_water_top - p_tr.y) / (p_br.y - p_tr.y);
+      let p_w_tl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_top, y: y_water_top };
+      let p_w_tr = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_top, y: y_water_top };
+
+      let t_left_bot = (y_water_bot - p_tl.y) / (p_bl.y - p_tl.y);
+      let t_right_bot = (y_water_bot - p_tr.y) / (p_br.y - p_tr.y);
+      let p_w_bl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_bot, y: y_water_bot };
+      let p_w_br = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_bot, y: y_water_bot };
+
+      let upperArea = calcQuadArea(p_tl, p_tr, p_w_tr, p_w_tl);
+      let lowerArea = calcQuadArea(p_w_bl, p_w_br, p_br, p_bl);
+
       shapes.push({
         id: "shape_" + (i + 1),
         points: [p_tl, p_tr, p_br, p_bl],
@@ -886,7 +910,27 @@ function generateCustomLand(useCustomWidths = false) {
         notes: notesName,
         color: colorsList[colorIndex].value,
         textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
-        textY: (p_tl.y + p_tr.y) / 2 + ( (p_bl.y + p_br.y) / 2 - (p_tl.y + p_tr.y) / 2 ) * 0.25 // Center in the top half
+        textY: (p_tl.y + p_tr.y) / 2 + ( (p_bl.y + p_br.y) / 2 - (p_tl.y + p_tr.y) / 2 ) * 0.25,
+        subShapes: [
+          {
+            name: "الجزء العلوي - " + ownerName,
+            points: [p_tl, p_tr, p_w_tr, p_w_tl],
+            area: upperArea,
+            topWidth: calcDist(p_tl, p_tr),
+            botWidth: calcDist(p_w_tl, p_w_tr),
+            leftLen: calcDist(p_tl, p_w_tl),
+            rightLen: calcDist(p_tr, p_w_tr)
+          },
+          {
+            name: "الجزء السفلي - " + ownerName,
+            points: [p_w_bl, p_w_br, p_br, p_bl],
+            area: lowerArea,
+            topWidth: calcDist(p_w_bl, p_w_br),
+            botWidth: calcDist(p_bl, p_br),
+            leftLen: calcDist(p_w_bl, p_bl),
+            rightLen: calcDist(p_w_br, p_br)
+          }
+        ]
       });
       
       addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
@@ -1217,6 +1261,20 @@ function renderSVG() {
     polygon.setAttribute("vector-effect", "non-scaling-stroke");
     polygon.setAttribute("data-id", w.id);
     polygon.setAttribute("data-type", "waterway");
+    
+    if (w.stats) {
+      polygon.onmousemove = (e) => {
+        showInspectorTooltip(e, {
+          name: "المجرى المائي (ترعة)",
+          isWaterway: true,
+          area: w.stats.area,
+          width: w.stats.width,
+          length: w.stats.length
+        });
+      };
+      polygon.onmouseleave = hideInspectorTooltip;
+    }
+
     polygon.onclick = (e) => onElementClick(e, 'waterway', w.id);
     polygon.addEventListener("touchstart", (e) => {
       e.stopPropagation();
@@ -1559,6 +1617,34 @@ function renderSVG() {
     }
 
     shapesGroup.appendChild(textGroup);
+
+    // Render interactive subShapes (invisible overlays)
+    if (s.subShapes) {
+      s.subShapes.forEach(sub => {
+        const subPts = sub.points.map(p => `${p.x},${p.y}`).join(" ");
+        const subPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        subPoly.setAttribute("points", subPts);
+        subPoly.setAttribute("fill", "transparent");
+        subPoly.setAttribute("stroke", "none");
+        subPoly.style.pointerEvents = "all";
+        
+        subPoly.onmousemove = (e) => {
+          showInspectorTooltip(e, {
+            name: sub.name,
+            isWaterway: false,
+            area: sub.area,
+            topWidth: sub.topWidth,
+            botWidth: sub.botWidth,
+            leftLen: sub.leftLen,
+            rightLen: sub.rightLen
+          });
+        };
+        subPoly.onmouseleave = hideInspectorTooltip;
+        subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
+        
+        shapesGroup.appendChild(subPoly);
+      });
+    }
   });
 
   // 3. Draw Split Lines
@@ -2104,6 +2190,55 @@ function onSvgDoubleClick(e) {
     }
     applyViewportTransform();
     saveState();
+  }
+}
+
+// ----------------------------------------------------
+// Interactive Inspector (Tooltip)
+// ----------------------------------------------------
+function showInspectorTooltip(e, data) {
+  const tooltip = document.getElementById("inspectorTooltip");
+  if (!tooltip) return;
+  
+  const pct = totalAreaSqm > 0 ? ((data.area / totalAreaSqm) * 100).toFixed(2) : 0;
+  
+  let html = `<h4>${data.name}</h4>`;
+  if (data.isWaterway) {
+    html += `<p><span class="label">المساحة:</span> <span class="value">${data.area.toFixed(2)} م²</span></p>`;
+    html += `<p><span class="label">الطول:</span> <span class="value">${data.length.toFixed(2)} م</span></p>`;
+    html += `<p><span class="label">العرض:</span> <span class="value">${data.width.toFixed(2)} م</span></p>`;
+  } else {
+    html += `<p><span class="label">المساحة:</span> <span class="value">${data.area.toFixed(2)} م²</span></p>`;
+    html += `<p><span class="label">العرض العلوي:</span> <span class="value">${data.topWidth.toFixed(2)} م</span></p>`;
+    html += `<p><span class="label">العرض السفلي:</span> <span class="value">${data.botWidth.toFixed(2)} م</span></p>`;
+    html += `<p><span class="label">الطول الأيمن:</span> <span class="value">${data.rightLen.toFixed(2)} م</span></p>`;
+    html += `<p><span class="label">الطول الأيسر:</span> <span class="value">${data.leftLen.toFixed(2)} م</span></p>`;
+  }
+  html += `<p><span class="label">النسبة من الإجمالي:</span> <span class="value" style="color: #64b5f6;">%${pct}</span></p>`;
+  
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  
+  // Position tooltip
+  let left = e.clientX + 15;
+  let top = e.clientY + 15;
+  
+  const rect = tooltip.getBoundingClientRect();
+  if (left + rect.width > window.innerWidth) {
+    left = e.clientX - rect.width - 15;
+  }
+  if (top + rect.height > window.innerHeight) {
+    top = e.clientY - rect.height - 15;
+  }
+  
+  tooltip.style.left = left + "px";
+  tooltip.style.top = top + "px";
+}
+
+function hideInspectorTooltip() {
+  const tooltip = document.getElementById("inspectorTooltip");
+  if (tooltip) {
+    tooltip.style.display = "none";
   }
 }
 
