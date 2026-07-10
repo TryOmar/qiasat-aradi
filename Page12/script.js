@@ -886,7 +886,7 @@ function generateCustomLand(useCustomWidths = false) {
         notes: notesName,
         color: colorsList[colorIndex].value,
         textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
-        textY: y_mid - 40 // Move text above waterway
+        textY: (p_tl.y + p_tr.y) / 2 + ( (p_bl.y + p_br.y) / 2 - (p_tl.y + p_tr.y) / 2 ) * 0.25 // Center in the top half
       });
       
       addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
@@ -1311,7 +1311,10 @@ function renderSVG() {
     if (s.area && s.area.sqm) {
       const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
       const areaX = s.textX;
-      const areaY = minY + shapeH * 0.25;
+      let areaY = minY + shapeH * 0.25;
+      if (activeTemplateType === 'mixed_waterway_new') {
+        areaY = minY + shapeH * 0.85; // Move to bottom to avoid waterway and text box
+      }
       
       areaGroup.setAttribute("class", "draggable-label");
       areaGroup.setAttribute("data-type", "shapeAreaText");
