@@ -816,6 +816,22 @@ function generateCustomLand(useCustomWidths = false) {
     const x_water_bot_right = p2.x + (p3.x - p2.x) * t_right_bot;
     const y_water_bot_right = p2.y + (p3.y - p2.y) * t_right_bot;
 
+    function calcDist(pa, pb) {
+      return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
+    }
+    function calcQuadArea(pa, pb, pc, pd) {
+      let A = calcDist(pa, pb);
+      let B = calcDist(pa, pd);
+      let C = calcDist(pc, pd);
+      let D = calcDist(pc, pb);
+      let diag = calcDist(pa, pc);
+      let s1 = (A + D + diag) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
+      let s2 = (C + B + diag) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
+      return area1 + area2;
+    }
+
     const w_tl = { x: x_water_top_left, y: y_water_top_left };
     const w_tr = { x: x_water_top_right, y: y_water_top_right };
     const w_br = { x: x_water_bot_right, y: y_water_bot_right };
