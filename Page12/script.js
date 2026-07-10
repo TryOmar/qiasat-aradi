@@ -2893,27 +2893,7 @@ function printDallalMap() {
 
       <div class="print-overlay-content" style="background: white; min-height: 100vh; display: flex; flex-direction: column; position: relative;">
         
-        <!-- Professional Header -->
-        <div class="report-header" style="border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin: 10px 15px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-          <div style="text-align: right;">
-            <h1 style="font-size: 18pt; color: #1b5e20; font-weight: 800; margin: 0; font-family: 'Cairo';">الدَّلاَّل</h1>
-            <p style="font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; font-family: 'Cairo';">تطبيق قياس وتقسيم الأراضي</p>
-          </div>
-          <div style="text-align: center;">
-            <h2 style="font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; font-family: 'Cairo';">تقرير رسم كروكي الأراضي الزراعية والمنازل</h2>
-          </div>
-          <div style="text-align: left; font-size: 8pt; color: #333; line-height: 1.5; font-family: 'Cairo';">
-            <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
-            <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
-            <div><strong>رقم التقرير:</strong> ${reportId}</div>
-          </div>
-        </div>
-
-        <!-- Owner Info -->
-        <div class="owner-info" style="margin: 5px 15px 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; font-family: 'Cairo';">
-          <strong>اسم المالك / العميل:</strong>
-          <span class="placeholder-line" style="color: #aaa; letter-spacing: 1px;">................................................................................................</span>
-        </div>
+        <!-- Header removed per user request -->
 
         <div class="canvas-container" style="flex: 1; width: 100%; max-width: 100%; margin: 5px auto; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 5px; overflow: hidden;">
           ${svgHTML}
