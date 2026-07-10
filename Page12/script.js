@@ -2631,6 +2631,22 @@ function closeModal() {
   document.getElementById("editModal").style.display = "none";
 }
 
+function getShapeSideLengths(s) {
+  if (!s || !s.points || s.points.length < 4) {
+    return { top: 0, bot: 0, left: 0, right: 0 };
+  }
+  const [p_tl, p_tr, p_br, p_bl] = s.points;
+  const dist = (pa, pb) => {
+    return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
+  };
+  return {
+    top: dist(p_tl, p_tr),
+    bot: dist(p_bl, p_br),
+    left: dist(p_tl, p_bl),
+    right: dist(p_tr, p_br)
+  };
+}
+
 // ----------------------------------------------------
 // Sidebar Properties Editor Panel
 // ----------------------------------------------------
@@ -2649,34 +2665,74 @@ function populateSidebarEditor() {
     const s = shapes.find(x => x.id === selectedElement.id);
     if (s) {
       let subPieceHtml = "";
-      if (s.isSubPiece) {
-        const pIndex = parseInt(s.id.split('_')[1]);
-        const customW = mixedPiecesTree[s.groupId].customWidths[pIndex];
-        const numPartners = mixedPiecesTree[s.groupId].partners;
-        
-        subPieceHtml = `
-          <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
-            <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
-            
-            <div class="editor-form-group">
-              <label>العرض العلوي (متر):</label>
-              <input type="number" step="0.01" value="${customW.top}" oninput="updateSubPieceWidth('${s.groupId}', ${pIndex}, 'top', this.value)">
-            </div>
-            <div class="editor-form-group">
-              <label>العرض السفلي (متر):</label>
-              <input type="number" step="0.01" value="${customW.bot}" oninput="updateSubPieceWidth('${s.groupId}', ${pIndex}, 'bot', this.value)">
-            </div>
-            
-            <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
-            <div class="editor-form-group" style="margin-bottom: 0;">
-              <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
-              <div style="display: flex; gap: 8px;">
-                <input type="number" id="subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
-                <button type="button" onclick="applySubdivision('${s.groupId}')" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق</button>
+      
+      const isMixedSub = s.isSubPiece && activeTemplateType === 'mixed_waterway_new';
+      const isRegularSub = !isMixedSub && (customPartnerWidths && customPartnerWidths.length > 1);
+
+      if (isMixedSub || isRegularSub) {
+        let pIndex = 0;
+        let groupId = "";
+        let customW = null;
+        let numPartners = 1;
+
+        if (isMixedSub) {
+          pIndex = s.subIndex !== undefined ? s.subIndex : parseInt(s.id.split('_').pop()) || 0;
+          groupId = s.groupId || "";
+          if (mixedPiecesTree && mixedPiecesTree[groupId] && mixedPiecesTree[groupId].customWidths[pIndex]) {
+            customW = mixedPiecesTree[groupId].customWidths[pIndex];
+            numPartners = mixedPiecesTree[groupId].partners;
+          }
+        } else {
+          pIndex = parseInt(s.id.split('_')[1]) - 1; // shape_1 => index 0
+          if (isNaN(pIndex)) {
+            pIndex = s.subIndex !== undefined ? s.subIndex : 0;
+          }
+          if (customPartnerWidths && customPartnerWidths[pIndex]) {
+            customW = customPartnerWidths[pIndex];
+            numPartners = customPartnerWidths.length;
+          }
+        }
+
+        if (customW) {
+          const sideLengths = getShapeSideLengths(s);
+          
+          subPieceHtml = `
+            <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
+              
+              <div class="editor-form-group">
+                <label>العرض العلوي (متر):</label>
+                <input type="number" step="0.01" id="sidebar-piece-width-top" value="${customW.top.toFixed(2)}" oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'top', this.value)">
               </div>
-            </div>
-          </div>
-        `;
+              <div class="editor-form-group">
+                <label>العرض السفلي (متر):</label>
+                <input type="number" step="0.01" id="sidebar-piece-width-bot" value="${customW.bot.toFixed(2)}" oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'bot', this.value)">
+              </div>
+              <div class="editor-form-group">
+                <label>الطول الأيمن الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(تحديث تلقائي)</span></label>
+                <input type="text" value="${sideLengths.right.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
+              </div>
+              <div class="editor-form-group">
+                <label>الطول الأيسر الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(تحديث تلقائي)</span></label>
+                <input type="text" value="${sideLengths.left.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
+              </div>
+          `;
+
+          if (isMixedSub) {
+            subPieceHtml += `
+              <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
+              <div class="editor-form-group" style="margin-bottom: 0;">
+                <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="number" id="subdivide-${groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
+                  <button type="button" onclick="applySubdivision('${groupId}')" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق</button>
+                </div>
+              </div>
+            `;
+          }
+
+          subPieceHtml += `</div>`;
+        }
       }
 
       html = `
@@ -2854,16 +2910,72 @@ function updateSelectedBorderField(field, value) {
 }
 
 function updateSubPieceWidth(groupId, pIndex, field, value) {
-  if (!mixedPiecesTree || !mixedPiecesTree[groupId]) return;
   let val = parseFloat(value);
   if (isNaN(val) || val < 0) val = 0;
-  
-  mixedPiecesTree[groupId].customWidths[pIndex][field] = val;
-  
-  // Re-generate shapes to apply the new subdivision widths
+
+  let widthsArr = null;
+  if (groupId && mixedPiecesTree && mixedPiecesTree[groupId]) {
+    widthsArr = mixedPiecesTree[groupId].customWidths;
+  } else {
+    widthsArr = customPartnerWidths;
+  }
+
+  if (!widthsArr || !widthsArr[pIndex]) return;
+
+  const oldVal = widthsArr[pIndex][field] || 0;
+  const diff = val - oldVal;
+
+  // تحديد القطعة المجاورة لامتصاص الفارق (التالية، وإذا كانت الأخيرة فالسابقة)
+  let targetIdx = pIndex + 1;
+  if (pIndex === widthsArr.length - 1) {
+    targetIdx = pIndex - 1;
+  }
+
+  if (targetIdx >= 0 && targetIdx < widthsArr.length) {
+    const neighborOldVal = widthsArr[targetIdx][field] || 0;
+    const neighborNewVal = neighborOldVal - diff;
+
+    // التحقق من أن القيمتين صالحتين ولا تجعلان الأبعاد سالبة
+    if (val >= 0 && neighborNewVal >= 0) {
+      widthsArr[pIndex][field] = val;
+      widthsArr[targetIdx][field] = neighborNewVal;
+    } else {
+      // إذا تجاوز التعديل الحد المسموح، نقوم بالحد منه لكي لا يصبح الجار سالباً
+      if (neighborNewVal < 0) {
+        const maxAllowedVal = oldVal + neighborOldVal;
+        widthsArr[pIndex][field] = maxAllowedVal;
+        widthsArr[targetIdx][field] = 0;
+      }
+    }
+  } else {
+    // إذا لم يكن هناك جار (قطعة وحيدة)، نقوم بالتحديث مباشرة
+    widthsArr[pIndex][field] = val;
+  }
+
+  // إعادة بناء الكروكي وتحديث الرسم وحفظ الحالة
   generateCustomLand(true); 
   renderSVG();
   saveStateDebounced();
+
+  // تحديث الحقول في السايدبار بعد إعادة الرسم لتظهر الأبعاد المجاورة المحدثة تلقائياً
+  const activeInput = document.activeElement;
+  const activeInputId = activeInput ? activeInput.id : null;
+  const selectionStart = activeInput ? activeInput.selectionStart : null;
+  const selectionEnd = activeInput ? activeInput.selectionEnd : null;
+
+  populateSidebarEditor();
+
+  if (activeInputId) {
+    const newInp = document.getElementById(activeInputId);
+    if (newInp) {
+      newInp.focus();
+      if (selectionStart !== null && selectionEnd !== null) {
+        try {
+          newInp.setSelectionRange(selectionStart, selectionEnd);
+        } catch(e) {}
+      }
+    }
+  }
 }
 
 // ----------------------------------------------------
