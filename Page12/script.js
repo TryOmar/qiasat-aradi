@@ -65,13 +65,53 @@ const colorsList = [
 document.addEventListener("DOMContentLoaded", function () {
   const svg = document.getElementById("dallalSvg");
 
-  // Load Saved Project from LocalStorage or Load Default
-  if (localStorage.getItem("dallal_map_project")) {
-    loadProjectFromLocalStorage();
+  const savedStateStr = localStorage.getItem("dallal_autosave");
+  if (savedStateStr) {
+    try {
+      const state = JSON.parse(savedStateStr);
+      shapes = state.shapes || [];
+      borderLabels = state.borderLabels || [];
+      splitLines = state.splitLines || [];
+      freeTexts = state.freeTexts || [];
+      waterways = state.waterways || [];
+      zoomScale = state.zoomScale || 1.0;
+      panX = state.panX || 0;
+      panY = state.panY || 0;
+      activeTemplateType = state.activeTemplateType || 'rectangle';
+      
+      if (state.inputs) {
+        if (document.getElementById("start-w1")) document.getElementById("start-w1").value = state.inputs.w1;
+        if (document.getElementById("start-w1-dir")) document.getElementById("start-w1-dir").value = state.inputs.w1Dir;
+        if (document.getElementById("start-w2")) document.getElementById("start-w2").value = state.inputs.w2;
+        if (document.getElementById("start-w2-dir")) document.getElementById("start-w2-dir").value = state.inputs.w2Dir;
+        if (document.getElementById("start-l2")) document.getElementById("start-l2").value = state.inputs.l2;
+        if (document.getElementById("start-l2-dir")) document.getElementById("start-l2-dir").value = state.inputs.l2Dir;
+        if (document.getElementById("start-l1")) document.getElementById("start-l1").value = state.inputs.l1;
+        if (document.getElementById("start-l1-dir")) document.getElementById("start-l1-dir").value = state.inputs.l1Dir;
+        if (document.getElementById("start-d1")) document.getElementById("start-d1").value = state.inputs.d1;
+        if (document.getElementById("start-d2")) document.getElementById("start-d2").value = state.inputs.d2;
+        if (document.getElementById("start-partners")) document.getElementById("start-partners").value = state.inputs.partners;
+      }
+
+      applyViewportTransform();
+      renderSVG();
+      
+      undoStack.push(JSON.parse(JSON.stringify(state)));
+      updateUndoRedoButtons();
+
+      const diagContainer = document.getElementById("diagonalsContainer");
+      if (diagContainer && activeTemplateType === 'quad_diagonal') {
+        diagContainer.style.display = 'block';
+      }
+
+      openStartModal(true);
+    } catch (e) {
+      console.error(e);
+      openStartModal();
+      loadDemoDataPreset(false);
+    }
   } else {
-    // First load -> Show Start Screen Modal immediately
     openStartModal();
-    // Load default mock/demo setup inside the canvas background just in case they cancel
     loadDemoDataPreset(false);
   }
 
@@ -140,6 +180,7 @@ function saveState() {
   undoStack.push(state);
   redoStack = []; // Clear redo
   updateUndoRedoButtons();
+  if (typeof autoSaveCurrentState === "function") autoSaveCurrentState();
 }
 
 function saveStateDebounced() {
@@ -196,48 +237,27 @@ function restoreState(state) {
   }
 }
 
-// LocalStorage Project Save/Load
-function saveProjectToLocalStorage() {
-  const project = {
-    shapes,
-    borderLabels,
-    splitLines,
-    freeTexts,
-    waterways,
-    zoomScale,
-    panX,
-    panY,
-    activeTemplateType
+function autoSaveCurrentState() {
+  const state = {
+    shapes, borderLabels, splitLines, freeTexts, waterways,
+    zoomScale, panX, panY, activeTemplateType,
+    inputs: {
+      w1: document.getElementById("start-w1")?.value || "",
+      w1Dir: document.getElementById("start-w1-dir")?.value || "",
+      w2: document.getElementById("start-w2")?.value || "",
+      w2Dir: document.getElementById("start-w2-dir")?.value || "",
+      l2: document.getElementById("start-l2")?.value || "",
+      l2Dir: document.getElementById("start-l2-dir")?.value || "",
+      l1: document.getElementById("start-l1")?.value || "",
+      l1Dir: document.getElementById("start-l1-dir")?.value || "",
+      d1: document.getElementById("start-d1")?.value || "",
+      d2: document.getElementById("start-d2")?.value || "",
+      partners: document.getElementById("start-partners")?.value || "1"
+    }
   };
-  localStorage.setItem("dallal_map_project", JSON.stringify(project));
-  alert("💾 تم حفظ مشروع الكروكي بنجاح في ذاكرة الهاتف المحفوظة!");
-  toggleFabMenu();
+  localStorage.setItem("dallal_autosave", JSON.stringify(state));
 }
-
-function loadProjectFromLocalStorage() {
-  try {
-    const dataStr = localStorage.getItem("dallal_map_project");
-    if (!dataStr) return;
-    const project = JSON.parse(dataStr);
-    shapes = project.shapes || [];
-    borderLabels = project.borderLabels || [];
-    splitLines = project.splitLines || [];
-    freeTexts = project.freeTexts || [];
-    waterways = project.waterways || [];
-    zoomScale = project.zoomScale || 1.0;
-    panX = project.panX || 0;
-    panY = project.panY || 0;
-    activeTemplateType = project.activeTemplateType || 'rectangle';
-
-    applyViewportTransform();
-    renderSVG();
-    saveState();
-  } catch (e) {
-    console.error("Failed to load project from local storage", e);
-  }
-}
-
-// ----------------------------------------------------
+window.addEventListener('beforeunload', autoSaveCurrentState);// ----------------------------------------------------
 // SVG Coordinate Mapping & Viewport Transforms
 // ----------------------------------------------------
 function getSvgCoords(e) {
@@ -361,20 +381,95 @@ function generateCustomLand() {
     scale = Math.min(740 / maxW, 500 / maxL);
   }
 
-  const drawW1 = w1 * scale;
-  const drawW2 = w2 * scale;
-  const drawL1 = l1 * scale;
-  const drawL2 = l2 * scale;
-  const avgHeight = (drawL1 + drawL2) / 2;
+  const d1Input = document.getElementById("start-d1");
+  const d2Input = document.getElementById("start-d2");
+  const diag1 = d1Input && d1Input.value ? parseArabicFloat(d1Input.value) : 0;
+  const diag2 = d2Input && d2Input.value ? parseArabicFloat(d2Input.value) : 0;
 
-  // Vertices of the main quadrilateral shape
-  const p1 = { x: centerX - drawW1 / 2, y: centerY - avgHeight / 2 }; // Top-Left
-  const p2 = { x: centerX + drawW1 / 2, y: centerY - avgHeight / 2 }; // Top-Right
-  const p3 = { x: centerX + drawW2 / 2, y: centerY + avgHeight / 2 }; // Bottom-Right
-  const p4 = { x: centerX - drawW2 / 2, y: centerY + avgHeight / 2 }; // Bottom-Left
+  let p1, p2, p3, p4;
+  let totalArea = 0;
 
-  // Smart Area Calculations
-  const totalArea = ((w1 + w2) / 2) * ((l1 + l2) / 2);
+  if (diag1 > 0 || diag2 > 0) {
+    let A = w2, B = l1, C = w1, D = l2;
+    let tempP1, tempP2, tempP3, tempP4;
+    tempP4 = { x: 0, y: 0 };
+    tempP3 = { x: A, y: 0 };
+
+    if (diag1 > 0) { // AC
+      let cos_alpha = (B*B + A*A - diag1*diag1) / (2 * B * A);
+      if(cos_alpha < -1 || cos_alpha > 1) { alert("القطر الأول غير منطقي مع أبعاد الأضلاع!"); return; }
+      let alpha = Math.acos(cos_alpha);
+      tempP1 = { x: B * Math.cos(alpha), y: -B * Math.sin(alpha) };
+
+      let cos_beta1 = (A*A + diag1*diag1 - B*B) / (2 * A * diag1);
+      let beta1 = Math.acos(cos_beta1);
+      let cos_beta2 = (D*D + diag1*diag1 - C*C) / (2 * D * diag1);
+      if(cos_beta2 < -1 || cos_beta2 > 1) { alert("القطر الأول غير منطقي مع أبعاد الأضلاع!"); return; }
+      let beta2 = Math.acos(cos_beta2);
+      let total_beta = beta1 + beta2;
+      tempP2 = { x: A - D * Math.cos(total_beta), y: -D * Math.sin(total_beta) };
+      
+      let s1 = (A + B + diag1) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - B) * (s1 - diag1));
+      let s2 = (C + D + diag1) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - D) * (s2 - diag1));
+      totalArea = area1 + area2;
+    } else { // BD
+      let cos_beta = (A*A + D*D - diag2*diag2) / (2 * A * D);
+      if(cos_beta < -1 || cos_beta > 1) { alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!"); return; }
+      let beta = Math.acos(cos_beta);
+      tempP2 = { x: A - D * Math.cos(beta), y: -D * Math.sin(beta) };
+      
+      let cos_alpha1 = (A*A + diag2*diag2 - D*D) / (2 * A * diag2);
+      let alpha1 = Math.acos(cos_alpha1);
+      let cos_alpha2 = (B*B + diag2*diag2 - C*C) / (2 * B * diag2);
+      if(cos_alpha2 < -1 || cos_alpha2 > 1) { alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!"); return; }
+      let alpha2 = Math.acos(cos_alpha2);
+      let total_alpha = alpha1 + alpha2;
+      tempP1 = { x: B * Math.cos(total_alpha), y: -B * Math.sin(total_alpha) };
+
+      let s1 = (A + D + diag2) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag2));
+      let s2 = (C + B + diag2) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag2));
+      totalArea = area1 + area2;
+    }
+
+    let minX = Math.min(tempP1.x, tempP2.x, tempP3.x, tempP4.x);
+    let maxX = Math.max(tempP1.x, tempP2.x, tempP3.x, tempP4.x);
+    let minY = Math.min(tempP1.y, tempP2.y, tempP3.y, tempP4.y);
+    let maxY = Math.max(tempP1.y, tempP2.y, tempP3.y, tempP4.y);
+    let shapeW = maxX - minX;
+    let shapeH = maxY - minY;
+
+    let rawScale = Math.min(740 / shapeW, 500 / shapeH);
+    if (avgL > avgW) {
+       rawScale = Math.min(500 / shapeW, 740 / shapeH);
+    }
+    scale = rawScale;
+
+    let boxCenterX = minX + shapeW / 2;
+    let boxCenterY = minY + shapeH / 2;
+
+    p1 = { x: centerX + (tempP1.x - boxCenterX) * scale, y: centerY + (tempP1.y - boxCenterY) * scale };
+    p2 = { x: centerX + (tempP2.x - boxCenterX) * scale, y: centerY + (tempP2.y - boxCenterY) * scale };
+    p3 = { x: centerX + (tempP3.x - boxCenterX) * scale, y: centerY + (tempP3.y - boxCenterY) * scale };
+    p4 = { x: centerX + (tempP4.x - boxCenterX) * scale, y: centerY + (tempP4.y - boxCenterY) * scale };
+
+  } else {
+    const drawW1 = w1 * scale;
+    const drawW2 = w2 * scale;
+    const drawL1 = l1 * scale;
+    const drawL2 = l2 * scale;
+    const avgHeight = (drawL1 + drawL2) / 2;
+
+    p1 = { x: centerX - drawW1 / 2, y: centerY - avgHeight / 2 };
+    p2 = { x: centerX + drawW1 / 2, y: centerY - avgHeight / 2 };
+    p3 = { x: centerX + drawW2 / 2, y: centerY + avgHeight / 2 };
+    p4 = { x: centerX - drawW2 / 2, y: centerY + avgHeight / 2 };
+
+    totalArea = ((w1 + w2) / 2) * ((l1 + l2) / 2);
+  }
   const detailedArea = sqmToFeddanCaratShares(totalArea);
 
   const excludedTemplates = ['quad_diagonal', 'mixed_waterway_new', 'mixed_split_image'];
@@ -466,8 +561,8 @@ function generateCustomLand() {
 
   } else if (activeTemplateType === 'v_split') {
     // Vertical split
-    const p_top_mid = { x: (p1.x + p2.x) / 2, y: p1.y };
-    const p_bot_mid = { x: (p4.x + p3.x) / 2, y: p4.y };
+    const p_top_mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+    const p_bot_mid = { x: (p4.x + p3.x) / 2, y: (p4.y + p3.y) / 2 };
 
     const halfArea = totalArea / 2;
     const halfDetailed = sqmToFeddanCaratShares(halfArea);
@@ -480,7 +575,7 @@ function generateCustomLand() {
       notes: isRotated ? "نصيب غربي" : "نصيب بحري",
       color: "#f1f8e9",
       textX: (p1.x + p_top_mid.x) / 2,
-      textY: centerY
+      textY: (p1.y + p_bot_mid.y) / 2
     });
 
     shapes.push({
@@ -491,7 +586,7 @@ function generateCustomLand() {
       notes: isRotated ? "نصيب شرقي" : "نصيب قبلي",
       color: "#e3f2fd",
       textX: (p_top_mid.x + p2.x) / 2,
-      textY: centerY
+      textY: (p2.y + p3.y) / 2
     });
 
     splitLines.push({
@@ -2188,6 +2283,20 @@ function loadTemplate(type) {
     const w2Input = document.getElementById("start-w2");
     const l2Input = document.getElementById("start-l2");
     const l1Input = document.getElementById("start-l1");
+    const d1Input = document.getElementById("start-d1");
+    const d2Input = document.getElementById("start-d2");
+    const diagContainer = document.getElementById("diagonalsContainer");
+
+    if (d1Input) d1Input.value = "";
+    if (d2Input) d2Input.value = "";
+
+    if (diagContainer) {
+      if (type === 'quad_diagonal') {
+        diagContainer.style.display = 'block';
+      } else {
+        diagContainer.style.display = 'none';
+      }
+    }
 
     if (type === 'generic_shape' || type === 'rectangle') {
       w1Input.value = "30";
@@ -2214,6 +2323,8 @@ function loadTemplate(type) {
       w2Input.value = "50";
       l2Input.value = "35";
       l1Input.value = "40";
+      if (d1Input) d1Input.value = "60";
+      if (d2Input) d2Input.value = "55";
     } else if (type === 'mixed_waterway_new') {
       w1Input.value = "150";
       w2Input.value = "150";
@@ -2232,7 +2343,7 @@ function loadTemplate(type) {
     }
 
     // Open the Start Screen modal to confirm or modify values
-    openStartModal();
+    openStartModal(true);
   } catch (err) {
     alert("حدث خطأ أثناء تحميل القالب: " + err.message);
   }
@@ -2294,8 +2405,10 @@ function populateStartModalFromCurrentBorders() {
   }
 }
 
-function openStartModal() {
-  populateStartModalFromCurrentBorders();
+function openStartModal(skipPopulate = false) {
+  if (!skipPopulate) {
+    populateStartModalFromCurrentBorders();
+  }
   document.getElementById("startModal").style.display = "flex";
 }
 

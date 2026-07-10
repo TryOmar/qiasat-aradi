@@ -209,6 +209,22 @@
             <input type="text" id="start-l1-dir" value="غربي" style="flex: 1; text-align: center;">
           </div>
         </div>
+
+        <div id="diagonalsContainer" style="display: none; background: #f9fbe7; padding: 10px; border-radius: 8px; border: 1px solid #cddc39; margin-bottom: 15px;">
+          <div class="editor-form-group">
+            <label>القطر الأول (AC) بالمتر:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" inputmode="decimal" id="start-d1" placeholder="مثال: 60" style="flex: 1;">
+            </div>
+          </div>
+          <div class="editor-form-group">
+            <label>القطر الثاني (BD) بالمتر:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" inputmode="decimal" id="start-d2" placeholder="مثال: 55" style="flex: 1;">
+            </div>
+          </div>
+          <p style="font-size: 11.5px; color: #558b2f; margin: 5px 0 0 0; font-weight: bold; text-align: center;">* يكفي إدخال أحد القطرين (AC) أو (BD) فقط للحصول على حساب وتقسيم أكثر دقة.</p>
+        </div>
         <div class="editor-form-group">
           <label>عدد الشركاء:</label>
           <div style="display: flex; gap: 8px;">
@@ -366,11 +382,10 @@
     <div class="fab-menu" id="fabMenu">
       <button type="button" onclick="openStartModal()" class="fab-item" style="--i:1; background: #e8f5e9; color: #1b5e20; border-color: #a5d6a7;" title="أبعاد الأرض">📐 أبعاد الأرض</button>
       <button type="button" onclick="openAddDataModal()" class="fab-item" style="--i:2; background: #e0f2f1; color: #004d40; border-color: #80cbc4;" title="إضافة بيانات">➕ إضافة بيانات</button>
-      <button type="button" onclick="saveProjectToLocalStorage()" class="fab-item" style="--i:3; background: #fffde7; color: #f57f17; border-color: #fff59d;" title="حفظ المشروع">💾 حفظ المشروع</button>
-      <button type="button" onclick="printDallalMap()" class="fab-item" style="--i:4; background: #e3f2fd; color: #0d47a1; border-color: #90caf9;" title="طباعة">🖨️ طباعة</button>
-      <button type="button" onclick="exportMapImage()" class="fab-item" style="--i:5; background: #fce4ec; color: #880e4f; border-color: #f48fb1;" title="حفظ صورة">🖼️ حفظ صورة</button>
-      <button type="button" onclick="restoreDemoDataPreset()" class="fab-item" style="--i:6; background: #efebe9; color: #4e342e; border-color: #bcaaa4;" title="البيانات التجريبية">🔄 البيانات التجريبية</button>
-      <button type="button" onclick="resetCanvasToDefault()" class="fab-item" style="--i:7; background: #ffebee; color: #b71c1c; border-color: #ffcdd2;" title="مسح اللوحة">🗑️ مسح اللوحة</button>
+      <button type="button" onclick="printDallalMap()" class="fab-item" style="--i:3; background: #e3f2fd; color: #0d47a1; border-color: #90caf9;" title="طباعة">🖨️ طباعة</button>
+      <button type="button" onclick="exportMapImage()" class="fab-item" style="--i:4; background: #fce4ec; color: #880e4f; border-color: #f48fb1;" title="حفظ صورة">🖼️ حفظ صورة</button>
+      <button type="button" onclick="restoreDemoDataPreset()" class="fab-item" style="--i:5; background: #efebe9; color: #4e342e; border-color: #bcaaa4;" title="البيانات التجريبية">🔄 البيانات التجريبية</button>
+      <button type="button" onclick="resetCanvasToDefault()" class="fab-item" style="--i:6; background: #ffebee; color: #b71c1c; border-color: #ffcdd2;" title="مسح اللوحة">🗑️ مسح اللوحة</button>
     </div>
     <button type="button" class="fab-main-btn" onclick="toggleFabMenu()" id="fabMainBtn">
       <span>+</span>
