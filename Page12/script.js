@@ -25,6 +25,26 @@ let splitLines = [];
 let freeTexts = [];
 let waterways = [];
 
+// Visual Scaling & Stretch Variables - متغيرات التمدد البصري والـ Auto Fit
+let visualXFactor = 1.0;
+let visualYFactor = 1.0;
+let visualCenterX = 450;
+let visualCenterY = 325;
+
+function getVisualX(x) {
+  return visualCenterX + (x - visualCenterX) * visualXFactor;
+}
+function getVisualY(y) {
+  return visualCenterY + (y - visualCenterY) * visualYFactor;
+}
+function getRealCoords(coords) {
+  if (!coords) return { x: 0, y: 0 };
+  return {
+    x: visualCenterX + (coords.x - visualCenterX) / visualXFactor,
+    y: visualCenterY + (coords.y - visualCenterY) / visualYFactor
+  };
+}
+
 // Selected & Panning State
 let selectedElement = null; // { type: 'shape'|'borderLabel'|'splitLine'|'freeText'|'waterway', id: string }
 let activeDrag = null; // { type: 'freeText'|'borderLabel'|'splitLineLabel'|'splitLineEnd'|'shapeText', id: string, index?: number, offset: {x, y} }
@@ -384,7 +404,8 @@ function generateCustomLand(useCustomWidths = false) {
     setDynamicPrintPage("portrait");
     centerX = 325;
     centerY = 450;
-    scale = Math.min(500 / maxW, 740 / maxL);
+    // Auto Fit (الهامش البصري 5%): width = 650 * 0.9 = 585, height = 900 * 0.9 = 810
+    scale = Math.min(585 / maxW, 810 / maxL);
   } else {
     // Landscape Mode
     svgElement.setAttribute("viewBox", "0 0 900 650");
@@ -396,7 +417,26 @@ function generateCustomLand(useCustomWidths = false) {
     setDynamicPrintPage("landscape");
     centerX = 450;
     centerY = 325;
-    scale = Math.min(740 / maxW, 500 / maxL);
+    // Auto Fit (الهامش البصري 5%): width = 900 * 0.9 = 810, height = 650 * 0.9 = 585
+    scale = Math.min(810 / maxW, 585 / maxL);
+  }
+
+  // تحديث المراكز وعوامل التمديد البصري لتكبير عرض/طول الأراضي الطولية والعريضة
+  visualCenterX = centerX;
+  visualCenterY = centerY;
+  visualXFactor = 1.0;
+  visualYFactor = 1.0;
+
+  if (avgW > 0 && avgL > 0) {
+    const ratioLtoW = avgL / avgW;
+    const ratioWtoL = avgW / avgL;
+    if (ratioLtoW > 6.0) {
+      // أرض طولية جداً ورأسية: نمدد المحور الأفقي بصرياً
+      visualXFactor = Math.min(3.0, ratioLtoW / 4.0);
+    } else if (ratioWtoL > 6.0) {
+      // أرض عريضة جداً وأفقية: نمدد المحور الرأسي بصرياً
+      visualYFactor = Math.min(3.0, ratioWtoL / 4.0);
+    }
   }
 
   function addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, idx) {
@@ -1305,7 +1345,7 @@ function renderSVG() {
 
   // 1. Draw Waterways
   waterways.forEach(w => {
-    const pointsStr = w.points.map(p => `${p.x},${p.y}`).join(" ");
+    const pointsStr = w.points.map(p => `${getVisualX(p.x)},${getVisualY(p.y)}`).join(" ");
     
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", pointsStr);
@@ -1335,8 +1375,10 @@ function renderSVG() {
     waterwaysGroup.appendChild(polygon);
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", w.labelX);
-    text.setAttribute("y", w.labelY);
+    const visualLabelX = getVisualX(w.labelX);
+    const visualLabelY = getVisualY(w.labelY);
+    text.setAttribute("x", visualLabelX);
+    text.setAttribute("y", visualLabelY);
     text.setAttribute("fill", "#006064");
     text.setAttribute("font-size", "14");
     text.setAttribute("font-weight", "bold");
@@ -1345,7 +1387,7 @@ function renderSVG() {
     text.setAttribute("data-id", w.id);
     text.setAttribute("data-type", "waterwayLabel");
     if (w.angle) {
-      text.setAttribute("transform", `rotate(${w.angle}, ${w.labelX}, ${w.labelY})`);
+      text.setAttribute("transform", `rotate(${w.angle}, ${visualLabelX}, ${visualLabelY})`);
     }
     text.textContent = w.label;
     waterwaysGroup.appendChild(text);
@@ -1353,7 +1395,7 @@ function renderSVG() {
 
   // 2. Draw Land Slices (shapes)
   shapes.forEach(s => {
-    const pointsStr = s.points.map(p => `${p.x},${p.y}`).join(" ");
+    const pointsStr = s.points.map(p => `${getVisualX(p.x)},${getVisualY(p.y)}`).join(" ");
     
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", pointsStr);
@@ -1420,19 +1462,20 @@ function renderSVG() {
     // 1. Draw standalone Area text (rotated -90) at 25% height
     if (s.area && s.area.sqm) {
       const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      const areaX = s.textX;
+      const areaX = getVisualX(s.textX);
       let areaY = minY + shapeH * 0.25;
       if (activeTemplateType === 'mixed_waterway_new') {
         areaY = minY + shapeH * 0.85; // Move to bottom to avoid waterway and text box
       }
+      const visualAreaY = getVisualY(areaY);
       
       areaGroup.setAttribute("class", "draggable-label");
       areaGroup.setAttribute("data-type", "shapeAreaText");
-      areaGroup.setAttribute("transform", `rotate(-90, ${areaX}, ${areaY})`);
+      areaGroup.setAttribute("transform", `rotate(-90, ${areaX}, ${visualAreaY})`);
       
       const areaText = document.createElementNS("http://www.w3.org/2000/svg", "text");
       areaText.setAttribute("x", areaX);
-      areaText.setAttribute("y", areaY);
+      areaText.setAttribute("y", visualAreaY);
       areaText.setAttribute("fill", "#000000");
       areaText.setAttribute("font-size", "15");
       areaText.setAttribute("font-weight", "bold");
@@ -1509,10 +1552,14 @@ function renderSVG() {
       const boxX = s.textX - boxW / 2;
       const boxY = s.textY - boxH / 2;
 
-      // Rotate group if needed
+      // Rotate and Translate group to apply visual scaling translation
+      const dx = getVisualX(s.textX) - s.textX;
+      const dy = getVisualY(s.textY) - s.textY;
+      let transformStr = `translate(${dx}, ${dy})`;
       if (rotateAngle !== 0) {
-        textGroup.setAttribute("transform", `rotate(${rotateAngle}, ${s.textX}, ${s.textY})`);
+        transformStr += ` rotate(${rotateAngle}, ${s.textX}, ${s.textY})`;
       }
+      textGroup.setAttribute("transform", transformStr);
 
       if (showBg) {
         const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -1673,7 +1720,7 @@ function renderSVG() {
     // Render interactive subShapes (invisible overlays)
     if (s.subShapes) {
       s.subShapes.forEach(sub => {
-        const subPts = sub.points.map(p => `${p.x},${p.y}`).join(" ");
+        const subPts = sub.points.map(p => `${getVisualX(p.x)},${getVisualY(p.y)}`).join(" ");
         const subPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
         subPoly.setAttribute("points", subPts);
         subPoly.setAttribute("fill", "transparent");
@@ -1706,10 +1753,10 @@ function renderSVG() {
   // 3. Draw Split Lines
   splitLines.forEach(l => {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", l.x1);
-    line.setAttribute("y1", l.y1);
-    line.setAttribute("x2", l.x2);
-    line.setAttribute("y2", l.y2);
+    line.setAttribute("x1", getVisualX(l.x1));
+    line.setAttribute("y1", getVisualY(l.y1));
+    line.setAttribute("x2", getVisualX(l.x2));
+    line.setAttribute("y2", getVisualY(l.y2));
     line.setAttribute("class", "split-line");
     line.setAttribute("data-id", l.id);
     if (l.isDashed) {
@@ -1728,8 +1775,8 @@ function renderSVG() {
     // Helper handles for endpoints (only when selected)
     if (selectedElement && selectedElement.type === 'splitLine' && selectedElement.id === l.id) {
       const handle1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      handle1.setAttribute("cx", l.x1);
-      handle1.setAttribute("cy", l.y1);
+      handle1.setAttribute("cx", getVisualX(l.x1));
+      handle1.setAttribute("cy", getVisualY(l.y1));
       handle1.setAttribute("r", 7);
       handle1.setAttribute("fill", "#c62828");
       handle1.setAttribute("class", "draggable-label");
@@ -1739,8 +1786,8 @@ function renderSVG() {
       splitLinesGroup.appendChild(handle1);
 
       const handle2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      handle2.setAttribute("cx", l.x2);
-      handle2.setAttribute("cy", l.y2);
+      handle2.setAttribute("cx", getVisualX(l.x2));
+      handle2.setAttribute("cy", getVisualY(l.y2));
       handle2.setAttribute("r", 7);
       handle2.setAttribute("fill", "#c62828");
       handle2.setAttribute("class", "draggable-label");
@@ -1753,18 +1800,20 @@ function renderSVG() {
     // Split Line Label
     if (l.label) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const visualLabelX = getVisualX(l.labelX);
+      const visualLabelY = getVisualY(l.labelY);
       g.setAttribute("class", "draggable-label");
       g.setAttribute("data-id", l.id);
       g.setAttribute("data-type", "splitLineLabel");
       if (l.angle) {
-        g.setAttribute("transform", `rotate(${l.angle}, ${l.labelX}, ${l.labelY})`);
+        g.setAttribute("transform", `rotate(${l.angle}, ${visualLabelX}, ${visualLabelY})`);
       }
 
       const boxW = l.label.length * 7 + 10;
       const boxH = 20;
       const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", l.labelX - boxW / 2);
-      rect.setAttribute("y", l.labelY - boxH / 1.5 + 1);
+      rect.setAttribute("x", visualLabelX - boxW / 2);
+      rect.setAttribute("y", visualLabelY - boxH / 1.5 + 1);
       rect.setAttribute("width", boxW);
       rect.setAttribute("height", boxH);
       rect.setAttribute("fill", "white");
@@ -1773,8 +1822,8 @@ function renderSVG() {
       rect.setAttribute("rx", "3");
 
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", l.labelX);
-      text.setAttribute("y", l.labelY);
+      text.setAttribute("x", visualLabelX);
+      text.setAttribute("y", visualLabelY);
       text.setAttribute("fill", "#000000");
       text.setAttribute("font-size", "12");
       text.setAttribute("font-weight", "bold");
@@ -1783,10 +1832,10 @@ function renderSVG() {
 
       if (l.originalLabelX !== undefined && l.originalLabelY !== undefined) {
         const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        guideLine.setAttribute("x1", l.originalLabelX);
-        guideLine.setAttribute("y1", l.originalLabelY);
-        guideLine.setAttribute("x2", l.labelX);
-        guideLine.setAttribute("y2", l.labelY);
+        guideLine.setAttribute("x1", getVisualX(l.originalLabelX));
+        guideLine.setAttribute("y1", getVisualY(l.originalLabelY));
+        guideLine.setAttribute("x2", visualLabelX);
+        guideLine.setAttribute("y2", visualLabelY);
         guideLine.setAttribute("stroke", "#999999");
         guideLine.setAttribute("stroke-width", "1.2");
         guideLine.setAttribute("stroke-dasharray", "4, 4");
@@ -1808,11 +1857,13 @@ function renderSVG() {
   // 4. Draw Outer Border Labels
   borderLabels.forEach(b => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const visualX = getVisualX(b.x);
+    const visualY = getVisualY(b.y);
     g.setAttribute("class", "draggable-label");
     g.setAttribute("data-id", b.id);
     g.setAttribute("data-type", "borderLabel");
     if (b.angle) {
-      g.setAttribute("transform", `rotate(${b.angle}, ${b.x}, ${b.y})`);
+      g.setAttribute("transform", `rotate(${b.angle}, ${visualX}, ${visualY})`);
     }
 
     const fontSize = parseFloat(b.fontSize || "13.5");
@@ -1820,8 +1871,8 @@ function renderSVG() {
     const boxH = fontSize * 1.6;
 
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", b.x - boxW / 2);
-    rect.setAttribute("y", b.y - boxH / 1.5 + 2);
+    rect.setAttribute("x", visualX - boxW / 2);
+    rect.setAttribute("y", visualY - boxH / 1.5 + 2);
     rect.setAttribute("width", boxW);
     rect.setAttribute("height", boxH);
     rect.setAttribute("fill", "white");
@@ -1830,8 +1881,8 @@ function renderSVG() {
     rect.setAttribute("rx", "3");
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", b.x);
-    text.setAttribute("y", b.y);
+    text.setAttribute("x", visualX);
+    text.setAttribute("y", visualY);
     text.setAttribute("fill", b.color || "#000000");
     text.setAttribute("font-size", b.fontSize || "13.5");
     text.setAttribute("font-weight", b.isBold !== false ? "bold" : "normal");
@@ -1840,10 +1891,10 @@ function renderSVG() {
 
     if (b.originalX !== undefined && b.originalY !== undefined) {
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      guideLine.setAttribute("x1", b.originalX);
-      guideLine.setAttribute("y1", b.originalY);
-      guideLine.setAttribute("x2", b.x);
-      guideLine.setAttribute("y2", b.y);
+      guideLine.setAttribute("x1", getVisualX(b.originalX));
+      guideLine.setAttribute("y1", getVisualY(b.originalY));
+      guideLine.setAttribute("x2", visualX);
+      guideLine.setAttribute("y2", visualY);
       guideLine.setAttribute("stroke", "#999999");
       guideLine.setAttribute("stroke-width", "1.2");
       guideLine.setAttribute("stroke-dasharray", "4, 4");
@@ -1864,11 +1915,13 @@ function renderSVG() {
   // 5. Draw Free Custom Texts
   freeTexts.forEach(t => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const visualX = getVisualX(t.x);
+    const visualY = getVisualY(t.y);
     g.setAttribute("class", "draggable-label");
     g.setAttribute("data-id", t.id);
     g.setAttribute("data-type", "freeText");
     if (t.angle) {
-      g.setAttribute("transform", `rotate(${t.angle}, ${t.x}, ${t.y})`);
+      g.setAttribute("transform", `rotate(${t.angle}, ${visualX}, ${visualY})`);
     }
 
     const fontSize = parseFloat(t.fontSize || "13");
@@ -1876,8 +1929,8 @@ function renderSVG() {
     const boxH = fontSize * 1.6;
 
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", t.x - boxW / 2);
-    rect.setAttribute("y", t.y - boxH / 1.5 + 2);
+    rect.setAttribute("x", visualX - boxW / 2);
+    rect.setAttribute("y", visualY - boxH / 1.5 + 2);
     rect.setAttribute("width", boxW);
     rect.setAttribute("height", boxH);
     rect.setAttribute("fill", "white");
@@ -1886,8 +1939,8 @@ function renderSVG() {
     rect.setAttribute("rx", "3");
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", t.x);
-    text.setAttribute("y", t.y);
+    text.setAttribute("x", visualX);
+    text.setAttribute("y", visualY);
     text.setAttribute("fill", t.color || "#000000");
     text.setAttribute("font-size", t.fontSize || "13");
     text.setAttribute("font-weight", t.isBold ? "bold" : "normal");
@@ -1896,10 +1949,10 @@ function renderSVG() {
 
     if (t.originalX !== undefined && t.originalY !== undefined) {
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      guideLine.setAttribute("x1", t.originalX);
-      guideLine.setAttribute("y1", t.originalY);
-      guideLine.setAttribute("x2", t.x);
-      guideLine.setAttribute("y2", t.y);
+      guideLine.setAttribute("x1", getVisualX(t.originalX));
+      guideLine.setAttribute("y1", getVisualY(t.originalY));
+      guideLine.setAttribute("x2", visualX);
+      guideLine.setAttribute("y2", visualY);
       guideLine.setAttribute("stroke", "#999999");
       guideLine.setAttribute("stroke-width", "1.2");
       guideLine.setAttribute("stroke-dasharray", "4, 4");
@@ -1935,7 +1988,7 @@ function onSvgMouseDown(e) {
     const id = draggableEl.getAttribute("data-id");
     const index = draggableEl.getAttribute("data-index");
 
-    const coords = getSvgCoords(e);
+    const coords = getRealCoords(getSvgCoords(e));
     let offset = { x: 0, y: 0 };
 
     if (type === 'freeText') {
@@ -1979,7 +2032,7 @@ function onSvgMouseDown(e) {
 
 function onSvgMouseMove(e) {
   if (activeDrag) {
-    const coords = getSvgCoords(e);
+    const coords = getRealCoords(getSvgCoords(e));
     const newX = Math.round(coords.x - activeDrag.offset.x);
     const newY = Math.round(coords.y - activeDrag.offset.y);
 
@@ -2240,7 +2293,7 @@ function onSvgDoubleClick(e) {
       panY = 0;
     } else {
       zoomScale = 1.6;
-      const coords = getSvgCoords(e);
+      const coords = getRealCoords(getSvgCoords(e));
       panX = 450 - coords.x * 1.6;
       panY = 280 - coords.y * 1.6;
     }
