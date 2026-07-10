@@ -30,6 +30,7 @@ let visualXFactor = 1.0;
 let visualYFactor = 1.0;
 let visualCenterX = 450;
 let visualCenterY = 325;
+let scale = 1.0;
 
 function getVisualX(x) {
   return visualCenterX + (x - visualCenterX) * visualXFactor;
@@ -379,7 +380,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   let centerX = 450;
   let centerY = 325;
-  let scale = 1;
+  scale = 1;
 
   let effW1 = w1, effW2 = w2, effL1 = l1, effL2 = l2;
   let effW1Dir = w1Dir, effW2Dir = w2Dir, effL1Dir = l1Dir, effL2Dir = l2Dir;
