@@ -828,17 +828,17 @@ function generateCustomLand(useCustomWidths = false) {
       return area1 + area2;
     }
 
-    const w_tl = { x: x_water_top_left, y: y_water_top };
-    const w_tr = { x: x_water_top_right, y: y_water_top };
-    const w_br = { x: x_water_bot_right, y: y_water_bot };
-    const w_bl = { x: x_water_bot_left, y: y_water_bot };
+    const w_tl = { x: x_water_top_left, y: y_water_top_left };
+    const w_tr = { x: x_water_top_right, y: y_water_top_right };
+    const w_br = { x: x_water_bot_right, y: y_water_bot_right };
+    const w_bl = { x: x_water_bot_left, y: y_water_bot_left };
 
     waterways.push({
       id: "water_new",
       points: [w_tl, w_tr, w_br, w_bl],
       label: "مجرى مائي (ترعة)",
       labelX: centerX,
-      labelY: y_mid + 4,
+      labelY: (y_water_top_left + y_water_bot_left) / 2 + 4,
       angle: 0,
       stats: {
         area: calcQuadArea(w_tl, w_tr, w_br, w_bl),
