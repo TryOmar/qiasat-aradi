@@ -791,7 +791,11 @@ function generateCustomLand(useCustomWidths = false) {
         leftTopMeters: (effL1 / 2) - 3.6,
         rightTopMeters: (effL2 / 2) - 3.6,
         leftWaterMeters: 7.20,
-        rightWaterMeters: 7.20
+        rightWaterMeters: 7.20,
+        westPartnersCount: 1,
+        eastPartnersCount: 1,
+        westPartnerWidths: [],
+        eastPartnerWidths: []
       };
     }
 
@@ -812,22 +816,6 @@ function generateCustomLand(useCustomWidths = false) {
     const x_water_bot_right = p2.x + (p3.x - p2.x) * t_right_bot;
     const y_water_bot_right = p2.y + (p3.y - p2.y) * t_right_bot;
 
-    function calcDist(pa, pb) {
-      return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2)) / scale;
-    }
-    function calcQuadArea(pa, pb, pc, pd) {
-      let A = calcDist(pa, pb);
-      let B = calcDist(pa, pd);
-      let C = calcDist(pc, pd);
-      let D = calcDist(pc, pb);
-      let diag = calcDist(pa, pc);
-      let s1 = (A + D + diag) / 2;
-      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
-      let s2 = (C + B + diag) / 2;
-      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
-      return area1 + area2;
-    }
-
     const w_tl = { x: x_water_top_left, y: y_water_top_left };
     const w_tr = { x: x_water_top_right, y: y_water_top_right };
     const w_br = { x: x_water_bot_right, y: y_water_bot_right };
@@ -842,122 +830,11 @@ function generateCustomLand(useCustomWidths = false) {
       angle: 0,
       stats: {
         area: calcQuadArea(w_tl, w_tr, w_br, w_bl),
-        width: calcDist(w_tl, w_bl), // average width would be better but this is fine
+        width: calcDist(w_tl, w_bl),
         length: calcDist(w_tl, w_tr)
       }
     });
 
-    const N = numPartners;
-
-    if (!customPartnerWidths || customPartnerWidths.length !== N) {
-      customPartnerWidths = [];
-      for (let i = 0; i < N; i++) {
-        customPartnerWidths.push({
-          top: effW1 / N,
-          bot: effW2 / N
-        });
-      }
-    }
-
-    for (let i = 0; i < N; i++) {
-      let ratioTop1 = 0;
-      for (let j = 0; j < i; j++) ratioTop1 += customPartnerWidths[j].top;
-      ratioTop1 /= effW1;
-
-      let ratioTop2 = ratioTop1 + (customPartnerWidths[i].top / effW1);
-
-      let ratioBot1 = 0;
-      for (let j = 0; j < i; j++) ratioBot1 += customPartnerWidths[j].bot;
-      ratioBot1 /= effW2;
-
-      let ratioBot2 = ratioBot1 + (customPartnerWidths[i].bot / effW2);
-
-      if (ratioTop1 < 0) ratioTop1 = 0; if (ratioTop1 > 1) ratioTop1 = 1;
-      if (ratioTop2 < 0) ratioTop2 = 0; if (ratioTop2 > 1) ratioTop2 = 1;
-      if (ratioBot1 < 0) ratioBot1 = 0; if (ratioBot1 > 1) ratioBot1 = 1;
-      if (ratioBot2 < 0) ratioBot2 = 0; if (ratioBot2 > 1) ratioBot2 = 1;
-
-      const p_tl = {
-        x: p1.x + (p2.x - p1.x) * ratioTop1,
-        y: p1.y + (p2.y - p1.y) * ratioTop1
-      };
-      const p_tr = {
-        x: p1.x + (p2.x - p1.x) * ratioTop2,
-        y: p1.y + (p2.y - p1.y) * ratioTop2
-      };
-      const p_br = {
-        x: p4.x + (p3.x - p4.x) * ratioBot2,
-        y: p4.y + (p3.y - p4.y) * ratioBot2
-      };
-      const p_bl = {
-        x: p4.x + (p3.x - p4.x) * ratioBot1,
-        y: p4.y + (p3.y - p4.y) * ratioBot1
-      };
-
-      let partAreaTotal = calcQuadArea(p_tl, p_tr, p_br, p_bl);
-      let partArea = partAreaTotal * 0.9; // Subtract ~10% for waterway
-      const partDetailed = sqmToFeddanCaratShares(partArea);
-
-      const colorIndex = (i + 1) % colorsList.length;
-      let ownerName = "الشريك " + (i + 1);
-      let notesName = "نصيب الشريك " + (i + 1);
-      
-      if (N === 1) {
-         ownerName = "اسم المالك";
-         notesName = "القطعة كاملة";
-      } else if (N === 2) {
-         ownerName = i === 0 ? "الشريك الأول (غربي)" : "الشريك الثاني (شرقي)";
-         notesName = i === 0 ? "القطعة الغربية" : "القطعة الشرقية";
-      }
-
-      let p_w_tl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_top, y: p_tl.y + (p_bl.y - p_tl.y) * t_left_top };
-      let p_w_tr = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_top, y: p_tr.y + (p_br.y - p_tr.y) * t_right_top };
-
-      let p_w_bl = { x: p_tl.x + (p_bl.x - p_tl.x) * t_left_bot, y: p_tl.y + (p_bl.y - p_tl.y) * t_left_bot };
-      let p_w_br = { x: p_tr.x + (p_br.x - p_tr.x) * t_right_bot, y: p_tr.y + (p_br.y - p_tr.y) * t_right_bot };
-
-      let upperArea = calcQuadArea(p_tl, p_tr, p_w_tr, p_w_tl);
-      let lowerArea = calcQuadArea(p_w_bl, p_w_br, p_br, p_bl);
-
-      shapes.push({
-        id: "shape_" + (i + 1),
-        points: [p_tl, p_tr, p_br, p_bl],
-        owner: ownerName,
-        area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
-        notes: notesName,
-        color: colorsList[colorIndex].value,
-        textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
-        textY: (p_tl.y + p_tr.y) / 2 + ( (p_bl.y + p_br.y) / 2 - (p_tl.y + p_tr.y) / 2 ) * 0.25,
-        subShapes: [
-          {
-            name: "القطعة الغربية",
-            points: [p_tl, p_tr, p_w_tr, p_w_tl],
-            area: upperArea,
-            topWidth: calcDist(p_tl, p_tr),
-            botWidth: calcDist(p_w_tl, p_w_tr),
-            leftLen: calcDist(p_tl, p_w_tl),
-            rightLen: calcDist(p_tr, p_w_tr),
-            perimeter: calcDist(p_tl, p_tr) + calcDist(p_w_tl, p_w_tr) + calcDist(p_tl, p_w_tl) + calcDist(p_tr, p_w_tr)
-          },
-          {
-            name: "القطعة الشرقية",
-            points: [p_w_bl, p_w_br, p_br, p_bl],
-            area: lowerArea,
-            topWidth: calcDist(p_w_bl, p_w_br),
-            botWidth: calcDist(p_bl, p_br),
-            leftLen: calcDist(p_w_bl, p_bl),
-            rightLen: calcDist(p_w_br, p_br),
-            perimeter: calcDist(p_w_bl, p_w_br) + calcDist(p_bl, p_br) + calcDist(p_w_bl, p_bl) + calcDist(p_w_br, p_br)
-          }
-        ]
-      });
-      
-      addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
-
-      const partW1 = customPartnerWidths[i].top;
-      const partW2 = customPartnerWidths[i].bot;
-
-      freeTexts.push({
         id: "note_top_" + Date.now() + "_" + i,
         text: partW1.toFixed(2) + " م",
         x: (p_tl.x + p_tr.x) / 2,
@@ -1659,12 +1536,9 @@ function renderSVG() {
           });
         };
         subPoly.onmouseleave = hideInspectorTooltip;
-        if (sub.name === "القطعة الغربية") {
-          subPoly.onclick = (e) => onElementClick(e, 'waterway_west', s.id);
-        } else {
-          subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
-        }
+        subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
         
+
         shapesGroup.appendChild(subPoly);
       });
     }
@@ -2372,18 +2246,22 @@ function openModalForElement(type, id) {
     document.getElementById("util-angle").value = t.angle || 0;
     document.getElementById("util-bold").checked = t.isBold !== false;
     document.getElementById("util-color").value = t.color || "#000000";
-  } else if (targetType === 'waterway_west' || targetType === 'waterway') {
+  } else if (targetType === 'waterway_west' || targetType === 'waterway_east' || targetType === 'waterway') {
     if (!customWaterwayData) {
       customWaterwayData = {
         leftTopMeters: (effL1 / 2) - 3.6,
         rightTopMeters: (effL2 / 2) - 3.6,
         leftWaterMeters: 7.20,
-        rightWaterMeters: 7.20
+        rightWaterMeters: 7.20,
+        westPartnersCount: 1,
+        eastPartnersCount: 1,
+        westPartnerWidths: [],
+        eastPartnerWidths: []
       };
     }
-    modalTitle.textContent = targetType === 'waterway' ? "أبعاد المجرى المائي" : "أبعاد القطعة الغربية";
     
     if (targetType === 'waterway') {
+      modalTitle.textContent = "أبعاد المجرى المائي";
       modalForm.innerHTML = `
         <div class="editor-form-group">
           <label>عرض المجرى الأيسر (بالمتر):</label>
@@ -2394,15 +2272,50 @@ function openModalForElement(type, id) {
           <input type="text" inputmode="decimal" id="modal-water-right" value="${customWaterwayData.rightWaterMeters.toFixed(2)}">
         </div>
       `;
-    } else {
+    } else if (targetType === 'waterway_west') {
+      modalTitle.textContent = "بيانات القطعة الغربية";
       modalForm.innerHTML = `
         <div class="editor-form-group">
-          <label>الطول الأيسر للقطعة الغربية (بالمتر):</label>
+          <label>العرض العلوي للقطعة (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-west-top" value="${(document.getElementById('start-w1') && document.getElementById('start-w1').value) ? document.getElementById('start-w1').value : effW1.toFixed(2)}">
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيسر للقطعة (بالمتر):</label>
           <input type="text" inputmode="decimal" id="modal-west-left" value="${customWaterwayData.leftTopMeters.toFixed(2)}">
         </div>
         <div class="editor-form-group">
-          <label>الطول الأيمن للقطعة الغربية (بالمتر):</label>
+          <label>الطول الأيمن للقطعة (بالمتر):</label>
           <input type="text" inputmode="decimal" id="modal-west-right" value="${customWaterwayData.rightTopMeters.toFixed(2)}">
+        </div>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
+        <div class="editor-form-group">
+          <label>تقسيم القطعة الغربية (عدد الشركاء داخلياً):</label>
+          <input type="number" id="modal-west-partners" min="1" max="20" value="${customWaterwayData.westPartnersCount || 1}">
+        </div>
+      `;
+    } else if (targetType === 'waterway_east') {
+      modalTitle.textContent = "بيانات القطعة الشرقية";
+      const botW = (document.getElementById('start-w2') && document.getElementById('start-w2').value) ? document.getElementById('start-w2').value : effW2.toFixed(2);
+      const leftBotM = Math.max(0, effL1 - customWaterwayData.leftTopMeters - customWaterwayData.leftWaterMeters);
+      const rightBotM = Math.max(0, effL2 - customWaterwayData.rightTopMeters - customWaterwayData.rightWaterMeters);
+      
+      modalForm.innerHTML = `
+        <div class="editor-form-group">
+          <label>العرض السفلي للقطعة (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-east-bot" value="${botW}">
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيسر للقطعة (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-east-left" value="${leftBotM.toFixed(2)}">
+        </div>
+        <div class="editor-form-group">
+          <label>الطول الأيمن للقطعة (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="modal-east-right" value="${rightBotM.toFixed(2)}">
+        </div>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
+        <div class="editor-form-group">
+          <label>تقسيم القطعة الشرقية (عدد الشركاء داخلياً):</label>
+          <input type="number" id="modal-east-partners" min="1" max="20" value="${customWaterwayData.eastPartnersCount || 1}">
         </div>
       `;
     }
@@ -2489,6 +2402,55 @@ function saveModalData() {
     if (customWaterwayData) {
       customWaterwayData.leftTopMeters = parseFloat(document.getElementById("modal-west-left").value) || ((effL1 / 2) - 3.6);
       customWaterwayData.rightTopMeters = parseFloat(document.getElementById("modal-west-right").value) || ((effL2 / 2) - 3.6);
+      
+      const newPartnersCount = parseInt(document.getElementById("modal-west-partners").value) || 1;
+      if (customWaterwayData.westPartnersCount !== newPartnersCount) {
+        customWaterwayData.westPartnersCount = newPartnersCount;
+        customWaterwayData.westPartnerWidths = []; // Reset widths to trigger regeneration
+      }
+
+      const newTopW = parseFloat(document.getElementById("modal-west-top").value) || 0;
+      if (document.getElementById('start-w1') && newTopW > 0) {
+         const oldTopW = parseFloat(document.getElementById('start-w1').value) || newTopW;
+         document.getElementById('start-w1').value = newTopW;
+         
+         if (oldTopW !== newTopW && customWaterwayData.westPartnerWidths && customWaterwayData.westPartnerWidths.length > 0) {
+            const scaleFactor = newTopW / oldTopW;
+            customWaterwayData.westPartnerWidths.forEach(p => { p.top *= scaleFactor; });
+         }
+      }
+
+      generateShapes();
+    }
+  } else if (targetType === 'waterway_east') {
+    if (customWaterwayData) {
+      const newPartnersCount = parseInt(document.getElementById("modal-east-partners").value) || 1;
+      if (customWaterwayData.eastPartnersCount !== newPartnersCount) {
+        customWaterwayData.eastPartnersCount = newPartnersCount;
+        customWaterwayData.eastPartnerWidths = []; // Reset widths
+      }
+
+      const newBotW = parseFloat(document.getElementById("modal-east-bot").value) || 0;
+      if (document.getElementById('start-w2') && newBotW > 0) {
+         const oldBotW = parseFloat(document.getElementById('start-w2').value) || newBotW;
+         document.getElementById('start-w2').value = newBotW;
+         
+         if (oldBotW !== newBotW && customWaterwayData.eastPartnerWidths && customWaterwayData.eastPartnerWidths.length > 0) {
+            const scaleFactor = newBotW / oldBotW;
+            customWaterwayData.eastPartnerWidths.forEach(p => { p.bot *= scaleFactor; });
+         }
+      }
+
+      const leftBotM = parseFloat(document.getElementById("modal-east-left").value) || 0;
+      const rightBotM = parseFloat(document.getElementById("modal-east-right").value) || 0;
+      
+      if (document.getElementById('start-l1')) {
+         document.getElementById('start-l1').value = (customWaterwayData.leftTopMeters + customWaterwayData.leftWaterMeters + leftBotM).toFixed(2);
+      }
+      if (document.getElementById('start-l2')) {
+         document.getElementById('start-l2').value = (customWaterwayData.rightTopMeters + customWaterwayData.rightWaterMeters + rightBotM).toFixed(2);
+      }
+
       generateShapes();
     }
   }
@@ -2530,7 +2492,52 @@ function populateSidebarEditor() {
           <label>المساحة (بالمتر المربع):</label>
           <input type="text" inputmode="decimal" value="${s.area.sqm || 0}" oninput="updateSelectedShapeArea('sqm', this.value)">
         </div>
+      `;
+      
+      if (activeTemplateType === 'mixed_waterway_new') {
+        let topW = 0, botW = 0, parentName = "", parentAction = "";
+        if (s.id.startsWith("west_")) {
+           const idx = parseInt(s.id.split("_")[1]);
+           if (customWaterwayData && customWaterwayData.westPartnerWidths && customWaterwayData.westPartnerWidths[idx]) {
+             topW = customWaterwayData.westPartnerWidths[idx].top;
+             botW = customWaterwayData.westPartnerWidths[idx].bot;
+           }
+           parentName = "القطعة الغربية";
+           parentAction = "waterway_west";
+        } else if (s.id.startsWith("east_")) {
+           const idx = parseInt(s.id.split("_")[1]);
+           if (customWaterwayData && customWaterwayData.eastPartnerWidths && customWaterwayData.eastPartnerWidths[idx]) {
+             topW = customWaterwayData.eastPartnerWidths[idx].top;
+             botW = customWaterwayData.eastPartnerWidths[idx].bot;
+           }
+           parentName = "القطعة الشرقية";
+           parentAction = "waterway_east";
+        }
 
+        if (parentAction) {
+          html += `
+            <div class="editor-form-group" style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin: 10px 0;">
+              <label><strong>أبعاد نصيب الشريك:</strong></label>
+              <div style="display:flex; gap:5px; margin-top:5px;">
+                <div style="flex:1">
+                  <label style="font-size: 11px;">العرض العلوي (م)</label>
+                  <input type="text" inputmode="decimal" value="${topW.toFixed(2)}" onchange="updatePartnerWidth('${s.id}', 'top', this.value)">
+                </div>
+                <div style="flex:1">
+                  <label style="font-size: 11px;">العرض السفلي (م)</label>
+                  <input type="text" inputmode="decimal" value="${botW.toFixed(2)}" onchange="updatePartnerWidth('${s.id}', 'bot', this.value)">
+                </div>
+              </div>
+            </div>
+            
+            <button type="button" onclick="openModalForElement('${parentAction}', null)" style="width: 100%; height: 32px; border: 1.5px solid #64b5f6; border-radius: 6px; background: #e3f2fd; color: #1976d2; font-weight: bold; cursor: pointer; margin-bottom: 10px;">
+              ⚙️ تعديل / تقسيم (${parentName}) بالكامل
+            </button>
+          `;
+        }
+      }
+
+      html += `
         <div class="editor-form-group">
           <label>اكتب ما تريد:</label>
           <textarea rows="3" oninput="updateSelectedShapeField('notes', this.value)">${s.notes || ''}</textarea>
@@ -2643,6 +2650,24 @@ function updateSelectedShapeArea(part, value) {
     renderSVG();
     saveStateDebounced();
   }
+}
+
+function updatePartnerWidth(id, edge, val) {
+  const v = parseFloat(val) || 0;
+  if (id.startsWith("west_")) {
+    const idx = parseInt(id.split("_")[1]);
+    if (customWaterwayData && customWaterwayData.westPartnerWidths && customWaterwayData.westPartnerWidths[idx]) {
+      customWaterwayData.westPartnerWidths[idx][edge] = v;
+    }
+  } else if (id.startsWith("east_")) {
+    const idx = parseInt(id.split("_")[1]);
+    if (customWaterwayData && customWaterwayData.eastPartnerWidths && customWaterwayData.eastPartnerWidths[idx]) {
+      customWaterwayData.eastPartnerWidths[idx][edge] = v;
+    }
+  }
+  generateShapes();
+  renderSVG();
+  saveStateDebounced();
 }
 
 function updateSelectedBorderField(field, value) {
