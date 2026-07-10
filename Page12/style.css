@@ -760,3 +760,60 @@ svg .waterway {
   transform: translateY(-1px);
 }
 
+/* Scrollable Bottom Nav */
+.scrollable-nav {
+  justify-content: flex-start !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  flex-flow: row !important;
+  gap: 15px !important;
+  padding: 5px 15px !important;
+  -webkit-overflow-scrolling: touch;
+}
+.scrollable-nav::-webkit-scrollbar {
+  display: none;
+}
+.scrollable-nav .nav-box {
+  flex: 0 0 auto;
+  min-width: 65px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  color: white;
+  transition: opacity 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+.scrollable-nav .nav-box p {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: white;
+  margin-top: 6px;
+}
+.scrollable-nav .nav-box svg,
+.scrollable-nav .nav-box img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+.scrollable-nav .nav-box img {
+  filter: brightness(0) invert(1);
+}
+.scrollable-nav .nav-box[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.scrollable-nav .nav-box:hover:not([disabled]) {
+  transform: translateY(-2px);
+  opacity: 1;
+}
