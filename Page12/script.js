@@ -2702,6 +2702,42 @@ function getShapeSideLengths(s) {
   };
 }
 
+function updateTotalDimension(dimension, value) {
+  let val = parseFloat(value);
+  if (isNaN(val) || val <= 0) return;
+
+  // تحديث القيمة في حقل الإدخال المقابل في مودال البداية
+  const startInput = document.getElementById("start-" + dimension);
+  if (startInput) {
+    startInput.value = val;
+  }
+
+  // إعادة بناء ورسم الأرض
+  generateCustomLand(true);
+  renderSVG();
+  saveStateDebounced();
+
+  // تحديث الحقول في السايدبار مع الحفاظ على الـ focus لكي يستمر المستخدم في الكتابة
+  const activeInput = document.activeElement;
+  const activeInputId = activeInput ? activeInput.id : null;
+  const selectionStart = activeInput ? activeInput.selectionStart : null;
+  const selectionEnd = activeInput ? activeInput.selectionEnd : null;
+
+  populateSidebarEditor();
+
+  if (activeInputId) {
+    const newInp = document.getElementById(activeInputId);
+    if (newInp) {
+      newInp.focus();
+      if (selectionStart !== null && selectionEnd !== null) {
+        try {
+          newInp.setSelectionRange(selectionStart, selectionEnd);
+        } catch(e) {}
+      }
+    }
+  }
+}
+
 // ----------------------------------------------------
 // Sidebar Properties Editor Panel
 // ----------------------------------------------------
@@ -2752,35 +2788,52 @@ function populateSidebarEditor() {
           const sideLengths = getShapeSideLengths(s);
           const isReadOnly = numPartners === 1;
           
-          subPieceHtml = `
-            <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
-              <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
-              
-              <div class="editor-form-group">
-                <label>العرض العلوي (متر): ${isReadOnly ? '<span style="font-size:10px;color:#d32f2f;">(ثابت للأرض)</span>' : ''}</label>
-                <input type="number" step="0.01" id="sidebar-piece-width-top" value="${customW.top.toFixed(2)}" 
-                  ${isReadOnly ? 'readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;"' : `oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'top', this.value)"`}>
-              </div>
-              <div class="editor-form-group">
-                <label>العرض السفلي (متر): ${isReadOnly ? '<span style="font-size:10px;color:#d32f2f;">(ثابت للأرض)</span>' : ''}</label>
-                <input type="number" step="0.01" id="sidebar-piece-width-bot" value="${customW.bot.toFixed(2)}" 
-                  ${isReadOnly ? 'readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;"' : `oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'bot', this.value)"`}>
-              </div>
-              <div class="editor-form-group">
-                <label>الطول الأيمن الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(تحديث تلقائي)</span></label>
-                <input type="text" value="${sideLengths.right.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
-              </div>
-              <div class="editor-form-group">
-                <label>الطول الأيسر الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(تحديث تلقائي)</span></label>
-                <input type="text" value="${sideLengths.left.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
-              </div>
-          `;
-
           if (isReadOnly) {
-            subPieceHtml += `
-              <p style="font-size: 11.5px; color: #e65100; margin: 8px 0; line-height: 1.4; font-weight: bold; background: #fff3e0; padding: 6px; border-radius: 4px;">
-                💡 أبعاد القطعة مطابقة للأرض الكلية. لتقسيم القطعة وتعديل أبعاد الشركاء، يرجى زيادة عدد الشركاء بالأسفل.
-              </p>
+            subPieceHtml = `
+              <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة (أبعاد الأرض الكلية)</h4>
+                
+                <div class="editor-form-group">
+                  <label>العرض العلوي (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-total-width-top" value="${customW.top.toFixed(2)}" oninput="updateTotalDimension('w1', this.value)">
+                </div>
+                <div class="editor-form-group">
+                  <label>العرض السفلي (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-total-width-bot" value="${customW.bot.toFixed(2)}" oninput="updateTotalDimension('w2', this.value)">
+                </div>
+                <div class="editor-form-group">
+                  <label>الطول الأيمن (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-total-len-right" value="${sideLengths.right.toFixed(2)}" oninput="updateTotalDimension('l2', this.value)">
+                </div>
+                <div class="editor-form-group">
+                  <label>الطول الأيسر (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-total-len-left" value="${sideLengths.left.toFixed(2)}" oninput="updateTotalDimension('l1', this.value)">
+                </div>
+                <p style="font-size: 11px; color: #1565c0; margin: 8px 0; line-height: 1.4; font-weight: bold; background: #e3f2fd; padding: 6px; border-radius: 4px; border: 1px dashed #90caf9;">
+                  💡 تعديل أي قيمة هنا سيحدث أبعاد الأرض الكروكي بالكامل! لتقسيم الأرض وتعديل أبعاد الشركاء، زد عدد الشركاء بالأسفل.
+                </p>
+            `;
+          } else {
+            subPieceHtml = `
+              <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
+                
+                <div class="editor-form-group">
+                  <label>العرض العلوي (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-piece-width-top" value="${customW.top.toFixed(2)}" oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'top', this.value)">
+                </div>
+                <div class="editor-form-group">
+                  <label>العرض السفلي (متر):</label>
+                  <input type="number" step="0.01" id="sidebar-piece-width-bot" value="${customW.bot.toFixed(2)}" oninput="updateSubPieceWidth('${groupId}', ${pIndex}, 'bot', this.value)">
+                </div>
+                <div class="editor-form-group">
+                  <label>الطول الأيمن الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(يُحسب تلقائياً)</span></label>
+                  <input type="text" value="${sideLengths.right.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
+                </div>
+                <div class="editor-form-group">
+                  <label>الطول الأيسر الفعلي (متر): <span style="font-size: 10.5px; color: #777;">(يُحسب تلقائياً)</span></label>
+                  <input type="text" value="${sideLengths.left.toFixed(2)}" readonly style="background: #f5f5f5; color: #666; cursor: not-allowed; text-align: center;">
+                </div>
             `;
           }
 
