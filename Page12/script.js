@@ -381,6 +381,31 @@ function generateCustomLand() {
     scale = Math.min(740 / maxW, 500 / maxL);
   }
 
+  function addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, idx) {
+    const leftLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
+    freeTexts.push({
+      id: "note_left_" + Date.now() + "_" + idx,
+      text: leftLen.toFixed(2) + " م",
+      x: p_tl.x + (p_bl.x - p_tl.x) * 0.75 + 28,
+      y: p_tl.y + (p_bl.y - p_tl.y) * 0.75,
+      fontSize: 12,
+      isBold: true,
+      angle: 0,
+      color: "#555"
+    });
+    const rightLen = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
+    freeTexts.push({
+      id: "note_right_" + Date.now() + "_" + idx,
+      text: rightLen.toFixed(2) + " م",
+      x: p_tr.x + (p_br.x - p_tr.x) * 0.75 - 28,
+      y: p_tr.y + (p_br.y - p_tr.y) * 0.75,
+      fontSize: 12,
+      isBold: true,
+      angle: 0,
+      color: "#555"
+    });
+  }
+
   const d1Input = document.getElementById("start-d1");
   const d2Input = document.getElementById("start-d2");
   const diag1 = d1Input && d1Input.value ? parseArabicFloat(d1Input.value) : 0;
@@ -506,6 +531,8 @@ function generateCustomLand() {
         textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
         textY: (p_tl.y + p_tr.y + p_br.y + p_bl.y) / 4
       });
+      
+      addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
 
       const partW1 = effW1 / numPartners;
       const partW2 = effW2 / numPartners;
@@ -538,7 +565,7 @@ function generateCustomLand() {
           id: "split_" + i,
           x1: p_tl.x, y1: p_tl.y,
           x2: p_bl.x, y2: p_bl.y,
-          label: `حد مشترك ${splitLen.toFixed(2)} م`,
+          label: "",
           labelX: p_tl.x - 20,
           labelY: (p_tl.y + p_bl.y) / 2,
           angle: 90,
@@ -558,6 +585,8 @@ function generateCustomLand() {
       textX: centerX,
       textY: centerY
     });
+    
+    addDividerLengthsFreeTexts(p1, p2, p3, p4, 0);
 
   } else if (activeTemplateType === 'v_split') {
     // Vertical split
@@ -577,6 +606,8 @@ function generateCustomLand() {
       textX: (p1.x + p_top_mid.x) / 2,
       textY: (p1.y + p_bot_mid.y) / 2
     });
+    
+    addDividerLengthsFreeTexts(p1, p_top_mid, p_bot_mid, p4, 0);
 
     shapes.push({
       id: "shape_2",
@@ -588,12 +619,14 @@ function generateCustomLand() {
       textX: (p_top_mid.x + p2.x) / 2,
       textY: (p2.y + p3.y) / 2
     });
+    
+    addDividerLengthsFreeTexts(p_top_mid, p2, p3, p_bot_mid, 1);
 
     splitLines.push({
       id: "split_1",
       x1: p_top_mid.x, y1: p_top_mid.y,
       x2: p_bot_mid.x, y2: p_bot_mid.y,
-      label: `حد مشترك ${( (effL1 + effL2) / 2 ).toFixed(2)} م`,
+      label: "",
       labelX: p_top_mid.x - 20,
       labelY: centerY,
       angle: 90,
@@ -618,6 +651,8 @@ function generateCustomLand() {
       textX: centerX,
       textY: (p1.y + p_left_mid.y) / 2
     });
+    
+    addDividerLengthsFreeTexts(p1, p2, p_right_mid, p_left_mid, 0);
 
     shapes.push({
       id: "shape_2",
@@ -629,12 +664,14 @@ function generateCustomLand() {
       textX: centerX,
       textY: (p_left_mid.y + p4.y) / 2
     });
+    
+    addDividerLengthsFreeTexts(p_left_mid, p_right_mid, p3, p4, 1);
 
     splitLines.push({
       id: "split_1",
       x1: p_left_mid.x, y1: p_left_mid.y,
       x2: p_right_mid.x, y2: p_right_mid.y,
-      label: `حد فاصل مشترك ${( (effW1 + effW2) / 2 ).toFixed(2)} م`,
+      label: "",
       labelX: centerX,
       labelY: p_left_mid.y - 12,
       angle: 0,
@@ -1039,15 +1076,49 @@ function renderSVG() {
       onElementClick(e, 'shape', s.id);
     });
 
-    // Background card for readability on top of image
+    // Calculate bounding box of the shape
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    s.points.forEach(p => {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    });
+    const shapeW = maxX - minX;
+    const shapeH = maxY - minY;
+
+    // 1. Draw standalone Area text (rotated -90) at 25% height
+    if (s.area && s.area.sqm) {
+      const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const areaX = s.textX;
+      const areaY = minY + shapeH * 0.25;
+      
+      areaGroup.setAttribute("class", "draggable-label");
+      areaGroup.setAttribute("data-type", "shapeAreaText");
+      areaGroup.setAttribute("transform", `rotate(-90, ${areaX}, ${areaY})`);
+      
+      const areaText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      areaText.setAttribute("x", areaX);
+      areaText.setAttribute("y", areaY);
+      areaText.setAttribute("fill", "#000000");
+      areaText.setAttribute("font-size", "15");
+      areaText.setAttribute("font-weight", "bold");
+      areaText.setAttribute("text-anchor", "middle");
+      
+      const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+      areaText.textContent = `${sqmFormatted} م²`;
+      
+      areaGroup.appendChild(areaText);
+      shapesGroup.appendChild(areaGroup);
+    }
+
+    // Background card for readability on top of image (for owner and notes)
     const mainLines = [];
     if (s.owner) {
       mainLines.push({ text: s.owner, isBold: true, fontSize: "14", color: "#000000" });
     }
-    if (s.area && s.area.sqm) {
-      const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
-      mainLines.push({ text: `المساحة: ${sqmFormatted} متر مربع`, isBold: true, fontSize: "13", color: "#1b5e20" });
-    }
+
     if (s.notes) {
       const noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       noteLines.forEach(lineText => {
@@ -1078,18 +1149,6 @@ function renderSVG() {
 
       const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
       const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
-
-      // Bounding box of the shape
-      let minX = Infinity, maxX = -Infinity;
-      let minY = Infinity, maxY = -Infinity;
-      s.points.forEach(p => {
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.y > maxY) maxY = p.y;
-      });
-      const shapeW = maxX - minX;
-      const shapeH = maxY - minY;
 
       // Calculate scale factors
       const hScaleX = (shapeW * 0.85) / unscaledBoxW;
