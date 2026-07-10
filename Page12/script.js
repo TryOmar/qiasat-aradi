@@ -805,35 +805,130 @@ function generateCustomLand(useCustomWidths = false) {
       angle: 0
     });
 
-    const halfArea = (totalArea * 0.9) / 2; // Subtracting ~10% waterway area
-    const halfDetailed = sqmToFeddanCaratShares(halfArea);
+    const N = numPartners;
 
-    shapes.push({
-      id: "shape_1", // Top Shape
-      points: [p1, p2, { x: x_water_top_right, y: y_water_top }, { x: x_water_top_left, y: y_water_top }],
-      owner: isRotated ? "الشريك الأول (غربي)" : "الشريك الأول (بحري)",
-      area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
-      notes: isRotated ? "القطعة الغربية" : "القطعة البحرية",
-      color: "#e8f5e9",
-      textX: centerX,
-      textY: (p1.y + y_water_top) / 2
-    });
+    if (!customPartnerWidths || customPartnerWidths.length !== N) {
+      customPartnerWidths = [];
+      for (let i = 0; i < N; i++) {
+        customPartnerWidths.push({
+          top: effW1 / N,
+          bot: effW2 / N
+        });
+      }
+    }
 
-    shapes.push({
-      id: "shape_2", // Bottom Shape
-      points: [{ x: x_water_bot_left, y: y_water_bot }, { x: x_water_bot_right, y: y_water_bot }, p3, p4],
-      owner: isRotated ? "الشريك الثاني (شرقي)" : "الشريك الثاني (قبلي)",
-      area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
-      notes: isRotated ? "القطعة الشرقية" : "القطعة القبلية",
-      color: "#fffde7",
-      textX: centerX,
-      textY: (y_water_bot + p4.y) / 2
-    });
+    for (let i = 0; i < N; i++) {
+      let ratioTop1 = 0;
+      for (let j = 0; j < i; j++) ratioTop1 += customPartnerWidths[j].top;
+      ratioTop1 /= effW1;
 
-    freeTexts.push({ id: "note_inner_tr", text: `${((effL2 * 0.45)).toFixed(1)} م`, x: p2.x - 20, y: (p2.y + y_water_top) / 2, fontSize: 12, isBold: true, angle: 90 });
-    freeTexts.push({ id: "note_inner_tl", text: `${((effL1 * 0.45)).toFixed(1)} م`, x: p1.x + 20, y: (p1.y + y_water_top) / 2, fontSize: 12, isBold: true, angle: -90 });
-    freeTexts.push({ id: "note_inner_br", text: `${((effL2 * 0.45)).toFixed(1)} م`, x: p3.x - 20, y: (y_water_bot + p3.y) / 2, fontSize: 12, isBold: true, angle: 90 });
-    freeTexts.push({ id: "note_inner_bl", text: `${((effL1 * 0.45)).toFixed(1)} م`, x: p4.x + 20, y: (y_water_bot + p4.y) / 2, fontSize: 12, isBold: true, angle: -90 });
+      let ratioTop2 = ratioTop1 + (customPartnerWidths[i].top / effW1);
+
+      let ratioBot1 = 0;
+      for (let j = 0; j < i; j++) ratioBot1 += customPartnerWidths[j].bot;
+      ratioBot1 /= effW2;
+
+      let ratioBot2 = ratioBot1 + (customPartnerWidths[i].bot / effW2);
+
+      if (ratioTop1 < 0) ratioTop1 = 0; if (ratioTop1 > 1) ratioTop1 = 1;
+      if (ratioTop2 < 0) ratioTop2 = 0; if (ratioTop2 > 1) ratioTop2 = 1;
+      if (ratioBot1 < 0) ratioBot1 = 0; if (ratioBot1 > 1) ratioBot1 = 1;
+      if (ratioBot2 < 0) ratioBot2 = 0; if (ratioBot2 > 1) ratioBot2 = 1;
+
+      const p_tl = {
+        x: p1.x + (p2.x - p1.x) * ratioTop1,
+        y: p1.y + (p2.y - p1.y) * ratioTop1
+      };
+      const p_tr = {
+        x: p1.x + (p2.x - p1.x) * ratioTop2,
+        y: p1.y + (p2.y - p1.y) * ratioTop2
+      };
+      const p_br = {
+        x: p4.x + (p3.x - p4.x) * ratioBot2,
+        y: p4.y + (p3.y - p4.y) * ratioBot2
+      };
+      const p_bl = {
+        x: p4.x + (p3.x - p4.x) * ratioBot1,
+        y: p4.y + (p3.y - p4.y) * ratioBot1
+      };
+
+      let A = Math.sqrt(Math.pow(p_tr.x - p_tl.x, 2) + Math.pow(p_tr.y - p_tl.y, 2)) / scale;
+      let B = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2)) / scale;
+      let C = Math.sqrt(Math.pow(p_br.x - p_bl.x, 2) + Math.pow(p_br.y - p_bl.y, 2)) / scale;
+      let D = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2)) / scale;
+      let diag = Math.sqrt(Math.pow(p_br.x - p_tl.x, 2) + Math.pow(p_br.y - p_tl.y, 2)) / scale;
+      
+      let s1 = (A + D + diag) / 2;
+      let area1 = Math.sqrt(s1 * (s1 - A) * (s1 - D) * (s1 - diag)) || 0;
+      let s2 = (C + B + diag) / 2;
+      let area2 = Math.sqrt(s2 * (s2 - C) * (s2 - B) * (s2 - diag)) || 0;
+      
+      let partArea = (area1 + area2) * 0.9; // Subtract ~10% for waterway
+      const partDetailed = sqmToFeddanCaratShares(partArea);
+
+      const colorIndex = (i + 1) % colorsList.length;
+      let ownerName = "الشريك " + (i + 1);
+      let notesName = "نصيب الشريك " + (i + 1);
+      
+      if (N === 1) {
+         ownerName = "اسم المالك";
+         notesName = "القطعة كاملة";
+      } else if (N === 2) {
+         ownerName = i === 0 ? "الشريك الأول (غربي)" : "الشريك الثاني (شرقي)";
+         notesName = i === 0 ? "القطعة الغربية" : "القطعة الشرقية";
+      }
+
+      shapes.push({
+        id: "shape_" + (i + 1),
+        points: [p_tl, p_tr, p_br, p_bl],
+        owner: ownerName,
+        area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
+        notes: notesName,
+        color: colorsList[colorIndex].value,
+        textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
+        textY: y_mid - 40 // Move text above waterway
+      });
+      
+      addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, i);
+
+      const partW1 = customPartnerWidths[i].top;
+      const partW2 = customPartnerWidths[i].bot;
+
+      freeTexts.push({
+        id: "note_top_" + Date.now() + "_" + i,
+        text: partW1.toFixed(2) + " م",
+        x: (p_tl.x + p_tr.x) / 2,
+        y: (p_tl.y + p_tr.y) / 2 + 20,
+        fontSize: 12,
+        isBold: true,
+        angle: 0,
+        color: "#555"
+      });
+
+      freeTexts.push({
+        id: "note_bot_" + Date.now() + "_" + i,
+        text: partW2.toFixed(2) + " م",
+        x: (p_bl.x + p_br.x) / 2,
+        y: (p_bl.y + p_br.y) / 2 - 20,
+        fontSize: 12,
+        isBold: true,
+        angle: 0,
+        color: "#555"
+      });
+
+      if (i > 0) {
+        splitLines.push({
+          id: "split_" + i,
+          x1: p_tl.x, y1: p_tl.y,
+          x2: p_bl.x, y2: p_bl.y,
+          label: "",
+          labelX: p_tl.x - 20,
+          labelY: (p_tl.y + p_bl.y) / 2,
+          angle: 90,
+          isDashed: true
+        });
+      }
+    }
 
   } else if (activeTemplateType === 'mixed_split_image') {
     // Vertical waterway in the middle, splitting into Left/Right, then horizontally split.
