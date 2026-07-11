@@ -2063,7 +2063,7 @@ function renderSVG() {
           btnTxt.setAttribute("font-size", 9.5 * scaleFactor);
           btnTxt.setAttribute("font-weight", "bold");
           btnTxt.setAttribute("text-anchor", "middle");
-          btnTxt.textContent = "⚙️ خيارات التحويل";
+          btnTxt.textContent = "⚙️ إعدادات التحويل";
           btnGroup.appendChild(btnTxt);
 
           btnGroup.onclick = (e) => {
@@ -2143,12 +2143,15 @@ function renderSVG() {
           btnTxt.setAttribute("font-size", 10.5 * scaleFactor);
           btnTxt.setAttribute("font-weight", "bold");
           btnTxt.setAttribute("text-anchor", "middle");
-          btnTxt.textContent = "⚖️ تحويل لفدان/قيراط/سهم";
+          btnTxt.textContent = "⚖️ التحويل";
           btnGroup.appendChild(btnTxt);
 
           btnGroup.onclick = (e) => {
             e.stopPropagation();
-            showCaratConversionModal();
+            // Enable conversion immediately without opening modal
+            showFeddanConversion = true;
+            localStorage.setItem("dallal_show_feddan", "true");
+            renderSVG();
           };
           btnGroup.addEventListener("touchstart", (e) => {
             e.stopPropagation();
