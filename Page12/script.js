@@ -78,12 +78,15 @@ let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
 
 // Color Palette for Shapes
 const colorsList = [
-  { name: "أبيض", value: "#ffffff" },
-  { name: "أخضر خفيف", value: "#f1f8e9" },
-  { name: "أزرق خفيف", value: "#e3f2fd" },
-  { name: "أصفر خفيف", value: "#fffde7" },
-  { name: "برتقالي خفيف", value: "#fff3e0" },
-  { name: "أحمر خفيف", value: "#ffebee" }
+  { name: "أخضر فاتح", value: "#DCEFD9", stroke: "#2E7D32" },
+  { name: "أزرق فاتح", value: "#D7E9FF", stroke: "#1565C0" },
+  { name: "أصفر فاتح", value: "#FFF0C9", stroke: "#EF6C00" },
+  { name: "وردي فاتح", value: "#F8DDE8", stroke: "#C2185B" },
+  { name: "بنفسجي فاتح", value: "#E9DDF8", stroke: "#6A1B9A" },
+  { name: "تركواز فاتح", value: "#D8F3EF", stroke: "#00796B" },
+  { name: "برتقالي خفيف", value: "#FBE9E7", stroke: "#D84315" },
+  { name: "ليموني خفيف", value: "#F1F8E9", stroke: "#558B2F" },
+  { name: "أبيض", value: "#ffffff", stroke: "#1b5e20" }
 ];
 
 // Document Load Initializer
@@ -1656,7 +1659,7 @@ function renderSVG() {
   });
 
   // 2. Draw Land Slices (shapes)
-  shapes.forEach(s => {
+  shapes.forEach((s, index) => {
     const pointsStr = s.points.map(p => `${getVisualX(p.x)},${getVisualY(p.y)}`).join(" ");
     
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
@@ -1680,7 +1683,7 @@ function renderSVG() {
       showBg = printChk.checked;
     }
 
-    if (showBg && (!s.color || s.color === "#ffffff" || s.color === "#f1f8e9" || s.color === "#e8f5e9")) {
+    if (showBg && (!s.color || s.color === "#ffffff" || s.color === "#f1f8e9" || s.color === "#e8f5e9" || s.color === "#DCEFD9")) {
       polygon.style.fill = "url(#agriPattern)";
       polygon.style.fillOpacity = "1";
     } else {
@@ -1688,8 +1691,11 @@ function renderSVG() {
       polygon.style.fillOpacity = "1";
     }
     
-    polygon.setAttribute("stroke", "#000000");
-    polygon.setAttribute("stroke-width", "6");
+    const colorObj = colorsList.find(c => c.value.toLowerCase() === (s.color || "#ffffff").toLowerCase());
+    const strokeColor = colorObj ? (colorObj.stroke || "#1b5e20") : "#1b5e20";
+    polygon.setAttribute("stroke", strokeColor);
+    polygon.setAttribute("stroke-width", "3.5");
+    polygon.setAttribute("stroke-linejoin", "round");
     polygon.setAttribute("vector-effect", "non-scaling-stroke");
     polygon.onclick = (e) => onElementClick(e, 'shape', s.id);
     polygon.addEventListener("touchstart", (e) => {
@@ -1723,8 +1729,8 @@ function renderSVG() {
     const visualShapeW = (maxX - minX) * scaleX;
     const visualShapeH = (maxY - minY) * scaleY;
 
-    // 1. Draw standalone Area text (rotated -90) at 25% height
-    if (s.area && s.area.sqm) {
+    // === 1. Draw standalone Area text (rotated -90) at 25% height (Only for Undivided Main land) ===
+    if (!s.isSubPiece && s.area && s.area.sqm) {
       const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
       const areaX = getVisualX(s.textX);
       let areaY = minY + (maxY - minY) * 0.25;
@@ -1752,182 +1758,189 @@ function renderSVG() {
       shapesGroup.appendChild(areaGroup);
     }
 
-    // Background card for readability on top of image (for owner and notes)
-    const mainLines = [];
-    if (s.owner) {
-      mainLines.push({ text: s.owner, isBold: true, fontSize: "14", color: "#000000" });
-    }
+    if (s.isSubPiece) {
+      // Draw subdivided piece text vertically (Area, Owner, Length) without card backgrounds
+      if (s.area && s.area.sqm) {
+        // Center line calculations
+        const topCX = (s.points[0].x + s.points[1].x) / 2;
+        const topCY = (s.points[0].y + s.points[1].y) / 2;
+        const botCX = (s.points[3].x + s.points[2].x) / 2;
+        const botCY = (s.points[3].y + s.points[2].y) / 2;
 
-    if (s.notes) {
-      const noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-      noteLines.forEach(lineText => {
-        mainLines.push({ text: lineText, isBold: false, fontSize: "11.5", color: "#555555" });
-      });
-    }
+        const vTopCX = getVisualX(topCX);
+        const vTopCY = getVisualY(topCY);
+        const vBotCX = getVisualX(botCX);
+        const vBotCY = getVisualY(botCY);
 
-    const conversionLines = [];
-    if (s.area && s.area.sqm && showFeddanConversion) {
-      const detail = sqmToFeddanCaratShares(s.area.sqm);
-      conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-      conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-      conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-    }
+        const yAreaX = vTopCX + 0.23 * (vBotCX - vTopCX);
+        const yAreaY = vTopCY + 0.23 * (vBotCY - vTopCY);
+        const yNameX = vTopCX + 0.50 * (vBotCX - vTopCX);
+        const yNameY = vTopCY + 0.50 * (vBotCY - vTopCY);
+        const yLengthX = vTopCX + 0.77 * (vBotCX - vTopCX);
+        const yLengthY = vTopCY + 0.77 * (vBotCY - vTopCY);
 
-    if (mainLines.length > 0 || conversionLines.length > 0 || showFeddanConversion === false) {
-      let maxChars = 0;
-      mainLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
-      conversionLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
+        const leftSideLength = calcDist(s.points[0], s.points[3]);
+        const rightSideLength = calcDist(s.points[1], s.points[2]);
+        const pieceMidLength = (leftSideLength + rightSideLength) / 2;
 
-      // Unscaled box dimensions
-      const baseCharWidth = 8.5;
-      const baseLineHeight = 23;
-      
-      const bottomFieldPadding = 8;
-      const bottomFieldH = showFeddanConversion ? (20 + 8 + 3 * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
-      const bottomFieldW = showFeddanConversion ? 130 : 170;
+        const pieceWidth = visualShapeW;
 
-      const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
-      const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
+        if (pieceWidth < 28) {
+          // Narrow: show only index
+          const tIdx = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tIdx.setAttribute("x", vTopCX + 0.5 * (vBotCX - vTopCX));
+          tIdx.setAttribute("y", vTopCY + 0.5 * (vBotCY - vTopCY) + 4);
+          tIdx.setAttribute("fill", "#000000");
+          tIdx.setAttribute("font-size", "13");
+          tIdx.setAttribute("font-weight", "bold");
+          tIdx.setAttribute("text-anchor", "middle");
+          tIdx.textContent = (index + 1).toString();
+          textGroup.appendChild(tIdx);
+        } else {
+          const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28));
 
-      // Calculate scale factors
-      const hScaleX = (visualShapeW * 0.85) / unscaledBoxW;
-      const hScaleY = (visualShapeH * 0.85) / unscaledBoxH;
-      const hScale = Math.min(1.0, hScaleX, hScaleY);
+          // Area
+          const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          areaGroup.setAttribute("transform", `rotate(-90, ${yAreaX}, ${yAreaY})`);
+          const tArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tArea.setAttribute("x", yAreaX);
+          tArea.setAttribute("y", yAreaY + 4);
+          tArea.setAttribute("fill", "#000000");
+          tArea.setAttribute("font-size", fontSize);
+          tArea.setAttribute("font-weight", "bold");
+          tArea.setAttribute("text-anchor", "middle");
+          const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+          tArea.textContent = `${sqmFormatted} م²`;
+          areaGroup.appendChild(tArea);
+          textGroup.appendChild(areaGroup);
 
-      const vScaleX = (visualShapeH * 0.85) / unscaledBoxW;
-      const vScaleY = (visualShapeW * 0.85) / unscaledBoxH;
-      const vScale = Math.min(1.0, vScaleX, vScaleY);
+          // Name
+          const nameGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          nameGroup.setAttribute("transform", `rotate(-90, ${yNameX}, ${yNameY})`);
+          const tName = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tName.setAttribute("x", yNameX);
+          tName.setAttribute("y", yNameY + 4);
+          tName.setAttribute("fill", "#000000");
+          tName.setAttribute("font-size", fontSize + 0.5);
+          tName.setAttribute("font-weight", "bold");
+          tName.setAttribute("text-anchor", "middle");
+          tName.textContent = s.owner || `شريك ${index + 1}`;
+          nameGroup.appendChild(tName);
+          textGroup.appendChild(nameGroup);
 
-      let scaleFactor = hScale;
-      let rotateAngle = 0;
-
-      // If vertical orientation is significantly better, rotate the text
-      if (vScale > hScale + 0.15) {
-        scaleFactor = vScale;
-        rotateAngle = -90;
-      }
-
-      // Limit scale factor to a minimum to keep text readable
-      scaleFactor = Math.max(0.45, scaleFactor);
-
-      // Scaled dimensions
-      const boxW = unscaledBoxW * scaleFactor;
-      const boxH = unscaledBoxH * scaleFactor;
-      
-      const visualTextX = getVisualX(s.textX);
-      const visualTextY = getVisualY(s.textY);
-      
-      const boxX = visualTextX - boxW / 2;
-      const boxY = visualTextY - boxH / 2;
-
-      let transformStr = "";
-      if (rotateAngle !== 0) {
-        transformStr = `rotate(${rotateAngle}, ${visualTextX}, ${visualTextY})`;
-      }
-      textGroup.setAttribute("transform", transformStr);
-
-      if (showBg) {
-        const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        bgRect.setAttribute("class", "text-bg-card");
-        bgRect.setAttribute("x", boxX);
-        bgRect.setAttribute("y", boxY);
-        bgRect.setAttribute("width", boxW);
-        bgRect.setAttribute("height", boxH);
-        bgRect.setAttribute("fill", "#ffffff");
-        bgRect.setAttribute("fill-opacity", "0.85");
-        bgRect.setAttribute("stroke", "#1b5e20");
-        bgRect.setAttribute("stroke-width", "1.5");
-        bgRect.setAttribute("rx", "6");
-        bgRect.setAttribute("ry", "6");
-        bgRect.setAttribute("pointer-events", "none");
-        textGroup.appendChild(bgRect);
-      }
-
-      // Draw all main text lines
-      let currentY = boxY + 12 * scaleFactor;
-      mainLines.forEach((line, idx) => {
-        const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        tSpan.setAttribute("x", visualTextX);
-        tSpan.setAttribute("y", currentY + 16 * scaleFactor);
-        tSpan.setAttribute("fill", line.color);
-        tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
-        if (line.isBold) {
-          tSpan.setAttribute("font-weight", "bold");
+          // Length
+          const lenGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          lenGroup.setAttribute("transform", `rotate(-90, ${yLengthX}, ${yLengthY})`);
+          const tLen = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tLen.setAttribute("x", yLengthX);
+          tLen.setAttribute("y", yLengthY + 4);
+          tLen.setAttribute("fill", "#000000");
+          tLen.setAttribute("font-size", fontSize);
+          tLen.setAttribute("font-weight", "bold");
+          tLen.setAttribute("text-anchor", "middle");
+          tLen.textContent = `${pieceMidLength.toFixed(2)} م`;
+          lenGroup.appendChild(tLen);
+          textGroup.appendChild(lenGroup);
         }
-        tSpan.setAttribute("text-anchor", "middle");
-        tSpan.textContent = line.text;
-        textGroup.appendChild(tSpan);
-        currentY += baseLineHeight * scaleFactor;
-      });
+      }
+    } else {
+      // Background card for readability on top of image (for owner and notes)
+      const mainLines = [];
+      if (s.owner) {
+        mainLines.push({ text: s.owner, isBold: true, fontSize: "14", color: "#000000" });
+      }
 
-      // Spacer and bottom field container
-      currentY += 6 * scaleFactor;
-
-      const fieldW = boxW - 16 * scaleFactor;
-      const fieldH = bottomFieldH * scaleFactor;
-      const fieldX = visualTextX - fieldW / 2;
-      const fieldY = currentY;
-
-      // Draw the bottom field container
-      const fieldRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      fieldRect.setAttribute("x", fieldX);
-      fieldRect.setAttribute("y", fieldY);
-      fieldRect.setAttribute("width", fieldW);
-      fieldRect.setAttribute("height", fieldH);
-      fieldRect.setAttribute("fill", showFeddanConversion ? "#e8f5e9" : "#f1f8e9");
-      fieldRect.setAttribute("stroke", showFeddanConversion ? "#c8e6c9" : "#d8eed8");
-      fieldRect.setAttribute("stroke-width", "1");
-      fieldRect.setAttribute("rx", 5 * scaleFactor);
-      fieldRect.setAttribute("ry", 5 * scaleFactor);
-      fieldRect.setAttribute("pointer-events", "none");
-      textGroup.appendChild(fieldRect);
-
-      if (showFeddanConversion) {
-        // 1. Draw button at the top of the box
-        const btnW = 100 * scaleFactor;
-        const btnH = 20 * scaleFactor;
-        const btnX = visualTextX;
-        const btnY = fieldY + bottomFieldPadding * scaleFactor;
-
-        const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        btnGroup.setAttribute("style", "cursor: pointer;");
-
-        const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        btnRect.setAttribute("x", btnX - btnW / 2);
-        btnRect.setAttribute("y", btnY);
-        btnRect.setAttribute("width", btnW);
-        btnRect.setAttribute("height", btnH);
-        btnRect.setAttribute("fill", "#2e7d32");
-        btnRect.setAttribute("rx", 3 * scaleFactor);
-        btnRect.setAttribute("ry", 3 * scaleFactor);
-        btnGroup.appendChild(btnRect);
-
-        const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        btnTxt.setAttribute("x", btnX);
-        btnTxt.setAttribute("y", btnY + btnH / 2 + 3.5 * scaleFactor);
-        btnTxt.setAttribute("fill", "#ffffff");
-        btnTxt.setAttribute("font-size", 9.5 * scaleFactor);
-        btnTxt.setAttribute("font-weight", "bold");
-        btnTxt.setAttribute("text-anchor", "middle");
-        btnTxt.textContent = "⚙️ خيارات التحويل";
-        btnGroup.appendChild(btnTxt);
-
-        btnGroup.onclick = (e) => {
-          e.stopPropagation();
-          showCaratConversionModal();
-        };
-        btnGroup.addEventListener("touchstart", (e) => {
-          e.stopPropagation();
+      if (s.notes) {
+        const noteLines = s.notes.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+        noteLines.forEach(lineText => {
+          mainLines.push({ text: lineText, isBold: false, fontSize: "11.5", color: "#555555" });
         });
+      }
 
-        textGroup.appendChild(btnGroup);
+      const conversionLines = [];
+      if (s.area && s.area.sqm && showFeddanConversion) {
+        const detail = sqmToFeddanCaratShares(s.area.sqm);
+        conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+      }
 
-        // 2. Draw conversion lines below the button
-        let convY = btnY + btnH + 6 * scaleFactor;
-        conversionLines.forEach((line, idx) => {
+      if (mainLines.length > 0 || conversionLines.length > 0 || showFeddanConversion === false) {
+        let maxChars = 0;
+        mainLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
+        conversionLines.forEach(l => { maxChars = Math.max(maxChars, l.text.length); });
+
+        // Unscaled box dimensions
+        const baseCharWidth = 8.5;
+        const baseLineHeight = 23;
+        
+        const bottomFieldPadding = 8;
+        const bottomFieldH = showFeddanConversion ? (20 + 8 + 3 * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
+        const bottomFieldW = showFeddanConversion ? 130 : 170;
+
+        const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
+        const unscaledBoxH = 12 + mainLines.length * baseLineHeight + 10 + bottomFieldH + 12;
+
+        // Calculate scale factors
+        const hScaleX = (visualShapeW * 0.85) / unscaledBoxW;
+        const hScaleY = (visualShapeH * 0.85) / unscaledBoxH;
+        const hScale = Math.min(1.0, hScaleX, hScaleY);
+
+        const vScaleX = (visualShapeH * 0.85) / unscaledBoxW;
+        const vScaleY = (visualShapeW * 0.85) / unscaledBoxH;
+        const vScale = Math.min(1.0, vScaleX, vScaleY);
+
+        let scaleFactor = hScale;
+        let rotateAngle = 0;
+
+        // If vertical orientation is significantly better, rotate the text
+        if (vScale > hScale + 0.15) {
+          scaleFactor = vScale;
+          rotateAngle = -90;
+        }
+
+        // Limit scale factor to a minimum to keep text readable
+        scaleFactor = Math.max(0.45, scaleFactor);
+
+        // Scaled dimensions
+        const boxW = unscaledBoxW * scaleFactor;
+        const boxH = unscaledBoxH * scaleFactor;
+        
+        const visualTextX = getVisualX(s.textX);
+        const visualTextY = getVisualY(s.textY);
+        
+        const boxX = visualTextX - boxW / 2;
+        const boxY = visualTextY - boxH / 2;
+
+        let transformStr = "";
+        if (rotateAngle !== 0) {
+          transformStr = `rotate(${rotateAngle}, ${visualTextX}, ${visualTextY})`;
+        }
+        textGroup.setAttribute("transform", transformStr);
+
+        if (showBg) {
+          const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          bgRect.setAttribute("class", "text-bg-card");
+          bgRect.setAttribute("x", boxX);
+          bgRect.setAttribute("y", boxY);
+          bgRect.setAttribute("width", boxW);
+          bgRect.setAttribute("height", boxH);
+          bgRect.setAttribute("fill", "#ffffff");
+          bgRect.setAttribute("fill-opacity", "0.85");
+          bgRect.setAttribute("stroke", "#1b5e20");
+          bgRect.setAttribute("stroke-width", "1.5");
+          bgRect.setAttribute("rx", "6");
+          bgRect.setAttribute("ry", "6");
+          bgRect.setAttribute("pointer-events", "none");
+          textGroup.appendChild(bgRect);
+        }
+
+        // Draw all main text lines
+        let currentY = boxY + 12 * scaleFactor;
+        mainLines.forEach((line, idx) => {
           const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
           tSpan.setAttribute("x", visualTextX);
-          tSpan.setAttribute("y", convY + 14 * scaleFactor);
+          tSpan.setAttribute("y", currentY + 16 * scaleFactor);
           tSpan.setAttribute("fill", line.color);
           tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
           if (line.isBold) {
@@ -1936,47 +1949,127 @@ function renderSVG() {
           tSpan.setAttribute("text-anchor", "middle");
           tSpan.textContent = line.text;
           textGroup.appendChild(tSpan);
-          convY += baseLineHeight * scaleFactor;
-        });
-      } else {
-        // Draw big button inside the box
-        const btnW = 150 * scaleFactor;
-        const btnH = 24 * scaleFactor;
-        const btnX = visualTextX;
-        const btnY = fieldY + bottomFieldPadding * scaleFactor;
-
-        const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        btnGroup.setAttribute("style", "cursor: pointer;");
-
-        const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        btnRect.setAttribute("x", btnX - btnW / 2);
-        btnRect.setAttribute("y", btnY);
-        btnRect.setAttribute("width", btnW);
-        btnRect.setAttribute("height", btnH);
-        btnRect.setAttribute("fill", "#2e7d32");
-        btnRect.setAttribute("rx", 4 * scaleFactor);
-        btnRect.setAttribute("ry", 4 * scaleFactor);
-        btnGroup.appendChild(btnRect);
-
-        const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        btnTxt.setAttribute("x", btnX);
-        btnTxt.setAttribute("y", btnY + btnH / 2 + 4 * scaleFactor);
-        btnTxt.setAttribute("fill", "#ffffff");
-        btnTxt.setAttribute("font-size", 10.5 * scaleFactor);
-        btnTxt.setAttribute("font-weight", "bold");
-        btnTxt.setAttribute("text-anchor", "middle");
-        btnTxt.textContent = "⚖️ تحويل لفدان/قيراط/سهم";
-        btnGroup.appendChild(btnTxt);
-
-        btnGroup.onclick = (e) => {
-          e.stopPropagation();
-          showCaratConversionModal();
-        };
-        btnGroup.addEventListener("touchstart", (e) => {
-          e.stopPropagation();
+          currentY += baseLineHeight * scaleFactor;
         });
 
-        textGroup.appendChild(btnGroup);
+        // Spacer and bottom field container
+        currentY += 6 * scaleFactor;
+
+        const fieldW = boxW - 16 * scaleFactor;
+        const fieldH = bottomFieldH * scaleFactor;
+        const fieldX = visualTextX - fieldW / 2;
+        const fieldY = currentY;
+
+        // Draw the bottom field container
+        const fieldRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        fieldRect.setAttribute("x", fieldX);
+        fieldRect.setAttribute("y", fieldY);
+        fieldRect.setAttribute("width", fieldW);
+        fieldRect.setAttribute("height", fieldH);
+        fieldRect.setAttribute("fill", showFeddanConversion ? "#e8f5e9" : "#f1f8e9");
+        fieldRect.setAttribute("stroke", showFeddanConversion ? "#c8e6c9" : "#d8eed8");
+        fieldRect.setAttribute("stroke-width", "1");
+        fieldRect.setAttribute("rx", 5 * scaleFactor);
+        fieldRect.setAttribute("ry", 5 * scaleFactor);
+        fieldRect.setAttribute("pointer-events", "none");
+        textGroup.appendChild(fieldRect);
+
+        if (showFeddanConversion) {
+          // 1. Draw button at the top of the box
+          const btnW = 100 * scaleFactor;
+          const btnH = 20 * scaleFactor;
+          const btnX = visualTextX;
+          const btnY = fieldY + bottomFieldPadding * scaleFactor;
+
+          const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          btnGroup.setAttribute("style", "cursor: pointer;");
+
+          const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          btnRect.setAttribute("x", btnX - btnW / 2);
+          btnRect.setAttribute("y", btnY);
+          btnRect.setAttribute("width", btnW);
+          btnRect.setAttribute("height", btnH);
+          btnRect.setAttribute("fill", "#2e7d32");
+          btnRect.setAttribute("rx", 3 * scaleFactor);
+          btnRect.setAttribute("ry", 3 * scaleFactor);
+          btnGroup.appendChild(btnRect);
+
+          const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          btnTxt.setAttribute("x", btnX);
+          btnTxt.setAttribute("y", btnY + btnH / 2 + 3.5 * scaleFactor);
+          btnTxt.setAttribute("fill", "#ffffff");
+          btnTxt.setAttribute("font-size", 9.5 * scaleFactor);
+          btnTxt.setAttribute("font-weight", "bold");
+          btnTxt.setAttribute("text-anchor", "middle");
+          btnTxt.textContent = "⚙️ خيارات التحويل";
+          btnGroup.appendChild(btnTxt);
+
+          btnGroup.onclick = (e) => {
+            e.stopPropagation();
+            showCaratConversionModal();
+          };
+          btnGroup.addEventListener("touchstart", (e) => {
+            e.stopPropagation();
+          });
+
+          textGroup.appendChild(btnGroup);
+
+          // 2. Draw conversion lines below the button
+          let convY = btnY + btnH + 6 * scaleFactor;
+          conversionLines.forEach((line, idx) => {
+            const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tSpan.setAttribute("x", visualTextX);
+            tSpan.setAttribute("y", convY + 14 * scaleFactor);
+            tSpan.setAttribute("fill", line.color);
+            tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
+            if (line.isBold) {
+              tSpan.setAttribute("font-weight", "bold");
+            }
+            tSpan.setAttribute("text-anchor", "middle");
+            tSpan.textContent = line.text;
+            textGroup.appendChild(tSpan);
+            convY += baseLineHeight * scaleFactor;
+          });
+        } else {
+          // Draw big button inside the box
+          const btnW = 150 * scaleFactor;
+          const btnH = 24 * scaleFactor;
+          const btnX = visualTextX;
+          const btnY = fieldY + bottomFieldPadding * scaleFactor;
+
+          const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          btnGroup.setAttribute("style", "cursor: pointer;");
+
+          const btnRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          btnRect.setAttribute("x", btnX - btnW / 2);
+          btnRect.setAttribute("y", btnY);
+          btnRect.setAttribute("width", btnW);
+          btnRect.setAttribute("height", btnH);
+          btnRect.setAttribute("fill", "#2e7d32");
+          btnRect.setAttribute("rx", 4 * scaleFactor);
+          btnRect.setAttribute("ry", 4 * scaleFactor);
+          btnGroup.appendChild(btnRect);
+
+          const btnTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          btnTxt.setAttribute("x", btnX);
+          btnTxt.setAttribute("y", btnY + btnH / 2 + 4 * scaleFactor);
+          btnTxt.setAttribute("fill", "#ffffff");
+          btnTxt.setAttribute("font-size", 10.5 * scaleFactor);
+          btnTxt.setAttribute("font-weight", "bold");
+          btnTxt.setAttribute("text-anchor", "middle");
+          btnTxt.textContent = "⚖️ تحويل لفدان/قيراط/سهم";
+          btnGroup.appendChild(btnTxt);
+
+          btnGroup.onclick = (e) => {
+            e.stopPropagation();
+            showCaratConversionModal();
+          };
+          btnGroup.addEventListener("touchstart", (e) => {
+            e.stopPropagation();
+          });
+
+          textGroup.appendChild(btnGroup);
+        }
       }
     }
 
@@ -2009,11 +2102,75 @@ function renderSVG() {
         } else {
           subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
         }
-        
         shapesGroup.appendChild(subPoly);
       });
     }
   });
+
+  // Draw outer boundary and corner circles of the main land parcel to match Page 11 styling
+  if (shapes.length > 0) {
+    let allPts = [];
+    shapes.forEach(s => {
+      if (s.points && s.points.length === 4) {
+        allPts.push(...s.points);
+      }
+    });
+
+    if (allPts.length >= 4) {
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      allPts.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      });
+
+      let pTL = null, pTR = null, pBR = null, pBL = null;
+      let dTL = Infinity, dTR = Infinity, dBR = Infinity, dBL = Infinity;
+
+      allPts.forEach(p => {
+        let distTL = Math.pow(p.x - minX, 2) + Math.pow(p.y - minY, 2);
+        if (distTL < dTL) { dTL = distTL; pTL = p; }
+
+        let distTR = Math.pow(p.x - maxX, 2) + Math.pow(p.y - minY, 2);
+        if (distTR < dTR) { dTR = distTR; pTR = p; }
+
+        let distBR = Math.pow(p.x - maxX, 2) + Math.pow(p.y - maxY, 2);
+        if (distBR < dBR) { dBR = distBR; pBR = p; }
+
+        let distBL = Math.pow(p.x - minX, 2) + Math.pow(p.y - maxY, 2);
+        if (distBL < dBL) { dBL = distBL; pBL = p; }
+      });
+
+      const corners = [pTL, pTR, pBR, pBL];
+
+      if (pTL && pTR && pBR && pBL) {
+        // Draw the outer dark green boundary
+        const outerPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        outerPoly.setAttribute("points", `${getVisualX(pTL.x)},${getVisualY(pTL.y)} ${getVisualX(pTR.x)},${getVisualY(pTR.y)} ${getVisualX(pBR.x)},${getVisualY(pBR.y)} ${getVisualX(pBL.x)},${getVisualY(pBL.y)}`);
+        outerPoly.setAttribute("fill", "none");
+        outerPoly.setAttribute("stroke", "#1b5e20");
+        outerPoly.setAttribute("stroke-width", "4");
+        outerPoly.setAttribute("stroke-linejoin", "round");
+        outerPoly.setAttribute("vector-effect", "non-scaling-stroke");
+        outerPoly.style.pointerEvents = "none";
+        shapesGroup.appendChild(outerPoly);
+
+        // Draw circles at the corners of the main land parcel
+        corners.forEach(p => {
+          if (p) {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", getVisualX(p.x));
+            c.setAttribute("cy", getVisualY(p.y));
+            c.setAttribute("r", 5);
+            c.setAttribute("fill", "#1b5e20");
+            c.style.pointerEvents = "none";
+            shapesGroup.appendChild(c);
+          }
+        });
+      }
+    }
+  }
 
   // 3. Draw Split Lines
   splitLines.forEach(l => {
@@ -2063,59 +2220,23 @@ function renderSVG() {
     }
 
     // Split Line Label
-    if (l.label) {
+    if (l.labelX !== undefined && l.labelY !== undefined) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      const offset = resolvedVisualOffsets[l.id] || { dx: 0, dy: 0 };
-      const visualLabelX = getVisualX(l.labelX) + offset.dx;
-      const visualLabelY = getVisualY(l.labelY) + offset.dy;
       g.setAttribute("class", "draggable-label");
       g.setAttribute("data-id", l.id);
       g.setAttribute("data-type", "splitLineLabel");
-      if (l.angle) {
-        g.setAttribute("transform", `rotate(${l.angle}, ${visualLabelX}, ${visualLabelY})`);
-      }
 
-      const boxW = l.label.length * 7 + 10;
-      const boxH = 20;
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", visualLabelX - boxW / 2);
-      rect.setAttribute("y", visualLabelY - boxH / 1.5 + 1);
-      rect.setAttribute("width", boxW);
-      rect.setAttribute("height", boxH);
-      rect.setAttribute("fill", "white");
-      rect.setAttribute("stroke", "#b0bec5");
-      rect.setAttribute("stroke-width", "1.5");
-      rect.setAttribute("rx", "3");
-
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", visualLabelX);
-      text.setAttribute("y", visualLabelY);
-      text.setAttribute("fill", "#000000");
-      text.setAttribute("font-size", "12");
-      text.setAttribute("font-weight", "bold");
-      text.setAttribute("text-anchor", "middle");
-      text.textContent = l.label;
-
-      if (offset.dy !== 0) {
-        const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        guideLine.setAttribute("x1", getVisualX(l.labelX));
-        guideLine.setAttribute("y1", getVisualY(l.labelY));
-        guideLine.setAttribute("x2", visualLabelX);
-        guideLine.setAttribute("y2", visualLabelY);
-        guideLine.setAttribute("stroke", "#999999");
-        guideLine.setAttribute("stroke-width", "1.2");
-        guideLine.setAttribute("stroke-dasharray", "4, 4");
-        g.appendChild(guideLine);
-      }
-
-      g.appendChild(rect);
-      g.appendChild(text);
-
+      const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      labelText.setAttribute("x", getVisualX(l.labelX));
+      labelText.setAttribute("y", getVisualY(l.labelY));
+      labelText.setAttribute("fill", "#d32f2f");
+      labelText.setAttribute("font-size", "14");
+      labelText.setAttribute("font-weight", "bold");
+      labelText.setAttribute("text-anchor", "middle");
+      labelText.textContent = l.label || "";
+      g.appendChild(labelText);
+      
       g.onclick = (e) => onElementClick(e, 'splitLine', l.id);
-      g.addEventListener("touchstart", (e) => {
-        e.stopPropagation();
-        onElementClick(e, 'splitLine', l.id);
-      });
       splitLinesGroup.appendChild(g);
     }
   });
@@ -2132,20 +2253,6 @@ function renderSVG() {
     if (b.angle) {
       g.setAttribute("transform", `rotate(${b.angle}, ${visualX}, ${visualY})`);
     }
-
-    const fontSize = parseFloat(b.fontSize || "13.5");
-    const boxW = b.text.length * (fontSize * 0.6) + 12;
-    const boxH = fontSize * 1.6;
-
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", visualX - boxW / 2);
-    rect.setAttribute("y", visualY - boxH / 1.5 + 2);
-    rect.setAttribute("width", boxW);
-    rect.setAttribute("height", boxH);
-    rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", "#b0bec5");
-    rect.setAttribute("stroke-width", "1.5");
-    rect.setAttribute("rx", "3");
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", visualX);
@@ -2168,7 +2275,6 @@ function renderSVG() {
       g.appendChild(guideLine);
     }
 
-    g.appendChild(rect);
     g.appendChild(text);
 
     g.onclick = (e) => onElementClick(e, 'borderLabel', b.id);
@@ -2192,20 +2298,6 @@ function renderSVG() {
       g.setAttribute("transform", `rotate(${t.angle}, ${visualX}, ${visualY})`);
     }
 
-    const fontSize = parseFloat(t.fontSize || "13");
-    const boxW = t.text.length * (fontSize * 0.6) + 12;
-    const boxH = fontSize * 1.6;
-
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", visualX - boxW / 2);
-    rect.setAttribute("y", visualY - boxH / 1.5 + 2);
-    rect.setAttribute("width", boxW);
-    rect.setAttribute("height", boxH);
-    rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", "#b0bec5");
-    rect.setAttribute("stroke-width", "1.5");
-    rect.setAttribute("rx", "3");
-
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", visualX);
     text.setAttribute("y", visualY);
@@ -2227,7 +2319,6 @@ function renderSVG() {
       g.appendChild(guideLine);
     }
 
-    g.appendChild(rect);
     g.appendChild(text);
 
     g.onclick = (e) => onElementClick(e, 'freeText', t.id);
@@ -2239,9 +2330,6 @@ function renderSVG() {
   });
 }
 
-// ----------------------------------------------------
-// Mouse & Touch Dragging and Panning Handlers
-// ----------------------------------------------------
 function onSvgMouseDown(e) {
   const target = e.target;
   const parent = target.parentElement;

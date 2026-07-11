@@ -853,3 +853,7 @@ svg .waterway {
 .inspector-tooltip span.value {
   font-weight: bold;
 }
+
+svg text {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
