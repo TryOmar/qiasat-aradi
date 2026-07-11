@@ -1919,6 +1919,8 @@ function renderSVG() {
       const conversionLines = [];
       if (s.area && s.area.sqm && showFeddanConversion) {
         const detail = sqmToFeddanCaratShares(s.area.sqm);
+        const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
+        conversionLines.push({ text: `${sqmFormatted} م²`, isBold: true, fontSize: "12.5", color: "#000000" });
         conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
         conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
         conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
@@ -1934,7 +1936,8 @@ function renderSVG() {
         const baseLineHeight = 23;
         
         const bottomFieldPadding = 8;
-        const bottomFieldH = showFeddanConversion ? (20 + 8 + 3 * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
+        const numConvLines = conversionLines.length;
+        const bottomFieldH = showFeddanConversion ? (20 + 8 + numConvLines * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
         const bottomFieldW = showFeddanConversion ? 130 : 170;
 
         const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
