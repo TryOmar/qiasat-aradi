@@ -283,6 +283,43 @@
     </div>
   </div>
 
+  <!-- Unified Waterway Edit Modal (Mobile First) -->
+  <div id="unifiedWaterwayModal" class="modal no-print">
+    <div class="modal-content unified-modal-content" style="max-width: 440px;">
+      <span class="modal-close" onclick="closeUnifiedWaterwayModal()">&times;</span>
+      <h3 style="margin-bottom: 15px; color: #1b5e20; font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+        🔧 تعديل أبعاد التقسيم
+      </h3>
+      <div class="unified-modal-body" style="flex: 1; overflow-y: auto; padding: 5px;">
+        <div class="editor-form-group mobile-field">
+          <label>طول القطعة الغربية (متر):</label>
+          <input type="text" inputmode="decimal" id="unified-west-len" class="mobile-input">
+        </div>
+        <div class="editor-form-group mobile-field">
+          <label>طول القطعة الشرقية (متر):</label>
+          <input type="text" inputmode="decimal" id="unified-east-len" class="mobile-input">
+        </div>
+        <div class="editor-form-group mobile-field">
+          <label>عرض القطعة الغربية عند المجرى (متر):</label>
+          <input type="text" inputmode="decimal" id="unified-west-width-at-waterway" class="mobile-input">
+        </div>
+        <div class="editor-form-group mobile-field">
+          <label>عرض القطعة الشرقية عند المجرى (متر):</label>
+          <input type="text" inputmode="decimal" id="unified-east-width-at-waterway" class="mobile-input">
+        </div>
+        <div class="editor-form-group mobile-field">
+          <label>عرض المجرى المائي (متر):</label>
+          <input type="text" inputmode="decimal" id="unified-waterway-width" class="mobile-input">
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+        <button type="button" class="modal-save-btn mobile-action-btn" onclick="saveUnifiedWaterwayData()">✔ تطبيق</button>
+        <button type="button" class="modal-cancel-btn mobile-action-btn" onclick="closeUnifiedWaterwayModal()">✖ إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Add Data Modal -->
   <div id="addDataModal" class="modal no-print">
     <div class="modal-content" style="max-width: 480px;">

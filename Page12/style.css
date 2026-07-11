@@ -857,3 +857,76 @@ svg .waterway {
 svg text {
   font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
+
+/* Mobile First - Unified Modal Styles */
+.unified-modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+  padding: 20px 20px 15px 20px !important;
+  box-sizing: border-box !important;
+}
+
+.unified-modal-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+  margin-bottom: 10px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-field {
+  margin-bottom: 16px !important;
+}
+
+.mobile-field label {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: #333 !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+
+.mobile-input {
+  height: 48px !important;
+  font-size: 16px !important; /* Prevents auto-zooming on iOS focus */
+  font-weight: bold !important;
+  font-family: 'Cairo', sans-serif !important;
+  text-align: center !important;
+  border: 2px solid #b0bec5 !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background-color: #fafafa !important;
+  transition: border-color 0.2s, background-color 0.2s !important;
+}
+
+.mobile-input:focus {
+  border-color: #2e7d32 !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+}
+
+.mobile-action-btn {
+  height: 48px !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+@media (max-width: 480px) {
+  .unified-modal-content {
+    width: 96% !important;
+    padding: 15px 12px 10px 12px !important;
+    max-height: 95vh !important;
+  }
+}
+

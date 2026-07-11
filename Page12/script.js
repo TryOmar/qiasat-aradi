@@ -8,6 +8,12 @@ function parseArabicFloat(str) {
   return parseFloat(clean) || 0;
 }
 
+// Global distance calculation helper
+function calcDist(pa, pb) {
+  if (!pa || !pb) return 0;
+  return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2));
+}
+
 let lastActionTime = 0;
 function preventDoubleTap() {
   const now = Date.now();
@@ -420,10 +426,11 @@ function generateCustomLand(useCustomWidths = false) {
     setDynamicPrintPage("landscape");
   }
 
-  function addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, idx) {
+  function addDividerLengthsFreeTexts(p_tl, p_tr, p_br, p_bl, idx, prefix) {
     const leftLen = Math.sqrt(Math.pow(p_bl.x - p_tl.x, 2) + Math.pow(p_bl.y - p_tl.y, 2));
+    const leftId = prefix ? ("note_left_" + prefix + "_" + idx) : ("note_left_" + Date.now() + "_" + idx);
     freeTexts.push({
-      id: "note_left_" + Date.now() + "_" + idx,
+      id: leftId,
       text: leftLen.toFixed(2) + " م",
       x: p_tl.x + (p_bl.x - p_tl.x) * 0.75 + 1.8,
       y: p_tl.y + (p_bl.y - p_tl.y) * 0.75,
@@ -433,8 +440,9 @@ function generateCustomLand(useCustomWidths = false) {
       color: "#555"
     });
     const rightLen = Math.sqrt(Math.pow(p_br.x - p_tr.x, 2) + Math.pow(p_br.y - p_tr.y, 2));
+    const rightId = prefix ? ("note_right_" + prefix + "_" + idx) : ("note_right_" + Date.now() + "_" + idx);
     freeTexts.push({
-      id: "note_right_" + Date.now() + "_" + idx,
+      id: rightId,
       text: rightLen.toFixed(2) + " م",
       x: p_tr.x + (p_br.x - p_tr.x) * 0.75 - 1.8,
       y: p_tr.y + (p_br.y - p_tr.y) * 0.75,
@@ -1132,7 +1140,7 @@ function generateCustomLand(useCustomWidths = false) {
           }
         });
 
-        addDividerLengthsFreeTexts(sub_tl, sub_tr, sub_br, sub_bl, i);
+        addDividerLengthsFreeTexts(sub_tl, sub_tr, sub_br, sub_bl, i, pieceIdPrefix);
 
         const partW1 = customWidths[i].top;
         const partW2 = customWidths[i].bot;
@@ -1655,6 +1663,13 @@ function renderSVG() {
       text.setAttribute("transform", `rotate(${w.angle}, ${visualLabelX}, ${visualLabelY})`);
     }
     text.textContent = w.label;
+    
+    text.onclick = (e) => onElementClick(e, 'waterwayLabel', w.id);
+    text.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'waterwayLabel', w.id);
+    });
+    
     waterwaysGroup.appendChild(text);
   });
 
@@ -2510,6 +2525,11 @@ function togglePinCroqui() {
 // Free Edit Modal Logic
 // ----------------------------------------------------
 function openFreeEditModal() {
+  if (activeTemplateType === 'mixed_waterway_new') {
+    openUnifiedWaterwayModal();
+    return;
+  }
+
   const numPartners = parseInt(document.getElementById("start-partners")?.value || "1");
   const excludedTemplates = ['quad_diagonal'];
   
@@ -2778,32 +2798,32 @@ function onElementClick(e, type, id) {
   let targetType = type;
   let targetId = id;
 
-  // فحص ما إذا كان النقر على تسمية بعد أو طول ونقوم بتحويله للقطعة المناسبة
+  // فحص ما إذا كان النقر على تسمية بعد أو طول ونقوم بفتح مودال التعديل الموحد
   if (activeTemplateType === 'mixed_waterway_new') {
+    let focusId = "";
     if (type === 'borderLabel') {
       if (id === 'border_3' || id === 'border_1') {
-        targetType = 'shape';
-        targetId = 'west_0';
+        focusId = "unified-west-len";
       } else if (id === 'border_4' || id === 'border_2') {
-        targetType = 'shape';
-        targetId = 'east_0';
+        focusId = "unified-east-len";
       }
     } else if (type === 'freeText' && id) {
-      if (id === 'note_l_t' || id === 'note_r_t') {
-        targetType = 'shape';
-        targetId = 'west_0';
-      } else if (id === 'note_l_b' || id === 'note_r_b') {
-        targetType = 'shape';
-        targetId = 'east_0';
-      } else if (id.startsWith('note_top_west_') || id.startsWith('note_bot_west_')) {
-        const idx = id.split('_').pop();
-        targetType = 'shape';
-        targetId = 'west_' + idx;
-      } else if (id.startsWith('note_top_east_') || id.startsWith('note_bot_east_')) {
-        const idx = id.split('_').pop();
-        targetType = 'shape';
-        targetId = 'east_' + idx;
+      if (id.startsWith('note_left_west_') || id.startsWith('note_right_west_')) {
+        focusId = "unified-west-len";
+      } else if (id.startsWith('note_left_east_') || id.startsWith('note_right_east_')) {
+        focusId = "unified-east-len";
+      } else if (id.startsWith('note_bot_west_')) {
+        focusId = "unified-west-width-at-waterway";
+      } else if (id.startsWith('note_top_east_')) {
+        focusId = "unified-east-width-at-waterway";
       }
+    } else if (type === 'waterway' || type === 'waterwayLabel') {
+      focusId = "unified-waterway-width";
+    }
+
+    if (focusId) {
+      openUnifiedWaterwayModal(focusId);
+      return;
     }
   } else {
     // التقسيمات العادية
@@ -2882,30 +2902,52 @@ function openModalForElement(type, id) {
         `;
       }
       
-      subPieceHtml = `
-        <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
-          <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة (أطوال القطعة)</h4>
-          <div class="editor-form-group">
-            <label>طول القطعة (الجانب الأيسر) بالمتر:</label>
-            <input type="number" step="0.01" value="${sideLengths.left.toFixed(2)}" oninput="updateMixedPieceLength('${s.groupId}', 'left', this.value)">
-          </div>
-          <div class="editor-form-group">
-            <label>طول القطعة (الجانب الأيمن) بالمتر:</label>
-            <input type="number" step="0.01" value="${sideLengths.right.toFixed(2)}" oninput="updateMixedPieceLength('${s.groupId}', 'right', this.value)">
-          </div>
-          
-          ${partnerWidthsHtml}
-          
-          <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
-          <div class="editor-form-group" style="margin-bottom: 0;">
-            <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
-              <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
+      if (activeTemplateType === 'mixed_waterway_new') {
+        subPieceHtml = `
+          <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
+            <div class="editor-form-group" style="margin-top: 5px; margin-bottom: 5px;">
+              <button type="button" onclick="closeModal(); openUnifiedWaterwayModal();" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   التعديل الحر</button>
+            </div>
+            
+            ${partnerWidthsHtml}
+            
+            <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
+            <div class="editor-form-group" style="margin-bottom: 0;">
+              <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
+                <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
+              </div>
             </div>
           </div>
-        </div>
-      `;
+        `;
+      } else {
+        subPieceHtml = `
+          <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة (أطوال القطعة)</h4>
+            <div class="editor-form-group">
+              <label>طول القطعة (الجانب الأيسر) بالمتر:</label>
+              <input type="number" step="0.01" value="${sideLengths.left.toFixed(2)}" oninput="updateMixedPieceLength('${s.groupId}', 'left', this.value)">
+            </div>
+            <div class="editor-form-group">
+              <label>طول القطعة (الجانب الأيمن) بالمتر:</label>
+              <input type="number" step="0.01" value="${sideLengths.right.toFixed(2)}" oninput="updateMixedPieceLength('${s.groupId}', 'right', this.value)">
+            </div>
+            
+            ${partnerWidthsHtml}
+            
+            <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
+            <div class="editor-form-group" style="margin-bottom: 0;">
+              <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
+                <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
     }
 
     modalForm.innerHTML = `
@@ -3311,18 +3353,10 @@ function populateSidebarEditor() {
           const sideLengths = getShapeSideLengths(s);
           subPieceHtml = `
             <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
-              <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة (أطوال وعروض القطعة)</h4>
+              <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
               
-              <div class="editor-form-group">
-                <label>طول القطعة (الجانب الأيسر) بالمتر:</label>
-                <input type="number" step="0.01" id="sidebar-mixed-piece-len-left" value="${sideLengths.left.toFixed(2)}">
-              </div>
-              <div class="editor-form-group">
-                <label>طول القطعة (الجانب الأيمن) بالمتر:</label>
-                <input type="number" step="0.01" id="sidebar-mixed-piece-len-right" value="${sideLengths.right.toFixed(2)}">
-              </div>
-              <div class="editor-form-group" style="margin-top: 10px; margin-bottom: 8px;">
-                <button type="button" onclick="applyMixedPieceLengths('${groupId}')" style="width: 100%; padding: 8px; background: #1976d2; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 13px;">⚙️ تطبيق الأطوال الجديدة</button>
+              <div class="editor-form-group" style="margin-top: 5px; margin-bottom: 5px;">
+                <button type="button" onclick="openUnifiedWaterwayModal()" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   التعديل الحر</button>
               </div>
           `;
           
@@ -3542,54 +3576,11 @@ function populateSidebarEditor() {
           </table>
         </div>
 
-        <div style="background:#f9fbe7; padding:10px; border-radius:8px; border:1px solid #dce775; margin-bottom:10px;">
-          <div style="font-weight:bold; color:#558b2f; font-size:13px; margin-bottom:8px;">⚡ تعديل عرض المجرى مباشرة</div>
-          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-            <input type="text" inputmode="decimal" id="sidebar-water-width"
-              value="${curWidth}"
-              style="flex:1; padding:8px; border:2px solid #aed581; border-radius:6px; font-size:15px; font-weight:bold; text-align:center; font-family:'Cairo';"
-              placeholder="مثال: 3.50">
-            <button type="button" onclick="applyWaterwayWidthChange('sidebar-water-width')"
-              style="background:#558b2f; color:white; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; font-family:'Cairo'; font-size:13px; white-space:nowrap;">
-              ✔ تطبيق
-            </button>
-          </div>
-          
-          <div style="font-weight:bold; color:#558b2f; font-size:13px; margin-bottom:8px; margin-top:12px;">📍 تحديد موقع المجرى المائي</div>
-          <select id="sidebar-water-pos-type" onchange="handleWaterwayPositionTypeChange(this.value)" style="width:100%; height:38px; border-radius:6px; border:2px solid #aed581; font-weight:bold; font-family:'Cairo'; padding:5px; margin-bottom:8px;">
-            <option value="middle" ${(customWaterwayData && customWaterwayData.positionType === 'middle') ? 'selected' : ''}>في منتصف الأرض (50%)</option>
-            <option value="start" ${(customWaterwayData && customWaterwayData.positionType === 'start') ? 'selected' : ''}>في بداية الأرض (0%)</option>
-            <option value="quarter" ${(customWaterwayData && customWaterwayData.positionType === 'quarter') ? 'selected' : ''}>عند ربع الأرض (25%)</option>
-            <option value="third" ${(customWaterwayData && customWaterwayData.positionType === 'third') ? 'selected' : ''}>عند ثلث الأرض (33.33%)</option>
-            <option value="two_thirds" ${(customWaterwayData && customWaterwayData.positionType === 'two_thirds') ? 'selected' : ''}>عند ثلثي الأرض (66.67%)</option>
-            <option value="three_quarters" ${(customWaterwayData && customWaterwayData.positionType === 'three_quarters') ? 'selected' : ''}>عند ثلاثة أرباع الأرض (75%)</option>
-            <option value="end" ${(customWaterwayData && customWaterwayData.positionType === 'end') ? 'selected' : ''}>في نهاية الأرض (100%)</option>
-            <option value="area_third" ${(customWaterwayData && customWaterwayData.positionType === 'area_third') ? 'selected' : ''}>📍 وضع المجرى عند ثلث المساحة</option>
-            <option value="custom_pct" ${(customWaterwayData && customWaterwayData.positionType === 'custom_pct') ? 'selected' : ''}>تحديد يدوي بنسبة مئوية...</option>
-          </select>
-          
-          <div id="sidebar-water-pos-pct-container" style="display: ${(customWaterwayData && customWaterwayData.positionType === 'custom_pct') ? 'block' : 'none'}; margin-top:8px;">
-            <label style="font-size:11px; font-weight:bold; color:#555; display:block; margin-bottom:4px;">النسبة المئوية للموقع (0 - 100):</label>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <input type="text" inputmode="decimal" id="sidebar-water-pos-pct" value="${(customWaterwayData && customWaterwayData.positionPct !== undefined) ? customWaterwayData.positionPct : 50}" style="flex:1; padding:8px; border:2px solid #aed581; border-radius:6px; font-size:15px; font-weight:bold; text-align:center; font-family:'Cairo';">
-              <button type="button" onclick="applyWaterwayPositionPct('sidebar-water-pos-pct')" style="background:#558b2f; color:white; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; font-family:'Cairo'; font-size:13px; white-space:nowrap;">تطبيق نسبة</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:#e8f5e9; padding:10px; border-radius:8px; border:1px solid #a5d6a7; margin-bottom:10px;">
-          <div style="font-weight:bold; color:#2e7d32; font-size:13px; margin-bottom:8px;">📐 تعديل عروض القطع عند المجرى</div>
-          <div class="editor-form-group">
-            <label>عرض القطعة الغربية عند المجرى (متر):</label>
-            <input type="text" inputmode="decimal" id="sidebar-west-width-at-waterway" value="${((customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : ws.width).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-size:14px; font-weight:bold; text-align:center; font-family:'Cairo'; border:2px solid #a5d6a7; border-radius:6px;">
-          </div>
-          <div class="editor-form-group" style="margin-top:8px;">
-            <label>عرض القطعة الشرقية عند المجرى (متر):</label>
-            <input type="text" inputmode="decimal" id="sidebar-east-width-at-waterway" value="${((customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : ws.width).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-size:14px; font-weight:bold; text-align:center; font-family:'Cairo'; border:2px solid #a5d6a7; border-radius:6px;">
-          </div>
-          <div class="editor-form-group" style="margin-top:10px; margin-bottom:4px;">
-            <button type="button" onclick="applyWidthsAtWaterway()" style="width:100%; padding:8px; background:#2e7d32; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-family:'Cairo'; font-size:13px;">⚙️ تطبيق العرض الجديد</button>
-          </div>
+        <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; border: 1px solid #90caf9; margin-bottom: 12px; text-align: center;">
+          <div style="font-weight: bold; color: #1565c0; font-size: 14px; margin-bottom: 10px;">📐 تعديل أبعاد وقيم التقسيم</div>
+          <button type="button" onclick="openUnifiedWaterwayModal()" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            🔧   التعديل الحر
+          </button>
         </div>
 
         <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32;">
@@ -3855,6 +3846,140 @@ function applyWidthsAtWaterway() {
 
   customWaterwayData.westWidthAtWaterway = westW;
   customWaterwayData.eastWidthAtWaterway = eastW;
+
+  generateCustomLand(true);
+  renderSVG();
+  saveState();
+  populateSidebarEditor();
+}
+
+// ----------------------------------------------------
+// Unified Waterway Edits Logic (Mobile First)
+// ----------------------------------------------------
+function setupUnifiedInputsAutoselect() {
+  const ids = [
+    "unified-west-len",
+    "unified-east-len",
+    "unified-west-width-at-waterway",
+    "unified-east-width-at-waterway",
+    "unified-waterway-width"
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (!el.dataset.autoselectSetup) {
+        el.dataset.autoselectSetup = "true";
+        el.addEventListener("focus", function() {
+          this.select();
+          setTimeout(() => {
+            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 80);
+        });
+      }
+    }
+  });
+}
+
+function openUnifiedWaterwayModal(focusFieldId) {
+  if (activeTemplateType !== 'mixed_waterway_new') return;
+
+  const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
+  const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
+
+  const uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 7.20;
+  const westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (l1Val - uw) / 2;
+  const eastLen = l1Val - westLen - uw;
+
+  const ws = getWaterwayStats();
+  const westW = (customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : (ws ? ws.width : 7.20);
+  const eastW = (customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : (ws ? ws.width : 7.20);
+
+  document.getElementById("unified-west-len").value = westLen.toFixed(2);
+  document.getElementById("unified-east-len").value = eastLen.toFixed(2);
+  document.getElementById("unified-west-width-at-waterway").value = westW.toFixed(2);
+  document.getElementById("unified-east-width-at-waterway").value = eastW.toFixed(2);
+  document.getElementById("unified-waterway-width").value = uw.toFixed(2);
+
+  setupUnifiedInputsAutoselect();
+
+  document.getElementById("unifiedWaterwayModal").style.display = "flex";
+
+  if (focusFieldId) {
+    setTimeout(() => {
+      const inp = document.getElementById(focusFieldId);
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }, 100);
+  }
+}
+
+function closeUnifiedWaterwayModal() {
+  document.getElementById("unifiedWaterwayModal").style.display = "none";
+}
+
+function saveUnifiedWaterwayData() {
+  const westLen = parseArabicFloat(document.getElementById("unified-west-len").value);
+  const eastLen = parseArabicFloat(document.getElementById("unified-east-len").value);
+  const westW = parseArabicFloat(document.getElementById("unified-west-width-at-waterway").value);
+  const eastW = parseArabicFloat(document.getElementById("unified-east-width-at-waterway").value);
+  const waterW = parseArabicFloat(document.getElementById("unified-waterway-width").value);
+
+  if (isNaN(westLen) || isNaN(eastLen) || isNaN(westW) || isNaN(eastW) || isNaN(waterW) ||
+      westLen < 0 || eastLen < 0 || westW < 0 || eastW < 0 || waterW < 0) {
+    alert("الرجاء إدخال قيم صحيحة أكبر من أو تساوي الصفر.");
+    return;
+  }
+
+  applyUnifiedWaterwayEdits(westLen, eastLen, westW, eastW, waterW);
+  closeUnifiedWaterwayModal();
+}
+
+function applyUnifiedWaterwayEdits(west_len, east_len, west_w, east_w, water_w) {
+  const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
+  const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
+
+  const maxAllowed = Math.min(l1Val, l2Val) * 0.9;
+  if (water_w >= maxAllowed) {
+    alert('عرض المجرى كبير جداً! الحد الأقصى المسموح به: ' + maxAllowed.toFixed(2) + ' م');
+    return;
+  }
+
+  const remainingSideLen = l1Val - water_w;
+  if (remainingSideLen <= 0) {
+    alert("عرض المجرى المائي أكبر من أو يساوي طول الأرض الكلي.");
+    return;
+  }
+
+  let r_pos = 0.5;
+  if (west_len + east_len > 0) {
+    r_pos = west_len / (west_len + east_len);
+  }
+
+  if (!customWaterwayData) {
+    customWaterwayData = {
+      userWidthMeters: water_w,
+      positionType: 'custom_pct',
+      positionPct: r_pos * 100,
+      leftTopMeters: remainingSideLen * r_pos,
+      rightTopMeters: (l2Val - water_w) * r_pos,
+      leftWaterMeters: water_w,
+      rightWaterMeters: water_w,
+      westWidthAtWaterway: west_w,
+      eastWidthAtWaterway: east_w
+    };
+  } else {
+    customWaterwayData.userWidthMeters = water_w;
+    customWaterwayData.leftWaterMeters = water_w;
+    customWaterwayData.rightWaterMeters = water_w;
+    customWaterwayData.positionType = 'custom_pct';
+    customWaterwayData.positionPct = r_pos * 100;
+    customWaterwayData.leftTopMeters = remainingSideLen * r_pos;
+    customWaterwayData.rightTopMeters = (l2Val - water_w) * r_pos;
+    customWaterwayData.westWidthAtWaterway = west_w;
+    customWaterwayData.eastWidthAtWaterway = east_w;
+  }
 
   generateCustomLand(true);
   renderSVG();
