@@ -1920,10 +1920,10 @@ function renderSVG() {
       if (s.area && s.area.sqm && showFeddanConversion) {
         const detail = sqmToFeddanCaratShares(s.area.sqm);
         const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
-        conversionLines.push({ text: `${sqmFormatted} م²`, isBold: true, fontSize: "12.5", color: "#000000" });
-        conversionLines.push({ text: `${detail.feddan} فدان`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        conversionLines.push({ text: `${detail.carat} قيراط`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        conversionLines.push({ text: `${detail.shares} سهم`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        conversionLines.push({ text: `المساحة: ${sqmFormatted} م²`, isBold: true, fontSize: "11", color: "#37474f", isSqm: true });
+        conversionLines.push({ text: `فدان: ${detail.feddan}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        conversionLines.push({ text: `قيراط: ${detail.carat}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        conversionLines.push({ text: `سهم: ${detail.shares}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
       }
 
       if (mainLines.length > 0 || conversionLines.length > 0 || showFeddanConversion === false) {
@@ -2079,14 +2079,38 @@ function renderSVG() {
           // 2. Draw conversion lines below the button
           let convY = btnY + btnH + 6 * scaleFactor;
           conversionLines.forEach((line, idx) => {
+            // Gray chip background behind the م² line
+            if (line.isSqm) {
+              const chipH = 17 * scaleFactor;
+              const chipW = fieldW - 12 * scaleFactor;
+              const chipRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+              chipRect.setAttribute("x", visualTextX - chipW / 2);
+              chipRect.setAttribute("y", convY + 1 * scaleFactor);
+              chipRect.setAttribute("width", chipW);
+              chipRect.setAttribute("height", chipH);
+              chipRect.setAttribute("fill", "#eceff1");
+              chipRect.setAttribute("rx", 4 * scaleFactor);
+              chipRect.setAttribute("pointer-events", "none");
+              textGroup.appendChild(chipRect);
+            }
+            // Green separator line before feddan line
+            if (idx === 1) {
+              const sepRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+              sepRect.setAttribute("x", visualTextX - (fieldW / 2) + 6 * scaleFactor);
+              sepRect.setAttribute("y", convY - 2 * scaleFactor);
+              sepRect.setAttribute("width", fieldW - 12 * scaleFactor);
+              sepRect.setAttribute("height", Math.max(0.8, 1 * scaleFactor));
+              sepRect.setAttribute("fill", "#a5d6a7");
+              sepRect.setAttribute("pointer-events", "none");
+              textGroup.appendChild(sepRect);
+              convY += 3 * scaleFactor;
+            }
             const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
             tSpan.setAttribute("x", visualTextX);
             tSpan.setAttribute("y", convY + 14 * scaleFactor);
             tSpan.setAttribute("fill", line.color);
             tSpan.setAttribute("font-size", parseFloat(line.fontSize) * scaleFactor);
-            if (line.isBold) {
-              tSpan.setAttribute("font-weight", "bold");
-            }
+            if (line.isBold) tSpan.setAttribute("font-weight", "bold");
             tSpan.setAttribute("text-anchor", "middle");
             tSpan.textContent = line.text;
             textGroup.appendChild(tSpan);
