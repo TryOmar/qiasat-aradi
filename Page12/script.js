@@ -1800,8 +1800,10 @@ function renderSVG() {
 
         const pieceWidth = visualShapeW;
 
-        if (pieceWidth < 28) {
-          // Narrow: show only index
+        const minDimension = Math.min(visualShapeW, visualShapeH);
+
+        if (minDimension < 28) {
+          // Narrow in either direction: show only index
           const tIdx = document.createElementNS("http://www.w3.org/2000/svg", "text");
           tIdx.setAttribute("x", vTopCX + 0.5 * (vBotCX - vTopCX));
           tIdx.setAttribute("y", vTopCY + 0.5 * (vBotCY - vTopCY) + 4);
@@ -1812,50 +1814,92 @@ function renderSVG() {
           tIdx.textContent = (index + 1).toString();
           textGroup.appendChild(tIdx);
         } else {
-          const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28));
-
-          // Area
-          const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-          areaGroup.setAttribute("transform", `rotate(-90, ${yAreaX}, ${yAreaY})`);
-          const tArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tArea.setAttribute("x", yAreaX);
-          tArea.setAttribute("y", yAreaY + 4);
-          tArea.setAttribute("fill", "#000000");
-          tArea.setAttribute("font-size", fontSize);
-          tArea.setAttribute("font-weight", "bold");
-          tArea.setAttribute("text-anchor", "middle");
+          const fontSize = Math.min(13.5, Math.max(9.5, minDimension * 0.28));
           const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
-          tArea.textContent = `${sqmFormatted} م²`;
-          areaGroup.appendChild(tArea);
-          textGroup.appendChild(areaGroup);
+          const ownerText = s.owner || `شريك ${index + 1}`;
+          const lengthText = `${pieceMidLength.toFixed(2)} م`;
 
-          // Name
-          const nameGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-          nameGroup.setAttribute("transform", `rotate(-90, ${yNameX}, ${yNameY})`);
-          const tName = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tName.setAttribute("x", yNameX);
-          tName.setAttribute("y", yNameY + 4);
-          tName.setAttribute("fill", "#000000");
-          tName.setAttribute("font-size", fontSize + 0.5);
-          tName.setAttribute("font-weight", "bold");
-          tName.setAttribute("text-anchor", "middle");
-          tName.textContent = s.owner || `شريك ${index + 1}`;
-          nameGroup.appendChild(tName);
-          textGroup.appendChild(nameGroup);
+          if (visualShapeH >= visualShapeW) {
+            // Vertical Layout (rotated -90) for tall pieces
+            // Area
+            const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            areaGroup.setAttribute("transform", `rotate(-90, ${yAreaX}, ${yAreaY})`);
+            const tArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tArea.setAttribute("x", yAreaX);
+            tArea.setAttribute("y", yAreaY + 4);
+            tArea.setAttribute("fill", "#000000");
+            tArea.setAttribute("font-size", fontSize);
+            tArea.setAttribute("font-weight", "bold");
+            tArea.setAttribute("text-anchor", "middle");
+            tArea.textContent = `${sqmFormatted} م²`;
+            areaGroup.appendChild(tArea);
+            textGroup.appendChild(areaGroup);
 
-          // Length
-          const lenGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-          lenGroup.setAttribute("transform", `rotate(-90, ${yLengthX}, ${yLengthY})`);
-          const tLen = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tLen.setAttribute("x", yLengthX);
-          tLen.setAttribute("y", yLengthY + 4);
-          tLen.setAttribute("fill", "#000000");
-          tLen.setAttribute("font-size", fontSize);
-          tLen.setAttribute("font-weight", "bold");
-          tLen.setAttribute("text-anchor", "middle");
-          tLen.textContent = `${pieceMidLength.toFixed(2)} م`;
-          lenGroup.appendChild(tLen);
-          textGroup.appendChild(lenGroup);
+            // Name
+            const nameGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            nameGroup.setAttribute("transform", `rotate(-90, ${yNameX}, ${yNameY})`);
+            const tName = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tName.setAttribute("x", yNameX);
+            tName.setAttribute("y", yNameY + 4);
+            tName.setAttribute("fill", "#000000");
+            tName.setAttribute("font-size", fontSize + 0.5);
+            tName.setAttribute("font-weight", "bold");
+            tName.setAttribute("text-anchor", "middle");
+            tName.textContent = ownerText;
+            nameGroup.appendChild(tName);
+            textGroup.appendChild(nameGroup);
+
+            // Length
+            const lenGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            lenGroup.setAttribute("transform", `rotate(-90, ${yLengthX}, ${yLengthY})`);
+            const tLen = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tLen.setAttribute("x", yLengthX);
+            tLen.setAttribute("y", yLengthY + 4);
+            tLen.setAttribute("fill", "#000000");
+            tLen.setAttribute("font-size", fontSize);
+            tLen.setAttribute("font-weight", "bold");
+            tLen.setAttribute("text-anchor", "middle");
+            tLen.textContent = lengthText;
+            lenGroup.appendChild(tLen);
+            textGroup.appendChild(lenGroup);
+          } else {
+            // Horizontal Layout (unrotated) for wide pieces
+            const vCenterX = getVisualX((topCX + botCX) / 2);
+            const vCenterY = getVisualY((topCY + botCY) / 2);
+
+            // Area
+            const tArea = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tArea.setAttribute("x", vCenterX);
+            tArea.setAttribute("y", vCenterY - fontSize - 2);
+            tArea.setAttribute("fill", "#000000");
+            tArea.setAttribute("font-size", fontSize);
+            tArea.setAttribute("font-weight", "bold");
+            tArea.setAttribute("text-anchor", "middle");
+            tArea.textContent = `${sqmFormatted} م²`;
+            textGroup.appendChild(tArea);
+
+            // Name
+            const tName = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tName.setAttribute("x", vCenterX);
+            tName.setAttribute("y", vCenterY + (fontSize * 0.3));
+            tName.setAttribute("fill", "#000000");
+            tName.setAttribute("font-size", fontSize + 0.5);
+            tName.setAttribute("font-weight", "bold");
+            tName.setAttribute("text-anchor", "middle");
+            tName.textContent = ownerText;
+            textGroup.appendChild(tName);
+
+            // Length
+            const tLen = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tLen.setAttribute("x", vCenterX);
+            tLen.setAttribute("y", vCenterY + fontSize + 4);
+            tLen.setAttribute("fill", "#000000");
+            tLen.setAttribute("font-size", fontSize);
+            tLen.setAttribute("font-weight", "bold");
+            tLen.setAttribute("text-anchor", "middle");
+            tLen.textContent = lengthText;
+            textGroup.appendChild(tLen);
+          }
         }
       }
     } else {
