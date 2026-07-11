@@ -98,8 +98,9 @@
         </div>
         
         <!-- Action Buttons Under Canvas -->
-        <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+        <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
           <button type="button" class="action-btn" id="freeEditBtn" onclick="openFreeEditModal()" style="padding: 12px 20px; font-size: 16px; background-color: #ff9800; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">🟠 التعديل الحر</button>
+          <button type="button" class="action-btn" onclick="openSmartAreaModal()" style="padding: 12px 20px; font-size: 16px; background-color: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 8px;">⚖️ تحويل لفدان/قيراط/سهم</button>
           <button type="button" class="action-btn generate-btn" onclick="printDallalMap()" style="padding: 12px 30px; font-size: 16px;">🖨️ إنشاء الخريطة والطباعة</button>
         </div>
       </div>
@@ -126,6 +127,12 @@
             <input type="checkbox" id="chkAgriBackground" checked onchange="toggleAgriBackground()" style="accent-color: #2e7d32; width: 16px; height: 16px;">
             إظهار الخلفية الزراعية
           </label>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <button type="button" onclick="openSmartAreaModal()" style="width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            ⚖️ تحويل لفدان/قيراط/سهم
+          </button>
         </div>
 
         <h3 style="margin-top: 20px;" id="editor-title">محرر العنصر المحدد</h3>
@@ -362,7 +369,7 @@
 
         <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات المساحة الذكية</h4>
         <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
-          <button type="button" class="sidebar-btn" style="grid-column: span 2; background: #e0f2f1; color: #00796b;" onclick="openSmartAreaModal()">📐 حساب وتحويل المساحة الذكية</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2; background: #2e7d32; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="openSmartAreaModal()">⚖️ تحويل لفدان/قيراط/سهم</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .... م²')">المساحة بالمتر</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .. فدان و .. قيراط و .. سهم')">المساحة بالتفصيل</button>
           <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('إجمالي القراريط: .... قيراط')">إجمالي القراريط</button>
@@ -516,7 +523,7 @@
 
         <h4 style="margin-top: 15px; color: #2e7d32; border-bottom: 1.5px solid #a5d6a7; padding-bottom: 3px; font-weight: bold;">بيانات المساحة الذكية</h4>
         <div class="preset-grid" style="margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 6px;">
-          <button type="button" class="sidebar-btn" style="grid-column: span 2; background: #e0f2f1; color: #00796b;" onclick="openSmartAreaModal()">📐 حساب وتحويل المساحة الذكية</button>
+          <button type="button" class="sidebar-btn" style="grid-column: span 2; background: #2e7d32; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="openSmartAreaModal()">⚖️ تحويل لفدان/قيراط/سهم</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .... م²')">المساحة بالمتر</button>
           <button type="button" class="sidebar-btn" onclick="addMapLabel('المساحة: .. فدان و .. قيراط و .. سهم')">المساحة بالتفصيل</button>
           <button type="button" class="sidebar-btn" style="grid-column: span 2;" onclick="addMapLabel('إجمالي القراريط: .... قيراط')">إجمالي القراريط</button>
