@@ -2802,11 +2802,14 @@ function onElementClick(e, type, id) {
   if (activeTemplateType === 'mixed_waterway_new') {
     let focusId = "";
     if (type === 'borderLabel') {
-      if (id === 'border_3' || id === 'border_1') {
-        focusId = "unified-west-len";
-      } else if (id === 'border_4' || id === 'border_2') {
-        focusId = "unified-east-len";
-      }
+      let startFocusId = "";
+      if (id === 'border_1') startFocusId = "start-w1";
+      else if (id === 'border_2') startFocusId = "start-w2";
+      else if (id === 'border_3') startFocusId = "start-l1";
+      else if (id === 'border_4') startFocusId = "start-l2";
+      
+      openStartModal(false, startFocusId);
+      return;
     } else if (type === 'freeText' && id) {
       if (id.startsWith('note_left_west_') || id.startsWith('note_right_west_')) {
         focusId = "unified-west-len";
@@ -4490,7 +4493,7 @@ function populateStartModalFromCurrentBorders() {
   }
 }
 
-function openStartModal(skipPopulate = false) {
+function openStartModal(skipPopulate = false, focusFieldId = null) {
   if (!skipPopulate) {
     populateStartModalFromCurrentBorders();
   }
@@ -4503,6 +4506,16 @@ function openStartModal(skipPopulate = false) {
     }
   }
   document.getElementById("startModal").style.display = "flex";
+  
+  if (focusFieldId) {
+    setTimeout(() => {
+      const inp = document.getElementById(focusFieldId);
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }, 100);
+  }
 }
 
 // Load default mock values if they click "رسم الأرض" with empty values
