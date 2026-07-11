@@ -1299,7 +1299,7 @@ function generateCustomLand(useCustomWidths = false) {
   // Draw external border labels
   borderLabels.push({
     id: "border_1",
-    text: `${effW1Dir} ${effW1.toFixed(2)} م`,
+    text: `${effW1Dir} ${effW1.toFixed(2)} م (العرض الكلي)`,
     x: centerX,
     y: p1.y - 18,
     fontSize: 14,
@@ -1308,7 +1308,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   borderLabels.push({
     id: "border_2",
-    text: `${effW2Dir} ${effW2.toFixed(2)} م`,
+    text: `${effW2Dir} ${effW2.toFixed(2)} م (العرض الكلي)`,
     x: centerX,
     y: p4.y + 22,
     fontSize: 14,
@@ -1317,7 +1317,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   borderLabels.push({
     id: "border_3",
-    text: `${effL1Dir} ${effL1.toFixed(2)} م`,
+    text: `${effL1Dir} ${effL1.toFixed(2)} م (الطول الكلي)`,
     x: p1.x - 22,
     y: centerY,
     fontSize: 14,
@@ -1326,7 +1326,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   borderLabels.push({
     id: "border_4",
-    text: `${effL2Dir} ${effL2.toFixed(2)} م`,
+    text: `${effL2Dir} ${effL2.toFixed(2)} م (الطول الكلي)`,
     x: p2.x + 22,
     y: centerY,
     fontSize: 14,
@@ -4651,10 +4651,10 @@ function loadDemoDataPreset(promptConfirm = true) {
   }];
 
   borderLabels = [
-    { id: "border_1", text: "غربي 60.00 م", x: 0, y: p1.y - 1.5, fontSize: 13, angle: 0 },
-    { id: "border_2", text: "شرقي 60.00 م", x: 0, y: p4.y + 1.5, fontSize: 13, angle: 0 },
-    { id: "border_3", text: "قبلي 30.00 م", x: p1.x - 1.5, y: 0, fontSize: 13, angle: -90 },
-    { id: "border_4", text: "بحري 30.00 م", x: p2.x + 1.5, y: 0, fontSize: 13, angle: 90 }
+    { id: "border_1", text: "غربي 60.00 م (العرض الكلي)", x: 0, y: p1.y - 1.5, fontSize: 13, angle: 0 },
+    { id: "border_2", text: "شرقي 60.00 م (العرض الكلي)", x: 0, y: p4.y + 1.5, fontSize: 13, angle: 0 },
+    { id: "border_3", text: "قبلي 30.00 م (الطول الكلي)", x: p1.x - 1.5, y: 0, fontSize: 13, angle: -90 },
+    { id: "border_4", text: "بحري 30.00 م (الطول الكلي)", x: p2.x + 1.5, y: 0, fontSize: 13, angle: 90 }
   ];
 
   freeTexts = [];
