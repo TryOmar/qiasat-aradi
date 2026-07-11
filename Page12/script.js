@@ -1297,11 +1297,15 @@ function generateCustomLand(useCustomWidths = false) {
   }
 
   // Draw external border labels
+  // Compute adaptive offset so labels stay inside the SVG viewport regardless of land scale
+  const labelOffY = Math.min(2.0, Math.max(0.4, avgL * 0.035));
+  const labelOffX = Math.min(2.0, Math.max(0.4, avgW * 0.035));
+
   borderLabels.push({
     id: "border_1",
     text: `${effW1Dir} ${effW1.toFixed(2)} م (العرض الكلي)`,
     x: centerX,
-    y: p1.y - 18,
+    y: p1.y - labelOffY,
     fontSize: 14,
     angle: 0
   });
@@ -1310,7 +1314,7 @@ function generateCustomLand(useCustomWidths = false) {
     id: "border_2",
     text: `${effW2Dir} ${effW2.toFixed(2)} م (العرض الكلي)`,
     x: centerX,
-    y: p4.y + 22,
+    y: p4.y + labelOffY,
     fontSize: 14,
     angle: 0
   });
@@ -1318,7 +1322,7 @@ function generateCustomLand(useCustomWidths = false) {
   borderLabels.push({
     id: "border_3",
     text: `${effL1Dir} ${effL1.toFixed(2)} م (الطول الكلي)`,
-    x: p1.x - 22,
+    x: p1.x - labelOffX,
     y: centerY,
     fontSize: 14,
     angle: -90
@@ -1327,7 +1331,7 @@ function generateCustomLand(useCustomWidths = false) {
   borderLabels.push({
     id: "border_4",
     text: `${effL2Dir} ${effL2.toFixed(2)} م (الطول الكلي)`,
-    x: p2.x + 22,
+    x: p2.x + labelOffX,
     y: centerY,
     fontSize: 14,
     angle: 90
