@@ -4585,10 +4585,28 @@ function closeAddDataModal() {
 }
 
 // Smart Area Modal triggers
-function openSmartAreaModal() {
+// Returns the total sqm area of the current land (sum of all main shapes)
+function getTotalLandSqm() {
+  if (!shapes || shapes.length === 0) return 0;
+  let total = 0;
+  shapes.forEach(s => {
+    if (s.area && s.area.sqm) total += parseFloat(s.area.sqm) || 0;
+  });
+  return total;
+}
+
+function openSmartAreaModal(prefillSqm) {
   document.getElementById("smartAreaModal").style.display = "flex";
   closeAddDataModal();
-  calcSmartArea(activeSmartAreaTab);
+  // Switch to sqm tab and prefill if a value is provided
+  if (prefillSqm !== undefined && prefillSqm > 0) {
+    switchSmartAreaTab('sqm');
+    const sqmInput = document.getElementById("smart-sqm-input");
+    sqmInput.value = prefillSqm.toFixed(2);
+    calcSmartArea('sqm');
+  } else {
+    calcSmartArea(activeSmartAreaTab);
+  }
 }
 
 function closeSmartAreaModal() {
