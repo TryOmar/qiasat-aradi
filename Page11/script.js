@@ -2095,15 +2095,17 @@ function renderCroquis() {
       const botY = (y3 + y4) / 2;
       const cy = (topY + botY) / 2;
 
-      // 1. رسم النصوص داخل القطعة (الاسم أفقي في المنتصف، والمساحة رأسية في النصف العلوي)
+      // 1. رسم النصوص داخل القطعة (الاسم، المساحة، والارتفاع كلها رأسية بالتوالي لتطابق المرفق)
       if (showCroquisNames || showCroquisMeasurements) {
         const labelGroup = svgEl("g");
         labelGroup.setAttribute("style", "pointer-events: none;"); // حتى لا تعيق التفاعل مع المضلع
         
         const pieceWidth = Math.abs(x2 - x1);
         const nameToShow = piece.name || `شريك ${index + 1}`;
+        const pieceH = botY - topY;
+        const pieceMidLength = l2 + k * ((piece.startX + piece.endX) / 2);
         
-        if (pieceWidth < 50 && !window.isExporting) {
+        if (pieceWidth < 28 && !window.isExporting) {
           // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
           const tIdx = svgEl("text");
           tIdx.setAttribute("x", cx);
@@ -2116,25 +2118,17 @@ function renderCroquis() {
           tIdx.textContent = (index + 1).toString();
           labelGroup.appendChild(tIdx);
         } else {
-          // 1. عرض الاسم أفقي في المنتصف
-          if (showCroquisNames) {
-            const tName = svgEl("text");
-            tName.setAttribute("x", cx);
-            tName.setAttribute("y", cy + 4 * textScale);
-            tName.setAttribute("fill", isRem ? "#e65100" : "#000000"); // أسود
-            tName.setAttribute("font-size", (12.5 * textScale) + "px"); // خط 12.5
-            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tName.setAttribute("text-anchor", "middle");
-            tName.setAttribute("font-weight", "bold");
-            tName.textContent = nameToShow;
-            labelGroup.appendChild(tName);
-          }
+          // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة
+          const yArea = topY + pieceH * 0.23;
+          const yName = topY + pieceH * 0.50;
+          const yLength = topY + pieceH * 0.77;
           
-          // 2. عرض المساحة رأسي (دوران -90 درجة) في النصف العلوي
+          // حجم خط ديناميكي يناسب عرض العمود
+          const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * textScale;
+          
+          // 1. عرض المساحة رأسي (دوران -90 درجة) في الجزء العلوي
           if (showCroquisMeasurements) {
             const areaVal = Number(piece.area.toFixed(2));
-            const yArea = (topY + cy) / 2; // منتصف النصف العلوي للقطعة تماماً لمنع التداخل ديناميكياً مع اسم الشريك
-            
             const areaGroup = svgEl("g");
             areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);
             
@@ -2142,23 +2136,58 @@ function renderCroquis() {
             tAreaVal.setAttribute("x", cx);
             tAreaVal.setAttribute("y", yArea + 4 * textScale);
             tAreaVal.setAttribute("fill", "#000000"); // أسود
-            tAreaVal.setAttribute("font-size", (12 * textScale) + "px");
+            tAreaVal.setAttribute("font-size", fontSize + "px");
             tAreaVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tAreaVal.setAttribute("text-anchor", "middle");
             tAreaVal.setAttribute("font-weight", "bold");
             tAreaVal.textContent = areaVal + " م²";
             areaGroup.appendChild(tAreaVal);
-            
             labelGroup.appendChild(areaGroup);
+          }
+          
+          // 2. عرض الاسم رأسي (دوران -90 درجة) في المنتصف
+          if (showCroquisNames) {
+            const nameGroup = svgEl("g");
+            nameGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yName})`);
+            
+            const tName = svgEl("text");
+            tName.setAttribute("x", cx);
+            tName.setAttribute("y", yName + 4 * textScale);
+            tName.setAttribute("fill", isRem ? "#e65100" : "#000000"); // أسود
+            tName.setAttribute("font-size", (fontSize + 0.5) + "px");
+            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tName.setAttribute("text-anchor", "middle");
+            tName.setAttribute("font-weight", "bold");
+            tName.textContent = nameToShow;
+            nameGroup.appendChild(tName);
+            labelGroup.appendChild(nameGroup);
+          }
+          
+          // 3. عرض طول القطعة رأسي (دوران -90 درجة) في الجزء السفلي
+          if (showCroquisMeasurements) {
+            const lenGroup = svgEl("g");
+            lenGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yLength})`);
+            
+            const tLenVal = svgEl("text");
+            tLenVal.setAttribute("x", cx);
+            tLenVal.setAttribute("y", yLength + 4 * textScale);
+            tLenVal.setAttribute("fill", "#000000"); // أسود
+            tLenVal.setAttribute("font-size", fontSize + "px");
+            tLenVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tLenVal.setAttribute("text-anchor", "middle");
+            tLenVal.setAttribute("font-weight", "bold");
+            tLenVal.textContent = pieceMidLength.toFixed(2) + " م";
+            lenGroup.appendChild(tLenVal);
+            labelGroup.appendChild(lenGroup);
           }
         }
         g.appendChild(labelGroup);
       }
 
-      // 2. عرض عروض القطع باللون الأسود مباشرة على الحدود العليا والسفلى لكل قطعة
+      // 2. عرض عروض القطع باللون الأسود مباشرة على الحدود العليا والسفلى لكل قطعة مع وحدة القياس (م)
       if (showCroquisMeasurements) {
         // العرض العلوي للقطعة (أعلى الحدود العليا)
-        const topWText = svgText(cx, mapY(0) - 8 * textScale, piece.topW.toFixed(2), {
+        const topWText = svgText(cx, mapY(0) - 8 * textScale, piece.topW.toFixed(2) + " م", {
           fill: "#000000", // أسود
           size: "11",
           weight: "bold",
@@ -2168,7 +2197,7 @@ function renderCroquis() {
 
         // العرض السفلي للقطعة (أسفل الحدود السفلى)
         const y_top_mid = (y3 + y4) / 2;
-        const botWText = svgText(cx, y_top_mid + 14 * textScale, piece.botW.toFixed(2), {
+        const botWText = svgText(cx, y_top_mid + 14 * textScale, piece.botW.toFixed(2) + " م", {
           fill: "#000000", // أسود
           size: "11",
           weight: "bold",
@@ -2177,94 +2206,7 @@ function renderCroquis() {
         g.appendChild(botWText);
       }
 
-      // 3. خطوط الفواصل والحدود مع القيم
-      if (showCroquisMeasurements) {
-        const y_fasil_pos = y1 + 0.75 * (y4 - y1);
-        
-        // الفواصل الداخلية (بين قطعتين)
-        if (index > 0) {
-          const boxW = 54 * textScale;
-          const boxH = 18 * textScale;
-          const boxX = x1 - boxW - 5 * textScale;
-          const boxY = y_fasil_pos - boxH / 2;
-
-          // صندوق أبيض صغير
-          const rect = svgEl("rect");
-          rect.setAttribute("x", boxX);
-          rect.setAttribute("y", boxY);
-          rect.setAttribute("width", boxW);
-          rect.setAttribute("height", boxH);
-          rect.setAttribute("fill", "white");
-          rect.setAttribute("stroke", "#b0bec5");
-          rect.setAttribute("stroke-width", 1 * textScale);
-          rect.setAttribute("rx", 2 * textScale);
-          g.appendChild(rect);
-
-          // نص طول الفاصل باللون الأسود
-          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos + 4 * textScale, piece.leftLine.toFixed(2) + " م", {
-            fill: "#000000",
-            size: "10.5",
-            weight: "bold",
-            bg: false,
-          });
-          g.appendChild(fasilText);
-        }
-
-        // الحد الأيسر للشريك الأول (الحد الأيسر للأرض X = 0)
-        if (index === 0) {
-          const boxW = 54 * textScale;
-          const boxH = 18 * textScale;
-          const boxX = x1 + 5 * textScale; // للداخل (يمين الخط)
-          const boxY = y_fasil_pos - boxH / 2;
-
-          const rect = svgEl("rect");
-          rect.setAttribute("x", boxX);
-          rect.setAttribute("y", boxY);
-          rect.setAttribute("width", boxW);
-          rect.setAttribute("height", boxH);
-          rect.setAttribute("fill", "white");
-          rect.setAttribute("stroke", "#b0bec5");
-          rect.setAttribute("stroke-width", 1 * textScale);
-          rect.setAttribute("rx", 2 * textScale);
-          g.appendChild(rect);
-
-          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos + 4 * textScale, l2.toFixed(2) + " م", {
-            fill: "#000000",
-            size: "10.5",
-            weight: "bold",
-            bg: false,
-          });
-          g.appendChild(fasilText);
-        }
-
-        // الحد الأيمن للشريك الأخير (الحد الأيمن للأرض X = w)
-        if (index === window.calculatedPieces.length - 1) {
-          const y_fasil_pos_right = y2 + 0.75 * (y3 - y2);
-          const boxW = 54 * textScale;
-          const boxH = 18 * textScale;
-          const boxX = x2 - boxW - 5 * textScale; // للداخل (يسار الخط)
-          const boxY = y_fasil_pos_right - boxH / 2;
-
-          const rect = svgEl("rect");
-          rect.setAttribute("x", boxX);
-          rect.setAttribute("y", boxY);
-          rect.setAttribute("width", boxW);
-          rect.setAttribute("height", boxH);
-          rect.setAttribute("fill", "white");
-          rect.setAttribute("stroke", "#b0bec5");
-          rect.setAttribute("stroke-width", 1 * textScale);
-          rect.setAttribute("rx", 2 * textScale);
-          g.appendChild(rect);
-
-          const fasilText = svgText(boxX + boxW / 2, y_fasil_pos_right + 4 * textScale, l1.toFixed(2) + " م", {
-            fill: "#000000",
-            size: "10.5",
-            weight: "bold",
-            bg: false,
-          });
-          g.appendChild(fasilText);
-        }
-      }
+      // 3. تم إزالة الصناديق البيضاء التي كانت تظهر على خطوط الفواصل والحدود لتطابق مظهر المرفق النظيف تماماً
     });
   }
 

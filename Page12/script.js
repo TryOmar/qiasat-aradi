@@ -1014,13 +1014,6 @@ function generateCustomLand(useCustomWidths = false) {
     w_bl_vis = { x: c_bot_vis.x - ux_bot_vis * (target_east_w / 2), y: c_bot_vis.y - uy_bot_vis * (target_east_w / 2) };
     w_br_vis = { x: c_bot_vis.x + ux_bot_vis * (target_east_w / 2), y: c_bot_vis.y + uy_bot_vis * (target_east_w / 2) };
 
-    // Verify convexity of all three sections (West, Waterway, East)
-    if (!isConvexQuad(p1, p2, w_tr, w_tl) || 
-        !isConvexQuad(w_tl, w_tr, w_br, w_bl) || 
-        !isConvexQuad(w_bl, w_br, p3, p4)) {
-      return false;
-    }
-
     waterways.push({
       id: "water_new",
       points: [w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis],
@@ -1556,7 +1549,6 @@ function resolveVisualLabelOverlap() {
     resolvedVisualOffsets[item.id] = { dx: 0, dy: shiftY };
     placed.push({ x: cx, y: cy + shiftY, hw: hw, hh: hh });
   });
-  return true;
 }
 
 // ----------------------------------------------------
@@ -3065,9 +3057,6 @@ function saveModalData() {
     const westWidthInput = document.getElementById('modal-west-width-at-waterway');
     const eastWidthInput = document.getElementById('modal-east-width-at-waterway');
 
-    const prevWest = customWaterwayData.westWidthAtWaterway;
-    const prevEast = customWaterwayData.eastWidthAtWaterway;
-
     if (westWidthInput) {
       const w = parseArabicFloat(westWidthInput.value);
       if (!isNaN(w) && w >= 0) customWaterwayData.westWidthAtWaterway = w;
@@ -3077,17 +3066,9 @@ function saveModalData() {
       if (!isNaN(w) && w >= 0) customWaterwayData.eastWidthAtWaterway = w;
     }
 
-    const isValid = generateCustomLand(true);
-    if (!isValid) {
-      customWaterwayData.westWidthAtWaterway = prevWest;
-      customWaterwayData.eastWidthAtWaterway = prevEast;
-      generateCustomLand(true);
-      alert("القيمة المدخلة غير ممكنة هندسياً. يرجى إدخال عرض يقع ضمن الحدود المسموح بها.");
-      return; // Keep modal open
-    }
-
     modalEditTarget = null;
     closeModal();
+    generateCustomLand(true);
     renderSVG();
     saveState();
     selectedElement = { type: 'waterway', id: 'water_new' };
@@ -3769,7 +3750,7 @@ function applyWidthsAtWaterway() {
   let westW = parseArabicFloat(westInput.value);
   let eastW = parseArabicFloat(eastInput.value);
 
-  if (isNaN(westW) || isNaN(eastW) || westW <= 0 || eastW <= 0) {
+  if (isNaN(westW) || isNaN(eastW) || westW < 0 || eastW < 0) {
     alert("الرجاء إدخال قيم عروض صحيحة أكبر من الصفر.");
     return;
   }
@@ -3784,23 +3765,10 @@ function applyWidthsAtWaterway() {
     };
   }
 
-  const prevWest = customWaterwayData.westWidthAtWaterway;
-  const prevEast = customWaterwayData.eastWidthAtWaterway;
-
   customWaterwayData.westWidthAtWaterway = westW;
   customWaterwayData.eastWidthAtWaterway = eastW;
 
-  const isValid = generateCustomLand(true);
-  if (!isValid) {
-    // Revert
-    customWaterwayData.westWidthAtWaterway = prevWest;
-    customWaterwayData.eastWidthAtWaterway = prevEast;
-    generateCustomLand(true);
-    alert("القيمة المدخلة غير ممكنة هندسياً. يرجى إدخال عرض يقع ضمن الحدود المسموح بها.");
-    populateSidebarEditor();
-    return;
-  }
-
+  generateCustomLand(true);
   renderSVG();
   saveState();
   populateSidebarEditor();
@@ -4883,14 +4851,4 @@ function disableCaratConversion() {
   }
 
   closeCaratConversionModal();
-}
-
-function isConvexQuad(a, b, c, d) {
-  if (!a || !b || !c || !d) return false;
-  const cp1 = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
-  const cp2 = (c.x - b.x) * (d.y - c.y) - (c.y - b.y) * (d.x - c.x);
-  const cp3 = (d.x - c.x) * (a.y - d.y) - (d.y - c.y) * (a.x - d.x);
-  const cp4 = (a.x - d.x) * (b.y - a.y) - (a.y - d.y) * (b.x - a.x);
-  return (cp1 > 0 && cp2 > 0 && cp3 > 0 && cp4 > 0) || 
-         (cp1 < 0 && cp2 < 0 && cp3 < 0 && cp4 < 0);
 }
