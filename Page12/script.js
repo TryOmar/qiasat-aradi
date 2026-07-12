@@ -1992,6 +1992,17 @@ function renderSVG() {
   waterways.forEach(w => {
     const pointsStr = w.points.map(p => `${getVisualX(p.x)},${getVisualY(p.y)}`).join(" ");
     
+    const outlinePoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    outlinePoly.setAttribute("points", pointsStr);
+    outlinePoly.setAttribute("fill", "none");
+    outlinePoly.setAttribute("stroke", "#1a1a1a");
+    outlinePoly.setAttribute("stroke-width", "6.5");
+    outlinePoly.setAttribute("stroke-linejoin", "round");
+    outlinePoly.setAttribute("stroke-dasharray", "6, 4");
+    outlinePoly.setAttribute("vector-effect", "non-scaling-stroke");
+    outlinePoly.style.pointerEvents = "none";
+    waterwaysGroup.appendChild(outlinePoly);
+
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", pointsStr);
     polygon.setAttribute("class", "waterway");
@@ -2024,15 +2035,27 @@ function renderSVG() {
     const visualLabelY = getVisualY(w.labelY) + offset.dy;
 
     if (offset.dy !== 0) {
+      const outline = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      outline.setAttribute("x1", getVisualX(w.labelX));
+      outline.setAttribute("y1", getVisualY(w.labelY));
+      outline.setAttribute("x2", visualLabelX);
+      outline.setAttribute("y2", visualLabelY);
+      outline.setAttribute("stroke", "#1a1a1a");
+      outline.setAttribute("stroke-width", "3.5");
+      outline.setAttribute("stroke-dasharray", "3, 3");
+      outline.style.opacity = "0.8";
+      outline.style.pointerEvents = "none";
+      waterwaysGroup.appendChild(outline);
+
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
       guideLine.setAttribute("x1", getVisualX(w.labelX));
       guideLine.setAttribute("y1", getVisualY(w.labelY));
       guideLine.setAttribute("x2", visualLabelX);
       guideLine.setAttribute("y2", visualLabelY);
-      guideLine.setAttribute("stroke", "#006064");
-      guideLine.setAttribute("stroke-width", "1");
+      guideLine.setAttribute("stroke", "#ffffff");
+      guideLine.setAttribute("stroke-width", "1.2");
       guideLine.setAttribute("stroke-dasharray", "3, 3");
-      guideLine.style.opacity = "0.7";
+      guideLine.style.pointerEvents = "none";
       waterwaysGroup.appendChild(guideLine);
     }
 
@@ -2110,9 +2133,17 @@ function renderSVG() {
       polygon.style.fillOpacity = "1";
     }
     
-    const colorObj = colorsList.find(c => c.value.toLowerCase() === (s.color || "#ffffff").toLowerCase());
-    const strokeColor = colorObj ? (colorObj.stroke || "#1b5e20") : "#1b5e20";
-    polygon.setAttribute("stroke", strokeColor);
+    const outlinePoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    outlinePoly.setAttribute("points", pointsStr);
+    outlinePoly.setAttribute("fill", "none");
+    outlinePoly.setAttribute("stroke", "#1a1a1a");
+    outlinePoly.setAttribute("stroke-width", "6.5");
+    outlinePoly.setAttribute("stroke-linejoin", "round");
+    outlinePoly.setAttribute("vector-effect", "non-scaling-stroke");
+    outlinePoly.style.pointerEvents = "none";
+    shapesGroup.appendChild(outlinePoly);
+
+    polygon.setAttribute("stroke", "#ffffff");
     polygon.setAttribute("stroke-width", "3.5");
     polygon.setAttribute("stroke-linejoin", "round");
     polygon.setAttribute("vector-effect", "non-scaling-stroke");
@@ -2668,11 +2699,22 @@ function renderSVG() {
       const corners = [pTL, pTR, pBR, pBL];
 
       if (pTL && pTR && pBR && pBL) {
-        // Draw the outer dark green boundary
+        // Draw outline for the outer boundary
+        const outerPolyOutline = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        outerPolyOutline.setAttribute("points", `${getVisualX(pTL.x)},${getVisualY(pTL.y)} ${getVisualX(pTR.x)},${getVisualY(pTR.y)} ${getVisualX(pBR.x)},${getVisualY(pBR.y)} ${getVisualX(pBL.x)},${getVisualY(pBL.y)}`);
+        outerPolyOutline.setAttribute("fill", "none");
+        outerPolyOutline.setAttribute("stroke", "#1a1a1a");
+        outerPolyOutline.setAttribute("stroke-width", "7");
+        outerPolyOutline.setAttribute("stroke-linejoin", "round");
+        outerPolyOutline.setAttribute("vector-effect", "non-scaling-stroke");
+        outerPolyOutline.style.pointerEvents = "none";
+        shapesGroup.appendChild(outerPolyOutline);
+
+        // Draw the outer white boundary
         const outerPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
         outerPoly.setAttribute("points", `${getVisualX(pTL.x)},${getVisualY(pTL.y)} ${getVisualX(pTR.x)},${getVisualY(pTR.y)} ${getVisualX(pBR.x)},${getVisualY(pBR.y)} ${getVisualX(pBL.x)},${getVisualY(pBL.y)}`);
         outerPoly.setAttribute("fill", "none");
-        outerPoly.setAttribute("stroke", "#1b5e20");
+        outerPoly.setAttribute("stroke", "#ffffff");
         outerPoly.setAttribute("stroke-width", "4");
         outerPoly.setAttribute("stroke-linejoin", "round");
         outerPoly.setAttribute("vector-effect", "non-scaling-stroke");
@@ -2685,8 +2727,10 @@ function renderSVG() {
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute("cx", getVisualX(p.x));
             c.setAttribute("cy", getVisualY(p.y));
-            c.setAttribute("r", 5);
-            c.setAttribute("fill", "#1b5e20");
+            c.setAttribute("r", 5.5);
+            c.setAttribute("fill", "#ffffff");
+            c.setAttribute("stroke", "#1a1a1a");
+            c.setAttribute("stroke-width", "1.8");
             c.style.pointerEvents = "none";
             shapesGroup.appendChild(c);
           }
@@ -2714,6 +2758,20 @@ function renderSVG() {
     });
     splitLinesGroup.appendChild(touchLine);
 
+    const outline = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    outline.setAttribute("x1", getVisualX(l.x1));
+    outline.setAttribute("y1", getVisualY(l.y1));
+    outline.setAttribute("x2", getVisualX(l.x2));
+    outline.setAttribute("y2", getVisualY(l.y2));
+    if (l.isDashed) {
+      outline.setAttribute("stroke-dasharray", "6, 4");
+    }
+    outline.setAttribute("stroke", "#1a1a1a");
+    outline.setAttribute("stroke-width", "7");
+    outline.setAttribute("vector-effect", "non-scaling-stroke");
+    outline.style.pointerEvents = "none";
+    splitLinesGroup.appendChild(outline);
+
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", getVisualX(l.x1));
     line.setAttribute("y1", getVisualY(l.y1));
@@ -2729,7 +2787,7 @@ function renderSVG() {
     if (l.isDashed) {
       line.setAttribute("stroke-dasharray", "6, 4");
     }
-    line.setAttribute("stroke", l.color || "#000000");
+    line.setAttribute("stroke", "#ffffff");
     line.setAttribute("stroke-width", "4");
     line.setAttribute("vector-effect", "non-scaling-stroke");
     line.onclick = (e) => onElementClick(e, 'splitLine', l.id);
@@ -2838,14 +2896,26 @@ function renderSVG() {
     text.textContent = b.text;
 
     if (offset.dy !== 0) {
+      const outline = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      outline.setAttribute("x1", getVisualX(b.x));
+      outline.setAttribute("y1", getVisualY(b.y));
+      outline.setAttribute("x2", visualX);
+      outline.setAttribute("y2", visualY);
+      outline.setAttribute("stroke", "#1a1a1a");
+      outline.setAttribute("stroke-width", "3.6");
+      outline.setAttribute("stroke-dasharray", "4, 4");
+      outline.style.pointerEvents = "none";
+      g.appendChild(outline);
+
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
       guideLine.setAttribute("x1", getVisualX(b.x));
       guideLine.setAttribute("y1", getVisualY(b.y));
       guideLine.setAttribute("x2", visualX);
       guideLine.setAttribute("y2", visualY);
-      guideLine.setAttribute("stroke", "#999999");
+      guideLine.setAttribute("stroke", "#ffffff");
       guideLine.setAttribute("stroke-width", "1.2");
       guideLine.setAttribute("stroke-dasharray", "4, 4");
+      guideLine.style.pointerEvents = "none";
       g.appendChild(guideLine);
     }
 
@@ -2897,14 +2967,26 @@ function renderSVG() {
     text.textContent = t.text;
 
     if (offset.dy !== 0) {
+      const outline = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      outline.setAttribute("x1", getVisualX(t.x));
+      outline.setAttribute("y1", getVisualY(t.y));
+      outline.setAttribute("x2", visualX);
+      outline.setAttribute("y2", visualY);
+      outline.setAttribute("stroke", "#1a1a1a");
+      outline.setAttribute("stroke-width", "3.6");
+      outline.setAttribute("stroke-dasharray", "4, 4");
+      outline.style.pointerEvents = "none";
+      g.appendChild(outline);
+
       const guideLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
       guideLine.setAttribute("x1", getVisualX(t.x));
       guideLine.setAttribute("y1", getVisualY(t.y));
       guideLine.setAttribute("x2", visualX);
       guideLine.setAttribute("y2", visualY);
-      guideLine.setAttribute("stroke", "#999999");
+      guideLine.setAttribute("stroke", "#ffffff");
       guideLine.setAttribute("stroke-width", "1.2");
       guideLine.setAttribute("stroke-dasharray", "4, 4");
+      guideLine.style.pointerEvents = "none";
       g.appendChild(guideLine);
     }
 
