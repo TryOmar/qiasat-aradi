@@ -188,28 +188,48 @@
           <label>العرض الأول (أعلى) (C) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
             <input type="text" inputmode="decimal" id="start-w1" value="30" placeholder="مثال: 30" style="flex: 2;">
-            <input type="text" id="start-w1-dir" value="بحري" style="flex: 1; text-align: center;">
+            <select id="start-w1-dir" style="flex: 1; text-align: center;" onchange="if(typeof updateDirectionRealtime === 'function') updateDirectionRealtime('start-w1-dir', 'border_1')">
+              <option value="بحري" selected>⬆️ بحري</option>
+              <option value="قبلي">⬇️ قبلي</option>
+              <option value="شرقي">➡️ شرقي</option>
+              <option value="غربي">⬅️ غربي</option>
+            </select>
           </div>
         </div>
         <div class="editor-form-group">
           <label>العرض الثاني (أسفل) (A) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
             <input type="text" inputmode="decimal" id="start-w2" value="35" placeholder="مثال: 35" style="flex: 2;">
-            <input type="text" id="start-w2-dir" value="قبلي" style="flex: 1; text-align: center;">
+            <select id="start-w2-dir" style="flex: 1; text-align: center;" onchange="if(typeof updateDirectionRealtime === 'function') updateDirectionRealtime('start-w2-dir', 'border_2')">
+              <option value="بحري">⬆️ بحري</option>
+              <option value="قبلي" selected>⬇️ قبلي</option>
+              <option value="شرقي">➡️ شرقي</option>
+              <option value="غربي">⬅️ غربي</option>
+            </select>
           </div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيمن (D) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
             <input type="text" inputmode="decimal" id="start-l2" value="50" placeholder="مثال: 50" style="flex: 2;">
-            <input type="text" id="start-l2-dir" value="شرقي" style="flex: 1; text-align: center;">
+            <select id="start-l2-dir" style="flex: 1; text-align: center;" onchange="if(typeof updateDirectionRealtime === 'function') updateDirectionRealtime('start-l2-dir', 'border_4')">
+              <option value="بحري">⬆️ بحري</option>
+              <option value="قبلي">⬇️ قبلي</option>
+              <option value="شرقي" selected>➡️ شرقي</option>
+              <option value="غربي">⬅️ غربي</option>
+            </select>
           </div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيسر (B) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
             <input type="text" inputmode="decimal" id="start-l1" value="45" placeholder="مثال: 45" style="flex: 2;">
-            <input type="text" id="start-l1-dir" value="غربي" style="flex: 1; text-align: center;">
+            <select id="start-l1-dir" style="flex: 1; text-align: center;" onchange="if(typeof updateDirectionRealtime === 'function') updateDirectionRealtime('start-l1-dir', 'border_3')">
+              <option value="بحري">⬆️ بحري</option>
+              <option value="قبلي">⬇️ قبلي</option>
+              <option value="شرقي">➡️ شرقي</option>
+              <option value="غربي" selected>⬅️ غربي</option>
+            </select>
           </div>
         </div>
 

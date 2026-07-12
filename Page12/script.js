@@ -5269,6 +5269,35 @@ function closeStartModal() {
   clearSelectionAndHighlights();
 }
 
+/**
+ * updateDirectionRealtime - تحديث اتجاه الضلع في الكروكي فوراً عند تغيير القائمة المنسدلة
+ *
+ * @description يقرأ القيمة المحددة من القائمة المنسدلة للاتجاه ويقوم بتحديث
+ *              الكلمة الأولى في مسمى الحد المقابل داخل مصفوفة borderLabels
+ *              ثم يعيد رسم الكروكي وحفظ الحالة تلقائياً بدون الحاجة لإعادة الحسابات الهندسية.
+ * @param {string} inputId - معرف القائمة المنسدلة (مثال: start-w1-dir)
+ * @param {string} borderId - معرف الحد المقابل (مثال: border_1)
+ */
+function updateDirectionRealtime(inputId, borderId) {
+  const select = document.getElementById(inputId);
+  if (!select) return;
+  const newDir = select.value.trim();
+  
+  if (borderLabels && borderLabels.length > 0) {
+    const border = borderLabels.find(b => b.id === borderId);
+    if (border) {
+      const parts = border.text.split(" ");
+      if (parts.length >= 2) {
+        parts[0] = newDir;
+        border.text = parts.join(" ");
+        renderSVG();
+        saveStateDebounced();
+      }
+    }
+  }
+}
+
+
 // Add Data Modals triggers
 function openAddDataModal() {
   document.getElementById("addDataModal").style.display = "flex";
