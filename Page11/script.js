@@ -461,6 +461,8 @@ function renderHeaderAndFooter() {
       <p>النسبة (%)</p>
       <p>العرض الأول (أعلى)</p>
       <p>العرض الثاني (أسفل)</p>
+      <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
+      <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -479,6 +481,8 @@ function renderHeaderAndFooter() {
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
     `;
   } else {
     headerContainer.innerHTML = `
@@ -491,6 +495,8 @@ function renderHeaderAndFooter() {
       <p>النسبة (%)</p>
       <p>العرض الأول (أعلى)</p>
       <p>العرض الثاني (أسفل)</p>
+      <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
+      <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
       <p>العلامة (م)</p>
       <p>الفاصل (م)</p>
       <p></p>
@@ -506,6 +512,8 @@ function renderHeaderAndFooter() {
       <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
       <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
@@ -652,6 +660,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </div>
+      <div class="col-group width-avg-group">
+        <span class="mobile-label">معدل العرض (م)</span>
+        <input type="text" class="partner-width-avg" readonly value="-">
+      </div>
+      <div class="col-group length-avg-group">
+        <span class="mobile-label">معدل الطول (م)</span>
+        <input type="text" class="partner-length-avg" readonly value="-">
+      </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
         <input type="text" class="partner-cum-width" readonly value="-">
@@ -704,6 +720,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
           <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
+      </div>
+      <div class="col-group width-avg-group">
+        <span class="mobile-label">معدل العرض (م)</span>
+        <input type="text" class="partner-width-avg" readonly value="-">
+      </div>
+      <div class="col-group length-avg-group">
+        <span class="mobile-label">معدل الطول (م)</span>
+        <input type="text" class="partner-length-avg" readonly value="-">
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
@@ -1119,6 +1143,12 @@ function calculateGeneral() {
       const widthTopInput = row.querySelector(".partner-width-top");
       if (widthTopInput) widthTopInput.value = "-";
 
+      const widthAvgInput = row.querySelector(".partner-width-avg");
+      if (widthAvgInput) widthAvgInput.value = "-";
+
+      const lengthAvgInput = row.querySelector(".partner-length-avg");
+      if (lengthAvgInput) lengthAvgInput.value = "-";
+
       const cumWidthInput = row.querySelector(".partner-cum-width");
       if (cumWidthInput) cumWidthInput.value = "-";
 
@@ -1375,6 +1405,19 @@ function runPartition() {
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
     } else if (widthTopInput) {
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
+    }
+
+    const widthAvgInput = row.querySelector(".partner-width-avg");
+    if (widthAvgInput) {
+      const avgW = (botWidth + topWidth) / 2;
+      widthAvgInput.value = avgW > 0 ? avgW.toFixed(4) : "-";
+    }
+
+    const lengthAvgInput = row.querySelector(".partner-length-avg");
+    if (lengthAvgInput) {
+      const avgW = (botWidth + topWidth) / 2;
+      const avgL = avgW > 0 ? (calculatedGeoArea / avgW) : 0;
+      lengthAvgInput.value = avgL > 0 ? avgL.toFixed(4) : "-";
     }
 
     const cumWidthInput = row.querySelector(".partner-cum-width");
@@ -2493,9 +2536,9 @@ function getTableDataArray() {
   
   // رأس الجدول
   if (currentInputMethod === "carats") {
-    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "سهم", "قيراط", "فدان", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "معدل العرض (م)", "معدل الطول (م)", "العلامة (م)", "الفاصل (م)"]);
   } else {
-    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "العلامة (م)", "الفاصل (م)"]);
+    data.push(["م", "الشريك", "النسبة/الكسر", "تعادل (س.ق.ف)", "المساحة (م²)", "النسبة (%)", "العرض الأول (أعلى)", "العرض الثاني (أسفل)", "معدل العرض (م)", "معدل الطول (م)", "العلامة (م)", "الفاصل (م)"]);
   }
   
   rows.forEach((row, idx) => {
@@ -2528,6 +2571,22 @@ function getTableDataArray() {
     rowData.push(w2_val); // top width (العرض الأول (أعلى))
     rowData.push(w1_val); // bottom width (العرض الثاني (أسفل))
     
+    // معدل العرض ومعدل الطول
+    let avgW_val = "-";
+    let avgL_val = "-";
+    if (w1_val !== "-" && w2_val !== "-") {
+      const w1_num = parseFloat(w1_val);
+      const w2_num = parseFloat(w2_val);
+      if (!isNaN(w1_num) && !isNaN(w2_num)) {
+        const avgW = (w1_num + w2_num) / 2;
+        avgW_val = avgW.toFixed(4);
+        const area_val = parseFloat(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : 0) || 0;
+        avgL_val = avgW > 0 ? (area_val / avgW).toFixed(4) : "-";
+      }
+    }
+    rowData.push(avgW_val);
+    rowData.push(avgL_val);
+    
     rowData.push(row.querySelector(".partner-cum-width") ? row.querySelector(".partner-cum-width").value : "-");
     rowData.push(row.querySelector(".partner-div-line") ? row.querySelector(".partner-div-line").value : "-");
     data.push(rowData);
@@ -2538,7 +2597,7 @@ function getTableDataArray() {
   if (remRow && remRow.style.display !== "none") {
     const remData = [];
     const inputs = remRow.querySelectorAll("input");
-    if (inputs.length >= 11) {
+    if (inputs.length >= 13) {
       remData.push(inputs[0].value);
       remData.push(inputs[1].value);
       if (currentInputMethod === "carats") {
@@ -2561,6 +2620,8 @@ function getTableDataArray() {
         remData.push(remW2);
         remData.push(inputs[9].value);
         remData.push(inputs[10].value);
+        remData.push(inputs[11].value);
+        remData.push(inputs[12].value);
       } else {
         remData.push(inputs[2].value);
         remData.push(inputs[3].value);
@@ -2580,6 +2641,8 @@ function getTableDataArray() {
         remData.push(remW2);
         remData.push(inputs[9].value);
         remData.push(inputs[10].value);
+        remData.push(inputs[11].value);
+        remData.push(inputs[12].value);
       }
       data.push(remData);
     }
@@ -2590,7 +2653,7 @@ function getTableDataArray() {
   if (totalRow) {
     const totData = [];
     const inputs = totalRow.querySelectorAll("input");
-    if (inputs.length >= 11) {
+    if (inputs.length >= 13) {
       totData.push(inputs[0].value);
       totData.push(inputs[1].value);
       if (currentInputMethod === "carats") {
@@ -2603,6 +2666,8 @@ function getTableDataArray() {
         totData.push(inputs[8].value);
         totData.push(inputs[9].value);
         totData.push(inputs[10].value);
+        totData.push(inputs[11].value);
+        totData.push(inputs[12].value);
       } else {
         totData.push(inputs[2].value);
         totData.push(inputs[3].value);
@@ -2612,6 +2677,8 @@ function getTableDataArray() {
         totData.push(inputs[8].value);
         totData.push(inputs[9].value);
         totData.push(inputs[10].value);
+        totData.push(inputs[11].value);
+        totData.push(inputs[12].value);
       }
       data.push(totData);
     }
@@ -4041,6 +4108,12 @@ function updateRemainderRowUI(remainingArea) {
     }
   }
 
+  const remAvgW = (remTopW + remBotW) / 2;
+  const remAvgL = remAvgW > 0 ? (absRem / remAvgW) : 0;
+  
+  const remAvgW_str = remAvgW > 0 ? remAvgW.toFixed(4) : "-";
+  const remAvgL_str = remAvgL > 0 ? remAvgL.toFixed(4) : "-";
+
   if (currentInputMethod === "carats") {
     row.innerHTML = `
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -4052,6 +4125,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -4068,6 +4143,8 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">

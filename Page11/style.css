@@ -337,7 +337,7 @@ body {
 
 .table-header, .partner-row, #total, #remainder-row-table {
   display: grid !important;
-  grid-template-columns: 40px var(--name-column-width, 140px) 70px 60px 60px 100px 80px 100px 100px 170px 100px 50px !important;
+  grid-template-columns: 40px var(--name-column-width, 140px) 70px 60px 60px 100px 80px 100px 100px 100px 100px 170px 100px 50px !important;
   gap: 4px !important;
   align-items: center !important;
   width: 100% !important;
@@ -2289,6 +2289,12 @@ body {
   /* Editable width inputs row */
   .width-bottom-group,
   .width-top-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Average width and average length row */
+  .width-avg-group,
+  .length-avg-group {
     grid-column: span 6 !important;
   }
 

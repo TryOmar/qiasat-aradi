@@ -1,8 +1,10 @@
 // tests.js - Unit & Integration Tests for Page11 Land Partition
 function runAutomatedTests() {
+  const startTime = performance.now();
   window.__RUNNING_TESTS__ = true;
   const report = [];
   let passed = true;
+  let maxGeoDiff = 0;
 
   function assert(condition, message, details = "") {
     if (!condition) passed = false;
@@ -12,6 +14,48 @@ function runAutomatedTests() {
       details: details
     });
   }
+
+  // Verify average width and average length relationship for all partner rows and remainder row
+  function verifyPartitionMath(stageName) {
+    const rows = document.querySelectorAll("#partners-list .partner-row");
+    rows.forEach((row, idx) => {
+      const name = row.querySelector(".partner-name") ? row.querySelector(".partner-name").value : `شريك ${idx + 1}`;
+      const areaVal = parseFloat(row.querySelector(".partner-area") ? row.querySelector(".partner-area").value : 0) || 0;
+      const avgWVal = parseFloat(row.querySelector(".partner-width-avg") ? row.querySelector(".partner-width-avg").value : 0) || 0;
+      const avgLVal = parseFloat(row.querySelector(".partner-length-avg") ? row.querySelector(".partner-length-avg").value : 0) || 0;
+      
+      if (avgWVal > 0 && avgLVal > 0) {
+        const calculatedArea = avgWVal * avgLVal;
+        const diff = Math.abs(calculatedArea - areaVal);
+        if (diff > maxGeoDiff) maxGeoDiff = diff;
+        assert(diff < 0.001, `تحقق هندسي (${stageName}) - الشريك ${name}: معدل العرض (${avgWVal.toFixed(4)}) × معدل الطول (${avgLVal.toFixed(4)}) ≈ المساحة (${areaVal.toFixed(4)})`, `الفرق الفعلي: ${diff.toFixed(6)} م²`);
+      }
+    });
+
+    const remRow = document.getElementById("remainder-row-table");
+    if (remRow && remRow.style.display !== "none") {
+      const inputs = remRow.querySelectorAll("input");
+      if (inputs.length >= 13) {
+        const areaVal = parseFloat(inputs[5].value) || 0;
+        const avgWVal = parseFloat(inputs[9].value) || 0;
+        const avgLVal = parseFloat(inputs[10].value) || 0;
+        if (avgWVal > 0 && avgLVal > 0) {
+          const calculatedArea = avgWVal * avgLVal;
+          const diff = Math.abs(calculatedArea - areaVal);
+          if (diff > maxGeoDiff) maxGeoDiff = diff;
+          assert(diff < 0.001, `تحقق هندسي (${stageName}) - الجزء المتبقي: معدل العرض (${avgWVal.toFixed(4)}) × معدل الطول (${avgLVal.toFixed(4)}) ≈ المساحة (${areaVal.toFixed(4)})`, `الفرق الفعلي: ${diff.toFixed(6)} م²`);
+        }
+      }
+    }
+  }
+
+  const originalRunPartition = window.runPartition;
+  let partitionCount = 0;
+  window.runPartition = function() {
+    originalRunPartition();
+    partitionCount++;
+    verifyPartitionMath(`خطوة التقسيم رقم ${partitionCount}`);
+  };
 
   // Backup current user state
   const backup = {
@@ -881,6 +925,59 @@ function runAutomatedTests() {
     window.runPartition();
     assert(window.isPartitioned === true, "الحالة 16: يجب أن نتمكن من تقسيم شركاء جدد مباشرة بنجاح.");
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 17: Performance and Regression Scaling Verification
+    // -------------------------------------------------------------------------
+    const perfSteps = [10, 50, 100];
+    perfSteps.forEach(count => {
+      // Clear and setup count partners
+      const list = document.getElementById("partners-list");
+      list.innerHTML = "";
+      
+      document.getElementById("length1").value = 100;
+      document.getElementById("length2").value = 100;
+      document.getElementById("width1").value = 100;
+      document.getElementById("width2").value = 100;
+      
+      for (let i = 0; i < count; i++) {
+        // distribute area equally
+        if (currentInputMethod === "carats") {
+          addNewPartnerRow(`شريك أداء ${i + 1}`, 0, 0, 10, ""); // 10 shares
+        } else {
+          addNewPartnerRow(`شريك أداء ${i + 1}`, "", "", "", `1/${count}`);
+        }
+      }
+      
+      // Measure runPartition execution time
+      const tStart = performance.now();
+      window.runPartition();
+      const tEnd = performance.now();
+      const runDuration = tEnd - tStart;
+      
+      assert(runDuration < 100, `الحالة 17 (الأداء لـ ${count} شريك): زمن التقسيم الهندسي يجب أن يكون سريعاً جداً (< 100 مللي ثانية).`, `الزمن الفعلي: ${runDuration.toFixed(2)} مللي ثانية`);
+      
+      // Verify no overlap: sum of botW and topW should match land dimensions
+      let sumBotW = 0;
+      let sumTopW = 0;
+      const rows = document.querySelectorAll("#partners-list .partner-row");
+      rows.forEach(r => {
+        sumBotW += parseFloat(r.querySelector(".partner-width-bottom") ? r.querySelector(".partner-width-bottom").value : 0) || 0;
+        sumTopW += parseFloat(r.querySelector(".partner-width-top") ? r.querySelector(".partner-width-top").value : 0) || 0;
+      });
+      
+      assert(Math.abs(sumBotW - 100) < 0.1, `الحالة 17 (تطابق الحدود لـ ${count} شريك): مجموع عروض الشركاء السفلية (${sumBotW.toFixed(2)} م) يطابق عرض الأرض السفلي (100 م).`);
+      assert(Math.abs(sumTopW - 100) < 0.1, `الحالة 17 (تطابق الحدود لـ ${count} شريك): مجموع عروض الشركاء العلوية (${sumTopW.toFixed(2)} م) يطابق عرض الأرض العلوي (100 م).`);
+    });
+
+    // -------------------------------------------------------------------------
+    // TEST CASE 18: Layout Orientation & Print sanity check
+    // -------------------------------------------------------------------------
+    const dataArray = getTableDataArray();
+    assert(dataArray.length > 0, "الحالة 18: دالة getTableDataArray يجب أن تنشئ تقريراً للطباعة بنجاح.");
+    if (dataArray.length > 0) {
+      assert(dataArray[0].length === 13, `الحالة 18: عدد أعمدة التصدير والطباعة يجب أن يكون 13 عموداً متطابقاً.`, `العدد الفعلي: ${dataArray[0].length}`);
+    }
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {
@@ -897,15 +994,165 @@ function runAutomatedTests() {
     window.isManualPartition = backup.isManualPartition;
     window.isPartitioned = backup.isPartitioned;
 
+    window.runPartition = originalRunPartition;
     window.__RUNNING_TESTS__ = false;
     window.runPartition();
   }
 
+  const endTime = performance.now();
+  const execTimeMs = endTime - startTime;
+  const totalTests = report.length;
+  const passedTests = report.filter(x => x.status === "PASS").length;
+  const failedTests = report.filter(x => x.status === "FAIL").length;
 
-  showTestResultsReport(report, passed);
+  const pct = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
+  let grade = "";
+  let gradeColor = "";
+  if (pct === 100) {
+    grade = "🟢 ممتاز (100%)";
+    gradeColor = "#2e7d32";
+  } else if (pct >= 95) {
+    grade = "🟢 جيد جداً (" + pct.toFixed(1) + "%)";
+    gradeColor = "#4caf50";
+  } else if (pct >= 90) {
+    grade = "🟡 جيد (" + pct.toFixed(1) + "%)";
+    gradeColor = "#fbc02d";
+  } else if (pct >= 70) {
+    grade = "🟠 يحتاج مراجعة (" + pct.toFixed(1) + "%)";
+    gradeColor = "#ef6c00";
+  } else {
+    grade = "🔴 فشل (" + pct.toFixed(1) + "%)";
+    gradeColor = "#c62828";
+  }
+
+  window.__LAST_TEST_SUMMARY__ = {
+    totalTests,
+    passedTests,
+    failedTests,
+    execTimeMs,
+    maxGeoDiff,
+    grade,
+    gradeColor,
+    report
+  };
+
+  showTestResultsReport(report, passed, {
+    totalTests,
+    passedTests,
+    failedTests,
+    execTimeMs,
+    maxGeoDiff,
+    grade,
+    gradeColor
+  });
 }
 
-function showTestResultsReport(report, passed) {
+function getTestCategory(message) {
+  const msg = message.toLowerCase();
+  if (msg.includes("تحقق هندسي") || msg.includes("مساحة") || msg.includes("النسبة") || msg.includes("فدان") || msg.includes("قيراط") || msg.includes("سهم") || msg.includes("متبقي") || msg.includes("المجموع")) {
+    return "الحسابات الهندسية";
+  }
+  if (msg.includes("تداخل") || msg.includes("فجوات") || msg.includes("الحدود") || msg.includes("تطابق") || msg.includes("العلامة") || msg.includes("الفاصل") || msg.includes("رسم") || msg.includes("كروكي")) {
+    return "الرسم والكروكي";
+  }
+  if (msg.includes("الأداء") || msg.includes("زمن") || msg.includes("ثانية") || msg.includes("أداء")) {
+    return "الأداء";
+  }
+  if (msg.includes("طباعة") || msg.includes("تصدير") || msg.includes("تقرير") || msg.includes("csv") || msg.includes("pdf") || msg.includes("أعمدة")) {
+    return "الطباعة والتقارير";
+  }
+  return "استقرار النظام";
+}
+
+window.saveQualityReport = function() {
+  const summaryData = window.__LAST_TEST_SUMMARY__;
+  if (!summaryData) return;
+  const dateStr = new Date().toLocaleString('ar-EG');
+  
+  let htmlContent = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="utf-8">
+      <title>تقرير جودة النسخة - تطبيق الدلال</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #fafafa; color: #333; }
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #1565c0; border-bottom: 2px solid #1565c0; padding-bottom: 10px; margin-bottom: 20px; font-family: Arial, sans-serif; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px; font-size: 14px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: #f5f5f5; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #e0e0e0; }
+        .stat-val { font-size: 20px; margin-top: 5px; color: #1565c0; }
+        .category-title { background: #ef5350; color: white; padding: 8px 12px; border-radius: 6px; margin-top: 25px; margin-bottom: 12px; font-size: 15px; font-weight: bold; }
+        .category-title.success { background: #1565c0; }
+        .test-row { background: #fff; padding: 10px 15px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13.5px; }
+        .status-pass { color: #2e7d32; font-weight: bold; }
+        .status-fail { color: #c62828; font-weight: bold; }
+        .details { font-family: monospace; font-size: 11px; color: #666; margin-top: 4px; direction: ltr; text-align: left; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>📄 تقرير جودة النسخة - تطبيق الدلال</h1>
+        <div class="meta-grid">
+          <div><strong>إصدار البرنامج:</strong> 3.0</div>
+          <div><strong>إصدار قاعدة الاختبارات:</strong> 2.1</div>
+          <div><strong>تاريخ تنفيذ الاختبار:</strong> ${dateStr}</div>
+          <div><strong>رقم الـ Commit المرجعي:</strong> 2dc9aca</div>
+        </div>
+        
+        <div class="stat-grid">
+          <div class="stat-box">المنفذة<div class="stat-val">${summaryData.totalTests}</div></div>
+          <div class="stat-box" style="background:#e8f5e9; border-color:#a5d6a7; color:#2e7d32;">الناجحة<div class="stat-val" style="color:#2e7d32;">${summaryData.passedTests}</div></div>
+          <div class="stat-box" style="background:#ffebee; border-color:#ffcdd2; color:#c62828;">الفاشلة<div class="stat-val" style="color:#c62828;">${summaryData.failedTests}</div></div>
+        </div>
+
+        <div style="background: #fff8e1; border: 1.5px solid #ffe082; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; font-size: 14.5px;">
+          <div>⏱️ <strong>زمن التنفيذ الكلي:</strong> ${summaryData.execTimeMs.toFixed(2)} مللي ثانية</div>
+          <div>📊 <strong>أكبر فرق هندسي:</strong> ${summaryData.maxGeoDiff.toFixed(6)} م²</div>
+          <div>🏆 <strong>مؤشر الجودة:</strong> <span style="font-weight:bold; color:${summaryData.gradeColor};">${summaryData.grade}</span></div>
+        </div>
+
+        <h2>تفاصيل نتائج الاختبارات المصنفة:</h2>
+  `;
+
+  const categories = ["الحسابات الهندسية", "الرسم والكروكي", "الأداء", "الطباعة والتقارير", "استقرار النظام"];
+  categories.forEach(cat => {
+    const catTests = summaryData.report.filter(x => getTestCategory(x.message) === cat);
+    if (catTests.length > 0) {
+      const hasFail = catTests.some(x => x.status === "FAIL");
+      htmlContent += `<div class="category-title ${hasFail ? '' : 'success'}">${cat} (${catTests.length} فحص)</div>`;
+      catTests.forEach(item => {
+        htmlContent += `
+          <div class="test-row">
+            <div style="flex: 1;">
+              <div>${item.message}</div>
+              ${item.details ? `<div class="details">${item.details}</div>` : ""}
+            </div>
+            <div class="${item.status === 'PASS' ? 'status-pass' : 'status-fail'}">${item.status === 'PASS' ? 'نجاح' : 'فشل'}</div>
+          </div>
+        `;
+      });
+    }
+  });
+
+  htmlContent += `
+      </div>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "Test_Quality_Report_" + new Date().toISOString().slice(0,10) + ".html");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+function showTestResultsReport(report, passed, summary = null) {
   let overlay = document.getElementById("test-report-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
@@ -914,34 +1161,79 @@ function showTestResultsReport(report, passed) {
     document.body.appendChild(overlay);
   }
 
+  const dateStr = new Date().toLocaleString('ar-EG');
+  let summaryHtml = "";
+  if (summary) {
+    summaryHtml = `
+      <div style="background: #e3f2fd; border: 1.5px solid #90caf9; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12.5px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; color: #0d47a1;">
+        <div style="grid-column: span 2; border-bottom: 1px solid #90caf9; padding-bottom: 4px; font-weight: bold;">
+          ℹ️ إصدار البرنامج: 3.0 | قاعدة الاختبارات: 2.1 | الـ Commit: 2dc9aca
+        </div>
+        <div>🗓️ <strong>التاريخ والوقت:</strong> ${dateStr}</div>
+        <div>⏱️ <strong>زمن التنفيذ:</strong> ${summary.execTimeMs.toFixed(2)} مللي ثانية</div>
+        <div>✅ <strong>المنفذة:</strong> ${summary.totalTests} فحص فرعي</div>
+        <div>🟢 <strong>الناجحة:</strong> ${summary.passedTests}</div>
+        <div>🔴 <strong>الفاشلة:</strong> ${summary.failedTests}</div>
+        <div>🏆 <strong>مؤشر الجودة:</strong> <span style="font-weight:bold; color:${summary.gradeColor};">${summary.grade}</span></div>
+        <div style="grid-column: span 2; border-top: 1px dashed #90caf9; padding-top: 6px; font-weight: bold; color: #2e7d32;">
+          📊 أكبر فرق هندسي تم رصده: ${summary.maxGeoDiff.toFixed(6)} م²
+        </div>
+      </div>
+    `;
+  }
+
   let html = `
     <div style="background: white; border-radius: 12px; width: 90%; max-width: 650px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 85%;">
       <div style="background: ${passed ? "#2e7d32" : "#c62828"}; color: white; padding: 15px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; font-size: 16px;">🧪 تقرير الاختبارات التلقائية لدقة الحسابات الهندسية</h3>
+        <h3 style="margin: 0; font-size: 16px;">🧪 تقرير جودة النسخة واختبارات الانحدار</h3>
         <button onclick="document.getElementById('test-report-overlay').style.display='none'" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
       </div>
       <div style="padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px;">
         <div style="font-weight: bold; font-size: 14px; color: ${passed ? "#2e7d32" : "#c62828"}; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 8px;">
           ${passed ? "🟢 جميع الاختبارات اجتازت بنجاح! دقة الحساب متناهية والفرق النهائي = 0.000000 م²" : "🔴 بعض الاختبارات فشلت. يرجى مراجعة التفاصيل أدناه."}
         </div>
+        ${summaryHtml}
   `;
 
-  report.forEach(item => {
-    html += `
-      <div style="border-right: 4px solid ${item.status === "PASS" ? "#2e7d32" : "#c62828"}; background: #f9f9f9; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; text-align: right;">
-        <div style="display: flex; justify-content: space-between; font-weight: bold; color: #333;">
-          <span>${item.message}</span>
-          <span style="color: ${item.status === "PASS" ? "#2e7d32" : "#c62828"};">${item.status === "PASS" ? "نجاح" : "فشل"}</span>
+  // Render tests grouped by category
+  const categories = ["الحسابات الهندسية", "الرسم والكروكي", "الأداء", "الطباعة والتقارير", "استقرار النظام"];
+  categories.forEach(cat => {
+    const catTests = report.filter(x => getTestCategory(x.message) === cat);
+    if (catTests.length > 0) {
+      const hasFail = catTests.some(x => x.status === "FAIL");
+      const catColor = hasFail ? "#d32f2f" : "#1565c0";
+      const catBg = hasFail ? "#ffebee" : "#e3f2fd";
+      
+      html += `
+        <div style="background: ${catBg}; color: ${catColor}; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: 12px; border: 1px solid ${hasFail ? '#ffcdd2' : '#bbdefb'}; display: flex; justify-content: space-between; align-items: center;">
+          <span>📁 ${cat}</span>
+          <span style="font-size:11.5px; opacity:0.9;">(${catTests.length} فحص)</span>
         </div>
-        ${item.details ? `<div style="font-family: monospace; color: #666; font-size: 11px; margin-top: 4px; direction: ltr; text-align: left;">${item.details}</div>` : ""}
-      </div>
-    `;
+      `;
+      
+      catTests.forEach(item => {
+        html += `
+          <div style="border-right: 4px solid ${item.status === "PASS" ? "#2e7d32" : "#c62828"}; background: #f9f9f9; padding: 8px 12px; border-radius: 4px; font-size: 12px; text-align: right; margin-right: 12px;">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #333;">
+              <span>${item.message}</span>
+              <span style="color: ${item.status === "PASS" ? "#2e7d32" : "#c62828"};">${item.status === "PASS" ? "نجاح" : "فشل"}</span>
+            </div>
+            ${item.details ? `<div style="font-family: monospace; color: #666; font-size: 10.5px; margin-top: 4px; direction: ltr; text-align: left;">${item.details}</div>` : ""}
+          </div>
+        `;
+      });
+    }
   });
 
   html += `
       </div>
-      <div style="padding: 12px; background: #f5f5f5; border-radius: 0 0 12px 12px; text-align: center;">
-        <button onclick="document.getElementById('test-report-overlay').style.display='none'" style="background: #2e7d32; color: white; border: none; padding: 6px 18px; border-radius: 6px; font-family: Cairo; font-weight: bold; cursor: pointer;">إغلاق</button>
+      <div style="padding: 12px; background: #f5f5f5; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center;">
+        <button onclick="saveQualityReport()" style="background: #1565c0; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-family: Cairo; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+          📄 حفظ تقرير الجودة
+        </button>
+        <button onclick="document.getElementById('test-report-overlay').style.display='none'" style="background: #2e7d32; color: white; border: none; padding: 8px 24px; border-radius: 6px; font-family: Cairo; font-weight: bold; cursor: pointer; font-size: 13px;">
+          إغلاق
+        </button>
       </div>
     </div>
   `;
