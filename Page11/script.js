@@ -1424,7 +1424,7 @@ function runPartition() {
 
     const cumWidthInput = row.querySelector(".partner-cum-width");
     if (cumWidthInput) {
-      cumWidthInput.value = `يمين ➡️ أعلى: ${topStart.toFixed(4)} ← ${topEnd.toFixed(4)} م | أسفل: ${botStart.toFixed(4)} ← ${botEnd.toFixed(4)} م`;
+      cumWidthInput.value = `من اليمين\nأعلى:\n${topStart.toFixed(4)} → ${topEnd.toFixed(4)} م\nأسفل:\n${botStart.toFixed(4)} → ${botEnd.toFixed(4)} م`;
     }
 
     const divLineInput = row.querySelector(".partner-div-line");
@@ -2286,7 +2286,7 @@ function renderCroquis() {
             const dirGroup = svgEl("g");
             dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
 
-            const badgeFontSize = Math.max(9, fontSize - 1.5);
+            const badgeFontSize = Math.max(9, fontSize - 1);
             const badgePadX = 6 * textScale;
             const badgePadY = 4 * textScale;
             const badgeLineH = (badgeFontSize + 3) * textScale;
@@ -2307,12 +2307,12 @@ function renderCroquis() {
             rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.18))");
             dirGroup.appendChild(rect);
 
-            // سطر الإيموجي
+            // سطر الإيموجي (أكبر حجماً)
             const tEmoji = svgEl("text");
             tEmoji.setAttribute("x", cx);
             tEmoji.setAttribute("y", yDirection - badgePadY + 1 * textScale);
             tEmoji.setAttribute("fill", badgeFill);
-            tEmoji.setAttribute("font-size", (badgeFontSize + 1) + "px");
+            tEmoji.setAttribute("font-size", (badgeFontSize + 4) + "px");
             tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tEmoji.setAttribute("text-anchor", "middle");
             tEmoji.textContent = badgeEmoji;
@@ -2527,6 +2527,12 @@ function renderCroquis() {
       const scaleX0 = mapX(0);  // بداية من اليمين (x=0)
       const scaleX1 = mapX(w);  // نهاية اليسار (x=w)
 
+      // عنوان المحور فوق الخط
+      const scaleMidX = (scaleX0 + scaleX1) / 2;
+      g.appendChild(svgText(scaleMidX, scaleY - 12 * textScale, "محور القياس المرجعي (متوسط العرض)", {
+        fill: "#37474f", size: "8.5", weight: "normal", bg: false
+      }));
+
       // اختيار خطوة القياس الرئيسية (ديناميكية)
       let majorStep;
       if (w < 20) majorStep = 1;
@@ -2563,18 +2569,24 @@ function renderCroquis() {
 
       // رسم نقاط القياس عند كل فاصل (Divider Ticks) بلون برتقالي مميز
       if (window.calculatedPieces && window.calculatedPieces.length > 0) {
+        let dividerNum = 0;
         window.calculatedPieces.forEach((piece, idx) => {
           if (piece.isRemainder) return;
           // endX: مسافة نهاية القطعة من اليمين (في إحداثيات البيانات)
-          // الفاصل على المحور البصري يتطلب عكس الإحداثيات لأن الرسم من اليمين إلى اليسار
-          const divMeters = piece.endX; // مسافة الفاصل من اليمين (قيمة القياس الحقيقية)
+          const divMeters = piece.endX;
           if (divMeters <= 0 || divMeters >= w) return;
-          const dx = mapX(w - divMeters); // الموقع البصري على المحور
+          dividerNum++;
+          const dx = mapX(w - divMeters);
 
           // شرطة برتقالية طويلة للفاصل
           g.appendChild(svgLine(dx, scaleY - 10 * textScale, dx, scaleY + 10 * textScale, { stroke: "#ef6c00", width: 2 * textScale }));
 
-          // رقم قيمة الفاصل أسفل المحور
+          // تسمية الفاصل فوق الخط
+          g.appendChild(svgText(dx, scaleY - 14 * textScale, `ف${dividerNum}`, {
+            fill: "#ef6c00", size: "8", weight: "bold", bg: true
+          }));
+
+          // قيمة الفاصل أسفل المحور
           g.appendChild(svgText(dx, scaleY + 22 * textScale, divMeters.toFixed(2) + " م", {
             fill: "#ef6c00",
             size: "8.5",
@@ -3130,6 +3142,110 @@ function exportPDF() {
   setTimeout(() => {
     alert('💡 في نافذة الطباعة، اختر "حفظ كـ PDF" من قائمة الطابعات لتصدير الملف كـ PDF.');
   }, 1000);
+}
+
+function printFieldGuide() {
+  if (!window.calculatedPieces || window.calculatedPieces.filter(p => !p.isRemainder).length === 0) {
+    alert("⚠ يرجى إجراء التقسيم أولاً قبل طباعة الدليل الحقلي.");
+    return;
+  }
+  if (hasDeficit()) {
+    alert("🔴 لا يمكن طباعة الدليل الحقلي لوجود عجز في الأنصبة. يرجى مراجعة الأنصبة أولاً.");
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const partners = window.calculatedPieces.filter(p => !p.isRemainder);
+  const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
+
+  let stepsHTML = `
+    <div class="step start-step">
+      <div class="step-icon">🏁</div>
+      <div class="step-content">
+        <div class="step-title">بداية القياس</div>
+        <div class="step-sub">ابدأ من الحد الأيمن للأرض (النقطة صفر)</div>
+      </div>
+    </div>`;
+
+  partners.forEach((piece, idx) => {
+    const isLast = idx === partners.length - 1;
+    const fcs = convertSquareMetersToFCS(piece.area);
+    stepsHTML += `
+    <div class="step-arrow">↓</div>
+    <div class="step piece-step">
+      <div class="step-num">${idx + 1}</div>
+      <div class="step-content">
+        <div class="step-title">${piece.name || 'شريك ' + (idx + 1)}</div>
+        <div class="step-area">${piece.area.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
+        <div class="step-widths">أعلى: ${piece.topW.toFixed(4)} م | أسفل: ${piece.botW.toFixed(4)} م</div>
+        ${!isLast ? `<div class="step-divider">الفاصل ${idx + 1}: <strong>${piece.endX.toFixed(4)} م</strong> من الحد الأيمن</div>` : ""}
+      </div>
+    </div>`;
+  });
+
+  stepsHTML += `
+    <div class="step-arrow">↓</div>
+    <div class="step end-step">
+      <div class="step-icon">🛑</div>
+      <div class="step-content">
+        <div class="step-title">نهاية التقسيم</div>
+        <div class="step-sub">الحد الأيسر للأرض — المساحة الإجمالية: ${totalArea}</div>
+      </div>
+    </div>`;
+
+  const guideHTML = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>دليل التنفيذ الحقلي - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 15mm 12mm; }
+    body { font-family: 'Cairo', sans-serif; direction: rtl; background: #fff; color: #111; font-size: 12pt; }
+    .header { border: 2.5px solid #1b5e20; border-radius: 10px; padding: 12px 18px; margin-bottom: 18px; background: #f1f8e9; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header h1 { font-size: 22pt; color: #1b5e20; font-weight: 800; }
+    .header h2 { font-size: 13pt; color: #2e7d32; font-weight: 700; text-align: center; }
+    .header .meta { font-size: 9pt; color: #444; text-align: left; line-height: 1.6; }
+    .direction-bar { background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 8px; padding: 8px 14px; margin-bottom: 18px; font-size: 11pt; font-weight: bold; color: #e65100; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .steps { display: flex; flex-direction: column; align-items: stretch; }
+    .step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px; border-radius: 10px; margin-bottom: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .start-step { background: #e8f5e9; border: 2px solid #2e7d32; }
+    .end-step { background: #ffebee; border: 2px solid #c62828; }
+    .piece-step { background: #f9f9f9; border: 1.5px solid #bdbdbd; }
+    .step-arrow { text-align: center; font-size: 18pt; color: #37474f; line-height: 1.2; margin: 2px 0; }
+    .step-icon { font-size: 22pt; line-height: 1; }
+    .step-num { min-width: 32px; height: 32px; border-radius: 50%; background: #1b5e20; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13pt; font-weight: 800; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-content { flex: 1; }
+    .step-title { font-size: 12.5pt; font-weight: 700; color: #1b5e20; margin-bottom: 2px; }
+    .start-step .step-title { color: #1b5e20; }
+    .end-step .step-title { color: #c62828; }
+    .step-sub { font-size: 10pt; color: #555; }
+    .step-area { font-size: 10pt; color: #333; margin-top: 2px; }
+    .step-widths { font-size: 9.5pt; color: #666; }
+    .step-divider { font-size: 11pt; color: #ef6c00; font-weight: bold; background: #fff3e0; border: 1.5px solid #ffe0b2; border-radius: 6px; padding: 4px 10px; margin-top: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .footer { margin-top: 24px; text-align: center; font-size: 8.5pt; color: #888; border-top: 1px solid #ccc; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div><h1>الدَّلاَّل</h1><p style="font-size:9pt;color:#388e3c;font-family:Cairo,sans-serif;">دليل التنفيذ الحقلي</p></div>
+    <h2>خطوات تقسيم الأرض على الطبيعة</h2>
+    <div class="meta"><div><strong>التاريخ:</strong> ${dateStr}</div><div><strong>المساحة:</strong> ${totalArea}</div><div><strong>عدد الشركاء:</strong> ${partners.length}</div></div>
+  </div>
+  <div class="direction-bar">➡️ اتجاه التقسيم: من اليمين إلى اليسار — ابدأ القياس من الحد الأيمن للأرض (النقطة صفر)</div>
+  <div class="steps">${stepsHTML}</div>
+  <div class="footer">تطبيق الدَّلاَّل لقياسات الأراضي الزراعية | الإصدار v2.4</div>
+</body>
+</html>`;
+
+  const win = window.open("", "_blank");
+  if (!win) { alert("⚠ تعذر فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة."); return; }
+  win.document.write(guideHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 600);
 }
 
 function exportExcel() {
@@ -4971,7 +5087,9 @@ function updateInspector(index) {
   }
   
   if (insRoundingDiffEl) {
-    insRoundingDiffEl.innerText = `${Math.abs(roundingDiff).toFixed(4)} م²`;
+    const absDiff = Math.abs(roundingDiff);
+    const isAccurate = absDiff < 0.01;
+    insRoundingDiffEl.innerHTML = `${absDiff.toFixed(4)} م² ${isAccurate ? '<span style="color:#2e7d32;font-weight:bold;">✔ العلاقة الهندسية صحيحة</span>' : '<span style="color:#c62828;">⚠ فرق ملحوظ</span>'}`;
   }
   
   if (insPercentEl) {
