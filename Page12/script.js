@@ -645,13 +645,37 @@ function sqmToFeddanCaratShares(sqm) {
 }
 
 /**
- * الحصول على أسماء القطع لنموذج المجرى المائي بناء على اتجاه المجرى.
- * إذا كان المجرى بالعرض (أفقي - mixed_waterway_new) -> القطعة البحرية والقطعة القبلية.
- * إذا كان المجرى بالطول (رأسي - mixed_split_image) -> القطعة الغربية والقطعة الشرقية.
+ * الحصول على اتجاه المجرى المائي هندسياً من النقاط أو كخيار احتياطي من القالب.
+ * @returns {"horizontal" | "vertical"}
+ */
+function getWaterwayDirection() {
+  if (typeof waterways !== 'undefined' && waterways && waterways.length > 0) {
+    const w = waterways[0];
+    if (w.points && w.points.length >= 4) {
+      const pts = w.points;
+      const width = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
+      const height = Math.sqrt(Math.pow(pts[3].x - pts[0].x, 2) + Math.pow(pts[3].y - pts[0].y, 2));
+      return width > height ? 'horizontal' : 'vertical';
+    }
+    if (w.angle === 90) return 'vertical';
+  }
+  // خيار احتياطي في مرحلة التهيئة قبل الرسم
+  if (typeof activeTemplateType !== 'undefined') {
+    if (activeTemplateType === 'mixed_waterway_new') return 'horizontal';
+    if (activeTemplateType === 'mixed_split_image') return 'vertical';
+  }
+  return 'horizontal';
+}
+
+/**
+ * الحصول على أسماء القطع لنموذج المجرى المائي بناء على اتجاه المجرى هندسياً.
+ * إذا كان المجرى أفقي (horizontal) -> القطعة البحرية والقطعة القبلية.
+ * إذا كان المجرى رأسي (vertical) -> القطعة الغربية والقطعة الشرقية.
  * @returns {{west: string, east: string}}
  */
 function getMixedPieceNames() {
-  if (activeTemplateType === 'mixed_waterway_new') {
+  const dir = getWaterwayDirection();
+  if (dir === 'horizontal') {
     return { west: "القطعة البحرية", east: "القطعة القبلية" };
   } else {
     return { west: "القطعة الغربية", east: "القطعة الشرقية" };
