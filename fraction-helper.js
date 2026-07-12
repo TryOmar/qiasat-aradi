@@ -716,7 +716,63 @@
       btn.className = "fh-activator-btn";
       btn.type = "button";
       btn.innerHTML = "🤖 تشغيل المساعد";
-      btn.addEventListener("click", function () {
+
+      let isDragging = false;
+      let startX, startY;
+      let initialLeft, initialTop;
+
+      btn.addEventListener("mousedown", dragStart);
+      btn.addEventListener("touchstart", dragStart, { passive: true });
+
+      function dragStart(e) {
+        isDragging = false;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startX = clientX;
+        startY = clientY;
+        const rect = btn.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        document.addEventListener("mousemove", dragMove);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("touchmove", dragMove, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+      }
+
+      function dragMove(e) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          isDragging = true;
+        }
+
+        if (isDragging) {
+          if (e.cancelable) e.preventDefault();
+          btn.style.right = 'auto';
+          btn.style.bottom = 'auto';
+          btn.style.left = (initialLeft + dx) + "px";
+          btn.style.top = (initialTop + dy) + "px";
+        }
+      }
+
+      function dragEnd() {
+        document.removeEventListener("mousemove", dragMove);
+        document.removeEventListener("mouseup", dragEnd);
+        document.removeEventListener("touchmove", dragMove);
+        document.removeEventListener("touchend", dragEnd);
+      }
+
+      btn.addEventListener("click", function (e) {
+        if (isDragging) {
+          e.preventDefault();
+          e.stopPropagation();
+          isDragging = false;
+          return;
+        }
         localStorage.setItem("fh_disabled", "false");
         btn.style.display = "none";
         if (activeInput) {
@@ -725,6 +781,7 @@
           if (tooltip) tooltip.classList.add("fh-active");
         }
       });
+
       document.body.appendChild(btn);
     } catch (err) {
       logError("showActivatorButton", err);
