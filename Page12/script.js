@@ -278,6 +278,7 @@ let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
 
 // Color Palette for Shapes
 const colorsList = [
+  { name: "أبيض", value: "#ffffff", stroke: "#1b5e20" },
   { name: "أخضر فاتح", value: "#DCEFD9", stroke: "#2E7D32" },
   { name: "أزرق فاتح", value: "#D7E9FF", stroke: "#1565C0" },
   { name: "أصفر فاتح", value: "#FFF0C9", stroke: "#EF6C00" },
@@ -285,8 +286,7 @@ const colorsList = [
   { name: "بنفسجي فاتح", value: "#E9DDF8", stroke: "#6A1B9A" },
   { name: "تركواز فاتح", value: "#D8F3EF", stroke: "#00796B" },
   { name: "برتقالي خفيف", value: "#FBE9E7", stroke: "#D84315" },
-  { name: "ليموني خفيف", value: "#F1F8E9", stroke: "#558B2F" },
-  { name: "أبيض", value: "#ffffff", stroke: "#1b5e20" }
+  { name: "ليموني خفيف", value: "#F1F8E9", stroke: "#558B2F" }
 ];
 
 // Document Load Initializer
@@ -923,7 +923,7 @@ function generateCustomLand(useCustomWidths = false) {
         owner: "الشريك " + (i + 1),
         area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
         notes: "نصيب الشريك " + (i + 1),
-        color: colorsList[colorIndex].value,
+        color: "#ffffff",
         textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
         textY: (p_tl.y + p_tr.y + p_br.y + p_bl.y) / 4
       });
@@ -976,7 +976,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: "اسم المالك",
       area: { feddan: detailedArea.feddan, carat: detailedArea.carat, shares: detailedArea.shares, sqm: totalArea },
       notes: "خريطة ارض",
-      color: "#f1f8e9",
+      color: "#ffffff",
       textX: centerX,
       textY: centerY
     });
@@ -997,7 +997,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: isRotated ? "الشريك الأول (غربي)" : "الشريك الأول (بحري)",
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب غربي" : "نصيب بحري",
-      color: "#f1f8e9",
+      color: "#ffffff",
       textX: (p1.x + p_top_mid.x) / 2,
       textY: (p1.y + p_bot_mid.y) / 2
     });
@@ -1010,7 +1010,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: isRotated ? "الشريك الثاني (شرقي)" : "الشريك الثاني (قبلي)",
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب شرقي" : "نصيب قبلي",
-      color: "#e3f2fd",
+      color: "#ffffff",
       textX: (p_top_mid.x + p2.x) / 2,
       textY: (p2.y + p3.y) / 2
     });
@@ -1042,7 +1042,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: isRotated ? "الشريك الأول (بحري)" : "الشريك الأول (شرقي)",
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب بحري" : "نصيب شرقي",
-      color: "#f1f8e9",
+      color: "#ffffff",
       textX: (p1.x + p2.x) / 2,
       textY: (p1.y + p_left_mid.y) / 2
     });
@@ -1055,7 +1055,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: isRotated ? "الشريك الثاني (قبلي)" : "الشريك الثاني (غربي)",
       area: { feddan: halfDetailed.feddan, carat: halfDetailed.carat, shares: halfDetailed.shares, sqm: halfArea },
       notes: isRotated ? "نصيب قبلي" : "نصيب غربي",
-      color: "#fffde7",
+      color: "#ffffff",
       textX: (p_left_mid.x + p_right_mid.x) / 2,
       textY: (p_left_mid.y + p4.y) / 2
     });
@@ -1081,7 +1081,7 @@ function generateCustomLand(useCustomWidths = false) {
       owner: "اسم المالك",
       area: { feddan: detailedArea.feddan, carat: detailedArea.carat, shares: detailedArea.shares, sqm: totalArea },
       notes: "رباعي مقاس بالقطرين",
-      color: "#f1f8e9",
+      color: "#ffffff",
       textX: centerX,
       textY: centerY + 3.5
     });
@@ -1439,7 +1439,7 @@ function generateCustomLand(useCustomWidths = false) {
           owner: ownerName,
           area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
           notes: notesName,
-          color: colorsList[colorIndex].value,
+          color: "#ffffff",
           textX: (sub_tl.x + sub_tr.x + sub_br.x + sub_bl.x) / 4,
           textY: (sub_tl.y + sub_tr.y) / 2 + ( (sub_bl.y + sub_br.y) / 2 - (sub_tl.y + sub_tr.y) / 2 ) * 0.50,
           parentShape: {
