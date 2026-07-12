@@ -860,7 +860,7 @@ function calculateAll() {
     if (length > 0 && width > 0) {
       area = length * width;
       perimeter = 2 * (length + width);
-      stepsText = `الشكل المختار: مستطيل\n` +
+      stepsText = `الشكل المختار: أرض مستطيلة\n` +
                   `المعادلة: المساحة = الطول × العرض\n` +
                   `الحساب: ${length} × ${width} = ${area.toFixed(2)} متر مربع\n` +
                   `المحيط = 2 × (الطول + العرض) = 2 × (${length} + ${width}) = ${perimeter.toFixed(2)} متر`;
@@ -884,7 +884,7 @@ function calculateAll() {
     if (side > 0) {
       area = side * side;
       perimeter = 4 * side;
-      stepsText = `الشكل المختار: مربع\n` +
+      stepsText = `الشكل المختار: أرض مربعة\n` +
                   `المعادلة: المساحة = الضلع × الضلع\n` +
                   `الحساب: ${side} × ${side} = ${area.toFixed(2)} متر مربع\n` +
                   `المحيط = 4 × الضلع = 4 × ${side} = ${perimeter.toFixed(2)} متر`;
@@ -918,7 +918,7 @@ function calculateAll() {
       const calculatedSide = Math.hypot(w_coord, l1 - l2); // الضلع المائل العلوي
       perimeter = a + l1 + l2 + calculatedSide;
       
-      stepsText = `الشكل المختار: شبه منحرف زراعي (مبسط)\n` +
+      stepsText = `الشكل المختار: أرض شبه منحرفة زراعية\n` +
                   `المعادلة: المساحة = متوسط العرض × متوسط الطول\n` +
                   `المعادلة: المساحة = 0.5 × (العرض العلوي + العرض السفلي) × 0.5 × (الطول الأيمن + الطول الأيسر)\n` +
                   `الحساب: 0.5 × (${c} + ${a}) × 0.5 × (${l2} + ${l1}) = ${area.toFixed(2)} متر مربع\n` +
@@ -969,7 +969,7 @@ function calculateAll() {
           } else {
             area = area1 + area2;
             perimeter = a + b + c + d;
-            stepsText = `الشكل المختار: رباعي غير منتظم (التقسيم الدقيق باستخدام القطر AC = ${d_ac} م)\n` +
+            stepsText = `الشكل المختار: أرض رباعية غير منتظمة (التقسيم الدقيق باستخدام القطر AC = ${d_ac} م)\n` +
                         `تم تقسيم الشكل إلى مثلثين بالقطر AC:\n` +
                         `- المثلث الأول ABC بأطوال أضلاع: ${a} م، ${d} م، ${d_ac} م\n` +
                         `  مساحة المثلث الأول (بقانون هيرون) = ${area1.toFixed(4)} م²\n` +
@@ -1011,7 +1011,7 @@ function calculateAll() {
           } else {
             area = area1 + area2;
             perimeter = a + b + c + d;
-            stepsText = `الشكل المختار: رباعي غير منتظم (التقسيم الدقيق باستخدام القطر BD = ${d_bd} م)\n` +
+            stepsText = `الشكل المختار: أرض رباعية غير منتظمة (التقسيم الدقيق باستخدام القطر BD = ${d_bd} م)\n` +
                         `تم تقسيم الشكل إلى مثلثين بالقطر BD:\n` +
                         `- المثلث الأول ABD بأطوال أضلاع: ${a} م، ${b} م، ${d_bd} م\n` +
                         `  مساحة المثلث الأول (بقانون هيرون) = ${area1.toFixed(4)} م²\n` +
@@ -2506,18 +2506,18 @@ function printCroquis() {
   let paramsList = [];
   
   if (activeShape === 'rectangle') {
-    shapeNameAr = 'مستطيل';
+    shapeNameAr = 'أرض مستطيلة';
     paramsList = [
       { label: 'الطول (م)', value: document.getElementById('rect-length').value || '0' },
       { label: 'العرض (م)', value: document.getElementById('rect-width').value || '0' }
     ];
   } else if (activeShape === 'square') {
-    shapeNameAr = 'مربع';
+    shapeNameAr = 'أرض مربعة';
     paramsList = [
       { label: 'طول الضلع (م)', value: document.getElementById('square-side').value || '0' }
     ];
   } else if (activeShape === 'trapezoid') {
-    shapeNameAr = 'شبه منحرف زراعي';
+    shapeNameAr = 'أرض شبه منحرفة زراعية';
     paramsList = [
       { label: 'القاعدة الكبرى - العرض السفلي A (م)', value: document.getElementById('trap-base-major').value || '0' },
       { label: 'القاعدة الصغرى - العرض العلوي C (م)', value: document.getElementById('trap-base-minor').value || '0' },
@@ -2525,7 +2525,7 @@ function printCroquis() {
       { label: 'الطول الأيسر B (م)', value: document.getElementById('trap-length-left').value || '0' }
     ];
   } else if (activeShape === 'quadrilateral') {
-    shapeNameAr = 'شكل رباعي غير منتظم';
+    shapeNameAr = 'أرض رباعية غير منتظمة';
     paramsList = [
       { label: 'الضلع أ - العرض السفلي (م)', value: document.getElementById('quad-side-a').value || '0' },
       { label: 'الضلع ب - الطول الأيسر (م)', value: document.getElementById('quad-side-b').value || '0' },
