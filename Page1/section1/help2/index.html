@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="stylesheet" href="style.css" />
   <title>🎓 دليل ومركز تدريب كتابة الكسور</title>
 </head>
@@ -312,37 +312,112 @@
       </div>
     </div>
 
+    <!-- Section: Surveyor Tips -->
+    <div class="section-title">💡 نصائح ميدانية للدَّلاَّلين</div>
+    <div class="tips-card">
+      <ul class="tips-list">
+        <li>📌 <strong>اقرأ القيمة بالحروف أولاً:</strong> احرص دائماً على قراءة القيمة ذهنياً بالحروف قبل كتابتها للتأكد من مطابقتها (مثال: هل تقصد 83 سم أم 80 سم وثلث سم؟).</li>
+        <li>📌 <strong>تجنب التقريب الخاطئ:</strong> لا تكتب <code>10.83</code> أبداً إذا كنت تقصد ثلث سنتيمتر؛ بل اكتب <code>10.833</code>.</li>
+        <li>📌 <strong>استخدم أزرار الكسور السريعة:</strong> استخدم الأزرار المتاحة في صندوق التجربة لتقليل نسبة الأخطاء المطبعية وضمان الكتابة الدقيقة.</li>
+        <li>📌 <strong>تأكد من فهم البرنامج:</strong> بعد إدخال أي قيمة في برنامج الدلال، اقرأ حقل (فهم البرنامج) و(بالحروف) للتأكد من أن البرنامج قرأها تماماً كما تقصدها.</li>
+      </ul>
+    </div>
+
     <!-- Sixth section: Quiz (Test yourself) -->
     <div class="section-title">🎓 اختبر نفسك (التدريب العملي)</div>
+    
+    <div class="quiz-tabs">
+      <button id="tab-training" class="tab-btn active" onclick="switchQuizMode('training')">📖 التدريب التدريجي</button>
+      <button id="tab-exam" class="tab-btn" onclick="switchQuizMode('exam')">🏆 الاختبار النهائي (20 سؤال)</button>
+    </div>
+
     <div class="quiz-card">
-      
-      <!-- User Level Progression Header -->
-      <div class="user-level-row">
-        <div>
-          <span class="quiz-score-text">المستوى الحالي:</span>
-          <span id="user-level-badge" class="level-badge lvl-beginner">🟢 مبتدئ</span>
-        </div>
-        <div style="display: flex; align-items: center;">
-          <div class="progress-container">
-            <div id="quiz-progress-bar" class="progress-bar"></div>
+      <!-- Active Quiz Container -->
+      <div id="quiz-active-container">
+        
+        <!-- Progressive Learning Panel -->
+        <div class="progress-panel">
+          <div class="panel-row">
+            <span class="panel-label">المستوى الحالي:</span>
+            <span id="user-level-badge" class="level-badge lvl-beginner">🟢 المستوى الأول</span>
           </div>
-          <span id="quiz-score-count" class="quiz-score-text">0 / 10 تمارين صحيحة</span>
+          <div class="panel-row">
+            <span class="panel-label">التقدم بالرموز:</span>
+            <span id="text-progress-blocks" class="progress-blocks">░░░░░░░░░░ 0%</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">التمارين:</span>
+            <span id="quiz-score-count" class="quiz-score-text">0 / 5 صحيحة</span>
+          </div>
+          <div class="panel-row text-small" id="last-visit-row" style="display:none;">
+            <span>آخر زيارة: <span id="last-visit-text">—</span></span>
+          </div>
+          <div class="panel-row text-small">
+            <span>أفضل نتيجة اختبار نهائي: <span id="best-score-text">—</span></span>
+          </div>
+        </div>
+
+        <!-- Timer Configuration -->
+        <div class="timer-config-row">
+          <label for="timer-select">⏱️ مؤقت السؤال:</label>
+          <select id="timer-select" onchange="changeTimerOption()">
+            <option value="0">بدون وقت</option>
+            <option value="30">30 ثانية</option>
+            <option value="60">60 ثانية</option>
+            <option value="120">120 ثانية</option>
+          </select>
+          <div id="timer-display-wrapper" style="display: none;">
+            <span id="timer-countdown">00:00</span>
+            <div class="timer-bar-container"><div id="timer-bar"></div></div>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <div id="quiz-question" style="font-size: 16px; color: #854d0e; font-weight: 800;">—</div>
+        </div>
+        
+        <!-- Option Buttons container -->
+        <div class="quiz-options-list" id="quiz-options-list"></div>
+
+        <div class="quiz-btn-row">
+          <button type="button" class="test-btn" style="flex: 1;" onclick="checkQuizAnswer()">تحقق من الإجابة</button>
+          <button type="button" class="test-btn" style="background-color: #4b5563;" onclick="loadNewQuiz()">السؤال التالي 🔄</button>
+        </div>
+
+        <div id="quiz-feedback" class="quiz-feedback" style="display: none;"></div>
+      </div>
+
+      <!-- Achievement Screen Container -->
+      <div id="quiz-result-container" style="display: none;">
+        <div class="achievement-card">
+          <div class="trophy-icon">🏆</div>
+          <h2 id="achievement-title">تهانينا! لقد أصبحت دَّلاَّل خبير</h2>
+          
+          <div class="achievement-stats">
+            <div class="stat-item">
+              <span class="stat-label">نسبة النجاح</span>
+              <span class="stat-value" id="ach-success-rate">0%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">عدد التدريبات</span>
+              <span class="stat-value" id="ach-total-exercises">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">متوسط سرعة الإجابة</span>
+              <span class="stat-value" id="ach-avg-speed">0 ثانية</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">أفضل نتيجة</span>
+              <span class="stat-value" id="ach-best-score">—</span>
+            </div>
+          </div>
+
+          <div class="achievement-actions">
+            <button type="button" class="action-btn-retry" onclick="resetTrainingProgress()">🔄 أعد التدريب من البداية</button>
+            <button type="button" class="action-btn-finish" onclick="location.href='../index.html'">✅ انتهيت، ابدأ استخدام برنامج الدَّلاَّل</button>
+          </div>
         </div>
       </div>
-
-      <div class="quiz-question">
-        <div id="quiz-question" style="font-size: 15px; color: #854d0e; font-weight: 800;">—</div>
-      </div>
-      
-      <!-- Option Buttons container -->
-      <div class="quiz-options-list" id="quiz-options-list"></div>
-
-      <div class="quiz-btn-row">
-        <button type="button" class="test-btn" style="flex: 1;" onclick="checkQuizAnswer()">تحقق من الإجابة</button>
-        <button type="button" class="test-btn" style="background-color: #4b5563;" onclick="loadNewQuiz()">السؤال التالي 🔄</button>
-      </div>
-
-      <div id="quiz-feedback" class="quiz-feedback" style="display: none;"></div>
     </div>
 
     <!-- Return button at the very bottom -->
@@ -358,6 +433,7 @@
   <div id="toast" class="toast"></div>
 
   <!-- Scripts -->
+  <script src="questions.js"></script>
   <script src="script.js"></script>
   <script src="../../../addnav.js"></script>
 </body>
