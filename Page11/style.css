@@ -2706,6 +2706,7 @@ body {
    ========================================================================== */
 .input-row input,
 .carat-select-inputs input,
+.carat-select-inputs select,
 .partner-row input,
 #remainder-row-table input,
 #width-step-value,
@@ -2727,6 +2728,7 @@ body {
 /* تمييز الحقل النشط بإطار أوضح عند التركيز */
 .input-row input:focus,
 .carat-select-inputs input:focus,
+.carat-select-inputs select:focus,
 .partner-row input:focus,
 #remainder-row-table input:focus,
 #width-step-value:focus,
