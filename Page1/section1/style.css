@@ -183,13 +183,18 @@
 }
 
 .s1 div .selector1 {
-  width: 24px;
+  width: 100px;
   height: 42px;
   position: relative;
   left: 5px;
   border: 2.5px solid #000000;
   border-radius: 8px;
   outline: none;
+  font-family: 'Cairo', Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  padding: 0 5px;
 }
 
 .s1 div input {

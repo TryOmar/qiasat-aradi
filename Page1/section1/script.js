@@ -87,7 +87,7 @@ function last(type, num) {
 }
 
 function other() {
-  if (area1.options[area1.selectedIndex].text != "اخر") {
+  if (area1.value !== "0" && area1.options[area1.selectedIndex].text !== "أخرى" && area1.options[area1.selectedIndex].text !== "اخر") {
     area2.value = area1.options[area1.selectedIndex].text;
   } else {
     area2.value = "";
