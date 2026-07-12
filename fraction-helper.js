@@ -675,6 +675,40 @@
           el.classList.contains("area_qasba_result")) {
         return true;
       }
+
+      // الأولوية الثالثة: التحقق من معرف الحقل، الاسم، أو الفئة بحثاً عن الكلمات المستبعدة
+      const identityStr = (el.id + " " + el.name + " " + el.className + " " + (el.placeholder || "")).toLowerCase();
+      const ignoreKeywords = [
+        "feddan", "fed", "carat", "car", "sahm", "sah", "share", "shares",
+        "qasba", "qasaba", "qas", "qabda", "qab", "pct", "percent", "percentage",
+        "ratio", "price", "area", "sqm", "value", "val"
+      ];
+      if (ignoreKeywords.some(kw => identityStr.includes(kw))) {
+        return true;
+      }
+
+      // الأولوية الرابعة: التحقق من تسمية الحقل (Label) في DOM
+      let labelText = "";
+      if (el.id) {
+        const labelEl = document.querySelector(`label[for="${el.id}"]`);
+        if (labelEl) labelText += " " + labelEl.textContent;
+      }
+      const prevEl = el.previousElementSibling;
+      if (prevEl && prevEl.tagName === "LABEL") {
+        labelText += " " + prevEl.textContent;
+      }
+      const parentGroup = el.closest(".editor-form-group") || el.closest(".mobile-field") || el.closest("div");
+      if (parentGroup) {
+        const groupLabel = parentGroup.querySelector("label");
+        if (groupLabel) labelText += " " + groupLabel.textContent;
+      }
+
+      const arabicIgnoreKeywords = [
+        "فدان", "قيراط", "سهم", "قصبة", "قبضة", "نسبة", "النسبة", "%", "مساحة", "المساحة", "سعر", "السعر", "قيمة", "القيمة"
+      ];
+      if (arabicIgnoreKeywords.some(kw => labelText.includes(kw))) {
+        return true;
+      }
     } catch (e) {
       // fallback
     }
