@@ -4,6 +4,17 @@
  * يوفر واجهة برمجية كاملة (Public API) مع إمكانية التهيئة والتنظيف وإلغاء المراقبة لتفادي تسريب الذاكرة.
  * @author Antigravity
  * @version 2.0.0
+ * 
+ * CHANGELOG:
+ * 
+ * v2.0.0 (2026-07-12)
+ * - إضافة البادئة الموحدة 'fh-' لجميع فئات الـ CSS والـ JS تفادياً لتعارض التنسيقات.
+ * - واجهة برمجية كاملة (Public API): init, destroy, refresh, attach, detach.
+ * - منع التهيئة المكررة (Guard Initialization) عند استدعاء init مراراً.
+ * - تصفير وتحرير كامل للذاكرة ومستمعات الأحداث والـ MutationObserver عند استدعاء destroy.
+ * - حماية الأكواد بقوالب try/catch متكاملة لتفادي إعاقة الصفحات المستضيفة.
+ * - تفعيل وضع التطوير (devMode) لقياس أداء زمن التهيئة ورسم الواجهات وعدد الحقول الملحقة بالصفحة.
+ * - تقسيم الكود وتوثيقه بالكامل باستخدام JSDoc قياسي.
  */
 
 (function () {
@@ -35,11 +46,12 @@
     showTypoDetector: true,
     showQuickPills: true,
     preferredPosition: 'auto',
+    devMode: false,
     lang: 'ar'
   };
 
   // ----------------------------------------------------
-  // 1. سجل الأخطاء والأمان (Error Logging)
+  // 1. سجل الأخطاء والأمان (Error Logging & Metrics)
   // ----------------------------------------------------
 
   /**
@@ -49,6 +61,18 @@
    */
   function logError(context, error) {
     console.error(`[FractionHelper] Error in ${context}:`, error);
+  }
+
+  /**
+   * طباعة مقاييس الأداء في وضع التطوير (devMode).
+   * @param {string} metric اسم القياس
+   * @param {number} time ms
+   * @param {string} [extra] معلومات إضافية
+   */
+  function logPerformance(metric, time, extra = "") {
+    if (config.devMode) {
+      console.log(`%c[FractionHelper DevMode] ${metric} took ${time.toFixed(2)}ms. ${extra}`, "color: #d97706; font-weight: bold;");
+    }
   }
 
   // ----------------------------------------------------
@@ -314,7 +338,7 @@
   }
 
   // ----------------------------------------------------
-  // 4. بناء وعرض واجهة المستخدم (DOM Rendering & Positioning)
+  // 4. بناء وعرض واجهة المستخدم (DOM Rendering)
   // ----------------------------------------------------
 
   /**
@@ -405,12 +429,13 @@
   }
 
   /**
-   * تحديث محتوى التوليب بناءً على مدخلات الحقل وإعدادات التهيئة.
+   * تحديث محتوى التوليب بناءً على مدخلات الحقل وإعدادات التهيئة مع قياس الأداء.
    * @param {HTMLInputElement} input الحقل المستهدف
    */
   function updateTooltip(input) {
     if (!tooltip) return;
     
+    const startTime = performance.now();
     try {
       const val = input.value.trim();
       
@@ -438,6 +463,9 @@
           ${pillsHtml}
         `;
         repositionTooltip(input);
+        
+        const endTime = performance.now();
+        logPerformance("Empty Tooltip Update", endTime - startTime);
         return;
       }
 
@@ -488,6 +516,9 @@
       html += pillsHtml;
       tooltip.innerHTML = html;
       repositionTooltip(input);
+      
+      const endTime = performance.now();
+      logPerformance("Content Tooltip Update", endTime - startTime, `Length: ${val.length}`);
     } catch (err) {
       logError("updateTooltip", err);
     }
@@ -589,10 +620,13 @@
   }
 
   // ----------------------------------------------------
-  // 7. الواجهة البرمجية المفتوحة (Public API Object)
+  // 7. الواجهة البرمجية المفتوحة المعتمدة (Public API)
   // ----------------------------------------------------
 
   window.FractionHelper = {
+    /** @type {string} الإصدار الحالي للمكون */
+    version: "2.0.0",
+
     /**
      * تهيئة المكوّن وبدء تشغيل واجهة المراقبة.
      * @param {Object} [options] خيارات التخصيص
@@ -600,6 +634,7 @@
     init: function (options) {
       if (isInitialized) return;
       
+      const startTime = performance.now();
       try {
         if (options) {
           config = Object.assign({}, config, options);
@@ -635,6 +670,9 @@
 
         domObserver.observe(document.body, { childList: true, subtree: true });
         isInitialized = true;
+        
+        const endTime = performance.now();
+        logPerformance("Initialization", endTime - startTime, `Monitored elements query count: ${document.querySelectorAll(config.selector).length}`);
       } catch (err) {
         logError("init", err);
       }
@@ -646,6 +684,7 @@
     destroy: function () {
       if (!isInitialized) return;
 
+      const startTime = performance.now();
       try {
         // إيقاف الـ MutationObserver
         if (domObserver) {
@@ -676,6 +715,9 @@
         }
 
         isInitialized = false;
+        
+        const endTime = performance.now();
+        logPerformance("Destruction/Cleanup", endTime - startTime);
       } catch (err) {
         logError("destroy", err);
       }
@@ -702,6 +744,7 @@
       if (!element) return;
       try {
         manuallyAttachedElements.add(element);
+        logPerformance("Manual Attach", 0, `Monitored count: ${manuallyAttachedElements.size}`);
       } catch (err) {
         logError("attach", err);
       }
@@ -719,6 +762,7 @@
           if (tooltip) tooltip.classList.remove("fh-active");
           activeInput = null;
         }
+        logPerformance("Manual Detach", 0, `Monitored count: ${manuallyAttachedElements.size}`);
       } catch (err) {
         logError("detach", err);
       }
