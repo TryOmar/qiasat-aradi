@@ -1,6 +1,6 @@
-/* CSS Styles for Shared Fraction Helper Component */
+/* CSS Styles for Shared Fraction Helper Component with namespace prefix "fh-" */
 
-.fraction-helper-tooltip {
+.fh-tooltip {
   position: absolute;
   background: #ffffff;
   border: 2.5px solid #2e7d32;
@@ -19,13 +19,13 @@
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
 }
 
-.fraction-helper-tooltip.active {
+.fh-tooltip.fh-active {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
-.fraction-helper-tooltip .tooltip-header {
+.fh-tooltip .fh-header {
   font-size: 12.5px;
   font-weight: 800;
   color: #1b5e20;
@@ -35,7 +35,7 @@
   gap: 6px;
 }
 
-.fraction-helper-tooltip .tooltip-translation {
+.fh-tooltip .fh-translation {
   font-size: 15px;
   font-weight: bold;
   color: #0f172a;
@@ -49,7 +49,7 @@
 }
 
 /* Typo Alert Card */
-.fraction-helper-tooltip .typo-alert {
+.fh-tooltip .fh-typo-alert {
   background-color: #fef2f2;
   border: 1.5px solid #fecaca;
   color: #991b1b;
@@ -60,13 +60,13 @@
   line-height: 1.6;
 }
 
-.fraction-helper-tooltip .typo-alert-header {
+.fh-tooltip .fh-typo-alert-header {
   font-weight: 800;
   font-size: 13.5px;
   margin-bottom: 4px;
 }
 
-.fraction-helper-tooltip .typo-visual-compare {
+.fh-tooltip .fh-typo-visual-compare {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,40 +78,40 @@
   border-radius: 8px;
 }
 
-.fraction-helper-tooltip .compare-item {
+.fh-tooltip .fh-compare-item {
   flex: 1;
   text-align: center;
   display: flex;
   flex-direction: column;
 }
 
-.fraction-helper-tooltip .compare-val {
+.fh-tooltip .fh-compare-val {
   font-size: 18px;
   font-weight: 800;
 }
 
-.fraction-helper-tooltip .compare-item.wrong .compare-val {
+.fh-tooltip .fh-compare-item.fh-wrong .fh-compare-val {
   color: #c62828;
 }
 
-.fraction-helper-tooltip .compare-item.correct .compare-val {
+.fh-tooltip .fh-compare-item.fh-correct .fh-compare-val {
   color: #1b5e20;
 }
 
-.fraction-helper-tooltip .compare-label {
+.fh-tooltip .fh-compare-label {
   font-size: 10.5px;
   font-weight: bold;
   color: #475569;
   margin-top: 3px;
 }
 
-.fraction-helper-tooltip .compare-sign {
+.fh-tooltip .fh-compare-sign {
   font-size: 20px;
   font-weight: 800;
   color: #94a3b8;
 }
 
-.fraction-helper-tooltip .typo-explanation {
+.fh-tooltip .fh-typo-explanation {
   font-size: 12.5px;
   color: #7f1d1d;
   background-color: #fff5f5;
@@ -122,14 +122,14 @@
   line-height: 1.5;
 }
 
-.fraction-helper-tooltip .correct-val-highlight {
+.fh-tooltip .fh-correct-val-highlight {
   color: #1b5e20;
   font-size: 14.5px;
   text-decoration: underline;
   font-weight: bold;
 }
 
-.fraction-helper-tooltip .typo-fix-btn {
+.fh-tooltip .fh-typo-fix-btn {
   background-color: #d32f2f;
   color: white;
   border: none;
@@ -148,12 +148,12 @@
   box-shadow: 0 2px 4px rgba(211, 47, 47, 0.15);
 }
 
-.fraction-helper-tooltip .typo-fix-btn:hover {
+.fh-tooltip .fh-typo-fix-btn:hover {
   background-color: #b71c1c;
 }
 
 /* Quick Fraction Pills */
-.fraction-helper-tooltip .pills-header {
+.fh-tooltip .fh-pills-header {
   font-size: 12px;
   font-weight: bold;
   color: #475569;
@@ -162,13 +162,13 @@
   padding-top: 8px;
 }
 
-.fraction-helper-tooltip .fraction-pills {
+.fh-tooltip .fh-fraction-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
 }
 
-.fraction-helper-tooltip .fraction-pill {
+.fh-tooltip .fh-fraction-pill {
   background-color: #f1f3f1;
   border: 1px solid #cbd5e1;
   color: #1b5e20;
@@ -185,24 +185,24 @@
   justify-content: center;
 }
 
-.fraction-helper-tooltip .fraction-pill:hover {
+.fh-tooltip .fh-fraction-pill:hover {
   background-color: #e8f5e9;
   border-color: #2e7d32;
   transform: scale(1.05);
 }
 
-.fraction-helper-tooltip .fraction-pill:active {
+.fh-tooltip .fh-fraction-pill:active {
   transform: scale(0.95);
 }
 
 /* Responsive Overrides */
 @media (max-width: 400px) {
-  .fraction-helper-tooltip .typo-visual-compare {
+  .fh-tooltip .fh-typo-visual-compare {
     flex-direction: column;
     gap: 6px;
     padding: 10px 8px;
   }
-  .fraction-helper-tooltip .compare-sign {
+  .fh-tooltip .fh-compare-sign {
     transform: rotate(90deg);
     margin: 2px 0;
   }
