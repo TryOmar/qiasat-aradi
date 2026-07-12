@@ -648,19 +648,23 @@
   }
 
   /**
-   * التحقق مما إذا كان يجب تجاهل الحقل (مثلاً حقول التحويل أو المطبوعة بـ ignore)
+   * التحقق مما إذا كان يجب تجاهل الحقل.
+   * ترتيب الأولويات:
+   * 1. الاستثناء الصريح والمباشر للمطورين (data-fh-ignore="true" أو class="fh-ignore").
+   * 2. التعرف التلقائي كخيار احتياطي للتوافق العكسي مع الكلاسات الحالية (Backward Compatibility).
    * @param {HTMLElement} el الحقل المستهدف
    * @returns {boolean}
    */
   function shouldIgnore(el) {
     if (!el) return true;
     try {
+      // الأولوية الأولى: الاستثناء الصريح
       if (el.classList.contains("fh-ignore") || 
           el.hasAttribute("data-fh-ignore") || 
           el.getAttribute("data-fh-ignore") === "true") {
         return true;
       }
-      // استثناء حقول التحويل من متر إلى القصبة والقبضة تلقائياً
+      // الأولوية الثانية (الخيار الاحتياطي): كلاسات التحويل الحالية لضمان التوافق العكسي
       if (el.closest(".conversion-card") || 
           el.closest(".s5") || 
           el.classList.contains("conv-input") || 
