@@ -226,7 +226,7 @@
         <div class="settings-row">
           <label>سعر القيراط الواحد:</label>
           <div class="price-input-wrapper">
-            <input tabindex="4" type="text" inputmode="decimal" id="carat-price-display" placeholder="مثال: 50,000" dir="auto" onkeyup="formatPrice(this);" />
+            <input tabindex="4" type="text" inputmode="decimal" id="carat-price-display" placeholder="مثال: 50,000" dir="auto" onkeyup="formatPrice(this);" oninput="adjustPriceFontSize(this)" />
             <input type="hidden" id="carat-price-numeric" />
             <span>جنيه</span>
           </div>

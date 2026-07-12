@@ -528,8 +528,27 @@ function formatPrice(input) {
   const rawValue = input.value.replace(/\D/g, "");
   caratPriceNumeric.value = rawValue;
   input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  adjustPriceFontSize(input);
   saveStateToSession();
   calculateAll();
+}
+
+function adjustPriceFontSize(input) {
+  if (!input) return;
+  const len = input.value.length;
+  if (len <= 8) {
+    input.style.fontSize = "16px";
+  } else if (len === 9) {
+    input.style.fontSize = "15px";
+  } else if (len === 10) {
+    input.style.fontSize = "14px";
+  } else if (len === 11) {
+    input.style.fontSize = "13px";
+  } else if (len === 12) {
+    input.style.fontSize = "12px";
+  } else {
+    input.style.fontSize = "11px";
+  }
 }
 
 // Clear all inputs
@@ -2362,6 +2381,7 @@ function loadStateFromSession() {
   
   caratPriceDisplay.value = sessionStorage.getItem("priceDisplay") || "";
   caratPriceNumeric.value = sessionStorage.getItem("priceNumeric") || "";
+  adjustPriceFontSize(caratPriceDisplay);
 
   // Set active card UI
   shapeCards.forEach(card => {

@@ -1271,7 +1271,6 @@ input::placeholder, select::placeholder {
    ========================================================================== */
 .input-row input,
 .input-with-select input,
-.price-input-wrapper input,
 .conv-input,
 .heirs-table-wrapper input,
 .input-row-inline input {
@@ -1286,6 +1285,21 @@ input::placeholder, select::placeholder {
   padding: 6px 10px !important;
   height: 38px !important; /* سمك مناسب وسهل للمس الميداني */
   text-align: center !important;
+}
+
+.price-input-wrapper input {
+  border: 2px solid #000000 !important; /* إطار أسود صريح */
+  border-radius: 8px !important; /* حواف مستديرة */
+  font-size: 16px; /* بدون important ليتم التحكم بالخط برمجياً */
+  font-weight: bold !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease-in-out, font-size 0.1s ease !important;
+  padding: 6px 10px !important;
+  height: 38px !important; /* سمك مناسب وسهل للمس الميداني */
+  text-align: center !important;
+  width: 180px !important; /* عرض مريح للمبالغ الطويلة */
 }
 
 /* تمييز الحقل النشط بإطار أوضح عند التركيز */
