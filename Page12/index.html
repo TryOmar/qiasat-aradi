@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../style.css" />
   <link rel="stylesheet" href="style.css?v=3.0" />
   <link rel="stylesheet" href="../responsive-global.css" />
+  <link rel="stylesheet" href="../fraction-helper.css" />
 </head>
 
 <body>
@@ -656,6 +657,14 @@
   <script src="../nav.js"></script>
   <script src="agri_bg_b64.js"></script>
   <script src="script.js?v=3.8"></script>
+  <script src="../fraction-helper.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      FractionHelper.init({
+        selector: 'input[inputmode="decimal"]:not(#util-font-size):not(#util-angle):not(#modal-carat-custom):not([id^="smart-"]), input[id^="sidebar-piece-width-"], input[id^="sidebar-total-"]'
+      });
+    });
+  </script>
   <script src="tests.js"></script>
   <script src="../outdoor-mode.js"></script>
 </body>
