@@ -408,7 +408,7 @@ svg .draggable-label.active rect {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1000;
+  z-index: 10001; /* Higher than bottom nav-bar (9999) to cover it */
   left: 0;
   top: 0;
   width: 100%;
@@ -791,8 +791,8 @@ svg text {
 .unified-modal-content {
   display: flex !important;
   flex-direction: column !important;
-  max-height: 90vh !important;
-  padding: 20px 20px 15px 20px !important;
+  max-height: 82vh !important; /* Avoid screen overflow */
+  padding: 18px 20px 12px 20px !important;
   box-sizing: border-box !important;
 }
 
@@ -806,7 +806,7 @@ svg text {
 }
 
 .mobile-field {
-  margin-bottom: 16px !important;
+  margin-bottom: 12px !important; /* Tighter vertical spacing */
 }
 
 .mobile-field label {
@@ -818,7 +818,7 @@ svg text {
 }
 
 .mobile-input {
-  height: 48px !important;
+  height: 42px !important; /* Slightly smaller height to save space */
   font-size: 16px !important; /* Prevents auto-zooming on iOS focus */
   font-weight: bold !important;
   font-family: 'Cairo', sans-serif !important;
@@ -839,8 +839,8 @@ svg text {
 }
 
 .mobile-action-btn {
-  height: 48px !important;
-  font-size: 16px !important;
+  height: 44px !important; /* Compact button height */
+  font-size: 15px !important;
   border-radius: 8px !important;
   font-family: 'Cairo', sans-serif !important;
   font-weight: 700 !important;
@@ -853,9 +853,9 @@ svg text {
 
 @media (max-width: 480px) {
   .unified-modal-content {
-    width: 96% !important;
-    padding: 15px 12px 10px 12px !important;
-    max-height: 95vh !important;
+    width: 94% !important;
+    padding: 12px 12px 8px 12px !important;
+    max-height: 82vh !important; /* Keep floating centered modal */
   }
 }
 
