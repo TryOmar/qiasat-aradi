@@ -648,6 +648,36 @@
   }
 
   /**
+   * التحقق مما إذا كان يجب تجاهل الحقل (مثلاً حقول التحويل أو المطبوعة بـ ignore)
+   * @param {HTMLElement} el الحقل المستهدف
+   * @returns {boolean}
+   */
+  function shouldIgnore(el) {
+    if (!el) return true;
+    try {
+      if (el.classList.contains("fh-ignore") || 
+          el.hasAttribute("data-fh-ignore") || 
+          el.getAttribute("data-fh-ignore") === "true") {
+        return true;
+      }
+      // استثناء حقول التحويل من متر إلى القصبة والقبضة تلقائياً
+      if (el.closest(".conversion-card") || 
+          el.closest(".s5") || 
+          el.classList.contains("conv-input") || 
+          el.classList.contains("conv-chip-input") ||
+          el.classList.contains("width1_result") || 
+          el.classList.contains("width2_result") || 
+          el.classList.contains("height_result") || 
+          el.classList.contains("area_qasba_result")) {
+        return true;
+      }
+    } catch (e) {
+      // fallback
+    }
+    return false;
+  }
+
+  /**
    * إغلاق التوليب فور الضغط على زر Esc.
    * @param {KeyboardEvent} e حدث لوحة المفاتيح
    */
@@ -662,6 +692,7 @@
   function handleFocusIn(e) {
     if (localStorage.getItem("fh_disabled") === "true") return;
     if (e.target && (e.target.matches(config.selector) || manuallyAttachedElements.has(e.target))) {
+      if (shouldIgnore(e.target)) return;
       if (hideTimeout) clearTimeout(hideTimeout);
       activeInput = e.target;
       updateTooltip(activeInput);
@@ -671,6 +702,7 @@
 
   function handleFocusOut(e) {
     if (e.target && (e.target.matches(config.selector) || manuallyAttachedElements.has(e.target))) {
+      if (shouldIgnore(e.target)) return;
       hideTimeout = setTimeout(function () {
         if (tooltip) tooltip.classList.remove("fh-active");
         activeInput = null;
@@ -680,6 +712,7 @@
 
   function handleInput(e) {
     if (e.target && e.target === activeInput) {
+      if (shouldIgnore(e.target)) return;
       const originalVal = activeInput.value;
       const normalizedVal = normalizeNumerals(originalVal);
       if (originalVal !== normalizedVal) {
