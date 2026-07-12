@@ -583,6 +583,61 @@
   // 6. مستمعات أحداث الواجهة الموحدة (Event Listeners)
   // ----------------------------------------------------
 
+  /**
+   * تحويل الأرقام العربية والفارسية والفاصلة العربية إلى أرقام إنجليزية ونقطة عشرية قياسية.
+   * @param {string} str النص المدخل
+   * @returns {string} النص بعد توحيد الأرقام
+   */
+  function normalizeNumerals(str) {
+    try {
+      const arabicMap = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      };
+      const persianMap = {
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+        '۵': '5', '۶': '6', '۷': '7', '٨': '8', '٩': '9'
+      };
+      
+      let result = str;
+      
+      // تحويل الأرقام الشرقية (العربية والفارسية)
+      for (let char in arabicMap) {
+        result = result.replace(new RegExp(char, 'g'), arabicMap[char]);
+      }
+      for (let char in persianMap) {
+        result = result.replace(new RegExp(char, 'g'), persianMap[char]);
+      }
+      
+      // تحويل الفاصلة العربية (٫) والفاصلة (،) والفاصلة العادية (,) لنقطة عشرية (.)
+      result = result.replace(/٫/g, '.').replace(/،/g, '.').replace(/,/g, '.');
+      
+      // معالجة تكرار العلامة العشرية (مثل 155.80.3)
+      const dotCount = (result.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        const firstDotIndex = result.indexOf('.');
+        result = result.substring(0, firstDotIndex + 1) + result.substring(firstDotIndex + 1).replace(/\./g, '');
+      }
+      
+      return result;
+    } catch (err) {
+      logError("normalizeNumerals", err);
+      return str;
+    }
+  }
+
+  /**
+   * إغلاق التوليب فور الضغط على زر Esc.
+   * @param {KeyboardEvent} e حدث لوحة المفاتيح
+   */
+  function handleKeyDown(e) {
+    if (e.key === "Escape" || e.key === "Esc") {
+      if (tooltip && tooltip.classList.contains("fh-active")) {
+        tooltip.classList.remove("fh-active");
+      }
+    }
+  }
+
   function handleFocusIn(e) {
     if (e.target && (e.target.matches(config.selector) || manuallyAttachedElements.has(e.target))) {
       if (hideTimeout) clearTimeout(hideTimeout);
@@ -603,6 +658,12 @@
 
   function handleInput(e) {
     if (e.target && e.target === activeInput) {
+      const originalVal = activeInput.value;
+      const normalizedVal = normalizeNumerals(originalVal);
+      if (originalVal !== normalizedVal) {
+        activeInput.value = normalizedVal;
+        triggerInputEvents(activeInput);
+      }
       debouncedUpdateTooltip(activeInput);
     }
   }
@@ -646,6 +707,7 @@
         document.addEventListener("focusin", handleFocusIn);
         document.addEventListener("focusout", handleFocusOut);
         document.addEventListener("input", handleInput);
+        document.addEventListener("keydown", handleKeyDown);
         
         window.addEventListener("resize", handleResize);
         window.addEventListener("scroll", handleScroll, true);
@@ -696,6 +758,7 @@
         document.removeEventListener("focusin", handleFocusIn);
         document.removeEventListener("focusout", handleFocusOut);
         document.removeEventListener("input", handleInput);
+        document.removeEventListener("keydown", handleKeyDown);
         
         window.removeEventListener("resize", handleResize);
         window.removeEventListener("scroll", handleScroll, true);
