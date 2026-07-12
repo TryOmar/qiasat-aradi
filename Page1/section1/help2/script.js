@@ -8,34 +8,85 @@ const resultFraction = document.getElementById("res-fraction");
 const resultStatus = document.getElementById("res-status");
 const testResultsCard = document.getElementById("test-results-card");
 const typoAlertContainer = document.getElementById("typo-alert-container");
+const whyDrawer = document.getElementById("why-drawer");
+const whyText = document.getElementById("why-text");
 
-// Quiz Elements
+// Quiz DOM Elements
 const quizQuestionText = document.getElementById("quiz-question");
-const quizInput = document.getElementById("quiz-input");
+const quizOptionsList = document.getElementById("quiz-options-list");
 const quizFeedback = document.getElementById("quiz-feedback");
-const quizBtnCheck = document.getElementById("quiz-btn-check");
+const quizProgressBar = document.getElementById("quiz-progress-bar");
+const quizScoreCount = document.getElementById("quiz-score-count");
+const userLevelBadge = document.getElementById("user-level-badge");
 
+// Quiz Data
 const quizQuestions = [
-  { question: "عشرة أمتار و80 سنتيمترًا وثلث سنتيمتر.", answer: "10.833", errorMsg: "انتبه، القيمة 10.83 تعني 83 سنتيمترًا فقط، وليست 80 سنتيمترًا وثلث سنتيمتر." },
-  { question: "عشرة أمتار و12 سنتيمترًا ونصف سنتيمتر.", answer: "10.125", errorMsg: "انتبه، القيمة 10.12 تعني 12 سنتيمترًا فقط، وليست 12 سنتيمترًا ونصف سنتيمتر." },
-  { question: "عشرة أمتار و16 سنتيمترًا وثلثا سنتيمتر.", answer: "10.166", errorMsg: "انتبه، القيمة 10.16 تعني 16 سنتيمترًا فقط، وليست 16 سنتيمترًا وثلثا سنتيمتر." },
-  { question: "عشرة أمتار و80 سنتيمترًا وربع سنتيمتر.", answer: "10.825", errorMsg: "انتبه، القيمة 10.82 تعني 82 سنتيمترًا فقط، وليست 80 سنتيمترًا وربع سنتيمتر." },
-  { question: "عشرة أمتار و80 سنتيمترًا ونصف سنتيمتر.", answer: "10.850", errorMsg: "انتبه، القيمة 10.85 تعني 85 سنتيمترًا فقط، وليست 80 سنتيمترًا ونصف سنتيمتر." },
-  { question: "عشرة أمتار و80 سنتيمترًا وثلاثة أرباع سنتيمتر.", answer: "10.875", errorMsg: "انتبه، القيمة 10.87 تعني 87 سنتيمترًا فقط، وليست 80 سنتيمترًا وثلاثة أرباع سنتيمتر." },
-  { question: "عشرة أمتار وسنتيمتر واحد.", answer: "10.010", errorMsg: "انتبه، القيمة 10.1 تعني 10 أمتار و10 سنتيمترات وليس سنتيمتر واحد." },
-  { question: "عشرة أمتار وخمسة سنتيمترات.", answer: "10.050", errorMsg: "انتبه، القيمة 10.5 تعني 10 أمتار و50 سنتيمترًا وليس 5 سنتيمترات." }
+  {
+    type: "mcq",
+    question: "ما القيمة الرقمية الصحيحة لتمثيل القياس التالي؟<br><strong>عشرة أمتار و80 سنتيمترًا وثلث سنتيمتر</strong>",
+    options: ["10.83", "10.833", "10.803", "10.333"],
+    answerIndex: 1,
+    reason: "القيمة 10.833 تعني 80 سم + 1/3 سم (حيث 0.333 سم هو ثلث سم). بينما 10.83 تعني 83 سم بالتمام بدون كسر الثلث."
+  },
+  {
+    type: "mcq",
+    question: "ما القيمة الرقمية الصحيحة لتمثيل القياس التالي؟<br><strong>عشرة أمتار و12 سنتيمترًا ونصف سنتيمتر</strong>",
+    options: ["10.12", "10.125", "10.102", "10.250"],
+    answerIndex: 1,
+    reason: "القيمة 10.125 متر هي 12.5 سم (12 سم ونصف). بينما 10.12 تعني 12 سم فقط بدون كسر النصف."
+  },
+  {
+    type: "mcq",
+    question: "ما القيمة الرقمية الصحيحة لتمثيل القياس التالي؟<br><strong>عشرة أمتار و80 سنتيمترًا ونصف سنتيمتر</strong>",
+    options: ["10.85", "10.850", "10.805", "10.500"],
+    answerIndex: 1,
+    reason: "القيمة 10.850 تعني 80 سم ونصف سم (80.5 سم). بينما 10.85 تعني 85 سم بالتمام والكمال."
+  },
+  {
+    type: "mcq",
+    question: "ما القيمة الرقمية الصحيحة لتمثيل القياس التالي؟<br><strong>عشرة أمتار و80 سنتيمترًا وثلاثة أرباع سنتيمتر</strong>",
+    options: ["10.87", "10.875", "10.807", "10.750"],
+    answerIndex: 1,
+    reason: "القيمة 10.875 تعني 80 سم وثلاثة أرباع سم (80.75 سم). بينما 10.87 تعني 87 سم بالتمام."
+  },
+  {
+    type: "boolean",
+    question: "هل القيمة <strong>155.83</strong> صحيحة لتمثيل طول قدره: <strong>155 متر و80 سم وثلث سنتيمتر</strong>؟",
+    options: ["نعم (صحيحة)", "لا (خاطئة)"],
+    answerIndex: 1,
+    reason: "خاطئة! كتابة 155.83 تعني 155 متر و83 سم بالتمام (مما يضيف 3 سم زيادة ويضيع كسر الثلث). القيمة الصحيحة هي 155.833."
+  },
+  {
+    type: "boolean",
+    question: "هل القيمة <strong>12.125</strong> صحيحة لتمثيل طول قدره: <strong>اثنا عشر متراً واثنا عشر سنتيمترًا ونصف سنتيمتر</strong>؟",
+    options: ["نعم (صحيحة)", "لا (خاطئة)"],
+    answerIndex: 0,
+    reason: "صحيحة! كسر نصف سنتيمتر بعد 12 سم يُكتب 125 بعد العلامة العشرية (12.125 متر)."
+  },
+  {
+    type: "boolean",
+    question: "هل القيمة <strong>50.705</strong> صحيحة لتمثيل طول قدره: <strong>خمسون متراً وسبعون سنتيمترًا ونصف سنتيمتر</strong>؟",
+    options: ["نعم (صحيحة)", "لا (خاطئة)"],
+    answerIndex: 0,
+    reason: "صحيحة! نصف سنتيمتر بعد 70 سم يُكتب 705 بعد العلامة العشرية (أي 70 سم + 0.5 سم = 70.5 سم = 0.705 متر)."
+  }
 ];
 
 let currentQuizIndex = 0;
+let scoreCorrect = 0;
+let totalExercises = 10;
+let quizCount = 0;
+let selectedOptionIndex = null;
+let isAnswered = false;
 
 // Setup Event Listeners
 window.onload = function() {
   testerInput.addEventListener("input", handleLiveInput);
   testerInput.focus();
   loadNewQuiz();
+  updateUserProgressUI();
   drawVisualScale(null, "");
   
-  // Set up resize handler for visual scale redrawing
   window.addEventListener("resize", () => {
     const val = testerInput.value.trim();
     if (val) handleLiveInput();
@@ -58,14 +109,30 @@ function handleLiveInput() {
     return;
   }
   
-  // Update UI with parsed values
+  // Update UI
   resultFahm.innerText = parsed.meters + "." + parsed.cms.toString().padStart(2, "0") + " متر";
   resultHuroof.innerText = parsed.fullText;
   resultMeters.innerText = parsed.metersText || "0 متر";
   resultCms.innerText = parsed.cmsText || "0 سنتيمتر";
   resultFraction.innerText = parsed.fractionText || "لا يوجد كسر";
   
-  // Check for common typos and display warning + correct alternative
+  // Update Why math drawer text
+  let decPart = val.split(".")[1] || "0";
+  let decVal = parseFloat("0." + decPart);
+  let cmVal = decVal * 100;
+  let cmInt = Math.floor(cmVal);
+  let mmRem = (cmVal - cmInt).toFixed(3);
+  
+  whyText.innerHTML = `
+    <strong>طريقة التحويل الحسابية:</strong><br>
+    • الجزء العشري المكتوب هو: <code>0.${decPart}</code> من المتر.<br>
+    • بالضرب في 100 لتحويله إلى سنتيمترات: <code>${cmVal.toFixed(3)} سم</code>.<br>
+    • السنتيمترات الصحيحة المقروءة: <code>${cmInt} سم</code>.<br>
+    • الكسر المتبقي من السنتيمتر: <code>${mmRem} سم</code> 
+    ${parsed.fractionText ? `(وهو ما يعادل <strong>${parsed.fractionText}</strong> في القياس الزراعي).` : '(لا يمثل كسر زراعي شائع).'}
+  `;
+
+  // Check for common typos
   const typoInfo = getTypoDetails(val);
   if (typoInfo.isTypo) {
     testResultsCard.className = "test-results typo-error";
@@ -83,7 +150,6 @@ function handleLiveInput() {
   } else {
     typoAlertContainer.style.display = "none";
     
-    // Classify correct inputs (Standard Fraction vs Other valid decimal)
     if (parsed.fractionText) {
       testResultsCard.className = "test-results correct-fraction";
       showSuccessStatus("🟢 كسر شائع: تمت قراءة الكسر والقياس بدقة.");
@@ -93,7 +159,7 @@ function handleLiveInput() {
     }
   }
   
-  // Draw the visual scale
+  // Draw scale
   const fractionNum = getFractionNumber(parsed.fractionText);
   const scaleLabel = parsed.fractionText ? parsed.fractionText.replace(" سنتيمتر", "") : "";
   drawVisualScale(fractionNum, scaleLabel);
@@ -105,68 +171,53 @@ function clearResults() {
   resultMeters.innerText = "—";
   resultCms.innerText = "—";
   resultFraction.innerText = "—";
-  resultStatus.className = "";
-  resultStatus.style.display = "none";
+  resultStatus.innerText = "";
   testResultsCard.className = "test-results";
   typoAlertContainer.style.display = "none";
+  whyDrawer.style.display = "none";
 }
 
 function showSuccessStatus(msg) {
   resultStatus.innerText = msg;
-  resultStatus.style.display = "block";
 }
 
 function showErrorStatus(msg) {
   resultStatus.innerText = msg;
-  resultStatus.style.display = "block";
 }
 
-// Typo analyzer for warning system
+function toggleWhyDrawer() {
+  if (whyDrawer.style.display === "block") {
+    whyDrawer.style.display = "none";
+  } else {
+    whyDrawer.style.display = "block";
+  }
+}
+
+// Typo detector
 function getTypoDetails(valStr) {
   const parts = valStr.split(".");
   if (parts.length > 1) {
     const m = parseInt(parts[0]) || 0;
     const dec = parts[1];
-    
     const mText = formatMetersArabic(m);
     
     if (dec === "83") {
-      return {
-        isTypo: true,
-        written: `${mText} و 83 سنتيمترًا.`,
-        intended: `${mText} و 80 سنتيمترًا وثلث سنتيمتر.`,
-        correctVal: `${m}.833`
-      };
+      return { isTypo: true, written: `${mText} و 83 سنتيمترًا.`, intended: `${mText} و 80 سنتيمترًا وثلث سنتيمتر.`, correctVal: `${m}.833` };
     }
     if (dec === "12") {
-      return {
-        isTypo: true,
-        written: `${mText} و 12 سنتيمترًا.`,
-        intended: `${mText} و 12 سنتيمترًا ونصف سنتيمتر.`,
-        correctVal: `${m}.125`
-      };
+      return { isTypo: true, written: `${mText} و 12 سنتيمترًا.`, intended: `${mText} و 12 سنتيمترًا ونصف سنتيمتر (1/8 متر).`, correctVal: `${m}.125` };
     }
     if (dec === "37") {
-      return {
-        isTypo: true,
-        written: `${mText} و 37 سنتيمترًا.`,
-        intended: `${mText} و 37 سنتيمترًا ونصف سنتيمتر (أو 3 أثمان سنتيمتر).`,
-        correctVal: `${m}.375`
-      };
+      return { isTypo: true, written: `${mText} و 37 سنتيمترًا.`, intended: `${mText} و 37 سنتيمترًا ونصف سنتيمتر (3/8 متر).`, correctVal: `${m}.375` };
     }
     if (dec === "87") {
-      return {
-        isTypo: true,
-        written: `${mText} و 87 سنتيمترًا.`,
-        intended: `${mText} و 80 سنتيمترًا وثلاثة أرباع سنتيمتر (أو 87.5 سم).`,
-        correctVal: `${m}.875`
-      };
+      return { isTypo: true, written: `${mText} و 87 سنتيمترًا.`, intended: `${mText} و 80 سنتيمترًا وثلاثة أرباع سنتيمتر (7/8 متر).`, correctVal: `${m}.875` };
     }
   }
   return { isTypo: false };
 }
 
-// Dynamic Fraction injection logic
+// Fraction pills context injector
 function applyQuickFraction(fractionKey) {
   let val = testerInput.value.trim();
   
@@ -197,7 +248,6 @@ function applyQuickFraction(fractionKey) {
     const integerPart = parts[0];
     let decPart = parts[1] || "";
     
-    // Take the tenths digit if present
     const firstDigit = decPart.length > 0 ? decPart[0] : "0";
     testerInput.value = integerPart + "." + firstDigit + map.surveyor;
   }
@@ -205,12 +255,10 @@ function applyQuickFraction(fractionKey) {
   handleLiveInput();
 }
 
-// Copy Action handler
 function copyCorrectVal() {
   const val = testerInput.value.trim();
   if (!val) return;
   
-  // Determine if it matches a typo, in which case copy the correct one
   const typoInfo = getTypoDetails(val);
   const valToCopy = typoInfo.isTypo ? typoInfo.correctVal : val;
   
@@ -230,7 +278,7 @@ function showToast(msg) {
   }, 2500);
 }
 
-// Visual scale drawer (Canvas-based)
+// Visual scale canvas drawer
 function drawVisualScale(fractionVal, labelText) {
   const canvas = document.getElementById("ruler-canvas");
   if (!canvas) return;
@@ -272,7 +320,6 @@ function drawVisualScale(fractionVal, labelText) {
     { val: 1.0, label: "1" }
   ];
   
-  // Draw tick marks
   ticks.forEach(tick => {
     const x = startX + tick.val * rulerW;
     ctx.beginPath();
@@ -289,18 +336,16 @@ function drawVisualScale(fractionVal, labelText) {
     ctx.fillText(tick.label, x, lineY + 10);
   });
   
-  // Draw active pointer
   if (fractionVal !== null && fractionVal >= 0 && fractionVal <= 1) {
     const pointerX = startX + fractionVal * rulerW;
     
     ctx.beginPath();
     ctx.moveTo(pointerX, lineY - 14);
     ctx.lineTo(pointerX, lineY + 14);
-    ctx.strokeStyle = "#16a34a"; // green arrow
+    ctx.strokeStyle = "#16a34a";
     ctx.lineWidth = 2.5;
     ctx.stroke();
     
-    // Triangle arrow
     ctx.beginPath();
     ctx.moveTo(pointerX, lineY - 4);
     ctx.lineTo(pointerX - 6, lineY - 11);
@@ -321,7 +366,7 @@ function drawVisualScale(fractionVal, labelText) {
 function numberToArabicWords(num) {
   const units = ["", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة", "عشرة"];
   const teens = ["أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"];
-  const tens = ["", "ععر", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+  const tens = ["", "عشر", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
   const hundreds = ["", "مائة", "مائتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"];
 
   if (num === 0) return "صفر";
@@ -525,32 +570,95 @@ function copyToTester(val) {
   showToast(`📋 تم نسخ القيمة ${val} إلى صندوق التجربة!`);
 }
 
-// Quiz Handlers
+// MCQ Quiz system with progression level
 function loadNewQuiz() {
   const randIndex = Math.floor(Math.random() * quizQuestions.length);
   currentQuizIndex = randIndex;
+  selectedOptionIndex = null;
+  isAnswered = false;
   
-  quizQuestionText.innerText = quizQuestions[randIndex].question;
-  quizInput.value = "";
+  const q = quizQuestions[randIndex];
+  quizQuestionText.innerHTML = q.question;
   quizFeedback.style.display = "none";
   quizFeedback.className = "quiz-feedback";
+  
+  // Render options list
+  quizOptionsList.innerHTML = "";
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quiz-option-btn";
+    btn.innerHTML = opt;
+    btn.onclick = () => selectOption(idx);
+    quizOptionsList.appendChild(btn);
+  });
+}
+
+function selectOption(index) {
+  if (isAnswered) return;
+  selectedOptionIndex = index;
+  
+  const btns = quizOptionsList.querySelectorAll(".quiz-option-btn");
+  btns.forEach((btn, idx) => {
+    if (idx === index) {
+      btn.className = "quiz-option-btn selected";
+    } else {
+      btn.className = "quiz-option-btn";
+    }
+  });
 }
 
 function checkQuizAnswer() {
-  const userAns = quizInput.value.trim();
-  const correctAns = quizQuestions[currentQuizIndex].answer;
+  if (isAnswered) return;
+  if (selectedOptionIndex === null) {
+    alert("الرجاء اختيار إجابة أولاً!");
+    return;
+  }
+  
+  isAnswered = true;
+  quizCount++;
+  
+  const q = quizQuestions[currentQuizIndex];
+  const btns = quizOptionsList.querySelectorAll(".quiz-option-btn");
   
   quizFeedback.style.display = "block";
   
-  if (userAns === correctAns) {
-    quizFeedback.innerText = "✅ ممتاز! إجابة صحيحة وكاملة.";
+  if (selectedOptionIndex === q.answerIndex) {
+    scoreCorrect++;
+    btns[selectedOptionIndex].className = "quiz-option-btn correct-ans";
+    quizFeedback.innerHTML = `✅ <strong>إجابة ممتازة وصحيحة!</strong><br>${q.reason}`;
     quizFeedback.className = "quiz-feedback success";
   } else {
-    if (userAns === "10.83" || userAns === "10.12" || userAns === "10.37" || userAns === "10.87" || userAns === "10.16" || userAns === "10.82" || userAns === "10.85" || userAns === "10.87") {
-      quizFeedback.innerText = "❌ " + quizQuestions[currentQuizIndex].errorMsg;
-    } else {
-      quizFeedback.innerText = `❌ إجابة غير دقيقة. القيمة الصحيحة للكسر المطلوب هي: ${correctAns}`;
-    }
+    btns[selectedOptionIndex].className = "quiz-option-btn wrong-ans";
+    btns[q.answerIndex].className = "quiz-option-btn correct-ans";
+    quizFeedback.innerHTML = `❌ <strong>إجابة غير صحيحة.</strong><br>${q.reason}`;
     quizFeedback.className = "quiz-feedback error";
   }
+  
+  updateUserProgressUI();
+}
+
+function updateUserProgressUI() {
+  // Update progress percentage
+  const pct = Math.min(100, Math.round((scoreCorrect / 10) * 100));
+  quizProgressBar.style.width = pct + "%";
+  quizScoreCount.innerText = `${scoreCorrect} / 10 تمارين صحيحة`;
+  
+  // Update User Level Badge
+  let lvlText = "🟢 مبتدئ";
+  let lvlClass = "lvl-beginner";
+  
+  if (scoreCorrect >= 10) {
+    lvlText = "🟡 دَّلاَّل خبير";
+    lvlClass = "lvl-expert";
+  } else if (scoreCorrect >= 7) {
+    lvlText = "🟣 محترف";
+    lvlClass = "lvl-pro";
+  } else if (scoreCorrect >= 4) {
+    lvlText = "🔵 جيد";
+    lvlClass = "lvl-good";
+  }
+  
+  userLevelBadge.innerText = lvlText;
+  userLevelBadge.className = "level-badge " + lvlClass;
 }

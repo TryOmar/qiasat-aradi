@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <title>🎓 تدريب على كتابة القياسات والكسور</title>
+  <title>🎓 دليل ومركز تدريب كتابة الكسور</title>
 </head>
 
 <body>
@@ -20,10 +20,30 @@
       ℹ️ هذه الصفحة تساعدك على تعلم الطريقة الصحيحة لكتابة القياسات الزراعية المستخدمة في برنامج <strong>الدَّلاَّل</strong>، حتى تتجنب الأخطاء قبل إجراء الحسابات وتضمن إدخال بياناتك بشكل صحيح.
     </div>
 
+    <!-- Comparative block: Compare 10.83 and 10.833 -->
+    <div class="section-title">⚖️ مقارنة هامة للفروقات</div>
+    <div class="compare-container">
+      <div class="compare-card wrong">
+        <div class="val">10.83</div>
+        <div class="meaning">
+          تعني: <strong>10 أمتار و83 سنتيمترًا</strong> بالتمام.<br>
+          (لا توجد كسور إضافية)
+        </div>
+      </div>
+      <div class="compare-divider">≠</div>
+      <div class="compare-card correct">
+        <div class="val">10.833</div>
+        <div class="meaning">
+          تعني: <strong>10 أمتار و80 سنتيمترًا وثلث سنتيمتر</strong>.<br>
+          (أضيف ثلث سم لـ 80 سم)
+        </div>
+      </div>
+    </div>
+
     <!-- Second section: Live Tester Box -->
-    <div class="section-title">✍️ جرّب كتابة أي قياس</div>
+    <div class="section-title">✍️ صندوق التجربة والتحليل الفوري</div>
     <div class="test-card">
-      <label for="tester-input">أدخل القياس (بالمتر والكسر العشري):</label>
+      <label for="tester-input">أدخل أي قياس لتجربته:</label>
       <div class="test-input-wrapper">
         <input type="text" inputmode="decimal" id="tester-input" placeholder="مثال: 10.833" dir="auto" />
       </div>
@@ -57,6 +77,12 @@
         <div class="result-item">
           <strong>🗣️ كما يكتبها الدَّلاَّل (بالحروف):</strong> 
           <span class="value-text" id="res-huroof">—</span>
+          <button type="button" class="why-btn" onclick="toggleWhyDrawer()">❓ لماذا؟</button>
+        </div>
+        
+        <!-- Expanded Math explanation -->
+        <div class="why-drawer" id="why-drawer">
+          <div id="why-text"></div>
         </div>
         
         <div class="result-item" style="border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 8px;">
@@ -289,21 +315,41 @@
     <!-- Sixth section: Quiz (Test yourself) -->
     <div class="section-title">🎓 اختبر نفسك (التدريب العملي)</div>
     <div class="quiz-card">
-      <div class="quiz-question">
-        <span>اكتب بالقيمة الرقمية العشري القياس التالي:</span>
-        <div id="quiz-question" style="font-size: 16px; color: #854d0e; font-weight: 800; margin-top: 8px;">—</div>
-      </div>
       
-      <div class="test-input-wrapper" style="margin-bottom: 10px;">
-        <input type="text" inputmode="decimal" id="quiz-input" placeholder="اكتب القيمة هنا (مثال: 10.833)" dir="auto" />
-        <button type="button" class="test-btn" id="quiz-btn-check" onclick="checkQuizAnswer()">تحقق</button>
+      <!-- User Level Progression Header -->
+      <div class="user-level-row">
+        <div>
+          <span class="quiz-score-text">المستوى الحالي:</span>
+          <span id="user-level-badge" class="level-badge lvl-beginner">🟢 مبتدئ</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <div class="progress-container">
+            <div id="quiz-progress-bar" class="progress-bar"></div>
+          </div>
+          <span id="quiz-score-count" class="quiz-score-text">0 / 10 تمارين صحيحة</span>
+        </div>
       </div>
 
+      <div class="quiz-question">
+        <div id="quiz-question" style="font-size: 15px; color: #854d0e; font-weight: 800;">—</div>
+      </div>
+      
+      <!-- Option Buttons container -->
+      <div class="quiz-options-list" id="quiz-options-list"></div>
+
       <div class="quiz-btn-row">
-        <button type="button" class="test-btn" onclick="loadNewQuiz()" style="flex: 1; height: 38px; background-color: #f59e0b; font-size: 13px;">سؤال جديد 🔄</button>
+        <button type="button" class="test-btn" style="flex: 1;" onclick="checkQuizAnswer()">تحقق من الإجابة</button>
+        <button type="button" class="test-btn" style="background-color: #4b5563;" onclick="loadNewQuiz()">السؤال التالي 🔄</button>
       </div>
 
       <div id="quiz-feedback" class="quiz-feedback" style="display: none;"></div>
+    </div>
+
+    <!-- Return button at the very bottom -->
+    <div class="return-btn-wrapper">
+      <button type="button" class="return-app-btn" onclick="location.href='../index.html'">
+        ✅ فهمت طريقة كتابة الكسور (العودة لبرنامج الدَّلاَّل)
+      </button>
     </div>
 
   </div>
