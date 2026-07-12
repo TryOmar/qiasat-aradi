@@ -1,3 +1,35 @@
+/**
+ * ======================================================================
+ * قياسات أراضي الدلال - محرك الكروكي والتقسيم التفاعلي
+ * نسخة: 2.0 (Mobile First & Polish UX)
+ * ======================================================================
+ *
+ * هذا الملف هو القلب البرمجي لتطبيق قياسات أراضي الدلال.
+ * يحتوي على:
+ *   - منطق توليد وعرض كروكي الأراضي (SVG Engine)
+ *   - خوارزميات حساب المساحة والتقسيم الهندسي للقطع
+ *   - نظام التفاعل اللمسي الكامل (Pan/Zoom/Touch)
+ *   - المحرك التفاعلي الموحد لتعديل الأبعاد والشركاء
+ *   - نظام الحفظ التلقائي (AutoSave) والتراجع/الإعادة (Undo/Redo)
+ *   - نظام الطباعة وتصدير الصور
+ *   - محرك تحويل وحدات القيراط والفدان والسهم
+ *
+ * ======================================================================
+ */
+
+// ----------------------------------------------------
+// دوال مساعدة: تحويل الأرقام والحسابات الهندسية الأساسية
+// ----------------------------------------------------
+
+/**
+ * parseArabicFloat - تحليل الأرقام العربية/الشرقية إلى float
+ *
+ * @description يحوّل أي نص رقمي (بما فيه الأرقام العربية ٠-٩
+ *              أو الفارسية ۰-۹ أو الأرقام اللاتينية) إلى رقم عشري.
+ *              يدعم أيضاً الفاصلة العربية (٫) كبديل لنقطة العشرية.
+ * @param {string} str - النص المراد تحليله
+ * @returns {number} القيمة العددية، أو 0 إذا كان الإدخال غير صالح
+ */
 // Arabic/Eastern digits converter and parser helper
 function parseArabicFloat(str) {
   if (!str) return 0;
@@ -8,12 +40,29 @@ function parseArabicFloat(str) {
   return parseFloat(clean) || 0;
 }
 
+/**
+ * calcDist - حساب المسافة الإقليدية بين نقطتين
+ *
+ * @description تطبيق مباشر لنظرية فيثاغورث لحساب الطول الحقيقي
+ *              لأي ضلع أو خط على الكروكي بين نقطتي إحداثيات.
+ * @param {{x:number,y:number}} pa - النقطة الأولى
+ * @param {{x:number,y:number}} pb - النقطة الثانية
+ * @returns {number} المسافة بالمتر (أو الوحدة المستخدمة في الكروكي)
+ */
 // Global distance calculation helper
 function calcDist(pa, pb) {
   if (!pa || !pb) return 0;
   return Math.sqrt(Math.pow(pb.x - pa.x, 2) + Math.pow(pb.y - pa.y, 2));
 }
 
+/**
+ * preventDoubleTap - منع اللمس المزدوج السريع (Double Tap Throttle)
+ *
+ * @description يحمي من فتح مودالين متداخلين أو تنفيذ إجراء مرتين
+ *              عند ضغط المستخدم بسرعة عالية على الهاتف.
+ *              الفترة الزمنية الآمنة: 300 مللي ثانية بين كل لمستين.
+ * @returns {boolean} true إذا كانت الفترة لم تنتهِ (يجب تجاهل الحدث)
+ */
 let lastActionTime = 0;
 function preventDoubleTap() {
   const now = Date.now();
@@ -24,14 +73,28 @@ function preventDoubleTap() {
   return false;
 }
 
-// Graphics State
+// -------------------------------------------------------
+// حالة الكروكي (Graphics State)
+// -------------------------------------------------------
+// shapes:       مصفوفة قطع الأرض (المضلعات الرباعية)
+// borderLabels: ملصقات الحدود الخارجية (الاتجاهات: بحري/قبلي/شرقي/غربي)
+// splitLines:   خطوط التقسيم بين الشركاء والأقطار والمواصير
+// freeTexts:    النصوص الحرة والأبعاد المكتوبة على الكروكي
+// waterways:    بيانات المجرى المائي (الترعة وعروض القطع المجاورة)
 let shapes = [];
 let borderLabels = [];
 let splitLines = [];
 let freeTexts = [];
 let waterways = [];
 
-// Visual Scaling & Stretch Variables - متغيرات التمدد البصري والـ Auto Fit
+// -------------------------------------------------------
+// متغيرات التمدد البصري والـ Auto Fit (Visual Scaling)
+// -------------------------------------------------------
+// scaleX/scaleY: معاملات التمدد الأفقي والرأسي لملاءمة الكروكي للشاشة
+// centerRx/Ry:  إحداثيات مركز الأرض الحقيقية (بالمتر)
+// visualCenterX/Y: إحداثيات مركز عنصر SVG بالبكسل
+// scale:        مقياس الرسم الكلي
+// partnerEditMode: وضع تعديل الشركاء ('keep_area' = حفظ المساحة, 'free_edit' = حر)
 let scaleX = 1.0;
 let scaleY = 1.0;
 let centerRx = 0.0;
@@ -41,12 +104,26 @@ let visualCenterY = 325;
 let scale = 1.0;
 let partnerEditMode = 'keep_area'; // 'keep_area' or 'free_edit'
 
+/**
+ * getVisualX / getVisualY - تحويل إحداثيات حقيقية (متر) → بكسل SVG
+ *
+ * @description يحوّل الإحداثي الحقيقي لنقطة ما (بالمتر) إلى إحداثي
+ *              بكسل داخل عنصر SVG بعد تطبيق معاملات التمدد البصري.
+ *              المعادلة: visualCoord = center + (real - centerReal) * scale
+ */
 function getVisualX(rx) {
   return visualCenterX + (rx - centerRx) * scaleX;
 }
 function getVisualY(ry) {
   return visualCenterY + (ry - centerRy) * scaleY;
 }
+/**
+ * getRealCoords - تحويل إحداثيات بكسل SVG → حقيقية (متر)
+ *
+ * @description العملية العكسية لـ getVisualX/Y.
+ *              يستخدم لتحويل موضع اللمس أو النقر على الشاشة
+ *              إلى إحداثيات حقيقية عند السحب والإفلات.
+ */
 function getRealCoords(coords) {
   if (!coords) return { x: 0, y: 0 };
   return {
@@ -161,7 +238,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       openStartModal(true);
     } catch (e) {
-      console.error(e);
+      // خطأ في تحليل بيانات الحفظ التلقائي (localStorage)
+      // قد يحدث عند تلف البيانات أو تغيير هيكل الكود
+      // الحل: تجاهل البيانات التالفة والبدء بنموذج افتراضي
+      console.warn('[Dallal AutoSave] فشل استعادة البيانات المحفوظة:', e.message);
+      console.error('[Dallal AutoSave] تفاصيل الخطأ:', e);
+      try { localStorage.removeItem('dallal_autosave'); } catch(_) {}
       openStartModal();
       loadDemoDataPreset(false);
     }
@@ -220,8 +302,22 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ----------------------------------------------------
-// State & Project Serialization
+// إدارة حالة المشروع (State & Project Serialization)
+// نظام التراجع/الإعادة (Undo/Redo) + الحفظ التلقائي (AutoSave)
+// طريقة العمل:
+//   - بعد كل تعديل تصدر saveState() لتخزين لقطة (نسخة عميقة) في undoStack
+//   - عند التراجع: تنتقل الحالة من undoStack إلى redoStack ويستعاد السابق
+//   - autoSaveCurrentState() تحفظ في localStorage لاستعادة البيانات بعد إغلاق التطبيق
 // ----------------------------------------------------
+
+/**
+ * saveState - حفظ لقطة حالة جديدة لنظام التراجع
+ *
+ * @description ينشئ نسخة عميقة (Deep Clone) من كامل حالة الكروكي
+ *              ويضيفها إلى undoStack. يتجنب حفظ لقطات متطابقة
+ *              بمقارنة الحالة الجديدة مع آخر لقطة محفوظة.
+ * @sideeffect يستدعي autoSaveCurrentState() لتحديث localStorage
+ */
 function saveState() {
   const state = {
     shapes: JSON.parse(JSON.stringify(shapes)),
@@ -346,6 +442,14 @@ function getSvgCoords(e) {
   return { x: svgCoords.x, y: svgCoords.y };
 }
 
+/**
+ * applyViewportTransform - تطبيق تحويل العرض والتكبير على عنصر SVG
+ *
+ * @description يحدث خاصية CSS Transform على مجموعة عناصر SVG
+ *              لتطبيق مستوى التكبير (zoomScale) والإزاحة (panX, panY)
+ *              دون إعادة رسم كاملة. يستخدم بعد كل عملية
+ *              سحب أو ضغط بصري لضمان سلاسة الحركة.
+ */
 function applyViewportTransform() {
   const viewportGroup = document.getElementById("viewportGroup");
   if (viewportGroup) {
@@ -354,8 +458,23 @@ function applyViewportTransform() {
 }
 
 // ----------------------------------------------------
-// Smart Area Math Conversion Helpers
+// تحويل وحدات المساحة (متر مربع → فدان/قيراط/سهم)
+// نظام الوحدات المتعارف عليه في مصر:
+//   1 فدان = 24 قيراط، و 1 قيراط = 24 سهماً
+//   حجم القيراط افتراضياً: 168 متر مربع (caratSize قابل للتخصيص)
 // ----------------------------------------------------
+
+/**
+ * sqmToFeddanCaratShares - تحويل المساحة من متر مربع إلى فدان/قيراط/سهم
+ *
+ * @description خوارزمية التحويل التدريجي:
+ *   1. أولاً: استخراج عدد الفددانات الكاملة (قسمة صحيحة)
+ *   2. ثانياً: من المتبقي استخراج عدد القراريط الكاملة
+ *   3. ثالثاً: المتبقي يحول إلى سهام (مقرباً لأقرب مئة)
+ *   4. تصحيح التجاوزات: إذا تجاوزت السهام 24 ترتفع القراريط، وإذا تجاوزت 24 ترتفع الفددانات
+ * @param {number} sqm - المساحة بالمتر المربع
+ * @returns {{feddan:number, carat:number, shares:number}} موزعة على الوحدات الثلاث
+ */
 function sqmToFeddanCaratShares(sqm) {
   const cSize = caratSize;
   const fSize = cSize * 24;
@@ -383,11 +502,35 @@ function sqmToFeddanCaratShares(sqm) {
 }
 
 // ----------------------------------------------------
-// Quad Generation Algorithm (Handles all template styles dynamically)
+// خوارزمية توليد الأرض وتقسيمها (Land Generation Algorithm)
+// تدعم جميع القوالب ديناميكياً: مستطيل، متوازي الأضلاع، رباعي القطرين،...
 // ----------------------------------------------------
+
+/**
+ * متغيرات تخصيص عروض الشركاء وبيانات المجرى المائي
+ * customPartnerWidths: مصفوفة [{top, bot}] لكل شريك بعرض بحري وقبلي مخصص
+ * customWaterwayData: بيانات الترعة وعروض القطع المجاورة للمجرى
+ */
 let customPartnerWidths = null;
 let customWaterwayData = null;
 
+/**
+ * generateCustomLand - الدالة الرئيسية لتوليد الكروكي
+ *
+ * @description تقرأ الأبعاد من بيانات المستخدم وتنشئ كامل الكروكي من الصفر.
+ *
+ * سير الخوارزمية:
+ *  1. تقرأ قيم w1, w2, l1, l2 والاتجاهات وعدد الشركاء
+ *  2. إذا تم إدخال قطر أو قطرين (AC/BD):
+ *     - تحسب إحداثيات الزوايا بقانون جيب التمام (Law of Cosines)
+ *     - تؤكد منطقية القطر مع الأضلاع (إذا cos خارج نطاق [-1, 1] يظهر تنبيه)
+ *     - تحسب المساحة بمعادلة هيرون للمثلثين
+ *  3. إذا لا قطر: تولد رباعي بسيط من الأبعاد مباشرة
+ *  4. توزع النقاط النهائية بين الشركاء تبعاً للقالب المختار
+ *  5. تعيد رسم SVG وتحدث الحفظ التلقائي
+ *
+ * @param {boolean} useCustomWidths - إذا true: يحافظ على عروض الشركاء المخصصة
+ */
 function generateCustomLand(useCustomWidths = false) {
   if (useCustomWidths !== true) {
     customPartnerWidths = null;
@@ -1391,6 +1534,24 @@ function generateCustomLand(useCustomWidths = false) {
 // A map to store visual offsets for labels so they don't overlap, resolved dynamically at render time.
 let resolvedVisualOffsets = {};
 
+// -------------------------------------------------------
+// خوارزمية تحديث التحويل الديناميكي (Dynamic Transform Engine)
+// توليد معاملات التمدد (scaleX, scaleY) والمركز (center) بحيث
+// تملأ الأرض الشاشة بأكبر قدر ممكن مع حفظ التناسب الهندسي.
+// -------------------------------------------------------
+
+/**
+ * updateDynamicTransform - حساب معاملات التمدد والمركز البصري
+ *
+ * @description تحسب معاملات scaleX و scaleY ومركز الكروكي بحيث
+ *              تنسجم الأرض (shapes) في منتصف عنصر SVG.
+ *
+ *  خطوات الخوارزمية:
+ *   1. تجمع جميع نقاط القطع وتجد الحدود العظمى (bounding box)
+ *   2. تحسب مركز الأرض الحقيقي (centerRx, centerRy)
+ *   3. تضبط معاملات التمدد بحيث تملأ الشاشة (مع خفض 5% كهامش)
+ *   4. تحدد المركز البصري (visualCenterX, visualCenterY) من قياسات SVG viewBox
+ */
 function updateDynamicTransform() {
   if (shapes.length === 0) {
     scaleX = 1.0;
@@ -1484,6 +1645,15 @@ function updateDynamicTransform() {
   scale = Math.min(scaleX, scaleY);
 }
 
+/**
+ * resolveVisualLabelOverlap - حل تداخل النصوص والملصقات على الكروكي
+ *
+ * @description تكتشف الملصقات المتداخلة بصرياً وتحسب إزاحات
+ *              ديناميكية لكل ملصق بحيث يبقى الكروكي مقروءاً.
+ *              النتائج تخزن في resolvedVisualOffsets وتُطبق
+ *              تلقائياً أثناء renderSVG().
+ * @sideeffect تحدّث resolvedVisualOffsets بإزاحات Y لكل ملصق
+ */
 function resolveVisualLabelOverlap() {
   resolvedVisualOffsets = {};
   let placed = [];
@@ -1600,6 +1770,29 @@ function resolveVisualLabelOverlap() {
 // ----------------------------------------------------
 // Rendering Engine
 // ----------------------------------------------------
+// -------------------------------------------------------
+// محرك رسم الكروكي (SVG Rendering Engine)
+// هذا القسم يحتوي على أضخم دالة في المشروع ويبني كامل
+// عناصر SVG من الصفر.
+// -------------------------------------------------------
+
+/**
+ * renderSVG - دالة رسم الكروكي الكامل
+ *
+ * @description تبني كامل عناصر SVG من حالة البيانات. تُستدعى
+ *              فقط عند تغيير البيانات (Apply) أو تحميل المشروع.
+ *              للحفاظ على الأداء: لا تُستدعى أثناء التحديد/السحب/التكبير.
+ *
+ *  مراحل الرسم:
+ *   1. تحسب updateDynamicTransform() لتسوية الأبعاد
+ *   2. بناء عناصر القطع (مضلعات + ألوان + مساحات + أسماء)
+ *   3. بناء خطوط التقسيم والمواصير (متقطعة)
+ *   4. رسم ملصقات الحدود الخارجية (borderLabels)
+ *   5. رسم النصوص الحرة (freeTexts)
+ *   6. بناء طبقة شفافة لمناطق اللمس (Touch Target Overlays) بعرض 48
+ *   7. رسم المجرى المائي إن وجد
+ *   8. حل تداخل النصوص (resolveVisualLabelOverlap)
+ */
 function renderSVG() {
   updateDynamicTransform();
   resolveVisualLabelOverlap();
@@ -2683,6 +2876,20 @@ function onSvgMouseUp() {
 }
 
 // Touch event bindings
+// -------------------------------------------------------
+// نظام التفاعل اللمسي (Touch & Pan/Zoom System)
+// يدعم: السحب بإصبع واحدة (Pan) + التكبير بإصبعين (Pinch Zoom)
+// نفس الدعم للفأرة وعجلة الماوس على أجهزة سطح المكتب
+// -------------------------------------------------------
+
+/**
+ * onSvgTouchStart - بدء اللمس على عنصر SVG
+ *
+ * @description يكتشف عدد الأصابع على الشاشة:
+ *   - 1 إصبع: يبدأ وضع السحب (Panning)
+ *   - 2 إصبع: يحفظ المسافة الأولية بين الإصبعين (Pinch Start)
+ * @param {TouchEvent} e - حدث اللمس
+ */
 function onSvgTouchStart(e) {
   if (e.touches.length === 1) {
     onSvgMouseDown(e);
@@ -2692,6 +2899,15 @@ function onSvgTouchStart(e) {
   }
 }
 
+/**
+ * onSvgTouchMove - حركة اللمس على عنصر SVG
+ *
+ * @description يحسب التغيير في الموضع:
+ *   - إصبع واحدة: يحرك panX و panY
+ *   - إصبعان: يحسب نسبة تغيير المسافة (Pinch Scale) ويحدث zoomScale
+ *   ثم يطبق applyViewportTransform() بدون إعادة رسم كاملة.
+ * @param {TouchEvent} e - حدث الحركة
+ */
 function onSvgTouchMove(e) {
   if (e.touches.length === 1) {
     onSvgMouseMove(e);
@@ -2715,6 +2931,14 @@ function onSvgTouchUp(e) {
   onSvgMouseUp();
 }
 
+/**
+ * getTouchDistance - حساب المسافة بين إصبعين على الشاشة
+ *
+ * @description تستخدم عدل فيثاغورث لحساب المسافة البكسلية
+ *              بين نقطتي لمس متزامنتين. أساس حساب التكبير بالضغط.
+ * @param {TouchEvent} e - حدث اللمس الذي يحتوي على إصبعين على الأقل
+ * @returns {number} المسافة بالبكسل
+ */
 function getTouchDistance(e) {
   const dx = e.touches[0].clientX - e.touches[1].clientX;
   const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -2926,6 +3150,15 @@ function applyFreeEdit() {
 let modalEditTarget = null; // { type, id }
 let isModalOpeningOrActive = false;
 
+/**
+ * triggerHaptic - تشغيل الاهتزاز اللمسي (Haptic Feedback)
+ *
+ * @description يستخدم Vibration API لتعزيز الإحساس بالتفاعل:
+ *   - 'tap': اهتزاز خفيف 15ms عند النقر على أي عنصر
+ *   - 'success': اهتزاز مزدوج [25, 45, 25]ms لتأكيد حفظ التغييرات
+ *              يتجاهل بصمت أجهزة سطح المكتب التي لا تدعم Vibration API.
+ * @param {'tap'|'success'} type - نوع الاهتزاز
+ */
 function triggerHaptic(type) {
   if (window.navigator && window.navigator.vibrate) {
     if (type === 'success') {
@@ -2936,6 +3169,15 @@ function triggerHaptic(type) {
   }
 }
 
+/**
+ * focusInputHelper - التركيز على حقل إدخال مع توسيطه بصرياً
+ *
+ * @description يتجنب اختفاء الحقل خلف لوحة المفاتيح على الهواتف:
+ *   1. يركّز على الحقل ويظلل القيمة الافتراضية بالكامل
+ *   2. يسحب ويوسط الحقل بسلاسة (scrollIntoView) ليبقى فوق لوحة المفاتيح
+ *   3. تأخير صغير (150ms) لضمان ظهور النافذة قبل التركيز
+ * @param {string} inputId - معرف حقل الإدخال
+ */
 function focusInputHelper(inputId) {
   setTimeout(() => {
     const input = document.getElementById(inputId);
@@ -3079,6 +3321,30 @@ function hideInspectorTooltip() {
   }
 }
 
+// -------------------------------------------------------
+// المحرك التفاعلي الموحد (Interactive Edit Engine)
+// عند النقر/اللمس على أي عنصر في الكروكي يفتح تلقائياً
+// النافذة المناسبة ويركز على الحقل المطابق للعنصر.
+// -------------------------------------------------------
+
+/**
+ * onElementClick - نقطة الدخول الموحدة لكل نقرة/لمسة على الكروكي
+ *
+ * @description الدالة المركزية لجميع نقرات المستخدم. تستقبل نوع العنصر ومعرفه
+ *              وتوجه إلى النافذة المناسبة وتركز على الحقل المطابق فوراً.
+ *
+ *  جدول التوجيه:
+ *  | نوع العنصر          | النافذة                       | الحقل المركز         |
+ *  |----------------------|---------------------------|------------------------|
+ *  | ضلع خارجي (border)   | مودال الأبعاد الكلية (start) | حقل الضلع المحدد     |
+ *  | قطر (diagonal)      | مودال الأبعاد الكلية        | حقل القطر المناسب      |
+ *  | قطعة شريك (shape)   | مودال التعديل الحر (free)  | صف وخلية الشريك     |
+ *  | مجرى مائي (waterway) | مودال المجرى الموحد       | حقل العرض المناسب    |
+ *
+ * @param {Event} e - حدث النقر/اللمس
+ * @param {string} type - نوع العنصر ('border'|'diagonal'|'shape'|'waterway'|'splitLine'|...)
+ * @param {string} id - معرف العنصر الفريد
+ */
 function onElementClick(e, type, id) {
   if (e) e.stopPropagation();
 
@@ -3508,6 +3774,14 @@ function updateUtilityField(field, value) {
   saveStateDebounced();
 }
 
+/**
+ * saveModalData - حفظ بيانات مودال التعديل الرئيسي (editModal)
+ *
+ * @description تسترجع بيانات العنصر المحدد من نماذج المودال
+ *              وتحدث shapes/splitLines/freeTexts/borderLabels/waterways
+ *              ثم تعيد رسم SVG وتحفظ الحالة.
+ * @sideeffect يستدعي renderSVG() + saveState() + triggerHaptic('success')
+ */
 function saveModalData() {
   if (!modalEditTarget) return;
   const { type, id } = modalEditTarget;
@@ -3659,6 +3933,18 @@ function setPartnerEditMode(mode) {
   populateSidebarEditor();
 }
 
+/**
+ * applyTotalDimensions - تطبيق الأبعاد الكلية الجديدة للأرض
+ *
+ * @description تقرأ قيم w1, w2, l1, l2 من مودال الأبعاد الكلية
+ *              وتعيد توليد الكروكي كاملاً بالحفاظ على تخصيصات
+ *              عروض الشركاء إن وجدت (customPartnerWidths).
+ *
+ *  مثال الاستخدام:
+ *   - المستخدم يغيّر من 40م إلى 45م بحري
+ *   - تقرأ applyTotalDimensions() القيمة وتعيد حساب
+ *     مواضع الشركاء مع حفظ درجات عروضهم
+ */
 function applyTotalDimensions() {
   const w1 = parseFloat(document.getElementById("sidebar-total-width-top").value) || 0;
   const w2 = parseFloat(document.getElementById("sidebar-total-width-bot").value) || 0;
@@ -4537,6 +4823,14 @@ function getWaterwayStats() {
   };
 }
 
+/**
+ * applySubdivision - تطبيق تقسيم خط التقسيم
+ *
+ * @description تقسم قطعة أرض إلى قطعتين تبعاً لخط تقسيم موجود.
+ *              تحسب المساحة الجديدة لكل قطعة تلقائياً.
+ * @param {string} groupId - معرف خط التقسيم في splitLines
+ * @param {boolean} isModal - true إذا استدعي من مودال التعديل
+ */
 function applySubdivision(groupId, isModal = false) {
   const inputId = isModal ? `modal-subdivide-${groupId}` : `subdivide-${groupId}`;
   const input = document.getElementById(inputId);
