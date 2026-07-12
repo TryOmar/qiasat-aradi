@@ -1146,13 +1146,13 @@ function generateCustomLand(useCustomWidths = false) {
 
     if (!customWaterwayData) {
       customWaterwayData = {
-        userWidthMeters: 7.20,        // العرض الموحد للمجرى - يتحكم فيه المستخدم
+        userWidthMeters: 0.00,        // العرض الموحد للمجرى - يتحكم فيه المستخدم
         positionType: 'middle',       // 'middle', 'start', 'quarter', 'third', 'two_thirds', 'three_quarters', 'end', 'custom_pct', 'area_third'
         positionPct: 50.0,            // النسبة المئوية الافتراضية
-        leftTopMeters: (effL1 - 7.20) / 2,
-        rightTopMeters: (effL2 - 7.20) / 2,
-        leftWaterMeters: 7.20,
-        rightWaterMeters: 7.20
+        leftTopMeters: (effL1 - 0.00) / 2,
+        rightTopMeters: (effL2 - 0.00) / 2,
+        leftWaterMeters: 0.00,
+        rightWaterMeters: 0.00
       };
     } else {
       if (customWaterwayData.userWidthMeters === undefined) {
@@ -1502,7 +1502,7 @@ function generateCustomLand(useCustomWidths = false) {
 
   } else if (activeTemplateType === 'mixed_split_image') {
     // Vertical waterway in the middle, splitting into Left/Right, then horizontally split.
-    const water_w = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 2.0;
+    const water_w = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
     const leftTop = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (w1 - water_w) / 2;
 
     const x_water_left = p1.x + leftTop;
@@ -3824,7 +3824,7 @@ function openModalForElement(type, id) {
     if (!customWaterwayData) {
       const _l1 = parseFloat(document.getElementById('start-l1') ? document.getElementById('start-l1').value : 50) || 50;
       const _l2 = parseFloat(document.getElementById('start-l2') ? document.getElementById('start-l2').value : 50) || 50;
-      customWaterwayData = { userWidthMeters: 7.20, leftTopMeters: (_l1/2)-3.6, rightTopMeters: (_l2/2)-3.6, leftWaterMeters: 7.20, rightWaterMeters: 7.20 };
+      customWaterwayData = { userWidthMeters: 0.00, leftTopMeters: (_l1/2), rightTopMeters: (_l2/2), leftWaterMeters: 0.00, rightWaterMeters: 0.00 };
     }
     if (customWaterwayData.userWidthMeters === undefined) {
       customWaterwayData.userWidthMeters = (customWaterwayData.leftWaterMeters + customWaterwayData.rightWaterMeters) / 2;
@@ -3848,7 +3848,7 @@ function openModalForElement(type, id) {
       ${statsHtml}
       <div class="editor-form-group">
         <label style="font-weight:bold; color:#1565c0;">⚙️ تعديل عرض المجرى (بالمتر):</label>
-        <input type="text" inputmode="decimal" id="modal-water-width" value="${(customWaterwayData.userWidthMeters||7.20).toFixed(2)}" style="width:100%; box-sizing:border-box; font-size:15px; font-weight:bold; text-align:center; padding:8px; border-radius:6px; border:1.5px solid #ccc;">
+        <input type="text" inputmode="decimal" id="modal-water-width" value="${(customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null ? customWaterwayData.userWidthMeters : 0.00).toFixed(2)}" style="width:100%; box-sizing:border-box; font-size:15px; font-weight:bold; text-align:center; padding:8px; border-radius:6px; border:1.5px solid #ccc;">
       </div>
       
       <div class="editor-form-group">
@@ -3987,7 +3987,7 @@ function saveModalData() {
 
     if (widthInput) {
       const newWidth = parseArabicFloat(widthInput.value);
-      customWaterwayData.userWidthMeters = newWidth >= 0 ? newWidth : 7.20;
+      customWaterwayData.userWidthMeters = !isNaN(newWidth) && newWidth >= 0 ? newWidth : 0.00;
     }
     if (posTypeSelect) {
       customWaterwayData.positionType = posTypeSelect.value;
@@ -4618,7 +4618,7 @@ function updateSubPieceWidth(groupId, pIndex, field, value) {
 function applyMixedPieceLengthSilent(groupId, side, val) {
   const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
   const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
-  const uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 7.20;
+  const uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
   const totalSideLen = side === 'left' ? l1Val : l2Val;
   const remainingSideLen = totalSideLen - uw;
 
@@ -4722,7 +4722,7 @@ function applyWidthsAtWaterway() {
 
   if (!customWaterwayData) {
     customWaterwayData = {
-      userWidthMeters: 7.20,
+      userWidthMeters: 0.00,
       positionType: 'middle',
       positionPct: 50.0,
       leftWaterMeters: 7.20,
@@ -4777,7 +4777,7 @@ function openUnifiedWaterwayModal(focusFieldId) {
   let uw, westLen, eastLen, westW, eastW;
 
   if (activeTemplateType === 'mixed_split_image') {
-    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 2.0;
+    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
     westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (w1Val - uw) / 2;
     eastLen = w1Val - westLen - uw;
     westW = 2.0;
@@ -4801,7 +4801,7 @@ function openUnifiedWaterwayModal(focusFieldId) {
     const eastLabel = document.querySelector('label[for="unified-east-len"]') || document.querySelector('#unified-east-len').previousElementSibling;
     if (eastLabel) eastLabel.textContent = "عرض القطعة الشرقية (متر):";
   } else {
-    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 7.20;
+    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
     westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (l1Val - uw) / 2;
     eastLen = l1Val - westLen - uw;
 
@@ -4977,7 +4977,7 @@ function handleWaterwayPositionTypeChange(value) {
     const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
     const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
     customWaterwayData = {
-      userWidthMeters: 7.20,
+      userWidthMeters: 0.00,
       positionType: 'middle',
       positionPct: 50.0,
       leftTopMeters: (l1Val - 7.20) / 2,
