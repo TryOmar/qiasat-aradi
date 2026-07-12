@@ -220,13 +220,16 @@
 .s2 input {
   position: relative;
   right: 10px;
-  width: 140px;
+  width: 180px;
   height: 42px;
   text-align: center;
   border: 2.5px solid #000000;
   border-radius: 8px;
   outline: none;
   font-weight: 800;
+  font-size: 16px;
+  font-family: 'Cairo', Arial, sans-serif;
+  transition: border-color 0.2s ease, font-size 0.1s ease;
 }
 
 .s2 input:focus {

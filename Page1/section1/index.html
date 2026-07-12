@@ -71,7 +71,7 @@
       <h3>ادخل سعر القيراط الواحد</h3>
       <div>
         <!-- Display input (formatted) -->
-        <input tabindex="4" type="tel" dir="auto" onkeyup="formatNumber(this); calculate();" />
+        <input tabindex="4" type="tel" dir="auto" onkeyup="formatNumber(this); calculate();" oninput="adjustPriceFontSize(this)" />
 
         <!-- Hidden input (unformatted, for calculations) -->
         <input type="hidden" id="numericValue" name="numericValue" />

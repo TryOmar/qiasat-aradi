@@ -13,6 +13,7 @@ let area_result3 = document.querySelector("#area-result3");
 let width1_result = document.querySelectorAll(".width1_result");
 let width2_result = document.querySelectorAll(".width2_result");
 let height_result = document.querySelectorAll(".height_result");
+let priceInput = document.querySelector(".s2 input[type='tel']");
 
 // Load data from sessionStorage when the page loads
 window.onload = function () {
@@ -43,6 +44,10 @@ function loadData() {
   area1.value = sessionStorage.getItem("area1") || "";
   area2.value = sessionStorage.getItem("area2") || "168";
   price.value = sessionStorage.getItem("price") || "";
+  if (priceInput && price.value) {
+    priceInput.value = price.value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    adjustPriceFontSize(priceInput);
+  }
 }
 
 // Add event listeners to save data on input change
@@ -225,6 +230,24 @@ function formatNumber(input) {
   document.getElementById("numericValue").value = rawValue;
   // Format the displayed value with commas
   input.value = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function adjustPriceFontSize(input) {
+  if (!input) return;
+  const len = input.value.length;
+  if (len <= 8) {
+    input.style.fontSize = "16px";
+  } else if (len === 9) {
+    input.style.fontSize = "15px";
+  } else if (len === 10) {
+    input.style.fontSize = "14px";
+  } else if (len === 11) {
+    input.style.fontSize = "13px";
+  } else if (len === 12) {
+    input.style.fontSize = "12px";
+  } else {
+    input.style.fontSize = "11px";
+  }
 }
 
 function convertInputsToMeters(inputs) {
