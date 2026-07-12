@@ -655,13 +655,41 @@ function sqmToFeddanCaratShares(sqm) {
  * @returns {"horizontal" | "vertical"}
  */
 function getWaterwayDirection() {
+  if (typeof activeTemplateType !== 'undefined' && activeTemplateType) {
+    if (activeTemplateType === 'mixed_waterway_new') {
+      let w1Dir = "بحري";
+      if (typeof borderLabels !== 'undefined' && borderLabels && borderLabels.length > 0) {
+        const b1 = borderLabels.find(b => b.id === "border_1");
+        if (b1 && b1.direction) w1Dir = b1.direction;
+      } else {
+        const w1DirEl = document.getElementById("start-w1-dir");
+        if (w1DirEl) w1Dir = w1DirEl.value.trim();
+      }
+      if (w1Dir === 'غربي' || w1Dir === 'شرقي') {
+        return WATERWAY_DIRECTION.VERTICAL;
+      }
+      return WATERWAY_DIRECTION.HORIZONTAL;
+    } else if (activeTemplateType === 'mixed_split_image') {
+      let l1Dir = "غربي";
+      if (typeof borderLabels !== 'undefined' && borderLabels && borderLabels.length > 0) {
+        const b3 = borderLabels.find(b => b.id === "border_3");
+        if (b3 && b3.direction) l1Dir = b3.direction;
+      } else {
+        const l1DirEl = document.getElementById("start-l1-dir");
+        if (l1DirEl) l1Dir = l1DirEl.value.trim();
+      }
+      if (l1Dir === 'بحري' || l1Dir === 'قبلي') {
+        return WATERWAY_DIRECTION.HORIZONTAL;
+      }
+      return WATERWAY_DIRECTION.VERTICAL;
+    }
+  }
+
   if (typeof waterways !== 'undefined' && waterways && waterways.length > 0) {
     const w = waterways[0];
-    // 1. الأولوية الأولى: الخاصية الصريحة للمجرى
     if (w.direction === WATERWAY_DIRECTION.HORIZONTAL || w.direction === WATERWAY_DIRECTION.VERTICAL) {
       return w.direction;
     }
-    // 2. الأولوية الثانية: التحليل الهندسي للنقاط كخيار احتياطي للتوافق العكسي
     if (w.points && w.points.length >= 4) {
       const pts = w.points;
       const width = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
@@ -670,28 +698,87 @@ function getWaterwayDirection() {
     }
     if (w.angle === 90) return WATERWAY_DIRECTION.VERTICAL;
   }
-  // 3. الأولوية الثالثة: التحقق من اسم القالب كحل أخير في مرحلة التهيئة قبل الرسم
-  if (typeof activeTemplateType !== 'undefined') {
-    if (activeTemplateType === 'mixed_waterway_new') return WATERWAY_DIRECTION.HORIZONTAL;
-    if (activeTemplateType === 'mixed_split_image') return WATERWAY_DIRECTION.VERTICAL;
-  }
-  console.warn("getWaterwayDirection: لم يتم تحديد اتجاه المجرى، تم الرجوع للقيمة الافتراضية horizontal");
   return WATERWAY_DIRECTION.HORIZONTAL;
 }
 
 /**
  * الحصول على أسماء القطع لنموذج المجرى المائي بناء على اتجاه المجرى هندسياً.
- * إذا كان المجرى أفقي (horizontal) -> القطعة البحرية والقطعة القبلية.
- * إذا كان المجرى رأسي (vertical) -> القطعة الغربية والقطعة الشرقية.
  * @returns {{west: string, east: string}}
  */
 function getMixedPieceNames() {
-  const dir = getWaterwayDirection();
-  if (dir === WATERWAY_DIRECTION.HORIZONTAL) {
-    return { west: "القطعة البحرية", east: "القطعة القبلية" };
+  let w1Dir = "بحري";
+  let w2Dir = "قبلي";
+
+  if (typeof borderLabels !== 'undefined' && borderLabels && borderLabels.length > 0) {
+    const b1 = borderLabels.find(b => b.id === "border_1");
+    const b2 = borderLabels.find(b => b.id === "border_2");
+    if (b1 && b1.direction) w1Dir = b1.direction;
+    if (b2 && b2.direction) w2Dir = b2.direction;
   } else {
-    return { west: "القطعة الغربية", east: "القطعة الشرقية" };
+    const w1DirEl = document.getElementById("start-w1-dir");
+    const w2DirEl = document.getElementById("start-w2-dir");
+    if (w1DirEl) w1Dir = w1DirEl.value.trim();
+    if (w2DirEl) w2Dir = w2DirEl.value.trim();
   }
+
+  const directionNameMap = {
+    "بحري": "القطعة البحرية",
+    "قبلي": "القطعة القبلية",
+    "غربي": "القطعة الغربية",
+    "شرقي": "القطعة الشرقية"
+  };
+
+  return {
+    west: directionNameMap[w1Dir] || "القطعة البحرية",
+    east: directionNameMap[w2Dir] || "القطعة القبلية"
+  };
+}
+
+/**
+ * تحديث أسماء القطع للشركاء ديناميكياً بناءً على الاتجاه الفعلي للمجرى.
+ */
+function updateShapeNamesDynamic() {
+  if (typeof shapes === 'undefined' || !shapes) return;
+  const pieceNames = getMixedPieceNames();
+  if (!pieceNames) return;
+
+  const allBases = ["القطعة البحرية", "القطعة القبلية", "القطعة الغربية", "القطعة الشرقية"];
+
+  shapes.forEach(s => {
+    if (!s.isSubPiece) return;
+
+    if (s.groupId === 'west') {
+      const currentBase = pieceNames.west;
+      const oldBases = allBases.filter(b => b !== currentBase);
+      
+      oldBases.forEach(oldBase => {
+        if (s.owner && s.owner.includes(oldBase)) {
+          s.owner = s.owner.split(oldBase).join(currentBase);
+        }
+        if (s.notes && s.notes.includes(oldBase)) {
+          s.notes = s.notes.split(oldBase).join(currentBase);
+        }
+        if (s.parentShape && s.parentShape.name && s.parentShape.name.includes(oldBase)) {
+          s.parentShape.name = s.parentShape.name.split(oldBase).join(currentBase);
+        }
+      });
+    } else if (s.groupId === 'east') {
+      const currentBase = pieceNames.east;
+      const oldBases = allBases.filter(b => b !== currentBase);
+      
+      oldBases.forEach(oldBase => {
+        if (s.owner && s.owner.includes(oldBase)) {
+          s.owner = s.owner.split(oldBase).join(currentBase);
+        }
+        if (s.notes && s.notes.includes(oldBase)) {
+          s.notes = s.notes.split(oldBase).join(currentBase);
+        }
+        if (s.parentShape && s.parentShape.name && s.parentShape.name.includes(oldBase)) {
+          s.parentShape.name = s.parentShape.name.split(oldBase).join(currentBase);
+        }
+      });
+    }
+  });
 }
 
 // ----------------------------------------------------
@@ -2006,6 +2093,7 @@ function resolveVisualLabelOverlap() {
  *   8. حل تداخل النصوص (resolveVisualLabelOverlap)
  */
 function renderSVG() {
+  updateShapeNamesDynamic();
   updateDynamicTransform();
   resolveVisualLabelOverlap();
 
@@ -3314,6 +3402,8 @@ function renderFreeEditTable() {
   if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
     if (!mixedPiecesTree) return;
 
+    const pieceNames = getMixedPieceNames();
+
     // West partners
     const westWidths = mixedPiecesTree.west.customWidths || [];
     westWidths.forEach((cw, i) => {
@@ -3322,7 +3412,7 @@ function renderFreeEditTable() {
       
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (الغربي)</td>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (${pieceNames.west})</td>
         <td style="padding: 10px; border: 1px solid #ddd;">
           <input type="number" step="0.01" class="free-edit-input" data-group="west" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
         </td>
@@ -3344,7 +3434,7 @@ function renderFreeEditTable() {
       
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (الشرقي)</td>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">شريك ${i + 1} (${pieceNames.east})</td>
         <td style="padding: 10px; border: 1px solid #ddd;">
           <input type="number" step="0.01" class="free-edit-input" data-group="east" data-index="${i}" data-side="top" value="${cw.top.toFixed(4)}" style="width: 80px; text-align: center; padding: 5px;">
         </td>
@@ -3972,6 +4062,14 @@ function openModalForElement(type, id) {
       </div>
       
       <div class="editor-form-group">
+        <label style="font-weight:bold; color:#1565c0;">↔️ اتجاه المجرى المائي:</label>
+        <select id="modal-water-direction" style="width:100%; height:38px; border-radius:6px; border:1.5px solid #ccc; font-weight:bold; font-family:'Cairo'; padding:5px;">
+          <option value="horizontal" ${getWaterwayDirection() === 'horizontal' ? 'selected' : ''}>أفقي (horizontal)</option>
+          <option value="vertical" ${getWaterwayDirection() === 'vertical' ? 'selected' : ''}>رأسي (vertical)</option>
+        </select>
+      </div>
+      
+      <div class="editor-form-group">
         <label style="font-weight:bold; color:#1565c0;">📍 تحديد موقع المجرى المائي:</label>
         <select id="modal-water-pos-type" onchange="document.getElementById('modal-water-pos-pct-container').style.display = (this.value === 'custom_pct' ? 'block' : 'none')" style="width:100%; height:38px; border-radius:6px; border:1.5px solid #ccc; font-weight:bold; font-family:'Cairo'; padding:5px;">
           <option value="middle" ${(customWaterwayData && customWaterwayData.positionType === 'middle') ? 'selected' : ''}>في منتصف الأرض (50%)</option>
@@ -4121,10 +4219,26 @@ function saveModalData() {
     const widthInput = document.getElementById('modal-water-width');
     const posTypeSelect = document.getElementById('modal-water-pos-type');
     const posPctInput = document.getElementById('modal-water-pos-pct');
+    const dirSelect = document.getElementById('modal-water-direction');
+
+    if (dirSelect) {
+      const newDir = dirSelect.value;
+      const oldDir = getWaterwayDirection();
+      if (newDir !== oldDir) {
+        if (newDir === 'horizontal') {
+          activeTemplateType = 'mixed_waterway_new';
+        } else {
+          activeTemplateType = 'mixed_split_image';
+        }
+        customWaterwayData = null; // force regeneration
+      }
+    }
 
     if (widthInput) {
       const newWidth = parseArabicFloat(widthInput.value);
-      customWaterwayData.userWidthMeters = !isNaN(newWidth) && newWidth >= 0 ? newWidth : 0.00;
+      if (customWaterwayData) {
+        customWaterwayData.userWidthMeters = !isNaN(newWidth) && newWidth >= 0 ? newWidth : 0.00;
+      }
     }
     if (posTypeSelect) {
       customWaterwayData.positionType = posTypeSelect.value;
@@ -4318,6 +4432,7 @@ function populateSidebarEditor() {
 
         if (isMixedSub) {
           const sideLengths = getShapeSideLengths(s);
+          const pieceNames = getMixedPieceNames();
           subPieceHtml = `
             <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
               <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
@@ -4543,6 +4658,7 @@ function populateSidebarEditor() {
     // بطاقة بيانات المجرى المائي في السايدبار
     const ws = getWaterwayStats();
     if (ws) {
+      const pieceNames = getMixedPieceNames();
       const curWidth = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null) ? customWaterwayData.userWidthMeters.toFixed(2) : ws.width.toFixed(2);
       html = `
         <div style="background:#e3f2fd; padding:12px; border-radius:8px; border:1px solid #90caf9; margin-bottom:14px;">
@@ -4564,7 +4680,7 @@ function populateSidebarEditor() {
         </div>
 
         <div style="background:#f1f8e9; border:1px solid #c5e1a5; border-radius:6px; padding:8px; font-size:12px; color:#2e7d32;">
-          ✅ مساحة الإجمالي = غربية ${ws.westArea.toFixed(1)} م² + مجرى ${ws.area.toFixed(1)} م² + شرقية ${ws.eastArea.toFixed(1)} م²
+          ✅ مساحة الإجمالي = ${pieceNames.west} ${ws.westArea.toFixed(1)} م² + مجرى ${ws.area.toFixed(1)} م² + ${pieceNames.east} ${ws.eastArea.toFixed(1)} م²
         </div>
       `;
     }
@@ -4966,6 +5082,16 @@ function openUnifiedWaterwayModal(focusFieldId) {
     if (eastLabel) eastLabel.textContent = "طول " + pieceNames.east + " (متر):";
   }
 
+  const westWidthLabel = document.querySelector('label[for="unified-west-width-at-waterway"]') || document.querySelector('#unified-west-width-at-waterway').previousElementSibling;
+  if (westWidthLabel) westWidthLabel.textContent = "عرض " + pieceNames.west + " عند المجرى (متر):";
+  const eastWidthLabel = document.querySelector('label[for="unified-east-width-at-waterway"]') || document.querySelector('#unified-east-width-at-waterway').previousElementSibling;
+  if (eastWidthLabel) eastWidthLabel.textContent = "عرض " + pieceNames.east + " عند المجرى (متر):";
+
+  const dirSelect = document.getElementById("unified-waterway-direction");
+  if (dirSelect) {
+    dirSelect.value = getWaterwayDirection();
+  }
+
   document.getElementById("unified-west-len").value = westLen.toFixed(2);
   document.getElementById("unified-east-len").value = eastLen.toFixed(2);
   document.getElementById("unified-west-width-at-waterway").value = westW.toFixed(2);
@@ -4987,6 +5113,24 @@ function closeUnifiedWaterwayModal() {
 }
 
 function saveUnifiedWaterwayData() {
+  const dirSelect = document.getElementById("unified-waterway-direction");
+  if (dirSelect) {
+    const newDir = dirSelect.value;
+    const oldDir = getWaterwayDirection();
+    if (newDir !== oldDir) {
+      if (newDir === 'horizontal') {
+        activeTemplateType = 'mixed_waterway_new';
+      } else {
+        activeTemplateType = 'mixed_split_image';
+      }
+      customWaterwayData = null;
+      generateCustomLand(true);
+      triggerHaptic('success');
+      closeUnifiedWaterwayModal();
+      return;
+    }
+  }
+
   const westLen = parseArabicFloat(document.getElementById("unified-west-len").value);
   const eastLen = parseArabicFloat(document.getElementById("unified-east-len").value);
   const westW = parseArabicFloat(document.getElementById("unified-west-width-at-waterway").value);

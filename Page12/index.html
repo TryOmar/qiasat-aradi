@@ -306,19 +306,26 @@
       </div>
       <div class="unified-modal-body">
         <div class="editor-form-group mobile-field">
-          <label>طول القطعة الغربية (متر):</label>
+          <label>↔️ اتجاه المجرى المائي:</label>
+          <select id="unified-waterway-direction" class="mobile-input" style="font-family:'Cairo'; font-weight:bold;">
+            <option value="horizontal">أفقي (horizontal)</option>
+            <option value="vertical">رأسي (vertical)</option>
+          </select>
+        </div>
+        <div class="editor-form-group mobile-field">
+          <label for="unified-west-len">طول القطعة الغربية (متر):</label>
           <input type="text" inputmode="decimal" id="unified-west-len" class="mobile-input">
         </div>
         <div class="editor-form-group mobile-field">
-          <label>طول القطعة الشرقية (متر):</label>
+          <label for="unified-east-len">طول القطعة الشرقية (متر):</label>
           <input type="text" inputmode="decimal" id="unified-east-len" class="mobile-input">
         </div>
         <div class="editor-form-group mobile-field">
-          <label>عرض القطعة الغربية عند المجرى (متر):</label>
+          <label for="unified-west-width-at-waterway">عرض القطعة الغربية عند المجرى (متر):</label>
           <input type="text" inputmode="decimal" id="unified-west-width-at-waterway" class="mobile-input">
         </div>
         <div class="editor-form-group mobile-field">
-          <label>عرض القطعة الشرقية عند المجرى (متر):</label>
+          <label for="unified-east-width-at-waterway">عرض القطعة الشرقية عند المجرى (متر):</label>
           <input type="text" inputmode="decimal" id="unified-east-width-at-waterway" class="mobile-input">
         </div>
         <div class="editor-form-group mobile-field">
