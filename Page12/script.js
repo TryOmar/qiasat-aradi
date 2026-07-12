@@ -1375,6 +1375,7 @@ function generateCustomLand(useCustomWidths = false) {
 
 
 
+  triggerHaptic('success');
   closeStartModal();
   renderSVG();
   saveState();
@@ -2746,6 +2747,7 @@ function togglePinCroqui() {
 // Free Edit Modal Logic
 // ----------------------------------------------------
 function openFreeEditModal() {
+  isModalOpeningOrActive = true;
   if (activeTemplateType === 'mixed_waterway_new') {
     openUnifiedWaterwayModal();
     return;
@@ -2911,6 +2913,7 @@ function onFreeEditWidthChange(group, idx, side, newVal, inputEl) {
 }
 
 function applyFreeEdit() {
+  triggerHaptic('success');
   closeFreeEditModal();
   generateCustomLand(true);
   renderSVG();
@@ -2921,6 +2924,17 @@ function applyFreeEdit() {
 // UI Click & Editing Popups
 // ----------------------------------------------------
 let modalEditTarget = null; // { type, id }
+let isModalOpeningOrActive = false;
+
+function triggerHaptic(type) {
+  if (window.navigator && window.navigator.vibrate) {
+    if (type === 'success') {
+      window.navigator.vibrate([25, 45, 25]);
+    } else if (type === 'tap') {
+      window.navigator.vibrate(15);
+    }
+  }
+}
 
 function focusInputHelper(inputId) {
   setTimeout(() => {
@@ -2969,9 +2983,11 @@ function highlightElementInDOM(type, id) {
 function clearSelectionAndHighlights() {
   selectedElement = null;
   highlightElementInDOM(null, null);
+  isModalOpeningOrActive = false;
 }
 
 function onSvgDoubleClick(e) {
+  if (isModalOpeningOrActive) return;
   const target = e.target;
   const parent = target.parentElement;
   
@@ -3065,6 +3081,9 @@ function hideInspectorTooltip() {
 
 function onElementClick(e, type, id) {
   if (e) e.stopPropagation();
+
+  if (isModalOpeningOrActive) return;
+  triggerHaptic('tap');
 
   let targetType = type;
   let targetId = id;
@@ -3209,6 +3228,7 @@ function onElementClick(e, type, id) {
 }
 
 function openModalForElement(type, id) {
+  isModalOpeningOrActive = true;
   selectedElement = { type, id };
   modalEditTarget = { type, id };
 
@@ -3559,6 +3579,7 @@ function saveModalData() {
     }
 
     modalEditTarget = null;
+    triggerHaptic('success');
     closeModal();
     generateCustomLand(true);
     renderSVG();
@@ -3569,6 +3590,7 @@ function saveModalData() {
   }
 
   modalEditTarget = null;
+  triggerHaptic('success');
   closeModal();
   renderSVG();
   populateSidebarEditor();
@@ -4244,6 +4266,7 @@ function setupUnifiedInputsAutoselect() {
 }
 
 function openUnifiedWaterwayModal(focusFieldId) {
+  isModalOpeningOrActive = true;
   if (activeTemplateType !== 'mixed_waterway_new' && activeTemplateType !== 'mixed_split_image') return;
 
   const w1Val = parseArabicFloat(document.getElementById("start-w1").value) || 50;
@@ -4338,6 +4361,7 @@ function saveUnifiedWaterwayData() {
   }
 
   applyUnifiedWaterwayEdits(westLen, eastLen, westW, eastW, waterW);
+  triggerHaptic('success');
   closeUnifiedWaterwayModal();
 }
 
@@ -4529,6 +4553,7 @@ function applySubdivision(groupId, isModal = false) {
   generateCustomLand(true);
   renderSVG();
   saveState();
+  triggerHaptic('success');
   
   // Clear selection since the old shape IDs might be gone
   selectedElement = null;
@@ -4788,6 +4813,7 @@ function resetCanvasToDefault() {
 function loadTemplate(type) {
   try {
     if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
+    triggerHaptic('tap');
     activeTemplateType = type;
     customWaterwayData = null;
 
@@ -4919,6 +4945,7 @@ function populateStartModalFromCurrentBorders() {
 }
 
 function openStartModal(skipPopulate = false, focusFieldId = null) {
+  isModalOpeningOrActive = true;
   if (!skipPopulate) {
     populateStartModalFromCurrentBorders();
   }

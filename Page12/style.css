@@ -354,26 +354,27 @@ svg .clickable-shape {
   cursor: pointer;
   stroke: #1b5e20;
   stroke-width: 2px;
-  transition: fill-opacity 0.2s, stroke 0.2s;
+  transition: fill-opacity 0.15s ease, stroke 0.15s ease, stroke-width 0.15s ease;
 }
 
 svg .clickable-shape:hover {
   fill-opacity: 0.95;
   stroke: #00c853;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 svg .clickable-shape.active {
   stroke: #00c853 !important;
   stroke-width: 4.5px !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
   fill-opacity: 0.98 !important;
+}
+
+svg .split-line {
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
 }
 
 svg .split-line.active {
   stroke: #00c853 !important;
   stroke-width: 5px !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
 }
 
 svg .waterway {
@@ -381,12 +382,16 @@ svg .waterway {
   stroke: #00838f;
   stroke-width: 3.5px;
   stroke-dasharray: 6, 4;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
 }
 
 svg .waterway.active {
   stroke: #00c853 !important;
   stroke-width: 5px !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
+}
+
+svg .draggable-label text {
+  transition: fill 0.15s ease, font-weight 0.15s ease;
 }
 
 svg .draggable-label.active text {
