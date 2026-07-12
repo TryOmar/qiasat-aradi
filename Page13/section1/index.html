@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../../fraction-helper.css" />
   <title>حساب وتقسيم مساحة الأراضي</title>
   <style>
     /* Highlight effect for input interactive elements inside SVG card */
@@ -465,6 +466,12 @@
   </div>
 
   <script src="script.js"></script>
+  <script src="../../fraction-helper.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initFractionHelper();
+    });
+  </script>
   <script src="../../nav.js"></script>
   <script src="../../outdoor-mode.js"></script>
 </body>

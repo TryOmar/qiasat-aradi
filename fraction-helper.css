@@ -1,0 +1,209 @@
+/* CSS Styles for Shared Fraction Helper Component */
+
+.fraction-helper-tooltip {
+  position: absolute;
+  background: #ffffff;
+  border: 2.5px solid #2e7d32;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  width: 320px;
+  max-width: calc(100vw - 20px);
+  z-index: 99999;
+  direction: rtl;
+  font-family: 'Cairo', Arial, sans-serif;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.fraction-helper-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.fraction-helper-tooltip .tooltip-header {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #1b5e20;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fraction-helper-tooltip .tooltip-translation {
+  font-size: 15px;
+  font-weight: bold;
+  color: #0f172a;
+  background-color: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+  border-right: 3px solid #64748b;
+  word-wrap: break-word;
+}
+
+/* Typo Alert Card */
+.fraction-helper-tooltip .typo-alert {
+  background-color: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.fraction-helper-tooltip .typo-alert-header {
+  font-weight: 800;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+
+.fraction-helper-tooltip .typo-visual-compare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0;
+  padding: 8px;
+  background: white;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.fraction-helper-tooltip .compare-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.fraction-helper-tooltip .compare-val {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.fraction-helper-tooltip .compare-item.wrong .compare-val {
+  color: #c62828;
+}
+
+.fraction-helper-tooltip .compare-item.correct .compare-val {
+  color: #1b5e20;
+}
+
+.fraction-helper-tooltip .compare-label {
+  font-size: 10.5px;
+  font-weight: bold;
+  color: #475569;
+  margin-top: 3px;
+}
+
+.fraction-helper-tooltip .compare-sign {
+  font-size: 20px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.fraction-helper-tooltip .typo-explanation {
+  font-size: 12.5px;
+  color: #7f1d1d;
+  background-color: #fff5f5;
+  padding: 8px;
+  border-radius: 6px;
+  border-right: 3px solid #f87171;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.fraction-helper-tooltip .correct-val-highlight {
+  color: #1b5e20;
+  font-size: 14.5px;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.fraction-helper-tooltip .typo-fix-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 800;
+  width: 100%;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  transition: background-color 0.15s ease;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(211, 47, 47, 0.15);
+}
+
+.fraction-helper-tooltip .typo-fix-btn:hover {
+  background-color: #b71c1c;
+}
+
+/* Quick Fraction Pills */
+.fraction-helper-tooltip .pills-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #475569;
+  margin: 10px 0 6px 0;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.fraction-helper-tooltip .fraction-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.fraction-helper-tooltip .fraction-pill {
+  background-color: #f1f3f1;
+  border: 1px solid #cbd5e1;
+  color: #1b5e20;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fraction-helper-tooltip .fraction-pill:hover {
+  background-color: #e8f5e9;
+  border-color: #2e7d32;
+  transform: scale(1.05);
+}
+
+.fraction-helper-tooltip .fraction-pill:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Overrides */
+@media (max-width: 400px) {
+  .fraction-helper-tooltip .typo-visual-compare {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 8px;
+  }
+  .fraction-helper-tooltip .compare-sign {
+    transform: rotate(90deg);
+    margin: 2px 0;
+  }
+}
