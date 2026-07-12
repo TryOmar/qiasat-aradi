@@ -79,9 +79,13 @@
         </div>
         
         <!-- Action Buttons Under Canvas -->
-        <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
           <button type="button" class="action-btn" id="freeEditBtn" onclick="openFreeEditModal()" style="padding: 12px 20px; font-size: 16px; background-color: #ff9800; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">🟠 تعديل الخريطة</button>
           <button type="button" class="action-btn" onclick="handleConversionButtonClick()" style="padding: 12px 20px; font-size: 16px; background-color: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 8px;">⚖️ تحويل لفدان/قيراط/سهم</button>
+          <label class="action-btn" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 16px; font-weight: bold; color: #1b5e20; background-color: #e8f5e9; border: 2px solid #a5d6a7; padding: 10px 16px; border-radius: 8px; margin: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box; height: 48px; line-height: normal; font-family: 'Cairo';">
+            <input type="checkbox" id="chkAgriBackground" onchange="toggleAgriBackground()" style="accent-color: #2e7d32; width: 18px; height: 18px; margin: 0; cursor: pointer;">
+            🌾 إظهار الخلفية الزراعية
+          </label>
           <button type="button" class="action-btn generate-btn" onclick="printDallalMap()" style="padding: 12px 30px; font-size: 16px;">🖨️ طباعة وحفظ الكروكي</button>
         </div>
       </div>
@@ -102,13 +106,7 @@
           <button type="button" class="sidebar-btn add-btn" onclick="addNewSplitLine()" style="flex: 1;">📏 رسم خط تقسيم</button>
         </div>
 
-        <h3 style="margin-top: 20px;">إعدادات العرض</h3>
-        <div style="background: #f1f8e9; padding: 10px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 10px;">
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: bold; color: #1b5e20;">
-            <input type="checkbox" id="chkAgriBackground" onchange="toggleAgriBackground()" style="accent-color: #2e7d32; width: 16px; height: 16px;">
-            🌾 إظهار الخلفية الزراعية
-          </label>
-        </div>
+
 
         <div style="margin-bottom: 15px;">
           <button type="button" onclick="handleConversionButtonClick()" style="width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
