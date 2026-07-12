@@ -363,6 +363,18 @@
       tooltip.addEventListener("click", function (e) {
         const pill = e.target.closest(".fh-fraction-pill");
         const fixBtn = e.target.closest(".fh-typo-fix-btn");
+        const hideBtn = e.target.closest(".fh-hide-btn");
+
+        if (hideBtn) {
+          try {
+            if (tooltip) tooltip.classList.remove("fh-active");
+            localStorage.setItem("fh_disabled", "true");
+            showActivatorButton();
+          } catch (err) {
+            logError("hideAssistant", err);
+          }
+          return;
+        }
 
         if (!activeInput) return;
 
@@ -455,6 +467,10 @@
 
       if (!val) {
         tooltip.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px;">
+            <span style="font-weight: 800; font-size: 13px; color: #1b5e20; font-family: 'Cairo'; display: flex; align-items: center; gap: 4px;">🤖 المساعد الذكي للكسور</span>
+            <button type="button" class="fh-hide-btn">🙈 إخفاء</button>
+          </div>
           <div class="fh-header">💡 طريقة إدخال الكسور زراعياً:</div>
           <div style="font-size:12.5px; line-height:1.5; color:#475569;">
             اكتب الرقم الصحيح، متبوعاً بالفاصلة العشرية ثم الكسور.
@@ -513,8 +529,13 @@
         `;
       }
 
-      html += pillsHtml;
-      tooltip.innerHTML = html;
+      const headerWrapperHtml = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px;">
+          <span style="font-weight: 800; font-size: 13px; color: #1b5e20; font-family: 'Cairo'; display: flex; align-items: center; gap: 4px;">🤖 المساعد الذكي للكسور</span>
+          <button type="button" class="fh-hide-btn">🙈 إخفاء</button>
+        </div>
+      `;
+      tooltip.innerHTML = headerWrapperHtml + html + pillsHtml;
       repositionTooltip(input);
       
       const endTime = performance.now();
@@ -639,6 +660,7 @@
   }
 
   function handleFocusIn(e) {
+    if (localStorage.getItem("fh_disabled") === "true") return;
     if (e.target && (e.target.matches(config.selector) || manuallyAttachedElements.has(e.target))) {
       if (hideTimeout) clearTimeout(hideTimeout);
       activeInput = e.target;
@@ -680,6 +702,35 @@
     }
   }
 
+  /**
+   * إنشاء وعرض زر التنشيط العائم عند إخفاء المساعد.
+   */
+  function showActivatorButton() {
+    try {
+      if (document.getElementById("fh-activator-btn")) {
+        document.getElementById("fh-activator-btn").style.display = "flex";
+        return;
+      }
+      const btn = document.createElement("button");
+      btn.id = "fh-activator-btn";
+      btn.className = "fh-activator-btn";
+      btn.type = "button";
+      btn.innerHTML = "🤖 تشغيل المساعد";
+      btn.addEventListener("click", function () {
+        localStorage.setItem("fh_disabled", "false");
+        btn.style.display = "none";
+        if (activeInput) {
+          activeInput.focus();
+          updateTooltip(activeInput);
+          if (tooltip) tooltip.classList.add("fh-active");
+        }
+      });
+      document.body.appendChild(btn);
+    } catch (err) {
+      logError("showActivatorButton", err);
+    }
+  }
+
   // ----------------------------------------------------
   // 7. الواجهة البرمجية المفتوحة المعتمدة (Public API)
   // ----------------------------------------------------
@@ -718,7 +769,6 @@
             for (let mutation of mutations) {
               for (let node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                  // إذا تم إضافة حقل يطابق شروطنا، نقوم بإجراء تحديث/تنشيط للمساعد
                   if (node.matches(config.selector) || node.querySelector(config.selector)) {
                     FractionHelper.refresh();
                   }
@@ -731,6 +781,11 @@
         });
 
         domObserver.observe(document.body, { childList: true, subtree: true });
+
+        if (localStorage.getItem("fh_disabled") === "true") {
+          showActivatorButton();
+        }
+
         isInitialized = true;
         
         const endTime = performance.now();
@@ -771,6 +826,11 @@
         tooltip = null;
         activeInput = null;
         manuallyAttachedElements.clear();
+
+        const btn = document.getElementById("fh-activator-btn");
+        if (btn && btn.parentNode) {
+          btn.parentNode.removeChild(btn);
+        }
 
         if (hideTimeout) {
           clearTimeout(hideTimeout);
