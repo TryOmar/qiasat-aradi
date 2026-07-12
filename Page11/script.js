@@ -463,8 +463,8 @@ function renderHeaderAndFooter() {
       <p>العرض الثاني (أسفل)</p>
       <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
       <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
-      <p>العلامة (م)</p>
-      <p>الفاصل (م)</p>
+      <p title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</p>
+      <p title="الفاصل: خط التقسيم الطولي بين هذه القطعة والقطعة المجاورة لها من اليسار" style="cursor: help;">الفاصل (م)</p>
       <p></p>
     `;
     
@@ -497,8 +497,8 @@ function renderHeaderAndFooter() {
       <p>العرض الثاني (أسفل)</p>
       <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
       <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
-      <p>العلامة (م)</p>
-      <p>الفاصل (م)</p>
+      <p title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</p>
+      <p title="الفاصل: خط التقسيم الطولي بين هذه القطعة والقطعة المجاورة لها من اليسار" style="cursor: help;">الفاصل (م)</p>
       <p></p>
     `;
     
@@ -1081,7 +1081,9 @@ function calculateGeneral() {
   rows.forEach((row, index) => {
     // 1. Update Serial Number (م)
     const indexInput = row.querySelector(".partner-index");
-    if (indexInput) indexInput.value = index + 1;
+    if (indexInput) {
+      indexInput.value = index === 0 ? "1 🏁" : (index + 1);
+    }
 
     if (isPartnerRowExcluded(row)) {
       return; // Skip area calculations for excluded row
@@ -1422,7 +1424,7 @@ function runPartition() {
 
     const cumWidthInput = row.querySelector(".partner-cum-width");
     if (cumWidthInput) {
-      cumWidthInput.value = `أسفل: ${botStart.toFixed(4)} إلى ${botEnd.toFixed(4)} م | أعلى: ${topStart.toFixed(4)} إلى ${topEnd.toFixed(4)} م`;
+      cumWidthInput.value = `يمين ➡️ أعلى: ${topStart.toFixed(4)} ← ${topEnd.toFixed(4)} م | أسفل: ${botStart.toFixed(4)} ← ${botEnd.toFixed(4)} م`;
     }
 
     const divLineInput = row.querySelector(".partner-div-line");
@@ -2033,13 +2035,15 @@ function renderCroquis() {
         ? { fill: "rgba(255, 193, 7, 0.11)", stroke: "#ff8f00" }
         : PIECE_COLORS[index % PIECE_COLORS.length];
 
-      const x1 = mapX(piece.startX);
-      const x2 = mapX(piece.endX);
+      // Mirror coordinates to draw from Right to Left visually
+      const x1 = mapX(w - piece.startX); // right boundary of piece visually
+      const x2 = mapX(w - piece.endX);   // left boundary of piece visually
       const y1 = mapY(0);
       const y2 = mapY(0);
-      // ارتفاع الحافة العليا: h(x) = l2 + k*x  (l2=يسار، l1=يمين، k=(l1-l2)/w)
-      const y3 = mapY(l2 + k * piece.endX);
-      const y4 = mapY(l2 + k * piece.startX);
+      // height at left boundary (x2): h(w - endX) = l2 + k * (w - endX)
+      const y3 = mapY(l2 + k * (w - piece.endX));
+      // height at right boundary (x1): h(w - startX) = l2 + k * (w - startX)
+      const y4 = mapY(l2 + k * (w - piece.startX));
 
       // تعبئة القطعة
       const poly = svgEl("polygon");
@@ -2087,34 +2091,34 @@ function renderCroquis() {
       if (dash) botBorder.setAttribute("stroke-dasharray", dash);
       g.appendChild(botBorder);
 
-      // 3. الحد الأيسر الخارجي (لأول شريك فقط، سميك)
+      // 3. الحد الأيمن الخارجي (لأول شريك فقط، سميك)
       if (index === 0) {
-        const leftBorder = svgEl("line");
-        leftBorder.setAttribute("x1", x1);
-        leftBorder.setAttribute("y1", y1);
-        leftBorder.setAttribute("x2", x1);
-        leftBorder.setAttribute("y2", y4);
-        leftBorder.setAttribute("stroke", color.stroke);
-        leftBorder.setAttribute("stroke-width", 3.5 * textScale);
-        leftBorder.setAttribute("stroke-linejoin", "round");
-        leftBorder.setAttribute("style", "pointer-events: none;");
-        if (dash) leftBorder.setAttribute("stroke-dasharray", dash);
-        g.appendChild(leftBorder);
-      }
-
-      // 4. الحد الأيمن الخارجي (لآخر شريك فقط، سميك)
-      if (index === window.calculatedPieces.length - 1) {
         const rightBorder = svgEl("line");
-        rightBorder.setAttribute("x1", x2);
-        rightBorder.setAttribute("y1", y2);
-        rightBorder.setAttribute("x2", x2);
-        rightBorder.setAttribute("y2", y3);
+        rightBorder.setAttribute("x1", x1);
+        rightBorder.setAttribute("y1", y1);
+        rightBorder.setAttribute("x2", x1);
+        rightBorder.setAttribute("y2", y4);
         rightBorder.setAttribute("stroke", color.stroke);
         rightBorder.setAttribute("stroke-width", 3.5 * textScale);
         rightBorder.setAttribute("stroke-linejoin", "round");
         rightBorder.setAttribute("style", "pointer-events: none;");
         if (dash) rightBorder.setAttribute("stroke-dasharray", dash);
         g.appendChild(rightBorder);
+      }
+
+      // 4. الحد الأيسر الخارجي (لآخر شريك فقط، سميك)
+      if (index === window.calculatedPieces.length - 1) {
+        const leftBorder = svgEl("line");
+        leftBorder.setAttribute("x1", x2);
+        leftBorder.setAttribute("y1", y2);
+        leftBorder.setAttribute("x2", x2);
+        leftBorder.setAttribute("y2", y3);
+        leftBorder.setAttribute("stroke", color.stroke);
+        leftBorder.setAttribute("stroke-width", 3.5 * textScale);
+        leftBorder.setAttribute("stroke-linejoin", "round");
+        leftBorder.setAttribute("style", "pointer-events: none;");
+        if (dash) leftBorder.setAttribute("stroke-dasharray", dash);
+        g.appendChild(leftBorder);
       }
 
       // 5. الفواصل الداخلية (تكون أقل سماكة)
@@ -2146,7 +2150,7 @@ function renderCroquis() {
         const pieceWidth = Math.abs(x2 - x1);
         const nameToShow = piece.name || `شريك ${index + 1}`;
         const pieceH = botY - topY;
-        const pieceMidLength = l2 + k * ((piece.startX + piece.endX) / 2);
+        const pieceMidLength = l2 + k * (w - (piece.startX + piece.endX) / 2);
         
         if (pieceWidth < 28 && !window.isExporting) {
           // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
@@ -2162,9 +2166,10 @@ function renderCroquis() {
           labelGroup.appendChild(tIdx);
         } else {
           // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة
-          const yArea = topY + pieceH * 0.23;
-          const yName = topY + pieceH * 0.50;
-          const yLength = topY + pieceH * 0.77;
+          const yArea = topY + pieceH * 0.18;
+          const yName = topY + pieceH * 0.42;
+          const yLength = topY + pieceH * 0.66;
+          const yDirection = topY + pieceH * 0.88;
           
           // حجم خط ديناميكي يناسب عرض العمود
           const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * textScale;
@@ -2222,6 +2227,34 @@ function renderCroquis() {
             tLenVal.textContent = pieceMidLength.toFixed(2) + " م";
             lenGroup.appendChild(tLenVal);
             labelGroup.appendChild(lenGroup);
+          }
+
+          // 4. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة)
+          let dirText = "";
+          let dirColor = "";
+          if (index === 0) {
+            dirText = "🏁 بداية التقسيم";
+            dirColor = "#2e7d32";
+          } else if (index === window.calculatedPieces.length - 1) {
+            dirText = "🛑 نهاية التقسيم";
+            dirColor = "#c62828";
+          }
+          
+          if (dirText && pieceH > 180) {
+            const dirGroup = svgEl("g");
+            dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
+            
+            const tDir = svgEl("text");
+            tDir.setAttribute("x", cx);
+            tDir.setAttribute("y", yDirection + 4 * textScale);
+            tDir.setAttribute("fill", dirColor);
+            tDir.setAttribute("font-size", (fontSize - 1.5) + "px");
+            tDir.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tDir.setAttribute("text-anchor", "middle");
+            tDir.setAttribute("font-weight", "bold");
+            tDir.textContent = dirText;
+            dirGroup.appendChild(tDir);
+            labelGroup.appendChild(dirGroup);
           }
         }
         g.appendChild(labelGroup);
@@ -2355,6 +2388,37 @@ function renderCroquis() {
       weight: "bold",
       bg: true,
     }));
+
+    // 5. اتجاه التقسيم (سهم مع كتابة أعلى الرسم)
+    const arrowY = mapY(0) - dimOffset - 25 * textScale;
+    const arrowStartX = mapX(w) - 40 * textScale;
+    const arrowEndX = mapX(0) + 40 * textScale;
+    
+    if (arrowStartX > arrowEndX) {
+      // رسم خط السهم (من اليمين إلى اليسار)
+      g.appendChild(svgLine(arrowStartX, arrowY, arrowEndX, arrowY, { 
+        stroke: "#ef6c00", 
+        width: 2.5 * textScale 
+      }));
+      
+      // رسم رأس السهم (pointing left)
+      const headSize = 6 * textScale;
+      const arrowHead = svgEl("polygon");
+      arrowHead.setAttribute("points", 
+        `${arrowEndX},${arrowY} ${arrowEndX + headSize},${arrowY - headSize/1.5} ${arrowEndX + headSize},${arrowY + headSize/1.5}`
+      );
+      arrowHead.setAttribute("fill", "#ef6c00");
+      g.appendChild(arrowHead);
+      
+      // كتابة النص فوق السهم
+      const arrowText = svgText((arrowStartX + arrowEndX) / 2, arrowY - 6 * textScale, "➡️ اتجاه التقسيم (من اليمين إلى اليسار)", {
+        fill: "#ef6c00",
+        size: "11.5",
+        weight: "bold",
+        bg: true
+      });
+      g.appendChild(arrowText);
+    }
 
     // --- رؤوس مضلع الأرض الخارجية ---
     // أسفل-يسار، أسفل-يمين، أعلى-يمين (l1=الطول الأيمن)، أعلى-يسار (l2=الطول الأيسر)
@@ -2857,6 +2921,9 @@ function printReport() {
       <div class="summary-box-row">
         <div class="summary-box-cell"><strong>متوسط العرض:</strong> <span>${avgWidth.toFixed(4)} م</span></div>
         <div class="summary-box-cell"><strong>متوسط الطول:</strong> <span>${avgLength.toFixed(4)} م</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>اتجاه التقسيم الحالي:</strong> <span class="status-badge" style="background-color: #e8f5e9; color: #2e7d32;">➡️ من اليمين إلى اليسار (بداية القياس: الحد الأيمن)</span></div>
       </div>
       <div class="summary-box-row">
         <div class="summary-box-cell" style="flex:2;"><strong>حالة التقسيم:</strong> <span class="status-badge">${divisionStatus}</span></div>
@@ -4103,7 +4170,7 @@ function updateRemainderRowUI(remainingArea) {
         }
       });
 
-      remCumWidth = `أسفل: ${partnersBotW.toFixed(2)} إلى ${w1.toFixed(2)} | أعلى: ${partnersTopW.toFixed(2)} إلى ${w2.toFixed(2)}`;
+      remCumWidth = `يمين ➡️ أعلى: ${partnersTopW.toFixed(4)} ← ${w2.toFixed(4)} م | أسفل: ${partnersBotW.toFixed(4)} ← ${w1.toFixed(4)} م`;
       remLengths = `يمين: ${remRightL.toFixed(2)} | يسار: ${remLeftL.toFixed(2)}`;
     }
   }
