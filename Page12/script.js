@@ -262,6 +262,12 @@ let startPanPoint = { x: 0, y: 0 };
 let lastTouchDist = 0; // For pinch to zoom
 let isCroquiPinned = true;
 
+// Waterway Direction Enum
+const WATERWAY_DIRECTION = {
+  HORIZONTAL: "horizontal",
+  VERTICAL: "vertical"
+};
+
 // Active Template Tracker
 let activeTemplateType = 'quad_diagonal';
 let mixedPiecesTree = null;
@@ -652,7 +658,7 @@ function getWaterwayDirection() {
   if (typeof waterways !== 'undefined' && waterways && waterways.length > 0) {
     const w = waterways[0];
     // 1. الأولوية الأولى: الخاصية الصريحة للمجرى
-    if (w.direction === 'horizontal' || w.direction === 'vertical') {
+    if (w.direction === WATERWAY_DIRECTION.HORIZONTAL || w.direction === WATERWAY_DIRECTION.VERTICAL) {
       return w.direction;
     }
     // 2. الأولوية الثانية: التحليل الهندسي للنقاط كخيار احتياطي للتوافق العكسي
@@ -660,17 +666,17 @@ function getWaterwayDirection() {
       const pts = w.points;
       const width = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
       const height = Math.sqrt(Math.pow(pts[3].x - pts[0].x, 2) + Math.pow(pts[3].y - pts[0].y, 2));
-      return width > height ? 'horizontal' : 'vertical';
+      return width > height ? WATERWAY_DIRECTION.HORIZONTAL : WATERWAY_DIRECTION.VERTICAL;
     }
-    if (w.angle === 90) return 'vertical';
+    if (w.angle === 90) return WATERWAY_DIRECTION.VERTICAL;
   }
   // 3. الأولوية الثالثة: التحقق من اسم القالب كحل أخير في مرحلة التهيئة قبل الرسم
   if (typeof activeTemplateType !== 'undefined') {
-    if (activeTemplateType === 'mixed_waterway_new') return 'horizontal';
-    if (activeTemplateType === 'mixed_split_image') return 'vertical';
+    if (activeTemplateType === 'mixed_waterway_new') return WATERWAY_DIRECTION.HORIZONTAL;
+    if (activeTemplateType === 'mixed_split_image') return WATERWAY_DIRECTION.VERTICAL;
   }
   console.warn("getWaterwayDirection: لم يتم تحديد اتجاه المجرى، تم الرجوع للقيمة الافتراضية horizontal");
-  return 'horizontal';
+  return WATERWAY_DIRECTION.HORIZONTAL;
 }
 
 /**
@@ -681,7 +687,7 @@ function getWaterwayDirection() {
  */
 function getMixedPieceNames() {
   const dir = getWaterwayDirection();
-  if (dir === 'horizontal') {
+  if (dir === WATERWAY_DIRECTION.HORIZONTAL) {
     return { west: "القطعة البحرية", east: "القطعة القبلية" };
   } else {
     return { west: "القطعة الغربية", east: "القطعة الشرقية" };
@@ -1390,7 +1396,7 @@ function generateCustomLand(useCustomWidths = false) {
       labelX: centerX,
       labelY: (y_water_top_left_vis + y_water_bot_left_vis) / 2,
       angle: 0,
-      direction: "horizontal",
+      direction: WATERWAY_DIRECTION.HORIZONTAL,
       stats: {
         area: uw === 0 ? 0 : calcQuadArea(w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis),
         width: uw,
@@ -1569,7 +1575,7 @@ function generateCustomLand(useCustomWidths = false) {
       labelX: x_water_left + water_w / 2,
       labelY: centerY,
       angle: 90,
-      direction: "vertical"
+      direction: WATERWAY_DIRECTION.VERTICAL
     });
 
     // Left Side Splits
