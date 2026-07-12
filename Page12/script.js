@@ -88,6 +88,123 @@ let freeTexts = [];
 let waterways = [];
 
 // -------------------------------------------------------
+// تتبع الاتجاهات والتحقق من عدم التكرار
+// -------------------------------------------------------
+let lastDirections = {
+  "start-w1-dir": "بحري",
+  "start-w2-dir": "قبلي",
+  "start-l2-dir": "شرقي",
+  "start-l1-dir": "غربي"
+};
+
+/**
+ * getDirectionLabel - الحصول على مسمى الاتجاه الحالي لضلع معين
+ * @param {'w1'|'w2'|'l1'|'l2'} side - الضلع
+ * @returns {string} اسم الاتجاه (بحري، قبلي، شرقي، غربي)
+ */
+function getDirectionLabel(side) {
+  const elId = `start-${side}-dir`;
+  const el = document.getElementById(elId);
+  const val = el ? el.value.trim() : "";
+  if (side === 'w1') return val || "بحري";
+  if (side === 'w2') return val || "قبلي";
+  if (side === 'l1') return val || "غربي";
+  if (side === 'l2') return val || "شرقي";
+  return "";
+}
+
+/**
+ * getDirEmoji - الحصول على الرمز التعبيري للاتجاه
+ */
+function getDirEmoji(dir) {
+  if (!dir) return "";
+  if (dir.includes("بحري")) return "⬆️";
+  if (dir.includes("قبلي")) return "⬇️";
+  if (dir.includes("شرقي")) return "➡️";
+  if (dir.includes("غربي")) return "⬅️";
+  return "";
+}
+
+/**
+ * formatBorderText - توليد النص النهائي للحد بناءً على نموذج البيانات
+ */
+function formatBorderText(b) {
+  const emoji = getDirEmoji(b.direction);
+  const lenVal = parseFloat(b.length);
+  const lenStr = isNaN(lenVal) ? "0.00" : lenVal.toFixed(2);
+  let text = `${emoji} ${b.direction} ${lenStr} م`;
+  if (b.description) {
+    text += ` ${b.description}`;
+  }
+  return text;
+}
+
+/**
+ * parseBorderTextParts - تحليل النص للتوافق مع الإصدارات القديمة (Migration)
+ */
+function parseBorderTextParts(text) {
+  if (!text) return { dir: "بحري", val: "", suffix: "" };
+  const parts = text.split(" ");
+  let dir = "";
+  let val = "";
+  let suffixParts = [];
+  
+  let i = 0;
+  // Skip emoji
+  if (i < parts.length && ["⬆️", "⬇️", "➡️", "⬅️"].includes(parts[i])) {
+    i++;
+  }
+  // Check direction
+  if (i < parts.length && ["بحري", "قبلي", "شرقي", "غربي"].includes(parts[i])) {
+    dir = parts[i];
+    i++;
+  }
+  // Check value
+  if (i < parts.length) {
+    val = parts[i];
+    i++;
+  }
+  // Skip "م"
+  if (i < parts.length && parts[i] === "م") {
+    i++;
+  }
+  // The rest is suffix
+  while (i < parts.length) {
+    suffixParts.push(parts[i]);
+    i++;
+  }
+  
+  return {
+    dir: dir || "بحري",
+    val: val,
+    suffix: suffixParts.join(" ")
+  };
+}
+
+/**
+ * getDropdownIdFromBorderId - معرف القائمة المنسدلة بناءً على معرف الحد
+ */
+function getDropdownIdFromBorderId(borderId) {
+  if (borderId === "border_1") return "start-w1-dir";
+  if (borderId === "border_2") return "start-w2-dir";
+  if (borderId === "border_3") return "start-l1-dir";
+  if (borderId === "border_4") return "start-l2-dir";
+  return null;
+}
+
+/**
+ * getValueInputIdFromBorderId - معرف حقل القيمة بناءً على معرف الحد
+ */
+function getValueInputIdFromBorderId(borderId) {
+  if (borderId === "border_1") return "start-w1";
+  if (borderId === "border_2") return "start-w2";
+  if (borderId === "border_3") return "start-l1";
+  if (borderId === "border_4") return "start-l2";
+  return null;
+}
+
+
+// -------------------------------------------------------
 // متغيرات التمدد البصري والـ Auto Fit (Visual Scaling)
 // -------------------------------------------------------
 // scaleX/scaleY: معاملات التمدد الأفقي والرأسي لملاءمة الكروكي للشاشة
@@ -182,6 +299,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const state = JSON.parse(savedStateStr);
       shapes = state.shapes || [];
       borderLabels = state.borderLabels || [];
+      // Migrate old borderLabel formats to the MVC model structure
+      borderLabels.forEach(b => {
+        if (b.id && b.id.startsWith("border_") && b.direction === undefined) {
+          const parsed = parseBorderTextParts(b.text);
+          b.direction = parsed.dir;
+          b.length = parseFloat(parsed.val) || 0;
+          b.description = parsed.suffix;
+          b.text = formatBorderText(b);
+        }
+      });
       splitLines = state.splitLines || [];
       freeTexts = state.freeTexts || [];
       waterways = state.waterways || [];
@@ -206,6 +333,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (document.getElementById("start-d1")) document.getElementById("start-d1").value = state.inputs.d1;
         if (document.getElementById("start-d2")) document.getElementById("start-d2").value = state.inputs.d2;
         if (document.getElementById("start-partners")) document.getElementById("start-partners").value = state.inputs.partners;
+
+        // تهيئة قيم الاتجاهات الأخيرة عند استعادة حفظ تلقائي
+        lastDirections["start-w1-dir"] = state.inputs.w1Dir || "بحري";
+        lastDirections["start-w2-dir"] = state.inputs.w2Dir || "قبلي";
+        lastDirections["start-l2-dir"] = state.inputs.l2Dir || "شرقي";
+        lastDirections["start-l1-dir"] = state.inputs.l1Dir || "غربي";
       }
       if (activeTemplateType === 'quad_diagonal' && shapes && shapes[0] && shapes[0].points && splitLines && splitLines.length >= 2) {
         const [sp1, sp2, sp3, sp4] = shapes[0].points;
@@ -383,6 +516,16 @@ function redo() {
 function restoreState(state) {
   shapes = JSON.parse(JSON.stringify(state.shapes));
   borderLabels = JSON.parse(JSON.stringify(state.borderLabels));
+  // Migrate old borderLabel formats to the MVC model structure
+  borderLabels.forEach(b => {
+    if (b.id && b.id.startsWith("border_") && b.direction === undefined) {
+      const parsed = parseBorderTextParts(b.text);
+      b.direction = parsed.dir;
+      b.length = parseFloat(parsed.val) || 0;
+      b.description = parsed.suffix;
+      b.text = formatBorderText(b);
+    }
+  });
   splitLines = JSON.parse(JSON.stringify(state.splitLines));
   freeTexts = JSON.parse(JSON.stringify(state.freeTexts));
   waterways = JSON.parse(JSON.stringify(state.waterways));
@@ -400,7 +543,7 @@ function restoreState(state) {
 
   const editor = document.getElementById("element-editor");
   if (editor) {
-    editor.innerHTML = `<p class="empty-editor-hint">اضغط على أي قطعة أرض أو نص أو ضلع لتعديل بياناته هنا.</p>`;
+    editor.innerHTML = `<p class="empty-editor-hint">المس أي قطعة أو نص داخل الكروكي لتعديل بياناته هنا.</p>`;
   }
 }
 
@@ -1474,41 +1617,57 @@ function generateCustomLand(useCustomWidths = false) {
   const labelOffY = Math.min(2.0, Math.max(0.4, avgL * 0.035));
   const labelOffX = Math.min(2.0, Math.max(0.4, avgW * 0.035));
 
-  borderLabels.push({
+  const border1 = {
     id: "border_1",
-    text: `${effW1Dir} ${effW1.toFixed(2)} م (العرض الكلي)`,
+    direction: effW1Dir,
+    length: effW1,
+    description: "(العرض الكلي)",
     x: centerX,
     y: p1.y - labelOffY,
     fontSize: 14,
     angle: 0
-  });
+  };
+  border1.text = formatBorderText(border1);
+  borderLabels.push(border1);
 
-  borderLabels.push({
+  const border2 = {
     id: "border_2",
-    text: `${effW2Dir} ${effW2.toFixed(2)} م (العرض الكلي)`,
+    direction: effW2Dir,
+    length: effW2,
+    description: "(العرض الكلي)",
     x: centerX,
     y: p4.y + labelOffY,
     fontSize: 14,
     angle: 0
-  });
+  };
+  border2.text = formatBorderText(border2);
+  borderLabels.push(border2);
 
-  borderLabels.push({
+  const border3 = {
     id: "border_3",
-    text: `${effL1Dir} ${effL1.toFixed(2)} م (الطول الكلي)`,
+    direction: effL1Dir,
+    length: effL1,
+    description: "(الطول الكلي)",
     x: p1.x - labelOffX,
     y: centerY,
     fontSize: 14,
     angle: -90
-  });
+  };
+  border3.text = formatBorderText(border3);
+  borderLabels.push(border3);
 
-  borderLabels.push({
+  const border4 = {
     id: "border_4",
-    text: `${effL2Dir} ${effL2.toFixed(2)} م (الطول الكلي)`,
+    direction: effL2Dir,
+    length: effL2,
+    description: "(الطول الكلي)",
     x: p2.x + labelOffX,
     y: centerY,
     fontSize: 14,
     angle: 90
-  });
+  };
+  border4.text = formatBorderText(border4);
+  borderLabels.push(border4);
 
   // Reset viewport zoom & pan to ensure new drawing fits cleanly
   zoomScale = 1.0;
@@ -3543,7 +3702,7 @@ function openModalForElement(type, id) {
           <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; margin-bottom: 15px;">
             <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
             <div class="editor-form-group" style="margin-top: 5px; margin-bottom: 5px;">
-              <button type="button" onclick="closeModal(); openUnifiedWaterwayModal();" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   التعديل الحر</button>
+              <button type="button" onclick="closeModal(); openUnifiedWaterwayModal();" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   تعديل الخريطة</button>
             </div>
             
             ${partnerWidthsHtml}
@@ -3980,12 +4139,12 @@ function applyTotalDimensions() {
 function populateSidebarEditor() {
   const editorPanel = document.getElementById("element-editor");
   if (!selectedElement) {
-    editorPanel.innerHTML = `<p class="empty-editor-hint">اضغط على أي قطعة أرض أو نص أو ضلع لتعديل بياناته هنا.</p>`;
-    document.getElementById("editor-title").textContent = "محرر العنصر المحدد";
+    editorPanel.innerHTML = `<p class="empty-editor-hint">المس أي قطعة أو نص داخل الكروكي لتعديل بياناته هنا.</p>`;
+    document.getElementById("editor-title").textContent = "بيانات العنصر المحدد";
     return;
   }
 
-  document.getElementById("editor-title").textContent = `محرر (${getElementTypeName()})`;
+  document.getElementById("editor-title").textContent = `بيانات (${getElementTypeName()})`;
 
   let html = "";
   if (selectedElement.type === 'shape') {
@@ -4027,7 +4186,7 @@ function populateSidebarEditor() {
               <h4 style="margin: 0 0 10px 0; color: #1565c0; font-size: 13px;">⚙️ أبعاد هذه القطعة</h4>
               
               <div class="editor-form-group" style="margin-top: 5px; margin-bottom: 5px;">
-                <button type="button" onclick="openUnifiedWaterwayModal()" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   التعديل الحر</button>
+                <button type="button" onclick="openUnifiedWaterwayModal()" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔧   تعديل الخريطة</button>
               </div>
           `;
           
@@ -4177,8 +4336,21 @@ function populateSidebarEditor() {
     if (b) {
       html = `
         <div class="editor-form-group">
-          <label>نص الحد / البعد:</label>
-          <input type="text" value="${b.text || ''}" oninput="updateSelectedBorderField('text', this.value)">
+          <label>الاتجاه:</label>
+          <select id="edit-border-dir" style="width: 100%; height: 38px; border-radius: 6px; border: 1.5px solid #ccc; font-weight: bold; font-family: 'Cairo'; padding: 5px;" onchange="updateBorderFromSidebar('${b.id}')">
+            <option value="بحري" ${b.direction === 'بحري' ? 'selected' : ''}>بحري</option>
+            <option value="قبلي" ${b.direction === 'قبلي' ? 'selected' : ''}>قبلي</option>
+            <option value="شرقي" ${b.direction === 'شرقي' ? 'selected' : ''}>شرقي</option>
+            <option value="غربي" ${b.direction === 'غربي' ? 'selected' : ''}>غربي</option>
+          </select>
+        </div>
+        <div class="editor-form-group">
+          <label>البعد (بالمتر):</label>
+          <input type="text" inputmode="decimal" id="edit-border-val" value="${b.length || 0}" oninput="updateBorderFromSidebar('${b.id}')" style="text-align: center;">
+        </div>
+        <div class="editor-form-group">
+          <label>الوصف الإضافي:</label>
+          <input type="text" id="edit-border-suffix" value="${b.description || ''}" oninput="updateBorderFromSidebar('${b.id}')" placeholder="مثال: (العرض الكلي)" style="text-align: center;">
         </div>
         <div class="editor-form-group">
           <label>زاوية الدوران (درجة):</label>
@@ -4250,7 +4422,7 @@ function populateSidebarEditor() {
         <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; border: 1px solid #90caf9; margin-bottom: 12px; text-align: center;">
           <div style="font-weight: bold; color: #1565c0; font-size: 14px; margin-bottom: 10px;">📐 تعديل أبعاد وقيم التقسيم</div>
           <button type="button" onclick="openUnifiedWaterwayModal()" style="width: 100%; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            🔧   التعديل الحر
+            🔧   تعديل الخريطة
           </button>
         </div>
 
@@ -4310,6 +4482,49 @@ function updateSelectedBorderField(field, value) {
   if (b) {
     if (field === 'angle' || field === 'fontSize') b[field] = parseFloat(value) || 0;
     else b[field] = value;
+    renderSVG();
+    saveStateDebounced();
+  }
+}
+
+/**
+ * updateBorderFromSidebar - تحديث أبعاد واتجاه الحد من القائمة الجانبية ومزامنتها
+ */
+function updateBorderFromSidebar(id) {
+  const dirEl = document.getElementById("edit-border-dir");
+  const valEl = document.getElementById("edit-border-val");
+  const suffixEl = document.getElementById("edit-border-suffix");
+  if (!dirEl || !valEl) return;
+  
+  const dir = dirEl.value.trim();
+  const val = parseArabicFloat(valEl.value) || 0;
+  const suffix = suffixEl ? suffixEl.value.trim() : "";
+  
+  const border = borderLabels.find(b => b.id === id);
+  if (border) {
+    border.direction = dir;
+    border.length = val;
+    border.description = suffix;
+    border.text = formatBorderText(border);
+    
+    // مزامنة حقول البداية
+    const dropdownId = getDropdownIdFromBorderId(id);
+    if (dropdownId) {
+      const startDirSelect = document.getElementById(dropdownId);
+      if (startDirSelect) {
+        startDirSelect.value = dir;
+      }
+      lastDirections[dropdownId] = dir;
+      
+      const startValInput = getValueInputIdFromBorderId(id);
+      if (startValInput) {
+        const inputEl = document.getElementById(startValInput);
+        if (inputEl) {
+          inputEl.value = val;
+        }
+      }
+    }
+    
     renderSVG();
     saveStateDebounced();
   }
@@ -5191,45 +5406,25 @@ function populateStartModalFromCurrentBorders() {
   const b3 = borderLabels.find(b => b.id === "border_3");
   const b4 = borderLabels.find(b => b.id === "border_4");
 
-  if (b1) {
-    const parts = b1.text.split(" ");
-    if (parts.length >= 2) {
-      const val = parseFloat(parts[1]);
-      if (!isNaN(val)) {
-        document.getElementById("start-w1").value = val;
-        document.getElementById("start-w1-dir").value = parts[0];
-      }
-    }
+  if (b1 && b1.length !== undefined) {
+    document.getElementById("start-w1").value = b1.length;
+    document.getElementById("start-w1-dir").value = b1.direction;
+    lastDirections["start-w1-dir"] = b1.direction;
   }
-  if (b2) {
-    const parts = b2.text.split(" ");
-    if (parts.length >= 2) {
-      const val = parseFloat(parts[1]);
-      if (!isNaN(val)) {
-        document.getElementById("start-w2").value = val;
-        document.getElementById("start-w2-dir").value = parts[0];
-      }
-    }
+  if (b2 && b2.length !== undefined) {
+    document.getElementById("start-w2").value = b2.length;
+    document.getElementById("start-w2-dir").value = b2.direction;
+    lastDirections["start-w2-dir"] = b2.direction;
   }
-  if (b3) {
-    const parts = b3.text.split(" ");
-    if (parts.length >= 2) {
-      const val = parseFloat(parts[1]);
-      if (!isNaN(val)) {
-        document.getElementById("start-l1").value = val;
-        document.getElementById("start-l1-dir").value = parts[0];
-      }
-    }
+  if (b3 && b3.length !== undefined) {
+    document.getElementById("start-l1").value = b3.length;
+    document.getElementById("start-l1-dir").value = b3.direction;
+    lastDirections["start-l1-dir"] = b3.direction;
   }
-  if (b4) {
-    const parts = b4.text.split(" ");
-    if (parts.length >= 2) {
-      const val = parseFloat(parts[1]);
-      if (!isNaN(val)) {
-        document.getElementById("start-l2").value = val;
-        document.getElementById("start-l2-dir").value = parts[0];
-      }
-    }
+  if (b4 && b4.length !== undefined) {
+    document.getElementById("start-l2").value = b4.length;
+    document.getElementById("start-l2-dir").value = b4.direction;
+    lastDirections["start-l2-dir"] = b4.direction;
   }
 
   const numPartnersInput = document.getElementById("start-partners");
@@ -5270,32 +5465,107 @@ function closeStartModal() {
 }
 
 /**
- * updateDirectionRealtime - تحديث اتجاه الضلع في الكروكي فوراً عند تغيير القائمة المنسدلة
+ * handleDirectionChange - معالجة تغيير اتجاه الضلع مع منع التكرار (تبديل تلقائي)
  *
- * @description يقرأ القيمة المحددة من القائمة المنسدلة للاتجاه ويقوم بتحديث
- *              الكلمة الأولى في مسمى الحد المقابل داخل مصفوفة borderLabels
- *              ثم يعيد رسم الكروكي وحفظ الحالة تلقائياً بدون الحاجة لإعادة الحسابات الهندسية.
- * @param {string} inputId - معرف القائمة المنسدلة (مثال: start-w1-dir)
- * @param {string} borderId - معرف الحد المقابل (مثال: border_1)
+ * @description يضمن بقاء الاتجاهات الأربعة فريدة في كل الأوقات. إذا اختار المستخدم
+ *              اتجاهاً مستخدماً بالفعل في قائمة أخرى، يتم تبديل القيمتين تلقائياً (Swap)
+ *              وتحديث المسميات على الكروكي وتخزين الحالة.
+ * @param {string} changedId - معرف القائمة المنسدلة التي تم تغييرها (مثال: start-w1-dir)
  */
-function updateDirectionRealtime(inputId, borderId) {
-  const select = document.getElementById(inputId);
+function handleDirectionChange(changedId) {
+  const dropdownIds = ["start-w1-dir", "start-w2-dir", "start-l2-dir", "start-l1-dir"];
+  const selectEl = document.getElementById(changedId);
+  if (!selectEl) return;
+  
+  const newVal = selectEl.value.trim();
+  const oldVal = lastDirections[changedId];
+  
+  // البحث عن قائمة أخرى تحمل نفس القيمة الجديدة المحددة
+  const duplicateId = dropdownIds.find(id => id !== changedId && document.getElementById(id)?.value === newVal);
+  
+  if (duplicateId) {
+    const dupEl = document.getElementById(duplicateId);
+    if (dupEl) {
+      // تبديل تلقائي: تعيين القيمة القديمة للقائمة المكررة
+      dupEl.value = oldVal;
+      lastDirections[duplicateId] = oldVal;
+      
+      const dupBorderId = getBorderIdFromDropdownId(duplicateId);
+      if (dupBorderId) {
+        updateBorderLabelText(duplicateId, dupBorderId);
+      }
+    }
+  }
+  
+  lastDirections[changedId] = newVal;
+  
+  const borderId = getBorderIdFromDropdownId(changedId);
+  if (borderId) {
+    updateBorderLabelText(changedId, borderId);
+  }
+  
+  renderSVG();
+  saveStateDebounced();
+  triggerHaptic("tap");
+}
+
+/**
+ * getBorderIdFromDropdownId - الحصول على معرف الحد المقابل لمعرف القائمة المنسدلة
+ */
+function getBorderIdFromDropdownId(dropdownId) {
+  if (dropdownId === "start-w1-dir") return "border_1";
+  if (dropdownId === "start-w2-dir") return "border_2";
+  if (dropdownId === "start-l1-dir") return "border_3";
+  if (dropdownId === "start-l2-dir") return "border_4";
+  return null;
+}
+
+/**
+ * updateBorderLabelText - تحديث نص التسمية للحد المقابل للاتجاه المختار
+ */
+function updateBorderLabelText(dropdownId, borderId) {
+  const select = document.getElementById(dropdownId);
   if (!select) return;
   const newDir = select.value.trim();
   
   if (borderLabels && borderLabels.length > 0) {
     const border = borderLabels.find(b => b.id === borderId);
     if (border) {
-      const parts = border.text.split(" ");
-      if (parts.length >= 2) {
-        parts[0] = newDir;
-        border.text = parts.join(" ");
-        renderSVG();
-        saveStateDebounced();
-      }
+      border.direction = newDir;
+      border.text = formatBorderText(border);
     }
   }
 }
+
+/**
+ * resetDirectionsToDefault - إعادة جميع الاتجاهات إلى الوضع الافتراضي بضغطة واحدة
+ */
+function resetDirectionsToDefault() {
+  const w1 = document.getElementById("start-w1-dir");
+  const w2 = document.getElementById("start-w2-dir");
+  const l2 = document.getElementById("start-l2-dir");
+  const l1 = document.getElementById("start-l1-dir");
+  
+  if (w1) w1.value = "بحري";
+  if (w2) w2.value = "قبلي";
+  if (l2) l2.value = "شرقي";
+  if (l1) l1.value = "غربي";
+  
+  lastDirections["start-w1-dir"] = "بحري";
+  lastDirections["start-w2-dir"] = "قبلي";
+  lastDirections["start-l2-dir"] = "شرقي";
+  lastDirections["start-l1-dir"] = "غربي";
+  
+  updateBorderLabelText("start-w1-dir", "border_1");
+  updateBorderLabelText("start-w2-dir", "border_2");
+  updateBorderLabelText("start-l1-dir", "border_3");
+  updateBorderLabelText("start-l2-dir", "border_4");
+  
+  renderSVG();
+  saveStateDebounced();
+  triggerHaptic("tap");
+}
+
 
 
 // Add Data Modals triggers
@@ -5541,10 +5811,10 @@ function printDallalMap() {
           detailedReportHTML += addRowStr("مساحة القيراط بالمتر المربع:", `${caratSize} م²`);
           
           if (sideTop > 0 || sideBottom > 0) {
-            detailedReportHTML += addRowStr("العرض البحري (الأعلى):", `${sideTop.toFixed(2)} م`);
-            detailedReportHTML += addRowStr("العرض القبلي (الأسفل):", `${sideBottom.toFixed(2)} م`);
-            detailedReportHTML += addRowStr("الطول الشرقي (الأيمن):", `${sideRight.toFixed(2)} م`);
-            detailedReportHTML += addRowStr("الطول الغربي (الأيسر):", `${sideLeft.toFixed(2)} م`);
+            detailedReportHTML += addRowStr(`العرض ${getDirectionLabel('w1')} (الأعلى):`, `${sideTop.toFixed(2)} م`);
+            detailedReportHTML += addRowStr(`العرض ${getDirectionLabel('w2')} (الأسفل):`, `${sideBottom.toFixed(2)} م`);
+            detailedReportHTML += addRowStr(`الطول ${getDirectionLabel('l2')} (الأيمن):`, `${sideRight.toFixed(2)} م`);
+            detailedReportHTML += addRowStr(`الطول ${getDirectionLabel('l1')} (الأيسر):`, `${sideLeft.toFixed(2)} م`);
           }
           
           detailedReportHTML += addRowStr("نسبة الشريك:", `${sub.area.feddan} فدان، ${sub.area.carat} قيراط، ${sub.area.shares} سهم`);
@@ -5635,10 +5905,10 @@ function printDallalMap() {
       detailedReportHTML += addRowStr("مساحة القيراط بالمتر المربع:", `${caratSize} م²`, false);
       
       if (sideTop > 0 || sideBottom > 0) {
-        detailedReportHTML += addRowStr("العرض البحري (الأعلى):", `${sideTop.toFixed(2)} م`, false);
-        detailedReportHTML += addRowStr("العرض القبلي (الأسفل):", `${sideBottom.toFixed(2)} م`, false);
-        detailedReportHTML += addRowStr("الطول الشرقي (الأيمن):", `${sideRight.toFixed(2)} م`, false);
-        detailedReportHTML += addRowStr("الطول الغربي (الأيسر):", `${sideLeft.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr(`العرض ${getDirectionLabel('w1')} (الأعلى):`, `${sideTop.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr(`العرض ${getDirectionLabel('w2')} (الأسفل):`, `${sideBottom.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr(`الطول ${getDirectionLabel('l2')} (الأيمن):`, `${sideRight.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr(`الطول ${getDirectionLabel('l1')} (الأيسر):`, `${sideLeft.toFixed(2)} م`, false);
       }
       
       detailedReportHTML += addRowStr("فدان:", `${detailed.feddan || 0}`, false);
