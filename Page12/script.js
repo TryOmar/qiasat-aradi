@@ -651,6 +651,11 @@ function sqmToFeddanCaratShares(sqm) {
 function getWaterwayDirection() {
   if (typeof waterways !== 'undefined' && waterways && waterways.length > 0) {
     const w = waterways[0];
+    // 1. الأولوية الأولى: الخاصية الصريحة للمجرى
+    if (w.direction === 'horizontal' || w.direction === 'vertical') {
+      return w.direction;
+    }
+    // 2. الأولوية الثانية: التحليل الهندسي للنقاط كخيار احتياطي للتوافق العكسي
     if (w.points && w.points.length >= 4) {
       const pts = w.points;
       const width = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
@@ -659,11 +664,12 @@ function getWaterwayDirection() {
     }
     if (w.angle === 90) return 'vertical';
   }
-  // خيار احتياطي في مرحلة التهيئة قبل الرسم
+  // 3. الأولوية الثالثة: التحقق من اسم القالب كحل أخير في مرحلة التهيئة قبل الرسم
   if (typeof activeTemplateType !== 'undefined') {
     if (activeTemplateType === 'mixed_waterway_new') return 'horizontal';
     if (activeTemplateType === 'mixed_split_image') return 'vertical';
   }
+  console.warn("getWaterwayDirection: لم يتم تحديد اتجاه المجرى، تم الرجوع للقيمة الافتراضية horizontal");
   return 'horizontal';
 }
 
@@ -1384,6 +1390,7 @@ function generateCustomLand(useCustomWidths = false) {
       labelX: centerX,
       labelY: (y_water_top_left_vis + y_water_bot_left_vis) / 2,
       angle: 0,
+      direction: "horizontal",
       stats: {
         area: uw === 0 ? 0 : calcQuadArea(w_tl_vis, w_tr_vis, w_br_vis, w_bl_vis),
         width: uw,
@@ -1561,7 +1568,8 @@ function generateCustomLand(useCustomWidths = false) {
       label: "مجرى مائي (ترعة)",
       labelX: x_water_left + water_w / 2,
       labelY: centerY,
-      angle: 90
+      angle: 90,
+      direction: "vertical"
     });
 
     // Left Side Splits
