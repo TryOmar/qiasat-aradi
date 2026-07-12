@@ -145,6 +145,11 @@
     <!-- Canvas Section (Interactive Croquis - نفس تنسيق الصفحة 13) -->
     <div class="s canvas-card" id="canvas-container" style="margin-top: 20px;">
       <h3>كروكي الأرض التفاعلي</h3>
+      <!-- اتجاه التقسيم أعلى الكروكي -->
+      <div id="croquis-direction-bar" style="background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; color: #e65100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center; direction: rtl;">
+        <span style="font-size: 14px; color: #ef6c00;">➡️ اتجاه التقسيم</span>
+        <span style="font-size: 12.5px; color: #f57c00;">من اليمين ← إلى اليسار (الاستلام يبدأ من الحد الأيمن للأرض - يمكن تغييره مستقبلاً)</span>
+      </div>
       <!-- قائمة مساحات الشركاء أعلى الخريطة -->
       <div id="croquis-legend" class="croquis-legend" style="display: none;"></div>
       <!-- منطقة الرسم -->
@@ -178,8 +183,16 @@
             </div>
             <div class="inspector-body">
               <div class="inspector-row">
-                <span class="ins-lbl">المساحة:</span>
+                <span class="ins-lbl">المساحة المعتمدة:</span>
                 <strong class="ins-val" id="ins-area">-</strong>
+              </div>
+              <div class="inspector-row" id="ins-dimensions-formula-row">
+                <span class="ins-lbl">معادلة المساحة:</span>
+                <strong class="ins-val" id="ins-dimensions-formula">-</strong>
+              </div>
+              <div class="inspector-row" id="ins-rounding-diff-row">
+                <span class="ins-lbl">فرق التقريب:</span>
+                <strong class="ins-val" id="ins-rounding-diff">-</strong>
               </div>
               <div class="inspector-row">
                 <span class="ins-lbl">النسبة من الأرض:</span>
@@ -194,11 +207,11 @@
                 <strong class="ins-val" id="ins-w-bottom">-</strong>
               </div>
               <div class="inspector-row">
-                <span class="ins-lbl">الطول الأيمن:</span>
+                <span class="ins-lbl">طول الحد الأيمن للقطعة:</span>
                 <strong class="ins-val" id="ins-length-right">-</strong>
               </div>
               <div class="inspector-row">
-                <span class="ins-lbl">الطول الأيسر:</span>
+                <span class="ins-lbl">طول الحد الأيسر للقطعة:</span>
                 <strong class="ins-val" id="ins-length-left">-</strong>
               </div>
               <div class="inspector-row" id="ins-divider-row">
@@ -439,6 +452,18 @@
           <div class="detail-row">
             <span>طول آخر فاصل:</span>
             <strong id="info-last-div-line">0.00 م</strong>
+          </div>
+          <div class="detail-row" id="row-target-area" style="display: none; border-top: 1.5px dashed #ccc; padding-top: 5px;">
+            <span>إجمالي الأنصبة المطلوبة:</span>
+            <strong id="info-target-area">0.00 م²</strong>
+          </div>
+          <div class="detail-row" id="row-target-percent" style="display: none;">
+            <span>نسبة الأنصبة المطلوبة:</span>
+            <strong id="info-target-percent">0.00 %</strong>
+          </div>
+          <div class="detail-row" id="row-deficit-needed" style="display: none; color: #c62828;">
+            <span>العجز المطلوب:</span>
+            <strong id="info-deficit-needed">0.00 م²</strong>
           </div>
         </div>
       </div>

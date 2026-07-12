@@ -1596,7 +1596,18 @@ function runPartition() {
         statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${absRem.toFixed(2)} م²</strong>، ويرجى مراجعة الحسابات.`;
         statusEl.style.color = "#c62828";
       } else {
-        statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong><br>قيمة العجز: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
+        const targetTotal = sumTargetAreas || (totalAreaM2 - remainingArea);
+        const targetPct = totalAreaM2 > 0 ? (targetTotal / totalAreaM2) * 100 : 0;
+        statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong>
+<br><br>مساحة الأرض الفعلية: <strong>${totalAreaM2.toFixed(2)} م²</strong>
+<br>────────────────
+<br>إجمالي الأنصبة المطلوبة: <strong>${targetTotal.toFixed(2)} م²</strong>
+<br>────────────────
+<br>نسبة الأنصبة المطلوبة: <strong>${targetPct.toFixed(2)} %</strong>
+<br>────────────────
+<br>العجز: <strong>${absRem.toFixed(2)} م²</strong>
+<br>≈ ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم
+<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
         statusEl.style.color = "#c62828";
       }
     }
@@ -1607,6 +1618,28 @@ function runPartition() {
   if (document.getElementById("info-distributed-percent")) {
     const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
     document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+  }
+
+  // إظهار / إخفاء صفوف إجمالي الأنصبة المطلوبة والعجز
+  {
+    const isDeficit = remainingArea < -0.05 && !window.isManualPartition;
+    const targetTotal = sumTargetAreas || 0;
+    const targetPct = totalAreaM2 > 0 ? (targetTotal / totalAreaM2) * 100 : 0;
+    const deficitM2 = Math.abs(remainingArea);
+    const rowTA = document.getElementById("row-target-area");
+    const rowTP = document.getElementById("row-target-percent");
+    const rowDN = document.getElementById("row-deficit-needed");
+    const elTA = document.getElementById("info-target-area");
+    const elTP = document.getElementById("info-target-percent");
+    const elDN = document.getElementById("info-deficit-needed");
+    if (rowTA) rowTA.style.display = isDeficit ? "flex" : "none";
+    if (rowTP) rowTP.style.display = isDeficit ? "flex" : "none";
+    if (rowDN) rowDN.style.display = isDeficit ? "flex" : "none";
+    if (isDeficit) {
+      if (elTA) elTA.innerText = targetTotal.toFixed(2) + " م²";
+      if (elTP) elTP.innerText = targetPct.toFixed(2) + " %";
+      if (elDN) elDN.innerText = deficitM2.toFixed(2) + " م²";
+    }
   }
 
   const remAcres = document.getElementById("rem-acres");
@@ -2229,31 +2262,74 @@ function renderCroquis() {
             labelGroup.appendChild(lenGroup);
           }
 
-          // 4. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة)
-          let dirText = "";
-          let dirColor = "";
+          // 4. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة) مع خلفية ملونة
+          let badgeEmoji = "";
+          let badgeLabel = "";
+          let badgeFill = "";
+          let badgeBorder = "";
+          let badgeBg = "";
           if (index === 0) {
-            dirText = "🏁 بداية التقسيم";
-            dirColor = "#2e7d32";
-          } else if (index === window.calculatedPieces.length - 1) {
-            dirText = "🛑 نهاية التقسيم";
-            dirColor = "#c62828";
+            badgeEmoji = "🏁";
+            badgeLabel = "بداية استلام الأنصبة";
+            badgeFill = "#1b5e20";
+            badgeBorder = "#2e7d32";
+            badgeBg = "#e8f5e9";
+          } else if (index === window.calculatedPieces.length - 1 && !piece.isRemainder) {
+            badgeEmoji = "🛑";
+            badgeLabel = "نهاية التقسيم";
+            badgeFill = "#b71c1c";
+            badgeBorder = "#c62828";
+            badgeBg = "#ffebee";
           }
-          
-          if (dirText && pieceH > 180) {
+
+          if (badgeLabel && pieceH > 180) {
             const dirGroup = svgEl("g");
             dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
-            
-            const tDir = svgEl("text");
-            tDir.setAttribute("x", cx);
-            tDir.setAttribute("y", yDirection + 4 * textScale);
-            tDir.setAttribute("fill", dirColor);
-            tDir.setAttribute("font-size", (fontSize - 1.5) + "px");
-            tDir.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tDir.setAttribute("text-anchor", "middle");
-            tDir.setAttribute("font-weight", "bold");
-            tDir.textContent = dirText;
-            dirGroup.appendChild(tDir);
+
+            const badgeFontSize = Math.max(9, fontSize - 1.5);
+            const badgePadX = 6 * textScale;
+            const badgePadY = 4 * textScale;
+            const badgeLineH = (badgeFontSize + 3) * textScale;
+            const badgeW = 80 * textScale;
+            const badgeH = badgeLineH * 2 + badgePadY * 2;
+
+            // خلفية مستطيلة بحواف دائرية
+            const rect = svgEl("rect");
+            rect.setAttribute("x", cx - badgeW / 2);
+            rect.setAttribute("y", yDirection - badgeH / 2);
+            rect.setAttribute("width", badgeW);
+            rect.setAttribute("height", badgeH);
+            rect.setAttribute("rx", 6 * textScale);
+            rect.setAttribute("ry", 6 * textScale);
+            rect.setAttribute("fill", badgeBg);
+            rect.setAttribute("stroke", badgeBorder);
+            rect.setAttribute("stroke-width", 1.2 * textScale);
+            rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.18))");
+            dirGroup.appendChild(rect);
+
+            // سطر الإيموجي
+            const tEmoji = svgEl("text");
+            tEmoji.setAttribute("x", cx);
+            tEmoji.setAttribute("y", yDirection - badgePadY + 1 * textScale);
+            tEmoji.setAttribute("fill", badgeFill);
+            tEmoji.setAttribute("font-size", (badgeFontSize + 1) + "px");
+            tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tEmoji.setAttribute("text-anchor", "middle");
+            tEmoji.textContent = badgeEmoji;
+            dirGroup.appendChild(tEmoji);
+
+            // سطر النص
+            const tLabel = svgEl("text");
+            tLabel.setAttribute("x", cx);
+            tLabel.setAttribute("y", yDirection + badgePadY + badgeLineH);
+            tLabel.setAttribute("fill", badgeFill);
+            tLabel.setAttribute("font-size", badgeFontSize + "px");
+            tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
+            tLabel.setAttribute("text-anchor", "middle");
+            tLabel.setAttribute("font-weight", "bold");
+            tLabel.textContent = badgeLabel;
+            dirGroup.appendChild(tLabel);
+
             labelGroup.appendChild(dirGroup);
           }
         }
@@ -2409,15 +2485,23 @@ function renderCroquis() {
       );
       arrowHead.setAttribute("fill", "#ef6c00");
       g.appendChild(arrowHead);
-      
-      // كتابة النص فوق السهم
-      const arrowText = svgText((arrowStartX + arrowEndX) / 2, arrowY - 6 * textScale, "➡️ اتجاه التقسيم (من اليمين إلى اليسار)", {
+
+      // كتابة النص فوق السهم - سطرين
+      const arrowMidX = (arrowStartX + arrowEndX) / 2;
+      const arrowText1 = svgText(arrowMidX, arrowY - 18 * textScale, "➡️ اتجاه التقسيم", {
         fill: "#ef6c00",
-        size: "11.5",
+        size: "12",
         weight: "bold",
         bg: true
       });
-      g.appendChild(arrowText);
+      g.appendChild(arrowText1);
+      const arrowText2 = svgText(arrowMidX, arrowY - 6 * textScale, "من اليمين ← إلى اليسار (يمكن تغييره مستقبلاً)", {
+        fill: "#f57c00",
+        size: "10",
+        weight: "normal",
+        bg: true
+      });
+      g.appendChild(arrowText2);
     }
 
     // --- رؤوس مضلع الأرض الخارجية ---
@@ -2436,6 +2520,65 @@ function renderCroquis() {
       c.setAttribute("fill", "#1b5e20");
       g.appendChild(c);
     });
+
+    // --- محور القياس الذكي (Adaptive Measuring Scale) أسفل الأرض ---
+    {
+      const scaleY = mapY(0) + 28 * textScale; // أسفل الحد السفلي للأرض
+      const scaleX0 = mapX(0);  // بداية من اليمين (x=0)
+      const scaleX1 = mapX(w);  // نهاية اليسار (x=w)
+
+      // اختيار خطوة القياس الرئيسية (ديناميكية)
+      let majorStep;
+      if (w < 20) majorStep = 1;
+      else if (w <= 50) majorStep = 2;
+      else if (w <= 150) majorStep = 5;
+      else majorStep = 10;
+
+      // رسم الخط الرئيسي للمقياس
+      g.appendChild(svgLine(scaleX0, scaleY, scaleX1, scaleY, { stroke: "#37474f", width: 1.5 * textScale }));
+
+      // شرطة اليمين (0)
+      g.appendChild(svgLine(scaleX0, scaleY - 6 * textScale, scaleX0, scaleY + 6 * textScale, { stroke: "#37474f", width: 1.5 * textScale }));
+      g.appendChild(svgText(scaleX0, scaleY + 15 * textScale, "0", { fill: "#263238", size: "9", weight: "bold" }));
+
+      // رسم شرطات الـ 1 متر (minor ticks) وشرطات الخطوة الرئيسية (major ticks)
+      for (let dist = 1; dist <= w; dist++) {
+        const tx = mapX(dist);
+        const isMajor = dist % majorStep === 0;
+        const tickH = isMajor ? 6 * textScale : 3 * textScale;
+        const tickW = isMajor ? 1.5 * textScale : 0.8 * textScale;
+        g.appendChild(svgLine(tx, scaleY - tickH, tx, scaleY + tickH, { stroke: isMajor ? "#37474f" : "#78909c", width: tickW }));
+        if (isMajor) {
+          g.appendChild(svgText(tx, scaleY + 15 * textScale, String(dist), { fill: "#263238", size: "9", weight: "bold" }));
+        }
+      }
+
+      // رسم وحدة القياس "م" بجانب الأرقام
+      g.appendChild(svgText(scaleX1 + 14 * textScale, scaleY + 15 * textScale, "م", { fill: "#37474f", size: "9", weight: "normal" }));
+
+      // رسم نقاط القياس عند كل فاصل (Divider Ticks) بلون برتقالي مميز
+      if (window.calculatedPieces && window.calculatedPieces.length > 0) {
+        window.calculatedPieces.forEach((piece, idx) => {
+          if (piece.isRemainder) return;
+          // endX: مسافة نهاية القطعة من اليمين (في إحداثيات البيانات)
+          // الفاصل على المحور البصري يتطلب عكس الإحداثيات لأن الرسم من اليمين إلى اليسار
+          const divMeters = piece.endX; // مسافة الفاصل من اليمين (قيمة القياس الحقيقية)
+          if (divMeters <= 0 || divMeters >= w) return;
+          const dx = mapX(w - divMeters); // الموقع البصري على المحور
+
+          // شرطة برتقالية طويلة للفاصل
+          g.appendChild(svgLine(dx, scaleY - 10 * textScale, dx, scaleY + 10 * textScale, { stroke: "#ef6c00", width: 2 * textScale }));
+
+          // رقم قيمة الفاصل أسفل المحور
+          g.appendChild(svgText(dx, scaleY + 22 * textScale, divMeters.toFixed(2) + " م", {
+            fill: "#ef6c00",
+            size: "8.5",
+            weight: "bold",
+            bg: true
+          }));
+        });
+      }
+    }
   }
 
   // تحديث قائمة مساحات الشركاء أعلى الخريطة
@@ -2896,7 +3039,28 @@ function printReport() {
   </div>
 
   <div class="section page-break-inside-avoid">
-    <div class="section-title">3. بيانات العرض والارتفاع المحسوبة</div>
+    <div class="section-title">3. بيانات تنفيذ التقسيم</div>
+    <div class="summary-box" style="gap: 6px;">
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>اتجاه التقسيم:</strong> <span class="status-badge" style="background-color: #e8f5e9; color: #2e7d32;">➡️ من اليمين إلى اليسار (الاستلام يبدأ من الحد الأيمن للأرض)</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>بداية القياس:</strong> <span>الحد الأيمن للأرض (0 م)</span></div>
+        <div class="summary-box-cell"><strong>نهاية القياس:</strong> <span>الحد الأيسر للأرض (${avgWidth.toFixed(2)} م)</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>عدد الشركاء:</strong> <span>${numPartners} شركاء</span></div>
+        <div class="summary-box-cell"><strong>مساحة الأرض:</strong> <span>${totalArea} م²</span></div>
+      </div>
+      <div class="summary-box-row">
+        <div class="summary-box-cell"><strong>تاريخ الطباعة:</strong> <span>${dateStr} - ${timeStr}</span></div>
+        <div class="summary-box-cell"><strong>إصدار البرنامج:</strong> <span>v2.4</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section page-break-inside-avoid">
+    <div class="section-title">4. بيانات العرض والارتفاع المحسوبة</div>
     <table>
       <thead><tr><th>البيان المحسوب</th><th>القيمة بالمتـر</th></tr></thead>
       <tbody>
@@ -2907,12 +3071,12 @@ function printReport() {
   </div>
 
   <div class="section">
-    <div class="section-title">4. جدول تفاصيل التقسيم على الشركاء</div>
+    <div class="section-title">5. جدول تفاصيل التقسيم على الشركاء</div>
     <table><thead>${headerRow}</thead><tbody>${tableRows}</tbody></table>
   </div>
 
   <div class="section page-break-inside-avoid">
-    <div class="section-title">5. ملخص نهائي لعملية التقسيم</div>
+    <div class="section-title">6. ملخص نهائي لعملية التقسيم</div>
     <div class="summary-box">
       <div class="summary-box-row">
         <div class="summary-box-cell"><strong>المساحة الإجمالية للأرض:</strong> <span>${totalArea} م²</span></div>
@@ -4757,6 +4921,8 @@ function updateInspector(index) {
   const inspector = document.getElementById("croquis-inspector");
   const partnerNameEl = document.getElementById("inspector-partner-name");
   const insAreaEl = document.getElementById("ins-area");
+  const insDimensionsFormulaEl = document.getElementById("ins-dimensions-formula");
+  const insRoundingDiffEl = document.getElementById("ins-rounding-diff");
   const insPercentEl = document.getElementById("ins-percent");
   const insWBottomEl = document.getElementById("ins-w-bottom");
   const insWTopEl = document.getElementById("ins-w-top");
@@ -4785,6 +4951,23 @@ function updateInspector(index) {
   
   if (insAreaEl) {
     insAreaEl.innerHTML = `${Number(piece.area.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
+  }
+  
+  // حساب متوسط العرض ومتوسط الارتفاع بدقة كاملة وعرض المعادلة وفرق التقريب
+  const w = (w1 + w2) / 2;
+  const diff_L = l2 - l1;
+  const k = diff_L / (w || 1);
+  const avgW = piece.width; // (piece.botW + piece.topW) / 2
+  const avgL = l2 + k * (w - (piece.startX + piece.endX) / 2);
+  const areaUnrounded = avgW * avgL;
+  const roundingDiff = areaUnrounded - piece.area;
+
+  if (insDimensionsFormulaEl) {
+    insDimensionsFormulaEl.innerHTML = `${avgW.toFixed(4)} م × ${avgL.toFixed(4)} م = ${areaUnrounded.toFixed(4)} م²`;
+  }
+  
+  if (insRoundingDiffEl) {
+    insRoundingDiffEl.innerText = `${Math.abs(roundingDiff).toFixed(4)} م²`;
   }
   
   if (insPercentEl) {
