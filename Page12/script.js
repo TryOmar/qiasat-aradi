@@ -185,6 +185,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Wheel zoom support
   svg.addEventListener("wheel", onSvgWheel, { passive: false });
 
+  // Screen resize & orientation change support (Mobile First & Adaptive UI)
+  window.addEventListener('resize', () => {
+    renderSVG();
+  });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      renderSVG();
+    }, 120);
+  });
+
   // Close modals when clicking outside
   window.onclick = function (event) {
     const editModal = document.getElementById("editModal");
@@ -1673,6 +1683,28 @@ function renderSVG() {
       waterwaysGroup.appendChild(guideLine);
     }
 
+    const labelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    let activeClass = "draggable-label";
+    if (selectedElement && selectedElement.type === 'waterwayLabel' && selectedElement.id === w.id) {
+      activeClass += " active";
+    }
+    labelGroup.setAttribute("class", activeClass);
+    labelGroup.setAttribute("data-id", w.id);
+    labelGroup.setAttribute("data-type", "waterwayLabel");
+    if (w.angle) {
+      labelGroup.setAttribute("transform", `rotate(${w.angle}, ${visualLabelX}, ${visualLabelY})`);
+    }
+
+    // Add transparent click target box for the label group (min 48px height)
+    const clickBox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    clickBox.setAttribute("x", visualLabelX - 60);
+    clickBox.setAttribute("y", visualLabelY - 24);
+    clickBox.setAttribute("width", 120);
+    clickBox.setAttribute("height", 48);
+    clickBox.setAttribute("fill", "transparent");
+    clickBox.setAttribute("cursor", "pointer");
+    labelGroup.appendChild(clickBox);
+
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", visualLabelX);
     text.setAttribute("y", visualLabelY);
@@ -1680,21 +1712,16 @@ function renderSVG() {
     text.setAttribute("font-size", "14");
     text.setAttribute("font-weight", "bold");
     text.setAttribute("text-anchor", "middle");
-    text.setAttribute("class", "draggable-label");
-    text.setAttribute("data-id", w.id);
-    text.setAttribute("data-type", "waterwayLabel");
-    if (w.angle) {
-      text.setAttribute("transform", `rotate(${w.angle}, ${visualLabelX}, ${visualLabelY})`);
-    }
     text.textContent = w.label;
+    labelGroup.appendChild(text);
     
-    text.onclick = (e) => onElementClick(e, 'waterwayLabel', w.id);
-    text.addEventListener("touchstart", (e) => {
+    labelGroup.onclick = (e) => onElementClick(e, 'waterwayLabel', w.id);
+    labelGroup.addEventListener("touchstart", (e) => {
       e.stopPropagation();
       onElementClick(e, 'waterwayLabel', w.id);
     });
     
-    waterwaysGroup.appendChild(text);
+    waterwaysGroup.appendChild(labelGroup);
   });
 
   // 2. Draw Land Slices (shapes)
@@ -2317,12 +2344,34 @@ function renderSVG() {
 
   // 3. Draw Split Lines
   splitLines.forEach(l => {
+    // Add transparent wide touch overlay line first (min 48px width) for mobile touch assistance
+    const touchLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    touchLine.setAttribute("x1", getVisualX(l.x1));
+    touchLine.setAttribute("y1", getVisualY(l.y1));
+    touchLine.setAttribute("x2", getVisualX(l.x2));
+    touchLine.setAttribute("y2", getVisualY(l.y2));
+    touchLine.setAttribute("stroke", "transparent");
+    touchLine.setAttribute("stroke-width", "48");
+    touchLine.setAttribute("cursor", "pointer");
+    touchLine.setAttribute("vector-effect", "non-scaling-stroke");
+    touchLine.onclick = (e) => onElementClick(e, 'splitLine', l.id);
+    touchLine.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      onElementClick(e, 'splitLine', l.id);
+    });
+    splitLinesGroup.appendChild(touchLine);
+
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", getVisualX(l.x1));
     line.setAttribute("y1", getVisualY(l.y1));
     line.setAttribute("x2", getVisualX(l.x2));
     line.setAttribute("y2", getVisualY(l.y2));
-    line.setAttribute("class", "split-line");
+    
+    let activeClass = "split-line";
+    if (selectedElement && selectedElement.type === 'splitLine' && selectedElement.id === l.id) {
+      activeClass += " active";
+    }
+    line.setAttribute("class", activeClass);
     line.setAttribute("data-id", l.id);
     if (l.isDashed) {
       line.setAttribute("stroke-dasharray", "6, 4");
@@ -2365,9 +2414,23 @@ function renderSVG() {
     // Split Line Label
     if (l.labelX !== undefined && l.labelY !== undefined) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g.setAttribute("class", "draggable-label");
+      let activeLabelClass = "draggable-label";
+      if (selectedElement && selectedElement.type === 'splitLine' && selectedElement.id === l.id) {
+        activeLabelClass += " active";
+      }
+      g.setAttribute("class", activeLabelClass);
       g.setAttribute("data-id", l.id);
       g.setAttribute("data-type", "splitLineLabel");
+
+      // Add transparent click target box (min 48px height)
+      const clickBox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      clickBox.setAttribute("x", getVisualX(l.labelX) - 60);
+      clickBox.setAttribute("y", getVisualY(l.labelY) - 24);
+      clickBox.setAttribute("width", 120);
+      clickBox.setAttribute("height", 48);
+      clickBox.setAttribute("fill", "transparent");
+      clickBox.setAttribute("cursor", "pointer");
+      g.appendChild(clickBox);
 
       const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
       labelText.setAttribute("x", getVisualX(l.labelX));
@@ -2390,12 +2453,27 @@ function renderSVG() {
     const offset = resolvedVisualOffsets[b.id] || { dx: 0, dy: 0 };
     const visualX = getVisualX(b.x) + offset.dx;
     const visualY = getVisualY(b.y) + offset.dy;
-    g.setAttribute("class", "draggable-label");
+    
+    let activeClass = "draggable-label";
+    if (selectedElement && selectedElement.type === 'borderLabel' && selectedElement.id === b.id) {
+      activeClass += " active";
+    }
+    g.setAttribute("class", activeClass);
     g.setAttribute("data-id", b.id);
     g.setAttribute("data-type", "borderLabel");
     if (b.angle) {
       g.setAttribute("transform", `rotate(${b.angle}, ${visualX}, ${visualY})`);
     }
+
+    // Add transparent click target box for the border label (min 48px height)
+    const clickBox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    clickBox.setAttribute("x", visualX - 80);
+    clickBox.setAttribute("y", visualY - 24);
+    clickBox.setAttribute("width", 160);
+    clickBox.setAttribute("height", 48);
+    clickBox.setAttribute("fill", "transparent");
+    clickBox.setAttribute("cursor", "pointer");
+    g.appendChild(clickBox);
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", visualX);
@@ -2434,12 +2512,27 @@ function renderSVG() {
     const offset = resolvedVisualOffsets[t.id] || { dx: 0, dy: 0 };
     const visualX = getVisualX(t.x) + offset.dx;
     const visualY = getVisualY(t.y) + offset.dy;
-    g.setAttribute("class", "draggable-label");
+    
+    let activeClass = "draggable-label";
+    if (selectedElement && selectedElement.type === 'freeText' && selectedElement.id === t.id) {
+      activeClass += " active";
+    }
+    g.setAttribute("class", activeClass);
     g.setAttribute("data-id", t.id);
     g.setAttribute("data-type", "freeText");
     if (t.angle) {
       g.setAttribute("transform", `rotate(${t.angle}, ${visualX}, ${visualY})`);
     }
+
+    // Add transparent click target box for the free text (min 48px height)
+    const clickBox = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    clickBox.setAttribute("x", visualX - 60);
+    clickBox.setAttribute("y", visualY - 24);
+    clickBox.setAttribute("width", 120);
+    clickBox.setAttribute("height", 48);
+    clickBox.setAttribute("fill", "transparent");
+    clickBox.setAttribute("cursor", "pointer");
+    g.appendChild(clickBox);
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("x", visualX);
@@ -2691,6 +2784,7 @@ function openFreeEditModal() {
 
 function closeFreeEditModal() {
   document.getElementById("freeEditModal").style.display = "none";
+  clearSelectionAndHighlights();
 }
 
 function renderFreeEditTable() {
@@ -2828,6 +2922,55 @@ function applyFreeEdit() {
 // ----------------------------------------------------
 let modalEditTarget = null; // { type, id }
 
+function focusInputHelper(inputId) {
+  setTimeout(() => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.focus();
+      if (typeof input.select === 'function') {
+        input.select();
+      }
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 120);
+}
+
+function highlightElementInDOM(type, id) {
+  // Remove "active" class from all active elements
+  const activeElements = document.querySelectorAll("svg .active");
+  activeElements.forEach(el => {
+    el.classList.remove("active");
+  });
+
+  // Add "active" class to the currently selected element
+  if (type && id) {
+    let selector = `[data-id="${id}"]`;
+    if (type === 'shape') {
+      selector = `polygon[data-id="${id}"], g[data-id="${id}"][data-type="shapeText"]`;
+    } else if (type === 'borderLabel') {
+      selector = `g[data-id="${id}"][data-type="borderLabel"]`;
+    } else if (type === 'splitLine') {
+      selector = `line[data-id="${id}"], g[data-id="${id}"][data-type="splitLineLabel"]`;
+    } else if (type === 'freeText') {
+      selector = `g[data-id="${id}"][data-type="freeText"]`;
+    } else if (type === 'waterway') {
+      selector = `polygon[data-id="${id}"][data-type="waterway"]`;
+    } else if (type === 'waterwayLabel') {
+      selector = `g[data-id="${id}"][data-type="waterwayLabel"]`;
+    }
+
+    const targets = document.querySelectorAll(selector);
+    targets.forEach(el => {
+      el.classList.add("active");
+    });
+  }
+}
+
+function clearSelectionAndHighlights() {
+  selectedElement = null;
+  highlightElementInDOM(null, null);
+}
+
 function onSvgDoubleClick(e) {
   const target = e.target;
   const parent = target.parentElement;
@@ -2926,7 +3069,13 @@ function onElementClick(e, type, id) {
   let targetType = type;
   let targetId = id;
 
-  // فحص ما إذا كان النقر على تسمية بعد أو طول ونقوم بفتح مودال التعديل الموحد
+  // 1. التمييز البصري الذكي الفوري في شجرة DOM دون إعادة رسم الكروكي
+  highlightElementInDOM(targetType, targetId);
+  selectedElement = { type: targetType, id: targetId };
+
+  // 2. محرك التعديل التفاعلي الموحد (Interactive Edit Engine)
+  
+  // أ. قوالب تقسيم المجرى المائي (mixed_waterway_new و mixed_split_image)
   if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
     let focusId = "";
     if (type === 'borderLabel') {
@@ -2962,36 +3111,100 @@ function onElementClick(e, type, id) {
       openUnifiedWaterwayModal(focusId);
       return;
     }
-  } else {
-    // التقسيمات العادية
-    if (type === 'freeText' && id) {
-      if (id.startsWith('note_top_') || id.startsWith('note_bot_') || id.startsWith('note_left_') || id.startsWith('note_right_')) {
-        const idx = parseInt(id.split('_').pop());
-        if (!isNaN(idx)) {
-          targetType = 'shape';
-          targetId = 'shape_' + (idx + 1);
-        }
-      }
-    } else if (type === 'borderLabel') {
-      if (id === 'border_3') {
-        targetType = 'shape';
-        targetId = 'shape_1';
-      } else if (id === 'border_4') {
-        targetType = 'shape';
-        targetId = 'shape_' + (customPartnerWidths ? customPartnerWidths.length : 1);
+  } 
+  // ب. قالب رباعي غير منتظم بالقطرين (quad_diagonal)
+  else if (activeTemplateType === 'quad_diagonal') {
+    if (type === 'borderLabel') {
+      let startFocusId = "";
+      if (id === 'border_1') startFocusId = "start-w1";
+      else if (id === 'border_2') startFocusId = "start-w2";
+      else if (id === 'border_3') startFocusId = "start-l1";
+      else if (id === 'border_4') startFocusId = "start-l2";
+      openStartModal(false, startFocusId);
+      return;
+    } else if (type === 'splitLine') {
+      if (id === 'split_diag_1') {
+        openStartModal(false, 'start-d1');
+        return;
+      } else if (id === 'split_diag_2') {
+        openStartModal(false, 'start-d2');
+        return;
       }
     }
   }
 
-  // إذا لم يتم تحويل العنصر لـ shape وظل عبارة عن تسمية حد أو خط تقسيم عام،
-  // نقوم بفتح المودال الإدخال العام للأبعاد الكلية للأرض.
-  if (targetType === 'borderLabel' || targetType === 'splitLine' || (targetType === 'freeText' && targetId && targetId.startsWith('note_'))) {
-    openStartModal();
-    return;
+  // ج. قوالب التقسيم المتعدد للشركاء (أكثر من شريك واحد)
+  const startPartnersInput = document.getElementById("start-partners");
+  const numPartners = parseInt(startPartnersInput ? startPartnersInput.value : "1") || 1;
+  const isMultiPartner = numPartners > 1 && activeTemplateType !== 'mixed_waterway_new' && activeTemplateType !== 'mixed_split_image' && activeTemplateType !== 'quad_diagonal';
+
+  if (isMultiPartner) {
+    if (type === 'borderLabel') {
+      let startFocusId = "";
+      if (id === 'border_1') startFocusId = "start-w1";
+      else if (id === 'border_2') startFocusId = "start-w2";
+      else if (id === 'border_3') startFocusId = "start-l1";
+      else if (id === 'border_4') startFocusId = "start-l2";
+      openStartModal(false, startFocusId);
+      return;
+    } else if (type === 'shape' && id.startsWith('shape_')) {
+      const idx = parseInt(id.split('_').pop()) - 1;
+      if (!isNaN(idx)) {
+        openFreeEditModal();
+        setTimeout(() => {
+          const inp = document.querySelector(`input.free-edit-input[data-group="standard"][data-index="${idx}"][data-side="top"]`);
+          if (inp) {
+            inp.focus();
+            inp.select();
+            inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 150);
+        return;
+      }
+    } else if (type === 'freeText' && id) {
+      if (id.startsWith('note_top_') || id.startsWith('note_bot_') || id.startsWith('note_left_') || id.startsWith('note_right_') || id.startsWith('shapeText_shape_')) {
+        const idxStr = id.split('_').pop();
+        let idx = parseInt(idxStr) - 1;
+        if (id.startsWith('note_top_') || id.startsWith('note_bot_') || id.startsWith('note_left_') || id.startsWith('note_right_')) {
+          idx = parseInt(idxStr);
+        }
+        if (!isNaN(idx)) {
+          openFreeEditModal();
+          setTimeout(() => {
+            const inp = document.querySelector(`input.free-edit-input[data-group="standard"][data-index="${idx}"][data-side="top"]`);
+            if (inp) {
+              inp.focus();
+              inp.select();
+              inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 150);
+          return;
+        }
+      }
+    }
   }
 
-  selectedElement = { type: targetType, id: targetId };
-  renderSVG();
+  // د. الحالة الافتراضية (شريك واحد أو ملصق مخصص)
+  if (targetType === 'borderLabel') {
+    let startFocusId = "";
+    if (id === 'border_1') startFocusId = "start-w1";
+    else if (id === 'border_2') startFocusId = "start-w2";
+    else if (id === 'border_3') startFocusId = "start-l1";
+    else if (id === 'border_4') startFocusId = "start-l2";
+    openStartModal(false, startFocusId);
+    return;
+  } else if (targetType === 'splitLine') {
+    openModalForElement('splitLine', id);
+    return;
+  } else if (targetType === 'freeText' && id && id.startsWith('note_')) {
+    if (numPartners === 1) {
+      openStartModal();
+      return;
+    }
+  }
+
+  // فتح محرر العنصر العام للمسودة أو القطعة الفردية
+  openModalForElement(targetType, targetId);
   populateSidebarEditor();
 }
 
@@ -3232,6 +3445,18 @@ function openModalForElement(type, id) {
   }
 
   modal.style.display = "flex";
+
+  // Focus and select the first relevant input field inside editModal
+  let focusId = "";
+  if (targetType === 'shape') focusId = "modal-owner";
+  else if (targetType === 'borderLabel') focusId = "modal-border-text";
+  else if (targetType === 'splitLine') focusId = "modal-split-label";
+  else if (targetType === 'freeText') focusId = "modal-free-text";
+  else if (targetType === 'waterway' || targetType === 'waterway_west') focusId = "modal-water-width";
+
+  if (focusId) {
+    focusInputHelper(focusId);
+  }
 }
 
 function updateUtilityField(field, value) {
@@ -3352,6 +3577,7 @@ function saveModalData() {
 
 function closeModal() {
   document.getElementById("editModal").style.display = "none";
+  clearSelectionAndHighlights();
 }
 
 function getShapeSideLengths(s) {
@@ -4089,18 +4315,13 @@ function openUnifiedWaterwayModal(focusFieldId) {
   document.getElementById("unifiedWaterwayModal").style.display = "flex";
 
   if (focusFieldId) {
-    setTimeout(() => {
-      const inp = document.getElementById(focusFieldId);
-      if (inp) {
-        inp.focus();
-        inp.select();
-      }
-    }, 100);
+    focusInputHelper(focusFieldId);
   }
 }
 
 function closeUnifiedWaterwayModal() {
   document.getElementById("unifiedWaterwayModal").style.display = "none";
+  clearSelectionAndHighlights();
 }
 
 function saveUnifiedWaterwayData() {
@@ -4712,13 +4933,7 @@ function openStartModal(skipPopulate = false, focusFieldId = null) {
   document.getElementById("startModal").style.display = "flex";
   
   if (focusFieldId) {
-    setTimeout(() => {
-      const inp = document.getElementById(focusFieldId);
-      if (inp) {
-        inp.focus();
-        inp.select();
-      }
-    }, 100);
+    focusInputHelper(focusFieldId);
   }
 }
 
@@ -4730,6 +4945,7 @@ document.getElementById("start-l1").value = "59.8";
 
 function closeStartModal() {
   document.getElementById("startModal").style.display = "none";
+  clearSelectionAndHighlights();
 }
 
 // Add Data Modals triggers

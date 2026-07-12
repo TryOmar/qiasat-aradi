@@ -267,12 +267,13 @@ body {
 .editor-form-group select {
   width: 100%;
   box-sizing: border-box;
-  padding: 6px;
+  padding: 8px 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   font-family: 'Cairo', sans-serif;
-  font-size: 12px;
+  font-size: 16px; /* 16px to prevent automatic safari/chrome zoom on mobile */
   font-weight: bold;
+  scroll-margin: 80px; /* spacing when scrolled into view */
 }
 
 .editor-form-group input:focus,
@@ -363,20 +364,16 @@ svg .clickable-shape:hover {
 }
 
 svg .clickable-shape.active {
-  stroke: #00c853;
-  stroke-width: 3.5px;
-  fill-opacity: 0.98;
+  stroke: #00c853 !important;
+  stroke-width: 4.5px !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
+  fill-opacity: 0.98 !important;
 }
 
-svg .split-line {
-  stroke: #222222;
-  stroke-width: 2.5px;
-  cursor: pointer;
-}
-
-svg .split-line:hover {
-  stroke: #c62828;
-  stroke-dasharray: 4, 4;
+svg .split-line.active {
+  stroke: #00c853 !important;
+  stroke-width: 5px !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
 }
 
 svg .waterway {
@@ -384,6 +381,22 @@ svg .waterway {
   stroke: #00838f;
   stroke-width: 3.5px;
   stroke-dasharray: 6, 4;
+}
+
+svg .waterway.active {
+  stroke: #00c853 !important;
+  stroke-width: 5px !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 200, 83, 0.6)) !important;
+}
+
+svg .draggable-label.active text {
+  fill: #00c853 !important;
+  font-weight: 900 !important;
+}
+
+svg .draggable-label.active rect {
+  stroke: #00c853 !important;
+  stroke-width: 2px !important;
 }
 
 /* Modal Dialogs */
@@ -404,11 +417,16 @@ svg .waterway {
   background-color: #fefefe;
   padding: 20px;
   border: 1px solid #888;
-  width: 90%;
-  max-width: 420px;
+  width: 95%;
+  max-width: 440px;
   border-radius: 12px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.15);
   animation: modalSlideUp 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 @keyframes modalSlideUp {
@@ -431,7 +449,13 @@ svg .waterway {
 .modal-actions {
   display: flex;
   gap: 10px;
+  position: sticky;
+  bottom: 0;
+  background-color: #ffffff;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
   margin-top: 15px;
+  z-index: 10;
 }
 
 .modal-save-btn,
