@@ -676,18 +676,8 @@
         return true;
       }
 
-      // الأولوية الثالثة: التحقق من معرف الحقل، الاسم، أو الفئة بحثاً عن الكلمات المستبعدة
+      // الأولوية الثالثة: التحقق باستخدام قائمتي السماح (Whitelist) والاستبعاد (Blacklist) لضمان اقتصاره على الأبعاد
       const identityStr = (el.id + " " + el.name + " " + el.className + " " + (el.placeholder || "")).toLowerCase();
-      const ignoreKeywords = [
-        "feddan", "fed", "carat", "car", "sahm", "sah", "share", "shares",
-        "qasba", "qasaba", "qas", "qabda", "qab", "pct", "percent", "percentage",
-        "ratio", "price", "area", "sqm", "value", "val"
-      ];
-      if (ignoreKeywords.some(kw => identityStr.includes(kw))) {
-        return true;
-      }
-
-      // الأولوية الرابعة: التحقق من تسمية الحقل (Label) في DOM
       let labelText = "";
       if (el.id) {
         const labelEl = document.querySelector(`label[for="${el.id}"]`);
@@ -702,17 +692,30 @@
         const groupLabel = parentGroup.querySelector("label");
         if (groupLabel) labelText += " " + groupLabel.textContent;
       }
+      const fullText = (identityStr + " " + labelText).toLowerCase();
 
-      const arabicIgnoreKeywords = [
-        "فدان", "قيراط", "سهم", "قصبة", "قبضة", "نسبة", "النسبة", "%", "مساحة", "المساحة", "سعر", "السعر", "قيمة", "القيمة"
+      // قائمة السماح للأبعاد والأطوال (Whitelist)
+      const whitelistKeywords = [
+        "length", "width", "height", "dist", "len", "dim", "diam", "border", "boundary", "meter", "cm", "top", "bot", "left", "right", "side", "start-w", "start-l",
+        "طول", "عرض", "ارتفاع", "ضلع", "قطر", "حد", "متر", "سم", "سنتيمتر", "أبعاد", "أطوال", "عروض", "المتر"
       ];
-      if (arabicIgnoreKeywords.some(kw => labelText.includes(kw))) {
-        return true;
+
+      // قائمة الاستبعاد المطلقة (Blacklist) لحماية الحقول الأخرى
+      const blacklistKeywords = [
+        "feddan", "fed", "carat", "car", "sahm", "sah", "share", "shares", "qasba", "qasaba", "qas", "qabda", "qab", "pct", "percent", "percentage", "ratio", "price", "area", "sqm", "value", "val", "cost", "total",
+        "فدان", "قيراط", "سهم", "قصبة", "قبضة", "نسبة", "النسبة", "%", "مساحة", "المساحة", "سعر", "السعر", "قيمة", "القيمة", "إجمالي", "الاجمالي", "تكلفة", "التكلفة"
+      ];
+
+      const isWhitelisted = whitelistKeywords.some(kw => fullText.includes(kw));
+      const isBlacklisted = blacklistKeywords.some(kw => fullText.includes(kw));
+
+      if (isWhitelisted && !isBlacklisted) {
+        return false; // لا تتجاهله (يعمل المساعد هنا)
       }
     } catch (e) {
       // fallback
     }
-    return false;
+    return true; // تجاهل أي حقل آخر بشكل افتراضي
   }
 
   /**
