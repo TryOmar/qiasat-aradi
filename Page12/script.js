@@ -6038,6 +6038,8 @@ function printDallalMap() {
   renderSVG();
   populateSidebarEditor();
 
+  const pieceNames = getMixedPieceNames();
+
   const isMainBgChecked = document.getElementById("chkAgriBackground") ? document.getElementById("chkAgriBackground").checked : false;
 
   const svgElement = document.getElementById("dallalSvg");
