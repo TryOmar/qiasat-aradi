@@ -2542,7 +2542,8 @@ function renderCroquis() {
       g.appendChild(svgText(scaleX0, scaleY + 15 * textScale, "0", { fill: "#263238", size: "9", weight: "bold" }));
 
       // رسم شرطات الـ 1 متر (minor ticks) وشرطات الخطوة الرئيسية (major ticks)
-      for (let dist = 1; dist <= w; dist++) {
+      const wFloor = Math.floor(w);
+      for (let dist = 1; dist <= wFloor; dist++) {
         const tx = mapX(dist);
         const isMajor = dist % majorStep === 0;
         const tickH = isMajor ? 6 * textScale : 3 * textScale;
@@ -2552,6 +2553,10 @@ function renderCroquis() {
           g.appendChild(svgText(tx, scaleY + 15 * textScale, String(dist), { fill: "#263238", size: "9", weight: "bold" }));
         }
       }
+
+      // شرطة النهاية (نهاية الأرض = w متر)
+      g.appendChild(svgLine(scaleX1, scaleY - 6 * textScale, scaleX1, scaleY + 6 * textScale, { stroke: "#37474f", width: 1.5 * textScale }));
+      g.appendChild(svgText(scaleX1, scaleY + 15 * textScale, w.toFixed(1), { fill: "#263238", size: "9", weight: "bold" }));
 
       // رسم وحدة القياس "م" بجانب الأرقام
       g.appendChild(svgText(scaleX1 + 14 * textScale, scaleY + 15 * textScale, "م", { fill: "#37474f", size: "9", weight: "normal" }));
@@ -4953,14 +4958,13 @@ function updateInspector(index) {
     insAreaEl.innerHTML = `${Number(piece.area.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
   }
   
-  // حساب متوسط العرض ومتوسط الارتفاع بدقة كاملة وعرض المعادلة وفرق التقريب
-  const w = (w1 + w2) / 2;
-  const diff_L = l2 - l1;
-  const k = diff_L / (w || 1);
+  // حساب متوسط العرض ومتوسط الطول بدقة كاملة وعرض المعادلة وفرق التقريب
+  // avgW مخزن مباشرة في piece.width كمتوسط حقيقي لعرض القطعة
+  // avgL = المساحة الحقيقية / متوسط العرض (يعطي متوسط الطول الدقيق)
   const avgW = piece.width; // (piece.botW + piece.topW) / 2
-  const avgL = l2 + k * (w - (piece.startX + piece.endX) / 2);
-  const areaUnrounded = avgW * avgL;
-  const roundingDiff = areaUnrounded - piece.area;
+  const avgL = piece.width > 0 ? piece.area / piece.width : 0;
+  const areaUnrounded = avgW * avgL; // = piece.area بالضبط
+  const roundingDiff = piece.area - Number(piece.area.toFixed(2));
 
   if (insDimensionsFormulaEl) {
     insDimensionsFormulaEl.innerHTML = `${avgW.toFixed(4)} م × ${avgL.toFixed(4)} م = ${areaUnrounded.toFixed(4)} م²`;
