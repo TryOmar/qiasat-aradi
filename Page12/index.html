@@ -100,7 +100,7 @@
         <!-- Action Buttons Under Canvas -->
         <div class="canvas-actions no-print" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
           <button type="button" class="action-btn" id="freeEditBtn" onclick="openFreeEditModal()" style="padding: 12px 20px; font-size: 16px; background-color: #ff9800; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo';">🟠 التعديل الحر</button>
-          <button type="button" class="action-btn" onclick="openSmartAreaModal(getTotalLandSqm())" style="padding: 12px 20px; font-size: 16px; background-color: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 8px;">⚖️ تحويل لفدان/قيراط/سهم</button>
+          <button type="button" class="action-btn" onclick="handleConversionButtonClick()" style="padding: 12px 20px; font-size: 16px; background-color: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 8px;">⚖️ تحويل لفدان/قيراط/سهم</button>
           <button type="button" class="action-btn generate-btn" onclick="printDallalMap()" style="padding: 12px 30px; font-size: 16px;">🖨️ إنشاء الخريطة والطباعة</button>
         </div>
       </div>
@@ -110,9 +110,9 @@
         <h3>قوالب جاهزة سريعة</h3>
         <div class="preset-grid">
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2; background: #e8f5e9; font-weight: bold; font-size: 14px;" onclick="loadTemplate('generic_shape')">🔳 اختار شكل و ابعاد جديدة</button>
-          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_waterway_new')">🗺️ تقسيم مختلط بمجرى مائي</button>
           <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('mixed_split_image')">🗺️ تقسيم مختلط بين مجرى مائي</button>
+          <button type="button" class="sidebar-btn preset-btn" style="grid-column: span 2;" onclick="loadTemplate('quad_diagonal')">⏢ رباعي غير منتظم بالقطرين</button>
         </div>
 
         <h3 style="margin-top: 20px;">أدوات الإضافة</h3>
@@ -124,13 +124,13 @@
         <h3 style="margin-top: 20px;">خيارات العرض</h3>
         <div style="background: #f1f8e9; padding: 10px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 10px;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: bold; color: #1b5e20;">
-            <input type="checkbox" id="chkAgriBackground" checked onchange="toggleAgriBackground()" style="accent-color: #2e7d32; width: 16px; height: 16px;">
+            <input type="checkbox" id="chkAgriBackground" onchange="toggleAgriBackground()" style="accent-color: #2e7d32; width: 16px; height: 16px;">
             إظهار الخلفية الزراعية
           </label>
         </div>
 
         <div style="margin-bottom: 15px;">
-          <button type="button" onclick="openSmartAreaModal(getTotalLandSqm())" style="width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <button type="button" onclick="handleConversionButtonClick()" style="width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             ⚖️ تحويل لفدان/قيراط/سهم
           </button>
         </div>
@@ -292,12 +292,13 @@
 
   <!-- Unified Waterway Edit Modal (Mobile First) -->
   <div id="unifiedWaterwayModal" class="modal no-print">
-    <div class="modal-content unified-modal-content" style="max-width: 440px;">
-      <span class="modal-close" onclick="closeUnifiedWaterwayModal()">&times;</span>
-      <h3 style="margin-bottom: 15px; color: #1b5e20; font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">
-        🔧 تعديل أبعاد التقسيم
-      </h3>
-      <div class="unified-modal-body" style="flex: 1; overflow-y: auto; padding: 5px;">
+    <div class="modal-content unified-modal-content">
+      <!-- رأس الموديال: العنوان وزر الإغلاق -->
+      <div class="unified-modal-header">
+        <h3>🔧 تعديل أبعاد التقسيم</h3>
+        <button type="button" class="modal-close-btn" onclick="closeUnifiedWaterwayModal()" title="إغلاق">×</button>
+      </div>
+      <div class="unified-modal-body">
         <div class="editor-form-group mobile-field">
           <label>طول القطعة الغربية (متر):</label>
           <input type="text" inputmode="decimal" id="unified-west-len" class="mobile-input">
@@ -319,7 +320,7 @@
           <input type="text" inputmode="decimal" id="unified-waterway-width" class="mobile-input">
         </div>
       </div>
-      <div class="modal-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+      <div class="modal-actions">
         <button type="button" class="modal-save-btn mobile-action-btn" onclick="saveUnifiedWaterwayData()">✔ تطبيق</button>
         <button type="button" class="modal-cancel-btn mobile-action-btn" onclick="closeUnifiedWaterwayModal()">✖ إلغاء</button>
       </div>
@@ -465,20 +466,6 @@
     </div>
   </div>
 
-  <!-- Mobile Floating Action Button (FAB) -->
-  <div class="fab-container no-print" id="fabContainer">
-    <div class="fab-menu" id="fabMenu">
-      <button type="button" onclick="openStartModal()" class="fab-item" style="--i:1; background: #e8f5e9; color: #1b5e20; border-color: #a5d6a7;" title="أبعاد الأرض">📐 أبعاد الأرض</button>
-      <button type="button" onclick="openAddDataModal()" class="fab-item" style="--i:2; background: #e0f2f1; color: #004d40; border-color: #80cbc4;" title="إضافة بيانات">➕ إضافة بيانات</button>
-      <button type="button" onclick="printDallalMap()" class="fab-item" style="--i:3; background: #e3f2fd; color: #0d47a1; border-color: #90caf9;" title="طباعة">🖨️ طباعة</button>
-      <button type="button" onclick="exportMapImage()" class="fab-item" style="--i:4; background: #fce4ec; color: #880e4f; border-color: #f48fb1;" title="حفظ صورة">🖼️ حفظ صورة</button>
-      <button type="button" onclick="restoreDemoDataPreset()" class="fab-item" style="--i:5; background: #efebe9; color: #4e342e; border-color: #bcaaa4;" title="البيانات التجريبية">🔄 البيانات التجريبية</button>
-      <button type="button" onclick="resetCanvasToDefault()" class="fab-item" style="--i:6; background: #ffebee; color: #b71c1c; border-color: #ffcdd2;" title="مسح اللوحة">🗑️ مسح اللوحة</button>
-    </div>
-    <button type="button" class="fab-main-btn" onclick="toggleFabMenu()" id="fabMainBtn">
-      <span>+</span>
-    </button>
-  </div>
 
 
   <!-- Add Data Modal -->

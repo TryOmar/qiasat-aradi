@@ -69,7 +69,7 @@ let lastTouchDist = 0; // For pinch to zoom
 let isCroquiPinned = true;
 
 // Active Template Tracker
-let activeTemplateType = 'rectangle';
+let activeTemplateType = 'quad_diagonal';
 let mixedPiecesTree = null;
 
 // Undo / Redo Stack State
@@ -79,7 +79,7 @@ let saveStateTimeout = null;
 
 // Smart Area Tabs
 let activeSmartAreaTab = 'sqm';
-let showFeddanConversion = localStorage.getItem("dallal_show_feddan") === "true";
+let showFeddanConversion = localStorage.getItem("dallal_show_feddan") !== "false";
 let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
 
 // Color Palette for Shapes
@@ -129,6 +129,23 @@ document.addEventListener("DOMContentLoaded", function () {
         if (document.getElementById("start-d1")) document.getElementById("start-d1").value = state.inputs.d1;
         if (document.getElementById("start-d2")) document.getElementById("start-d2").value = state.inputs.d2;
         if (document.getElementById("start-partners")) document.getElementById("start-partners").value = state.inputs.partners;
+      }
+      if (activeTemplateType === 'quad_diagonal' && shapes && shapes[0] && shapes[0].points && splitLines && splitLines.length >= 2) {
+        const [sp1, sp2, sp3, sp4] = shapes[0].points;
+        const lenAC = Math.sqrt(Math.pow(sp3.x - sp1.x, 2) + Math.pow(sp3.y - sp1.y, 2));
+        const lenBD = Math.sqrt(Math.pow(sp2.x - sp4.x, 2) + Math.pow(sp2.y - sp4.y, 2));
+        
+        splitLines.forEach(l => {
+          if (l.id === "split_diag_1") {
+            l.label = `م ${lenBD.toFixed(2)} (BD) القطر الثاني`;
+            l.labelX = sp1.x + (sp3.x - sp1.x) * 0.25 + 2.5;
+            l.labelY = sp1.y + (sp3.y - sp1.y) * 0.25 - 1.5;
+          } else if (l.id === "split_diag_2") {
+            l.label = `م ${lenAC.toFixed(2)} (AC) القطر الأول`;
+            l.labelX = sp4.x + (sp2.x - sp4.x) * 0.25 - 2.5;
+            l.labelY = sp4.y + (sp2.y - sp4.y) * 0.25 - 1.5;
+          }
+        });
       }
 
       applyViewportTransform();
@@ -777,26 +794,27 @@ function generateCustomLand(useCustomWidths = false) {
     const lenBD = Math.sqrt(Math.pow(p2.x - p4.x, 2) + Math.pow(p2.y - p4.y, 2));
 
     // Draw diagonal AC
+    // Draw diagonal AC (from p1 to p3, top-left to bottom-right)
     splitLines.push({
       id: "split_diag_1",
       x1: p1.x, y1: p1.y,
       x2: p3.x, y2: p3.y,
-      label: `القطر الأول (AC) ${lenAC.toFixed(2)} م`,
-      labelX: (p1.x + p3.x) / 2 + 2.5,
-      labelY: (p1.y + p3.y) / 2 - 1.5,
+      label: `م ${lenBD.toFixed(2)} (BD) القطر الثاني`,
+      labelX: p1.x + (p3.x - p1.x) * 0.25 + 2.5,
+      labelY: p1.y + (p3.y - p1.y) * 0.25 - 1.5,
       angle: Math.round(Math.atan2(p3.y - p1.y, p3.x - p1.x) * 180 / Math.PI),
       isDashed: true,
       color: "#0288d1"
     });
 
-    // Draw diagonal BD
+    // Draw diagonal BD (from p4 to p2, bottom-left to top-right)
     splitLines.push({
       id: "split_diag_2",
       x1: p4.x, y1: p4.y,
       x2: p2.x, y2: p2.y,
-      label: `القطر الثاني (BD) ${lenBD.toFixed(2)} م`,
-      labelX: (p4.x + p2.x) / 2 - 2.5,
-      labelY: (p4.y + p2.y) / 2 - 1.5,
+      label: `م ${lenAC.toFixed(2)} (AC) القطر الأول`,
+      labelX: p4.x + (p2.x - p4.x) * 0.25 - 2.5,
+      labelY: p4.y + (p2.y - p4.y) * 0.25 - 1.5,
       angle: Math.round(Math.atan2(p2.y - p4.y, p2.x - p4.x) * 180 / Math.PI),
       isDashed: true,
       color: "#0288d1"
@@ -1127,7 +1145,7 @@ function generateCustomLand(useCustomWidths = false) {
           notes: notesName,
           color: colorsList[colorIndex].value,
           textX: (sub_tl.x + sub_tr.x + sub_br.x + sub_bl.x) / 4,
-          textY: (sub_tl.y + sub_tr.y) / 2 + ( (sub_bl.y + sub_br.y) / 2 - (sub_tl.y + sub_tr.y) / 2 ) * 0.25,
+          textY: (sub_tl.y + sub_tr.y) / 2 + ( (sub_bl.y + sub_br.y) / 2 - (sub_tl.y + sub_tr.y) / 2 ) * 0.50,
           parentShape: {
             name: baseName,
             points: parentCorners,
@@ -1748,8 +1766,7 @@ function renderSVG() {
     const visualShapeW = (maxX - minX) * scaleX;
     const visualShapeH = (maxY - minY) * scaleY;
 
-    // === 1. Draw standalone Area text (rotated -90) at 25% height (Only for Undivided Main land) ===
-    if (!s.isSubPiece && s.area && s.area.sqm) {
+    if (false) {
       const areaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
       const areaX = getVisualX(s.textX);
       let areaY = minY + (maxY - minY) * 0.25;
@@ -1777,7 +1794,7 @@ function renderSVG() {
       shapesGroup.appendChild(areaGroup);
     }
 
-    if (s.isSubPiece) {
+    if (false) {
       // Draw subdivided piece text vertically (Area, Owner, Length) without card backgrounds
       if (s.area && s.area.sqm) {
         // Center line calculations
@@ -1921,13 +1938,17 @@ function renderSVG() {
       }
 
       const conversionLines = [];
-      if (s.area && s.area.sqm && showFeddanConversion) {
-        const detail = sqmToFeddanCaratShares(s.area.sqm);
+      if (s.area && s.area.sqm) {
         const sqmFormatted = Number.isInteger(s.area.sqm) ? s.area.sqm : s.area.sqm.toFixed(2);
-        conversionLines.push({ text: `المساحة: ${sqmFormatted} م²`, isBold: true, fontSize: "11", color: "#37474f", isSqm: true });
-        conversionLines.push({ text: `فدان: ${detail.feddan}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        conversionLines.push({ text: `قيراط: ${detail.carat}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
-        conversionLines.push({ text: `سهم: ${detail.shares}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+        if (showFeddanConversion) {
+          const detail = sqmToFeddanCaratShares(s.area.sqm);
+          conversionLines.push({ text: `فدان: ${detail.feddan}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+          conversionLines.push({ text: `قيراط: ${detail.carat}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+          conversionLines.push({ text: `سهم: ${detail.shares}`, isBold: true, fontSize: "12.5", color: "#1b5e20" });
+          conversionLines.push({ text: `المساحة: ${sqmFormatted} م²`, isBold: true, fontSize: "11", color: "#37474f", isSqm: true });
+        } else {
+          conversionLines.push({ text: `المساحة: ${sqmFormatted} م²`, isBold: true, fontSize: "11", color: "#37474f", isSqm: true });
+        }
       }
 
       if (mainLines.length > 0 || conversionLines.length > 0 || showFeddanConversion === false) {
@@ -1941,7 +1962,7 @@ function renderSVG() {
         
         const bottomFieldPadding = 8;
         const numConvLines = conversionLines.length;
-        const bottomFieldH = showFeddanConversion ? (20 + 8 + numConvLines * baseLineHeight + bottomFieldPadding * 2) : (24 + bottomFieldPadding * 2);
+        const bottomFieldH = 20 + 8 + numConvLines * baseLineHeight + bottomFieldPadding * 2;
         const bottomFieldW = showFeddanConversion ? 130 : 170;
 
         const unscaledBoxW = Math.max(bottomFieldW + 24, maxChars * baseCharWidth + 24);
@@ -2072,7 +2093,7 @@ function renderSVG() {
 
           btnGroup.onclick = (e) => {
             e.stopPropagation();
-            showCaratConversionModal();
+            handleConversionButtonClick();
           };
           btnGroup.addEventListener("touchstart", (e) => {
             e.stopPropagation();
@@ -2097,8 +2118,8 @@ function renderSVG() {
               chipRect.setAttribute("pointer-events", "none");
               textGroup.appendChild(chipRect);
             }
-            // Green separator line before feddan line
-            if (idx === 1) {
+            // Green separator line before sqm line
+            if (line.isSqm && showFeddanConversion) {
               const sepRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
               sepRect.setAttribute("x", visualTextX - (fieldW / 2) + 6 * scaleFactor);
               sepRect.setAttribute("y", convY - 2 * scaleFactor);
@@ -2121,11 +2142,41 @@ function renderSVG() {
             convY += baseLineHeight * scaleFactor;
           });
         } else {
-          // Draw big button inside the box
+          // 1. Draw the conversion line (sqm line) at the top of the box
+          let convY = fieldY + bottomFieldPadding * scaleFactor;
+          const sqmLine = conversionLines[0];
+          if (sqmLine) {
+            // Draw gray chip background
+            const chipH = 18 * scaleFactor;
+            const chipW = fieldW - 12 * scaleFactor;
+            const chipRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            chipRect.setAttribute("x", visualTextX - chipW / 2);
+            chipRect.setAttribute("y", convY + 1 * scaleFactor);
+            chipRect.setAttribute("width", chipW);
+            chipRect.setAttribute("height", chipH);
+            chipRect.setAttribute("fill", "#eceff1");
+            chipRect.setAttribute("rx", 4 * scaleFactor);
+            chipRect.setAttribute("pointer-events", "none");
+            textGroup.appendChild(chipRect);
+
+            const tSpan = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tSpan.setAttribute("x", visualTextX);
+            tSpan.setAttribute("y", convY + 14 * scaleFactor);
+            tSpan.setAttribute("fill", sqmLine.color);
+            tSpan.setAttribute("font-size", parseFloat(sqmLine.fontSize) * scaleFactor);
+            if (sqmLine.isBold) tSpan.setAttribute("font-weight", "bold");
+            tSpan.setAttribute("text-anchor", "middle");
+            tSpan.textContent = sqmLine.text;
+            textGroup.appendChild(tSpan);
+            
+            convY += baseLineHeight * scaleFactor;
+          }
+
+          // 2. Draw the big button below the sqm line
           const btnW = 150 * scaleFactor;
           const btnH = 24 * scaleFactor;
           const btnX = visualTextX;
-          const btnY = fieldY + bottomFieldPadding * scaleFactor;
+          const btnY = convY + 4 * scaleFactor;
 
           const btnGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
           btnGroup.setAttribute("style", "cursor: pointer;");
@@ -2152,10 +2203,7 @@ function renderSVG() {
 
           btnGroup.onclick = (e) => {
             e.stopPropagation();
-            // Enable conversion immediately without opening modal
-            showFeddanConversion = true;
-            localStorage.setItem("dallal_show_feddan", "true");
-            renderSVG();
+            handleConversionButtonClick();
           };
           btnGroup.addEventListener("touchstart", (e) => {
             e.stopPropagation();
@@ -4725,38 +4773,19 @@ function loadDemoDataPreset(promptConfirm = true) {
     return;
   }
 
-  const drawW = 60.00;
-  const drawL = 30.00;
+  activeTemplateType = 'quad_diagonal';
+  showFeddanConversion = true;
+  localStorage.setItem("dallal_show_feddan", "true");
 
-  const p1 = { x: -drawW / 2, y: -drawL / 2 };
-  const p2 = { x: drawW / 2, y: -drawL / 2 };
-  const p3 = { x: drawW / 2, y: drawL / 2 };
-  const p4 = { x: -drawW / 2, y: drawL / 2 };
+  if (document.getElementById("start-w1")) document.getElementById("start-w1").value = "45";
+  if (document.getElementById("start-w2")) document.getElementById("start-w2").value = "50";
+  if (document.getElementById("start-l1")) document.getElementById("start-l1").value = "40";
+  if (document.getElementById("start-l2")) document.getElementById("start-l2").value = "35";
+  if (document.getElementById("start-d1")) document.getElementById("start-d1").value = "60";
+  if (document.getElementById("start-d2")) document.getElementById("start-d2").value = "60.83";
+  if (document.getElementById("start-partners")) document.getElementById("start-partners").value = "1";
 
-  const totalArea = 1800; // 30 * 60
-
-  shapes = [{
-    id: "shape_1",
-    points: [p1, p2, p3, p4],
-    owner: "اسم المالك",
-    area: { feddan: 0, carat: 10, shares: 6.81, sqm: totalArea },
-    notes: "خريطة ارض",
-    color: "#ffffff",
-    textX: 0,
-    textY: 0
-  }];
-
-  borderLabels = [
-    { id: "border_1", text: "غربي 60.00 م (العرض الكلي)", x: 0, y: p1.y - 1.5, fontSize: 13, angle: 0 },
-    { id: "border_2", text: "شرقي 60.00 م (العرض الكلي)", x: 0, y: p4.y + 1.5, fontSize: 13, angle: 0 },
-    { id: "border_3", text: "قبلي 30.00 م (الطول الكلي)", x: p1.x - 1.5, y: 0, fontSize: 13, angle: -90 },
-    { id: "border_4", text: "بحري 30.00 م (الطول الكلي)", x: p2.x + 1.5, y: 0, fontSize: 13, angle: 90 }
-  ];
-
-  freeTexts = [];
-
-  splitLines = [];
-  waterways = [];
+  generateCustomLand(true);
 
   // Center view
   zoomScale = 1.0;
@@ -4772,13 +4801,6 @@ function loadDemoDataPreset(promptConfirm = true) {
   if (fab) fab.classList.remove("open");
 }
 
-// Mobile FAB triggers
-function toggleFabMenu() {
-  const fab = document.getElementById("fabContainer");
-  if (fab) {
-    fab.classList.toggle("open");
-  }
-}
 
 // ----------------------------------------------------
 // Image Export Functionality
@@ -4820,6 +4842,8 @@ function printDallalMap() {
   renderSVG();
   populateSidebarEditor();
 
+  const isMainBgChecked = document.getElementById("chkAgriBackground") ? document.getElementById("chkAgriBackground").checked : false;
+
   const svgElement = document.getElementById("dallalSvg");
   const svgHTML = svgElement.outerHTML;
 
@@ -4831,7 +4855,8 @@ function printDallalMap() {
   let detailedReportHTML = "";
   if (activeTemplateType === 'mixed_waterway_new') {
     detailedReportHTML += `<div class="mixed-report-container" style="padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl; width: 100%; max-width: 900px; margin: 20px auto; page-break-inside: auto;">`;
-    detailedReportHTML += `<h2 style="color: #1b5e20; text-align: center; border-bottom: 2px solid #1b5e20; padding-bottom: 10px; margin-bottom: 20px; page-break-after: avoid;">التقرير التفصيلي لقطع الأراضي</h2>`;
+    detailedReportHTML += `<h2 style="color: #1b5e20; text-align: center; border-bottom: 2px solid #1b5e20; padding-bottom: 10px; margin-bottom: 10px; page-break-after: avoid;">التقرير التفصيلي لقطع الأراضي</h2>`;
+    detailedReportHTML += `<div style="text-align: center; background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 8px; padding: 10px; margin-bottom: 20px; font-size: 15px; font-weight: bold; color: #1b5e20; page-break-inside: avoid;">⚖️ مساحة القيراط المعتمدة في التحويل: ${caratSize} م²</div>`;
     
     // Group shapes by parentShape.name
     const parentGroups = {};
@@ -4855,12 +4880,29 @@ function printDallalMap() {
       if (group.subPieces && group.subPieces.length > 0) {
         detailedReportHTML += `<div style="display: flex; gap: 15px; flex-wrap: wrap;">`;
         group.subPieces.forEach(sub => {
+          let sideTop = 0, sideBottom = 0, sideRight = 0, sideLeft = 0;
+          if (sub.points && sub.points.length >= 4) {
+            sideTop = calcDist(sub.points[0], sub.points[1]);
+            sideRight = calcDist(sub.points[1], sub.points[2]);
+            sideBottom = calcDist(sub.points[3], sub.points[2]);
+            sideLeft = calcDist(sub.points[0], sub.points[3]);
+          }
+
           detailedReportHTML += `<div style="flex: 1; min-width: 250px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">`;
           detailedReportHTML += `<h4 style="color: #1565c0; margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed #bbdefb; padding-bottom: 5px;">📍 ${sub.notes || sub.owner}</h4>`;
           detailedReportHTML += `<table style="width: 100%; font-size: 13px; border-collapse: collapse;">`;
           const addRowStr = (label, valStr) => `<tr><td style="padding: 4px 0; color: #555;">${label}</td><td style="padding: 4px 0; font-weight: bold; text-align: left; color: #222;">${valStr}</td></tr>`;
           
           detailedReportHTML += addRowStr("المساحة:", `${sub.area.sqm.toFixed(2)} م²`);
+          detailedReportHTML += addRowStr("مساحة القيراط بالمتر المربع:", `${caratSize} م²`);
+          
+          if (sideTop > 0 || sideBottom > 0) {
+            detailedReportHTML += addRowStr("العرض البحري (الأعلى):", `${sideTop.toFixed(2)} م`);
+            detailedReportHTML += addRowStr("العرض القبلي (الأسفل):", `${sideBottom.toFixed(2)} م`);
+            detailedReportHTML += addRowStr("الطول الشرقي (الأيمن):", `${sideRight.toFixed(2)} م`);
+            detailedReportHTML += addRowStr("الطول الغربي (الأيسر):", `${sideLeft.toFixed(2)} م`);
+          }
+          
           detailedReportHTML += addRowStr("نسبة الشريك:", `${sub.area.feddan} فدان، ${sub.area.carat} قيراط، ${sub.area.shares} سهم`);
           
           detailedReportHTML += `</table></div>`;
@@ -4904,6 +4946,68 @@ function printDallalMap() {
          detailedReportHTML += `</table></div>`;
        }
     }
+    detailedReportHTML += `</div>`;
+  } else {
+    // General shapes report
+    detailedReportHTML += `<div class="mixed-report-container" style="padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl; width: 100%; max-width: 900px; margin: 20px auto; page-break-inside: auto;">`;
+    detailedReportHTML += `<h2 style="color: #1b5e20; text-align: center; border-bottom: 2px solid #1b5e20; padding-bottom: 10px; margin-bottom: 10px; page-break-after: avoid;">جدول تفاصيل المساحة والتقسيم</h2>`;
+    detailedReportHTML += `<div style="text-align: center; background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 8px; padding: 10px; margin-bottom: 20px; font-size: 15px; font-weight: bold; color: #1b5e20; page-break-inside: avoid;">⚖️ مساحة القيراط المعتمدة في التحويل: ${caratSize} م²</div>`;
+    
+    detailedReportHTML += `<div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">`;
+    shapes.forEach((s, index) => {
+      const ownerText = s.owner || `القطعة الرئيسية / الشريك ${index + 1}`;
+      
+      let sqmVal = 0;
+      if (s.area && s.area.sqm !== undefined) {
+        sqmVal = s.area.sqm;
+      } else if (typeof s.area === 'number') {
+        sqmVal = s.area;
+      }
+      
+      const sqmFormatted = Number.isInteger(sqmVal) ? sqmVal : sqmVal.toFixed(2);
+      const detailed = sqmToFeddanCaratShares(sqmVal);
+      
+      // Calculate side lengths
+      let sideTop = 0, sideBottom = 0, sideRight = 0, sideLeft = 0;
+      if (s.points && s.points.length >= 4) {
+        sideTop = calcDist(s.points[0], s.points[1]);
+        sideRight = calcDist(s.points[1], s.points[2]);
+        sideBottom = calcDist(s.points[3], s.points[2]);
+        sideLeft = calcDist(s.points[0], s.points[3]);
+      }
+      
+      detailedReportHTML += `<div style="flex: 1; min-width: 280px; max-width: 420px; background: #fff; border: 1.5px solid #c8e6c9; border-radius: 10px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; page-break-inside: avoid;">`;
+      detailedReportHTML += `<h4 style="color: #1b5e20; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #a5d6a7; padding-bottom: 6px; font-size: 16px; font-weight: bold; text-align: center;">📍 ${ownerText}</h4>`;
+      detailedReportHTML += `<table style="width: 100%; font-size: 14px; border-collapse: collapse; text-align: right; font-family: 'Cairo';">`;
+      
+      const addRowStr = (label, valStr, isSpecial) => {
+        const bg = isSpecial ? 'background: #f1f8e9;' : '';
+        const color = isSpecial ? '#1b5e20' : '#222';
+        const weight = isSpecial ? 'bold' : 'normal';
+        return `<tr style="${bg}"><td style="padding: 8px 8px; color: #555; border-bottom: 1px solid #e0e0e0;">${label}</td><td style="padding: 8px 8px; font-weight: ${weight}; text-align: left; color: ${color}; border-bottom: 1px solid #e0e0e0;">${valStr}</td></tr>`;
+      };
+      
+      detailedReportHTML += addRowStr("المساحة الإجمالية:", `${sqmFormatted} م²`, true);
+      detailedReportHTML += addRowStr("مساحة القيراط بالمتر المربع:", `${caratSize} م²`, false);
+      
+      if (sideTop > 0 || sideBottom > 0) {
+        detailedReportHTML += addRowStr("العرض البحري (الأعلى):", `${sideTop.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr("العرض القبلي (الأسفل):", `${sideBottom.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr("الطول الشرقي (الأيمن):", `${sideRight.toFixed(2)} م`, false);
+        detailedReportHTML += addRowStr("الطول الغربي (الأيسر):", `${sideLeft.toFixed(2)} م`, false);
+      }
+      
+      detailedReportHTML += addRowStr("فدان:", `${detailed.feddan || 0}`, false);
+      detailedReportHTML += addRowStr("قيراط:", `${detailed.carat || 0}`, false);
+      detailedReportHTML += addRowStr("سهم:", `${detailed.shares || 0}`, false);
+      
+      if (s.notes) {
+        detailedReportHTML += addRowStr("بيانات إضافية:", s.notes.replace(/\n/g, "<br>"), false);
+      }
+      
+      detailedReportHTML += `</table></div>`;
+    });
+    detailedReportHTML += `</div>`;
     detailedReportHTML += `</div>`;
   }
 
@@ -4963,8 +5067,6 @@ function printDallalMap() {
           ${svgHTML}
         </div>
 
-        ${detailedReportHTML}
-
         <!-- Controls (No Print) -->
         <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; padding: 15px; background: #f9f9f9; border-top: 1px solid #eee; font-family: 'Cairo', sans-serif;">
           <button onclick="let svg=document.querySelector('#printOverlay .canvas-container svg'); let curr=parseFloat(svg.style.width||100); svg.style.width=(curr*1.25)+'%'; svg.style.height='auto';" style="font-weight: bold; font-size: 16px; padding: 4px 15px; background: #eceff1; border: 1.5px solid #b0bec5; border-radius: 6px; cursor: pointer; color: #37474f; transition: background 0.2s;">+</button>
@@ -4984,10 +5086,12 @@ function printDallalMap() {
         
         <div class="no-print" style="display: flex; justify-content: center; width: 100%; padding: 5px 15px; background: #f9f9f9; font-family: 'Cairo', sans-serif;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: bold; color: #1b5e20;">
-            <input type="checkbox" id="chkPrintAgriBackground" checked onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
+            <input type="checkbox" id="chkPrintAgriBackground" ${isMainBgChecked ? 'checked' : ''} onchange="togglePrintAgriBackground()" style="accent-color: #2e7d32; width: 14px; height: 14px;">
             تضمين الخلفية في الطباعة
           </label>
         </div>
+
+        ${detailedReportHTML}
 
         <div class="footer no-print" style="text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #eee; padding-top: 15px; margin: 10px 15px 50px 15px; font-family: 'Cairo';">
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
@@ -5085,6 +5189,16 @@ function togglePrintAgriBackground() {
     textBgs.forEach(r => {
       r.style.display = showBg ? "block" : "none";
     });
+  }
+}
+
+function handleConversionButtonClick() {
+  if (!showFeddanConversion) {
+    showFeddanConversion = true;
+    localStorage.setItem("dallal_show_feddan", "true");
+    renderSVG();
+  } else {
+    showCaratConversionModal();
   }
 }
 
