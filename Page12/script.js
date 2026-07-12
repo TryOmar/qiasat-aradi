@@ -1206,9 +1206,11 @@ function generateCustomLand(useCustomWidths = false) {
 
   } else if (activeTemplateType === 'mixed_split_image') {
     // Vertical waterway in the middle, splitting into Left/Right, then horizontally split.
-    const water_w = 2.0; // Waterway width in meters
-    const x_water_left = centerX - water_w / 2;
-    const x_water_right = centerX + water_w / 2;
+    const water_w = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 2.0;
+    const leftTop = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (w1 - water_w) / 2;
+
+    const x_water_left = p1.x + leftTop;
+    const x_water_right = x_water_left + water_w;
 
     const y_water_top = p1.y;
     const y_water_bot = p4.y;
@@ -1222,7 +1224,7 @@ function generateCustomLand(useCustomWidths = false) {
         { x: x_water_left, y: y_water_bot }
       ],
       label: "مجرى مائي (ترعة)",
-      labelX: centerX,
+      labelX: x_water_left + water_w / 2,
       labelY: centerY,
       angle: 90
     });
@@ -2925,7 +2927,7 @@ function onElementClick(e, type, id) {
   let targetId = id;
 
   // فحص ما إذا كان النقر على تسمية بعد أو طول ونقوم بفتح مودال التعديل الموحد
-  if (activeTemplateType === 'mixed_waterway_new') {
+  if (activeTemplateType === 'mixed_waterway_new' || activeTemplateType === 'mixed_split_image') {
     let focusId = "";
     if (type === 'borderLabel') {
       let startFocusId = "";
@@ -2937,9 +2939,9 @@ function onElementClick(e, type, id) {
       openStartModal(false, startFocusId);
       return;
     } else if (type === 'freeText' && id) {
-      if (id.startsWith('note_left_west_') || id.startsWith('note_right_west_')) {
+      if (id.startsWith('note_left_west_') || id.startsWith('note_right_west_') || id.startsWith('shapeText_shape_1') || id.startsWith('shapeText_shape_2')) {
         focusId = "unified-west-len";
-      } else if (id.startsWith('note_left_east_') || id.startsWith('note_right_east_')) {
+      } else if (id.startsWith('note_left_east_') || id.startsWith('note_right_east_') || id.startsWith('shapeText_shape_3') || id.startsWith('shapeText_shape_4')) {
         focusId = "unified-east-len";
       } else if (id.startsWith('note_bot_west_')) {
         focusId = "unified-west-width-at-waterway";
@@ -2948,6 +2950,12 @@ function onElementClick(e, type, id) {
       }
     } else if (type === 'waterway' || type === 'waterwayLabel') {
       focusId = "unified-waterway-width";
+    } else if (type === 'shape') {
+      if (id === 'shape_1' || id === 'shape_2') {
+        focusId = "unified-west-len";
+      } else if (id === 'shape_3' || id === 'shape_4') {
+        focusId = "unified-east-len";
+      }
     }
 
     if (focusId) {
@@ -4010,18 +4018,65 @@ function setupUnifiedInputsAutoselect() {
 }
 
 function openUnifiedWaterwayModal(focusFieldId) {
-  if (activeTemplateType !== 'mixed_waterway_new') return;
+  if (activeTemplateType !== 'mixed_waterway_new' && activeTemplateType !== 'mixed_split_image') return;
 
+  const w1Val = parseArabicFloat(document.getElementById("start-w1").value) || 50;
   const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
   const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
 
-  const uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 7.20;
-  const westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (l1Val - uw) / 2;
-  const eastLen = l1Val - westLen - uw;
+  let uw, westLen, eastLen, westW, eastW;
 
-  const ws = getWaterwayStats();
-  const westW = (customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : (ws ? ws.width : 7.20);
-  const eastW = (customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : (ws ? ws.width : 7.20);
+  if (activeTemplateType === 'mixed_split_image') {
+    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 2.0;
+    westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (w1Val - uw) / 2;
+    eastLen = w1Val - westLen - uw;
+    westW = 2.0;
+    eastW = 2.0;
+
+    // Hide waterway height at waterway fields since they aren't used in mixed_split_image
+    const westWField = document.getElementById("unified-west-width-at-waterway");
+    if (westWField) {
+      const container = westWField.closest(".editor-form-group");
+      if (container) container.style.display = "none";
+    }
+    const eastWField = document.getElementById("unified-east-width-at-waterway");
+    if (eastWField) {
+      const container = eastWField.closest(".editor-form-group");
+      if (container) container.style.display = "none";
+    }
+
+    // Change labels to width instead of length
+    const westLabel = document.querySelector('label[for="unified-west-len"]') || document.querySelector('#unified-west-len').previousElementSibling;
+    if (westLabel) westLabel.textContent = "عرض القطعة الغربية (متر):";
+    const eastLabel = document.querySelector('label[for="unified-east-len"]') || document.querySelector('#unified-east-len').previousElementSibling;
+    if (eastLabel) eastLabel.textContent = "عرض القطعة الشرقية (متر):";
+  } else {
+    uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 7.20;
+    westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (l1Val - uw) / 2;
+    eastLen = l1Val - westLen - uw;
+
+    const ws = getWaterwayStats();
+    westW = (customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : (ws ? ws.width : 7.20);
+    eastW = (customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : (ws ? ws.width : 7.20);
+
+    // Show them
+    const westWField = document.getElementById("unified-west-width-at-waterway");
+    if (westWField) {
+      const container = westWField.closest(".editor-form-group");
+      if (container) container.style.display = "block";
+    }
+    const eastWField = document.getElementById("unified-east-width-at-waterway");
+    if (eastWField) {
+      const container = eastWField.closest(".editor-form-group");
+      if (container) container.style.display = "block";
+    }
+
+    // Restore standard labels
+    const westLabel = document.querySelector('label[for="unified-west-len"]') || document.querySelector('#unified-west-len').previousElementSibling;
+    if (westLabel) westLabel.textContent = "طول القطعة الغربية (متر):";
+    const eastLabel = document.querySelector('label[for="unified-east-len"]') || document.querySelector('#unified-east-len').previousElementSibling;
+    if (eastLabel) eastLabel.textContent = "طول القطعة الشرقية (متر):";
+  }
 
   document.getElementById("unified-west-len").value = westLen.toFixed(2);
   document.getElementById("unified-east-len").value = eastLen.toFixed(2);
@@ -4066,6 +4121,28 @@ function saveUnifiedWaterwayData() {
 }
 
 function applyUnifiedWaterwayEdits(west_len, east_len, west_w, east_w, water_w) {
+  if (activeTemplateType === 'mixed_split_image') {
+    const w1Val = parseArabicFloat(document.getElementById("start-w1").value) || 50;
+    if (water_w >= w1Val * 0.9) {
+      alert('عرض المجرى كبير جداً! الحد الأقصى المسموح به: ' + (w1Val * 0.9).toFixed(2) + ' م');
+      return;
+    }
+    let r_pos = 0.5;
+    if (west_len + east_len > 0) {
+      r_pos = west_len / (west_len + east_len);
+    }
+    customWaterwayData = {
+      userWidthMeters: water_w,
+      leftTopMeters: (w1Val - water_w) * r_pos,
+      rightTopMeters: w1Val - water_w - ((w1Val - water_w) * r_pos)
+    };
+    generateCustomLand(true);
+    renderSVG();
+    saveState();
+    populateSidebarEditor();
+    return;
+  }
+
   const l1Val = parseArabicFloat(document.getElementById("start-l1").value) || 50;
   const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
 
@@ -4491,6 +4568,7 @@ function loadTemplate(type) {
   try {
     if (typeof preventDoubleTap === "function" && preventDoubleTap()) return;
     activeTemplateType = type;
+    customWaterwayData = null;
 
     // Pre-populate input fields based on the selected template style
     const w1Input = document.getElementById("start-w1");
