@@ -3074,7 +3074,7 @@ function printCroquis() {
       <p>تطبيق قياس وتقسيم الأراضي</p>
     </div>
     <div class="report-header-center">
-      <h2>تقرير حساب ورسم وتقسيم الأراضي الزراعية</h2>
+      <h2>تقرير حساب وتقسيم الأراضي الزراعية</h2>
     </div>
     <div class="report-header-left">
       <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
