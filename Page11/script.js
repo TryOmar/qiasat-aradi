@@ -2731,7 +2731,7 @@ function printReport() {
       <p>تطبيق قياس وتقسيم الأراضي</p>
     </div>
     <div class="report-header-center">
-      <h2>تقرير القسمة في حال اختلاف الأطوال</h2>
+      <h2>تقرير تقسيم أرض باختلاف الأطوال</h2>
     </div>
     <div class="report-header-left">
       <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
@@ -2843,7 +2843,7 @@ function exportExcel() {
   
   // ترويسة المعلومات
   const infoRows = [
-    ["تقرير القسمة في حال اختلاف الأطوال - الدلال"],
+    ["تقرير تقسيم أرض باختلاف الأطوال - الدلال"],
     ["تاريخ التقرير", new Date().toLocaleDateString('ar-EG')],
     [],
     ["أبعاد الأرض الإجمالية"],
