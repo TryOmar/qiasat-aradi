@@ -3791,11 +3791,8 @@ function openModalForElement(type, id) {
             
             <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
             <div class="editor-form-group" style="margin-bottom: 0;">
-              <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
-              <div style="display: flex; gap: 8px;">
-                <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
-                <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
-              </div>
+              <label>تقسيم هذه القطعة (عدد الشركاء):</label>
+              <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="width: 100%; box-sizing: border-box; text-align: center; font-weight: bold; padding: 8px; border-radius: 6px; border: 1.5px solid #ccc;">
             </div>
           </div>
         `;
@@ -3816,11 +3813,8 @@ function openModalForElement(type, id) {
             
             <hr style="border: none; border-top: 1px dashed #90caf9; margin: 10px 0;">
             <div class="editor-form-group" style="margin-bottom: 0;">
-              <label>تقسيم هذه القطعة (عدد الشركاء الحالي: ${numPartners}):</label>
-              <div style="display: flex; gap: 8px;">
-                <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="flex: 1; text-align: center;">
-                <button type="button" onclick="applySubdivision('${s.groupId}', true); closeModal();" style="background: #1976d2; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 12px;">تطبيق التقسيم</button>
-              </div>
+              <label>تقسيم هذه القطعة (عدد الشركاء):</label>
+              <input type="number" id="modal-subdivide-${s.groupId}" value="${numPartners}" min="1" style="width: 100%; box-sizing: border-box; text-align: center; font-weight: bold; padding: 8px; border-radius: 6px; border: 1.5px solid #ccc;">
             </div>
           </div>
         `;
@@ -4035,6 +4029,23 @@ function saveModalData() {
       s.area.sqm = parseFloat(document.getElementById("modal-sqm").value) || 0;
       s.notes = document.getElementById("modal-notes").value;
       s.color = document.getElementById("modal-color").value;
+
+      // Smart Subdivision check and trigger
+      const subdivideInput = document.getElementById(`modal-subdivide-${s.groupId}`);
+      if (subdivideInput) {
+        let newPartners = parseInt(subdivideInput.value);
+        if (isNaN(newPartners) || newPartners < 1) newPartners = 1;
+        
+        if (mixedPiecesTree && mixedPiecesTree[s.groupId]) {
+          const currentPartners = mixedPiecesTree[s.groupId].partners;
+          if (newPartners !== currentPartners) {
+            mixedPiecesTree[s.groupId].partners = newPartners;
+            // Clear customWidths so they get regenerated evenly
+            mixedPiecesTree[s.groupId].customWidths = [];
+            generateCustomLand(true);
+          }
+        }
+      }
     }
   } else if (targetType === 'borderLabel') {
     const b = borderLabels.find(x => x.id === id);
