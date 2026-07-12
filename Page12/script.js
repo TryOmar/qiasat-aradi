@@ -644,6 +644,20 @@ function sqmToFeddanCaratShares(sqm) {
   return { feddan: finalFeddan, carat: finalCarat, shares: Math.max(0, finalShares) };
 }
 
+/**
+ * الحصول على أسماء القطع لنموذج المجرى المائي بناء على اتجاه المجرى.
+ * إذا كان المجرى بالعرض (أفقي - mixed_waterway_new) -> القطعة البحرية والقطعة القبلية.
+ * إذا كان المجرى بالطول (رأسي - mixed_split_image) -> القطعة الغربية والقطعة الشرقية.
+ * @returns {{west: string, east: string}}
+ */
+function getMixedPieceNames() {
+  if (activeTemplateType === 'mixed_waterway_new') {
+    return { west: "القطعة البحرية", east: "القطعة القبلية" };
+  } else {
+    return { west: "القطعة الغربية", east: "القطعة الشرقية" };
+  }
+}
+
 // ----------------------------------------------------
 // خوارزمية توليد الأرض وتقسيمها (Land Generation Algorithm)
 // تدعم جميع القوالب ديناميكياً: مستطيل، متوازي الأضلاع، رباعي القطرين،...
@@ -1496,8 +1510,9 @@ function generateCustomLand(useCustomWidths = false) {
       }
     }
 
-    subdividePieceLongitudinally([p1, p2, w_tr, w_tl], mixedPiecesTree.west.partners, mixedPiecesTree.west.customWidths, "القطعة الغربية", "west", 0);
-    subdividePieceLongitudinally([w_bl, w_br, p3, p4], mixedPiecesTree.east.partners, mixedPiecesTree.east.customWidths, "القطعة الشرقية", "east", 3);
+    const pieceNames = getMixedPieceNames();
+    subdividePieceLongitudinally([p1, p2, w_tr, w_tl], mixedPiecesTree.west.partners, mixedPiecesTree.west.customWidths, pieceNames.west, "west", 0);
+    subdividePieceLongitudinally([w_bl, w_br, p3, p4], mixedPiecesTree.east.partners, mixedPiecesTree.east.customWidths, pieceNames.east, "east", 3);
 
 
   } else if (activeTemplateType === 'mixed_split_image') {
@@ -2651,7 +2666,7 @@ function renderSVG() {
           });
         };
         subPoly.onmouseleave = hideInspectorTooltip;
-        if (sub.name === "القطعة الغربية") {
+        if (s.groupId === "west") {
           subPoly.onclick = (e) => onElementClick(e, 'waterway_west', s.id);
         } else {
           subPoly.onclick = (e) => onElementClick(e, 'shape', s.id);
@@ -3897,18 +3912,9 @@ function openModalForElement(type, id) {
     document.getElementById("util-bold").checked = t.isBold !== false;
     document.getElementById("util-color").value = t.color || "#000000";
   } else if (targetType === 'waterway_west' || targetType === 'waterway') {
-    if (!customWaterwayData) {
-      const _l1 = parseFloat(document.getElementById('start-l1') ? document.getElementById('start-l1').value : 50) || 50;
-      const _l2 = parseFloat(document.getElementById('start-l2') ? document.getElementById('start-l2').value : 50) || 50;
-      customWaterwayData = { userWidthMeters: 0.00, leftTopMeters: (_l1/2), rightTopMeters: (_l2/2), leftWaterMeters: 0.00, rightWaterMeters: 0.00 };
-    }
-    if (customWaterwayData.userWidthMeters === undefined) {
-      customWaterwayData.userWidthMeters = (customWaterwayData.leftWaterMeters + customWaterwayData.rightWaterMeters) / 2;
-    }
-
-    modalTitle.textContent = "💧 تعديل المجرى المائي";
-
     const wStats = getWaterwayStats();
+    const pieceNames = getMixedPieceNames();
+    modalTitle.textContent = "💧 تعديل المجرى المائي";
     const statsHtml = wStats ? `
       <div style="background:#e3f2fd; border:1px solid #90caf9; border-radius:8px; padding:10px; margin-bottom:14px; font-size:13px;">
         <div style="font-weight:bold; color:#0d47a1; margin-bottom:6px;">📊 البيانات الحالية للمجرى</div>
@@ -3924,7 +3930,7 @@ function openModalForElement(type, id) {
       ${statsHtml}
       <div class="editor-form-group">
         <label style="font-weight:bold; color:#1565c0;">⚙️ تعديل عرض المجرى (بالمتر):</label>
-        <input type="text" inputmode="decimal" id="modal-water-width" value="${(customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null ? customWaterwayData.userWidthMeters : 0.00).toFixed(2)}" style="width:100%; box-sizing:border-box; font-size:15px; font-weight:bold; text-align:center; padding:8px; border-radius:6px; border:1.5px solid #ccc;">
+        <input type="text" inputmode="decimal" id="modal-water-width" value="${(customWaterwayData && customWaterwayData.userWidthMeters !== undefined && customWaterwayData.userWidthMeters !== null ? customWaterwayData.userWidthMeters : 0.00).toFixed(2)}" style="width:100%; box-sizing:border-box; font-size:15px; font-weight:bold; text-align:center; padding:8px; border-radius:6px; border:1.5px solid #ccc;">
       </div>
       
       <div class="editor-form-group">
@@ -3950,11 +3956,11 @@ function openModalForElement(type, id) {
       <div class="editor-form-group" style="border: 1px solid #c5e1a5; padding: 10px; border-radius: 6px; background: #f1f8e9; margin-top:10px;">
         <label style="font-weight:bold; color:#2e7d32; display:block; margin-bottom:6px;">📐 عروض القطع عند المجرى المائي:</label>
         <div class="editor-form-group">
-          <label style="font-size:12px; color:#555;">عرض القطعة الغربية عند المجرى (متر):</label>
+          <label style="font-size:12px; color:#555;">عرض ${pieceNames.west} عند المجرى (متر):</label>
           <input type="text" inputmode="decimal" id="modal-west-width-at-waterway" value="${((customWaterwayData && customWaterwayData.westWidthAtWaterway !== undefined) ? customWaterwayData.westWidthAtWaterway : (wStats ? wStats.width : 150.00)).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-weight:bold; text-align:center; border-radius:6px; border:1.5px solid #ccc;">
         </div>
         <div class="editor-form-group" style="margin-top:6px;">
-          <label style="font-size:12px; color:#555;">عرض القطعة الشرقية عند المجرى (متر):</label>
+          <label style="font-size:12px; color:#555;">عرض ${pieceNames.east} عند المجرى (متر):</label>
           <input type="text" inputmode="decimal" id="modal-east-width-at-waterway" value="${((customWaterwayData && customWaterwayData.eastWidthAtWaterway !== undefined) ? customWaterwayData.eastWidthAtWaterway : (wStats ? wStats.width : 150.00)).toFixed(2)}" style="width:100%; box-sizing:border-box; padding:6px; font-weight:bold; text-align:center; border-radius:6px; border:1.5px solid #ccc;">
         </div>
       </div>
@@ -4868,6 +4874,7 @@ function openUnifiedWaterwayModal(focusFieldId) {
   const l2Val = parseArabicFloat(document.getElementById("start-l2").value) || 50;
 
   let uw, westLen, eastLen, westW, eastW;
+  const pieceNames = getMixedPieceNames();
 
   if (activeTemplateType === 'mixed_split_image') {
     uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
@@ -4890,9 +4897,9 @@ function openUnifiedWaterwayModal(focusFieldId) {
 
     // Change labels to width instead of length
     const westLabel = document.querySelector('label[for="unified-west-len"]') || document.querySelector('#unified-west-len').previousElementSibling;
-    if (westLabel) westLabel.textContent = "عرض القطعة الغربية (متر):";
+    if (westLabel) westLabel.textContent = "عرض " + pieceNames.west + " (متر):";
     const eastLabel = document.querySelector('label[for="unified-east-len"]') || document.querySelector('#unified-east-len').previousElementSibling;
-    if (eastLabel) eastLabel.textContent = "عرض القطعة الشرقية (متر):";
+    if (eastLabel) eastLabel.textContent = "عرض " + pieceNames.east + " (متر):";
   } else {
     uw = (customWaterwayData && customWaterwayData.userWidthMeters !== undefined) ? customWaterwayData.userWidthMeters : 0.00;
     westLen = (customWaterwayData && customWaterwayData.leftTopMeters !== undefined) ? customWaterwayData.leftTopMeters : (l1Val - uw) / 2;
@@ -4916,9 +4923,9 @@ function openUnifiedWaterwayModal(focusFieldId) {
 
     // Restore standard labels
     const westLabel = document.querySelector('label[for="unified-west-len"]') || document.querySelector('#unified-west-len').previousElementSibling;
-    if (westLabel) westLabel.textContent = "طول القطعة الغربية (متر):";
+    if (westLabel) westLabel.textContent = "طول " + pieceNames.west + " (متر):";
     const eastLabel = document.querySelector('label[for="unified-east-len"]') || document.querySelector('#unified-east-len').previousElementSibling;
-    if (eastLabel) eastLabel.textContent = "طول القطعة الشرقية (متر):";
+    if (eastLabel) eastLabel.textContent = "طول " + pieceNames.east + " (متر):";
   }
 
   document.getElementById("unified-west-len").value = westLen.toFixed(2);
@@ -5946,9 +5953,9 @@ function printDallalMap() {
          const totalA = ws.totalArea;
          const westPct = totalA > 0 ? ((ws.westArea / totalA) * 100).toFixed(2) : '0.00';
          const eastPct = totalA > 0 ? ((ws.eastArea / totalA) * 100).toFixed(2) : '0.00';
-         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">القطعة الغربية</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.westArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${westPct}%</td></tr>`;
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">${pieceNames.west}</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.westArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${westPct}%</td></tr>`;
          detailedReportHTML += `<tr style="background:#f1f8e9;"><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1565c0;">المجرى المائي</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.area.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#c62828;">${ws.pct}%</td></tr>`;
-         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">القطعة الشرقية</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.eastArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${eastPct}%</td></tr>`;
+         detailedReportHTML += `<tr><td style="padding:7px 10px; border:1px solid #e8f5e9; color:#1b5e20;">${pieceNames.east}</td><td style="padding:7px 10px; border:1px solid #e8f5e9; font-weight:bold;">${ws.eastArea.toFixed(2)}</td><td style="padding:7px 10px; border:1px solid #e8f5e9;">${eastPct}%</td></tr>`;
          detailedReportHTML += `<tr style="background:#c8e6c9; font-weight:bold;"><td style="padding:8px 10px; border:1px solid #a5d6a7;">الإجمالي</td><td style="padding:8px 10px; border:1px solid #a5d6a7;">${ws.totalArea.toFixed(2)}</td><td style="padding:8px 10px; border:1px solid #a5d6a7;">100%</td></tr>`;
          detailedReportHTML += `</table></div>`;
        }
