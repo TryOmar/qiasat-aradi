@@ -14,7 +14,7 @@ let a_style = `height: 90%; text-decoration: none; display: flex; flex-direction
 let img_style = ` width: 28px; height: 25px; box-sizing: border-box;`
 let p_style = ` margin: 0px; padding: 0px;`
 newNav.innerHTML = ` 
-    <a href="help2/index.html" class="nav-box" style="${a_style}">
+    <a href="${result_nav}Page1/section1/help2/index.html" class="nav-box" style="${a_style}">
       <img src="${result_nav}imgs/nav1.png" alt="nav1" style="${img_style}" />
       <p style="${p_style}">كسور</p>
     </a>
@@ -48,11 +48,3 @@ return count;
 
 let input = document.querySelector("input");
 let nav = document.querySelector(".nav");
-
-// window.visualViewport.addEventListener("resize", () =>
-//   window.getComputedStyle(nav).display == "none"
-//     ? (nav.style.display = "flex")
-//     : window.getComputedStyle(nav).display == "flex"
-//     ? (nav.style.display = "none")
-//     : ""
-// );
