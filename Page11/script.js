@@ -2425,10 +2425,12 @@ function renderCroquis() {
 
       // 2. عرض عروض القطع باللون الأسود مباشرة على الحدود العليا والسفلى لكل قطعة مع وحدة القياس (م)
       if (showCroquisMeasurements) {
+        const dynamicWSize = Math.min(11, Math.max(7.5, pieceWidth * 0.25));
+
         // العرض العلوي للقطعة (أعلى الحدود العليا)
         const topWText = svgText(cx, mapY(0) - 8 * textScale, piece.topW.toFixed(2) + " م", {
           fill: "#000000", // أسود
-          size: "11",
+          size: dynamicWSize.toString(),
           weight: "bold",
           bg: false,
         });
@@ -2438,7 +2440,7 @@ function renderCroquis() {
         const y_top_mid = (y3 + y4) / 2;
         const botWText = svgText(cx, y_top_mid + 14 * textScale, piece.botW.toFixed(2) + " م", {
           fill: "#000000", // أسود
-          size: "11",
+          size: dynamicWSize.toString(),
           weight: "bold",
           bg: false,
         });
