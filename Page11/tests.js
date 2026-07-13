@@ -72,6 +72,7 @@ function runAutomatedTests() {
   };
 
   try {
+    window.isManualPartition = false;
 
     // -------------------------------------------------------------------------
     // TEST CASE 1: Rectangle, 2-stage partition, then remainder redistribution
