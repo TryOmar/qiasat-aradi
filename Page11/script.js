@@ -2107,6 +2107,8 @@ function renderCroquis() {
       // height at right boundary (x1): h(w - startX) = l2 + k * (w - startX)
       const y4 = mapY(l2 + k * (w - piece.startX));
 
+      const pieceWidth = Math.abs(x2 - x1);
+
       // تعبئة القطعة
       const poly = svgEl("polygon");
       poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x2},${y3} ${x1},${y4}`);
@@ -2210,12 +2212,11 @@ function renderCroquis() {
         const labelGroup = svgEl("g");
         labelGroup.setAttribute("style", "pointer-events: none;"); // حتى لا تعيق التفاعل مع المضلع
         
-        const pieceWidth = Math.abs(x2 - x1);
         const nameToShow = piece.name || `شريك ${index + 1}`;
         const pieceH = botY - topY;
         const pieceMidLength = l2 + k * (w - (piece.startX + piece.endX) / 2);
         
-        if (pieceWidth < 28 && !window.isExporting) {
+        if (pieceWidth < 12 && !window.isExporting) {
           // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
           const tIdx = svgText(cx, cy + 4 * textScale, (index + 1).toString(), {
             fill: isRem ? "#e65100" : "#000000",
@@ -2231,7 +2232,7 @@ function renderCroquis() {
           const yDirection = topY + pieceH * 0.82;
           
           // حجم خط ديناميكي يناسب عرض العمود
-          const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * textScale;
+          const fontSize = Math.min(13.5, Math.max(7.5, pieceWidth * 0.30)) * textScale;
           
           // 1. عرض المساحة رأسي (دوران -90 درجة) في الجزء العلوي
           if (showCroquisMeasurements) {
