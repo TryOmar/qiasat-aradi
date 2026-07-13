@@ -1861,14 +1861,14 @@ function svgEl(tag) {
 function svgText(x, y, content, opts = {}) {
   const t = svgEl("text");
   // تقريب الإحداثيات لمنع اهتزاز أو ضبابية النصوص على بعض الشاشات
-  const rx = parseFloat(x).toFixed(2);
-  const ry = parseFloat(y).toFixed(2);
+  const rx = Math.round(parseFloat(x) * 100) / 100;
+  const ry = Math.round(parseFloat(y) * 100) / 100;
   t.setAttribute("x", rx);
   t.setAttribute("y", ry);
   t.setAttribute("text-anchor", opts.anchor || "middle");
   
-  // تحديد خطوط عربية واضحة وبدائلها
-  t.setAttribute("font-family", '"Tajawal", "Cairo", "Noto Sans Arabic", Arial, sans-serif');
+  // تحديد خطوط عربية واضحة وبدائلها (بدون علامات تنصيص مزدوجة داخل SVG attribute)
+  t.setAttribute("font-family", "Tajawal, Cairo, 'Noto Sans Arabic', Arial, sans-serif");
   
   // تحسين جودة وحدة الخط للتكبير والطباعة
   t.setAttribute("text-rendering", "geometricPrecision");
@@ -1880,10 +1880,6 @@ function svgText(x, y, content, opts = {}) {
   t.setAttribute("fill", opts.fill || "#222");
   if (opts.transform) t.setAttribute("transform", opts.transform);
   if (opts.opacity) t.setAttribute("opacity", opts.opacity);
-  
-  // دعم كامل للكتابة باللغة العربية RTL على الموبايل
-  t.setAttribute("direction", "rtl");
-  t.setAttribute("unicode-bidi", "embed");
 
   t.textContent = content;
   
