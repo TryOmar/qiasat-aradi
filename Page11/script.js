@@ -2282,10 +2282,8 @@ function renderCroquis() {
             badgeBg = "#ffebee";
           }
 
-          if (badgeLabel && pieceH > 180) {
-            const dirGroup = svgEl("g");
-            dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
-
+          if (badgeLabel) {
+            // حساب الأبعاد للمقارنة والتحقق من التداخل
             const badgeFontSize = Math.max(7.5, fontSize - 2.5);
             const emojiFontSize = badgeFontSize + 7;
             const badgePadX = 4 * textScale;
@@ -2297,45 +2295,128 @@ function renderCroquis() {
             const badgeW = 72 * textScale;
             const badgeH = emojiHeight + labelHeight + badgePadY * 2;
 
-            // خلفية مستطيلة بحواف دائرية
-            const rect = svgEl("rect");
-            rect.setAttribute("x", cx - badgeW / 2);
-            rect.setAttribute("y", yDirection - badgeH / 2);
-            rect.setAttribute("width", badgeW);
-            rect.setAttribute("height", badgeH);
-            rect.setAttribute("rx", 4 * textScale);
-            rect.setAttribute("ry", 4 * textScale);
-            rect.setAttribute("fill", badgeBg);
-            rect.setAttribute("stroke", badgeBorder);
-            rect.setAttribute("stroke-width", 1 * textScale);
-            rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
-            dirGroup.appendChild(rect);
+            // تحديد ما إذا كان هناك مساحة داخلية كافية خالية من التصادم
+            let drawInside = false;
+            let finalYDirection = yDirection;
 
-            // سطر الإيموجي (أكبر حجماً)
-            const tEmoji = svgEl("text");
-            tEmoji.setAttribute("x", cx);
-            tEmoji.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY / 2);
-            tEmoji.setAttribute("fill", badgeFill);
-            tEmoji.setAttribute("font-size", emojiFontSize + "px");
-            tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tEmoji.setAttribute("text-anchor", "middle");
-            tEmoji.textContent = badgeEmoji;
-            dirGroup.appendChild(tEmoji);
+            if (pieceH > 260 && pieceWidth > 45) {
+              // التحقق من المسافة السفلية لمنع تداخل الأبعاد
+              const maxAllowedY = botY - badgeW / 2 - 14 * textScale;
+              const minAllowedY = yLength + badgeW / 2 + 12 * textScale;
+              if (maxAllowedY > minAllowedY) {
+                drawInside = true;
+                // ضبط الموضع لتجنب تداخل الأبعاد السفلية تماماً
+                finalYDirection = Math.min(yDirection, maxAllowedY);
+              }
+            }
 
-            // سطر النص
-            const tLabel = svgEl("text");
-            tLabel.setAttribute("x", cx);
-            tLabel.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
-            tLabel.setAttribute("fill", badgeFill);
-            tLabel.setAttribute("font-size", badgeFontSize + "px");
-            tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tLabel.setAttribute("text-anchor", "middle");
-            tLabel.setAttribute("font-weight", "bold");
-            tLabel.textContent = badgeLabel;
-            dirGroup.appendChild(tLabel);
+            if (drawInside) {
+              // 1. رسم الشارة داخل القطعة (تدوير -90 درجة)
+              const dirGroup = svgEl("g");
+              dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${finalYDirection})`);
 
+              const rect = svgEl("rect");
+              rect.setAttribute("x", cx - badgeW / 2);
+              rect.setAttribute("y", finalYDirection - badgeH / 2);
+              rect.setAttribute("width", badgeW);
+              rect.setAttribute("height", badgeH);
+              rect.setAttribute("rx", 4 * textScale);
+              rect.setAttribute("ry", 4 * textScale);
+              rect.setAttribute("fill", badgeBg);
+              rect.setAttribute("stroke", badgeBorder);
+              rect.setAttribute("stroke-width", 1 * textScale);
+              rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
+              dirGroup.appendChild(rect);
 
-            labelGroup.appendChild(dirGroup);
+              const tEmoji = svgEl("text");
+              tEmoji.setAttribute("x", cx);
+              tEmoji.setAttribute("y", finalYDirection - badgeH / 2 + emojiHeight + badgePadY / 2);
+              tEmoji.setAttribute("fill", badgeFill);
+              tEmoji.setAttribute("font-size", emojiFontSize + "px");
+              tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
+              tEmoji.setAttribute("text-anchor", "middle");
+              tEmoji.textContent = badgeEmoji;
+              dirGroup.appendChild(tEmoji);
+
+              const tLabel = svgEl("text");
+              tLabel.setAttribute("x", cx);
+              tLabel.setAttribute("y", finalYDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
+              tLabel.setAttribute("fill", badgeFill);
+              tLabel.setAttribute("font-size", badgeFontSize + "px");
+              tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
+              tLabel.setAttribute("text-anchor", "middle");
+              tLabel.setAttribute("font-weight", "bold");
+              tLabel.textContent = badgeLabel;
+              dirGroup.appendChild(tLabel);
+
+              labelGroup.appendChild(dirGroup);
+            } else {
+              // 2. تموضع ذكي خارج حدود الأرض لتفادي التداخل نهائياً (رسم أفقي مع خط إشارة)
+              const anchorX = isStart ? x1 : x2;
+              const anchorY = isStart ? y1 : y2;
+              
+              // إزاحة الشارة للأعلى والخارج (10-15 بكسل هامش أمان إضافي)
+              const offsetX = isStart ? 35 * textScale : -35 * textScale;
+              const offsetY = -40 * textScale;
+              
+              const badgeCX = anchorX + offsetX;
+              const badgeCY = anchorY + offsetY;
+
+              // خط إشارة مقطع
+              const leader = svgLine(anchorX, anchorY, badgeCX, badgeCY + badgeH / 2, {
+                stroke: badgeBorder,
+                width: 1.2 * textScale,
+                dash: "2,2"
+              });
+              labelGroup.appendChild(leader);
+
+              // نقطة تثبيت على الزاوية
+              const dot = svgEl("circle");
+              dot.setAttribute("cx", anchorX);
+              dot.setAttribute("cy", anchorY);
+              dot.setAttribute("r", 3.5 * textScale);
+              dot.setAttribute("fill", badgeBorder);
+              labelGroup.appendChild(dot);
+
+              // الشارة الأفقية
+              const dirGroup = svgEl("g");
+              
+              const rect = svgEl("rect");
+              rect.setAttribute("x", badgeCX - badgeW / 2);
+              rect.setAttribute("y", badgeCY - badgeH / 2);
+              rect.setAttribute("width", badgeW);
+              rect.setAttribute("height", badgeH);
+              rect.setAttribute("rx", 4 * textScale);
+              rect.setAttribute("ry", 4 * textScale);
+              rect.setAttribute("fill", badgeBg);
+              rect.setAttribute("stroke", badgeBorder);
+              rect.setAttribute("stroke-width", 1 * textScale);
+              rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
+              dirGroup.appendChild(rect);
+
+              const tEmoji = svgEl("text");
+              tEmoji.setAttribute("x", badgeCX);
+              tEmoji.setAttribute("y", badgeCY - badgeH / 2 + emojiHeight + badgePadY / 2);
+              tEmoji.setAttribute("fill", badgeFill);
+              tEmoji.setAttribute("font-size", emojiFontSize + "px");
+              tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
+              tEmoji.setAttribute("text-anchor", "middle");
+              tEmoji.textContent = badgeEmoji;
+              dirGroup.appendChild(tEmoji);
+
+              const tLabel = svgEl("text");
+              tLabel.setAttribute("x", badgeCX);
+              tLabel.setAttribute("y", badgeCY - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
+              tLabel.setAttribute("fill", badgeFill);
+              tLabel.setAttribute("font-size", badgeFontSize + "px");
+              tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
+              tLabel.setAttribute("text-anchor", "middle");
+              tLabel.setAttribute("font-weight", "bold");
+              tLabel.textContent = badgeLabel;
+              dirGroup.appendChild(tLabel);
+
+              labelGroup.appendChild(dirGroup);
+            }
           }
         }
         g.appendChild(labelGroup);
