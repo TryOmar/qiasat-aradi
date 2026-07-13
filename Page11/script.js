@@ -2693,6 +2693,24 @@ function exportCroquis() {
   
   // 3. استنساخ عنصر الـ SVG بدقته الكاملة
   const clonedSvg = svgNode.cloneNode(true);
+  
+  // حساب Bounding Box الحقيقي وتحديث الـ viewBox للنسخة المصدرة فقط لملء الصورة بالكامل (هامش 5%)
+  const contentEl = document.getElementById("croquis-content");
+  if (contentEl) {
+    const bbox = contentEl.getBBox();
+    if (bbox.width > 0 && bbox.height > 0) {
+      const maxDim = Math.max(bbox.width, bbox.height);
+      const margin = Math.max(25, maxDim * 0.05); // هامش 5%
+      const vbX = Math.round(bbox.x - margin);
+      const vbY = Math.round(bbox.y - margin);
+      const vbW = Math.round(bbox.width + margin * 2);
+      const vbH = Math.round(bbox.height + margin * 2);
+      clonedSvg.setAttribute("viewBox", `${vbX} ${vbY} ${vbW} ${vbH}`);
+      clonedSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      console.log(`croquis-layout: Export viewBox adjusted to [${vbX} ${vbY} ${vbW} ${vbH}]`);
+    }
+  }
+
   const expW = window.exportWidth || 1600;
   const expH = window.exportHeight || 1000;
   clonedSvg.setAttribute("width", expW.toString());
