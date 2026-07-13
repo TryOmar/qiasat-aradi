@@ -340,12 +340,14 @@ window.AnimationController = {
         return `نقطة الصفر 🏁: ابدأ القياس من الحد الأيمن للأرض.`;
       case "MEASURE_BOTTOM":
         {
-          const val = step.caption.match(/(\d+\.\d+|\d+) م/)?.[0] || "";
+          const match = step.caption.match(/(\d+\.\d+|\d+) م/);
+          const val = (match && match[0]) || "";
           return `قس مسافة ${val} أسفل وثبّت وتداً 📌.`;
         }
       case "MEASURE_TOP":
         {
-          const val = step.caption.match(/(\d+\.\d+|\d+) م/)?.[0] || "";
+          const match = step.caption.match(/(\d+\.\d+|\d+) م/);
+          const val = (match && match[0]) || "";
           return `قس مسافة ${val} أعلى وثبّت وتداً 📌.`;
         }
       case "CONNECT_ROPE":

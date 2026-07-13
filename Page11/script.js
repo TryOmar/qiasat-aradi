@@ -1968,7 +1968,8 @@ function renderCroquis() {
   let stretchX = 1.0;
   let stretchY = 1.0;
 
-  const viewType = document.getElementById("long-plot-view")?.value || "agricultural";
+  const longPlotViewEl = document.getElementById("long-plot-view");
+  const viewType = (longPlotViewEl ? longPlotViewEl.value : null) || "agricultural";
   if (viewType === "agricultural" && w > 0 && maxLen > 0) {
     const ratio = w / maxLen;
     const invRatio = maxLen / w;
@@ -3980,7 +3981,8 @@ function updateConversionsTable() {
   ];
 
   dims.forEach(dim => {
-    const val = parseFloat(document.getElementById(dim.field)?.value) || 0;
+    const dimEl = document.getElementById(dim.field);
+    const val = parseFloat(dimEl ? dimEl.value : 0) || 0;
     html += buildCard({
       id: dim.id,
       label: dim.label,
@@ -4203,8 +4205,10 @@ function adjustWidthStep(btn, type, direction) {
   }
 
   // منع تجاوز عرض الأرض
-  const landW1 = parseFloat(document.getElementById("width1")?.value) || 0;
-  const landW2 = parseFloat(document.getElementById("width2")?.value) || 0;
+  const w1El = document.getElementById("width1");
+  const w2El = document.getElementById("width2");
+  const landW1 = parseFloat(w1El ? w1El.value : 0) || 0;
+  const landW2 = parseFloat(w2El ? w2El.value : 0) || 0;
   const maxWidth = type === "bottom" ? landW1 : landW2;
   if (maxWidth > 0 && newVal > maxWidth) {
     btn.classList.add("step-btn-limit");
@@ -5015,8 +5019,10 @@ function updateTableTotals() {
   
   if (isManualPartition) {
     rows.forEach(row => {
-      totalBotWidth += parseFloat(row.querySelector(".partner-width-bottom")?.value) || 0;
-      totalTopWidth += parseFloat(row.querySelector(".partner-width-top")?.value) || 0;
+      const botEl = row.querySelector(".partner-width-bottom");
+      const topEl = row.querySelector(".partner-width-top");
+      totalBotWidth += parseFloat(botEl ? botEl.value : 0) || 0;
+      totalTopWidth += parseFloat(topEl ? topEl.value : 0) || 0;
     });
     
     if (isRemVisible) {
