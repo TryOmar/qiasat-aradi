@@ -1867,7 +1867,7 @@ function svgText(x, y, content, opts = {}) {
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseSize = parseFloat(opts.size || "13");
-  t.setAttribute("font-size", baseSize * textScale);
+  t.setAttribute("font-size", (baseSize * textScale) + "px");
   t.setAttribute("font-weight", opts.weight || "bold");
   t.setAttribute("fill", opts.fill || "#222");
   if (opts.transform) t.setAttribute("transform", opts.transform);
