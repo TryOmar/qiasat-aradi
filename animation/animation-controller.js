@@ -13,6 +13,7 @@ window.AnimationController = {
   lastTime: 0,
   speedMs: 1500,
   locale: "ar",
+  activeMode: "training", // 'training' (التدريب التفصيلي) أو 'fast' (التنفيذ السريع)
 
   // مراجع عناصر DOM
   modal: null,
@@ -21,6 +22,9 @@ window.AnimationController = {
   stepIndicator: null,
   playBtn: null,
   speedSelect: null,
+  modeSelect: null,
+  checkpointCard: null,
+  progressBarFill: null,
 
   /**
    * تشغيل المحاكاة وإدخال البيانات كـ Parameter مستقل لمنع الاعتماد على متغيرات الصفحة.
@@ -39,6 +43,9 @@ window.AnimationController = {
       this.stepIndicator = document.getElementById("animation-step-indicator");
       this.playBtn = document.getElementById("btn-anim-play");
       this.speedSelect = document.getElementById("anim-speed");
+      this.modeSelect = document.getElementById("anim-mode");
+      this.checkpointCard = document.getElementById("anim-checkpoint-card");
+      this.progressBarFill = document.getElementById("anim-progress-bar-fill");
 
       if (!this.modal || !this.svg) {
         console.error("عناصر DOM لمودال المحاكاة غير متوفرة!");
@@ -60,12 +67,28 @@ window.AnimationController = {
 
       // فتح الشاشة الافتراضية
       this.modal.style.display = "flex";
-      this.currentStepIndex = 0;
+      
+      // استرجاع الجلسة السابقة (البند 8: حفظ حالة التنفيذ)
+      let startStepIdx = 0;
+      const savedStep = sessionStorage.getItem("ld_anim_last_step");
+      if (savedStep !== null) {
+        const parsed = parseInt(savedStep);
+        if (parsed >= 0 && parsed < this.steps.length) {
+          startStepIdx = parsed;
+        }
+      }
+      
+      this.currentStepIndex = startStepIdx;
       this.progress = 0;
       this.isPlaying = false;
 
       if (this.playBtn && str) {
         this.playBtn.innerHTML = str.play;
+      }
+      
+      // مزامنة الوضع الحالي
+      if (this.modeSelect) {
+        this.activeMode = this.modeSelect.value || "training";
       }
       if (this.speedSelect) {
         this.speedMs = parseInt(this.speedSelect.value) || 1500;
@@ -84,15 +107,33 @@ window.AnimationController = {
     if (index < 0 || index >= this.steps.length) return;
     
     this.currentStepIndex = index;
+    // حفظ الخطوة الحالية في الجلسة
+    sessionStorage.setItem("ld_anim_last_step", index);
+
     const step = this.steps[index];
     const str = window.AnimationStrings[this.locale];
 
-    // تحديث المحتوى النصي
-    if (this.captionText) {
-      this.captionText.innerHTML = step.caption;
+    // إخفاء كارت التحقق عند الانتقال
+    if (this.checkpointCard) {
+      this.checkpointCard.style.display = "none";
     }
+
+    // تحديث المحتوى النصي بناءً على الوضع الميداني النشط (التدريب vs السريع)
+    if (this.captionText) {
+      if (this.activeMode === "fast") {
+        this.captionText.innerHTML = this.getShortCaption(step);
+      } else {
+        this.captionText.innerHTML = step.caption;
+      }
+    }
+
+    // تحديث مؤشر الخطوات و شريط التقدم الجرافيكي
     if (this.stepIndicator && str) {
-      this.stepIndicator.innerText = `${str.step} ${index + 1} ${str.of} ${this.steps.length} | ${step.title}`;
+      this.stepIndicator.innerText = `${str.step} ${index + 1} ${str.of} ${this.steps.length}`;
+    }
+    if (this.progressBarFill) {
+      const pct = Math.round(((index + 1) / this.steps.length) * 100);
+      this.progressBarFill.style.width = `${pct}%`;
     }
 
     const hasAnimation = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
@@ -104,6 +145,9 @@ window.AnimationController = {
     window.AnimationRenderer.renderDynamic(step, this.progress);
 
     if (this.isPlaying) {
+      this.runStepAnimation();
+    } else if (hasAnimation) {
+      // إذا كان متوقفاً، نبدأ الرسوم لإظهار الانسيابية
       this.runStepAnimation();
     }
   },
@@ -120,21 +164,37 @@ window.AnimationController = {
     const self = this;
 
     function animLoop(timestamp) {
-      if (!self.isPlaying) return;
-
       const elapsed = timestamp - self.lastTime;
       self.lastTime = timestamp;
 
+      // حساب التقدم بالسرعة المختارة
       self.progress += elapsed / self.speedMs;
+      
       if (self.progress >= 1) {
         self.progress = 1;
         window.AnimationRenderer.renderDynamic(self.steps[self.currentStepIndex], 1);
-
-        // انتظار ثانية كاملة بين المشاهد تلقائياً
+        
         if (self.isPlaying) {
-          self.timeoutId = setTimeout(() => {
-            self.nextStep();
-          }, 1000);
+          // إيقاف مؤقت لعرض بطاقة التحقق بعد كل خطوة قياس/وتد
+          const step = self.steps[self.currentStepIndex];
+          const needsCheck = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
+          
+          if (needsCheck && self.checkpointCard) {
+            self.pause();
+            self.checkpointCard.style.display = "flex";
+          } else {
+            // انتظار ثانية كاملة بين المشاهد تلقائياً في السيناريوهات العامة
+            self.timeoutId = setTimeout(() => {
+              self.nextStep();
+            }, 1000);
+          }
+        } else {
+          // إظهار كارت التحقق الميداني حتى لو لم يكن التشغيل تلقائياً
+          const step = self.steps[self.currentStepIndex];
+          const needsCheck = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
+          if (needsCheck && self.checkpointCard) {
+            self.checkpointCard.style.display = "flex";
+          }
         }
       } else {
         // تحديث الطبقة المتحركة فقط 60 إطاراً بالثانية
@@ -144,6 +204,28 @@ window.AnimationController = {
     }
 
     this.animationFrameId = requestAnimationFrame(animLoop);
+  },
+
+  /**
+   * تأكيد وضع الوتد والانتقال للخطوة التالية (البند 6)
+   */
+  confirmStep: function () {
+    if (this.checkpointCard) {
+      this.checkpointCard.style.display = "none";
+    }
+    this.play(); // استئناف الحركة والانتقال
+  },
+
+  /**
+   * إعادة تشغيل الخطوة الحالية فقط (البند 4)
+   */
+  replayCurrentStep: function () {
+    this.pause();
+    if (this.checkpointCard) {
+      this.checkpointCard.style.display = "none";
+    }
+    this.progress = 0;
+    this.showStep(this.currentStepIndex);
   },
 
   nextStep: function () {
@@ -156,6 +238,7 @@ window.AnimationController = {
       this.showStep(this.currentStepIndex + 1);
     } else {
       this.pause();
+      this.showFinalSummaryToast();
     }
   },
 
@@ -220,6 +303,76 @@ window.AnimationController = {
   },
 
   /**
+   * تغيير وضع الشرح: التدريب أو السريع
+   */
+  changeMode: function () {
+    if (this.modeSelect) {
+      this.activeMode = this.modeSelect.value || "training";
+      
+      // تكييف السرعة تلقائياً حسب الوضع المحدد
+      if (this.activeMode === "fast" && this.speedSelect) {
+        this.speedSelect.value = "800"; // سرعة 2x افتراضية للوضع السريع
+        this.speedMs = 800;
+      } else if (this.activeMode === "training" && this.speedSelect) {
+        this.speedSelect.value = "1500"; // سرعة 1x افتراضية للتدريب
+        this.speedMs = 1500;
+      }
+      
+      // تحديث النصوص المعروضة حالياً
+      this.showStep(this.currentStepIndex);
+    }
+  },
+
+  /**
+   * توليد صيغ نصية مختصرة ومباشرة للوضع السريع (البند 9)
+   */
+  getShortCaption: function (step) {
+    switch (step.type) {
+      case "INTRO_LAND":
+        return `محيط وأبعاد الأرض الإجمالية المطلوبة.`;
+      case "START_POINT":
+        return `نقطة الصفر 🏁: ابدأ القياس من الحد الأيمن للأرض.`;
+      case "MEASURE_BOTTOM":
+        {
+          const val = step.caption.match(/(\d+\.\d+|\d+) م/)?.[0] || "";
+          return `قس مسافة ${val} أسفل وثبّت وتداً 📌.`;
+        }
+      case "MEASURE_TOP":
+        {
+          const val = step.caption.match(/(\d+\.\d+|\d+) م/)?.[0] || "";
+          return `قس مسافة ${val} أعلى وثبّت وتداً 📌.`;
+        }
+      case "CONNECT_ROPE":
+        return `شد حبلاً مستقيماً ومشدوداً بين الوتدين لتحديد الفاصل.`;
+      case "SHOW_DIVIDER":
+        return `قس طول خيط الفاصل الفعلي للتأكيد والمطابقة.`;
+      case "SHOW_SHARE":
+        return `تم تسليم قطعة الشريك الحالية وتحديد مساحتها.`;
+      case "FINAL_SUMMARY":
+        return `✅ تم تنفيذ التقسيم بالكامل بنجاح. الأوتاد مثبتة.`;
+      default:
+        return step.caption;
+    }
+  },
+
+  /**
+   * عرض رسالة النجاح الختامية بشكل بارز (البند 7)
+   */
+  showFinalSummaryToast: function () {
+    const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
+    const pegsCount = 2 * (window.calculatedPieces.length + 1);
+    
+    alert(`🎉 تم اكتمال تنفيذ التقسيم بنجاح!
+-------------------------------------
+• عدد الشركاء: ${window.calculatedPieces.length} شركاء
+• عدد الفواصل المحددة: ${window.calculatedPieces.length - 1} فواصل
+• إجمالي الأوتاد الموضوعة: ${pegsCount} أوتاد 📌
+• مساحة الأرض الإجمالية: ${totalArea} م²
+
+الأرض جاهزة تماماً للتسليم الفعلي للشركاء.`);
+  },
+
+  /**
    * تنظيف الذاكرة كلياً لضمان عدم وجود تسريب (Memory Leak).
    */
   cleanup: function () {
@@ -251,5 +404,8 @@ window.AnimationController = {
     this.stepIndicator = null;
     this.playBtn = null;
     this.speedSelect = null;
+    this.modeSelect = null;
+    this.checkpointCard = null;
+    this.progressBarFill = null;
   }
 };
