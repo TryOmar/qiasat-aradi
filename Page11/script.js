@@ -2963,11 +2963,11 @@ function printReport() {
 <head>
   <meta charset="UTF-8">
   <title>تقرير تقسيم الأراضي - الدلال</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
-    body { font-family: 'Cairo', sans-serif; background: #fff; color: #222; font-size: 9.5pt; direction: rtl; padding-bottom: 35px; position: relative; }
+    body { font-family: 'Tajawal', 'Cairo', 'Noto Sans Arabic', sans-serif; background: #fff; color: #222; font-size: 9.5pt; direction: rtl; padding-bottom: 35px; position: relative; }
     .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .report-header-right { text-align: right; }
     .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
@@ -3348,11 +3348,11 @@ function printFieldGuideDirect() {
 <head>
   <meta charset="UTF-8">
   <title>دليل التنفيذ الحقلي الذكي - الدلال</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { size: A4 portrait; margin: 15mm 12mm; }
-    body { font-family: 'Cairo', sans-serif; direction: rtl; background: #fff; color: #111; font-size: 12pt; }
+    body { font-family: 'Tajawal', 'Cairo', 'Noto Sans Arabic', sans-serif; direction: rtl; background: #fff; color: #111; font-size: 12pt; }
     .header { border: 2.5px solid #1b5e20; border-radius: 10px; padding: 12px 18px; margin-bottom: 18px; background: #f1f8e9; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .header h1 { font-size: 22pt; color: #1b5e20; font-weight: 800; }
     .header h2 { font-size: 13pt; color: #2e7d32; font-weight: 700; text-align: center; }
