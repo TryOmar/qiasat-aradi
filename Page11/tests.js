@@ -34,7 +34,7 @@ function runAutomatedTests() {
 
     const remRow = document.getElementById("remainder-row-table");
     if (remRow && remRow.style.display !== "none") {
-      const inputs = remRow.querySelectorAll("input");
+      const inputs = remRow.querySelectorAll("input, textarea");
       if (inputs.length >= 13) {
         const areaVal = parseFloat(inputs[5].value) || 0;
         const avgWVal = parseFloat(inputs[9].value) || 0;

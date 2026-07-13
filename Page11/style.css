@@ -2759,6 +2759,34 @@ body {
   border-color: #777777 !important;
 }
 
+.partner-row textarea.partner-cum-width,
+#remainder-row-table textarea.partner-cum-width {
+  width: 100% !important;
+  height: 65px !important;
+  border: 1px solid #777777 !important;
+  border-radius: 4px !important;
+  font-size: 10.5px !important;
+  color: #1b5e20 !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #f5f5f5 !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+  font-family: inherit !important;
+  line-height: 1.35 !important;
+  padding: 4px 2px !important;
+  overflow: hidden !important;
+  white-space: pre-wrap !important;
+}
+
+#remainder-row-table textarea.partner-cum-width {
+  background-color: #fffde7 !important;
+  color: #e65100 !important;
+  border-color: #ffe082 !important;
+}
+
+
+
 /* الحقول التي للقراءة فقط في بطاقات التحويل */
 .conv-chip-input[readonly] {
   border: none !important;

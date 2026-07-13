@@ -24,6 +24,9 @@
   /** @type {boolean} حالة تهيئة المكوّن */
   let isInitialized = false;
 
+  /** @type {boolean} حالة الإغلاق الكامل للمساعد في الجلسة الحالية */
+  let isSessionClosed = false;
+
   /** @type {HTMLElement|null} مرجع التوليب المساعد الطائر */
   let tooltip = null;
 
@@ -781,6 +784,13 @@
    */
   function showActivatorButton() {
     try {
+      if (isSessionClosed) {
+        const existingBtn = document.getElementById("fh-activator-btn");
+        if (existingBtn) {
+          existingBtn.style.display = "none";
+        }
+        return;
+      }
       if (document.getElementById("fh-activator-btn")) {
         document.getElementById("fh-activator-btn").style.display = "flex";
         return;
@@ -789,7 +799,38 @@
       btn.id = "fh-activator-btn";
       btn.className = "fh-activator-btn";
       btn.type = "button";
-      btn.innerHTML = "🤖 تشغيل المساعد";
+      btn.innerHTML = `<span class="fh-activator-text">🤖 تشغيل المساعد</span>`;
+
+      // إضافة زر إغلاق كامل (✕) بجوار نص تشغيل المساعد
+      const closeBtn = document.createElement("span");
+      closeBtn.className = "fh-activator-close";
+      closeBtn.setAttribute("role", "button");
+      closeBtn.setAttribute("aria-label", "إغلاق زر تشغيل المساعد");
+      closeBtn.title = "إخفاء زر التشغيل حتى إعادة تشغيل التطبيق";
+
+      // منع سحب الزر أو التفاعل معه عند النقر/لمس زر الإغلاق الكامل
+      closeBtn.addEventListener("mousedown", function (e) {
+        e.stopPropagation();
+      });
+      closeBtn.addEventListener("touchstart", function (e) {
+        e.stopPropagation();
+      });
+
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (btn.classList.contains("fh-fading-out")) return;
+
+        isSessionClosed = true;
+        btn.classList.add("fh-fading-out");
+        
+        setTimeout(function () {
+          btn.style.display = "none";
+          btn.classList.remove("fh-fading-out");
+        }, 180);
+      });
+
+      btn.appendChild(closeBtn);
 
       let isDragging = false;
       let startX, startY;

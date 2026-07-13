@@ -249,8 +249,14 @@
   direction: rtl;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease !important;
+}
+
+.fh-activator-btn.fh-fading-out {
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  pointer-events: none !important;
 }
 
 .fh-activator-btn:hover {
@@ -263,4 +269,38 @@
   cursor: grabbing;
   transform: scale(0.95);
 }
+
+.fh-activator-close {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  cursor: pointer !important;
+  margin-right: 4px !important;
+  user-select: none !important;
+  pointer-events: auto !important;
+}
+
+.fh-activator-close::before {
+  content: "✕" !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.fh-activator-close:hover::before {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+
 

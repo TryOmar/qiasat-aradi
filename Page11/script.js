@@ -670,7 +670,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
-        <input type="text" class="partner-cum-width" readonly value="-">
+        <textarea class="partner-cum-width" readonly>-</textarea>
       </div>
       <div class="col-group border-group">
         <span class="mobile-label">الفاصل (م)</span>
@@ -731,7 +731,7 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       </div>
       <div class="col-group cum-group">
         <span class="mobile-label">العلامة (م)</span>
-        <input type="text" class="partner-cum-width" readonly value="-">
+        <textarea class="partner-cum-width" readonly>-</textarea>
       </div>
       <div class="col-group border-group">
         <span class="mobile-label">الفاصل (م)</span>
@@ -1622,7 +1622,7 @@ function runPartition() {
 
   // إظهار / إخفاء صفوف إجمالي الأنصبة المطلوبة والعجز
   {
-    const isDeficit = remainingArea < -0.05 && !window.isManualPartition;
+    const isDeficit = remainingArea < -0.01;
     const targetTotal = sumTargetAreas || 0;
     const targetPct = totalAreaM2 > 0 ? (targetTotal / totalAreaM2) * 100 : 0;
     const deficitM2 = Math.abs(remainingArea);
@@ -2287,11 +2287,15 @@ function renderCroquis() {
             dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
 
             const badgeFontSize = Math.max(9, fontSize - 1);
+            const emojiFontSize = badgeFontSize + 14;
             const badgePadX = 6 * textScale;
-            const badgePadY = 4 * textScale;
-            const badgeLineH = (badgeFontSize + 3) * textScale;
-            const badgeW = 80 * textScale;
-            const badgeH = badgeLineH * 2 + badgePadY * 2;
+            const badgePadY = 6 * textScale;
+            
+            const emojiHeight = emojiFontSize * textScale;
+            const labelHeight = badgeFontSize * textScale;
+            
+            const badgeW = 92 * textScale;
+            const badgeH = emojiHeight + labelHeight + badgePadY * 2 + 2 * textScale;
 
             // خلفية مستطيلة بحواف دائرية
             const rect = svgEl("rect");
@@ -2310,9 +2314,9 @@ function renderCroquis() {
             // سطر الإيموجي (أكبر حجماً)
             const tEmoji = svgEl("text");
             tEmoji.setAttribute("x", cx);
-            tEmoji.setAttribute("y", yDirection - badgePadY + 1 * textScale);
+            tEmoji.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY / 2 - 1 * textScale);
             tEmoji.setAttribute("fill", badgeFill);
-            tEmoji.setAttribute("font-size", (badgeFontSize + 4) + "px");
+            tEmoji.setAttribute("font-size", emojiFontSize + "px");
             tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
             tEmoji.setAttribute("text-anchor", "middle");
             tEmoji.textContent = badgeEmoji;
@@ -2321,7 +2325,7 @@ function renderCroquis() {
             // سطر النص
             const tLabel = svgEl("text");
             tLabel.setAttribute("x", cx);
-            tLabel.setAttribute("y", yDirection + badgePadY + badgeLineH);
+            tLabel.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight);
             tLabel.setAttribute("fill", badgeFill);
             tLabel.setAttribute("font-size", badgeFontSize + "px");
             tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2520,82 +2524,6 @@ function renderCroquis() {
       c.setAttribute("fill", "#1b5e20");
       g.appendChild(c);
     });
-
-    // --- محور القياس الذكي (Adaptive Measuring Scale) أسفل الأرض ---
-    {
-      const scaleY = mapY(0) + 28 * textScale; // أسفل الحد السفلي للأرض
-      const scaleX0 = mapX(0);  // بداية من اليمين (x=0)
-      const scaleX1 = mapX(w);  // نهاية اليسار (x=w)
-
-      // عنوان المحور فوق الخط
-      const scaleMidX = (scaleX0 + scaleX1) / 2;
-      g.appendChild(svgText(scaleMidX, scaleY - 12 * textScale, "محور القياس المرجعي (متوسط العرض)", {
-        fill: "#37474f", size: "8.5", weight: "normal", bg: false
-      }));
-
-      // اختيار خطوة القياس الرئيسية (ديناميكية)
-      let majorStep;
-      if (w < 20) majorStep = 1;
-      else if (w <= 50) majorStep = 2;
-      else if (w <= 150) majorStep = 5;
-      else majorStep = 10;
-
-      // رسم الخط الرئيسي للمقياس
-      g.appendChild(svgLine(scaleX0, scaleY, scaleX1, scaleY, { stroke: "#37474f", width: 1.5 * textScale }));
-
-      // شرطة اليمين (0)
-      g.appendChild(svgLine(scaleX0, scaleY - 6 * textScale, scaleX0, scaleY + 6 * textScale, { stroke: "#37474f", width: 1.5 * textScale }));
-      g.appendChild(svgText(scaleX0, scaleY + 15 * textScale, "0", { fill: "#263238", size: "9", weight: "bold" }));
-
-      // رسم شرطات الـ 1 متر (minor ticks) وشرطات الخطوة الرئيسية (major ticks)
-      const wFloor = Math.floor(w);
-      for (let dist = 1; dist <= wFloor; dist++) {
-        const tx = mapX(dist);
-        const isMajor = dist % majorStep === 0;
-        const tickH = isMajor ? 6 * textScale : 3 * textScale;
-        const tickW = isMajor ? 1.5 * textScale : 0.8 * textScale;
-        g.appendChild(svgLine(tx, scaleY - tickH, tx, scaleY + tickH, { stroke: isMajor ? "#37474f" : "#78909c", width: tickW }));
-        if (isMajor) {
-          g.appendChild(svgText(tx, scaleY + 15 * textScale, String(dist), { fill: "#263238", size: "9", weight: "bold" }));
-        }
-      }
-
-      // شرطة النهاية (نهاية الأرض = w متر)
-      g.appendChild(svgLine(scaleX1, scaleY - 6 * textScale, scaleX1, scaleY + 6 * textScale, { stroke: "#37474f", width: 1.5 * textScale }));
-      g.appendChild(svgText(scaleX1, scaleY + 15 * textScale, w.toFixed(1), { fill: "#263238", size: "9", weight: "bold" }));
-
-      // رسم وحدة القياس "م" بجانب الأرقام
-      g.appendChild(svgText(scaleX1 + 14 * textScale, scaleY + 15 * textScale, "م", { fill: "#37474f", size: "9", weight: "normal" }));
-
-      // رسم نقاط القياس عند كل فاصل (Divider Ticks) بلون برتقالي مميز
-      if (window.calculatedPieces && window.calculatedPieces.length > 0) {
-        let dividerNum = 0;
-        window.calculatedPieces.forEach((piece, idx) => {
-          if (piece.isRemainder) return;
-          // endX: مسافة نهاية القطعة من اليمين (في إحداثيات البيانات)
-          const divMeters = piece.endX;
-          if (divMeters <= 0 || divMeters >= w) return;
-          dividerNum++;
-          const dx = mapX(w - divMeters);
-
-          // شرطة برتقالية طويلة للفاصل
-          g.appendChild(svgLine(dx, scaleY - 10 * textScale, dx, scaleY + 10 * textScale, { stroke: "#ef6c00", width: 2 * textScale }));
-
-          // تسمية الفاصل فوق الخط
-          g.appendChild(svgText(dx, scaleY - 14 * textScale, `ف${dividerNum}`, {
-            fill: "#ef6c00", size: "8", weight: "bold", bg: true
-          }));
-
-          // قيمة الفاصل أسفل المحور
-          g.appendChild(svgText(dx, scaleY + 22 * textScale, divMeters.toFixed(2) + " م", {
-            fill: "#ef6c00",
-            size: "8.5",
-            weight: "bold",
-            bg: true
-          }));
-        });
-      }
-    }
   }
 
   // تحديث قائمة مساحات الشركاء أعلى الخريطة
@@ -3652,38 +3580,38 @@ function updateCalculationSteps() {
         <div style="display: flex; gap: 10px; width: 100%;">
           
           <!-- Top Border Card -->
-          <div style="flex: 1; background: #2c2c2e; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1px solid #444; color: #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="text-align: center; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold;">عند الحد العلوي</div>
-            <div style="text-align: center; font-size: 20px; color: #42a5f5; font-weight: bold; direction: ltr; margin-bottom: 12px;">${topQiratWidth.toFixed(4)} م</div>
+          <div style="flex: 1; background: #ffffff; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1.5px solid #a5d6a7; color: #000000; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div style="text-align: center; font-size: 13px; color: #1b5e20; margin-bottom: 6px; font-weight: bold;">عند الحد العلوي</div>
+            <div style="text-align: center; font-size: 20px; color: #2e7d32; font-weight: bold; direction: ltr; margin-bottom: 12px;">${topQiratWidth.toFixed(4)} م</div>
             
-            <div style="border-top: 1px solid #444; margin-bottom: 8px;"></div>
+            <div style="border-top: 1px solid #e0e0e0; margin-bottom: 8px;"></div>
             
             <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-              <span style="font-weight: bold; color: #ddd;">العرض العلوي</span>
-              <span style="font-weight: bold; direction: ltr; color: #fff;">${w2} م</span>
+              <span style="font-weight: bold; color: #333333;">العرض العلوي</span>
+              <span style="font-weight: bold; direction: ltr; color: #1b5e20;">${w2} م</span>
             </div>
             
             <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <span style="font-weight: bold; color: #ddd;">عدد القراريط</span>
-              <span style="font-weight: bold; direction: ltr; color: #fff;">${totalQirats.toFixed(4)} قيراط</span>
+              <span style="font-weight: bold; color: #333333;">عدد القراريط</span>
+              <span style="font-weight: bold; direction: ltr; color: #1b5e20;">${totalQirats.toFixed(4)} قيراط</span>
             </div>
           </div>
 
           <!-- Bottom Border Card -->
-          <div style="flex: 1; background: #2c2c2e; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1px solid #444; color: #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="text-align: center; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold;">عند الحد السفلي</div>
-            <div style="text-align: center; font-size: 20px; color: #42a5f5; font-weight: bold; direction: ltr; margin-bottom: 12px;">${botQiratWidth.toFixed(4)} م</div>
+          <div style="flex: 1; background: #ffffff; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1.5px solid #a5d6a7; color: #000000; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div style="text-align: center; font-size: 13px; color: #1b5e20; margin-bottom: 6px; font-weight: bold;">عند الحد السفلي</div>
+            <div style="text-align: center; font-size: 20px; color: #2e7d32; font-weight: bold; direction: ltr; margin-bottom: 12px;">${botQiratWidth.toFixed(4)} م</div>
             
-            <div style="border-top: 1px solid #444; margin-bottom: 8px;"></div>
+            <div style="border-top: 1px solid #e0e0e0; margin-bottom: 8px;"></div>
             
             <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-              <span style="font-weight: bold; color: #ddd;">العرض السفلي</span>
-              <span style="font-weight: bold; direction: ltr; color: #fff;">${w1} م</span>
+              <span style="font-weight: bold; color: #333333;">العرض السفلي</span>
+              <span style="font-weight: bold; direction: ltr; color: #1b5e20;">${w1} م</span>
             </div>
             
             <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <span style="font-weight: bold; color: #ddd;">عدد القراريط</span>
-              <span style="font-weight: bold; direction: ltr; color: #fff;">${totalQirats.toFixed(4)} قيراط</span>
+              <span style="font-weight: bold; color: #333333;">عدد القراريط</span>
+              <span style="font-weight: bold; direction: ltr; color: #1b5e20;">${totalQirats.toFixed(4)} قيراط</span>
             </div>
           </div>
 
@@ -4455,7 +4383,7 @@ function updateRemainderRowUI(remainingArea) {
         }
       });
 
-      remCumWidth = `يمين ➡️ أعلى: ${partnersTopW.toFixed(4)} ← ${w2.toFixed(4)} م | أسفل: ${partnersBotW.toFixed(4)} ← ${w1.toFixed(4)} م`;
+      remCumWidth = `من اليمين\nأعلى:\n${partnersTopW.toFixed(4)} ← ${w2.toFixed(4)} م\nأسفل:\n${partnersBotW.toFixed(4)} ← ${w1.toFixed(4)} م`;
       remLengths = `يمين: ${remRightL.toFixed(2)} | يسار: ${remLeftL.toFixed(2)}`;
     }
   }
@@ -4479,7 +4407,7 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
@@ -4497,11 +4425,12 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remCumWidth}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
       <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
   }
+
 }
 
 /* ================================================================
