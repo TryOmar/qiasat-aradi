@@ -2277,18 +2277,20 @@ function renderCroquis() {
           }
 
           // 4. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة) مع خلفية ملونة
+          const isStart = (index === 0);  // تعريف صريح لتفادي ReferenceError على الموبايل
+          const isEnd = (index === window.calculatedPieces.length - 1 && !piece.isRemainder);
           let badgeEmoji = "";
           let badgeLabel = "";
           let badgeFill = "";
           let badgeBorder = "";
           let badgeBg = "";
-          if (index === 0) {
+          if (isStart) {
             badgeEmoji = "[بداية]";
             badgeLabel = "بداية استلام الأنصبة";
             badgeFill = "#1b5e20";
             badgeBorder = "#2e7d32";
             badgeBg = "#e8f5e9";
-          } else if (index === window.calculatedPieces.length - 1 && !piece.isRemainder) {
+          } else if (isEnd) {
             badgeEmoji = "[نهاية]";
             badgeLabel = "نهاية التقسيم";
             badgeFill = "#b71c1c";
