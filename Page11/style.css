@@ -3126,6 +3126,12 @@ body {
   padding: 10px 14px !important;
   margin-bottom: 10px !important;
   font-size: 13px !important;
+  transition: all 0.2s ease !important;
+}
+.fh-guide-divider-row-highlighted {
+  border-color: #2e7d32 !important;
+  background-color: #e8f5e9 !important;
+  box-shadow: 0 0 10px rgba(46, 125, 50, 0.25) !important;
 }
 .fh-guide-divider-title {
   color: #e65100 !important;

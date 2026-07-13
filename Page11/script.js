@@ -3076,6 +3076,11 @@ function printFieldGuide() {
   openFieldGuideModal();
 }
 
+function highlightAndKeepSegment(idx) {
+  window.selectedSegmentIndex = idx;
+  highlightSegment(idx);
+}
+
 function openFieldGuideModal() {
   if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
     alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
@@ -3091,11 +3096,11 @@ function openFieldGuideModal() {
   // 1. حساب المتغيرات ديناميكياً
   const dividersCount = window.calculatedPieces.length - 1;
   const pegsCount = 2 * (window.calculatedPieces.length + 1);
+  const estimatedTime = Math.max(10, 5 * window.calculatedPieces.length);
   
   // شريط القياس المناسب
   let maxDim = 50;
   if (window.calculatedPieces.length > 0) {
-    // حساب أقصى بعد مطلوب قياسه
     let maxEndX = 0;
     window.calculatedPieces.forEach(p => {
       if (p.endX > maxEndX) maxEndX = p.endX;
@@ -3109,51 +3114,78 @@ function openFieldGuideModal() {
   else if (maxDim < 50) tapeLength = 50;
   else tapeLength = 100;
 
-  // 2. تحديث الكارت الأيمن (الملخص)
+  // 2. تحديث الكارت الأيمن (الملخص + الأدوات المطلوبة + الزمن)
   const summaryHTML = `
-    <div class="fh-guide-summary-item">
-      <span>اتجاه التقسيم:</span>
-      <span>➡️ من اليمين إلى اليسار</span>
+    <!-- بطاقة الملخص الإحصائي -->
+    <div style="margin-bottom: 20px;">
+      <div class="fh-guide-summary-item">
+        <span>اتجاه التقسيم:</span>
+        <span>➡️ من اليمين إلى اليسار</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>نقطة البداية:</span>
+        <span>الحد الأيمن (الصفر) 🏁</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>عدد الشركاء:</span>
+        <span>${window.calculatedPieces.length} شركاء</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>عدد الفواصل:</span>
+        <span>${dividersCount} فواصل</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>الأوتاد المطلوبة:</span>
+        <span>${pegsCount} أوتاد 📌</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>شريط القياس المناسب:</span>
+        <span>${tapeLength} متر</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>زمن التنفيذ المتوقع:</span>
+        <span>${estimatedTime} دقيقة ⏱️</span>
+      </div>
+      <div class="fh-guide-summary-item" style="border-top: 1px dashed #c8e6c9; padding-top: 8px; margin-top: 8px;">
+        <span>المساحة الإجمالية:</span>
+        <span style="color: #1b5e20;">${totalArea} م²</span>
+      </div>
     </div>
-    <div class="fh-guide-summary-item">
-      <span>نقطة البداية:</span>
-      <span>الحد الأيمن (الصفر) 🏁</span>
-    </div>
-    <div class="fh-guide-summary-item">
-      <span>عدد الشركاء:</span>
-      <span>${window.calculatedPieces.length} شركاء</span>
-    </div>
-    <div class="fh-guide-summary-item">
-      <span>عدد الفواصل:</span>
-      <span>${dividersCount} فواصل</span>
-    </div>
-    <div class="fh-guide-summary-item">
-      <span>الأوتاد المطلوبة:</span>
-      <span>${pegsCount} أوتاد 📌</span>
-    </div>
-    <div class="fh-guide-summary-item">
-      <span>شريط القياس المناسب:</span>
-      <span>${tapeLength} متر</span>
-    </div>
-    <div class="fh-guide-summary-item" style="border-top: 1px dashed #c8e6c9; padding-top: 8px; margin-top: 8px;">
-      <span>المساحة الإجمالية:</span>
-      <span style="color: #1b5e20;">${totalArea} م²</span>
+    
+    <!-- بطاقة الأدوات المطلوبة -->
+    <div style="border-top: 1.5px solid #c8e6c9; padding-top: 15px; margin-top: 15px;">
+      <h4 style="color: #0d47a1 !important; border-bottom: 1px solid #90caf9 !important; padding-bottom: 6px !important; margin: 0 0 12px 0 !important; font-size: 15px !important; font-weight: bold !important;">🛠️ الأدوات الميدانية المطلوبة</h4>
+      <div class="fh-guide-summary-item">📏 شريط قياس ${tapeLength} م</div>
+      <div class="fh-guide-summary-item">🔨 شاكوش أو مرزبة حديدية</div>
+      <div class="fh-guide-summary-item">📍 ${pegsCount} أوتاد خشبية / حديدية</div>
+      <div class="fh-guide-summary-item">🧵 خيط شد متين للعلام</div>
+      <div class="fh-guide-summary-item">✏️ قلم تعليم أو علام ملون</div>
     </div>
   `;
   document.getElementById("guide-summary-content").innerHTML = summaryHTML;
 
-  // 3. تحديث الكارت الأيسر (الفواصل والقياسات)
+  // 3. تحديث الكارت الأيسر (الفواصل والقياسات ومؤشرات الخطوات المزدوجة)
   let dividersHTML = "";
   window.calculatedPieces.forEach((piece, idx) => {
     if (idx < window.calculatedPieces.length - 1) {
-      const isRem = !!piece.isRemainder;
-      const label = isRem ? "الفاصل المتبقي" : `الفاصل ${idx + 1} (بعد نصيب ${piece.name})`;
+      const nextPiece = window.calculatedPieces[idx + 1];
+      const stepTitle = `الخطوة ${idx + 1} من ${dividersCount} | الآن يتم تحديد الحد الفاصل بين (${piece.name || 'شريك ' + (idx + 1)}) و (${nextPiece.name || 'شريك ' + (idx + 2)})`;
+      const pegIndex1 = 2 * idx + 3;
+      const pegIndex2 = 2 * idx + 4;
+      
       dividersHTML += `
-        <div class="fh-guide-divider-row">
-          <div class="fh-guide-divider-title">📌 ${label}</div>
+        <div class="fh-guide-divider-row" data-partner-index="${idx}" style="cursor: pointer; position: relative; padding-right: 42px !important;"
+             onmouseenter="highlightSegment(${idx})"
+             onmouseleave="removeHighlight()"
+             onclick="highlightAndKeepSegment(${idx})">
+          <div style="position: absolute; right: 12px; top: 12px; font-size: 18px; color: #1b5e20;">📌</div>
+          <div class="fh-guide-divider-title">${stepTitle}</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 6px; font-weight: bold;">
+            (تم وضع الأوتاد رقم ${pegIndex1} و ${pegIndex2} من إجمالي ${pegsCount} أوتاد)
+          </div>
           <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-            <span>أعلى: <strong>${piece.endX.toFixed(2)} م</strong></span>
-            <span>أسفل: <strong>${piece.endX.toFixed(2)} م</strong></span>
+            <span>القياس على الحد العلوي: <strong>${piece.endX.toFixed(2)} م</strong></span>
+            <span>القياس على الحد السفلي: <strong>${piece.endX.toFixed(2)} م</strong></span>
             <span>طول الفاصل الفعلي: <strong>${piece.divLine.toFixed(2)} م</strong></span>
           </div>
         </div>
@@ -3163,6 +3195,20 @@ function openFieldGuideModal() {
   if (dividersHTML === "") {
     dividersHTML = `<div class="fh-guide-divider-row" style="text-align:center; color:#555;">لا توجد فواصل مطلوبة (شريك واحد فقط).</div>`;
   }
+  
+  // إضافة بطاقة النجاح والتعليمات الختامية
+  dividersHTML += `
+    <div style="border: 2px solid #81c784; background: #e8f5e9; padding: 16px; border-radius: 12px; margin-top: 20px;">
+      <div class="fh-guide-section-title" style="color: #1b5e20; margin-bottom: 6px !important;">🎉 تم تنفيذ التقسيم بنجاح!</div>
+      <ul class="fh-guide-text-list" style="color: #2e7d32; font-weight: bold; margin-bottom: 0;">
+        <li>✔ تم وضع جميع الأوتاد لتحديد الفواصل.</li>
+        <li>✔ أصبحت الأرض جاهزة للتسليم الفعلي للشركاء.</li>
+        <li>✔ يرجى مراجعة وتأكيد القياسات التراكمية على الطبيعة.</li>
+        <li>✔ تأكد من ثبات الأوتاد 📌 في التربة جيداً لئلا تُفقد.</li>
+        <li>✔ مطابقة التنفيذ الميداني مع الكروكي والجدول الورقي.</li>
+      </ul>
+    </div>
+  `;
   document.getElementById("guide-dividers-list").innerHTML = dividersHTML;
 
   // فتح المودال
@@ -5001,6 +5047,14 @@ function highlightSegment(index) {
   
   // 3. تحديث المفتش التفاعلي بالبيانات الكاملة للقطعة
   updateInspector(index);
+
+  // 4. تسليط الضوء على صف الفاصل في الدليل الحقلي الذكي (إذا كان مفتوحاً)
+  const guideRow = document.querySelector(`.fh-guide-divider-row[data-partner-index="${index}"]`);
+  if (guideRow) {
+    document.querySelectorAll(".fh-guide-divider-row").forEach(r => r.classList.remove("fh-guide-divider-row-highlighted"));
+    guideRow.classList.add("fh-guide-divider-row-highlighted");
+    guideRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function removeHighlight() {
@@ -5013,8 +5067,13 @@ function removeHighlight() {
   document.querySelectorAll("#partners-list .partner-row").forEach(r => {
     r.classList.remove("partner-row-highlighted");
   });
+
+  // 3. إزالة الإضاءة من صفوف الدليل الحقلي الذكي
+  document.querySelectorAll(".fh-guide-divider-row").forEach(r => {
+    r.classList.remove("fh-guide-divider-row-highlighted");
+  });
   
-  // 3. إذا كان هناك شريك محدد مسبقاً بالنقر، نعيد تحديث المفتش لعرض بياناته
+  // 4. إذا كان هناك شريك محدد مسبقاً بالنقر، نعيد تحديث المفتش لعرض بياناته
   if (window.selectedSegmentIndex !== null) {
     updateInspector(window.selectedSegmentIndex);
     
@@ -5024,6 +5083,11 @@ function removeHighlight() {
     
     const row = document.querySelector(`#partners-list .partner-row[data-index="${window.selectedSegmentIndex}"]`);
     if (row) row.classList.add("partner-row-highlighted");
+
+    const guideRow = document.querySelector(`.fh-guide-divider-row[data-partner-index="${window.selectedSegmentIndex}"]`);
+    if (guideRow) {
+      guideRow.classList.add("fh-guide-divider-row-highlighted");
+    }
   } else {
     // إذا لم يكن هناك تحديد، نخفي المفتش
     const inspector = document.getElementById("croquis-inspector");
