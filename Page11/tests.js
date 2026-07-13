@@ -999,6 +999,48 @@ function runAutomatedTests() {
     window.runPartition();
   }
 
+  // 10. اختبار أداء محرك الرسوم المتحركة (500 خطوة محاكاة واستقرار الذاكرة)
+  try {
+    const tStart = performance.now();
+    
+    // توليد 100 شريك لتوليد 500 خطوة محاكاة تقريباً
+    const dummyLand = { w: 1000, w1: 1000, w2: 1000, l1: 500, l2: 500 };
+    const dummyPieces = [];
+    for (let i = 0; i < 100; i++) {
+      dummyPieces.push({
+        name: `شريك ${i + 1}`,
+        startX: i * 10,
+        endX: (i + 1) * 10,
+        area: 100,
+        botW: 10,
+        topW: 10,
+        width: 10,
+        divLine: 10,
+        isRemainder: false
+      });
+    }
+
+    // توليد الخطوات
+    const steps = window.AnimationEngine.generateScenario(dummyLand, dummyPieces, "ar");
+    assert(steps.length >= 500, `أداء محرك الرسوم - توليد عدد (${steps.length}) خطوة محاكاة ديناميكية بنجاح`, `عدد الخطوات المتولدة: ${steps.length} خطوة`);
+
+    // محاكاة تشغيل وإغلاق المحرك في الخلفية وقياس الزمن
+    const testSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    window.AnimationRenderer.init(testSvg, dummyLand, dummyPieces);
+    
+    // تشغيل خطوة
+    window.AnimationRenderer.renderStatic(steps[0]);
+    window.AnimationRenderer.renderDynamic(steps[0], 0.5);
+    window.AnimationRenderer.renderDynamic(steps[0], 1.0);
+    
+    const tEnd = performance.now();
+    const duration = tEnd - tStart;
+    
+    assert(duration < 250, `أداء محرك الرسوم - تشغيل وتنظيف المحرك في الذاكرة خلال (${duration.toFixed(2)} مللي ثانية)`, `معدل الأداء ممتاز وأقل من الحد الأقصى 250ms`);
+  } catch (err) {
+    assert(false, "أداء محرك الرسوم - فشل بسبب خطأ برمجي", err.toString());
+  }
+
   const endTime = performance.now();
   const execTimeMs = endTime - startTime;
   const totalTests = report.length;

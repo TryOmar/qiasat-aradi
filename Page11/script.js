@@ -5054,3 +5054,24 @@ function updateInspector(index) {
   inspector.style.display = "block";
 }
 
+/**
+ * دالة ربط واجهة الكروكي بمحرك الرسوم المتحركة التفاعلي.
+ */
+function openAnimationSimulation() {
+  if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
+    alert("يرجى إدخال بيانات الأرض والشركاء أولاً لتوليد الشرح الميداني!");
+    return;
+  }
+  
+  const landData = {
+    w: w,
+    w1: w1,
+    w2: w2,
+    l1: l1,
+    l2: l2
+  };
+  
+  window.AnimationController.start(landData, window.calculatedPieces);
+}
+
+
