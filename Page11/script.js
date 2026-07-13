@@ -2659,9 +2659,11 @@ function renderCroquis() {
         legendDiv.appendChild(chip);
       });
       legendDiv.style.display = "flex";
-    } else {
-      legendDiv.style.display = "none";
     }
+  }
+
+  if (typeof applySmartLayout === "function" && !window.isExporting) {
+    applySmartLayout();
   }
   } catch (e) {
     console.error("Error in renderCroquis:", e);
