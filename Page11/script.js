@@ -5084,5 +5084,9 @@ function openAnimationSimulation() {
   window.AnimationController.start(landData, window.calculatedPieces);
 }
 
+// ربط الدالة بـ window لضمان وصول أحداث الـ HTML إليها في كافة ظروف التحميل
+window.openAnimationSimulation = openAnimationSimulation;
+
+
 
 
