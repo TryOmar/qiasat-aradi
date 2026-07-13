@@ -2202,7 +2202,7 @@ function renderCroquis() {
           const yArea = topY + pieceH * 0.18;
           const yName = topY + pieceH * 0.42;
           const yLength = topY + pieceH * 0.66;
-          const yDirection = topY + pieceH * 0.88;
+          const yDirection = topY + pieceH * 0.82;
           
           // حجم خط ديناميكي يناسب عرض العمود
           const fontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * textScale;
@@ -2286,16 +2286,16 @@ function renderCroquis() {
             const dirGroup = svgEl("g");
             dirGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yDirection})`);
 
-            const badgeFontSize = Math.max(9, fontSize - 1);
-            const emojiFontSize = badgeFontSize + 14;
-            const badgePadX = 6 * textScale;
-            const badgePadY = 6 * textScale;
+            const badgeFontSize = Math.max(7.5, fontSize - 2.5);
+            const emojiFontSize = badgeFontSize + 7;
+            const badgePadX = 4 * textScale;
+            const badgePadY = 4 * textScale;
             
             const emojiHeight = emojiFontSize * textScale;
             const labelHeight = badgeFontSize * textScale;
             
-            const badgeW = 92 * textScale;
-            const badgeH = emojiHeight + labelHeight + badgePadY * 2 + 2 * textScale;
+            const badgeW = 72 * textScale;
+            const badgeH = emojiHeight + labelHeight + badgePadY * 2;
 
             // خلفية مستطيلة بحواف دائرية
             const rect = svgEl("rect");
@@ -2303,18 +2303,18 @@ function renderCroquis() {
             rect.setAttribute("y", yDirection - badgeH / 2);
             rect.setAttribute("width", badgeW);
             rect.setAttribute("height", badgeH);
-            rect.setAttribute("rx", 6 * textScale);
-            rect.setAttribute("ry", 6 * textScale);
+            rect.setAttribute("rx", 4 * textScale);
+            rect.setAttribute("ry", 4 * textScale);
             rect.setAttribute("fill", badgeBg);
             rect.setAttribute("stroke", badgeBorder);
-            rect.setAttribute("stroke-width", 1.2 * textScale);
-            rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.18))");
+            rect.setAttribute("stroke-width", 1 * textScale);
+            rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
             dirGroup.appendChild(rect);
 
             // سطر الإيموجي (أكبر حجماً)
             const tEmoji = svgEl("text");
             tEmoji.setAttribute("x", cx);
-            tEmoji.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY / 2 - 1 * textScale);
+            tEmoji.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY / 2);
             tEmoji.setAttribute("fill", badgeFill);
             tEmoji.setAttribute("font-size", emojiFontSize + "px");
             tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2325,7 +2325,7 @@ function renderCroquis() {
             // سطر النص
             const tLabel = svgEl("text");
             tLabel.setAttribute("x", cx);
-            tLabel.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight);
+            tLabel.setAttribute("y", yDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
             tLabel.setAttribute("fill", badgeFill);
             tLabel.setAttribute("font-size", badgeFontSize + "px");
             tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
@@ -2333,6 +2333,7 @@ function renderCroquis() {
             tLabel.setAttribute("font-weight", "bold");
             tLabel.textContent = badgeLabel;
             dirGroup.appendChild(tLabel);
+
 
             labelGroup.appendChild(dirGroup);
           }
