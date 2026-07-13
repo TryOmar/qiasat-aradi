@@ -1860,10 +1860,18 @@ function svgEl(tag) {
 
 function svgText(x, y, content, opts = {}) {
   const t = svgEl("text");
-  t.setAttribute("x", x);
-  t.setAttribute("y", y);
+  // تقريب الإحداثيات لمنع اهتزاز أو ضبابية النصوص على بعض الشاشات
+  const rx = parseFloat(x).toFixed(2);
+  const ry = parseFloat(y).toFixed(2);
+  t.setAttribute("x", rx);
+  t.setAttribute("y", ry);
   t.setAttribute("text-anchor", opts.anchor || "middle");
-  t.setAttribute("font-family", "Cairo, Arial, sans-serif");
+  
+  // تحديد خطوط عربية واضحة وبدائلها
+  t.setAttribute("font-family", '"Tajawal", "Cairo", "Noto Sans Arabic", Arial, sans-serif');
+  
+  // تحسين جودة وحدة الخط للتكبير والطباعة
+  t.setAttribute("text-rendering", "geometricPrecision");
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseSize = parseFloat(opts.size || "13");
@@ -1890,11 +1898,19 @@ function svgText(x, y, content, opts = {}) {
 
 function svgLine(x1, y1, x2, y2, opts = {}) {
   const l = svgEl("line");
-  l.setAttribute("x1", x1);
-  l.setAttribute("y1", y1);
-  l.setAttribute("x2", x2);
-  l.setAttribute("y2", y2);
+  // تقريب الإحداثيات لتفادي تشوش الحواف
+  const rx1 = parseFloat(x1).toFixed(2);
+  const ry1 = parseFloat(y1).toFixed(2);
+  const rx2 = parseFloat(x2).toFixed(2);
+  const ry2 = parseFloat(y2).toFixed(2);
+  l.setAttribute("x1", rx1);
+  l.setAttribute("y1", ry1);
+  l.setAttribute("x2", rx2);
+  l.setAttribute("y2", ry2);
   l.setAttribute("stroke", opts.stroke || "#666");
+  
+  // دقة رسم الأشكال والخطوط
+  l.setAttribute("shape-rendering", "geometricPrecision");
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseWidth = parseFloat(opts.width || "1");
@@ -2050,6 +2066,7 @@ function renderCroquis() {
   );
   shadowPoly.setAttribute("fill", "rgba(0,0,0,0.08)");
   shadowPoly.setAttribute("rx", "4");
+  shadowPoly.setAttribute("shape-rendering", "geometricPrecision");
   g.appendChild(shadowPoly);
 
   // === 2. الإطار الخارجي الكامل ===
@@ -2062,6 +2079,7 @@ function renderCroquis() {
   mainPoly.setAttribute("stroke", "#1b5e20");
   mainPoly.setAttribute("stroke-width", (2.5 * textScale) + "px");
   mainPoly.setAttribute("stroke-linejoin", "round");
+  mainPoly.setAttribute("shape-rendering", "geometricPrecision");
   g.appendChild(mainPoly);
 
 
@@ -2090,6 +2108,7 @@ function renderCroquis() {
       poly.setAttribute("stroke", "none"); // بدون حدود مدمجة بالمضلع لتمكين تحكم كامل بالسمك واللون
       poly.setAttribute("class", "polygon-segment");
       poly.setAttribute("id", `croquis-poly-${index}`);
+      poly.setAttribute("shape-rendering", "geometricPrecision");
       poly.style.pointerEvents = "auto";
       poly.style.cursor = "pointer";
       
