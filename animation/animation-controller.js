@@ -13,7 +13,7 @@ window.AnimationController = {
   lastTime: 0,
   speedMs: 1500,
   locale: "ar",
-  activeMode: "training", // 'training' (التدريب التفصيلي) أو 'fast' (التنفيذ السريع)
+  activeMode: "training", // 'training' (التدريب التفصيلي)، 'fast' (التنفيذ السريع) أو 'practice' (التدريب العملي التفاعلي)
 
   // مراجع عناصر DOM
   modal: null,
@@ -118,10 +118,12 @@ window.AnimationController = {
       this.checkpointCard.style.display = "none";
     }
 
-    // تحديث المحتوى النصي بناءً على الوضع الميداني النشط (التدريب vs السريع)
+    // تحديث المحتوى النصي بناءً على الوضع الميداني النشط
     if (this.captionText) {
       if (this.activeMode === "fast") {
         this.captionText.innerHTML = this.getShortCaption(step);
+      } else if (this.activeMode === "practice") {
+        this.captionText.innerHTML = this.getPracticeCaption(step);
       } else {
         this.captionText.innerHTML = step.caption;
       }
@@ -174,27 +176,28 @@ window.AnimationController = {
         self.progress = 1;
         window.AnimationRenderer.renderDynamic(self.steps[self.currentStepIndex], 1);
         
-        if (self.isPlaying) {
-          // إيقاف مؤقت لعرض بطاقة التحقق بعد كل خطوة قياس/وتد
-          const step = self.steps[self.currentStepIndex];
-          const needsCheck = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
+        // إيقاف مؤقت لعرض بطاقة التحقق بعد كل خطوة قياس/وتد
+        const step = self.steps[self.currentStepIndex];
+        const needsCheck = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
+        
+        if (needsCheck && self.checkpointCard) {
+          self.pause();
           
-          if (needsCheck && self.checkpointCard) {
-            self.pause();
-            self.checkpointCard.style.display = "flex";
-          } else {
-            // انتظار ثانية كاملة بين المشاهد تلقائياً في السيناريوهات العامة
-            self.timeoutId = setTimeout(() => {
-              self.nextStep();
-            }, 1000);
+          // تعديل صيغة السؤال في وضع التدريب العملي (البند 2)
+          const checkpointLabel = self.checkpointCard.querySelector("span");
+          if (checkpointLabel) {
+            if (self.activeMode === "practice") {
+              checkpointLabel.innerHTML = "❓ هل وضعت الوتد في المكان الصحيح؟";
+            } else {
+              checkpointLabel.innerHTML = "❓ هل تم الانتهاء من تنفيذ ووتد هذه الخطوة ميدانياً؟";
+            }
           }
-        } else {
-          // إظهار كارت التحقق الميداني حتى لو لم يكن التشغيل تلقائياً
-          const step = self.steps[self.currentStepIndex];
-          const needsCheck = step.type === "MEASURE_BOTTOM" || step.type === "MEASURE_TOP" || step.type === "CONNECT_ROPE";
-          if (needsCheck && self.checkpointCard) {
-            self.checkpointCard.style.display = "flex";
-          }
+          self.checkpointCard.style.display = "flex";
+        } else if (self.isPlaying) {
+          // انتظار ثانية كاملة بين المشاهد تلقائياً في السيناريوهات العامة
+          self.timeoutId = setTimeout(() => {
+            self.nextStep();
+          }, 1000);
         }
       } else {
         // تحديث الطبقة المتحركة فقط 60 إطاراً بالثانية
@@ -303,7 +306,7 @@ window.AnimationController = {
   },
 
   /**
-   * تغيير وضع الشرح: التدريب أو السريع
+   * تغيير وضع الشرح: التدريب أو السريع أو التدريب العملي التفاعلي
    */
   changeMode: function () {
     if (this.modeSelect) {
@@ -311,11 +314,14 @@ window.AnimationController = {
       
       // تكييف السرعة تلقائياً حسب الوضع المحدد
       if (this.activeMode === "fast" && this.speedSelect) {
-        this.speedSelect.value = "800"; // سرعة 2x افتراضية للوضع السريع
+        this.speedSelect.value = "800"; 
         this.speedMs = 800;
       } else if (this.activeMode === "training" && this.speedSelect) {
-        this.speedSelect.value = "1500"; // سرعة 1x افتراضية للتدريب
+        this.speedSelect.value = "1500"; 
         this.speedMs = 1500;
+      } else if (this.activeMode === "practice" && this.speedSelect) {
+        this.speedSelect.value = "2500"; // سرعة هادئة جداً لوضع التدريب العملي
+        this.speedMs = 2500;
       }
       
       // تحديث النصوص المعروضة حالياً
@@ -356,13 +362,56 @@ window.AnimationController = {
   },
 
   /**
+   * توليد صيغ تدريبية عمل تفاعلية تطلب من المستخدم القياس بملء الفراغات (البند 1)
+   */
+  getPracticeCaption: function (step) {
+    let raw = step.caption;
+    // استبدال الأرقام المحصورة بين أقواس في الكابشن بعلامة فراغات لتحدي المستخدم
+    const regex = /\((\d+\.\d+|\d+)\s*م\)/g;
+    if (regex.test(raw)) {
+      raw = raw.replace(regex, "(........ م)");
+      // زر الكشف
+      raw += ` <a href="#" onclick="event.preventDefault(); AnimationController.revealPracticeNumber('${step.caption.replace(/'/g, "\\'")}')" style="color: #0d47a1; font-weight: bold; text-decoration: underline; margin-right: 12px; font-size: 13px;">🔍 كشف الرقم الصحيح</a>`;
+    }
+    return raw;
+  },
+
+  /**
+   * كشف الرقم الصحيح داخل وضع التدريب التفاعلي
+   */
+  revealPracticeNumber: function (originalCaption) {
+    if (this.captionText) {
+      this.captionText.innerHTML = originalCaption + ` <span style="color:#2e7d32; font-weight:bold; margin-right:10px;">✅ تم الكشف!</span>`;
+    }
+  },
+
+  /**
    * عرض رسالة النجاح الختامية بشكل بارز (البند 7)
    */
   showFinalSummaryToast: function () {
     const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
     const pegsCount = 2 * (window.calculatedPieces.length + 1);
     
-    alert(`🎉 تم اكتمال تنفيذ التقسيم بنجاح!
+    if (this.activeMode === "practice") {
+      // تسجيل عدد مرات النجاح في الـ localStorage (البند 4)
+      const completions = parseInt(localStorage.getItem("ld_practice_completions") || "0") + 1;
+      localStorage.setItem("ld_practice_completions", completions);
+      
+      alert(`🎓 أحسنت! لقد أكملت تدريب تنفيذ تقسيم الأرض بنجاح.
+---------------------------------------------------------
+📋 قائمة المراجعة النهائية للتنفيذ:
+[✓] تم قياس الحد العلوي بالكامل.
+[✓] تم قياس الحد السفلي بالكامل.
+[✓] تم وضع جميع الأوتاد لتحديد الفواصل.
+[✓] تم شد جميع الحبال (خيوط العلام).
+[✓] تم مراجعة الفواصل الهندسية وتطابقها.
+
+الأرض جاهزة للتسليم للشركاء. (عدد مرات إتمام التدريب: ${completions})
+
+⚠️ تنبيه هام للتحقق من الواقع:
+إذا وجدت اختلافاً بين القياسات الفعلية على الطبيعة والقياسات الموجودة في البرنامج، فيجب مراجعة قياسات الأرض الأربعة الأساسية أولاً قبل تثبيت الأوتاد والتسليم.`);
+    } else {
+      alert(`🎉 تم اكتمال تنفيذ التقسيم بنجاح!
 -------------------------------------
 • عدد الشركاء: ${window.calculatedPieces.length} شركاء
 • عدد الفواصل المحددة: ${window.calculatedPieces.length - 1} فواصل
@@ -370,6 +419,7 @@ window.AnimationController = {
 • مساحة الأرض الإجمالية: ${totalArea} م²
 
 الأرض جاهزة تماماً للتسليم الفعلي للشركاء.`);
+    }
   },
 
   /**
