@@ -5059,19 +5059,30 @@ function updateInspector(index) {
  */
 function openAnimationSimulation() {
   if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
-    alert("يرجى إدخال بيانات الأرض والشركاء أولاً لتوليد الشرح الميداني!");
+    alert("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
+    return;
+  }
+  
+  const w1Val = parseFloat(document.getElementById("width1").value) || 0;
+  const w2Val = parseFloat(document.getElementById("width2").value) || 0;
+  const l1Val = parseFloat(document.getElementById("length1").value) || 0;
+  const l2Val = parseFloat(document.getElementById("length2").value) || 0;
+  
+  if (w1Val <= 0 || w2Val <= 0 || l1Val <= 0 || l2Val <= 0) {
+    alert("يرجى إدخال أبعاد الأرض الأربعة بشكل صحيح أولاً!");
     return;
   }
   
   const landData = {
-    w: w,
-    w1: w1,
-    w2: w2,
-    l1: l1,
-    l2: l2
+    w: (w1Val + w2Val) / 2,
+    w1: w1Val,
+    w2: w2Val,
+    l1: l1Val,
+    l2: l2Val
   };
   
   window.AnimationController.start(landData, window.calculatedPieces);
 }
+
 
 
