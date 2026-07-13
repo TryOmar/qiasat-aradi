@@ -34,7 +34,6 @@ let lastTouchDist = 0;
 let lastTouchMidX = 0;
 let lastTouchMidY = 0;
 let isTwoFingerTouch = false;
-let isFullscreen = false;
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Trace: DOMContentLoaded fired");
@@ -243,34 +242,6 @@ function updateCroquisTransform() {
     display.innerText = Math.round(croquisScale * 100) + "%";
   }
 }
-
-// تبديل وضع ملء الشاشة
-function toggleFullscreenCroquis() {
-  const card = document.getElementById("canvas-container");
-  const btnText = document.getElementById("btn-fullscreen-text");
-  if (!card) return;
-  
-  isFullscreen = !isFullscreen;
-  
-  if (isFullscreen) {
-    card.classList.add("croquis-fullscreen-mode");
-    if (btnText) btnText.innerText = "إنهاء ملء الشاشة";
-    document.body.style.overflow = "hidden";
-  } else {
-    card.classList.remove("croquis-fullscreen-mode");
-    if (btnText) btnText.innerText = "ملء الشاشة";
-    document.body.style.overflow = "";
-  }
-  
-  setTimeout(fitCroquis, 300);
-}
-
-// خروج من الشاشة الكاملة بالضغط على Escape
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && isFullscreen) {
-    toggleFullscreenCroquis();
-  }
-});
 
 
 
