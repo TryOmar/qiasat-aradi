@@ -3073,18 +3073,116 @@ function exportPDF() {
 }
 
 function printFieldGuide() {
-  if (!window.calculatedPieces || window.calculatedPieces.filter(p => !p.isRemainder).length === 0) {
-    alert("⚠ يرجى إجراء التقسيم أولاً قبل طباعة الدليل الحقلي.");
+  openFieldGuideModal();
+}
+
+function openFieldGuideModal() {
+  if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
+    alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
     return;
   }
   if (hasDeficit()) {
-    alert("🔴 لا يمكن طباعة الدليل الحقلي لوجود عجز في الأنصبة. يرجى مراجعة الأنصبة أولاً.");
+    alert("🔴 لا يمكن عرض الدليل الحقلي لوجود عجز في الأنصبة. يرجى مراجعة الأنصبة أولاً.");
     return;
   }
 
+  const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
+  
+  // 1. حساب المتغيرات ديناميكياً
+  const dividersCount = window.calculatedPieces.length - 1;
+  const pegsCount = 2 * (window.calculatedPieces.length + 1);
+  
+  // شريط القياس المناسب
+  let maxDim = 50;
+  if (window.calculatedPieces.length > 0) {
+    // حساب أقصى بعد مطلوب قياسه
+    let maxEndX = 0;
+    window.calculatedPieces.forEach(p => {
+      if (p.endX > maxEndX) maxEndX = p.endX;
+      if (p.divLine > maxEndX) maxEndX = p.divLine;
+    });
+    maxDim = maxEndX;
+  }
+  let tapeLength = 50;
+  if (maxDim < 20) tapeLength = 20;
+  else if (maxDim < 30) tapeLength = 30;
+  else if (maxDim < 50) tapeLength = 50;
+  else tapeLength = 100;
+
+  // 2. تحديث الكارت الأيمن (الملخص)
+  const summaryHTML = `
+    <div class="fh-guide-summary-item">
+      <span>اتجاه التقسيم:</span>
+      <span>➡️ من اليمين إلى اليسار</span>
+    </div>
+    <div class="fh-guide-summary-item">
+      <span>نقطة البداية:</span>
+      <span>الحد الأيمن (الصفر) 🏁</span>
+    </div>
+    <div class="fh-guide-summary-item">
+      <span>عدد الشركاء:</span>
+      <span>${window.calculatedPieces.length} شركاء</span>
+    </div>
+    <div class="fh-guide-summary-item">
+      <span>عدد الفواصل:</span>
+      <span>${dividersCount} فواصل</span>
+    </div>
+    <div class="fh-guide-summary-item">
+      <span>الأوتاد المطلوبة:</span>
+      <span>${pegsCount} أوتاد 📌</span>
+    </div>
+    <div class="fh-guide-summary-item">
+      <span>شريط القياس المناسب:</span>
+      <span>${tapeLength} متر</span>
+    </div>
+    <div class="fh-guide-summary-item" style="border-top: 1px dashed #c8e6c9; padding-top: 8px; margin-top: 8px;">
+      <span>المساحة الإجمالية:</span>
+      <span style="color: #1b5e20;">${totalArea} م²</span>
+    </div>
+  `;
+  document.getElementById("guide-summary-content").innerHTML = summaryHTML;
+
+  // 3. تحديث الكارت الأيسر (الفواصل والقياسات)
+  let dividersHTML = "";
+  window.calculatedPieces.forEach((piece, idx) => {
+    if (idx < window.calculatedPieces.length - 1) {
+      const isRem = !!piece.isRemainder;
+      const label = isRem ? "الفاصل المتبقي" : `الفاصل ${idx + 1} (بعد نصيب ${piece.name})`;
+      dividersHTML += `
+        <div class="fh-guide-divider-row">
+          <div class="fh-guide-divider-title">📌 ${label}</div>
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>أعلى: <strong>${piece.endX.toFixed(2)} م</strong></span>
+            <span>أسفل: <strong>${piece.endX.toFixed(2)} م</strong></span>
+            <span>طول الفاصل الفعلي: <strong>${piece.divLine.toFixed(2)} م</strong></span>
+          </div>
+        </div>
+      `;
+    }
+  });
+  if (dividersHTML === "") {
+    dividersHTML = `<div class="fh-guide-divider-row" style="text-align:center; color:#555;">لا توجد فواصل مطلوبة (شريك واحد فقط).</div>`;
+  }
+  document.getElementById("guide-dividers-list").innerHTML = dividersHTML;
+
+  // فتح المودال
+  document.getElementById("field-guide-modal").style.display = "flex";
+}
+
+function closeFieldGuideModal() {
+  document.getElementById("field-guide-modal").style.display = "none";
+}
+
+function openAnimationSimulationFromGuide() {
+  closeFieldGuideModal();
+  openAnimationSimulation();
+}
+
+function printFieldGuideDirect() {
+  closeFieldGuideModal();
+  
   const now = new Date();
   const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-  const partners = window.calculatedPieces.filter(p => !p.isRemainder);
   const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
 
   let stepsHTML = `
@@ -3096,18 +3194,19 @@ function printFieldGuide() {
       </div>
     </div>`;
 
-  partners.forEach((piece, idx) => {
-    const isLast = idx === partners.length - 1;
+  window.calculatedPieces.forEach((piece, idx) => {
+    const isLast = idx === window.calculatedPieces.length - 1;
     const fcs = convertSquareMetersToFCS(piece.area);
+    const label = piece.isRemainder ? "الجزء المتبقي" : (piece.name || 'شريك ' + (idx + 1));
     stepsHTML += `
     <div class="step-arrow">↓</div>
     <div class="step piece-step">
       <div class="step-num">${idx + 1}</div>
       <div class="step-content">
-        <div class="step-title">${piece.name || 'شريك ' + (idx + 1)}</div>
+        <div class="step-title">${label}</div>
         <div class="step-area">${piece.area.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
-        <div class="step-widths">أعلى: ${piece.topW.toFixed(4)} م | أسفل: ${piece.botW.toFixed(4)} م</div>
-        ${!isLast ? `<div class="step-divider">الفاصل ${idx + 1}: <strong>${piece.endX.toFixed(4)} م</strong> من الحد الأيمن</div>` : ""}
+        <div class="step-widths">أعلى: ${piece.topW.toFixed(2)} م | أسفل: ${piece.botW.toFixed(2)} م</div>
+        ${!isLast ? `<div class="step-divider">الفاصل ${idx + 1}: أعلى <strong>${piece.endX.toFixed(2)} م</strong> | أسفل <strong>${piece.endX.toFixed(2)} م</strong> (طول الفاصل: ${piece.divLine.toFixed(2)} م)</div>` : ""}
       </div>
     </div>`;
   });
@@ -3118,7 +3217,7 @@ function printFieldGuide() {
       <div class="step-icon">🛑</div>
       <div class="step-content">
         <div class="step-title">نهاية التقسيم</div>
-        <div class="step-sub">الحد الأيسر للأرض — المساحة الإجمالية: ${totalArea}</div>
+        <div class="step-sub">الحد الأيسر للأرض — المساحة الإجمالية: ${totalArea} م²</div>
       </div>
     </div>`;
 
@@ -3126,7 +3225,7 @@ function printFieldGuide() {
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>دليل التنفيذ الحقلي - الدلال</title>
+  <title>دليل التنفيذ الحقلي الذكي - الدلال</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3160,11 +3259,11 @@ function printFieldGuide() {
   <div class="header">
     <div><h1>الدَّلاَّل</h1><p style="font-size:9pt;color:#388e3c;font-family:Cairo,sans-serif;">دليل التنفيذ الحقلي</p></div>
     <h2>خطوات تقسيم الأرض على الطبيعة</h2>
-    <div class="meta"><div><strong>التاريخ:</strong> ${dateStr}</div><div><strong>المساحة:</strong> ${totalArea}</div><div><strong>عدد الشركاء:</strong> ${partners.length}</div></div>
+    <div class="meta"><div><strong>التاريخ:</strong> ${dateStr}</div><div><strong>المساحة:</strong> ${totalArea} م²</div><div><strong>عدد الشركاء:</strong> ${window.calculatedPieces.length}</div></div>
   </div>
   <div class="direction-bar">➡️ اتجاه التقسيم: من اليمين إلى اليسار — ابدأ القياس من الحد الأيمن للأرض (النقطة صفر)</div>
   <div class="steps">${stepsHTML}</div>
-  <div class="footer">تطبيق الدَّلاَّل لقياسات الأراضي الزراعية | الإصدار v2.4</div>
+  <div class="footer">تطبيق الدَّلاَّل لقياسات الأراضي الزراعية | الإصدار v3.0</div>
 </body>
 </html>`;
 

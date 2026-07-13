@@ -624,6 +624,83 @@
       </div>
     </div>
 
+    <!-- مودال دليل التنفيذ الحقلي الذكي -->
+    <div id="field-guide-modal" class="fh-guide-modal">
+      <div class="fh-guide-modal-content">
+        <div class="fh-guide-modal-header">
+          <h3>🧭 دليل التنفيذ الحقلي الذكي</h3>
+          <button class="fh-guide-modal-close" onclick="closeFieldGuideModal()">&times;</button>
+        </div>
+        
+        <div class="fh-guide-modal-body">
+          <!-- الكارت الأيمن: ملخص إحصائيات التنفيذ الذكي -->
+          <div class="fh-guide-summary-card">
+            <h4>📊 ملخص التنفيذ الذكي</h4>
+            <div id="guide-summary-content">
+              <!-- Dynamically populated from JS -->
+            </div>
+          </div>
+          
+          <!-- الكارت الأيسر: الخطوات والإرشادات الميدانية -->
+          <div class="fh-guide-steps-container">
+            <div>
+              <div class="fh-guide-section-title">📍 قبل التوجه إلى الأرض</div>
+              <ul class="fh-guide-text-list">
+                <li>✔️ تأكد من مطابقة أبعاد الأرض للواقع وتطابقها مع الحسابات.</li>
+                <li>✔️ أحضر شريط قياس بطول مناسب.</li>
+                <li>✔️ جهز أوتاداً خشبية أو حديدية كافية لتثبيت علامات التقسيم.</li>
+                <li>✔️ يفضل وجود شخصين على الأقل لتسهيل عملية شد شريط القياس.</li>
+              </ul>
+            </div>
+            
+            <div>
+              <div class="fh-guide-section-title">🏁 نقطة البداية واتجاه القياس</div>
+              <ul class="fh-guide-text-list">
+                <li id="guide-start-instruction">يبدأ القياس من الحد الأيمن للأرض (اعتبره نقطة الصفر).</li>
+              </ul>
+            </div>
+            
+            <div>
+              <div class="fh-guide-section-title">📏 كيفية وتد الفواصل الميدانية</div>
+              <ul class="fh-guide-text-list" style="margin-bottom: 12px;">
+                <li>يتم القياس دائمًا على الحد العلوي والحد السفلي للأرض بشكل مستقل، ويُمنع القياس من منتصف الأرض.</li>
+                <li>بعد كل مسافة مستلمة، يتم وضع وتد لتحديد فاصل الشريك.</li>
+              </ul>
+              
+              <!-- جدول الفواصل الديناميكي المولد -->
+              <div id="guide-dividers-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+            
+            <div>
+              <div class="fh-guide-section-title">🔨 تنفيذ وشد الحبل الفاصل</div>
+              <ul class="fh-guide-text-list">
+                <li>قس مسافة الشريك المطلوبة على الحد العلوي ثم ضع وتداً 📌.</li>
+                <li>قس نفس المسافة المناظرة على الحد السفلي ثم ضع وتداً آخر 📌.</li>
+                <li>شد خيطاً (خيط قياس متين) مستقيماً بين الوتدين؛ هذا الخيط يمثل الحد الفاصل الفعلي لقطعة الشريك.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div class="fh-guide-section-title">⚠️ تنبيهات ميدانية حاسمة</div>
+              <ul class="fh-guide-text-list" style="color: #c62828;">
+                <li>لا تعتمد مطلقاً على التقدير البصري للزوايا أو الفواصل.</li>
+                <li>تأكد من شد شريط القياس بشكل مستقيم تماماً دون ارتخاء.</li>
+                <li>راجع كل علامة وتد وتأكد من مطابقة أرقام التراكمي قبل الانتقال للفاصل التالي.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="fh-guide-modal-footer">
+          <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulationFromGuide()" style="background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32; font-weight: bold;">🎬 تشغيل الشرح المتحرك</button>
+          <button class="btn btn-primary btn-sm" onclick="printFieldGuideDirect()" style="background: #1b5e20; color: white; font-weight: bold;">🖨️ طباعة الدليل الورقي</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeFieldGuideModal()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
     <!-- مودال شرح طريقة تعديل العروض يدوياً -->
 
     <!-- مودال شرح طريقة تعديل العروض يدوياً -->
