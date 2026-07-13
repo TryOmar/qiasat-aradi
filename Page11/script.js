@@ -2286,14 +2286,14 @@ function renderCroquis() {
           let badgeBorder = "";
           let badgeBg = "";
           if (isStart) {
-            badgeEmoji = "[بداية]";
-            badgeLabel = "بداية استلام الأنصبة";
+            badgeEmoji = "🏁";
+            badgeLabel = "البداية";
             badgeFill = "#1b5e20";
             badgeBorder = "#2e7d32";
             badgeBg = "#e8f5e9";
           } else if (isEnd) {
-            badgeEmoji = "[نهاية]";
-            badgeLabel = "نهاية التقسيم";
+            badgeEmoji = "🚩";
+            badgeLabel = "النهاية";
             badgeFill = "#b71c1c";
             badgeBorder = "#c62828";
             badgeBg = "#ffebee";
@@ -2301,15 +2301,15 @@ function renderCroquis() {
 
           if (badgeLabel) {
             // حساب الأبعاد للمقارنة والتحقق من التداخل
-            const badgeFontSize = Math.max(7.5, fontSize - 2.5);
-            const emojiFontSize = badgeFontSize + 7;
-            const badgePadX = 4 * textScale;
-            const badgePadY = 4 * textScale;
+            const badgeFontSize = Math.max(6.5, fontSize - 3.5);
+            const emojiFontSize = badgeFontSize + 5;
+            const badgePadX = 2.5 * textScale;
+            const badgePadY = 2.5 * textScale;
             
             const emojiHeight = emojiFontSize * textScale;
             const labelHeight = badgeFontSize * textScale;
             
-            const badgeW = 72 * textScale;
+            const badgeW = 52 * textScale;
             const badgeH = emojiHeight + labelHeight + badgePadY * 2;
 
             // تحديد ما إذا كان هناك مساحة داخلية كافية خالية من التصادم
@@ -2365,8 +2365,8 @@ function renderCroquis() {
               const anchorY = isStart ? y1 : y2;
               
               // إزاحة الشارة للأعلى والخارج (10-15 بكسل هامش أمان إضافي)
-              const offsetX = isStart ? 35 * textScale : -35 * textScale;
-              const offsetY = -40 * textScale;
+              const offsetX = isStart ? 26 * textScale : -26 * textScale;
+              const offsetY = -30 * textScale;
               
               const badgeCX = anchorX + offsetX;
               const badgeCY = anchorY + offsetY;
