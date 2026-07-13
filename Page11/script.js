@@ -1,3 +1,4 @@
+console.log("Trace: Start of script.js loading");
 let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
@@ -36,6 +37,7 @@ let isTwoFingerTouch = false;
 let isFullscreen = false;
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("Trace: DOMContentLoaded fired");
   loadData();
   updateWidthModeDescription();
   
@@ -1010,6 +1012,8 @@ function syncExclusionUI() {
 }
 
 function calculateGeneral() {
+  console.log("Trace: calculateGeneral start");
+  try {
   if (!window.isNormalizing) {
     window.normalizedDiff = 0;
   }
@@ -1277,6 +1281,9 @@ function calculateGeneral() {
   updateConversionsTable();
   renderCroquis();
   updateCalculationSteps();
+  } catch (e) {
+    console.error("Error in calculateGeneral:", e);
+  }
 }
 
 function runPartition() {
@@ -1921,7 +1928,9 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
 }
 
 function renderCroquis() {
-  const g = document.getElementById("croquis-content");
+  console.log("Trace: renderCroquis start");
+  try {
+    const g = document.getElementById("croquis-content");
   if (!g) return;
   g.innerHTML = "";
 
@@ -2632,6 +2641,9 @@ function renderCroquis() {
     } else {
       legendDiv.style.display = "none";
     }
+  }
+  } catch (e) {
+    console.error("Error in renderCroquis:", e);
   }
 }
 
@@ -4940,7 +4952,9 @@ function convertSquareMetersToFCS(area) {
 }
 
 function updateTableTotals() {
-  const rows = document.querySelectorAll("#partners-list .partner-row");
+  console.log("Trace: updateTableTotals start");
+  try {
+    const rows = document.querySelectorAll("#partners-list .partner-row");
   const remRow = document.getElementById("remainder-row-table");
   const isRemVisible = remRow && remRow.style.display !== "none" && remRow.style.display !== "";
   
@@ -5044,6 +5058,9 @@ function updateTableTotals() {
     
     if (botWidthEl) botWidthEl.value = "-";
     if (topWidthEl) topWidthEl.value = "-";
+  }
+  } catch (e) {
+    console.error("Error in updateTableTotals:", e);
   }
 }
 
