@@ -1882,7 +1882,7 @@ function svgText(x, y, content, opts = {}) {
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseSize = parseFloat(opts.size || "13");
-  t.setAttribute("font-size", (baseSize * textScale) + "px");
+  t.setAttribute("font-size", (baseSize * textScale));
   t.setAttribute("font-weight", opts.weight || "bold");
   t.setAttribute("fill", opts.fill || "#222");
   if (opts.transform) t.setAttribute("transform", opts.transform);
@@ -1893,7 +1893,7 @@ function svgText(x, y, content, opts = {}) {
   // إضافة خلفية بيضاء للنص إذا طُلب
   if (opts.bg) {
     t.setAttribute("stroke", "white");
-    t.setAttribute("stroke-width", (3 * textScale) + "px");
+    t.setAttribute("stroke-width", (3 * textScale));
     t.setAttribute("paint-order", "stroke");
   }
   return t;
@@ -1917,7 +1917,7 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseWidth = parseFloat(opts.width || "1");
-  l.setAttribute("stroke-width", (baseWidth * textScale) + "px");
+  l.setAttribute("stroke-width", (baseWidth * textScale));
   
   if (opts.dash) {
     const dashes = opts.dash.split(",").map(d => parseFloat(d) * textScale).join(",");
@@ -2070,7 +2070,7 @@ function renderCroquis() {
   shadowPoly.setAttribute("points",
     `${mapX(0)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(0)+sOff} ${mapX(w)+sOff},${mapY(l1)+sOff} ${mapX(0)+sOff},${mapY(l2)+sOff}`
   );
-  shadowPoly.setAttribute("fill", "rgba(0,0,0,0.08)");
+  shadowPoly.setAttribute("fill", "#f0f0f0");
   shadowPoly.setAttribute("rx", "4");
   shadowPoly.setAttribute("shape-rendering", "geometricPrecision");
   g.appendChild(shadowPoly);
@@ -2083,7 +2083,7 @@ function renderCroquis() {
   );
   mainPoly.setAttribute("fill", "#FDFBF2");
   mainPoly.setAttribute("stroke", "#1b5e20");
-  mainPoly.setAttribute("stroke-width", (2.5 * textScale) + "px");
+  mainPoly.setAttribute("stroke-width", (2.5 * textScale));
   mainPoly.setAttribute("stroke-linejoin", "round");
   mainPoly.setAttribute("shape-rendering", "geometricPrecision");
   g.appendChild(mainPoly);
@@ -2094,7 +2094,7 @@ function renderCroquis() {
     window.calculatedPieces.forEach((piece, index) => {
       const isRem = piece.isRemainder;
       const color = isRem 
-        ? { fill: "rgba(255, 193, 7, 0.11)", stroke: "#ff8f00" }
+        ? { fill: "#fff8e1", stroke: "#ff8f00" }
         : PIECE_COLORS[index % PIECE_COLORS.length];
 
       // Mirror coordinates to draw from Right to Left visually
@@ -2135,7 +2135,7 @@ function renderCroquis() {
       topBorder.setAttribute("x2", x2);
       topBorder.setAttribute("y2", y2);
       topBorder.setAttribute("stroke", color.stroke);
-      topBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
+      topBorder.setAttribute("stroke-width", (3.5 * textScale));
       topBorder.setAttribute("stroke-linejoin", "round");
       topBorder.setAttribute("style", "pointer-events: none;");
       if (dash) topBorder.setAttribute("stroke-dasharray", dash);
@@ -2148,7 +2148,7 @@ function renderCroquis() {
       botBorder.setAttribute("x2", x2);
       botBorder.setAttribute("y2", y3);
       botBorder.setAttribute("stroke", color.stroke);
-      botBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
+      botBorder.setAttribute("stroke-width", (3.5 * textScale));
       botBorder.setAttribute("stroke-linejoin", "round");
       botBorder.setAttribute("style", "pointer-events: none;");
       if (dash) botBorder.setAttribute("stroke-dasharray", dash);
@@ -2162,7 +2162,7 @@ function renderCroquis() {
         rightBorder.setAttribute("x2", x1);
         rightBorder.setAttribute("y2", y4);
         rightBorder.setAttribute("stroke", color.stroke);
-        rightBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
+        rightBorder.setAttribute("stroke-width", (3.5 * textScale));
         rightBorder.setAttribute("stroke-linejoin", "round");
         rightBorder.setAttribute("style", "pointer-events: none;");
         if (dash) rightBorder.setAttribute("stroke-dasharray", dash);
@@ -2177,7 +2177,7 @@ function renderCroquis() {
         leftBorder.setAttribute("x2", x2);
         leftBorder.setAttribute("y2", y3);
         leftBorder.setAttribute("stroke", color.stroke);
-        leftBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
+        leftBorder.setAttribute("stroke-width", (3.5 * textScale));
         leftBorder.setAttribute("stroke-linejoin", "round");
         leftBorder.setAttribute("style", "pointer-events: none;");
         if (dash) leftBorder.setAttribute("stroke-dasharray", dash);
@@ -2192,7 +2192,7 @@ function renderCroquis() {
         dividerLine.setAttribute("x2", x1);
         dividerLine.setAttribute("y2", y4);
         dividerLine.setAttribute("stroke", color.stroke); // لون الشريك الحالي
-        dividerLine.setAttribute("stroke-width", (2.5 * textScale) + "px");
+        dividerLine.setAttribute("stroke-width", (2.5 * textScale));
         dividerLine.setAttribute("stroke-linejoin", "round");
         dividerLine.setAttribute("style", "pointer-events: none;");
         if (dash) dividerLine.setAttribute("stroke-dasharray", dash);
@@ -2283,13 +2283,13 @@ function renderCroquis() {
           let badgeBorder = "";
           let badgeBg = "";
           if (index === 0) {
-            badgeEmoji = "🏁";
+            badgeEmoji = "[بداية]";
             badgeLabel = "بداية استلام الأنصبة";
             badgeFill = "#1b5e20";
             badgeBorder = "#2e7d32";
             badgeBg = "#e8f5e9";
           } else if (index === window.calculatedPieces.length - 1 && !piece.isRemainder) {
-            badgeEmoji = "🛑";
+            badgeEmoji = "[نهاية]";
             badgeLabel = "نهاية التقسيم";
             badgeFill = "#b71c1c";
             badgeBorder = "#c62828";
@@ -2338,8 +2338,7 @@ function renderCroquis() {
               rect.setAttribute("ry", 4 * textScale);
               rect.setAttribute("fill", badgeBg);
               rect.setAttribute("stroke", badgeBorder);
-              rect.setAttribute("stroke-width", (1 * textScale) + "px");
-              rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
+              rect.setAttribute("stroke-width", (1 * textScale));
               dirGroup.appendChild(rect);
 
               const tEmoji = svgText(cx, finalYDirection - badgeH / 2 + emojiHeight + badgePadY / 2, badgeEmoji, {
@@ -2397,8 +2396,7 @@ function renderCroquis() {
               rect.setAttribute("ry", 4 * textScale);
               rect.setAttribute("fill", badgeBg);
               rect.setAttribute("stroke", badgeBorder);
-              rect.setAttribute("stroke-width", (1 * textScale) + "px");
-              rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
+              rect.setAttribute("stroke-width", (1 * textScale));
               dirGroup.appendChild(rect);
 
               const tEmoji = svgText(badgeCX, badgeCY - badgeH / 2 + emojiHeight + badgePadY / 2, badgeEmoji, {
@@ -2458,8 +2456,8 @@ function renderCroquis() {
     const lY2 = mapY(l2);  // l2 = الطول الأيسر هو ارتفاع الجانب الأيسر
     
     // خطوط المساعدة المقطعة
-    g.appendChild(svgLine(lX, lY1, lX - dimOffset, lY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    g.appendChild(svgLine(lX, lY2, lX - dimOffset, lY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(lX, lY1, lX - dimOffset, lY1, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(lX, lY2, lX - dimOffset, lY2, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
     g.appendChild(svgLine(lX - dimOffset, lY1, lX - dimOffset, lY2, { stroke: "#1b5e20", width: "2" }));
@@ -2484,8 +2482,8 @@ function renderCroquis() {
     const rY2 = mapY(l1);  // l1 = الطول الأيمن هو ارتفاع الجانب الأيمن
     
     // خطوط المساعدة المقطعة
-    g.appendChild(svgLine(rX, rY1, rX + dimOffset, rY1, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(rX, rY1, rX + dimOffset, rY1, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(rX, rY2, rX + dimOffset, rY2, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
     g.appendChild(svgLine(rX + dimOffset, rY1, rX + dimOffset, rY2, { stroke: "#1b5e20", width: "2" }));
@@ -2510,8 +2508,8 @@ function renderCroquis() {
     const bX2 = mapX(w);
     
     // خطوط المساعدة المقطعة
-    g.appendChild(svgLine(bX1, mapY(0), bX1, bY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    g.appendChild(svgLine(bX2, mapY(0), bX2, bY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(bX1, mapY(0), bX1, bY, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(bX2, mapY(0), bX2, bY, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
     g.appendChild(svgLine(bX1, bY, bX2, bY, { stroke: "#1b5e20", width: "2" }));
@@ -2534,8 +2532,8 @@ function renderCroquis() {
     const topX2 = mapX(w);
     
     // خطوط مساعدة من كل سقف لأعلى
-    g.appendChild(svgLine(topX1, mapY(l2), topX1, topEdgeY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
-    g.appendChild(svgLine(topX2, mapY(l1), topX2, topEdgeY, { stroke: "rgba(46, 125, 50, 0.55)", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(topX1, mapY(l2), topX1, topEdgeY, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
+    g.appendChild(svgLine(topX2, mapY(l1), topX2, topEdgeY, { stroke: "#4CAF50", width: "1.2", dash: "2,3" }));
     
     // خط الأبعاد
     g.appendChild(svgLine(topX1, topEdgeY, topX2, topEdgeY, { stroke: "#1b5e20", width: "2" }));
@@ -2574,14 +2572,14 @@ function renderCroquis() {
 
       // كتابة النص فوق السهم - سطرين
       const arrowMidX = (arrowStartX + arrowEndX) / 2;
-      const arrowText1 = svgText(arrowMidX, arrowY - 18 * textScale, "➡️ اتجاه التقسيم", {
+      const arrowText1 = svgText(arrowMidX, arrowY - 18 * textScale, "اتجاه التقسيم", {
         fill: "#ef6c00",
         size: "12",
         weight: "bold",
         bg: true
       });
       g.appendChild(arrowText1);
-      const arrowText2 = svgText(arrowMidX, arrowY - 6 * textScale, "من اليمين ← إلى اليسار (يمكن تغييره مستقبلاً)", {
+      const arrowText2 = svgText(arrowMidX, arrowY - 6 * textScale, "من اليمين الى اليسار", {
         fill: "#f57c00",
         size: "10",
         weight: "normal",
@@ -2606,6 +2604,24 @@ function renderCroquis() {
       c.setAttribute("fill", "#1b5e20");
       g.appendChild(c);
     });
+  }
+
+  // === ضبط viewBox على عنصر SVG لعرض كامل المحتوى على جميع الشاشات (الموبايل والكمبيوتر) ===
+  // الأبعاد الإضافية تأخذ بعين الاعتبار نصوص الأبعاد الخارجية التي تتجاوز حدود الشكل
+  if (!window.isExporting) {
+    const svgEl2 = document.getElementById("croquis-svg");
+    if (svgEl2) {
+      const extraLeft = 80;   // مساحة لنصوص الطول الأيسر + خطوط الأبعاد
+      const extraRight = 80;  // مساحة لنصوص الطول الأيمن + خطوط الأبعاد
+      const extraTop = 70;    // مساحة لنصوص العرض العلوي + سهم الاتجاه
+      const extraBottom = 50; // مساحة لنصوص العرض السفلي
+      const vbX = -extraLeft;
+      const vbY = -extraTop;
+      const vbW = containerW + extraLeft + extraRight;
+      const vbH = containerH + extraTop + extraBottom;
+      svgEl2.setAttribute("viewBox", vbX + " " + vbY + " " + vbW + " " + vbH);
+      svgEl2.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    }
   }
 
   // تحديث قائمة مساحات الشركاء أعلى الخريطة

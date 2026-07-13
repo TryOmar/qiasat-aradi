@@ -650,7 +650,7 @@ body {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* ظ†طµ طھظ„ظ…ظٹط­ظٹ */
@@ -681,7 +681,7 @@ body {
   left: 10px !important;
   right: 10px !important;
   bottom: 10px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   cursor: default !important;
   touch-action: none !important;
   background: white !important;
