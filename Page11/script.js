@@ -1872,12 +1872,17 @@ function svgText(x, y, content, opts = {}) {
   t.setAttribute("fill", opts.fill || "#222");
   if (opts.transform) t.setAttribute("transform", opts.transform);
   if (opts.opacity) t.setAttribute("opacity", opts.opacity);
+  
+  // دعم كامل للكتابة باللغة العربية RTL على الموبايل
+  t.setAttribute("direction", "rtl");
+  t.setAttribute("unicode-bidi", "embed");
+
   t.textContent = content;
   
   // إضافة خلفية بيضاء للنص إذا طُلب
   if (opts.bg) {
     t.setAttribute("stroke", "white");
-    t.setAttribute("stroke-width", 3 * textScale);
+    t.setAttribute("stroke-width", (3 * textScale) + "px");
     t.setAttribute("paint-order", "stroke");
   }
   return t;
@@ -1893,7 +1898,7 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
   
   const textScale = window.isExporting ? 2.2 : 1;
   const baseWidth = parseFloat(opts.width || "1");
-  l.setAttribute("stroke-width", baseWidth * textScale);
+  l.setAttribute("stroke-width", (baseWidth * textScale) + "px");
   
   if (opts.dash) {
     const dashes = opts.dash.split(",").map(d => parseFloat(d) * textScale).join(",");
@@ -2055,7 +2060,7 @@ function renderCroquis() {
   );
   mainPoly.setAttribute("fill", "#FDFBF2");
   mainPoly.setAttribute("stroke", "#1b5e20");
-  mainPoly.setAttribute("stroke-width", 2.5 * textScale);
+  mainPoly.setAttribute("stroke-width", (2.5 * textScale) + "px");
   mainPoly.setAttribute("stroke-linejoin", "round");
   g.appendChild(mainPoly);
 
@@ -2105,7 +2110,7 @@ function renderCroquis() {
       topBorder.setAttribute("x2", x2);
       topBorder.setAttribute("y2", y2);
       topBorder.setAttribute("stroke", color.stroke);
-      topBorder.setAttribute("stroke-width", 3.5 * textScale);
+      topBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
       topBorder.setAttribute("stroke-linejoin", "round");
       topBorder.setAttribute("style", "pointer-events: none;");
       if (dash) topBorder.setAttribute("stroke-dasharray", dash);
@@ -2118,7 +2123,7 @@ function renderCroquis() {
       botBorder.setAttribute("x2", x2);
       botBorder.setAttribute("y2", y3);
       botBorder.setAttribute("stroke", color.stroke);
-      botBorder.setAttribute("stroke-width", 3.5 * textScale);
+      botBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
       botBorder.setAttribute("stroke-linejoin", "round");
       botBorder.setAttribute("style", "pointer-events: none;");
       if (dash) botBorder.setAttribute("stroke-dasharray", dash);
@@ -2132,7 +2137,7 @@ function renderCroquis() {
         rightBorder.setAttribute("x2", x1);
         rightBorder.setAttribute("y2", y4);
         rightBorder.setAttribute("stroke", color.stroke);
-        rightBorder.setAttribute("stroke-width", 3.5 * textScale);
+        rightBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
         rightBorder.setAttribute("stroke-linejoin", "round");
         rightBorder.setAttribute("style", "pointer-events: none;");
         if (dash) rightBorder.setAttribute("stroke-dasharray", dash);
@@ -2147,7 +2152,7 @@ function renderCroquis() {
         leftBorder.setAttribute("x2", x2);
         leftBorder.setAttribute("y2", y3);
         leftBorder.setAttribute("stroke", color.stroke);
-        leftBorder.setAttribute("stroke-width", 3.5 * textScale);
+        leftBorder.setAttribute("stroke-width", (3.5 * textScale) + "px");
         leftBorder.setAttribute("stroke-linejoin", "round");
         leftBorder.setAttribute("style", "pointer-events: none;");
         if (dash) leftBorder.setAttribute("stroke-dasharray", dash);
@@ -2162,7 +2167,7 @@ function renderCroquis() {
         dividerLine.setAttribute("x2", x1);
         dividerLine.setAttribute("y2", y4);
         dividerLine.setAttribute("stroke", color.stroke); // لون الشريك الحالي
-        dividerLine.setAttribute("stroke-width", 2.5 * textScale);
+        dividerLine.setAttribute("stroke-width", (2.5 * textScale) + "px");
         dividerLine.setAttribute("stroke-linejoin", "round");
         dividerLine.setAttribute("style", "pointer-events: none;");
         if (dash) dividerLine.setAttribute("stroke-dasharray", dash);
@@ -2187,15 +2192,11 @@ function renderCroquis() {
         
         if (pieceWidth < 28 && !window.isExporting) {
           // إذا كانت الأرض ضيقة جداً، نعرض رقم القطعة فقط لتفادي التداخل
-          const tIdx = svgEl("text");
-          tIdx.setAttribute("x", cx);
-          tIdx.setAttribute("y", cy + 4 * textScale);
-          tIdx.setAttribute("fill", isRem ? "#e65100" : "#000000"); // لون داكن عالي التباين
-          tIdx.setAttribute("font-size", (12.5 * textScale) + "px"); // خط أكبر
-          tIdx.setAttribute("font-family", "Cairo, Arial, sans-serif");
-          tIdx.setAttribute("text-anchor", "middle");
-          tIdx.setAttribute("font-weight", "bold");
-          tIdx.textContent = (index + 1).toString();
+          const tIdx = svgText(cx, cy + 4 * textScale, (index + 1).toString(), {
+            fill: isRem ? "#e65100" : "#000000",
+            size: "12.5",
+            weight: "bold"
+          });
           labelGroup.appendChild(tIdx);
         } else {
           // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة
@@ -2213,15 +2214,11 @@ function renderCroquis() {
             const areaGroup = svgEl("g");
             areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);
             
-            const tAreaVal = svgEl("text");
-            tAreaVal.setAttribute("x", cx);
-            tAreaVal.setAttribute("y", yArea + 4 * textScale);
-            tAreaVal.setAttribute("fill", "#000000"); // أسود
-            tAreaVal.setAttribute("font-size", fontSize + "px");
-            tAreaVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tAreaVal.setAttribute("text-anchor", "middle");
-            tAreaVal.setAttribute("font-weight", "bold");
-            tAreaVal.textContent = areaVal + " م²";
+            const tAreaVal = svgText(cx, yArea + 4 * textScale, areaVal + " م²", {
+              fill: "#000000",
+              size: (fontSize / textScale).toString(),
+              weight: "bold"
+            });
             areaGroup.appendChild(tAreaVal);
             labelGroup.appendChild(areaGroup);
           }
@@ -2231,15 +2228,11 @@ function renderCroquis() {
             const nameGroup = svgEl("g");
             nameGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yName})`);
             
-            const tName = svgEl("text");
-            tName.setAttribute("x", cx);
-            tName.setAttribute("y", yName + 4 * textScale);
-            tName.setAttribute("fill", isRem ? "#e65100" : "#000000"); // أسود
-            tName.setAttribute("font-size", (fontSize + 0.5) + "px");
-            tName.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tName.setAttribute("text-anchor", "middle");
-            tName.setAttribute("font-weight", "bold");
-            tName.textContent = nameToShow;
+            const tName = svgText(cx, yName + 4 * textScale, nameToShow, {
+              fill: isRem ? "#e65100" : "#000000",
+              size: ((fontSize + 0.5) / textScale).toString(),
+              weight: "bold"
+            });
             nameGroup.appendChild(tName);
             labelGroup.appendChild(nameGroup);
           }
@@ -2249,15 +2242,11 @@ function renderCroquis() {
             const lenGroup = svgEl("g");
             lenGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yLength})`);
             
-            const tLenVal = svgEl("text");
-            tLenVal.setAttribute("x", cx);
-            tLenVal.setAttribute("y", yLength + 4 * textScale);
-            tLenVal.setAttribute("fill", "#000000"); // أسود
-            tLenVal.setAttribute("font-size", fontSize + "px");
-            tLenVal.setAttribute("font-family", "Cairo, Arial, sans-serif");
-            tLenVal.setAttribute("text-anchor", "middle");
-            tLenVal.setAttribute("font-weight", "bold");
-            tLenVal.textContent = pieceMidLength.toFixed(2) + " م";
+            const tLenVal = svgText(cx, yLength + 4 * textScale, pieceMidLength.toFixed(2) + " م", {
+              fill: "#000000",
+              size: (fontSize / textScale).toString(),
+              weight: "bold"
+            });
             lenGroup.appendChild(tLenVal);
             labelGroup.appendChild(lenGroup);
           }
@@ -2324,29 +2313,22 @@ function renderCroquis() {
               rect.setAttribute("ry", 4 * textScale);
               rect.setAttribute("fill", badgeBg);
               rect.setAttribute("stroke", badgeBorder);
-              rect.setAttribute("stroke-width", 1 * textScale);
+              rect.setAttribute("stroke-width", (1 * textScale) + "px");
               rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
               dirGroup.appendChild(rect);
 
-              const tEmoji = svgEl("text");
-              tEmoji.setAttribute("x", cx);
-              tEmoji.setAttribute("y", finalYDirection - badgeH / 2 + emojiHeight + badgePadY / 2);
-              tEmoji.setAttribute("fill", badgeFill);
-              tEmoji.setAttribute("font-size", emojiFontSize + "px");
-              tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
-              tEmoji.setAttribute("text-anchor", "middle");
-              tEmoji.textContent = badgeEmoji;
+              const tEmoji = svgText(cx, finalYDirection - badgeH / 2 + emojiHeight + badgePadY / 2, badgeEmoji, {
+                fill: badgeFill,
+                size: (emojiFontSize / textScale).toString(),
+                weight: "bold"
+              });
               dirGroup.appendChild(tEmoji);
 
-              const tLabel = svgEl("text");
-              tLabel.setAttribute("x", cx);
-              tLabel.setAttribute("y", finalYDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
-              tLabel.setAttribute("fill", badgeFill);
-              tLabel.setAttribute("font-size", badgeFontSize + "px");
-              tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
-              tLabel.setAttribute("text-anchor", "middle");
-              tLabel.setAttribute("font-weight", "bold");
-              tLabel.textContent = badgeLabel;
+              const tLabel = svgText(cx, finalYDirection - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale, badgeLabel, {
+                fill: badgeFill,
+                size: (badgeFontSize / textScale).toString(),
+                weight: "bold"
+              });
               dirGroup.appendChild(tLabel);
 
               labelGroup.appendChild(dirGroup);
@@ -2390,29 +2372,22 @@ function renderCroquis() {
               rect.setAttribute("ry", 4 * textScale);
               rect.setAttribute("fill", badgeBg);
               rect.setAttribute("stroke", badgeBorder);
-              rect.setAttribute("stroke-width", 1 * textScale);
+              rect.setAttribute("stroke-width", (1 * textScale) + "px");
               rect.setAttribute("filter", "drop-shadow(0px 1px 2px rgba(0,0,0,0.15))");
               dirGroup.appendChild(rect);
 
-              const tEmoji = svgEl("text");
-              tEmoji.setAttribute("x", badgeCX);
-              tEmoji.setAttribute("y", badgeCY - badgeH / 2 + emojiHeight + badgePadY / 2);
-              tEmoji.setAttribute("fill", badgeFill);
-              tEmoji.setAttribute("font-size", emojiFontSize + "px");
-              tEmoji.setAttribute("font-family", "Cairo, Arial, sans-serif");
-              tEmoji.setAttribute("text-anchor", "middle");
-              tEmoji.textContent = badgeEmoji;
+              const tEmoji = svgText(badgeCX, badgeCY - badgeH / 2 + emojiHeight + badgePadY / 2, badgeEmoji, {
+                fill: badgeFill,
+                size: (emojiFontSize / textScale).toString(),
+                weight: "bold"
+              });
               dirGroup.appendChild(tEmoji);
 
-              const tLabel = svgEl("text");
-              tLabel.setAttribute("x", badgeCX);
-              tLabel.setAttribute("y", badgeCY - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale);
-              tLabel.setAttribute("fill", badgeFill);
-              tLabel.setAttribute("font-size", badgeFontSize + "px");
-              tLabel.setAttribute("font-family", "Cairo, Arial, sans-serif");
-              tLabel.setAttribute("text-anchor", "middle");
-              tLabel.setAttribute("font-weight", "bold");
-              tLabel.textContent = badgeLabel;
+              const tLabel = svgText(badgeCX, badgeCY - badgeH / 2 + emojiHeight + badgePadY + labelHeight - 1 * textScale, badgeLabel, {
+                fill: badgeFill,
+                size: (badgeFontSize / textScale).toString(),
+                weight: "bold"
+              });
               dirGroup.appendChild(tLabel);
 
               labelGroup.appendChild(dirGroup);
