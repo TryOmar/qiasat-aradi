@@ -64,6 +64,13 @@ let showActualDims = true; // متغير لإظهار الأبعاد الهند�
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
 let showCroquisNames = true;
+let showCroquisDimensions = true;
+let showCroquisDividers = true;
+let showCroquisAreas = true;
+let showCroquisNumbers = true;
+let showCroquisBadges = true;
+let croquisFontSize = 13;
+let croquisMeasurementSize = 12;
 const PIECE_COLORS = [
   { fill: "#DCEFD9", stroke: "#2E7D32" }, // شريك 1: أخضر فاتح / أخضر غامق
   { fill: "#D7E9FF", stroke: "#1565C0" }, // شريك 2: أزرق فاتح / أزرق غامق
@@ -201,6 +208,85 @@ document.addEventListener("keydown", (e) => {
 function toggleCroquisNames() {
   const chk = document.getElementById("chk-toggle-names");
   if (chk) showCroquisNames = chk.checked;
+  calculateAll();
+}
+
+function saveCroquisSettings() {
+  localStorage.setItem("p13-show-dimensions", showCroquisDimensions ? "true" : "false");
+  localStorage.setItem("p13-show-dividers", showCroquisDividers ? "true" : "false");
+  localStorage.setItem("p13-show-names", showCroquisNames ? "true" : "false");
+  localStorage.setItem("p13-show-areas", showCroquisAreas ? "true" : "false");
+  localStorage.setItem("p13-show-numbers", showCroquisNumbers ? "true" : "false");
+  localStorage.setItem("p13-show-badges", showCroquisBadges ? "true" : "false");
+  localStorage.setItem("p13-font-size", croquisFontSize.toString());
+  localStorage.setItem("p13-measurement-size", croquisMeasurementSize.toString());
+}
+
+function loadCroquisSettings() {
+  showCroquisDimensions = (localStorage.getItem("p13-show-dimensions") !== "false");
+  showCroquisDividers = (localStorage.getItem("p13-show-dividers") !== "false");
+  showCroquisNames = (localStorage.getItem("p13-show-names") !== "false");
+  showCroquisAreas = (localStorage.getItem("p13-show-areas") !== "false");
+  showCroquisNumbers = (localStorage.getItem("p13-show-numbers") !== "false");
+  showCroquisBadges = (localStorage.getItem("p13-show-badges") !== "false");
+  croquisFontSize = parseInt(localStorage.getItem("p13-font-size")) || 13;
+  croquisMeasurementSize = parseInt(localStorage.getItem("p13-measurement-size")) || 12;
+
+  // Sync to DOM inputs
+  const chkDimensions = document.getElementById("settings-show-dimensions");
+  const chkDividers = document.getElementById("settings-show-dividers");
+  const chkNames = document.getElementById("settings-show-names");
+  const chkAreas = document.getElementById("settings-show-areas");
+  const chkNumbers = document.getElementById("settings-show-numbers");
+  const chkBadges = document.getElementById("settings-show-badges");
+  const inputFontSize = document.getElementById("settings-font-size");
+  const inputMeasurementSize = document.getElementById("settings-measurement-size");
+
+  if (chkDimensions) chkDimensions.checked = showCroquisDimensions;
+  if (chkDividers) chkDividers.checked = showCroquisDividers;
+  if (chkNames) chkNames.checked = showCroquisNames;
+  if (chkAreas) chkAreas.checked = showCroquisAreas;
+  if (chkNumbers) chkNumbers.checked = showCroquisNumbers;
+  if (chkBadges) chkBadges.checked = showCroquisBadges;
+  if (inputFontSize) inputFontSize.value = croquisFontSize;
+  if (inputMeasurementSize) inputMeasurementSize.value = croquisMeasurementSize;
+}
+
+function updateCroquisSettings() {
+  const chkDimensions = document.getElementById("settings-show-dimensions");
+  const chkDividers = document.getElementById("settings-show-dividers");
+  const chkNames = document.getElementById("settings-show-names");
+  const chkAreas = document.getElementById("settings-show-areas");
+  const chkNumbers = document.getElementById("settings-show-numbers");
+  const chkBadges = document.getElementById("settings-show-badges");
+  const inputFontSize = document.getElementById("settings-font-size");
+  const inputMeasurementSize = document.getElementById("settings-measurement-size");
+
+  if (chkDimensions) showCroquisDimensions = chkDimensions.checked;
+  if (chkDividers) showCroquisDividers = chkDividers.checked;
+  if (chkNames) showCroquisNames = chkNames.checked;
+  if (chkAreas) showCroquisAreas = chkAreas.checked;
+  if (chkNumbers) showCroquisNumbers = chkNumbers.checked;
+  if (chkBadges) showCroquisBadges = chkBadges.checked;
+  if (inputFontSize) croquisFontSize = parseInt(inputFontSize.value) || 13;
+  if (inputMeasurementSize) croquisMeasurementSize = parseInt(inputMeasurementSize.value) || 12;
+
+  saveCroquisSettings();
+  calculateAll();
+}
+
+function resetCroquisSettings() {
+  showCroquisDimensions = true;
+  showCroquisDividers = true;
+  showCroquisNames = true;
+  showCroquisAreas = true;
+  showCroquisNumbers = true;
+  showCroquisBadges = true;
+  croquisFontSize = 13;
+  croquisMeasurementSize = 12;
+
+  saveCroquisSettings();
+  loadCroquisSettings();
   calculateAll();
 }
 
@@ -1781,7 +1867,7 @@ function drawLandCanvas(vertices) {
         }
 
         // 5. الفواصل الداخلية (تكون أقل سماكة)
-        if (i > 0) {
+        if (i > 0 && showCroquisDividers) {
           ctx.lineWidth = Math.max(2, 2.5 * scaleMultiplier);
           ctx.beginPath();
           ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
@@ -1802,16 +1888,18 @@ function drawLandCanvas(vertices) {
       const nameToShow = heir.name || `شريك ${i + 1}`;
       const pieceMidLength = (pieceLeftL + pieceRightL) / 2;
       
-      if (showCroquisNames || showCroquisMeasurements) {
+      if (showCroquisNames || showCroquisDimensions || showCroquisAreas || showCroquisNumbers) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
         if (pieceWidth < Math.max(28, 28 * scaleMultiplier) && !window.isExporting) {
-          // Narrow piece: just draw index number
-          const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
-          ctx.font = `bold ${fontSize}px Cairo`;
-          ctx.fillStyle = "#000000";
-          ctx.fillText((i + 1).toString(), centroidX, centroidY);
+          // Narrow piece: just draw index number if enabled
+          if (showCroquisNumbers) {
+            const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier) * (croquisFontSize / 13));
+            ctx.font = `bold ${fontSize}px Cairo`;
+            ctx.fillStyle = "#000000";
+            ctx.fillText((i + 1).toString(), centroidX, centroidY);
+          }
         } else {
           // Center line points (top center and bottom center)
           const topCX = (cpTopPrev.x + cpTopCurr.x) / 2;
@@ -1831,33 +1919,42 @@ function drawLandCanvas(vertices) {
           const baseFontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * scaleMultiplier;
 
           // 1. المساحة رأسي (دوران -90 درجة) في الجزء العلوي
-          if (showCroquisMeasurements) {
+          if (showCroquisAreas) {
             ctx.save();
             ctx.translate(areaX, areaY);
             ctx.rotate(-Math.PI / 2);
-            ctx.font = `bold ${baseFontSize}px Cairo`;
+            ctx.font = `bold ${baseFontSize * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
             ctx.fillText(`${heir.share.toFixed(2)} م²`, 0, 0);
             ctx.restore();
           }
 
-          // 2. الاسم رأسي (دوران -90 درجة) في المنتصف
+          // 2. الاسم أو الرقم رأسي (دوران -90 درجة) في المنتصف
           if (showCroquisNames) {
             ctx.save();
             ctx.translate(nameX, nameY);
             ctx.rotate(-Math.PI / 2);
-            ctx.font = `bold ${baseFontSize + 0.5}px Cairo`;
+            const dispName = (showCroquisNumbers ? (i + 1) + ". " : "") + nameToShow;
+            ctx.font = `bold ${(baseFontSize + 0.5) * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
-            ctx.fillText(nameToShow, 0, 0);
+            ctx.fillText(dispName, 0, 0);
+            ctx.restore();
+          } else if (showCroquisNumbers) {
+            ctx.save();
+            ctx.translate(nameX, nameY);
+            ctx.rotate(-Math.PI / 2);
+            ctx.font = `bold ${(baseFontSize + 0.5) * (croquisFontSize / 13)}px Cairo`;
+            ctx.fillStyle = "#000000";
+            ctx.fillText((i + 1).toString(), 0, 0);
             ctx.restore();
           }
 
           // 3. طول القطعة رأسي (دوران -90 درجة) في الجزء السفلي
-          if (showCroquisMeasurements) {
+          if (showCroquisDimensions) {
             ctx.save();
             ctx.translate(lenX, lenY);
             ctx.rotate(-Math.PI / 2);
-            ctx.font = `bold ${baseFontSize}px Cairo`;
+            ctx.font = `bold ${baseFontSize * (croquisMeasurementSize / 12)}px Cairo`;
             ctx.fillStyle = "#000000";
             ctx.fillText(`${pieceMidLength.toFixed(2)} م`, 0, 0);
             ctx.restore();
@@ -1865,18 +1962,20 @@ function drawLandCanvas(vertices) {
         }
 
         // Draw side length labels on the edges
-        ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier)) + "px Cairo";
-        
-        // Top width of piece (Black color for sun readability) with 'م' unit
-        ctx.fillStyle = "#000000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(`${pieceTopW.toFixed(2)} م`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
-        
-        // Bottom width with 'م' unit
-        ctx.fillText(`${pieceBotW.toFixed(2)} م`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
-        
-        // تم إزالة الصناديق البيضاء التي كانت تظهر على خطوط الفواصل والحدود لتطابق مظهر المرفق النظيف تماماً
+        if (showCroquisDimensions) {
+          ctx.font = "bold " + Math.round(Math.max(9, 12 * scaleMultiplier) * (croquisMeasurementSize / 12)) + "px Cairo";
+          
+          // Top width of piece (Black color for sun readability) with 'م' unit
+          ctx.fillStyle = "#000000";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(`${pieceTopW.toFixed(2)} م`, (cpTopPrev.x + cpTopCurr.x) / 2, (cpTopPrev.y + cpTopCurr.y) / 2 - 8 * scaleMultiplier);
+          
+          // Bottom width with 'م' unit
+          ctx.fillText(`${pieceBotW.toFixed(2)} م`, (cpBottomPrev.x + cpBottomCurr.x) / 2, (cpBottomPrev.y + cpBottomCurr.y) / 2 + 12 * scaleMultiplier);
+          
+          // تم إزالة الصناديق البيضاء التي كانت تظهر على خطوط الفواصل والحدود لتطابق مظهر المرفق النظيف تماماً
+        }
       }
         // Draw handle for dragging vertical dividers (between slices) - Visually removed as requested
         if (i > 0) {
@@ -2374,6 +2473,7 @@ function saveStateToSession() {
 }
 
 function loadStateFromSession() {
+  loadCroquisSettings();
   activeShape = sessionStorage.getItem("activeShape") || "trapezoid";
   caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "168";
   caratPresetSelect.value = (["168", "171.388", "175", "175.035"].includes(caratSizeInput.value)) ? caratSizeInput.value : "custom";

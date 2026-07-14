@@ -304,21 +304,56 @@
         </div>
       </div>
       <!-- مفاتيح التبديل والتحكم -->
-      <div class="croquis-toggles-row" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; margin-top: 15px; margin-bottom: 10px;">
-        <button type="button" class="croquis-refresh-btn" onclick="calculateAll()" style="display: none;">
-          🔄 تحديث الخريطة
-        </button>
-        <label class="croquis-toggle-chip">
-          <input type="checkbox" id="chk-toggle-names" checked onchange="toggleCroquisNames()">
-          <span class="chip-dot"></span>
-          <span>الأسماء والمقاسات</span>
-        </label>
-        <div style="display: none; align-items: center; gap: 8px; font-family: Cairo, Arial, sans-serif;">
-          <label for="long-plot-view" style="font-size: 11px; font-weight: bold; color: #2e7d32; white-space: nowrap;">عرض الأراضي الزراعية الطويلة:</label>
-          <select id="long-plot-view" onchange="calculateAll();" style="height: 28px; border-radius: 5px; border: 1.5px solid #a5d6a7; font-weight: bold; font-size: 11px; color: #2e7d32; cursor: pointer; padding: 0 5px; background: white; font-family: Cairo, sans-serif;">
-            <option value="agricultural" selected>عرض محسّن للأراضي الزراعية (بصري)</option>
-            <option value="real">عرض بمقياس حقيقي (متناسق)</option>
-          </select>
+      <!-- لوحة إعدادات الكروكي الجديدة -->
+      <div class="s-settings-box" style="background: #f1f8e9; border: 1.5px solid #c8e6c9; border-radius: 12px; padding: 12px; margin-top: 15px; margin-bottom: 15px; direction: rtl; font-family: Cairo, Arial, sans-serif;">
+        <div style="font-weight: bold; color: #1b5e20; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>⚙️ إعدادات عرض الكروكي الرسمية</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-dimensions" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>الأبعاد الخارجية</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-dividers" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>الفواصل الداخلية</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-names" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>أسماء الشركاء</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-areas" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>المساحات</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-numbers" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>أرقام القطع</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+            <input type="checkbox" id="settings-show-badges" checked onchange="updateCroquisSettings()" style="accent-color: #2e7d32; cursor: pointer; width: 15px; height: 15px;">
+            <span>الشارات والأوتاد</span>
+          </label>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; border-top: 1px dashed #c8e6c9; padding-top: 10px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label for="settings-font-size" style="font-size: 12px; font-weight: bold; color: #555;">حجم خط النصوص:</label>
+            <input type="number" id="settings-font-size" value="13" min="8" max="24" step="1" oninput="updateCroquisSettings()" style="width: 55px; text-align: center; height: 26px; border-radius: 5px; border: 1.5px solid #ccc; font-weight: bold; font-family: inherit;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label for="settings-measurement-size" style="font-size: 12px; font-weight: bold; color: #555;">حجم خط القياسات:</label>
+            <input type="number" id="settings-measurement-size" value="12" min="8" max="24" step="1" oninput="updateCroquisSettings()" style="width: 55px; text-align: center; height: 26px; border-radius: 5px; border: 1.5px solid #ccc; font-weight: bold; font-family: inherit;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="long-plot-view" style="font-size: 12px; font-weight: bold; color: #555;">عرض الأرض الطويلة:</label>
+            <select id="long-plot-view" onchange="calculateAll(); saveStateToSession();" style="height: 28px; border-radius: 6px; border: 1.5px solid #ccc; font-weight: bold; font-size: 12px; font-family: Cairo, sans-serif; cursor: pointer; padding: 0 5px; background: white;">
+              <option value="agricultural" selected>عرض محسّن (بصري)</option>
+              <option value="real">بمقياس حقيقي (متناسق)</option>
+            </select>
+          </div>
+          <button type="button" onclick="resetCroquisSettings()" style="background: #fafafa; border: 1.5px solid #ccc; border-radius: 6px; color: #333; font-size: 11px; font-weight: bold; padding: 4px 10px; cursor: pointer; font-family: Cairo; margin-right: auto; transition: all 0.2s;">
+            ↺ إعادة ضبط الافتراضيات
+          </button>
         </div>
       </div>
 
