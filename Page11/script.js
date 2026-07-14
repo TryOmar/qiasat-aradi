@@ -1539,6 +1539,9 @@ function runPartition(shouldRender = true) {
       calculateGeneral(false);
       runPartition(false);
       window.isNormalizing = false;
+      if (shouldRender) {
+        renderCroquis();
+      }
       return;
     }
   }
