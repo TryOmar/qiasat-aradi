@@ -661,6 +661,10 @@ function toggleDivisionPanel() {
     if (sketchPanel) sketchPanel.style.display = "block";
     btnToggleDivision.classList.add("active-panel");
     generateHeirsTable();
+    // [Commit 4 – Division Direction] إظهار زر تبديل الاتجاه
+    if (typeof DivisionDirection !== "undefined" && DivisionDirection.init) {
+      DivisionDirection.init();
+    }
   } else {
     divisionPanel.style.display = "none";
     if (sketchPanel) sketchPanel.style.display = "none";
@@ -1752,10 +1756,20 @@ function drawLandCanvas(vertices) {
     const W = (landTop + landBottom) / 2;
 
     // Canvas corners (from visual canvas points)
-    const cpA = canvasPoints[0]; // bottom-left
-    const cpB = canvasPoints[1]; // bottom-right
-    const cpC = canvasPoints[2]; // top-right
-    const cpD = canvasPoints[3]; // top-left
+    let cpA = canvasPoints[0]; // bottom-left
+    let cpB = canvasPoints[1]; // bottom-right
+    let cpC = canvasPoints[2]; // top-right
+    let cpD = canvasPoints[3]; // top-left
+
+    // [Commit 4 – Division Direction] تحويل الإحداثيات بصرياّ للاتجاه الرأسي (canvas coords فقط)
+    if (typeof DivisionDirection !== "undefined" && DivisionDirection.getTransformedPoints
+        && window.divisionDirection === "vertical") {
+      const transformed = DivisionDirection.getTransformedPoints(canvasPoints, cssW, cssH);
+      cpA = transformed[0];
+      cpB = transformed[1];
+      cpC = transformed[2];
+      cpD = transformed[3];
+    }
 
     // Ensure all heirs have their exact area-based widths computed
     if (heirsData.some(h => h.topW === undefined || h.botW === undefined || isNaN(h.topW) || isNaN(h.botW))) {
