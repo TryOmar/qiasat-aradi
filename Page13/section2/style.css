@@ -2,11 +2,8 @@
    Page13 Section2 - حساب بالقصبة والقبضة
    ================================================== */
 
-/* استيراد الخط */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap');
-
 * {
-  font-family: 'Cairo', sans-serif;
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
   box-sizing: border-box;
 }
 

@@ -1,5 +1,5 @@
 body {
-  font-family: 'Cairo', sans-serif;
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
   background-color: #f7f9f6;
   color: #333333;
 }
@@ -139,7 +139,7 @@ body {
   outline: none;
   text-align: center;
   padding: 5px;
-  font-family: 'Cairo', sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -175,7 +175,7 @@ body {
 }
 
 .s h3 {
-  font-family: 'Cairo', sans-serif;
+  font-family: inherit;
   font-size: 15px;
   font-weight: bold;
   background-color: #2e7d32 !important;
@@ -222,7 +222,7 @@ body {
   border: 1.5px solid #d0d0d0;
   border-radius: 6px;
   text-align: center;
-  font-family: 'Cairo', sans-serif;
+  font-family: inherit;
   font-weight: 600;
 }
 
@@ -230,7 +230,7 @@ body {
   height: 34px;
   border: 1.5px solid #d0d0d0;
   border-radius: 6px;
-  font-family: 'Cairo', sans-serif;
+  font-family: inherit;
   font-weight: 600;
 }
 
