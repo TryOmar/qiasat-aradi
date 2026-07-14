@@ -1,7 +1,7 @@
 /**
  * @file layout-buffer.js
  * @description طبقة مستقلة (Helper/Wrapper) لتخزين أبعاد العناصر (Layout Buffering) ومنع الـ Layout Thrashing.
- * تقوم بتخزين نتيجة getBoundingClientRect وتحديثها فقط عند تغيير حجم الشاشة أو اتجاهها.
+ * تقوم بتخزين نتيجة getBoundingClientRect وتحديثها فقط عند تغيير حجم الشاشة أو اتجاهها أو طباعتها.
  */
 (function() {
   const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -48,6 +48,8 @@
 
   window.addEventListener("resize", updateAllCaches);
   window.addEventListener("orientationchange", updateAllCaches);
+  window.addEventListener("beforeprint", updateAllCaches);
+  window.addEventListener("afterprint", updateAllCaches);
 
   // تصدير واجهة برمجية بسيطة
   window.LayoutBuffer = {
