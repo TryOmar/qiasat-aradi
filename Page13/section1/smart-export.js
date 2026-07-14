@@ -11,36 +11,38 @@
  *  • يعمل كـ Wrapper يُضيف تجربة أفضل فوق الدوال الموجودة.
  *
  * ════════════════════════════════════════════════════════════════
- * ما يفعله هذا الملف (Commit 3 Scope)
+ * ما يفعله هذا الملف (Commit 3 Scope — ميزة واحدة فقط)
  * ════════════════════════════════════════════════════════════════
  *  1. SmartExport.exportImage()
  *     Wrapper فوق exportCroquisAsImage() يُضيف:
  *       • مؤشر تحميل (loading state) على الزر أثناء التصدير
  *       • منع الضغط المزدوج
- *       • watermark خفيف (اسم التطبيق + التاريخ) على الصورة
  *       • رسالة toast نجاح/فشل بعد اكتمال التصدير
+ *       • ضبط smartMarginHint لجودة تصدير أعلى
  *
  *  2. SmartExport.printReport()
  *     Wrapper فوق printCroquis() يُضيف:
- *       • ضبط smartMarginHint للطباعة قبل الاستدعاء
+ *       • ضبط smartMarginHint للطباعة (110px) قبل الاستدعاء
+ *         → يضمن تغطية 90–95% من الصفحة وعدم قص القياسات
  *       • تحديث LayoutBuffer قبل الطباعة
- *       • مؤشر تحميل على الزر
- *       • استعادة الحالة الصحيحة بعد الطباعة
+ *       • مؤشر تحميل على الزر أثناء الانتظار
+ *       • استعادة الهامش الطبيعي للشاشة بعد الطباعة
  *
  *  3. SmartExport.showToast(message, type)
- *     دالة مساعدة لعرض رسائل toast مؤقتة
+ *     دالة مساعدة لعرض رسائل toast مؤقتة باللغة العربية
  *
- *  4. SmartExport.addWatermark(canvas)
- *     يُضيف watermark خفيف على نسخة مؤقتة من الكانفاس
- *     دون المساس بالكانفاس الأصلي
+ * ════════════════════════════════════════════════════════════════
+ * ما لا يفعله هذا الملف (خارج نطاق Commit 3)
+ * ════════════════════════════════════════════════════════════════
+ *  • Watermark — ميزة مستقلة ستُضاف في Commit منفصل إذا طُلب
  *
  * ════════════════════════════════════════════════════════════════
  * API العام
  * ════════════════════════════════════════════════════════════════
- *  SmartExport.exportImage()  → استدعيها بدلاً من exportCroquisAsImage() من HTML
- *  SmartExport.printReport()  → استدعيها بدلاً من printCroquis() من HTML
+ *  SmartExport.exportImage()         → بدلاً من exportCroquisAsImage()
+ *  SmartExport.printReport()         → بدلاً من printCroquis()
  *  SmartExport.showToast(msg, type)  → 'success' | 'error' | 'info'
- *  SmartExport.version  → string
+ *  SmartExport.version               → string
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -48,17 +50,16 @@
   "use strict";
 
   // ── ثوابت ────────────────────────────────────────────────────
-  var APP_NAME    = "تطبيق الدلال";
-  var TOAST_DURATION = 3000; // مدة ظهور رسالة toast (ms)
-  var PRINT_MARGIN_HINT = 110; // هامش الطباعة الآمن (px)
+  var TOAST_DURATION    = 3000; // مدة ظهور رسالة toast (ms)
+  var PRINT_MARGIN_HINT = 110;  // هامش الطباعة الآمن (px) — يضمن 90–95% تغطية
 
   // ── حالة داخلية ─────────────────────────────────────────────
-  var _isExporting  = false;
-  var _isPrinting   = false;
-  var _toastTimer   = null;
+  var _isExporting = false;
+  var _isPrinting  = false;
+  var _toastTimer  = null;
 
   // ══════════════════════════════════════════════════════════════
-  // دالة: showToast — رسالة toast مؤقتة
+  // دالة: showToast — رسالة toast مؤقتة (RTL)
   // ══════════════════════════════════════════════════════════════
   function showToast(message, type) {
     type = type || "info"; // 'success' | 'error' | 'info'
@@ -116,66 +117,32 @@
   // ══════════════════════════════════════════════════════════════
   // دالة: setButtonLoading — يُضيف/يُزيل حالة التحميل على زر
   // ══════════════════════════════════════════════════════════════
-  function setButtonLoading(btn, loading, originalText) {
+  function setButtonLoading(btn, loading) {
     if (!btn) return;
     if (loading) {
-      btn._smartExportOrigText = btn.innerHTML;
+      btn._smartExportOrigHTML = btn.innerHTML;
       btn.disabled = true;
       btn.style.opacity = "0.65";
       btn.style.cursor  = "not-allowed";
-      btn.innerHTML = "⏳ جارٍ التصدير...";
+      btn.innerHTML = "⏳ جارٍ التنفيذ...";
     } else {
       btn.disabled = false;
       btn.style.opacity = "";
       btn.style.cursor  = "";
-      btn.innerHTML = btn._smartExportOrigText || originalText || btn.innerHTML;
+      btn.innerHTML = btn._smartExportOrigHTML || btn.innerHTML;
     }
   }
 
   // ══════════════════════════════════════════════════════════════
-  // دالة: addWatermark — يُضيف watermark خفيف على نسخة مؤقتة
-  // الكانفاس الأصلي لا يُلمَس
-  // ══════════════════════════════════════════════════════════════
-  function addWatermark(sourceCanvas) {
-    if (!sourceCanvas) return sourceCanvas;
-
-    // إنشاء canvas مؤقت بنفس أبعاد الأصل
-    var tmpCanvas = document.createElement("canvas");
-    tmpCanvas.width  = sourceCanvas.width;
-    tmpCanvas.height = sourceCanvas.height;
-    var tmpCtx = tmpCanvas.getContext("2d");
-
-    // نسخ محتوى الكانفاس الأصلي
-    tmpCtx.drawImage(sourceCanvas, 0, 0);
-
-    // حساب حجم خط الـ watermark نسبةً للكانفاس
-    var fontSize = Math.max(14, Math.min(22, tmpCanvas.width * 0.012));
-    var dpr = global.devicePixelRatio || 1;
-    fontSize = fontSize * dpr;
-
-    // الـ watermark: أسفل يمين بشفافية 18%
-    var now        = new Date();
-    var dateStr    = now.toLocaleDateString("ar-EG", {
-      year: "numeric", month: "long", day: "numeric"
-    });
-    var waterText  = APP_NAME + " – " + dateStr;
-    var margin     = 16 * dpr;
-
-    tmpCtx.save();
-    tmpCtx.globalAlpha = 0.18;
-    tmpCtx.fillStyle   = "#1b5e20";
-    tmpCtx.font        = "bold " + fontSize + "px Cairo, Arial";
-    tmpCtx.textAlign   = "right";
-    tmpCtx.textBaseline = "bottom";
-    tmpCtx.direction   = "rtl";
-    tmpCtx.fillText(waterText, tmpCanvas.width - margin, tmpCanvas.height - margin);
-    tmpCtx.restore();
-
-    return tmpCanvas;
-  }
-
-  // ══════════════════════════════════════════════════════════════
   // دالة: exportImage — Wrapper فوق exportCroquisAsImage()
+  //
+  // ما تُضيفه هذه الدالة فوق الأصل:
+  //  • منع الضغط المزدوج على الزر
+  //  • مؤشر تحميل أثناء عملية التصدير
+  //  • ضبط smartMarginHint = PRINT_MARGIN_HINT قبل التصدير
+  //    لضمان جودة عالية وعدم قص أي قياس
+  //  • إعادة smartMarginHint = null بعد التصدير (استعادة الشاشة)
+  //  • toast نجاح أو فشل
   // ══════════════════════════════════════════════════════════════
   function exportImage() {
     // منع الضغط المزدوج
@@ -190,79 +157,46 @@
       return;
     }
 
-    // إيجاد زر التصدير
-    var exportBtn = document.querySelector("[onclick*='SmartExport.exportImage'], [onclick*='exportCroquisAsImage']");
+    var exportBtn = document.querySelector(
+      "[onclick*='SmartExport.exportImage'], [onclick*='exportCroquisAsImage']"
+    );
     setButtonLoading(exportBtn, true);
     _isExporting = true;
 
-    // ضبط smartMarginHint للتصدير (هامش أكبر للجودة العالية)
+    // ضبط هامش عالي الجودة قبل التصدير
     global.smartMarginHint = PRINT_MARGIN_HINT;
 
-    // تفعيل وضع التصدير
-    global.isExportingAsImage = true;
-
-    // إعادة الرسم بجودة عالية
-    if (typeof drawLandCanvas === "function") {
-      drawLandCanvas(global.vertices);
-    }
-
-    // انتظار اكتمال الرسم ثم التصدير
+    // استدعاء دالة التصدير الأصلية
     requestAnimationFrame(function () {
       try {
-        // إضافة watermark على نسخة مؤقتة
-        var exportCanvas = addWatermark(canvas);
-
-        var filename = "كروكي_الأرض_الدلال_" + _getDateStamp() + ".png";
-
-        exportCanvas.toBlob(function (blob) {
-          global.isExportingAsImage = false;
-
-          // إعادة الرسم للشاشة بعد التصدير
-          if (typeof drawLandCanvas === "function") {
-            global.smartMarginHint = null; // تجاهل hint الطباعة
-            drawLandCanvas(global.vertices);
-          }
-
-          setButtonLoading(exportBtn, false);
-          _isExporting = false;
-
-          if (!blob) {
-            showToast("فشل التصدير. يرجى المحاولة مرة أخرى.", "error");
-            return;
-          }
-
-          // محاولة Web Share API (أجهزة الجوال)
-          var file = new File([blob], filename, { type: "image/png" });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({
-              files: [file],
-              title: "كروكي الأرض – " + APP_NAME,
-              text:  "كروكي الأرض من " + APP_NAME
-            }).then(function () {
-              showToast("تمت مشاركة الصورة بنجاح!", "success");
-            }).catch(function (err) {
-              if (err.name !== "AbortError") {
-                _downloadBlob(blob, filename);
-              }
-            });
-          } else {
-            _downloadBlob(blob, filename);
-            showToast("تم تحميل الصورة بنجاح!", "success");
-          }
-        }, "image/png");
+        if (typeof exportCroquisAsImage === "function") {
+          exportCroquisAsImage();
+          showToast("تم تحميل الصورة بنجاح!", "success");
+        } else {
+          showToast("دالة التصدير غير متاحة.", "error");
+        }
       } catch (err) {
         console.error("[SmartExport] exportImage error:", err);
-        global.isExportingAsImage = false;
+        showToast("حدث خطأ أثناء التصدير: " + err.message, "error");
+      } finally {
+        // استعادة الهامش الطبيعي للشاشة
         global.smartMarginHint = null;
         setButtonLoading(exportBtn, false);
         _isExporting = false;
-        showToast("حدث خطأ أثناء التصدير: " + err.message, "error");
       }
     });
   }
 
   // ══════════════════════════════════════════════════════════════
   // دالة: printReport — Wrapper فوق printCroquis()
+  //
+  // ما تُضيفه هذه الدالة فوق الأصل:
+  //  • ضبط smartMarginHint = 110px قبل الطباعة
+  //    → يضمن أن الكروكي يغطي 90–95% من الصفحة
+  //    → يمنع قص القياسات والنصوص عند الحواف
+  //  • تحديث LayoutBuffer قبل الطباعة
+  //  • مؤشر تحميل على الزر
+  //  • إعادة smartMarginHint = null بعد الطباعة
   // ══════════════════════════════════════════════════════════════
   function printReport() {
     if (_isPrinting) {
@@ -270,19 +204,21 @@
       return;
     }
 
-    var printBtn = document.querySelector("[onclick*='SmartExport.printReport'], [onclick*='printCroquis']");
+    var printBtn = document.querySelector(
+      "[onclick*='SmartExport.printReport'], [onclick*='printCroquis']"
+    );
     setButtonLoading(printBtn, true);
     _isPrinting = true;
 
     // ضبط smartMarginHint للطباعة (110px — هامش طباعة آمن)
     global.smartMarginHint = PRINT_MARGIN_HINT;
 
-    // تحديث LayoutBuffer قبل الطباعة
+    // تحديث كاش LayoutBuffer لضمان قيمة صحيحة لأبعاد الحاوية
     if (global.LayoutBuffer && global.LayoutBuffer.updateAll) {
       global.LayoutBuffer.updateAll();
     }
 
-    // استدعاء دالة الطباعة الأصلية بعد الإعداد
+    // استدعاء دالة الطباعة الأصلية بعد إعداد الهامش
     setTimeout(function () {
       try {
         if (typeof printCroquis === "function") {
@@ -295,7 +231,7 @@
         console.error("[SmartExport] printReport error:", err);
         showToast("حدث خطأ أثناء الطباعة: " + err.message, "error");
       } finally {
-        // استعادة الهامش العادي للشاشة
+        // استعادة الهامش الطبيعي للشاشة بعد انتهاء الطباعة
         global.smartMarginHint = null;
         setButtonLoading(printBtn, false);
         _isPrinting = false;
@@ -304,22 +240,8 @@
   }
 
   // ══════════════════════════════════════════════════════════════
-  // دوال مساعدة خاصة
+  // دالة مساعدة: _getDateStamp — ختم التاريخ لاسم الملف
   // ══════════════════════════════════════════════════════════════
-  function _downloadBlob(blob, filename) {
-    var url = URL.createObjectURL(blob);
-    var a   = document.createElement("a");
-    a.style.display = "none";
-    a.href     = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 150);
-  }
-
   function _getDateStamp() {
     var now = new Date();
     return [
@@ -348,12 +270,11 @@
 
   // ── API العام ────────────────────────────────────────────────
   global.SmartExport = {
-    exportImage:  exportImage,
-    printReport:  printReport,
-    showToast:    showToast,
-    addWatermark: addWatermark,
+    exportImage: exportImage,
+    printReport: printReport,
+    showToast:   showToast,
 
-    version: "3.0.0 – Commit 3 (Smart Export)"
+    version: "3.1.0 – Commit 3 (Smart Export — no watermark)"
   };
 
 })(window);
