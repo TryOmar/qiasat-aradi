@@ -291,6 +291,10 @@ function resetCroquisSettings() {
 }
 
 window.addEventListener("resize", () => {
+  // [Commit 2 – Smart Layout] تحديث كاش LayoutBuffer عند تغيير الحجم
+  if (typeof SmartLayout !== "undefined" && SmartLayout.onResize) {
+    SmartLayout.onResize();
+  }
   calculateAll();
 });
 
@@ -1280,6 +1284,10 @@ function calculateAll() {
   totalLimitAreaSpan.innerText = area.toFixed(2);
   
   // Draw on Canvas
+  // [Commit 2 – Smart Layout] تهيئة أبعاد الكانفاس الذكية قبل الرسم
+  if (typeof SmartLayout !== "undefined" && SmartLayout.prepare) {
+    SmartLayout.prepare(canvas, vertices);
+  }
   drawLandCanvas(vertices);
 
   // تحديث واجهة إعدادات التقسيم (يمين/يسار مقابل الطول)
@@ -1534,7 +1542,11 @@ function drawLandCanvas(vertices) {
   const visualVertices = getVisualVertices(vertices);
 
   // 2. Scale and Fit visual vertices inside Canvas bounding box (85% to 90% footprint, with extra space for printing)
-  const margin = isPrinting ? 110 : Math.max(50, Math.min(60 * scaleMultiplier, 80));
+  // [Commit 2 – Smart Layout] يستخدم window.smartMarginHint إن توفَّر، وإلا يرجع للحساب الأصلي
+  const margin = isPrinting ? 110
+    : (typeof window.smartMarginHint === "number" && window.smartMarginHint > 0
+        ? window.smartMarginHint
+        : Math.max(50, Math.min(60 * scaleMultiplier, 80)));
   const drawW = cssW - 2 * margin;
   const drawH = cssH - 2 * margin;
 
