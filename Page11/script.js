@@ -5333,9 +5333,9 @@ function updateInspector(index) {
   inspector.style.display = "block";
 }
 
-/**
- * دالة ربط واجهة الكروكي بمحرك الرسوم المتحركة التفاعلي.
- */
+let isAnimScriptsLoaded = false;
+let isAnimScriptsLoading = false;
+
 function openAnimationSimulation() {
   if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
     alert("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
@@ -5360,7 +5360,59 @@ function openAnimationSimulation() {
     l2: l2Val
   };
   
-  window.AnimationController.start(landData, window.calculatedPieces);
+  if (isAnimScriptsLoaded) {
+    window.AnimationController.start(landData, window.calculatedPieces);
+    return;
+  }
+  
+  if (isAnimScriptsLoading) return;
+  isAnimScriptsLoading = true;
+  
+  // تحديث نص الأزرار مؤقتاً لتوفير تجربة مستخدم ممتازة
+  const btns = document.querySelectorAll("button[onclick='openAnimationSimulation()'], button[onclick='openAnimationSimulationFromGuide()']");
+  btns.forEach(btn => {
+    btn.setAttribute("data-orig-text", btn.innerHTML);
+    btn.innerHTML = "⏳ جاري تحميل المحاكاة...";
+    btn.disabled = true;
+  });
+  
+  const scripts = [
+    "../animation/animation-assets.js",
+    "../animation/animation-utils.js",
+    "../animation/animation-engine.js",
+    "../animation/animation-renderer.js",
+    "../animation/animation-controller.js"
+  ];
+  
+  function loadNextScript(index) {
+    if (index >= scripts.length) {
+      isAnimScriptsLoaded = true;
+      isAnimScriptsLoading = false;
+      
+      btns.forEach(btn => {
+        btn.innerHTML = btn.getAttribute("data-orig-text") || "🎬 شرح التنفيذ";
+        btn.disabled = false;
+      });
+      
+      window.AnimationController.start(landData, window.calculatedPieces);
+      return;
+    }
+    
+    const script = document.createElement("script");
+    script.src = scripts[index];
+    script.onload = () => loadNextScript(index + 1);
+    script.onerror = () => {
+      alert("فشل تحميل ملفات المحاكاة. يرجى التحقق من اتصالك بالشبكة.");
+      isAnimScriptsLoading = false;
+      btns.forEach(btn => {
+        btn.innerHTML = btn.getAttribute("data-orig-text") || "🎬 شرح التنفيذ";
+        btn.disabled = false;
+      });
+    };
+    document.body.appendChild(script);
+  }
+  
+  loadNextScript(0);
 }
 
 // ربط الدالة بـ window لضمان وصول أحداث الـ HTML إليها في كافة ظروف التحميل
