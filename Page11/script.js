@@ -46,9 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
     addNewPartnerRow("شريك 1");
   }
   renderHeaderAndFooter();
-  calculateGeneral();
+  calculateGeneral(!isPartitioned);
   if (isPartitioned) {
-    runPartition();
+    runPartition(true);
   }
   
   // Setup SVG interactions
@@ -761,14 +761,18 @@ function saveAndCalc() {
 
 function saveAndCalcImmediate() {
   saveData();
-  calculateGeneral();
   
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
-  if (l1 > 0 && l2 > 0 && w1 > 0 && w2 > 0) {
-    runPartition();
+  
+  const hasDimensions = (l1 > 0 && l2 > 0 && w1 > 0 && w2 > 0);
+  
+  calculateGeneral(!hasDimensions);
+  
+  if (hasDimensions) {
+    runPartition(true);
   }
   // Refresh conversions table AFTER user leaves field (not during typing)
   updateConversionsTable();
@@ -982,7 +986,7 @@ function syncExclusionUI() {
   });
 }
 
-function calculateGeneral() {
+function calculateGeneral(shouldRender = true) {
   console.log("Trace: calculateGeneral start");
   try {
   if (!window.isNormalizing) {
@@ -1250,14 +1254,16 @@ function calculateGeneral() {
   updateTableTotals();
   adjustNameColumnWidth();
   updateConversionsTable();
-  renderCroquis();
+  if (shouldRender) {
+    renderCroquis();
+  }
   updateCalculationSteps();
   } catch (e) {
     console.error("Error in calculateGeneral:", e);
   }
 }
 
-function runPartition() {
+function runPartition(shouldRender = true) {
   ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
@@ -1530,8 +1536,8 @@ function runPartition() {
         }
       }
       
-      calculateGeneral();
-      runPartition();
+      calculateGeneral(false);
+      runPartition(false);
       window.isNormalizing = false;
       return;
     }
@@ -1678,7 +1684,9 @@ function runPartition() {
   updateRemainderRowUI(remainingArea);
   updateTableTotals();
   saveData();
-  renderCroquis();
+  if (shouldRender) {
+    renderCroquis();
+  }
   updateCalculationSteps();
 }
 
@@ -1705,8 +1713,7 @@ function clearAll(confirmRequired = false) {
 
   renderHeaderAndFooter();
   saveData();
-  calculateGeneral();
-  renderCroquis();
+  calculateGeneral(true);
 }
 
 function clearPartners(confirmRequired = false) {
@@ -1725,8 +1732,7 @@ function clearPartners(confirmRequired = false) {
   
   renderHeaderAndFooter();
   saveData();
-  calculateGeneral();
-  renderCroquis();
+  calculateGeneral(true);
 
   // Focus the "أضف شريك" button
   const btnAdd = document.getElementById("btn-add-partner");

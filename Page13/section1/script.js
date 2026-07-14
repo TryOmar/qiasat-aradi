@@ -235,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
   setupEventListeners();
   resizeCanvasToFit();
-  calculateAll();
 });
 
 function setupEventListeners() {
