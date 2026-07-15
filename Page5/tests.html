@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نظام الفحص والاختبارات التلقائية - برنامج المواريث</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 30px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #38bdf8;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 15px;
+      font-size: 28px;
+    }
+    .summary-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    .stat-label {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .test-case-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      padding: 15px 20px;
+      transition: all 0.2s ease;
+    }
+    .test-case-card:hover {
+      border-color: #475569;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .badge-pass {
+      background-color: #064e3b;
+      color: #34d399;
+      border: 1px solid #047857;
+    }
+    .badge-fail {
+      background-color: #7f1d1d;
+      color: #fca5a5;
+      border: 1px solid #b91c1c;
+    }
+    .case-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      display: none;
+    }
+    .details-table th, .details-table td {
+      border: 1px solid #334155;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .details-table th {
+      background-color: #0f172a;
+      color: #cbd5e1;
+    }
+    .text-error {
+      color: #ef4444;
+      font-weight: bold;
+    }
+    .text-success {
+      color: #10b981;
+      font-weight: bold;
+    }
+    .btn-run {
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    .btn-run:hover {
+      background-color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>نظام الفحص والاختبارات التلقائية - برنامج المواريث (Page5)</h1>
+  <p style="color: #94a3b8;">هذه صفحة مستقلة تقوم بمحاكاة واختبار محرك المواريث والتأكد من صحة النتائج المخرجة ومطابقتها للشريعة الإسلامية وسلامة حقول الإدخال.</p>
+
+  <div class="summary-card">
+    <div class="stat">
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-label">إجمالي الاختبارات</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val text-success" id="stat-passed">0</div>
+      <div class="stat-label">حالات ناجحة</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val text-error" id="stat-failed">0</div>
+      <div class="stat-label">حالات فاشلة</div>
+    </div>
+    <div class="stat">
+      <button class="btn-run" onclick="runAllTests()">تشغيل الفحص 🔄</button>
+    </div>
+  </div>
+
+  <div id="test-results-list">
+    <!-- Test cases will be rendered here -->
+  </div>
+</div>
+
+<!-- Hidden inputs container for mocking the Page5 environment -->
+<div style="display: none;">
+  <input type="text" id="txt_acre" value="0">
+  <input type="text" id="txt_carat" value="0">
+  <input type="text" id="txt_share" value="0">
+  <input type="text" id="txt_numwives" value="0">
+  <input type="text" id="txt_numFemales" value="0">
+  <input type="text" id="txt_numMales" value="0">
+  <input type="text" id="txt_TotalAllshare" value="0">
+  <input type="text" id="txt_Totalsacre" value="0">
+  <input type="text" id="txt_Totalcarat" value="0">
+  <input type="text" id="txt_Totalshare" value="0">
+  <input type="text" id="txt_TotalPercentVal" value="0">
+  
+  <input type="text" id="txt_leftacre" value="0">
+  <input type="text" id="txt_leftscarat" value="0">
+  <input type="text" id="txt_leftshare" value="0">
+  <input type="text" id="txt_leftPercent" value="0">
+
+  <div id="leftSharesMessage"></div>
+  <div id="checkboxCount"></div>
+  <div id="groups-panel"></div>
+  <button id="btn-create-group"></button>
+  <table id="tbl_Results"></table>
+</div>
+
+<!-- Import Miras script.js -->
+<script src="script.js"></script>
+
+<script>
+  if (typeof mirasGroups === 'undefined') {
+    var mirasGroups = [];
+  }
+
+  // Scenario definitions including the 10 calculation cases and 6 validation cases
+  const testScenarios = [
+    {
+      id: 1,
+      name: "الحالة 1: زوجة + بنت واحدة (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 1, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [{ index: 0, acre: 0, carat: 3, share: "0.000", percent: "12.50%" }],
+        females: [{ index: 0, acre: 0, carat: 12, share: "0.000", percent: "50.00%" }],
+        males: [],
+        leftover: { acre: 0, carat: 9, share: "0.000", percent: "37.50%", exists: true }
+      }
+    },
+    {
+      id: 2,
+      name: "الحالة 2: زوجة + بنتان (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 2, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [{ index: 0, acre: 0, carat: 3, share: "0.000", percent: "12.50%" }],
+        females: [
+          { index: 0, acre: 0, carat: 8, share: "0.000", percent: "33.33%" },
+          { index: 1, acre: 0, carat: 8, share: "0.000", percent: "33.33%" }
+        ],
+        males: [],
+        leftover: { acre: 0, carat: 5, share: "0.000", percent: "20.83%", exists: true }
+      }
+    },
+    {
+      id: 3,
+      name: "الحالة 3: زوجة + 3 بنات (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 3, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [{ index: 0, acre: 0, carat: 3, share: "0.000", percent: "12.50%" }],
+        females: [
+          { index: 0, acre: 0, carat: 5, share: "8.000", percent: "22.22%" },
+          { index: 1, acre: 0, carat: 5, share: "8.000", percent: "22.22%" },
+          { index: 2, acre: 0, carat: 5, share: "8.000", percent: "22.22%" }
+        ],
+        males: [],
+        leftover: { acre: 0, carat: 5, share: "0.000", percent: "20.83%", exists: true }
+      }
+    },
+    {
+      id: 4,
+      name: "الحالة 4: بنت واحدة فقط (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 0, females: 1, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [],
+        females: [{ index: 0, acre: 0, carat: 12, share: "0.000", percent: "50.00%" }],
+        males: [],
+        leftover: { acre: 0, carat: 12, share: "0.000", percent: "50.00%", exists: true }
+      }
+    },
+    {
+      id: 5,
+      name: "الحالة 5: بنتان فقط (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 0, females: 2, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [],
+        females: [
+          { index: 0, acre: 0, carat: 8, share: "0.000", percent: "33.33%" },
+          { index: 1, acre: 0, carat: 8, share: "0.000", percent: "33.33%" }
+        ],
+        males: [],
+        leftover: { acre: 0, carat: 8, share: "0.000", percent: "33.33%", exists: true }
+      }
+    },
+    {
+      id: 6,
+      name: "الحالة 6: 3 بنات فقط (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 0, females: 3, males: 0 },
+      expected: {
+        totalShares: 576,
+        wives: [],
+        females: [
+          { index: 0, acre: 0, carat: 5, share: "8.000", percent: "22.22%" },
+          { index: 1, acre: 0, carat: 5, share: "8.000", percent: "22.22%" },
+          { index: 2, acre: 0, carat: 5, share: "8.000", percent: "22.22%" }
+        ],
+        males: [],
+        leftover: { acre: 0, carat: 8, share: "0.000", percent: "33.33%", exists: true }
+      }
+    },
+    {
+      id: 7,
+      name: "الحالة 7: زوجة + بنت + ابن (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 1, males: 1 },
+      expected: {
+        totalShares: 576,
+        wives: [{ index: 0, acre: 0, carat: 3, share: "0.000", percent: "12.50%" }],
+        females: [{ index: 0, acre: 0, carat: 7, share: "0.000", percent: "29.17%" }],
+        males: [{ index: 0, acre: 0, carat: 14, share: "0.000", percent: "58.33%" }],
+        leftover: { exists: false }
+      }
+    },
+    {
+      id: 8,
+      name: "الحالة 8: زوجة + بنتان + ابن (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 2, males: 1 },
+      expected: {
+        totalShares: 576,
+        wives: [{ index: 0, acre: 0, carat: 3, share: "0.000", percent: "12.50%" }],
+        females: [
+          { index: 0, acre: 0, carat: 5, share: "6.000", percent: "21.88%" },
+          { index: 1, acre: 0, carat: 5, share: "6.000", percent: "21.88%" }
+        ],
+        males: [{ index: 0, acre: 0, carat: 10, share: "12.000", percent: "43.75%" }],
+        leftover: { exists: false }
+      }
+    },
+    {
+      id: 9,
+      name: "الحالة 9: ابنان فقط (تركة 24 قيراطاً)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 0, females: 0, males: 2 },
+      expected: {
+        totalShares: 576,
+        wives: [],
+        females: [],
+        males: [
+          { index: 0, acre: 0, carat: 12, share: "0.000", percent: "50.00%" },
+          { index: 1, acre: 0, carat: 12, share: "0.000", percent: "50.00%" }
+        ],
+        leftover: { exists: false }
+      }
+    },
+    {
+      id: 10,
+      name: "الحالة 10: حماية مساحة صفرية",
+      inputs: { acre: 0, carat: 0, share: 0, wives: 1, females: 1, males: 1 },
+      expected: {
+        totalShares: 0,
+        wives: [{ index: 0, acre: 0, carat: 0, share: "0.000", percent: "0.00%" }],
+        females: [{ index: 0, acre: 0, carat: 0, share: "0.000", percent: "0.00%" }],
+        males: [{ index: 0, acre: 0, carat: 0, share: "0.000", percent: "0.00%" }],
+        leftover: { exists: false }
+      }
+    },
+    // --- Step 2 Validation Tests ---
+    {
+      id: 11,
+      name: "الحالة 11: نصوص في الزوجات (تأمين الحقل)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: "abc", females: 1, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_numwives",
+      expectedValue: 0
+    },
+    {
+      id: 12,
+      name: "الحالة 12: قيم سالبة في الأفدنة (تأمين الحقل)",
+      inputs: { acre: -5, carat: 24, share: 0, wives: 1, females: 1, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_acre",
+      expectedValue: 0
+    },
+    {
+      id: 13,
+      name: "الحالة 13: قيم سالبة في الإناث (تأمين الحقل)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: -3, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_numFemales",
+      expectedValue: 0
+    },
+    {
+      id: 14,
+      name: "الحالة 14: كسور في عدد الزوجات (تأمين الحقل)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 2.7, females: 1, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_numwives",
+      expectedValue: 2
+    },
+    {
+      id: 15,
+      name: "الحالة 15: أسهم سالبة (تأمين الحقل)",
+      inputs: { acre: 0, carat: 24, share: -2.5, wives: 1, females: 1, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_share",
+      expectedValue: 0
+    },
+    {
+      id: 16,
+      name: "الحالة 16: تجاوز الحد الأقصى للورثة (تأمين الحقل)",
+      inputs: { acre: 0, carat: 24, share: 0, wives: 1, females: 500, males: 0 },
+      isValidationTest: true,
+      assertField: "txt_numFemales",
+      expectedValue: 100
+    }
+  ];
+
+  // Run a single test scenario
+  function runScenario(sc) {
+    sessionStorage.clear();
+    
+    document.getElementById("txt_acre").value = sc.inputs.acre;
+    document.getElementById("txt_carat").value = sc.inputs.carat;
+    document.getElementById("txt_share").value = sc.inputs.share;
+    document.getElementById("txt_numwives").value = sc.inputs.wives;
+    document.getElementById("txt_numFemales").value = sc.inputs.females;
+    document.getElementById("txt_numMales").value = sc.inputs.males;
+
+    try {
+      calculateShares(true);
+    } catch (e) {
+      return { passed: false, error: e.message, details: [{ item: "برمجة الحساب", expected: "تشغيل بدون استثناء", actual: e.message, match: false }] };
+    }
+
+    const details = [];
+    let passed = true;
+
+    // Handle Validation tests
+    if (sc.isValidationTest) {
+      const actualVal = parseFloat(document.getElementById(sc.assertField).value);
+      const match = (actualVal === sc.expectedValue);
+      details.push({
+        item: `قيمة حقل ${sc.assertField}`,
+        expected: sc.expectedValue,
+        actual: isNaN(actualVal) ? document.getElementById(sc.assertField).value : actualVal,
+        match: match
+      });
+      return { passed: match, details };
+    }
+
+    // Assert total shares
+    const actualTotal = parseFloat(document.getElementById("txt_TotalAllshare").value) || 0;
+    const totalMatch = Math.abs(actualTotal - sc.expected.totalShares) < 0.01;
+    details.push({
+      item: "إجمالي السهام",
+      expected: sc.expected.totalShares,
+      actual: actualTotal,
+      match: totalMatch
+    });
+    if (!totalMatch) passed = false;
+
+    // Assert Wives
+    sc.expected.wives.forEach(exp => {
+      const acreVal = parseInt(document.getElementById(`txt_Wivesacre${exp.index}`).value) || 0;
+      const caratVal = parseInt(document.getElementById(`txt_Wivescarat${exp.index}`).value) || 0;
+      const shareVal = document.getElementById(`txt_Wivesshare${exp.index}`).value;
+      const percentVal = document.getElementById(`txt_PercentWives${exp.index}`).value;
+
+      const match = (acreVal === exp.acre) && (caratVal === exp.carat) && 
+                    (parseFloat(shareVal).toFixed(3) === parseFloat(exp.share).toFixed(3)) && 
+                    (percentVal === exp.percent);
+
+      details.push({
+        item: `الزوجة ${exp.index + 1} (فدان/قيراط/سهم/نسبة)`,
+        expected: `${exp.acre} ف، ${exp.carat} ق، ${exp.share} س (${exp.percent})`,
+        actual: `${acreVal} ف، ${caratVal} ق، ${shareVal} س (${percentVal})`,
+        match: match
+      });
+      if (!match) passed = false;
+    });
+
+    // Assert Females
+    sc.expected.females.forEach(exp => {
+      const actAcre = parseInt(document.getElementById(`txt_Femalesacre${exp.index}`).value) || 0;
+      const actCarat = parseInt(document.getElementById(`txt_Femalescarat${exp.index}`).value) || 0;
+      const actShare = document.getElementById(`txt_Femalesshare${exp.index}`).value;
+      const actPercent = document.getElementById(`txt_FemalesPercent${exp.index}`).value;
+
+      const match = (actAcre === exp.acre) && (actCarat === exp.carat) && 
+                    (parseFloat(actShare).toFixed(3) === parseFloat(exp.share).toFixed(3)) && 
+                    (actPercent === exp.percent);
+
+      details.push({
+        item: `البنت ${exp.index + 1} (فدان/قيراط/سهم/نسبة)`,
+        expected: `${exp.acre} ف، ${exp.carat} ق، ${exp.share} س (${exp.percent})`,
+        actual: `${actAcre} ف، ${actCarat} ق، ${actShare} س (${actPercent})`,
+        match: match
+      });
+      if (!match) passed = false;
+    });
+
+    // Assert Males
+    sc.expected.males.forEach(exp => {
+      const actAcre = parseInt(document.getElementById(`txt_malesacre${exp.index}`).value) || 0;
+      const actCarat = parseInt(document.getElementById(`txt_malescarat${exp.index}`).value) || 0;
+      const actShare = document.getElementById(`txt_malesshare${exp.index}`).value;
+      const actPercent = document.getElementById(`txt_malePercent${exp.index}`).value;
+
+      const match = (actAcre === exp.acre) && (actCarat === exp.carat) && 
+                    (parseFloat(actShare).toFixed(3) === parseFloat(exp.share).toFixed(3)) && 
+                    (actPercent === exp.percent);
+
+      details.push({
+        item: `الابن ${exp.index + 1} (فدان/قيراط/سهم/نسبة)`,
+        expected: `${exp.acre} ف، ${exp.carat} ق، ${exp.share} س (${exp.percent})`,
+        actual: `${actAcre} ف، ${actCarat} ق، ${actShare} س (${actPercent})`,
+        match: match
+      });
+      if (!match) passed = false;
+    });
+
+    // Assert Leftover
+    const isLeftActual = sessionStorage.getItem("isSharesLeft") === "true";
+    if (sc.expected.leftover && sc.expected.leftover.exists) {
+      const exp = sc.expected.leftover;
+      const actAcre = parseInt(document.getElementById("txt_leftacre").value) || 0;
+      const actCarat = parseInt(document.getElementById("txt_leftscarat").value) || 0;
+      const actShare = document.getElementById("txt_leftshare").value;
+      const actPercent = document.getElementById("txt_leftPercent").value;
+
+      const match = isLeftActual && (actAcre === exp.acre) && (actCarat === exp.carat) && 
+                    (parseFloat(actShare).toFixed(3) === parseFloat(exp.share).toFixed(3)) && 
+                    (actPercent === exp.percent);
+
+      details.push({
+        item: "الأسهم المتبقية (فدان/قيراط/سهم/نسبة)",
+        expected: `نعم، ${exp.acre} ف، ${exp.carat} ق، ${exp.share} س (${exp.percent})`,
+        actual: isLeftActual ? `نعم، ${actAcre} ف، ${actCarat} ق، ${actShare} س (${actPercent})` : "لا يوجد متبقي",
+        match: match
+      });
+      if (!match) passed = false;
+    } else {
+      const match = !isLeftActual;
+      details.push({
+        item: "الأسهم المتبقية (توقع العدم)",
+        expected: "لا يوجد متبقي",
+        actual: isLeftActual ? "يوجد متبقي" : "لا يوجد متبقي",
+        match: match
+      });
+      if (!match) passed = false;
+    }
+
+    return { passed, details };
+  }
+
+  function toggleDetails(id) {
+    const table = document.getElementById(`details-${id}`);
+    if (table.style.display === "table") {
+      table.style.display = "none";
+    } else {
+      table.style.display = "table";
+    }
+  }
+
+  function runAllTests() {
+    let passedCount = 0;
+    let failedCount = 0;
+    const listContainer = document.getElementById("test-results-list");
+    listContainer.innerHTML = "";
+
+    testScenarios.forEach(sc => {
+      const res = runScenario(sc);
+      if (res.passed) {
+        passedCount++;
+      } else {
+        failedCount++;
+      }
+
+      const card = document.createElement("div");
+      card.className = "test-case-card";
+      
+      const badgeClass = res.passed ? "badge-pass" : "badge-fail";
+      const badgeText = res.passed ? "ناجح" : "فاشل";
+      
+      let rowsHtml = "";
+      res.details.forEach(det => {
+        rowsHtml += `
+          <tr>
+            <td>${det.item}</td>
+            <td>${det.expected}</td>
+            <td class="${det.match ? 'text-success' : 'text-error'}">${det.actual}</td>
+            <td>${det.match ? '✅ مطابِق' : '❌ غير مطابِق'}</td>
+          </tr>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="card-header" onclick="toggleDetails(${sc.id})">
+          <span class="case-title">${sc.name}</span>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <table class="details-table" id="details-${sc.id}">
+          <thead>
+            <tr>
+              <th>العنصر المفحوص</th>
+              <th>القيمة الشرعية/حالة الإدخال المتوقعة</th>
+              <th>القيمة الفعلية للبرنامج الحالي</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
+
+      listContainer.appendChild(card);
+    });
+
+    document.getElementById("stat-total").innerText = testScenarios.length;
+    document.getElementById("stat-passed").innerText = passedCount;
+    document.getElementById("stat-failed").innerText = failedCount;
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(runAllTests, 150);
+  });
+</script>
+
+</body>
+</html>

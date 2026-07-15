@@ -131,6 +131,7 @@ function calculateScaresAndCarats(totalShares) {
 }
 
 function calculatePercentage(part, total) {
+  if (total === 0) return "0.00";
   const percentage = (part / total) * 100;
   return percentage.toFixed(2);
 }
@@ -361,10 +362,10 @@ function calculateShares(newCalculation = false) {
       (totalAllShares - nasebZwga) / (2.0 * numMalesValue + numFemalesValue);
     // console.log("HI0: ", nasebBnat);
   } else if (numFemalesValue == 1) {
-    nasebBnat = 0.5 * (totalAllShares - nasebZwga);
+    nasebBnat = 0.5 * totalAllShares;
     // console.log("HI: ", nasebBnat);
   } else if (numFemalesValue > 1) {
-    nasebBnat = (2.0 * (totalAllShares - nasebZwga)) / 3.0;
+    nasebBnat = (2.0 * totalAllShares) / 3.0;
     nasebBnat = nasebBnat / numFemalesValue;
     // console.log("HI2: ", nasebBnat);
   }
