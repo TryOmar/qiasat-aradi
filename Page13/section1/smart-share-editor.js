@@ -127,10 +127,10 @@
       const skipBot = (heir.id === skipHeirId && skipField === 'botW');
 
       if (sqmInput && !skipSqm && document.activeElement !== sqmInput) {
-        sqmInput.value = values.sqm.toFixed(2);
+        sqmInput.value = (values.sqm || 0).toFixed(2);
       }
       if (pctInput && !skipPct && document.activeElement !== pctInput) {
-        pctInput.value = values.pct.toFixed(2);
+        pctInput.value = (values.pct || 0).toFixed(2);
       }
       if (feddanInput && !skipFeddan && document.activeElement !== feddanInput) {
         feddanInput.value = values.feddans;
@@ -139,7 +139,7 @@
         caratInput.value = values.carats;
       }
       if (sahmInput && !skipSahm && document.activeElement !== sahmInput) {
-        sahmInput.value = values.shares.toFixed(2);
+        sahmInput.value = (values.shares || 0).toFixed(2);
       }
       if (topInput && !skipTop && document.activeElement !== topInput) {
         topInput.value = (heir.topW || 0).toFixed(2);
@@ -885,6 +885,9 @@
       }
     }
 
+    // Build options list once before the loop to avoid O(N^2) complexity
+    const sharedOptionsHtml = heirsData.map(oth => `<option value="${oth.id}">${oth.name}</option>`).join("");
+
     const rows = heirsListTbody.querySelectorAll("tr");
     rows.forEach((row) => {
       const idx = parseInt(row.getAttribute("data-index"));
@@ -1083,13 +1086,9 @@
       // ح. حقن خيارات الخصم باستخدام المعرفات الفريدة (IDs) للحفاظ على الخيارات مستقلة عن الترتيب
       const select = row.querySelector(".heir-offset");
       if (select) {
-        let optionsHtml = `<option value="all" ${heir.offsetDest === 'all' ? 'selected' : ''}>باقي الشركاء بالتساوي</option>`;
-        heirsData.forEach((oth) => {
-          if (oth.id !== heir.id) {
-            optionsHtml += `<option value="${oth.id}" ${heir.offsetDest === oth.id ? 'selected' : ''}>${oth.name}</option>`;
-          }
-        });
-        select.innerHTML = optionsHtml;
+        const currentHeirOption = `<option value="${heir.id}">${heir.name}</option>`;
+        select.innerHTML = `<option value="all">باقي الشركاء بالتساوي</option>` + sharedOptionsHtml.replace(currentHeirOption, "");
+        select.value = heir.offsetDest || 'all';
 
         // الاستماع الفوري لتعديل وجهة الخصم وحفظها في الشريك
         select.addEventListener("change", (e) => {

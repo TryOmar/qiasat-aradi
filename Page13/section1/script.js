@@ -1427,6 +1427,17 @@ function getPieceRealSides(tPrev, tCurr) {
     y: vertices[3].y + tCurr * (vertices[2].y - vertices[3].y)
   };
   
+  if (activeShape === 'trapezoid') {
+    const l1Val = parseFloat(document.getElementById("trap-length-right")?.value) || 0;
+    const l2Val = parseFloat(document.getElementById("trap-length-left")?.value) || 0;
+    return {
+      top: Math.hypot(pTopCurr.x - pTopPrev.x, pTopCurr.y - pTopPrev.y),
+      bottom: Math.hypot(pBotCurr.x - pBotPrev.x, pBotCurr.y - pBotPrev.y),
+      left: l2Val + tPrev * (l1Val - l2Val),
+      right: l2Val + tCurr * (l1Val - l2Val)
+    };
+  }
+
   return {
     top: Math.hypot(pTopCurr.x - pTopPrev.x, pTopCurr.y - pTopPrev.y),
     bottom: Math.hypot(pBotCurr.x - pBotPrev.x, pBotCurr.y - pBotPrev.y),
@@ -2003,7 +2014,7 @@ function drawLandCanvas(vertices) {
             ctx.rotate(-Math.PI / 2);
             ctx.font = `bold ${baseFontSize * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
-            ctx.fillText(`${heir.share.toFixed(2)} م²`, 0, 0);
+            ctx.fillText(`${(heir.share || 0).toFixed(2)} م²`, 0, 0);
             ctx.restore();
           }
 
@@ -2154,7 +2165,7 @@ function updateHeirsUI() {
       inputName.value = heir.name;
     }
     if (inputSqm && document.activeElement !== inputSqm) {
-      inputSqm.value = heir.share.toFixed(2);
+      inputSqm.value = (heir.share || 0).toFixed(2);
     }
     if (inputSahm && document.activeElement !== inputSahm) {
       inputSahm.value = conv.shares.toFixed(2);
@@ -2188,18 +2199,13 @@ function renderHeirsRows() {
     ? (parseFloat(document.getElementById('trap-length-right')?.value) || 0)
     : 0;
 
-  heirsListTbody.innerHTML = "";
+  let html = "";
 
   heirsData.forEach((heir, idx) => {
     const conv = convertSqmToFeddans(heir.share, caratSize);
     
-    // Build select dropdown option for other heirs
+    // Build select dropdown option for other heirs (overwritten by smart-share-editor.js)
     let optionsHtml = `<option value="all">باقي الشركاء بالتساوي</option>`;
-    heirsData.forEach((oth, oIdx) => {
-      if (oIdx !== idx) {
-        optionsHtml += `<option value="${oIdx}">${oth.name}</option>`;
-      }
-    });
 
     // عمودا يمين/يسار: إما عمود "الطول" الواحد (colspan=2) أو عمودين مستقلين
     let sidesCells = '';
@@ -2220,7 +2226,7 @@ function renderHeirsRows() {
         </td>`;
     }
 
-    heirsListTbody.innerHTML += `
+    html += `
       <tr data-index="${idx}">
         <td>
           <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
@@ -2235,7 +2241,7 @@ function renderHeirsRows() {
         </td>
         ${sidesCells}
         <td>
-          <input type="text" inputmode="decimal" class="heir-share heir-share-sqm" value="${heir.share.toFixed(2)}" 
+          <input type="text" inputmode="decimal" class="heir-share heir-share-sqm" value="${(heir.share || 0).toFixed(2)}" 
             oninput="debouncedUpdateHeirShare(${idx}, 'sqm', this.value)" 
             onblur="commitHeirShareImmediately(${idx}, 'sqm', this.value)" 
             onkeydown="if(event.key === 'Enter') { commitHeirShareImmediately(${idx}, 'sqm', this.value); this.blur(); }" />
@@ -2266,6 +2272,8 @@ function renderHeirsRows() {
       </tr>
     `;
   });
+
+  heirsListTbody.innerHTML = html;
 }
 
 
@@ -2296,6 +2304,86 @@ function distributeEqually() {
   calculateAll();
 }
 
+// [Commit 8 – Area Validation] التحقق الهندسي النهائي لمساحات القطع (Shoelace Formula)
+window.validatePartitionAreasShoelace = function() {
+  if (!vertices || vertices.length < 4 || !heirsData || heirsData.length === 0 || calculatedArea <= 0) {
+    return { ok: false, sumGeomArea: 0, totalDiff: 0, pieces: [] };
+  }
+
+  const exactTs = [0];
+  let tempCumArea = 0;
+  for (let i = 0; i < heirsData.length - 1; i++) {
+    tempCumArea += heirsData[i].share;
+    exactTs.push(findTForArea(tempCumArea, calculatedArea));
+  }
+  exactTs.push(1.0);
+
+  let allAreasValid = true;
+  let sumGeomArea = 0;
+  const piecesReport = [];
+
+  for (let idx = 0; idx < heirsData.length; idx++) {
+    const tPrev = exactTs[idx];
+    const tCurr = exactTs[idx + 1];
+
+    const pBotPrev = {
+      x: vertices[0].x + tPrev * (vertices[1].x - vertices[0].x),
+      y: vertices[0].y + tPrev * (vertices[1].y - vertices[0].y)
+    };
+    const pBotCurr = {
+      x: vertices[0].x + tCurr * (vertices[1].x - vertices[0].x),
+      y: vertices[0].y + tCurr * (vertices[1].y - vertices[0].y)
+    };
+    const pTopPrev = {
+      x: vertices[3].x + tPrev * (vertices[2].x - vertices[3].x),
+      y: vertices[3].y + tPrev * (vertices[2].y - vertices[3].y)
+    };
+    const pTopCurr = {
+      x: vertices[3].x + tCurr * (vertices[2].x - vertices[3].x),
+      y: vertices[3].y + tCurr * (vertices[2].y - vertices[3].y)
+    };
+
+    // Shoelace formula: V1 -> V2 -> V3 -> V4
+    const pts = [pBotPrev, pBotCurr, pTopCurr, pTopPrev];
+    let shoelaceArea = 0;
+    for (let i = 0; i < 4; i++) {
+      const j = (i + 1) % 4;
+      shoelaceArea += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    }
+    shoelaceArea = Math.abs(shoelaceArea) * 0.5;
+
+    const requestedArea = heirsData[idx].share;
+    const diff = Math.abs(shoelaceArea - requestedArea);
+    sumGeomArea += shoelaceArea;
+
+    // الفرق لا يتجاوز 0.001 م²
+    const pieceOk = diff <= 0.001;
+    if (!pieceOk) {
+      allAreasValid = false;
+    }
+
+    piecesReport.push({
+      name: heirsData[idx].name || `شريك ${idx + 1}`,
+      shoelaceArea: shoelaceArea,
+      requestedArea: requestedArea,
+      diff: diff,
+      ok: pieceOk
+    });
+  }
+
+  const totalDiff = Math.abs(sumGeomArea - calculatedArea);
+  if (totalDiff > 0.001) {
+    allAreasValid = false;
+  }
+
+  return {
+    ok: allAreasValid,
+    sumGeomArea: sumGeomArea,
+    totalDiff: totalDiff,
+    pieces: piecesReport
+  };
+};
+
 function updateHeirsDistribution() {
   let distributedSum = 0;
   heirsData.forEach(h => distributedSum += h.share);
@@ -2304,8 +2392,15 @@ function updateHeirsDistribution() {
   
   const diff = Math.abs(distributedSum - calculatedArea);
   if (diff < 0.05) {
-    distributionStatus.className = "status-ok";
-    distributionStatus.innerText = "التوزيع متطابق 100%";
+    // التحقق الفعلي من المساحات عبر صيغة شوليس
+    const valResult = window.validatePartitionAreasShoelace();
+    if (valResult.ok) {
+      distributionStatus.className = "status-ok";
+      distributionStatus.innerHTML = "✅ التوزيع متطابق 100% (تم التحقق الهندسي الفعلي للمساحات بمطابقة تامة ±0.001 م²)";
+    } else {
+      distributionStatus.className = "status-err";
+      distributionStatus.innerText = `تنبيه: التوزيع متطابق اسمياً ولكن فشل التحقق الهندسي لمساحة القطع! الفارق الهندسي: ${valResult.totalDiff.toFixed(4)} م²`;
+    }
   } else {
     distributionStatus.className = "status-err";
     distributionStatus.innerText = `تنبيه: التوزيع غير متطابق! فارق المساحة: ${(calculatedArea - distributedSum).toFixed(2)} م²`;
@@ -3243,10 +3338,19 @@ function updateInspector(index) {
   const insWTopEl = document.getElementById("ins-w-top");
   const insLengthRightEl = document.getElementById("ins-length-right");
   const insLengthLeftEl = document.getElementById("ins-length-left");
+  const insLblRightEl = document.getElementById("ins-lbl-right");
+  const insLblLeftEl = document.getElementById("ins-lbl-left");
   const insDividerRow = document.getElementById("ins-divider-row");
   const insDividerEl = document.getElementById("ins-divider");
   
   if (!inspector) return;
+
+  if (insLblRightEl) {
+    insLblRightEl.innerText = "الطول الأيمن:";
+  }
+  if (insLblLeftEl) {
+    insLblLeftEl.innerText = "الطول الأيسر:";
+  }
   
   // Set partner/heir name
   if (partnerNameEl) {
@@ -3256,11 +3360,11 @@ function updateInspector(index) {
   
   // Area and conversion to feddan/carat/sahm
   const caratSize = parseFloat(caratSizeInput.value) || 168;
-  const pct = calculatedArea > 0 ? (heir.share / calculatedArea) * 100 : 0;
-  const conv = convertSqmToFeddans(heir.share, caratSize);
+  const pct = calculatedArea > 0 ? ((heir.share || 0) / calculatedArea) * 100 : 0;
+  const conv = convertSqmToFeddans(heir.share || 0, caratSize);
   
   if (insAreaEl) {
-    insAreaEl.innerHTML = `${Number(heir.share.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)</span>`;
+    insAreaEl.innerHTML = `${Number((heir.share || 0).toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)</span>`;
   }
   
   if (insPercentEl) {
@@ -3624,7 +3728,7 @@ function openFieldGuideModal() {
             <span style="font-size:11px; font-weight:normal; color:#666;">الترتيب: ${idx + 1}</span>
           </div>
           <div style="font-size:12px; margin-bottom:4px;">
-            المساحة: <strong>${heir.share.toFixed(2)} م²</strong> (${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)
+            المساحة: <strong>${(heir.share || 0).toFixed(2)} م²</strong> (${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)
           </div>
           <div style="font-size:12px; color:#555;">
             العرض العلوي: ${heir.topW.toFixed(2)} م | العرض السفلي: ${heir.botW.toFixed(2)} م
@@ -3700,7 +3804,7 @@ function printFieldGuideDirect() {
       <div class="step-num">${idx + 1}</div>
       <div class="step-content">
         <div class="step-title">${label}</div>
-        <div class="step-area">${heir.share.toFixed(2)} م² &nbsp;(${conv.feddans} فدان ${conv.carats} ق ${conv.shares.toFixed(2)} س)</div>
+        <div class="step-area">${(heir.share || 0).toFixed(2)} م² &nbsp;(${conv.feddans} فدان ${conv.carats} ق ${conv.shares.toFixed(2)} س)</div>
         <div class="step-widths">علوياً: ${heir.topW.toFixed(2)} م | سفلياً: ${heir.botW.toFixed(2)} م</div>
         ${!isLast ? `
           <div class="step-divider">
