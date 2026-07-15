@@ -87,7 +87,7 @@ window.canvasPiecesGeometry = [];
 let oldZoomFactor = 1.0;
 let isPrinting = false;
 
-window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'ltr';
+window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
 
 function updatePartitionDirectionButtonUI() {
   const btn = document.getElementById('btn-partition-direction');
@@ -2777,7 +2777,7 @@ function saveStateToSession() {
   }
 
   // حفظ اتجاه التقسيم في localStorage
-  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection || 'ltr');
+  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection || 'rtl');
 }
 
 function loadStateFromSession() {
@@ -2895,7 +2895,7 @@ function loadStateFromSession() {
   }
 
   // استرجاع اتجاه التقسيم من localStorage
-  window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'ltr';
+  window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
 }
 
 // Print trigger
