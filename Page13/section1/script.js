@@ -1037,13 +1037,13 @@ function calculateAll() {
       
       const w_coord = 0.5 * (a + c);
       const calculatedSide = Math.hypot(w_coord, l1 - l2); // الضلع المائل العلوي
-      perimeter = a + l1 + l2 + calculatedSide;
+      perimeter = a + c + l1 + l2;
       
       stepsText = `الشكل المختار: أرض شبه منحرفة زراعية\n` +
                   `المعادلة: المساحة = متوسط العرض × متوسط الطول\n` +
                   `المعادلة: المساحة = 0.5 × (العرض العلوي + العرض السفلي) × 0.5 × (الطول الأيمن + الطول الأيسر)\n` +
                   `الحساب: 0.5 × (${c} + ${a}) × 0.5 × (${l2} + ${l1}) = ${area.toFixed(2)} متر مربع\n` +
-                  `المحيط = مجموع الأبعاد الأربعة = ${a} + ${l1} (طول أيمن) + ${l2} (طول أيسر) + ${calculatedSide.toFixed(2)} (الضلع المائل) = ${perimeter.toFixed(2)} متر`;
+                  `المحيط = مجموع الأبعاد الأربعة = ${a} (عرض سفلي) + ${c} (عرض علوي) + ${l1} (طول أيمن) + ${l2} (طول أيسر) = ${perimeter.toFixed(2)} متر`;
 
       // Coordinates (Flat bottom base A, centered top base C)
       vertices = [
