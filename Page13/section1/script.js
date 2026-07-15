@@ -1045,12 +1045,12 @@ function calculateAll() {
                   `الحساب: 0.5 × (${c} + ${a}) × 0.5 × (${l2} + ${l1}) = ${area.toFixed(2)} متر مربع\n` +
                   `المحيط = مجموع الأبعاد الأربعة = ${a} + ${l1} (طول أيمن) + ${l2} (طول أيسر) + ${calculatedSide.toFixed(2)} (الضلع المائل) = ${perimeter.toFixed(2)} متر`;
 
-      // Coordinates (Flat bottom base, vertical left/right heights, exactly like Page 11!)
+      // Coordinates (Flat bottom base A, centered top base C)
       vertices = [
         { x: 0, y: 0 },
-        { x: w_coord, y: 0 },
-        { x: w_coord, y: l1 },
-        { x: 0, y: l2 }
+        { x: a, y: 0 },
+        { x: a - (a - c) / 2, y: l1 },
+        { x: (a - c) / 2, y: l2 }
       ];
     }
 
@@ -1621,9 +1621,13 @@ function drawLandCanvas(vertices) {
 
     // Compute real side length in meters
     let len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    if (activeShape === 'trapezoid' && !showActualDims) {
-      if (i === 1) {
+    if (activeShape === 'trapezoid') {
+      if (i === 0) {
+        len = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+      } else if (i === 1) {
         len = parseFloat(document.getElementById('trap-length-right')?.value) || 0;
+      } else if (i === 2) {
+        len = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
       } else if (i === 3) {
         len = parseFloat(document.getElementById('trap-length-left')?.value) || 0;
       }
