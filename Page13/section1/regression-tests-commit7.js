@@ -52,7 +52,7 @@ window.runCommit7Tests = function(options) {
 
   const validatePartitionAreas = () => {
     if (typeof window.validatePartitionAreasShoelace === "function") {
-      return window.validatePartitionAreasShoelace();
+      return window.validatePartitionAreasShoelace(true);
     }
     const exactTs = [0];
     let tempCumArea = 0;
@@ -315,7 +315,61 @@ window.runCommit7Tests = function(options) {
     const allowedOpDuration = isHeadless ? 1000 : 200;
     assert(opDuration < allowedOpDuration, `أداء العمليات (تحريك وحفظ) لـ 100 شريك: تمت العمليات في أقل من ${allowedOpDuration}ms`, `الوقت المستغرق: ${opDuration.toFixed(1)} ms`);
 
-    // استعادة البيانات الأصلية قبل بدء اختبار التسريب لتسريع المحاكاة ومنع تجميد المتصفح
+    // ==========================================
+    // 3b. اختبارات الاستقرار العددي والحالات الحرجة (Numerical Stability Tests)
+    // ==========================================
+    console.log("\n%c3b. اختبارات الاستقرار العددي والحالات الحرجة (Numerical Stability)...", "font-weight: bold; color: #1565c0;");
+
+    // الحالة أ: أرض متناهية الصغر (1 م²) مع 3 شركاء
+    selectShape("rectangle");
+    setVal("rect-length", 1);
+    setVal("rect-width", 1);
+    if (countInput) {
+      countInput.value = 3;
+      if (typeof generateHeirsTable === "function") generateHeirsTable();
+    }
+    if (typeof distributeEqually === "function") distributeEqually();
+    if (typeof calculateAll === "function") calculateAll();
+    const stabilityTiny = validatePartitionAreas();
+    assert(stabilityTiny.ok, "الاستقرار العددي (أرض متناهية الصغر 1م² لـ 3 شركاء): مساحات القطع دقيقة ومطابقة تماماً وخالية من NaN/Infinity", `فارق الاتحاد: ${stabilityTiny.totalDiff.toFixed(8)} م²`);
+
+    // الحالة ب: أرض متناهية الكبر (1,000,000 م²) مع 5 شركاء
+    setVal("rect-length", 1000);
+    setVal("rect-width", 1000);
+    if (countInput) {
+      countInput.value = 5;
+      if (typeof generateHeirsTable === "function") generateHeirsTable();
+    }
+    if (typeof distributeEqually === "function") distributeEqually();
+    if (typeof calculateAll === "function") calculateAll();
+    const stabilityHuge = validatePartitionAreas();
+    assert(stabilityHuge.ok, "الاستقرار العددي (أرض ضخمة 1,000,000م² لـ 5 شركاء): مساحات القطع دقيقة ومطابقة تماماً وخالية من NaN/Infinity", `فارق الاتحاد: ${stabilityHuge.totalDiff.toFixed(6)} م²`);
+
+    // الحالة ج: أبعاد تحتوي على كسور عشرية طويلة معقدة مع 7 شركاء في شبه منحرف
+    selectShape("trapezoid");
+    const minorInputT = document.getElementById("trap-base-minor");
+    const majorInputT = document.getElementById("trap-base-major");
+    const rightInputT = document.getElementById("trap-length-right");
+    const leftInputT = document.getElementById("trap-length-left");
+    if (minorInputT) minorInputT.value = 33.333333;
+    if (majorInputT) majorInputT.value = 55.555555;
+    if (rightInputT) rightInputT.value = 44.444444;
+    if (leftInputT) leftInputT.value = 22.222222;
+    if (countInput) {
+      countInput.value = 7;
+      if (typeof generateHeirsTable === "function") generateHeirsTable();
+    }
+    if (typeof distributeEqually === "function") distributeEqually();
+    if (typeof calculateAll === "function") calculateAll();
+    const stabilityDecimal = validatePartitionAreas();
+    assert(stabilityDecimal.ok, "الاستقرار العددي (أبعاد عشرية دقيقة لشبه منحرف لـ 7 شركاء): مساحات القطع والحدود دقيقة تماماً", `فارق الاتحاد: ${stabilityDecimal.totalDiff.toFixed(6)} م²`);
+
+    // استعادة مظهر وشكل المستطيل الافتراضي للاختبار التالي
+    selectShape("rectangle");
+    setVal("rect-length", 100);
+    setVal("rect-width", 50);
+
+    // استعادة البيانات الأصلية قبل بدء اختبار التسريب
     try {
       heirsData = JSON.parse(originalHeirsData);
       const countInput = document.getElementById("heirs-count");
