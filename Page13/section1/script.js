@@ -250,6 +250,20 @@ function loadCroquisSettings() {
   if (chkBadges) chkBadges.checked = showCroquisBadges;
   if (inputFontSize) inputFontSize.value = croquisFontSize;
   if (inputMeasurementSize) inputMeasurementSize.value = croquisMeasurementSize;
+
+  // Restore settings panel collapsible state
+  const isExpanded = localStorage.getItem("p13-settings-expanded") === "true";
+  const content = document.getElementById("croquis-settings-content");
+  const arrow = document.getElementById("croquis-settings-arrow");
+  if (content && arrow) {
+    if (isExpanded) {
+      content.style.display = "block";
+      arrow.textContent = "▼";
+    } else {
+      content.style.display = "none";
+      arrow.textContent = "▶";
+    }
+  }
 }
 
 function updateCroquisSettings() {
@@ -288,6 +302,23 @@ function resetCroquisSettings() {
   saveCroquisSettings();
   loadCroquisSettings();
   calculateAll();
+}
+
+function toggleCroquisSettingsPanel() {
+  const content = document.getElementById("croquis-settings-content");
+  const arrow = document.getElementById("croquis-settings-arrow");
+  if (content && arrow) {
+    const isHidden = content.style.display === "none";
+    if (isHidden) {
+      content.style.display = "block";
+      arrow.textContent = "▼";
+      localStorage.setItem("p13-settings-expanded", "true");
+    } else {
+      content.style.display = "none";
+      arrow.textContent = "▶";
+      localStorage.setItem("p13-settings-expanded", "false");
+    }
+  }
 }
 
 window.addEventListener("resize", () => {
