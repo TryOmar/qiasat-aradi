@@ -425,37 +425,37 @@
       <table id="tbl_landEnters">
         <tr>
           <td>
-            <label> سهم</label>
+            <label>فدان</label>
           </td>
           <td>
             <label>قيراط</label>
           </td>
           <td>
-            <label>فدان</label>
+            <label> سهم</label>
           </td>
         </tr>
         <tr>
           <td>
-            <input tabindex="1" type="text" inputmode="decimal" id="txt_share" placeholder="23.75" oninput="calculateShares()">
+            <input tabindex="1" type="text" inputmode="decimal" id="txt_acre" step="1" placeholder="مثال: 1" oninput="calculateShares()">
           </td>
           <td>
-            <input tabindex="2" type="text" inputmode="decimal" id="txt_carat" step="1" placeholder="12" oninput="calculateShares()">
+            <input tabindex="2" type="text" inputmode="decimal" id="txt_carat" step="1" placeholder="مثال: 12" oninput="calculateShares()">
           </td>
           <td>
-            <input tabindex="3" type="text" inputmode="decimal" id="txt_acre" step="1" placeholder="2" oninput="calculateShares()">
+            <input tabindex="3" type="text" inputmode="decimal" id="txt_share" placeholder="مثال: 6.25" oninput="calculateShares()">
           </td>
         </tr>
       </table>
       <!-- ---------------------------------------------------------- -->
       <br>
       <div class="row-buttons-small">
-        <button class="btn-clear" onclick="clearInputFields()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          حذف
-        </button>
         <button class="btn-calc" onclick="calculateShares(true)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           احسب
+        </button>
+        <button class="btn-clear" onclick="clearInputFields()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          حذف
         </button>
       </div>
       <br>
@@ -534,13 +534,33 @@
         </tr>
       </table>
 
+      <!-- لوحة مجموعات الورثة (Heirs Grouping) -->
+      <div id="groups-panel" style="margin-top: 20px; width: 100%; max-width: 600px; display: none; direction: rtl; font-family: Cairo, sans-serif; text-align: right;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #1b5e20; color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 14px; flex-wrap: wrap; gap: 8px;">
+          <span>📁 مجموعات تقسيم الورثة المشتركة</span>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <button id="btn-help-group" onclick="toggleHelpModal(true)" style="border: 1.5px solid #cbd5e1; background: #475569; color: white; padding: 5px 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: Cairo; outline: none; transition: all 0.2s ease;">❓ شرح الاستخدام</button>
+            <button id="btn-clear-groups" onclick="clearAllGroups()" style="border: 1.5px solid #ef4444; background: #dc2626; color: white; padding: 5px 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: Cairo; outline: none; transition: all 0.2s ease;">🗑️ حذف الكل</button>
+            <button id="btn-create-group" onclick="createGroupFromSelected()" style="border: 1.5px solid #ffcc80; background: #e65100; color: white; padding: 5px 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: Cairo; outline: none; transition: all 0.2s ease;">➕ إنشاء مجموعة من المحددين</button>
+          </div>
+        </div>
+        
+        <div id="groups-container" style="background: white; border: 2px solid #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; padding: 15px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <!-- Dynamic group cards loaded here -->
+        </div>
+      </div>
+
       <p id="leftSharesMessage" style="text-align: center; direction: rtl; font-size: 20px;"></p>
       
       <!-- أزرار الطباعة في آخر الصفحة -->
-      <div class="print-container last-element">
-        <button class="btn-print" onclick="printReport()">
+      <div class="print-container last-element" style="display: flex; gap: 10px; justify-content: center; width: 100%; max-width: 360px; margin: 15px auto;">
+        <button class="btn-print" onclick="printReport()" style="flex: 1; padding: 10px 15px; font-size: 13.5px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-          طباعة التقرير والنتائج
+          طباعة التقرير
+        </button>
+        <button class="btn-print" onclick="downloadReportImage()" style="flex: 1; padding: 10px 15px; font-size: 13.5px; background: linear-gradient(135deg, #1565c0, #1e88e5); border: 2px solid #90caf9;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          تحميل التقرير
         </button>
       </div>
 
@@ -553,6 +573,28 @@
 
   </div>
   </div>
+  <!-- نافذة شرح الاستخدام للمجموعات -->
+  <div id="help-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 10000; justify-content: center; align-items: center; direction: rtl; font-family: Cairo, sans-serif; text-align: right;">
+    <div style="background: white; border-radius: 12px; width: 90%; max-width: 440px; box-shadow: 0 4px 25px rgba(0,0,0,0.18); overflow: hidden; animation: slideDownModal 0.28s cubic-bezier(0.16, 1, 0.3, 1);">
+      <div style="background: #1b5e20; color: white; padding: 12px 18px; font-weight: bold; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <span>❓ طريقة استخدام المجموعات</span>
+        <span onclick="toggleHelpModal(false)" style="cursor: pointer; font-size: 24px; font-weight: bold; line-height: 1; user-select: none;">&times;</span>
+      </div>
+      <div style="padding: 18px 24px; font-size: 14px; color: #334155; line-height: 1.65; font-family: Cairo;">
+        <ol style="margin: 0; padding-right: 20px;">
+          <li style="margin-bottom: 10px;">ضع علامة <span style="color: #1b5e20; font-weight: bold;">✔</span> أمام الورثة الذين تريد جمعهم في مجموعة واحدة.</li>
+          <li style="margin-bottom: 10px;">اضغط على <span style="color: #e65100; font-weight: bold;">إنشاء مجموعة من المحددين</span>.</li>
+          <li style="margin-bottom: 10px;">ستظهر بطاقة جديدة توضح أعضاء المجموعة وإجمالي نصيبها.</li>
+          <li style="margin-bottom: 10px;">يمكن إنشاء أكثر من مجموعة حسب الحاجة.</li>
+          <li style="margin-bottom: 0;">إذا أردت إعادة البدء، اضغط على <span style="color: #dc2626; font-weight: bold;">🗑️ حذف الكل</span>.</li>
+        </ol>
+      </div>
+      <div style="background: #f8fafc; padding: 12px 18px; text-align: left; border-top: 1.5px solid #e2e8f0; display: flex; justify-content: flex-end;">
+        <button onclick="toggleHelpModal(false)" style="background: #1b5e20; color: white; border: none; padding: 6px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: Cairo; font-size: 12.5px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script src="../outdoor-mode.js"></script>
 

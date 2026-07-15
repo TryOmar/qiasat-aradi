@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../../shared-ui.css" />
   <link rel="stylesheet" href="../../fraction-helper.css" />
   <title>حساب وتقسيم مساحة الأراضي</title>
   <style>
@@ -43,6 +44,17 @@
   </style>
 </head>
 <body>
+  <!-- Top premium navigation banner -->
+  <div class="top-nav-bar no-print" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; width: 100%; box-sizing: border-box; background: #2e7d32; color: white; border-radius: 0 0 10px 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <button class="nav-btn" onclick="triggerPage13RegressionTests()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: white; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: bold; font-family: Cairo, Arial, sans-serif; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+      <span>🧪 تشغيل اختبارات الانحدار</span>
+    </button>
+    <div class="top-nav-center" style="flex-grow: 1; text-align: center;">
+      <h2 style="font-size: 14px; margin: 0; color: white; font-family: Cairo, Arial, sans-serif;">حساب وتقسيم مساحة الأراضي</h2>
+    </div>
+    <div style="width: 130px; visibility: hidden;"></div>
+  </div>
+
   <div class="con main-container">
     <div class="dec1 no-print"></div>
 
@@ -371,6 +383,8 @@
             تحميل الصورة
           </button>
           <button class="btn btn-secondary btn-sm" onclick="typeof SmartExport !== 'undefined' ? SmartExport.printReport() : printCroquis()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px;">طباعة التقرير والنتائج</button>
+          <button class="btn btn-secondary btn-sm" onclick="printFieldGuide()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="طباعة خطوات التنفيذ الميداني">🧭 دليل التنفيذ الحقلي</button>
+          <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulation()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="تشغيل المحاكاة المتحركة لشرح التنفيذ ميدانياً">🎬 شرح التنفيذ</button>
         </div>
         <button class="btn btn-divide btn-sm" id="btn-toggle-division" onclick="toggleDivisionPanel()" style="margin-top: 8px;">تقسيم الأرض</button>
       </div>
@@ -384,6 +398,7 @@
           <label for="heirs-count">عدد الشركاء:</label>
           <input type="text" inputmode="decimal" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
           <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
+          <button class="btn btn-add-heir btn-sm no-print" onclick="addNewHeir(event)" style="font-weight: bold; font-size: 13px; margin-right: 8px;">إضافة شريك</button>
         </div>
         <!-- خيار متقدم: يظهر فقط لنموذج شبه المنحرف -->
         <div id="actual-dims-toggle" style="display: none; margin-top: 8px; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; color: #01579b; font-weight: bold;">
@@ -405,6 +420,7 @@
               <th>قيراط</th>
               <th>فدان</th>
               <th>خصم الفرق من</th>
+              <th class="actions-header no-print">التحكم</th>
             </tr>
           </thead>
           <tbody id="heirs-list">
@@ -413,7 +429,7 @@
         </table>
       </div>
       <div class="division-info">
-        <p>المساحة الموزعة: <span id="distributed-area">0</span> م² من إجمالي <span id="total-limit-area">0</span> م²</p>
+        <p>المساحة الموزعة: <span id="distributed-area">0</span> م² من إجمالي <span id="total-limit-area">0</span> م²<span id="calc-area-m2" style="display:none;">0</span></p>
         <p id="distribution-status" class="status-ok">التوزيع متطابق 100%</p>
       </div>
     </div>
@@ -454,6 +470,8 @@
         </div>
       </div>
     </div>
+
+
 
     <!-- Calculation Steps (Details) -->
     <details class="steps-details">
@@ -498,11 +516,120 @@
     </div>
   </div>
 
+  <!-- دليل التنفيذ الميداني للمهندسين والمساحين المودال التفاعلي -->
+  <div id="field-guide-modal" class="fh-guide-modal">
+    <div class="fh-guide-modal-content">
+      <div class="fh-guide-modal-header">
+        <h3>📋 دليل التنفيذ الميداني للمساحين والمهندسين</h3>
+        <button class="fh-guide-modal-close" onclick="closeFieldGuideModal()">&times;</button>
+      </div>
+      <div class="fh-guide-modal-body">
+        <!-- كارت ملخص يسار -->
+        <div class="fh-guide-summary-card" id="guide-summary-content">
+          <!-- Dynamic Content -->
+        </div>
+        <!-- كارت خطوات الفواصل يمين -->
+        <div class="fh-guide-steps-container">
+          <div class="fh-guide-section-title">📌 خطوات تحديد الفواصل الميدانية بالتتابع</div>
+          <div id="guide-dividers-list" style="overflow-y:auto; max-height:430px;">
+            <!-- Dynamic Content -->
+          </div>
+        </div>
+      </div>
+      <div class="fh-guide-modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulationFromGuide()" style="background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32; font-weight: bold;">🎬 تشغيل شرح التنفيذ</button>
+        <button class="btn btn-primary btn-sm" onclick="printFieldGuideDirect()" style="background: #1b5e20; color: white; font-weight: bold;">🖨️ طباعة الدليل الورقي</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeFieldGuideModal()" style="font-weight: bold;">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال محاكاة التنفيذ الميداني التفاعلي -->
+  <div id="animation-modal" class="fh-anim-modal">
+    <div class="fh-anim-modal-content">
+      <div class="fh-anim-modal-header">
+        <h3>🎬 شرح التنفيذ الميداني التفاعلي</h3>
+        <button class="fh-anim-modal-close" onclick="AnimationController.stop()">&times;</button>
+      </div>
+      
+      <div class="fh-anim-modal-body">
+        <div class="fh-anim-caption-box">
+          <div class="fh-anim-avatar">
+            <svg viewBox="0 0 64 64" width="48" height="48">
+              <circle cx="32" cy="32" r="30" fill="#e8f5e9" stroke="#c8e6c9" stroke-width="2" />
+              <g transform="translate(8, 8)">
+                <path d="M6,38 C6,28 12,24 24,24 C36,24 42,28 42,38" fill="#1b5e20" />
+                <path d="M14,24 L34,24 L38,38 L10,38 Z" fill="#ffa726" />
+                <circle cx="24" cy="16" r="8" fill="#ffcc80" />
+                <path d="M14,14 C14,7 34,7 34,14" fill="#ffd54f" />
+                <path d="M10,14 L38,14" stroke="#ffd54f" stroke-width="2.5" stroke-linecap="round" />
+              </g>
+            </svg>
+          </div>
+           <div style="flex: 1; display: flex; flex-direction: column;">
+            <p id="animation-text" style="margin: 0;">جاري تحميل المحاكاة...</p>
+            <div id="anim-checkpoint-card" style="margin-top: 10px; padding: 10px 14px; background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 8px; font-size: 13.5px; display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: Cairo;">
+              <span style="font-weight: bold; color: #e65100; display: flex; align-items: center; gap: 6px;">❓ هل تم الانتهاء من تنفيذ ووتد هذه الخطوة ميدانياً؟</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="fh-anim-btn" onclick="AnimationController.confirmStep()" style="background: #2e7d32; color: white; border: none; padding: 4px 10px; font-size: 12.5px;">نعم، تم بنجاح ✅</button>
+                <button class="fh-anim-btn" onclick="AnimationController.replayCurrentStep()" style="background: #757575; color: white; border: none; padding: 4px 10px; font-size: 12.5px;">إعادة شرح الخطوة ↺</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="fh-anim-viewport">
+          <svg id="animation-svg" width="100%" height="100%" viewBox="0 0 1000 600" style="display:block; position:absolute; top:0; left:0;">
+            <!-- elements drawn dynamically -->
+          </svg>
+        </div>
+      </div>
+      
+      <div class="fh-anim-modal-footer">
+        <div class="fh-anim-controls-bar" style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="fh-anim-btn" onclick="AnimationController.prevStep()">⏮ السابق</button>
+            <button class="fh-anim-btn fh-anim-play-btn" id="btn-anim-play" onclick="AnimationController.togglePlay()">▶ تشغيل</button>
+            <button class="fh-anim-btn" onclick="AnimationController.nextStep()">التالي ⏭</button>
+            <button class="fh-anim-btn" onclick="AnimationController.replayCurrentStep()">↺ إعادة الخطوة</button>
+          </div>
+          
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div class="fh-anim-speed-selector">
+              <label>الوضع الميداني:</label>
+              <select id="anim-mode" onchange="AnimationController.changeMode()">
+                <option value="training" selected>🎓 وضع التدريب التفصيلي</option>
+                <option value="fast">👷 وضع التنفيذ السريع</option>
+                <option value="practice">🎯 وضع التدريب العملي</option>
+              </select>
+            </div>
+            <div class="fh-anim-speed-selector">
+              <label>سرعة الحركة:</label>
+              <select id="anim-speed" onchange="AnimationController.changeSpeed()">
+                <option value="2500">×0.5 (بطيء)</option>
+                <option value="1500" selected>1× (طبيعي)</option>
+                <option value="800">2× (سريع)</option>
+                <option value="400">4× (سريع جداً)</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <div id="anim-progress-bar-container" style="width: 120px; height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; display: inline-block; vertical-align: middle;">
+                <div id="anim-progress-bar-fill" style="width: 0%; height: 100%; background: #2e7d32; transition: width 0.3s ease;"></div>
+              </div>
+              <span id="animation-step-indicator" style="font-weight: bold; font-size: 13px; color: #1b5e20;">الخطوة 1 من 1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="../../layout-buffer.js"></script>
   <script src="smart-layout.js"></script>
   <script src="smart-export.js"></script>
   <script src="division-direction.js"></script>
   <script src="script.js"></script>
+  <script src="smart-share-editor.js"></script>
   <script src="../../fraction-helper.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -511,5 +638,23 @@
   </script>
   <script src="../../nav.js"></script>
   <script src="../../outdoor-mode.js"></script>
+  <!-- Regression tests -->
+  <script src="smart-layout-test.js" charset="utf-8"></script>
+  <script src="smart-share-editor-test.js" charset="utf-8"></script>
+  <script src="field-guide-test.js" charset="utf-8"></script>
+  <script src="regression-tests-commit7.js" charset="utf-8"></script>
+  <script>
+    async function triggerPage13RegressionTests() {
+      if (typeof runSmartShareEditorTests !== "function" || typeof runSmartLayoutTests !== "function" || typeof runFieldGuideTests !== "function" || typeof runCommit7Tests !== "function") {
+        alert("خطأ: لم يتم تحميل ملفات الاختبارات بشكل صحيح.");
+        return;
+      }
+      const layoutResults = runSmartLayoutTests();
+      const shareResults = runSmartShareEditorTests();
+      const guideResults = runFieldGuideTests();
+      const commit7Results = await runCommit7Tests();
+      showUnifiedTestResultsReport(shareResults, layoutResults, guideResults, commit7Results);
+    }
+  </script>
 </body>
 </html>

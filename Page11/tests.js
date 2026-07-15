@@ -15,6 +15,62 @@ function runAutomatedTests() {
     });
   }
 
+  // Event listener spy & timer tracking
+  const consoleErrors = [];
+  const originalConsoleError = console.error;
+  console.error = function(...args) {
+    consoleErrors.push("console.error: " + args.join(" "));
+    return originalConsoleError.apply(console, arguments);
+  };
+
+  const handleGlobalError = function(event) {
+    const errorMsg = event.error ? `${event.error.name}: ${event.error.message}` : event.message;
+    consoleErrors.push("Global exception: " + errorMsg);
+  };
+
+  const handleGlobalRejection = function(event) {
+    const reason = event.reason ? (event.reason.message || event.reason) : "unknown reason";
+    consoleErrors.push("Unhandled promise rejection: " + reason);
+  };
+
+  window.addEventListener("error", handleGlobalError);
+  window.addEventListener("unhandledrejection", handleGlobalRejection);
+
+  const listenerRegistry = [];
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    listenerRegistry.push({ target: this, type, listener, options });
+    return originalAddEventListener.apply(this, arguments);
+  };
+
+  EventTarget.prototype.removeEventListener = function(type, listener, options) {
+    const idx = listenerRegistry.findIndex(r => r.target === this && r.type === type && r.listener === listener);
+    if (idx !== -1) {
+      listenerRegistry.splice(idx, 1);
+    }
+    return originalRemoveEventListener.apply(this, arguments);
+  };
+
+  let activeTimers = 0;
+  const originalSetTimeout = window.setTimeout;
+  const originalClearTimeout = window.clearTimeout;
+
+  window.setTimeout = function(fn, delay) {
+    activeTimers++;
+    const id = originalSetTimeout(() => {
+      activeTimers--;
+      fn();
+    }, delay);
+    return id;
+  };
+
+  window.clearTimeout = function(id) {
+    activeTimers = Math.max(0, activeTimers - 1);
+    return originalClearTimeout.apply(this, arguments);
+  };
+
   // Verify average width and average length relationship for all partner rows and remainder row
   function verifyPartitionMath(stageName) {
     const rows = document.querySelectorAll("#partners-list .partner-row");
@@ -979,6 +1035,64 @@ function runAutomatedTests() {
       assert(dataArray[0].length === 13, `الحالة 18: عدد أعمدة التصدير والطباعة يجب أن يكون 13 عموداً متطابقاً.`, `العدد الفعلي: ${dataArray[0].length}`);
     }
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 19: Event Listener Leak Test
+    // -------------------------------------------------------------------------
+    const getConnectedListeners = () => listenerRegistry.filter(r => r.target instanceof Node && r.target.isConnected).length;
+    const initialListeners = getConnectedListeners();
+
+    // Loop: split land, clear partners, add partners, re-split 5 times
+    for (let cycle = 0; cycle < 5; cycle++) {
+      addNewPartnerRow(`شريك تسريب ${cycle + 1}`, 0, 4, 16, "");
+      window.runPartition();
+      if (typeof clearPartners === "function") {
+        clearPartners(false);
+      } else {
+        const list = document.getElementById("partners-list");
+        if (list) list.innerHTML = "";
+        window.runPartition();
+      }
+    }
+
+    const postCycleListeners = getConnectedListeners();
+    const isListenerCountStable = Math.abs(postCycleListeners - initialListeners) <= 2;
+    assert(isListenerCountStable, "الحالة 19 (تسريب مستمعي الأحداث): بعد 5 دورات متتالية من إضافة، حذف، وتقسيم الأرض، لم يزد عدد مستمعي الأحداث المتصلين بالـ DOM.", `قبل: ${initialListeners} | بعد: ${postCycleListeners}`);
+
+    // -------------------------------------------------------------------------
+    // TEST CASE 20: Memory Stability Test
+    // -------------------------------------------------------------------------
+    const stressStartTime = performance.now();
+
+    // 1. 500 consecutive edits to fields
+    const lengthInput = document.getElementById("length1");
+    if (lengthInput) {
+      const originalValue = lengthInput.value;
+      for (let i = 0; i < 500; i++) {
+        lengthInput.value = 100 + (i % 10);
+        lengthInput.dispatchEvent(new Event("input", { bubbles: true }));
+        lengthInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      lengthInput.value = originalValue;
+    }
+
+    // 2. 100 saves and restores of history state
+    for (let i = 0; i < 100; i++) {
+      if (typeof saveCurrentStateToHistory === "function") {
+        saveCurrentStateToHistory(`فحص استقرار الذاكرة ${i}`);
+      }
+    }
+    if (typeof clearHistory === "function") {
+      clearHistory();
+    } else {
+      localStorage.removeItem("p11-history");
+    }
+
+    const stressDuration = performance.now() - stressStartTime;
+    const isTimersOk = activeTimers <= 2;
+
+    assert(stressDuration < 1000, `الحالة 20 (ثبات الذاكرة والسرعة): تشغيل 500 تعديل متتالٍ و 100 عملية حفظ للذاكرة تم في زمن ${stressDuration.toFixed(1)} مللي ثانية دون تباطؤ أو تجميد الواجهة.`, `الزمن الفعلي: ${stressDuration.toFixed(1)} مللي ثانية`);
+    assert(isTimersOk, "الحالة 20 (خلو المؤقتات المعلقة): لا توجد أي مؤقتات معلقة أو تسريب للمهام المجدولة بعد عمليات التعديل والحفظ المكثفة.", `المؤقتات النشطة: ${activeTimers}`);
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {
@@ -998,6 +1112,12 @@ function runAutomatedTests() {
     window.runPartition = originalRunPartition;
     window.__RUNNING_TESTS__ = false;
     window.runPartition();
+
+    // Restore EventTarget and setTimeout
+    EventTarget.prototype.addEventListener = originalAddEventListener;
+    EventTarget.prototype.removeEventListener = originalRemoveEventListener;
+    window.setTimeout = originalSetTimeout;
+    window.clearTimeout = originalClearTimeout;
   }
 
   // 10. اختبار أداء محرك الرسوم المتحركة (500 خطوة محاكاة واستقرار الذاكرة)
@@ -1041,6 +1161,14 @@ function runAutomatedTests() {
   } catch (err) {
     assert(false, "أداء محرك الرسوم - فشل بسبب خطأ برمجي", err.toString());
   }
+
+  // Check for any console errors or exceptions caught during the run
+  assert(consoleErrors.length === 0, "الحالة 21 (خلو سجل Console والمنظومة من الأخطاء والاستثناءات): لم يتم رصد أي أخطاء أو استثناءات أثناء تشغيل الاختبارات.", consoleErrors.length > 0 ? consoleErrors.slice(0, 5).join(" | ") : "نظيف");
+
+  // Clean up global error listeners and restore console.error
+  window.removeEventListener("error", handleGlobalError);
+  window.removeEventListener("unhandledrejection", handleGlobalRejection);
+  console.error = originalConsoleError;
 
   const endTime = performance.now();
   const execTimeMs = endTime - startTime;

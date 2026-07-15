@@ -1,7 +1,14 @@
 body {
-  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
-  background-color: #f7f9f6;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f7f9f6 !important;
   color: #333333;
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif !important;
 }
 
 .main-container {
@@ -695,27 +702,70 @@ body {
 }
 
 .heirs-table-wrapper th {
-  background-color: #e1f5fe;
-  color: #01579b;
-  padding: 6px 3px;
-  border: 1px solid #b3e5fc;
-  font-size: 11px;
+  background-color: #f5f5f5 !important;
+  color: #1b5e20 !important;
+  padding: 8px 6px !important;
+  border: 1px solid #e0e0e0 !important;
+  border-bottom: 2.5px solid #2e7d32 !important;
+  font-size: 12.5px !important;
+  font-weight: bold !important;
 }
 
 .heirs-table-wrapper td {
-  padding: 4px 2px;
-  text-align: center;
-  border: 1px solid #e0e0e0;
+  padding: 5px 4px !important;
+  text-align: center !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: middle !important;
 }
 
 .heirs-table-wrapper input {
-  font-family: 'Cairo', sans-serif;
-  font-weight: 700;
-  text-align: center;
-  border-radius: 4px;
-  border: 1.5px solid #d0d0d0;
-  padding: 3px 2px;
-  outline: none;
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  border-radius: 4px !important;
+  border: 1px solid #cccccc !important;
+  padding: 2px 4px !important;
+  outline: none !important;
+  height: 28px !important;
+  font-size: 12px !important;
+  color: black !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.heirs-table-wrapper input:focus {
+  border-color: #2e7d32 !important;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1) !important;
+  outline: none !important;
+}
+
+.heirs-table-wrapper input[readonly],
+.heirs-table-wrapper input.heir-side-right,
+.heirs-table-wrapper input.heir-side-left,
+.heirs-table-wrapper input.heir-side-height {
+  background-color: #f5f5f5 !important;
+  color: #1b5e20 !important;
+  border-color: #e0e0e0 !important;
+  font-weight: bold !important;
+  cursor: default !important;
+}
+
+.heirs-table-wrapper select {
+  height: 28px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  font-family: 'Cairo', sans-serif !important;
+  outline: none !important;
+  padding: 0 4px !important;
+  background-color: #ffffff !important;
+  color: black !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Hide Chrome/Safari/Opera/Edge number spinners to reclaim text space */
@@ -1272,7 +1322,6 @@ input::placeholder, select::placeholder {
 .input-row input,
 .input-with-select input,
 .conv-input,
-.heirs-table-wrapper input,
 .input-row-inline input {
   border: 2px solid #000000 !important; /* إطار أسود صريح */
   border-radius: 8px !important; /* حواف مستديرة */
@@ -1307,7 +1356,6 @@ input::placeholder, select::placeholder {
 .input-with-select input:focus,
 .price-input-wrapper input:focus,
 .conv-input:focus,
-.heirs-table-wrapper input:focus,
 .input-row-inline input:focus {
   border-color: #000000 !important;
   border-width: 2.5px !important;
@@ -1321,7 +1369,6 @@ input::placeholder, select::placeholder {
   text-align: right !important;
 }
 
-.heirs-table-wrapper input[readonly],
 .input-row input[readonly],
 .conv-input[readonly] {
   background-color: #f5f5f5 !important;
@@ -1341,6 +1388,191 @@ input::placeholder, select::placeholder {
   padding: 0 !important;
   box-shadow: none !important;
   pointer-events: none !important;
+}
+
+/* Smart Share Editor Styles */
+.btn-add-heir {
+  background-color: #2e7d32 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 4px 12px !important;
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 30px !important;
+}
+
+.btn-add-heir:hover {
+  background-color: #1b5e20 !important;
+}
+
+.btn-add-heir:active {
+  transform: scale(0.97) !important;
+}
+
+.actions-cell {
+  padding: 4px !important;
+  text-align: center !important;
+}
+
+.heir-actions-wrapper {
+  display: flex !important;
+  gap: 4px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.btn-action {
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  border: 1px solid #ccc !important;
+  background-color: #fafafa !important;
+  color: #333 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.btn-action:hover:not(:disabled) {
+  background-color: #e0e0e0 !important;
+  border-color: #999 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-action:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+
+.btn-action:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  background-color: #f0f0f0 !important;
+  color: #aaa !important;
+  border-color: #ddd !important;
+}
+
+.btn-delete-heir {
+  color: #d32f2f !important;
+  border-color: #ffcdd2 !important;
+  background-color: #ffebee !important;
+}
+
+.btn-delete-heir:hover:not(:disabled) {
+  background-color: #d32f2f !important;
+  color: white !important;
+  border-color: #d32f2f !important;
+}
+
+/* Locks Column & Toggle Button Styles */
+.heir-locks-wrapper {
+  display: flex !important;
+  gap: 3px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.btn-lock-toggle {
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+  width: 28px !important;
+  height: 26px !important;
+  border-radius: 4px !important;
+  border: 1px solid #ccc !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+  line-height: 1.1 !important;
+}
+
+.btn-lock-toggle.unlocked {
+  background-color: #fafafa !important;
+  color: #888 !important;
+  border-color: #e0e0e0 !important;
+}
+
+.btn-lock-toggle.unlocked:hover {
+  background-color: #f0f0f0 !important;
+  color: #666 !important;
+  border-color: #ccc !important;
+}
+
+.btn-lock-toggle.locked {
+  background-color: #e3f2fd !important;
+  color: #1565c0 !important;
+  border-color: #90caf9 !important;
+}
+
+.btn-lock-toggle.locked:hover {
+  background-color: #bbdefb !important;
+  border-color: #64b5f6 !important;
+}
+
+.btn-lock-toggle .lock-label {
+  font-size: 8.5px !important;
+  margin-top: -1px !important;
+}
+
+/* Drag & Drop Visual Styles */
+.drag-handle {
+  cursor: grab !important;
+  color: #aaa !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  padding: 0 4px !important;
+  user-select: none !important;
+  transition: color 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 26px !important;
+}
+
+.drag-handle:hover {
+  color: #333 !important;
+}
+
+.drag-handle:active {
+  cursor: grabbing !important;
+}
+
+tr.dragging {
+  opacity: 0.4 !important;
+  background-color: #f1f3f4 !important;
+  border: 2px dashed #90caf9 !important;
+}
+
+tr.drag-over-above {
+  border-top: 3px solid #1565c0 !important;
+}
+
+tr.drag-over-below {
+  border-bottom: 3px solid #1565c0 !important;
+}
+
+/* Locked Input Styling */
+.input-locked {
+  background-color: #f5f5f5 !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  border-color: #e0e0e0 !important;
 }
 
 

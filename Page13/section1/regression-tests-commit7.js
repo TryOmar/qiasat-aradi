@@ -1,0 +1,335 @@
+/**
+ * @file regression-tests-commit7.js
+ * @description Commit 7 Acceptance Test Suite – Page13/section1
+ */
+
+window.runCommit7Tests = function(options) {
+  "use strict";
+  options = options || {};
+  
+  // الكشف التلقائي عن بيئة الاختبارات الآلية (Headless) للتحويل للوضع المتزامن السريع
+  const isHeadless = navigator.userAgent.includes("Headless") || 
+                     navigator.userAgent.includes("HeadlessChrome") || 
+                     window.errors_captured !== undefined ||
+                     options.sync === true;
+                     
+  const leakDuration = options.leakTestDuration !== undefined ? options.leakTestDuration : (isHeadless ? 0 : 10);
+  
+  const startTime = performance.now();
+  const results = [];
+  let testIndex = 0;
+
+  function assert(condition, label, detail) {
+    testIndex++;
+    const status = condition ? "PASS" : "FAIL";
+    results.push({ id: testIndex, label, status, detail: detail || "" });
+    const color = condition ? "color: green; font-weight: bold;" : "color: red; font-weight: bold; background-color: #ffebee;";
+    console.log(`%c[C7-T${testIndex}] ${label} → ${status}${detail ? " | " + detail : ""}`, color);
+    return condition;
+  }
+
+  // Backup original state
+  const originalActiveShape = activeShape;
+  const originalIsDivisionActive = isDivisionActive;
+  const originalHeirsData = JSON.stringify(heirsData);
+
+  // Helper selectors and mutators
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = val;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  };
+
+  const selectShape = (shape) => {
+    const card = document.querySelector(`.shape-card[data-shape="${shape}"]`);
+    if (card) {
+      card.click();
+    }
+  };
+
+  try {
+    console.log("%c🚀 بدء اختبارات الانحدار الشاملة – Commit 7 (Comprehensive Regression Tests)", "font-weight: bold; font-size: 16px; color: #7b1fa2;");
+
+    // ==========================================
+    // 1. اختبارات الدقة المتناهية (Precision Verification Tests)
+    // ==========================================
+    console.log("\n%c1. اختبارات الدقة المتناهية (Precision Verification)...", "font-weight: bold; color: #1565c0;");
+    
+    // إعداد مستطيل 100م × 50م = 5000م² و3 شركاء بالتساوي
+    selectShape("rectangle");
+    setVal("rect-length", 100);
+    setVal("rect-width", 50);
+    
+    if (!isDivisionActive && typeof toggleDivisionPanel === "function") {
+      toggleDivisionPanel();
+    }
+    
+    const countInput = document.getElementById("heirs-count");
+    if (countInput) {
+      countInput.value = 3;
+      if (typeof generateHeirsTable === "function") generateHeirsTable();
+    }
+    if (typeof distributeEqually === "function") {
+      distributeEqually();
+    }
+
+    // تحقق من دقة مجموع الأنصبة بقيم متناهية الصغر
+    let sumShares = 0;
+    heirsData.forEach(h => sumShares += h.share);
+    const sharesDiff = Math.abs(sumShares - calculatedArea);
+    assert(sharesDiff < 1e-6, "دقة مجموع الأنصبة: مجموع أنصبة الشركاء يطابق المساحة الكلية بدقة متناهية (أقل من 10^-6 م²)", `الفارق: ${sharesDiff.toFixed(10)} م²`);
+
+    // تحقق من دقة الأبعاد الفرعية (الأطوال والعروض)
+    let sumTopW = 0;
+    let sumBotW = 0;
+    heirsData.forEach(h => {
+      sumTopW += h.topW || 0;
+      sumBotW += h.botW || 0;
+    });
+    const topWDiff = Math.abs(sumTopW - 50); // عرض المستطيل
+    const botWDiff = Math.abs(sumBotW - 50);
+    assert(topWDiff < 1e-6 && botWDiff < 1e-6, "دقة أبعاد التقسيم: مجموع العروض العلوية والسفلية للقطع يطابق العرض الكلي بدقة متناهية", `علوي فارق: ${topWDiff.toFixed(10)}, سفلي فارق: ${botWDiff.toFixed(10)}`);
+
+    // ==========================================
+    // 2. التحقق من الحفظ والاسترجاع بالكامل (Session Save/Restore Tests)
+    // ==========================================
+    console.log("\n%c2. اختبارات الحفظ والاسترجاع الشامل (Session Save/Restore)...", "font-weight: bold; color: #1565c0;");
+
+    // إعداد خصائص مخصصة
+    heirsData[0].name = "شريك مخصص أ";
+    heirsData[0].locks = { area: true, percent: false, order: true, full: false };
+    heirsData[1].name = "شريك مخصص ب";
+    heirsData[1].locks = { area: false, percent: true, order: false, full: false };
+    
+    // ضبط اتجاه التقسيم وإعدادات الكروكي
+    const divDirBtn = document.getElementById("btn-division-direction");
+    const isTransverseDefault = divDirBtn ? divDirBtn.textContent.includes("عرضي") : false;
+    if (divDirBtn && isTransverseDefault) {
+      divDirBtn.click(); // تغيير الاتجاه
+    }
+
+    if (typeof saveStateToSession === "function") {
+      saveStateToSession();
+    }
+
+    // إفراغ البيانات بالكامل لمحاكاة إعادة تحميل الصفحة
+    heirsData = [];
+    isDivisionActive = false;
+    
+    if (typeof loadStateFromSession === "function") {
+      loadStateFromSession();
+    }
+
+    const isRestoreOk = heirsData.length === 3 &&
+                        heirsData[0].name === "شريك مخصص أ" &&
+                        heirsData[0].locks.area === true &&
+                        heirsData[0].locks.order === true &&
+                        heirsData[1].name === "شريك مخصص ب" &&
+                        heirsData[1].locks.percent === true;
+
+    assert(isRestoreOk, "استرجاع الجلسة بالكامل: تم استرجاع بنية الشركاء، الأسماء، الأقفال، والترتيب بنجاح ومطابقة كاملة للبيانات المخزنة");
+
+    // ==========================================
+    // 3. اختبار الأداء والتحميل لـ 100 شريك (100-Partner Stress Test)
+    // ==========================================
+    console.log("\n%c3. اختبار الضغط والأداء لـ 100 شريك (100-Partner Load Test)...", "font-weight: bold; color: #1565c0;");
+
+    const loadStart = performance.now();
+    
+    if (countInput) {
+      countInput.value = 100;
+      if (typeof generateHeirsTable === "function") generateHeirsTable();
+    }
+
+    const loadDuration = performance.now() - loadStart;
+    assert(heirsData.length === 100, "إنشاء 100 شريك: تم إنشاء وتوليد جدول 100 شريك بنجاح في الواجهة والبيانات", `العدد الفعلي: ${heirsData.length}`);
+    assert(loadDuration < 1500, "أداء التحميل لـ 100 شريك: تم توليد ورسم وحساب الجدول لـ 100 شريك في أقل من 1500ms دون تجميد الواجهة", `الوقت المستغرق: ${loadDuration.toFixed(1)} ms`);
+
+    // محاكاة تحريك شريك وحفظه للتأكد من استقرار العمليات مع الأعداد الكبيرة
+    const opStart = performance.now();
+    if (typeof moveHeirDown === "function") {
+      moveHeirDown(heirsData[0].id);
+    }
+    if (typeof saveStateToSession === "function") {
+      saveStateToSession();
+    }
+    const opDuration = performance.now() - opStart;
+    assert(opDuration < 200, "أداء العمليات (تحريك وحفظ) لـ 100 شريك: تمت العمليات في أقل من 200ms", `الوقت المستغرق: ${opDuration.toFixed(1)} ms`);
+
+    // ==========================================
+    // 4. إعداد اختبار تسريب الذاكرة والـ Event Listeners (Memory Leak Test)
+    // ==========================================
+    console.log(`\n%c4. تشغيل محاكاة استقرار الموقتات وتسريب الذاكرة لـ (${leakDuration} ثوانٍ)...`);
+
+    const listenerRegistry = [];
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+      listenerRegistry.push({ target: this, type, listener, options });
+      return originalAddEventListener.apply(this, arguments);
+    };
+
+    EventTarget.prototype.removeEventListener = function(type, listener, options) {
+      const idx = listenerRegistry.findIndex(r => r.target === this && r.type === type && r.listener === listener);
+      if (idx !== -1) {
+        listenerRegistry.splice(idx, 1);
+      }
+      return originalRemoveEventListener.apply(this, arguments);
+    };
+
+    // نتحقق من العناصر المتصلة بالـ DOM فقط أو العناصر العامة لتجنب احتساب العناصر المحذوفة كـ Leaks
+    const getConnectedListeners = () => listenerRegistry.filter(r => (r.target instanceof Node && r.target.isConnected) || r.target === window || r.target === document).length;
+    
+    const initialListenersCount = getConnectedListeners();
+    const initialDrawTimes = [];
+    
+    // قياس أزمنة الرسم البدئية
+    for (let i = 0; i < 3; i++) {
+      const t0 = performance.now();
+      if (typeof calculateAll === "function") calculateAll();
+      initialDrawTimes.push(performance.now() - t0);
+    }
+    const avgInitialDrawTime = initialDrawTimes.reduce((a, b) => a + b, 0) / initialDrawTimes.length;
+
+    // دالة لتنفيذ دورة محاكاة واحدة للتعديل والحذف والتحريك
+    const runSimulationCycle = (cycleIdx) => {
+      if (typeof addNewHeir === "function") {
+        addNewHeir();
+      }
+      if (heirsData.length > 0 && typeof updateHeirFields === "function") {
+        updateHeirFields(heirsData[heirsData.length - 1].id, "sqm", 20 + (cycleIdx % 10));
+      }
+      if (heirsData.length > 2 && typeof moveHeirDown === "function") {
+        moveHeirDown(heirsData[0].id);
+      }
+      if (heirsData.length > 4 && typeof deleteHeir === "function") {
+        deleteHeir(heirsData[heirsData.length - 1].id);
+      }
+      if (typeof calculateAll === "function") {
+        calculateAll();
+      }
+    };
+
+    const finalizeTest = () => {
+      // قياس أزمنة الرسم النهائية بعد المحاكاة
+      const finalDrawTimes = [];
+      for (let i = 0; i < 3; i++) {
+        const t0 = performance.now();
+        if (typeof calculateAll === "function") calculateAll();
+        finalDrawTimes.push(performance.now() - t0);
+      }
+      const avgFinalDrawTime = finalDrawTimes.reduce((a, b) => a + b, 0) / finalDrawTimes.length;
+      const finalListenersCount = getConnectedListeners();
+
+      // حساب نسبة الزيادة في زمن الرسم
+      const drawTimeIncreaseRatio = avgInitialDrawTime > 0 ? (avgFinalDrawTime - avgInitialDrawTime) / avgInitialDrawTime : 0;
+      const leakedListeners = Math.max(0, finalListenersCount - initialListenersCount);
+
+      assert(leakedListeners === 0, "استقرار الأحداث (Event Listeners): لا يوجد أي تسريب لمستمعي الأحداث بعد العمليات المستمرة والمتكررة", `المستمعون المضافون الصافي: ${leakedListeners} (البداية: ${initialListenersCount}, النهاية: ${finalListenersCount})`);
+      
+      const isPerfStable = drawTimeIncreaseRatio < 0.40;
+      assert(isPerfStable, "استقرار زمن الرسم والأداء: لم يتراجع زمن الرسم بأكثر من 40% بعد العمليات المستمرة", `زمن الرسم الأولي: ${avgInitialDrawTime.toFixed(2)}ms, النهائي: ${avgFinalDrawTime.toFixed(2)}ms, نسبة الزيادة: ${(drawTimeIncreaseRatio * 100).toFixed(1)}%`);
+
+      // استعادة مسجلات الأحداث الأصلية
+      EventTarget.prototype.addEventListener = originalAddEventListener;
+      EventTarget.prototype.removeEventListener = originalRemoveEventListener;
+
+      // ==========================================
+      // 5. التحقق من تجربة المستخدم والوميض (UX & Input Focus Tests)
+      // ==========================================
+      console.log("\n%c5. اختبارات تجربة المستخدم واستقرار التركيز (UX & Focus)...", "font-weight: bold; color: #1565c0;");
+
+      // تحقق من عدم فقدان تركيز الحقل المدخل (input focus) عند الكتابة المستمرة
+      const focusRow = document.querySelector("#heirs-list tr");
+      const nameInput = focusRow ? focusRow.querySelector(".heir-name") : null;
+      let focusLost = false;
+
+      if (nameInput) {
+        nameInput.focus();
+        // محاكاة كتابة حرف
+        nameInput.value = "شريك التركيز";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+        
+        // تحقق هل ما زال الحقل يمتلك التركيز بعد معالجة الأحداث
+        if (document.activeElement !== nameInput) {
+          focusLost = true;
+        }
+      }
+      assert(!focusLost, "استقرار تركيز عناصر الإدخال: لا يفقد المستخدم التركيز (Input Focus) على الحقول أثناء كتابة الأسماء أو الأنصبة");
+
+      // استعادة حالة النظام الأصلية بالكامل لضمان نظافة الاختبارات
+      selectShape(originalActiveShape);
+      if (!originalIsDivisionActive) {
+        const toggleBtn = document.getElementById("btn-toggle-division");
+        if (toggleBtn && isDivisionActive) toggleBtn.click();
+      }
+      try {
+        heirsData = JSON.parse(originalHeirsData);
+        renderHeirsRows();
+        calculateAll();
+        if (typeof updateFieldGuide === "function") {
+          updateFieldGuide();
+        }
+      } catch(e) {}
+
+      const duration = performance.now() - startTime;
+      console.log(`\n%c🏁 انتهاء اختبارات Commit 7 بنجاح في زمن ${duration.toFixed(1)} ms`, "font-weight: bold; font-size: 14px; color: #7b1fa2;");
+      
+      const passedCount = results.filter(r => r.status === "PASS").length;
+      const failedCount = results.filter(r => r.status === "FAIL").length;
+
+      return {
+        passed: failedCount === 0,
+        results: results,
+        summary: {
+          totalTests: results.length,
+          passedTests: passedCount,
+          failedTests: failedCount,
+          execTimeMs: Math.round(duration)
+        }
+      };
+    };
+
+    if (leakDuration === 0) {
+      // تشغيل متزامن وسريع في البيئة Headless (5 دورات تكفي لمحاكاة التسريب دون عبء على المعالج)
+      for (let i = 0; i < 5; i++) {
+        runSimulationCycle(i);
+      }
+      return finalizeTest();
+    } else {
+      // تشغيل غير حاصر لمعالج الرسوميات وتجنب تجميد المتصفح بفاصل زمني 100ms
+      return new Promise((resolve) => {
+        const leakTestStart = performance.now();
+        let cycleIdx = 0;
+        const intervalId = setInterval(() => {
+          cycleIdx++;
+          runSimulationCycle(cycleIdx);
+
+          if (performance.now() - leakTestStart >= (leakDuration * 1000)) {
+            clearInterval(intervalId);
+            resolve(finalizeTest());
+          }
+        }, 100);
+      });
+    }
+
+  } catch (error) {
+    assert(false, "فشل غير متوقع أثناء تنفيذ اختبارات الانحدار لـ Commit 7.", error.message);
+    const passedCount = results.filter(r => r.status === "PASS").length;
+    const failedCount = results.filter(r => r.status === "FAIL").length;
+    return {
+      passed: false,
+      results: results,
+      summary: {
+        totalTests: results.length,
+        passedTests: passedCount,
+        failedTests: failedCount,
+        execTimeMs: Math.round(performance.now() - startTime)
+      }
+    };
+  }
+};

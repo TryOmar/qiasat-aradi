@@ -325,6 +325,9 @@ document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
   setupEventListeners();
   resizeCanvasToFit();
+  if (typeof window.updateFieldGuide === "function") {
+    window.updateFieldGuide();
+  }
 });
 
 function setupEventListeners() {
@@ -671,6 +674,9 @@ function toggleDivisionPanel() {
     btnToggleDivision.classList.remove("active-panel");
   }
   calculateAll();
+  if (typeof window.updateFieldGuide === "function") {
+    window.updateFieldGuide();
+  }
 }
 
 // Reset Smart Division panel
@@ -684,6 +690,9 @@ function resetDivision() {
   if (heirsListTbody) heirsListTbody.innerHTML = "";
   if (heirsCountInput) heirsCountInput.value = "3";
   saveStateToSession();
+  if (typeof window.updateFieldGuide === "function") {
+    window.updateFieldGuide();
+  }
 }
 
 // إظهار/إخفاء خيار "الأبعاد الهندسية الفعلية" بناءً على الشكل المختار
@@ -1831,7 +1840,7 @@ function drawLandCanvas(vertices) {
       heir.rightL = pieceRightL;
 
       // Draw slice background fill
-      const color = PIECE_COLORS[i % PIECE_COLORS.length];
+      const color = heir.color || PIECE_COLORS[i % PIECE_COLORS.length];
       ctx.fillStyle = color.fill;
       ctx.beginPath();
       ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
@@ -2053,17 +2062,6 @@ function generateHeirsTable() {
   calculateAll();
 }
 
-// Called on every keystroke in heirs inputs - updates instantly
-function debouncedUpdateHeirShare(idx, type, newValString) {
-  const newVal = parseFloat(newValString) || 0;
-  updateHeirShare(idx, type, newVal);
-}
-
-function commitHeirShareImmediately(idx, type, newValString) {
-  const newVal = parseFloat(newValString) || 0;
-  updateHeirShare(idx, type, newVal);
-}
-
 // Helper to get total land dimensions based on shape
 function getLandDimensions() {
   let landTop = 0, landBottom = 0;
@@ -2075,91 +2073,13 @@ function getLandDimensions() {
     landTop = s; landBottom = s;
   } else if (activeShape === 'trapezoid') {
     landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+    longPlotView = document.getElementById('long-plot-view'); // keep longPlotView binding if needed
     landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
   } else if (activeShape === 'quadrilateral') {
     landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
     landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
   }
   return { landTop, landBottom };
-}
-
-// Update side widths manually with constant area conservation
-function updateHeirSide(idx, sideStr, valStr) {
-  const newVal = parseFloat(valStr) || 0;
-  if (!heirsData[idx]) return;
-  
-  if (sideStr === 'topW' || sideStr === 'botW') {
-    const oldVal = heirsData[idx][sideStr] || 0;
-    const diff = newVal - oldVal;
-    if (diff === 0) return;
-    
-    const otherSideStr = (sideStr === 'topW') ? 'botW' : 'topW';
-    const oldOtherVal = heirsData[idx][otherSideStr] || 0;
-    const sum = oldVal + oldOtherVal;
-    
-    let actualDiff = diff;
-    if (diff > 0) {
-      actualDiff = Math.min(diff, oldOtherVal);
-    } else {
-      actualDiff = -Math.min(-diff, oldVal);
-    }
-    
-    if (actualDiff === 0) {
-      renderHeirsRows();
-      return;
-    }
-    
-    heirsData[idx][sideStr] = oldVal + actualDiff;
-    heirsData[idx][otherSideStr] = oldOtherVal - actualDiff;
-    
-    // Distribute opposite change to target to maintain total widths
-    const targetSelect = document.getElementById(`offset-dest-${idx}`);
-    const targetVal = targetSelect ? targetSelect.value : 'all';
-    
-    if (targetVal === 'all') {
-      const otherHeirs = heirsData.filter((_, i) => i !== idx);
-      if (otherHeirs.length > 0) {
-        const shareDiff = actualDiff / otherHeirs.length;
-        otherHeirs.forEach(h => {
-          h[sideStr] = Math.max(0, (h[sideStr] || 0) - shareDiff);
-          h[otherSideStr] = Math.max(0, (h[otherSideStr] || 0) + shareDiff);
-        });
-      }
-    } else {
-      const tIdx = parseInt(targetVal);
-      if (heirsData[tIdx]) {
-        const targetOldVal = heirsData[tIdx][sideStr] || 0;
-        const targetActualDiff = Math.min(actualDiff, targetOldVal);
-        
-        heirsData[tIdx][sideStr] = targetOldVal - targetActualDiff;
-        heirsData[tIdx][otherSideStr] = (heirsData[tIdx][otherSideStr] || 0) + targetActualDiff;
-        
-        if (targetActualDiff !== actualDiff) {
-          heirsData[idx][sideStr] = oldVal + targetActualDiff;
-          heirsData[idx][otherSideStr] = oldOtherVal - targetActualDiff;
-        }
-      }
-    }
-    
-    saveStateToSession();
-    calculateAll();
-  }
-}
-
-function debouncedUpdateHeirSplitShare(idx, unitType, newValString) {
-  let newVal = parseFloat(newValString) || 0;
-  if (unitType === 'carat' || unitType === 'feddan') {
-    newVal = parseInt(newValString) || 0;
-  }
-  updateHeirSplitShare(idx, unitType, newVal);
-}
-
-function commitHeirSplitShareImmediately(idx, unitType, newValString) {
-  let newVal = parseFloat(newValString) || 0;
-  if (unitType === 'carat' || unitType === 'feddan') {
-    newVal = parseInt(newValString) || 0;
-  }
-  updateHeirSplitShare(idx, unitType, newVal);
 }
 
 function updateHeirsUI() {
@@ -2316,115 +2236,7 @@ function updateHeirName(idx, value) {
   }
 }
 
-// Triggered when a user types in a share directly
-function updateHeirShare(idx, type, newVal) {
-  if (calculatedArea <= 0) return;
-  if (heirsData.length === 1) {
-    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
-    renderHeirsRows();
-    return;
-  }
-  const oldVal = heirsData[idx].share;
-  const diff = newVal - oldVal;
-  
-  if (newVal < 0 || newVal > calculatedArea) {
-    alert("الحصة المدخلة غير مسموح بها (يجب أن تكون بين 0 ومساحة الأرض الكلية).");
-    renderHeirsRows();
-    return;
-  }
 
-  applyShareDiff(idx, diff);
-}
-
-// Triggered when editing split shares (Feddan, Carat, Sahm)
-function updateHeirSplitShare(idx, unitType, newVal) {
-  if (calculatedArea <= 0) return;
-  if (heirsData.length === 1) {
-    alert("عند وجود شريك واحد فقط، يجب أن تكون حصته مساوية لمساحة الأرض الكلية.");
-    renderHeirsRows();
-    return;
-  }
-  const caratSize = parseFloat(caratSizeInput.value) || 168;
-  const currentConv = convertSqmToFeddans(heirsData[idx].share, caratSize);
-  
-  // Calculate new target sqm for this heir
-  let newFeddans = currentConv.feddans;
-  let newCarats = currentConv.carats;
-  let newShares = currentConv.shares;
-
-  if (unitType === 'feddan') newFeddans = newVal;
-  if (unitType === 'carat') newCarats = newVal;
-  if (unitType === 'sahm') newShares = newVal;
-
-  const targetSqm = (newFeddans * 24 * caratSize) + (newCarats * caratSize) + (newShares * caratSize / 24);
-  const diff = targetSqm - heirsData[idx].share;
-
-  if (targetSqm < 0 || targetSqm > calculatedArea) {
-    alert("الحصة المدخلة غير مسموح بها (يجب أن تكون بين 0 ومساحة الأرض الكلية).");
-    renderHeirsRows();
-    return;
-  }
-
-  applyShareDiff(idx, diff);
-}
-
-// Math redistribution logic for sharing differences
-function applyShareDiff(idx, diff) {
-  const destSelect = document.getElementById(`offset-dest-${idx}`).value;
-  
-  if (destSelect === "all") {
-    // Distribute among all other heirs equally
-    const othersCount = heirsData.length - 1;
-    if (othersCount > 0) {
-      const shareAdjustment = -diff / othersCount;
-      
-      // Safety validation first
-      let valid = true;
-      heirsData.forEach((h, oIdx) => {
-        if (oIdx !== idx && (h.share + shareAdjustment < 0)) {
-          valid = false;
-        }
-      });
-
-      if (!valid) {
-        alert("فشل التعديل: التعديل سيؤدي لحصة سالبة لأحد الشركاء. يرجى اختيار جهة خصم مخصصة.");
-        renderHeirsRows();
-        return;
-      }
-
-      heirsData[idx].share += diff;
-      heirsData.forEach((h, oIdx) => {
-        if (oIdx !== idx) {
-          h.share += shareAdjustment;
-        }
-      });
-    }
-  } else {
-    // Offset from a specific heir
-    const targetIdx = parseInt(destSelect);
-    if (heirsData[targetIdx]) {
-      const targetOldShare = heirsData[targetIdx].share;
-      if (targetOldShare - diff < 0) {
-        alert(`فشل التعديل: لا توجد مساحة كافية للخصم من ${heirsData[targetIdx].name}.`);
-        renderHeirsRows();
-        return;
-      }
-      heirsData[idx].share += diff;
-      heirsData[targetIdx].share -= diff;
-    }
-  }
-
-  // Recalculate topW and botW proportionally
-  const dims = getLandDimensions();
-  heirsData.forEach(h => {
-    h.topW = (h.share / (calculatedArea || 1)) * dims.landTop;
-    h.botW = (h.share / (calculatedArea || 1)) * dims.landBottom;
-  });
-
-  saveStateToSession();
-  updateHeirsUI();
-  calculateAll();
-}
 
 function distributeEqually() {
   if (calculatedArea <= 0) return;
@@ -2499,6 +2311,40 @@ function saveStateToSession() {
 }
 
 function loadStateFromSession() {
+  const transferJson = sessionStorage.getItem("divisionInput");
+  if (transferJson) {
+    try {
+      const input = JSON.parse(transferJson);
+      if (input && input.source === "Page5") {
+        const mappedHeirs = [];
+        input.groups.forEach(g => {
+          mappedHeirs.push({
+            id: g.id,
+            name: g.name,
+            share: g.totalShare * (168 / 24), // Convert to square meters (1 share = 168/24 sqm)
+            color: g.color
+          });
+        });
+        input.individualHeirs.forEach(h => {
+          mappedHeirs.push({
+            id: h.id,
+            name: h.name,
+            share: h.share * (168 / 24), // Convert to square meters
+            color: null
+          });
+        });
+        
+        sessionStorage.setItem("heirsData", JSON.stringify(mappedHeirs));
+        sessionStorage.setItem("isDivisionActive", "true");
+        sessionStorage.setItem("heirsCount", mappedHeirs.length.toString());
+      }
+    } catch (err) {
+      console.error("Failed to parse divisionInput:", err);
+    } finally {
+      sessionStorage.removeItem("divisionInput");
+    }
+  }
+
   loadCroquisSettings();
   activeShape = sessionStorage.getItem("activeShape") || "trapezoid";
   caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "168";
@@ -3563,4 +3409,478 @@ document.addEventListener("DOMContentLoaded", () => {
     }, true);
   }
 });
+
+// --- دليل التنفيذ الحقلي الذكي للمهندسين والمساحين ---
+function buildFieldGuideData() {
+  if (typeof isDivisionActive === "undefined" || !isDivisionActive) return null;
+  if (!heirsData || heirsData.length <= 1) return null;
+  if (!vertices || vertices.length < 4) return null;
+  if (!window.canvasPiecesGeometry || window.canvasPiecesGeometry.length === 0) return null;
+
+  const pA = vertices[0];
+  const pB = vertices[1];
+  const pC = vertices[2];
+  const pD = vertices[3];
+
+  if (!pA || !pB || !pC || !pD) return null;
+
+  const L_top = Math.hypot(pC.x - pD.x, pC.y - pD.y);
+  const L_bottom = Math.hypot(pB.x - pA.x, pB.y - pA.y);
+  const L_left = Math.hypot(pD.x - pA.x, pD.y - pA.y);
+  const L_right = Math.hypot(pC.x - pB.x, pC.y - pB.y);
+
+  const exactTs = [0];
+  let tempCumArea = 0;
+  for (let i = 0; i < heirsData.length - 1; i++) {
+    const heir = heirsData[i];
+    if (!heir || typeof heir.share !== "number") return null;
+    tempCumArea += heir.share;
+    if (typeof calculatedArea !== "number" || calculatedArea <= 0) return null;
+    exactTs.push(findTForArea(tempCumArea, calculatedArea));
+  }
+  exactTs.push(1.0);
+
+  const stakes = [];
+  const boundaryRopes = [];
+  const dividerRopes = [];
+  const steps = [];
+
+  stakes.push({ id: "D", name: "الركن العلوي الأيسر (D)", coords: pD, desc: "نقطة الركن الأساسية لبداية القياس العلوي." });
+  stakes.push({ id: "C", name: "الركن العلوي الأيمن (C)", coords: pC, desc: `يقع على بعد ${L_top.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع العلوي.` });
+  stakes.push({ id: "B", name: "الركن السفلي الأيمن (B)", coords: pB, desc: `يقع على بعد ${L_right.toFixed(2)} م من الركن العلوي الأيمن (C) على طول الضلع الأيمن.` });
+  stakes.push({ id: "A", name: "الركن السفلي الأيسر (A)", coords: pA, desc: `يقع على بعد ${L_left.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع الأيسر.` });
+
+  boundaryRopes.push({ name: "الحد العلوي (D ↔ C)", length: L_top, from: "D", to: "C" });
+  boundaryRopes.push({ name: "الحد السفلي (A ↔ B)", length: L_bottom, from: "A", to: "B" });
+  boundaryRopes.push({ name: "الحد الأيسر (D ↔ A)", length: L_left, from: "D", to: "A" });
+  boundaryRopes.push({ name: "الحد الأيمن (C ↔ B)", length: L_right, from: "C", to: "B" });
+
+  let cumTop = 0;
+  let cumBot = 0;
+
+  for (let i = 0; i < heirsData.length - 1; i++) {
+    const t = exactTs[i + 1];
+    const pT = { x: pD.x + t * (pC.x - pD.x), y: pD.y + t * (pC.y - pD.y) };
+    const pBg = { x: pA.x + t * (pB.x - pA.x), y: pA.y + t * (pB.y - pA.y) };
+
+    const heir = heirsData[i];
+    cumTop += heir.topW || 0;
+    cumBot += heir.botW || 0;
+
+    const tId = `T${i + 1}`;
+    const bId = `B${i + 1}`;
+
+    stakes.push({ id: tId, name: `وتد الفصل العلوي رقم ${i + 1} (${tId})`, coords: pT, desc: `قس مسافة ${cumTop.toFixed(2)} م من الركن العلوي الأيسر (D) باتجاه الركن العلوي الأيمن (C).` });
+    stakes.push({ id: bId, name: `وتد الفصل السفلي رقم ${i + 1} (${bId})`, coords: pBg, desc: `قس مسافة ${cumBot.toFixed(2)} م من الركن السفلي الأيسر (A) باتجاه الركن السفلي الأيمن (B).` });
+
+    const dividerLength = Math.hypot(pT.x - pBg.x, pT.y - pBg.y);
+    dividerRopes.push({
+      name: `الحبل الفاصل رقم ${i + 1} بين ${heir.name || `الشريك ${i + 1}`} و ${(heirsData[i + 1] && heirsData[i + 1].name) || `الشريك ${i + 2}`}`,
+      length: dividerLength,
+      from: tId,
+      to: bId
+    });
+  }
+
+  steps.push("دق الأوتاد الأربعة الأساسية عند أركان الأرض الخارجية: الركن السفلي الأيسر (A)، السفلي الأيمن (B)، العلوي الأيمن (C)، والعلوي الأيسر (D).");
+  steps.push(`شد الحبال الأربعة الخارجية لتأكيد الحدود ومطابقة القياسات مع المدخلات الفعلية: الحد العلوي (${L_top.toFixed(2)} م)، السفلي (${L_bottom.toFixed(2)} م)، الأيسر (${L_left.toFixed(2)} م)، والأيمن (${L_right.toFixed(2)} م).`);
+  
+  if (heirsData.length > 1) {
+    steps.push("ابدأ بالقياس على الضلع العلوي من الركن العلوي الأيسر (D) باتجاه الضلع الأيمن، ودق أوتاد الفصل العلوية بالتتابع حسب المسافات الموضحة.");
+    steps.push("انتقل إلى الضلع السفلي والافتتاح بالقياس من الركن السفلي الأيسر (A) باتجاه الضلع الأيمن، ودق أوتاد الفصل السفلية بالتتابع حسب المسافات الموضحة.");
+    steps.push("شد الحبال الفاصلة المستقيمة بين كل وتد علوي ووتد سفلي مقابل له (T1 مع B1، T2 مع B2، وهكذا).");
+    steps.push("لضمان دقة العمل وتفادي الأخطاء، قس الأطوال الفعلية للحبال الفاصلة الممدودة في الطبيعة وقارنها بالأطوال المحسوبة في الجدول للتأكد من مطابقتها.");
+  }
+
+  const totalStakes = stakes.length;
+  const totalRopes = boundaryRopes.length + dividerRopes.length;
+  const estimatedTime = 30 + 10 * totalStakes;
+
+  return {
+    statistics: { stakes: totalStakes, ropes: totalRopes, estimatedTime },
+    boundaryRopes,
+    dividerRopes,
+    stakes,
+    steps
+  };
+}
+
+function openFieldGuideModal() {
+  const guideData = buildFieldGuideData();
+  if (!guideData) {
+    alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
+    return;
+  }
+  
+  const totalArea = calculatedArea ? calculatedArea.toFixed(2) : "-";
+  const summaryHTML = `
+    <!-- بطاقة الملخص الإحصائي -->
+    <div style="margin-bottom: 20px;">
+      <div class="fh-guide-summary-item">
+        <span>اتجاه التقسيم:</span>
+        <span>⬅️ من اليسار إلى اليمين</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>نقطة البداية:</span>
+        <span>الحد الأيسر (الصفر) 🏁</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>عدد الشركاء:</span>
+        <span>${heirsData.length} شركاء</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>عدد الفواصل:</span>
+        <span>${guideData.dividerRopes.length} فواصل</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>الأوتاد المطلوبة:</span>
+        <span>${guideData.statistics.stakes} أوتاد 📌</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>أطوال الفواصل الإجمالية:</span>
+        <span>${guideData.statistics.ropes} حبال</span>
+      </div>
+      <div class="fh-guide-summary-item">
+        <span>زمن التنفيذ المتوقع:</span>
+        <span>${guideData.statistics.estimatedTime} دقيقة ⏱️</span>
+      </div>
+      <div class="fh-guide-summary-item" style="border-top: 1px dashed #c8e6c9; padding-top: 8px; margin-top: 8px;">
+        <span>المساحة الإجمالية:</span>
+        <span style="color: #1b5e20;">${totalArea} م²</span>
+      </div>
+    </div>
+  `;
+  
+  const summaryCard = document.getElementById("guide-summary-content");
+  if (summaryCard) summaryCard.innerHTML = summaryHTML;
+
+  const dividersList = document.getElementById("guide-dividers-list");
+  if (dividersList) {
+    let listHTML = "";
+    
+    listHTML += `
+      <div class="fh-guide-divider-row">
+        <div class="fh-guide-divider-title">🏁 نقطة البداية الأساسية</div>
+        <div style="color:#666;">ابدأ القياس من الركن الأيسر للأرض (الركن D للضلع العلوي والركن A للضلع السفلي)</div>
+      </div>
+    `;
+    
+    const caratSize = caratSizeInput ? (parseFloat(caratSizeInput.value) || 168) : 168;
+    let cumTop = 0;
+    let cumBot = 0;
+    
+    heirsData.forEach((heir, idx) => {
+      const isLast = idx === heirsData.length - 1;
+      const conv = convertSqmToFeddans(heir.share, caratSize);
+      const label = heir.name || `الشريك ${idx + 1}`;
+      
+      listHTML += `
+        <div class="fh-guide-divider-row" style="background:#f9f9f9; border: 1px solid #ccc; cursor:pointer;" onclick="highlightPartnerRow('${heir.id}')">
+          <div class="fh-guide-divider-title" style="color:#1b5e20; display:flex; justify-content:space-between;">
+            <span>👤 ${label}</span>
+            <span style="font-size:11px; font-weight:normal; color:#666;">الترتيب: ${idx + 1}</span>
+          </div>
+          <div style="font-size:12px; margin-bottom:4px;">
+            المساحة: <strong>${heir.share.toFixed(2)} م²</strong> (${conv.feddans} فدان، ${conv.carats} ق، ${conv.shares.toFixed(2)} س)
+          </div>
+          <div style="font-size:12px; color:#555;">
+            العرض العلوي: ${heir.topW.toFixed(2)} م | العرض السفلي: ${heir.botW.toFixed(2)} م
+          </div>
+        </div>
+      `;
+      
+      if (!isLast) {
+        cumTop += heir.topW;
+        cumBot += heir.botW;
+        const dividerLen = guideData.dividerRopes[idx]?.length || 0;
+        listHTML += `
+          <div class="fh-guide-divider-row" style="background:#fff8e1; border-color:#ffe082;">
+            <div class="fh-guide-divider-title" style="color:#e65100;">🚧 الخط الفاصل رقم ${idx + 1}</div>
+            <div style="font-size:12px; line-height:1.5;">
+              - <strong>الوتد العلوي (T${idx + 1}):</strong> قس <strong>${cumTop.toFixed(2)} م</strong> من الركن العلوي الأيسر (D).<br>
+              - <strong>الوتد السفلي (B${idx + 1}):</strong> قس <strong>${cumBot.toFixed(2)} م</strong> من الركن السفلي الأيسر (A).<br>
+              - <strong>طول الحبل الفاصل:</strong> شد حبلاً مستقيماً بطول <strong>${dividerLen.toFixed(2)} م</strong> بين الوتدين.
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    listHTML += `
+      <div class="fh-guide-divider-row" style="background:#ffebee; border-color:#ffcdd2;">
+        <div class="fh-guide-divider-title" style="color:#c62828;">🛑 نقطة النهاية</div>
+        <div style="color:#666;">الحد الأيمن للأرض (الركن C علوياً والركن B سفلياً)</div>
+      </div>
+    `;
+    
+    dividersList.innerHTML = listHTML;
+  }
+
+  const modal = document.getElementById("field-guide-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeFieldGuideModal() {
+  const modal = document.getElementById("field-guide-modal");
+  if (modal) modal.style.display = "none";
+}
+
+function printFieldGuideDirect() {
+  closeFieldGuideModal();
+  
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const totalArea = calculatedArea ? calculatedArea.toFixed(2) : "-";
+
+  let stepsHTML = `
+    <div class="step start-step">
+      <div class="step-icon">🏁</div>
+      <div class="step-content">
+        <div class="step-title">بداية القياس</div>
+        <div class="step-sub">ابدأ من الحد الأيسر للأرض (الركن D علوياً والركن A سفلياً)</div>
+      </div>
+    </div>`;
+
+  const caratSize = caratSizeInput ? (parseFloat(caratSizeInput.value) || 168) : 168;
+  const guideData = buildFieldGuideData();
+  let cumTop = 0;
+  let cumBot = 0;
+
+  heirsData.forEach((heir, idx) => {
+    const isLast = idx === heirsData.length - 1;
+    const conv = convertSqmToFeddans(heir.share, caratSize);
+    const label = heir.name || `الشريك ${idx + 1}`;
+    
+    stepsHTML += `
+    <div class="step-arrow">↓</div>
+    <div class="step piece-step">
+      <div class="step-num">${idx + 1}</div>
+      <div class="step-content">
+        <div class="step-title">${label}</div>
+        <div class="step-area">${heir.share.toFixed(2)} م² &nbsp;(${conv.feddans} فدان ${conv.carats} ق ${conv.shares.toFixed(2)} س)</div>
+        <div class="step-widths">علوياً: ${heir.topW.toFixed(2)} م | سفلياً: ${heir.botW.toFixed(2)} م</div>
+        ${!isLast ? `
+          <div class="step-divider">
+            الفاصل رقم ${idx + 1}: علوياً قس <strong>${(cumTop + heir.topW).toFixed(2)} م</strong> من البداية | سفلياً قس <strong>${(cumBot + heir.botW).toFixed(2)} م</strong> من البداية<br>
+            طول الفاصل الفعلي: <strong>${(guideData.dividerRopes[idx]?.length || 0).toFixed(2)} م</strong>
+          </div>` : ""}
+      </div>
+    </div>`;
+    
+    cumTop += heir.topW;
+    cumBot += heir.botW;
+  });
+
+  stepsHTML += `
+    <div class="step-arrow">↓</div>
+    <div class="step end-step">
+      <div class="step-icon">🛑</div>
+      <div class="step-content">
+        <div class="step-title">نهاية التقسيم</div>
+        <div class="step-sub">الحد الأيمن للأرض — المساحة الإجمالية: ${totalArea} م²</div>
+      </div>
+    </div>`;
+
+  const guideHTML = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>دليل التنفيذ الحقلي الذكي - الدلال</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 15mm 12mm; }
+    body { font-family: 'Tajawal', 'Cairo', 'Noto Sans Arabic', sans-serif; direction: rtl; background: #fff; color: #111; font-size: 12pt; }
+    .header { border: 2.5px solid #1b5e20; border-radius: 10px; padding: 12px 18px; margin-bottom: 18px; background: #f1f8e9; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header h1 { font-size: 22pt; color: #1b5e20; font-weight: 800; }
+    .header h2 { font-size: 13pt; color: #2e7d32; font-weight: 700; text-align: center; }
+    .header .meta { font-size: 9pt; color: #444; text-align: left; line-height: 1.6; }
+    .direction-bar { background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 8px; padding: 8px 14px; margin-bottom: 18px; font-size: 11pt; font-weight: bold; color: #e65100; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .steps { display: flex; flex-direction: column; align-items: stretch; }
+    .step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px; border-radius: 10px; margin-bottom: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .start-step { background: #e8f5e9; border: 2px solid #2e7d32; }
+    .end-step { background: #ffebee; border: 2px solid #c62828; }
+    .piece-step { background: #f9f9f9; border: 1.5px solid #bdbdbd; }
+    .step-arrow { text-align: center; font-size: 18pt; color: #37474f; line-height: 1.2; margin: 2px 0; }
+    .step-icon { font-size: 22pt; line-height: 1; }
+    .step-num { min-width: 32px; height: 32px; border-radius: 50%; background: #1b5e20; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13pt; font-weight: 800; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-content { flex: 1; }
+    .step-title { font-size: 12.5pt; font-weight: 700; color: #1b5e20; margin-bottom: 2px; }
+    .start-step .step-title { color: #1b5e20; }
+    .end-step .step-title { color: #c62828; }
+    .step-sub { font-size: 10pt; color: #555; }
+    .step-area { font-size: 10pt; color: #333; margin-top: 2px; }
+    .step-widths { font-size: 9.5pt; color: #666; }
+    .step-divider { font-size: 11pt; color: #ef6c00; font-weight: bold; background: #fff3e0; border: 1.5px solid #ffe0b2; border-radius: 6px; padding: 4px 10px; margin-top: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .footer { margin-top: 24px; text-align: center; font-size: 8.5pt; color: #888; border-top: 1px solid #ccc; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div><h1>الدَّلاَّل</h1><p style="font-size:9pt;color:#388e3c;font-family:Cairo,sans-serif;">دليل التنفيذ الحقلي</p></div>
+    <h2>خطوات تقسيم الأرض على الطبيعة</h2>
+    <div class="meta"><div><strong>التاريخ:</strong> ${dateStr}</div><div><strong>المساحة:</strong> ${totalArea} م²</div><div><strong>عدد الشركاء:</strong> ${heirsData.length}</div></div>
+  </div>
+  <div class="direction-bar">➡️ اتجاه التقسيم: من اليسار إلى اليمين — ابدأ القياس من الحد الأيسر للأرض (النقطة صفر)</div>
+  <div class="steps">${stepsHTML}</div>
+  <div class="footer">تطبيق الدَّلاَّل لقياسات الأراضي الزراعية | الإصدار v3.0</div>
+</body>
+</html>`;
+
+  const win = window.open("", "_blank");
+  if (!win) { alert("⚠ تعذر فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة."); return; }
+  win.document.write(guideHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 600);
+}
+
+function printFieldGuide() {
+  openFieldGuideModal();
+}
+
+function highlightPartnerRow(heirId) {
+  const row = document.querySelector(`#heirs-table tr[data-id="${heirId}"]`);
+  if (row) {
+    document.querySelectorAll("#heirs-table tr").forEach(r => r.classList.remove("partner-row-highlighted"));
+    row.classList.add("partner-row-highlighted");
+    row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+function openAnimationSimulationFromGuide() {
+  closeFieldGuideModal();
+  openAnimationSimulation();
+}
+
+window.buildFieldGuideData = buildFieldGuideData;
+window.openFieldGuideModal = openFieldGuideModal;
+window.closeFieldGuideModal = closeFieldGuideModal;
+window.printFieldGuideDirect = printFieldGuideDirect;
+window.printFieldGuide = printFieldGuide;
+window.highlightPartnerRow = highlightPartnerRow;
+window.openAnimationSimulationFromGuide = openAnimationSimulationFromGuide;
+
+// --- New UI Unification Functions ---
+let isAnimScriptsLoaded = false;
+let isAnimScriptsLoading = false;
+
+function openAnimationSimulation() {
+  if (!heirsData || heirsData.length === 0) {
+    alert("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
+    return;
+  }
+  
+  let landTop = 0, landBottom = 0, landLeft = 0, landRight = 0;
+  if (activeShape === 'rectangle') {
+    landLeft = parseFloat(document.getElementById('rect-length')?.value) || 0;
+    landTop = parseFloat(document.getElementById('rect-width')?.value) || 0;
+    landBottom = landTop; landRight = landLeft;
+  } else if (activeShape === 'square') {
+    let s = parseFloat(document.getElementById('square-side')?.value) || 0;
+    landTop = s; landBottom = s; landLeft = s; landRight = s;
+  } else if (activeShape === 'trapezoid') {
+    landBottom = parseFloat(document.getElementById('trap-base-major')?.value) || 0;
+    landTop = parseFloat(document.getElementById('trap-base-minor')?.value) || 0;
+    landLeft = parseFloat(document.getElementById('trap-length-left')?.value) || 0;
+    landRight = parseFloat(document.getElementById('trap-length-right')?.value) || 0;
+  } else if (activeShape === 'quadrilateral') {
+    landBottom = parseFloat(document.getElementById('quad-side-a')?.value) || 0;
+    landLeft = parseFloat(document.getElementById('quad-side-b')?.value) || 0;
+    landTop = parseFloat(document.getElementById('quad-side-c')?.value) || 0;
+    landRight = parseFloat(document.getElementById('quad-side-d')?.value) || 0;
+  }
+
+  if (landTop <= 0 || landBottom <= 0 || landLeft <= 0 || landRight <= 0) {
+    alert("يرجى إدخال أبعاد الأرض الأربعة بشكل صحيح أولاً!");
+    return;
+  }
+
+  const landData = {
+    w: (landTop + landBottom) / 2,
+    w1: landTop,
+    w2: landBottom,
+    l1: landLeft,
+    l2: landRight
+  };
+
+  let cumWidth = 0;
+  const pieces = heirsData.map((h, idx) => {
+    const pieceAvgW = ((h.topW || 0) + (h.botW || 0)) / 2;
+    const startX = cumWidth;
+    const endX = cumWidth + pieceAvgW;
+    cumWidth = endX;
+    
+    return {
+      area: h.share,
+      topW: h.topW || 0,
+      botW: h.botW || 0,
+      leftL: h.leftL || 0,
+      rightL: h.rightL || 0,
+      name: h.name || `الشريك ${idx + 1}`,
+      startX: startX,
+      endX: endX,
+      divLine: h.rightL || 0,
+      width: pieceAvgW
+    };
+  });
+
+  window.calculatedPieces = pieces;
+
+  if (isAnimScriptsLoaded) {
+    window.AnimationController.start(landData, pieces);
+    return;
+  }
+
+  if (isAnimScriptsLoading) return;
+  isAnimScriptsLoading = true;
+
+  const btns = document.querySelectorAll("button[onclick='openAnimationSimulation()']");
+  btns.forEach(btn => {
+    btn.setAttribute("data-orig-text", btn.innerHTML);
+    btn.innerHTML = "⏳ جاري تحميل المحاكاة...";
+    btn.disabled = true;
+  });
+
+  const scripts = [
+    "../../animation/animation-assets.js",
+    "../../animation/animation-utils.js",
+    "../../animation/animation-engine.js",
+    "../../animation/animation-renderer.js",
+    "../../animation/animation-controller.js"
+  ];
+
+  function loadNextScript(index) {
+    if (index >= scripts.length) {
+      isAnimScriptsLoaded = true;
+      isAnimScriptsLoading = false;
+      
+      btns.forEach(btn => {
+        btn.innerHTML = btn.getAttribute("data-orig-text") || "🎬 شرح التنفيذ";
+        btn.disabled = false;
+      });
+      
+      window.AnimationController.start(landData, pieces);
+      return;
+    }
+    
+    const script = document.createElement("script");
+    script.src = scripts[index];
+    script.onload = () => loadNextScript(index + 1);
+    script.onerror = () => {
+      alert("فشل تحميل ملفات المحاكاة. يرجى التحقق من اتصالك بالشبكة.");
+      isAnimScriptsLoading = false;
+      btns.forEach(btn => {
+        btn.innerHTML = btn.getAttribute("data-orig-text") || "🎬 شرح التنفيذ";
+        btn.disabled = false;
+      });
+    };
+    document.body.appendChild(script);
+  }
+
+  loadNextScript(0);
+}
+
+window.openAnimationSimulation = openAnimationSimulation;
+
 
