@@ -72,6 +72,38 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   });
+
+  // الاستماع لحدث تغيير اتجاه التقسيم لتحديث الواجهة بصرياً دون حسابات
+  window.addEventListener("partition-direction-changed", function (e) {
+    const dir = e.detail.direction;
+    console.log("Trace: partition-direction-changed caught:", dir);
+    
+    // تحديث القائمة المنسدلة
+    const select = document.getElementById("partition-direction-select");
+    if (select) select.value = dir;
+
+    // تحديث بطاقة اتجاه التقسيم فوق الجدول
+    const badge = document.getElementById("table-direction-badge");
+    if (badge) {
+      if (dir === "LTR") {
+        badge.innerHTML = "🏁 اتجاه التقسيم: ➡️ من اليسار إلى اليمين (الحد الأيسر هو نقطة الصفر)";
+      } else {
+        badge.innerHTML = "🏁 اتجاه التقسيم: ⬅️ من اليمين إلى اليسار (الحد الأيمن هو نقطة الصفر)";
+      }
+    }
+
+    // رندرة المكونات بصرياً بناءً على الاتجاه المختار
+    updateTableRowsUI();
+    renderCroquis();
+    
+    let remainingArea = 0;
+    if (window.calcState) {
+      remainingArea = window.calcState.remainingArea;
+    }
+    updateRemainderRowUI(remainingArea);
+    updateTableTotals();
+    updateCalculationSteps();
+  });
 });
 
 function setupSVGInteractions() {
@@ -287,6 +319,7 @@ function saveData() {
   localStorage.setItem("p11-input-method", document.getElementById("share-input-method").value);
   localStorage.setItem("p11-is-partitioned", isPartitioned ? "true" : "false");
   localStorage.setItem("p11-is-manual-partition", isManualPartition ? "true" : "false");
+  localStorage.setItem("p11-partition-direction", window.PartitionDirectionManager.getDirection());
 
   const modeKeepArea = document.getElementById("mode-keep-area");
   if (modeKeepArea) {
@@ -397,6 +430,9 @@ function loadData() {
   }
 
   isPartitioned = (localStorage.getItem("p11-is-partitioned") === "true");
+  
+  const savedDir = localStorage.getItem("p11-partition-direction") || "RTL";
+  window.PartitionDirectionManager.setDirection(savedDir);
 }
 
 function handleCaratAreaChange(triggerCalculate = true) {
@@ -1250,6 +1286,7 @@ function calculateGeneral(shouldRender = true) {
     }
   }
   
+  updateTableRowsUI();
   updateRemainderRowUI(remainingArea);
   updateTableTotals();
   adjustNameColumnWidth();
@@ -1454,6 +1491,10 @@ function runPartition(shouldRender = true) {
         name: partnerName,
         startX: tPrev_top * w,
         endX: tCurr_top * w,
+        tPrev_top: tPrev_top,
+        tCurr_top: tCurr_top,
+        tPrev_bot: tPrev_bot,
+        tCurr_bot: tCurr_bot,
         botW: botWidth,
         topW: topWidth,
         width: (botWidth + topWidth) / 2,
@@ -1479,6 +1520,10 @@ function runPartition(shouldRender = true) {
       name: "المتبقي",
       startX: lastT_top * w,
       endX: 1.0 * w,
+      tPrev_top: lastT_top,
+      tCurr_top: 1.0,
+      tPrev_bot: lastT_bot,
+      tCurr_bot: 1.0,
       botW: remBotW,
       topW: remTopW,
       width: (remBotW + remTopW) / 2,
@@ -1684,6 +1729,7 @@ function runPartition(shouldRender = true) {
   if (document.getElementById("info-partners-count")) {
     document.getElementById("info-partners-count").innerText = window.calcState.activePartnersCount;
   }
+  updateTableRowsUI();
   updateRemainderRowUI(remainingArea);
   updateTableTotals();
   saveData();
@@ -2206,15 +2252,35 @@ function renderCroquis() {
           labelGroup.appendChild(tIdx);
         } else {
           // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة
-          const yArea = topY + pieceH * 0.18;
-          const yName = topY + pieceH * 0.42;
-          const yLength = topY + pieceH * 0.66;
-          const yDirection = topY + pieceH * 0.82;
+          const yLeftLen   = topY + pieceH * 0.16;
+          const yArea      = topY + pieceH * 0.36;
+          const yName      = topY + pieceH * 0.56;
+          const yRightLen  = topY + pieceH * 0.76;
+          const yDirection = topY + pieceH * 0.86;
+          
+          // إزاحة أفقية لوضع النص بجانب الفاصل المقابل له (الحد الأيسر X2 والحد الأيمن X1)
+          const padX = Math.min(16 * textScale, pieceWidth * 0.22);
+          const xLeft = x2 + padX;
+          const xRight = x1 - padX;
           
           // حجم خط ديناميكي يناسب عرض العمود
           const fontSize = Math.min(13.5, Math.max(7.5, pieceWidth * 0.30)) * textScale;
           
-          // 1. عرض المساحة رأسي (دوران -90 درجة) في الجزء العلوي
+          // 1. عرض طول الحد الأيسر رأسي (دوران -90 درجة) بجانب الفاصل الأيسر
+          if (showCroquisMeasurements) {
+            const lenGroup = svgEl("g");
+            lenGroup.setAttribute("transform", `rotate(-90, ${xLeft}, ${yLeftLen})`);
+            
+            const tLenVal = svgText(xLeft, yLeftLen + 4 * textScale, piece.divLine.toFixed(2) + " م", {
+              fill: "#000000",
+              size: (fontSize / textScale).toString(),
+              weight: "bold"
+            });
+            lenGroup.appendChild(tLenVal);
+            labelGroup.appendChild(lenGroup);
+          }
+          
+          // 2. عرض المساحة رأسي (دوران -90 درجة) تحت طول الحد الأيسر في المنتصف
           if (showCroquisMeasurements) {
             const areaVal = Number(piece.area.toFixed(2));
             const areaGroup = svgEl("g");
@@ -2229,7 +2295,7 @@ function renderCroquis() {
             labelGroup.appendChild(areaGroup);
           }
           
-          // 2. عرض الاسم رأسي (دوران -90 درجة) في المنتصف
+          // 3. عرض الاسم رأسي (دوران -90 درجة) في المنتصف
           if (showCroquisNames) {
             const nameGroup = svgEl("g");
             nameGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yName})`);
@@ -2243,12 +2309,12 @@ function renderCroquis() {
             labelGroup.appendChild(nameGroup);
           }
           
-          // 3. عرض طول القطعة رأسي (دوران -90 درجة) في الجزء السفلي
+          // 4. عرض طول الحد الأيمن رأسي (دوران -90 درجة) بجانب الفاصل الأيمن
           if (showCroquisMeasurements) {
             const lenGroup = svgEl("g");
-            lenGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yLength})`);
+            lenGroup.setAttribute("transform", `rotate(-90, ${xRight}, ${yRightLen})`);
             
-            const tLenVal = svgText(cx, yLength + 4 * textScale, pieceMidLength.toFixed(2) + " م", {
+            const tLenVal = svgText(xRight, yRightLen + 4 * textScale, piece.leftLine.toFixed(2) + " م", {
               fill: "#000000",
               size: (fontSize / textScale).toString(),
               weight: "bold"
@@ -2257,9 +2323,15 @@ function renderCroquis() {
             labelGroup.appendChild(lenGroup);
           }
 
-          // 4. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة) مع خلفية ملونة
-          const isStart = (index === 0);  // تعريف صريح لتفادي ReferenceError على الموبايل
-          const isEnd = (index === window.calculatedPieces.length - 1 && !piece.isRemainder);
+          // 5. مؤشر بداية/نهاية التقسيم داخل القطعة (دوران -90 درجة) مع خلفية ملونة
+          const isLTR = window.PartitionDirectionManager.isLTR();
+          const activePieces = window.calculatedPieces.filter(p => !p.isRemainder);
+          const isStart = isLTR 
+            ? (piece === activePieces[activePieces.length - 1])
+            : (piece === activePieces[0]);
+          const isEnd = isLTR
+            ? (piece === activePieces[0])
+            : (piece === activePieces[activePieces.length - 1]);
           let badgeEmoji = "";
           let badgeLabel = "";
           let badgeFill = "";
@@ -2299,7 +2371,7 @@ function renderCroquis() {
             if (pieceH > 260 && pieceWidth > 45) {
               // التحقق من المسافة السفلية لمنع تداخل الأبعاد
               const maxAllowedY = botY - badgeW / 2 - 14 * textScale;
-              const minAllowedY = yLength + badgeW / 2 + 12 * textScale;
+              const minAllowedY = yRightLen + badgeW / 2 + 12 * textScale;
               if (maxAllowedY > minAllowedY) {
                 drawInside = true;
                 // ضبط الموضع لتجنب تداخل الأبعاد السفلية تماماً
@@ -2536,42 +2608,49 @@ function renderCroquis() {
 
     // 5. اتجاه التقسيم (سهم مع كتابة أعلى الرسم)
     const arrowY = mapY(0) - dimOffset - 25 * textScale;
-    const arrowStartX = mapX(w) - 40 * textScale;
-    const arrowEndX = mapX(0) + 40 * textScale;
+    const isLTR = window.PartitionDirectionManager.isLTR();
     
-    if (arrowStartX > arrowEndX) {
-      // رسم خط السهم (من اليمين إلى اليسار)
-      g.appendChild(svgLine(arrowStartX, arrowY, arrowEndX, arrowY, { 
-        stroke: "#ef6c00", 
-        width: 2.5 * textScale 
-      }));
-      
-      // رسم رأس السهم (pointing left)
-      const headSize = 6 * textScale;
-      const arrowHead = svgEl("polygon");
+    const arrowStartX = isLTR ? (mapX(0) + 40 * textScale) : (mapX(w) - 40 * textScale);
+    const arrowEndX = isLTR ? (mapX(w) - 40 * textScale) : (mapX(0) + 40 * textScale);
+    
+    g.appendChild(svgLine(arrowStartX, arrowY, arrowEndX, arrowY, { 
+      stroke: "#ef6c00", 
+      width: 2.5 * textScale 
+    }));
+    
+    // رسم رأس السهم
+    const headSize = 6 * textScale;
+    const arrowHead = svgEl("polygon");
+    if (isLTR) {
+      // pointing right
+      arrowHead.setAttribute("points", 
+        `${arrowEndX},${arrowY} ${arrowEndX - headSize},${arrowY - headSize/1.5} ${arrowEndX - headSize},${arrowY + headSize/1.5}`
+      );
+    } else {
+      // pointing left
       arrowHead.setAttribute("points", 
         `${arrowEndX},${arrowY} ${arrowEndX + headSize},${arrowY - headSize/1.5} ${arrowEndX + headSize},${arrowY + headSize/1.5}`
       );
-      arrowHead.setAttribute("fill", "#ef6c00");
-      g.appendChild(arrowHead);
-
-      // كتابة النص فوق السهم - سطرين
-      const arrowMidX = (arrowStartX + arrowEndX) / 2;
-      const arrowText1 = svgText(arrowMidX, arrowY - 18 * textScale, "اتجاه التقسيم", {
-        fill: "#ef6c00",
-        size: "12",
-        weight: "bold",
-        bg: true
-      });
-      g.appendChild(arrowText1);
-      const arrowText2 = svgText(arrowMidX, arrowY - 6 * textScale, "من اليمين الى اليسار", {
-        fill: "#f57c00",
-        size: "10",
-        weight: "normal",
-        bg: true
-      });
-      g.appendChild(arrowText2);
     }
+    arrowHead.setAttribute("fill", "#ef6c00");
+    g.appendChild(arrowHead);
+
+    // كتابة النص فوق السهم - سطرين
+    const arrowMidX = (arrowStartX + arrowEndX) / 2;
+    const arrowText1 = svgText(arrowMidX, arrowY - 18 * textScale, "اتجاه التقسيم", {
+      fill: "#ef6c00",
+      size: "12",
+      weight: "bold",
+      bg: true
+    });
+    g.appendChild(arrowText1);
+    const arrowText2 = svgText(arrowMidX, arrowY - 6 * textScale, isLTR ? "من اليسار الى اليمين" : "من اليمين الى اليسار", {
+      fill: "#f57c00",
+      size: "10",
+      weight: "normal",
+      bg: true
+    });
+    g.appendChild(arrowText2);
 
     // --- رؤوس مضلع الأرض الخارجية ---
     // أسفل-يسار، أسفل-يمين، أعلى-يمين (l1=الطول الأيمن)، أعلى-يسار (l2=الطول الأيسر)
@@ -2942,6 +3021,20 @@ function getTableDataArray() {
     }
   }
   
+  if (window.PartitionDirectionManager.isLTR()) {
+    const header = data[0];
+    const partners = data.slice(1).filter(r => r[1] !== "المتبقي" && r[1] !== "الإجمالي");
+    const remainder = data.slice(1).find(r => r[1] === "المتبقي");
+    const total = data.slice(1).find(r => r[1] === "الإجمالي");
+    
+    partners.reverse();
+    
+    const newData = [header, ...partners];
+    if (remainder) newData.push(remainder);
+    if (total) newData.push(total);
+    return newData;
+  }
+  
   return data;
 }
 
@@ -3220,17 +3313,18 @@ function openFieldGuideModal() {
   else if (maxDim < 50) tapeLength = 50;
   else tapeLength = 100;
 
+  const isLTR = window.PartitionDirectionManager.isLTR();
   // 2. تحديث الكارت الأيمن (الملخص + الأدوات المطلوبة + الزمن)
   const summaryHTML = `
     <!-- بطاقة الملخص الإحصائي -->
     <div style="margin-bottom: 20px;">
       <div class="fh-guide-summary-item">
         <span>اتجاه التقسيم:</span>
-        <span>➡️ من اليمين إلى اليسار</span>
+        <span>${isLTR ? "➡️ من اليسار إلى اليمين" : "⬅️ من اليمين إلى اليسار"}</span>
       </div>
       <div class="fh-guide-summary-item">
         <span>نقطة البداية:</span>
-        <span>الحد الأيمن (الصفر) 🏁</span>
+        <span>${isLTR ? "الحد الأيسر (الصفر) 🏁" : "الحد الأيمن (الصفر) 🏁"}</span>
       </div>
       <div class="fh-guide-summary-item">
         <span>عدد الشركاء:</span>
@@ -3272,31 +3366,47 @@ function openFieldGuideModal() {
 
   // 3. تحديث الكارت الأيسر (الفواصل والقياسات ومؤشرات الخطوات المزدوجة)
   let dividersHTML = "";
-  window.calculatedPieces.forEach((piece, idx) => {
-    if (idx < window.calculatedPieces.length - 1) {
-      const nextPiece = window.calculatedPieces[idx + 1];
-      const stepTitle = `الخطوة ${idx + 1} من ${dividersCount} | الآن يتم تحديد الحد الفاصل بين (${piece.name || 'شريك ' + (idx + 1)}) و (${nextPiece.name || 'شريك ' + (idx + 2)})`;
-      const pegIndex1 = 2 * idx + 3;
-      const pegIndex2 = 2 * idx + 4;
-      
-      dividersHTML += `
-        <div class="fh-guide-divider-row" data-partner-index="${idx}" style="cursor: pointer; position: relative; padding-right: 42px !important;"
-             onmouseenter="highlightSegment(${idx})"
-             onmouseleave="removeHighlight()"
-             onclick="highlightAndKeepSegment(${idx})">
-          <div style="position: absolute; right: 12px; top: 12px; font-size: 18px; color: #1b5e20;">📌</div>
-          <div class="fh-guide-divider-title">${stepTitle}</div>
-          <div style="font-size: 12px; color: #666; margin-bottom: 6px; font-weight: bold;">
-            (تم وضع الأوتاد رقم ${pegIndex1} و ${pegIndex2} من إجمالي ${pegsCount} أوتاد)
-          </div>
-          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-            <span>القياس على الحد العلوي: <strong>${piece.endX.toFixed(2)} م</strong></span>
-            <span>القياس على الحد السفلي: <strong>${piece.endX.toFixed(2)} م</strong></span>
-            <span>طول الفاصل الفعلي: <strong>${piece.divLine.toFixed(2)} م</strong></span>
-          </div>
+  
+  const dividerIndices = [];
+  for (let i = 0; i < dividersCount; i++) {
+    dividerIndices.push(i);
+  }
+  if (isLTR) {
+    dividerIndices.reverse();
+  }
+
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+
+  dividerIndices.forEach((idx, stepNum) => {
+    const piece = window.calculatedPieces[idx];
+    const nextPiece = window.calculatedPieces[idx + 1];
+    const p1Name = isLTR ? nextPiece.name : piece.name;
+    const p2Name = isLTR ? piece.name : nextPiece.name;
+    const stepTitle = `الخطوة ${stepNum + 1} من ${dividersCount} | الآن يتم تحديد الحد الفاصل بين (${p1Name || 'شريك ' + (idx + 2)}) و (${p2Name || 'شريك ' + (idx + 1)})`;
+    const pegIndex1 = isLTR ? (2 * (dividersCount - idx) + 1) : (2 * idx + 3);
+    const pegIndex2 = isLTR ? (2 * (dividersCount - idx) + 2) : (2 * idx + 4);
+    
+    const topVal = isLTR ? ((1.0 - piece.tCurr_top) * w2) : (piece.tCurr_top * w2);
+    const botVal = isLTR ? ((1.0 - piece.tCurr_bot) * w1) : (piece.tCurr_bot * w1);
+    
+    dividersHTML += `
+      <div class="fh-guide-divider-row" data-partner-index="${idx}" style="cursor: pointer; position: relative; padding-right: 42px !important;"
+           onmouseenter="highlightSegment(${idx})"
+           onmouseleave="removeHighlight()"
+           onclick="highlightAndKeepSegment(${idx})">
+        <div style="position: absolute; right: 12px; top: 12px; font-size: 18px; color: #1b5e20;">📌</div>
+        <div class="fh-guide-divider-title">${stepTitle}</div>
+        <div style="font-size: 12px; color: #666; margin-bottom: 6px; font-weight: bold;">
+          (تم وضع الأوتاد رقم ${pegIndex1} و ${pegIndex2} من إجمالي ${pegsCount} أوتاد)
         </div>
-      `;
-    }
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <span>القياس على الحد العلوي: <strong>${topVal.toFixed(2)} م</strong></span>
+          <span>القياس على الحد السفلي: <strong>${botVal.toFixed(2)} م</strong></span>
+          <span>طول الفاصل الفعلي: <strong>${piece.divLine.toFixed(2)} م</strong></span>
+        </div>
+      </div>
+    `;
   });
   if (dividersHTML === "") {
     dividersHTML = `<div class="fh-guide-divider-row" style="text-align:center; color:#555;">لا توجد فواصل مطلوبة (شريك واحد فقط).</div>`;
@@ -3337,28 +3447,45 @@ function printFieldGuideDirect() {
   const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
 
+  const isLTR = window.PartitionDirectionManager.isLTR();
+  const w1 = parseFloat(document.getElementById("width1").value) || 0;
+  const w2 = parseFloat(document.getElementById("width2").value) || 0;
+
   let stepsHTML = `
     <div class="step start-step">
       <div class="step-icon">🏁</div>
       <div class="step-content">
         <div class="step-title">بداية القياس</div>
-        <div class="step-sub">ابدأ من الحد الأيمن للأرض (النقطة صفر)</div>
+        <div class="step-sub">${isLTR ? "ابدأ من الحد الأيسر للأرض (النقطة صفر)" : "ابدأ من الحد الأيمن للأرض (النقطة صفر)"}</div>
       </div>
     </div>`;
 
-  window.calculatedPieces.forEach((piece, idx) => {
-    const isLast = idx === window.calculatedPieces.length - 1;
+  const scenarioPieces = isLTR ? [...window.calculatedPieces].reverse() : window.calculatedPieces;
+
+  scenarioPieces.forEach((piece, loopIdx) => {
+    const idx = window.calculatedPieces.indexOf(piece);
+    const isLast = loopIdx === scenarioPieces.length - 1;
     const fcs = convertSquareMetersToFCS(piece.area);
     const label = piece.isRemainder ? "الجزء المتبقي" : (piece.name || 'شريك ' + (idx + 1));
+    
+    let dividerHTML = "";
+    if (!isLast) {
+      const divPiece = isLTR ? window.calculatedPieces[idx - 1] : piece;
+      const topVal = isLTR ? ((1.0 - divPiece.tCurr_top) * w2) : (divPiece.tCurr_top * w2);
+      const botVal = isLTR ? ((1.0 - divPiece.tCurr_bot) * w1) : (divPiece.tCurr_bot * w1);
+      const divLineVal = divPiece.divLine;
+      dividerHTML = `<div class="step-divider">الفاصل ${loopIdx + 1}: أعلى <strong>${topVal.toFixed(2)} م</strong> | أسفل <strong>${botVal.toFixed(2)} م</strong> (طول الفاصل: ${divLineVal.toFixed(2)} م)</div>`;
+    }
+    
     stepsHTML += `
     <div class="step-arrow">↓</div>
     <div class="step piece-step">
-      <div class="step-num">${idx + 1}</div>
+      <div class="step-num">${loopIdx + 1}</div>
       <div class="step-content">
         <div class="step-title">${label}</div>
         <div class="step-area">${piece.area.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
         <div class="step-widths">أعلى: ${piece.topW.toFixed(2)} م | أسفل: ${piece.botW.toFixed(2)} م</div>
-        ${!isLast ? `<div class="step-divider">الفاصل ${idx + 1}: أعلى <strong>${piece.endX.toFixed(2)} م</strong> | أسفل <strong>${piece.endX.toFixed(2)} م</strong> (طول الفاصل: ${piece.divLine.toFixed(2)} م)</div>` : ""}
+        ${dividerHTML}
       </div>
     </div>`;
   });
@@ -3369,9 +3496,13 @@ function printFieldGuideDirect() {
       <div class="step-icon">🛑</div>
       <div class="step-content">
         <div class="step-title">نهاية التقسيم</div>
-        <div class="step-sub">الحد الأيسر للأرض — المساحة الإجمالية: ${totalArea} م²</div>
+        <div class="step-sub">${isLTR ? "الحد الأيمن للأرض" : "الحد الأيسر للأرض"} — المساحة الإجمالية: ${totalArea} م²</div>
       </div>
     </div>`;
+
+  const dirBarText = isLTR 
+    ? `➡️ اتجاه التقسيم: من اليسار إلى اليمين — ابدأ القياس من الحد الأيسر للأرض (النقطة صفر)`
+    : `➡️ اتجاه التقسيم: من اليمين إلى اليسار — ابدأ القياس من الحد الأيمن للأرض (النقطة صفر)`;
 
   const guideHTML = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -3413,7 +3544,7 @@ function printFieldGuideDirect() {
     <h2>خطوات تقسيم الأرض على الطبيعة</h2>
     <div class="meta"><div><strong>التاريخ:</strong> ${dateStr}</div><div><strong>المساحة:</strong> ${totalArea} م²</div><div><strong>عدد الشركاء:</strong> ${window.calculatedPieces.length}</div></div>
   </div>
-  <div class="direction-bar">➡️ اتجاه التقسيم: من اليمين إلى اليسار — ابدأ القياس من الحد الأيمن للأرض (النقطة صفر)</div>
+  <div class="direction-bar">${dirBarText}</div>
   <div class="steps">${stepsHTML}</div>
   <div class="footer">تطبيق الدَّلاَّل لقياسات الأراضي الزراعية | الإصدار v3.0</div>
 </body>
@@ -4826,6 +4957,7 @@ function saveCurrentStateToHistory(description = "") {
     inputMethod: currentInputMethod,
     isPartitioned: isPartitioned,
     isManualPartition: isManualPartition,
+    partitionDirection: window.PartitionDirectionManager.getDirection(),
     partners: partners
   };
 
@@ -4917,6 +5049,12 @@ function restoreHistoryState(index) {
   document.getElementById("input-carat-area").value = state.caratArea;
   document.getElementById("other-carat-area").value = state.otherCaratArea;
   document.getElementById("share-input-method").value = state.inputMethod;
+
+  if (state.partitionDirection) {
+    window.PartitionDirectionManager.setDirection(state.partitionDirection);
+  } else {
+    window.PartitionDirectionManager.setDirection("RTL");
+  }
 
   currentInputMethod = state.inputMethod;
   isPartitioned = state.isPartitioned;
@@ -5082,6 +5220,112 @@ function updateTableTotals() {
   }
   } catch (e) {
     console.error("Error in updateTableTotals:", e);
+  }
+}
+
+function updateTableRowsUI() {
+  console.log("Trace: updateTableRowsUI start");
+  try {
+    const isLTR = window.PartitionDirectionManager.isLTR();
+    const rows = Array.from(document.querySelectorAll("#partners-list .partner-row"));
+    const activeRows = rows.filter(row => !isPartnerRowExcluded(row));
+    const totalActive = activeRows.length;
+
+    const w1 = parseFloat(document.getElementById("width1").value) || 0;
+    const w2 = parseFloat(document.getElementById("width2").value) || 0;
+
+    rows.forEach((row, index) => {
+      // 1. CSS order
+      row.style.order = isLTR ? (rows.length - index) : index;
+
+      // 2. Display Index ("م")
+      const indexInput = row.querySelector(".partner-index");
+      if (indexInput) {
+        if (isPartnerRowExcluded(row)) {
+          indexInput.value = "-";
+        } else {
+          const activeIndex = activeRows.indexOf(row);
+          const displayIdx = isLTR ? (totalActive - activeIndex) : (activeIndex + 1);
+          indexInput.value = ((isLTR && activeIndex === totalActive - 1) || (!isLTR && activeIndex === 0))
+            ? "1 🏁"
+            : displayIdx;
+        }
+      }
+
+      if (isPartnerRowExcluded(row)) return;
+
+      const activeIndex = activeRows.indexOf(row);
+      const piece = window.calculatedPieces ? window.calculatedPieces[activeIndex] : null;
+      if (piece) {
+        // 3. Cumulative Width
+        const cumWidthInput = row.querySelector(".partner-cum-width");
+        if (cumWidthInput) {
+          const tPrevTop = parseFloat(piece.tPrev_top) || 0;
+          const tCurrTop = parseFloat(piece.tCurr_top) || 0;
+          const tPrevBot = parseFloat(piece.tPrev_bot) || 0;
+          const tCurrBot = parseFloat(piece.tCurr_bot) || 0;
+
+          if (isLTR) {
+            const topStart = (1.0 - tCurrTop) * w2;
+            const topEnd = (1.0 - tPrevTop) * w2;
+            const botStart = (1.0 - tCurrBot) * w1;
+            const botEnd = (1.0 - tPrevBot) * w1;
+            cumWidthInput.value = `من اليسار\nأعلى:\n${topStart.toFixed(4)} → ${topEnd.toFixed(4)} م\nأسفل:\n${botStart.toFixed(4)} → ${botEnd.toFixed(4)} م`;
+          } else {
+            const topStart = tPrevTop * w2;
+            const topEnd = tCurrTop * w2;
+            const botStart = tPrevBot * w1;
+            const botEnd = tCurrBot * w1;
+            cumWidthInput.value = `من اليمين\nأعلى:\n${topStart.toFixed(4)} → ${topEnd.toFixed(4)} م\nأسفل:\n${botStart.toFixed(4)} → ${botEnd.toFixed(4)} م`;
+          }
+        }
+
+        // 4. Divider Line
+        const divLineInput = row.querySelector(".partner-div-line");
+        if (divLineInput) {
+          const leftLine = parseFloat(piece.leftLine) || 0;
+          const divLine = parseFloat(piece.divLine) || 0;
+          if (isLTR) {
+            divLineInput.value = `يسار: ${divLine.toFixed(4)} م | يمين: ${leftLine.toFixed(4)} م`;
+          } else {
+            divLineInput.value = `يمين: ${leftLine.toFixed(4)} م | يسار: ${divLine.toFixed(4)} م`;
+          }
+        }
+      }
+    });
+
+    // Also update remainder row cumulative fields
+    const remRow = document.getElementById("remainder-row-table");
+    if (remRow && remRow.style.display !== "none") {
+      const remPiece = window.calculatedPieces ? window.calculatedPieces.find(p => p.isRemainder) : null;
+      if (remPiece) {
+        const inputs = remRow.querySelectorAll("input, textarea");
+        if (inputs.length >= 11) {
+          const tPrevTop = parseFloat(remPiece.tPrev_top) || 0;
+          const tCurrTop = parseFloat(remPiece.tCurr_top) || 0;
+          const tPrevBot = parseFloat(remPiece.tPrev_bot) || 0;
+          const tCurrBot = parseFloat(remPiece.tCurr_bot) || 0;
+
+          if (isLTR) {
+            const topStart = (1.0 - tCurrTop) * w2;
+            const topEnd = (1.0 - tPrevTop) * w2;
+            const botStart = (1.0 - tCurrBot) * w1;
+            const botEnd = (1.0 - tPrevBot) * w1;
+            inputs[9].value = `من اليسار\nأعلى:\n${topStart.toFixed(4)} → ${topEnd.toFixed(4)} م\nأسفل:\n${botStart.toFixed(4)} → ${botEnd.toFixed(4)} م`;
+            inputs[10].value = `يسار: ${remPiece.divLine.toFixed(4)} م | يمين: ${remPiece.leftLine.toFixed(4)} م`;
+          } else {
+            const topStart = tPrevTop * w2;
+            const topEnd = tCurrTop * w2;
+            const botStart = tPrevBot * w1;
+            const botEnd = tCurrBot * w1;
+            inputs[9].value = `من اليمين\nأعلى:\n${topStart.toFixed(4)} → ${topEnd.toFixed(4)} م\nأسفل:\n${botStart.toFixed(4)} → ${botEnd.toFixed(4)} م`;
+            inputs[10].value = `يمين: ${remPiece.leftLine.toFixed(4)} م | يسار: ${remPiece.divLine.toFixed(4)} م`;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error in updateTableRowsUI:", e);
   }
 }
 

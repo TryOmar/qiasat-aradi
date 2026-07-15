@@ -70,10 +70,23 @@ window.AnimationStrings = {
     
     // سيناريوهات الشرح
     introLand: (w1, w2, l1, l2) => `هذه هي الأرض المطلوب تقسيمها. أبعادها الأربعة: الحد السفلي (${w1} م)، الحد العلوي (${w2} م)، الحد الأيمن (${l1} م)، الحد الأيسر (${l2} م).`,
-    startPoint: "يبدأ القياس والاستلام الميداني من الحد الأيمن للأرض (يمين ➡️ يسار).",
-    measureBottom: (w, curr) => `قس مسافة (${w} م) على الحد السفلي بدءاً من الوتد السابق (المسافة التراكمية من اليمين: ${curr} م)، وثبت وتداً 📌.`,
+    get startPoint() {
+      const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+      return isLTR 
+        ? "يبدأ القياس والاستلام الميداني من الحد الأيسر للأرض (يسار ➡️ يمين)." 
+        : "يبدأ القياس والاستلام الميداني من الحد الأيمن للأرض (يمين ➡️ يسار).";
+    },
+    measureBottom: (w, curr) => {
+      const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+      const side = isLTR ? "اليسار" : "اليمين";
+      return `قس مسافة (${w} م) على الحد السفلي بدءاً من الوتد السابق (المسافة التراكمية من ${side}: ${curr} م)، وثبت وتداً 📌.`;
+    },
     measureBottomRemainder: (w) => `قس المسافة المتبقية على الحد السفلي وهي (${w} م) لتصل للحد الأيسر، وثبت وتداً 📌.`,
-    measureTop: (w, curr) => `انتقل للحد العلوي وقس مسافة (${w} م) بدءاً من العلامة السابقة (المسافة التراكمية من اليمين: ${curr} م)، وثبت وتداً 📌.`,
+    measureTop: (w, curr) => {
+      const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+      const side = isLTR ? "اليسار" : "اليمين";
+      return `انتقل للحد العلوي وقس مسافة (${w} م) بدءاً من العلامة السابقة (المسافة التراكمية من ${side}: ${curr} م)، وثبت وتداً 📌.`;
+    },
     measureTopRemainder: (w) => `قس المسافة المتبقية على الحد العلوي وهي (${w} م) لتصل للحد الأيسر للأرض، وثبت وتداً 📌.`,
     connectRope: "شد حبلاً (خيط قياس) مستقيماً بين الوتد السفلي والوتد العلوي لتحديد فاصل القطعة.",
     showDivider: (len) => `قم بقياس طول الفاصل الفعلي بالكامل بالشريط للتأكد من مطابقته للحسابات الهندسية: (${len} م).`,

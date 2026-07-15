@@ -93,7 +93,8 @@ window.AnimationRenderer = {
   },
 
   mapX: function (x) {
-    const rx = this.landData.w - x;
+    const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+    const rx = isLTR ? x : (this.landData.w - x);
     return this.offsetX + (rx * this.stretchX) * this.drawScale;
   },
 
@@ -102,7 +103,8 @@ window.AnimationRenderer = {
   },
 
   getBottomY: function (x) {
-    const rx = this.landData.w - x;
+    const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+    const rx = isLTR ? x : (this.landData.w - x);
     return this.mapY(this.landData.l2 + this.k * rx);
   },
 

@@ -87,6 +87,49 @@ window.canvasPiecesGeometry = [];
 let oldZoomFactor = 1.0;
 let isPrinting = false;
 
+window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'ltr';
+
+function updatePartitionDirectionButtonUI() {
+  const btn = document.getElementById('btn-partition-direction');
+  if (!btn) return;
+  if (window.partitionOrderDirection === 'rtl') {
+    btn.innerHTML = '⬅️ اتجاه التقسيم: من اليمين إلى اليسار';
+    btn.style.backgroundColor = '#ef6c00';
+  } else {
+    btn.innerHTML = '➡️ اتجاه التقسيم: من اليسار إلى اليمين';
+    btn.style.backgroundColor = '#2e7d32';
+  }
+}
+
+function updatePartitionDirectionIndicatorUI() {
+  const indicatorText = document.getElementById('partition-direction-indicator-text');
+  const indicatorBox = document.getElementById('partition-direction-indicator');
+  if (!indicatorText || !indicatorBox) return;
+  if (window.partitionOrderDirection === 'rtl') {
+    indicatorText.innerHTML = '⬅️ من اليمين إلى اليسار';
+    indicatorBox.style.color = '#ef6c00';
+    indicatorBox.style.background = '#fff3e0';
+    indicatorBox.style.borderColor = '#ffe0b2';
+  } else {
+    indicatorText.innerHTML = '➡️ من اليسار إلى اليمين';
+    indicatorBox.style.color = '#2e7d32';
+    indicatorBox.style.background = '#e8f5e9';
+    indicatorBox.style.borderColor = '#c8e6c9';
+  }
+}
+
+function togglePartitionOrderDirection() {
+  window.partitionOrderDirection = window.partitionOrderDirection === 'ltr' ? 'rtl' : 'ltr';
+  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection);
+  updatePartitionDirectionButtonUI();
+  updatePartitionDirectionIndicatorUI();
+  
+  // Recalculate and re-render
+  calculateAll();
+  renderHeirsRows();
+  updateHeirsUI();
+}
+
 // Interaction & division global variables
 let isDraggingDivider = false;
 let draggedDividerIdx = -1;
@@ -356,6 +399,12 @@ document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
   setupEventListeners();
   resizeCanvasToFit();
+  if (typeof updatePartitionDirectionButtonUI === "function") {
+    updatePartitionDirectionButtonUI();
+  }
+  if (typeof updatePartitionDirectionIndicatorUI === "function") {
+    updatePartitionDirectionIndicatorUI();
+  }
   if (typeof window.updateFieldGuide === "function") {
     window.updateFieldGuide();
   }
@@ -1449,22 +1498,41 @@ function getPieceRealSides(tPrev, tCurr) {
 // Re-calculate all slice dimensions using exact area-based coordinates
 function recalculateHeirsDimensions() {
   if (calculatedArea <= 0 || heirsData.length === 0) return;
+  
+  const shares = (window.partitionOrderDirection === 'rtl')
+    ? heirsData.map(h => h.share || 0).reverse()
+    : heirsData.map(h => h.share || 0);
+
   const exactTs = [0];
   let tempCumArea = 0;
   for (let i = 0; i < heirsData.length - 1; i++) {
-    tempCumArea += heirsData[i].share;
+    tempCumArea += shares[i];
     exactTs.push(findTForArea(tempCumArea, calculatedArea));
   }
   exactTs.push(1.0);
   
-  heirsData.forEach((h, idx) => {
-    const tPrev = exactTs[idx];
-    const tCurr = exactTs[idx + 1];
+  const slicesDims = [];
+  for (let i = 0; i < heirsData.length; i++) {
+    const tPrev = exactTs[i];
+    const tCurr = exactTs[i + 1];
     const realSides = getPieceRealSides(tPrev, tCurr);
-    h.topW = realSides.top;
-    h.botW = realSides.bottom;
-    h.leftL = realSides.left;
-    h.rightL = realSides.right;
+    slicesDims.push({
+      top: realSides.top,
+      bottom: realSides.bottom,
+      left: realSides.left,
+      right: realSides.right
+    });
+  }
+
+  heirsData.forEach((h, idx) => {
+    const sliceIdx = (window.partitionOrderDirection === 'rtl')
+      ? heirsData.length - 1 - idx
+      : idx;
+    const dims = slicesDims[sliceIdx];
+    h.topW = dims.top;
+    h.botW = dims.bottom;
+    h.leftL = dims.left;
+    h.rightL = dims.right;
   });
 }
 
@@ -1839,12 +1907,22 @@ function drawLandCanvas(vertices) {
       recalculateHeirsDimensions();
     }
 
-    // Calculate cumulative t values for top and bottom sides separately
+    // Calculate cumulative t values for top and bottom sides separately.
+    // slices are always accumulated left→right on the canvas.
+    // Under RTL, slice i from the left is owned by heir[N-1-i], so we reverse the order of widths.
+    const N_pre = heirsData.length;
+    const topWOrder = (window.partitionOrderDirection === 'rtl')
+      ? heirsData.map(h => h.topW || 0).reverse()
+      : heirsData.map(h => h.topW || 0);
+    const botWOrder = (window.partitionOrderDirection === 'rtl')
+      ? heirsData.map(h => h.botW || 0).reverse()
+      : heirsData.map(h => h.botW || 0);
+
     let cumTop = 0;
     const splitTsTop = [0];
-    heirsData.forEach((h, idx) => {
-      cumTop += h.topW || 0;
-      let t = landTop > 0 ? cumTop / landTop : (idx + 1) / heirsData.length;
+    topWOrder.forEach((topW, idx) => {
+      cumTop += topW;
+      let t = landTop > 0 ? cumTop / landTop : (idx + 1) / N_pre;
       t = Math.max(0, Math.min(1, t));
       splitTsTop.push(t);
     });
@@ -1852,9 +1930,9 @@ function drawLandCanvas(vertices) {
 
     let cumBot = 0;
     const splitTsBot = [0];
-    heirsData.forEach((h, idx) => {
-      cumBot += h.botW || 0;
-      let t = landBottom > 0 ? cumBot / landBottom : (idx + 1) / heirsData.length;
+    botWOrder.forEach((botW, idx) => {
+      cumBot += botW;
+      let t = landBottom > 0 ? cumBot / landBottom : (idx + 1) / N_pre;
       t = Math.max(0, Math.min(1, t));
       splitTsBot.push(t);
     });
@@ -1863,14 +1941,19 @@ function drawLandCanvas(vertices) {
     // Reset geometry check array
     window.canvasPiecesGeometry = [];
 
-    // Draw each piece
+    const N = heirsData.length;
+
+    // Draw each physical slice left-to-right (i=0 is leftmost slice on canvas).
+    // Under LTR heir[i] owns slice i; under RTL heir[N-1-i] owns slice i.
     for (let i = 0; i < heirsData.length; i++) {
       const tPrevTop = splitTsTop[i];
       const tCurrTop = splitTsTop[i + 1];
       const tPrevBot = splitTsBot[i];
       const tCurrBot = splitTsBot[i + 1];
-      
-      const heir = heirsData[i];
+
+      // Resolve which heir owns this physical slice
+      const heirIdx = (window.partitionOrderDirection === 'rtl') ? (N - 1 - i) : i;
+      const heir = heirsData[heirIdx];
       if (!heir) continue;
 
       // Canvas coordinates for vertical slice (interpolated separately along the top and bottom sides)
@@ -1879,22 +1962,19 @@ function drawLandCanvas(vertices) {
       const cpTopCurr    = { x: cpD.x + tCurrTop * (cpC.x - cpD.x), y: cpD.y + tCurrTop * (cpC.y - cpD.y) };
       const cpBottomCurr = { x: cpA.x + tCurrBot * (cpB.x - cpA.x), y: cpA.y + tCurrBot * (cpB.y - cpA.y) };
 
-      // Save geometry for click/hover checking
-      const geom = [cpTopPrev, cpTopCurr, cpBottomCurr, cpBottomPrev];
-      window.canvasPiecesGeometry.push(geom);
+      // Save geometry: geometry[heirIdx] = the canvas polygon for that heir
+      if (!window.canvasPiecesGeometry[heirIdx]) {
+        window.canvasPiecesGeometry[heirIdx] = [cpTopPrev, cpTopCurr, cpBottomCurr, cpBottomPrev];
+      }
 
       // Use exact physical side lengths
-      const pieceTopW = heir.topW || 0;
-      const pieceBotW = heir.botW || 0;
-      const pieceLeftL = heir.leftL || 0;
+      const pieceTopW   = heir.topW   || 0;
+      const pieceBotW   = heir.botW   || 0;
+      const pieceLeftL  = heir.leftL  || 0;
       const pieceRightL = heir.rightL || 0;
 
-      // Save to heirsData for table display
-      heir.leftL = pieceLeftL;
-      heir.rightL = pieceRightL;
-
       // Draw slice background fill
-      const color = heir.color || PIECE_COLORS[i % PIECE_COLORS.length];
+      const color = heir.color || PIECE_COLORS[heirIdx % PIECE_COLORS.length];
       ctx.fillStyle = color.fill;
       ctx.beginPath();
       ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
@@ -1905,7 +1985,7 @@ function drawLandCanvas(vertices) {
       ctx.fill();
 
       // Draw matching outer border of segment or AutoCAD blue glow highlight
-      if (i === window.hoveredPieceIndex || i === window.selectedPieceIndex) {
+      if (heirIdx === window.hoveredPieceIndex || heirIdx === window.selectedPieceIndex) {
         ctx.save();
         ctx.strokeStyle = "#00b0ff"; // أزرق ساطع
         ctx.lineWidth = Math.max(3.5, 4.5 * scaleMultiplier);
@@ -1974,7 +2054,7 @@ function drawLandCanvas(vertices) {
       
       // Draw label text horizontally (no rotation) with high contrast black color
       const pieceWidth = Math.abs(cpTopCurr.x - cpTopPrev.x);
-      const nameToShow = heir.name || `شريك ${i + 1}`;
+      const nameToShow = heir.name || `شريك ${heirIdx + 1}`;
       const pieceMidLength = (pieceLeftL + pieceRightL) / 2;
       
       if (showCroquisNames || showCroquisDimensions || showCroquisAreas || showCroquisNumbers) {
@@ -1987,7 +2067,7 @@ function drawLandCanvas(vertices) {
             const fontSize = Math.round(Math.max(12, 14 * scaleMultiplier) * (croquisFontSize / 13));
             ctx.font = `bold ${fontSize}px Cairo`;
             ctx.fillStyle = "#000000";
-            ctx.fillText((i + 1).toString(), centroidX, centroidY);
+            ctx.fillText((heirIdx + 1).toString(), centroidX, centroidY);
           }
         } else {
           // Center line points (top center and bottom center)
@@ -1996,18 +2076,38 @@ function drawLandCanvas(vertices) {
           const botCX = (cpBottomPrev.x + cpBottomCurr.x) / 2;
           const botCY = (cpBottomPrev.y + cpBottomCurr.y) / 2;
 
-          // Interpolation along the center line
-          const areaX = topCX + 0.23 * (botCX - topCX);
-          const areaY = topCY + 0.23 * (botCY - topCY);
-          const nameX = topCX + 0.50 * (botCX - topCX);
-          const nameY = topCY + 0.50 * (botCY - topCY);
-          const lenX  = topCX + 0.77 * (botCX - topCX);
-          const lenY  = topCY + 0.77 * (botCY - topCY);
+          // Interpolation along the boundaries and center line
+          const padX = Math.min(16 * scaleMultiplier, pieceWidth * 0.22);
+          
+          // Left length is close to the left divider (cpTopPrev to cpBottomPrev)
+          const leftLenX  = (cpTopPrev.x + 0.16 * (cpBottomPrev.x - cpTopPrev.x)) + padX;
+          const leftLenY  = (cpTopPrev.y + 0.16 * (cpBottomPrev.y - cpTopPrev.y));
+          
+          // Area and Name remain on the center line
+          const areaX = topCX + 0.36 * (botCX - topCX);
+          const areaY = topCY + 0.36 * (botCY - topCY);
+          const nameX = topCX + 0.56 * (botCX - topCX);
+          const nameY = topCY + 0.56 * (botCY - topCY);
+          
+          // Right length is close to the right divider (cpTopCurr to cpBottomCurr)
+          const rightLenX  = (cpTopCurr.x + 0.76 * (cpBottomCurr.x - cpTopCurr.x)) - padX;
+          const rightLenY  = (cpTopCurr.y + 0.76 * (cpBottomCurr.y - cpTopCurr.y));
 
           // Dynamic font size based on piece width
           const baseFontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * scaleMultiplier;
 
-          // 1. المساحة رأسي (دوران -90 درجة) في الجزء العلوي
+          // 1. طول الحد الأيسر رأسي (دوران -90 درجة) في الجزء العلوي
+          if (showCroquisDimensions) {
+            ctx.save();
+            ctx.translate(leftLenX, leftLenY);
+            ctx.rotate(-Math.PI / 2);
+            ctx.font = `bold ${baseFontSize * (croquisMeasurementSize / 12)}px Cairo`;
+            ctx.fillStyle = "#000000";
+            ctx.fillText(`${pieceLeftL.toFixed(2)} م`, 0, 0);
+            ctx.restore();
+          }
+
+          // 2. المساحة رأسي (دوران -90 درجة) تحت طول الحد الأيسر
           if (showCroquisAreas) {
             ctx.save();
             ctx.translate(areaX, areaY);
@@ -2018,12 +2118,12 @@ function drawLandCanvas(vertices) {
             ctx.restore();
           }
 
-          // 2. الاسم أو الرقم رأسي (دوران -90 درجة) في المنتصف
+          // 3. الاسم أو الرقم رأسي (دوران -90 درجة) في المنتصف
           if (showCroquisNames) {
             ctx.save();
             ctx.translate(nameX, nameY);
             ctx.rotate(-Math.PI / 2);
-            const dispName = (showCroquisNumbers ? (i + 1) + ". " : "") + nameToShow;
+            const dispName = (showCroquisNumbers ? (heirIdx + 1) + ". " : "") + nameToShow;
             ctx.font = `bold ${(baseFontSize + 0.5) * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
             ctx.fillText(dispName, 0, 0);
@@ -2034,18 +2134,18 @@ function drawLandCanvas(vertices) {
             ctx.rotate(-Math.PI / 2);
             ctx.font = `bold ${(baseFontSize + 0.5) * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
-            ctx.fillText((i + 1).toString(), 0, 0);
+            ctx.fillText((heirIdx + 1).toString(), 0, 0);
             ctx.restore();
           }
 
-          // 3. طول القطعة رأسي (دوران -90 درجة) في الجزء السفلي
+          // 4. طول الحد الأيمن رأسي (دوران -90 درجة) في الجزء السفلي
           if (showCroquisDimensions) {
             ctx.save();
-            ctx.translate(lenX, lenY);
+            ctx.translate(rightLenX, rightLenY);
             ctx.rotate(-Math.PI / 2);
             ctx.font = `bold ${baseFontSize * (croquisMeasurementSize / 12)}px Cairo`;
             ctx.fillStyle = "#000000";
-            ctx.fillText(`${pieceMidLength.toFixed(2)} م`, 0, 0);
+            ctx.fillText(`${pieceRightL.toFixed(2)} م`, 0, 0);
             ctx.restore();
           }
         }
@@ -2216,13 +2316,13 @@ function renderHeirsRows() {
           <input type="text" inputmode="decimal" class="heir-side-height" style="width:75px; background-color: #f1f3f4; cursor: default;" value="${trapHeight.toFixed(2)}" readonly />
         </td>`;
     } else {
-      // عمودان: يمين ويسار (الأضلاع المائلة الهندسية)
+      // عمودان: الطول الأيسر ثم الأيمن (ترتيب ثابت يوافق رأس الجدول)
       sidesCells = `
         <td>
-          <input type="text" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
+          <input type="text" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
         </td>
         <td>
-          <input type="text" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
+          <input type="text" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
         </td>`;
     }
 
@@ -2675,6 +2775,9 @@ function saveStateToSession() {
   if (roundingSelect) {
     sessionStorage.setItem("numberRoundingMode", roundingSelect.value);
   }
+
+  // حفظ اتجاه التقسيم في localStorage
+  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection || 'ltr');
 }
 
 function loadStateFromSession() {
@@ -2790,6 +2893,9 @@ function loadStateFromSession() {
   if (roundingSelect) {
     roundingSelect.value = savedRounding;
   }
+
+  // استرجاع اتجاه التقسيم من localStorage
+  window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'ltr';
 }
 
 // Print trigger
@@ -3617,13 +3723,9 @@ function updateInspector(index) {
     insLengthLeftEl.innerText = `${(heir.leftL || 0).toFixed(2)} م`;
   }
   
-  // Divider length (if not the last piece)
-  if (index < heirsData.length - 1) {
-    if (insDividerRow) insDividerRow.style.display = "flex";
-    if (insDividerEl) insDividerEl.innerText = `${(heir.leftL || 0).toFixed(2)} م`;
-  } else {
-    if (insDividerRow) insDividerRow.style.display = "none";
-  }
+  // Divider row is permanently hidden per the new UI design
+  if (insDividerRow) insDividerRow.style.setProperty('display', 'none', 'important');
+  if (insDividerEl) insDividerEl.innerText = `${(heir.rightL || 0).toFixed(2)} م`;
   
   inspector.style.display = "block";
 }
@@ -3800,18 +3902,23 @@ function buildFieldGuideData() {
 
   if (!pA || !pB || !pC || !pD) return null;
 
-  const L_top = Math.hypot(pC.x - pD.x, pC.y - pD.y);
+  const L_top    = Math.hypot(pC.x - pD.x, pC.y - pD.y);
   const L_bottom = Math.hypot(pB.x - pA.x, pB.y - pA.y);
-  const L_left = Math.hypot(pD.x - pA.x, pD.y - pA.y);
-  const L_right = Math.hypot(pC.x - pB.x, pC.y - pB.y);
+  const L_left   = Math.hypot(pD.x - pA.x, pD.y - pA.y);
+  const L_right  = Math.hypot(pC.x - pB.x, pC.y - pB.y);
+
+  const isRTL = (window.partitionOrderDirection === 'rtl');
+
+  // Build exactTs using shares ordered as they appear on the land (L→R)
+  const orderedShares = isRTL
+    ? heirsData.map(h => h.share || 0).reverse()
+    : heirsData.map(h => h.share || 0);
 
   const exactTs = [0];
   let tempCumArea = 0;
   for (let i = 0; i < heirsData.length - 1; i++) {
-    const heir = heirsData[i];
-    if (!heir || typeof heir.share !== "number") return null;
-    tempCumArea += heir.share;
     if (typeof calculatedArea !== "number" || calculatedArea <= 0) return null;
+    tempCumArea += orderedShares[i];
     exactTs.push(findTForArea(tempCumArea, calculatedArea));
   }
   exactTs.push(1.0);
@@ -3821,51 +3928,82 @@ function buildFieldGuideData() {
   const dividerRopes = [];
   const steps = [];
 
-  stakes.push({ id: "D", name: "الركن العلوي الأيسر (D)", coords: pD, desc: "نقطة الركن الأساسية لبداية القياس العلوي." });
-  stakes.push({ id: "C", name: "الركن العلوي الأيمن (C)", coords: pC, desc: `يقع على بعد ${L_top.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع العلوي.` });
-  stakes.push({ id: "B", name: "الركن السفلي الأيمن (B)", coords: pB, desc: `يقع على بعد ${L_right.toFixed(2)} م من الركن العلوي الأيمن (C) على طول الضلع الأيمن.` });
-  stakes.push({ id: "A", name: "الركن السفلي الأيسر (A)", coords: pA, desc: `يقع على بعد ${L_left.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع الأيسر.` });
+  if (isRTL) {
+    // RTL: starting corner is C (top-right) and B (bottom-right)
+    stakes.push({ id: "C", name: "الركن العلوي الأيمن (C)", coords: pC, desc: "نقطة الركن الأساسية لبداية القياس العلوي (بداية التقسيم من اليمين)." });
+    stakes.push({ id: "D", name: "الركن العلوي الأيسر (D)", coords: pD, desc: `يقع على بعد ${L_top.toFixed(2)} م من الركن العلوي الأيمن (C) على طول الضلع العلوي.` });
+    stakes.push({ id: "B", name: "الركن السفلي الأيمن (B)", coords: pB, desc: `يقع على بعد ${L_right.toFixed(2)} م من الركن العلوي الأيمن (C) على طول الضلع الأيمن.` });
+    stakes.push({ id: "A", name: "الركن السفلي الأيسر (A)", coords: pA, desc: `يقع على بعد ${L_left.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع الأيسر.` });
+  } else {
+    // LTR: starting corner is D (top-left) and A (bottom-left)
+    stakes.push({ id: "D", name: "الركن العلوي الأيسر (D)", coords: pD, desc: "نقطة الركن الأساسية لبداية القياس العلوي." });
+    stakes.push({ id: "C", name: "الركن العلوي الأيمن (C)", coords: pC, desc: `يقع على بعد ${L_top.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع العلوي.` });
+    stakes.push({ id: "B", name: "الركن السفلي الأيمن (B)", coords: pB, desc: `يقع على بعد ${L_right.toFixed(2)} م من الركن العلوي الأيمن (C) على طول الضلع الأيمن.` });
+    stakes.push({ id: "A", name: "الركن السفلي الأيسر (A)", coords: pA, desc: `يقع على بعد ${L_left.toFixed(2)} م من الركن العلوي الأيسر (D) على طول الضلع الأيسر.` });
+  }
 
   boundaryRopes.push({ name: "الحد العلوي (D ↔ C)", length: L_top, from: "D", to: "C" });
   boundaryRopes.push({ name: "الحد السفلي (A ↔ B)", length: L_bottom, from: "A", to: "B" });
   boundaryRopes.push({ name: "الحد الأيسر (D ↔ A)", length: L_left, from: "D", to: "A" });
   boundaryRopes.push({ name: "الحد الأيمن (C ↔ B)", length: L_right, from: "C", to: "B" });
 
+  // Divider stakes and ropes
+  // For RTL, cumulative measurement runs from right edge (t=1) towards left (t=0)
   let cumTop = 0;
   let cumBot = 0;
 
   for (let i = 0; i < heirsData.length - 1; i++) {
+    // orderedShares[i] is the i-th slice from the starting edge
+    const heirForSlice = isRTL ? heirsData[heirsData.length - 1 - i] : heirsData[i];
+    cumTop += heirForSlice.topW || 0;
+    cumBot += heirForSlice.botW || 0;
+
+    // t value from left (geometry):
     const t = exactTs[i + 1];
     const pT = { x: pD.x + t * (pC.x - pD.x), y: pD.y + t * (pC.y - pD.y) };
     const pBg = { x: pA.x + t * (pB.x - pA.x), y: pA.y + t * (pB.y - pA.y) };
 
-    const heir = heirsData[i];
-    cumTop += heir.topW || 0;
-    cumBot += heir.botW || 0;
-
     const tId = `T${i + 1}`;
     const bId = `B${i + 1}`;
 
-    stakes.push({ id: tId, name: `وتد الفصل العلوي رقم ${i + 1} (${tId})`, coords: pT, desc: `قس مسافة ${cumTop.toFixed(2)} م من الركن العلوي الأيسر (D) باتجاه الركن العلوي الأيمن (C).` });
-    stakes.push({ id: bId, name: `وتد الفصل السفلي رقم ${i + 1} (${bId})`, coords: pBg, desc: `قس مسافة ${cumBot.toFixed(2)} م من الركن السفلي الأيسر (A) باتجاه الركن السفلي الأيمن (B).` });
+    const nextHeir = isRTL ? heirsData[heirsData.length - 2 - i] : heirsData[i + 1];
+
+    if (isRTL) {
+      // Distance measured from the right edge: L_top - cumTop for top, L_bottom - cumBot for bottom
+      stakes.push({ id: tId, name: `وتد الفصل العلوي رقم ${i + 1} (${tId})`, coords: pT, desc: `قس مسافة ${cumTop.toFixed(2)} م من الركن العلوي الأيمن (C) باتجاه الركن العلوي الأيسر (D).` });
+      stakes.push({ id: bId, name: `وتد الفصل السفلي رقم ${i + 1} (${bId})`, coords: pBg, desc: `قس مسافة ${cumBot.toFixed(2)} م من الركن السفلي الأيمن (B) باتجاه الركن السفلي الأيسر (A).` });
+    } else {
+      stakes.push({ id: tId, name: `وتد الفصل العلوي رقم ${i + 1} (${tId})`, coords: pT, desc: `قس مسافة ${cumTop.toFixed(2)} م من الركن العلوي الأيسر (D) باتجاه الركن العلوي الأيمن (C).` });
+      stakes.push({ id: bId, name: `وتد الفصل السفلي رقم ${i + 1} (${bId})`, coords: pBg, desc: `قس مسافة ${cumBot.toFixed(2)} م من الركن السفلي الأيسر (A) باتجاه الركن السفلي الأيمن (B).` });
+    }
 
     const dividerLength = Math.hypot(pT.x - pBg.x, pT.y - pBg.y);
     dividerRopes.push({
-      name: `الحبل الفاصل رقم ${i + 1} بين ${heir.name || `الشريك ${i + 1}`} و ${(heirsData[i + 1] && heirsData[i + 1].name) || `الشريك ${i + 2}`}`,
+      name: `الحبل الفاصل رقم ${i + 1} بين ${heirForSlice.name || `الشريك ${i + 1}`} و ${(nextHeir && nextHeir.name) || `الشريك ${i + 2}`}`,
       length: dividerLength,
       from: tId,
       to: bId
     });
   }
 
-  steps.push("دق الأوتاد الأربعة الأساسية عند أركان الأرض الخارجية: الركن السفلي الأيسر (A)، السفلي الأيمن (B)، العلوي الأيمن (C)، والعلوي الأيسر (D).");
-  steps.push(`شد الحبال الأربعة الخارجية لتأكيد الحدود ومطابقة القياسات مع المدخلات الفعلية: الحد العلوي (${L_top.toFixed(2)} م)، السفلي (${L_bottom.toFixed(2)} م)، الأيسر (${L_left.toFixed(2)} م)، والأيمن (${L_right.toFixed(2)} م).`);
-  
-  if (heirsData.length > 1) {
-    steps.push("ابدأ بالقياس على الضلع العلوي من الركن العلوي الأيسر (D) باتجاه الضلع الأيمن، ودق أوتاد الفصل العلوية بالتتابع حسب المسافات الموضحة.");
-    steps.push("انتقل إلى الضلع السفلي والافتتاح بالقياس من الركن السفلي الأيسر (A) باتجاه الضلع الأيمن، ودق أوتاد الفصل السفلية بالتتابع حسب المسافات الموضحة.");
-    steps.push("شد الحبال الفاصلة المستقيمة بين كل وتد علوي ووتد سفلي مقابل له (T1 مع B1، T2 مع B2، وهكذا).");
-    steps.push("لضمان دقة العمل وتفادي الأخطاء، قس الأطوال الفعلية للحبال الفاصلة الممدودة في الطبيعة وقارنها بالأطوال المحسوبة في الجدول للتأكد من مطابقتها.");
+  if (isRTL) {
+    steps.push("دق الأوتاد الأربعة الأساسية عند أركان الأرض الخارجية: الركن السفلي الأيمن (B)، العلوي الأيمن (C)، العلوي الأيسر (D)، والسفلي الأيسر (A).");
+    steps.push(`شد الحبال الأربعة الخارجية لتأكيد الحدود: الحد العلوي (${L_top.toFixed(2)} م)، السفلي (${L_bottom.toFixed(2)} م)، الأيسر (${L_left.toFixed(2)} م)، والأيمن (${L_right.toFixed(2)} م).`);
+    if (heirsData.length > 1) {
+      steps.push("ابدأ بالقياس على الضلع العلوي من الركن العلوي الأيمن (C) باتجاه الضلع الأيسر، ودق أوتاد الفصل العلوية بالتتابع حسب المسافات الموضحة.");
+      steps.push("انتقل إلى الضلع السفلي وابدأ بالقياس من الركن السفلي الأيمن (B) باتجاه الضلع الأيسر، ودق أوتاد الفصل السفلية بالتتابع.");
+      steps.push("شد الحبال الفاصلة المستقيمة بين كل وتد علوي ووتد سفلي مقابل له (T1 مع B1، T2 مع B2، وهكذا).");
+      steps.push("لضمان دقة العمل، قس الأطوال الفعلية للحبال الفاصلة في الطبيعة وقارنها بالأطوال المحسوبة في الجدول.");
+    }
+  } else {
+    steps.push("دق الأوتاد الأربعة الأساسية عند أركان الأرض الخارجية: الركن السفلي الأيسر (A)، السفلي الأيمن (B)، العلوي الأيمن (C)، والعلوي الأيسر (D).");
+    steps.push(`شد الحبال الأربعة الخارجية لتأكيد الحدود ومطابقة القياسات مع المدخلات الفعلية: الحد العلوي (${L_top.toFixed(2)} م)، السفلي (${L_bottom.toFixed(2)} م)، الأيسر (${L_left.toFixed(2)} م)، والأيمن (${L_right.toFixed(2)} م).`);
+    if (heirsData.length > 1) {
+      steps.push("ابدأ بالقياس على الضلع العلوي من الركن العلوي الأيسر (D) باتجاه الضلع الأيمن، ودق أوتاد الفصل العلوية بالتتابع حسب المسافات الموضحة.");
+      steps.push("انتقل إلى الضلع السفلي والافتتاح بالقياس من الركن السفلي الأيسر (A) باتجاه الضلع الأيمن، ودق أوتاد الفصل السفلية بالتتابع حسب المسافات الموضحة.");
+      steps.push("شد الحبال الفاصلة المستقيمة بين كل وتد علوي ووتد سفلي مقابل له (T1 مع B1، T2 مع B2، وهكذا).");
+      steps.push("لضمان دقة العمل وتفادي الأخطاء، قس الأطوال الفعلية للحبال الفاصلة الممدودة في الطبيعة وقارنها بالأطوال المحسوبة في الجدول للتأكد من مطابقتها.");
+    }
   }
 
   const totalStakes = stakes.length;
@@ -3877,7 +4015,8 @@ function buildFieldGuideData() {
     boundaryRopes,
     dividerRopes,
     stakes,
-    steps
+    steps,
+    direction: isRTL ? 'rtl' : 'ltr'
   };
 }
 

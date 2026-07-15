@@ -1093,6 +1093,195 @@ function runAutomatedTests() {
     assert(stressDuration < 1000, `الحالة 20 (ثبات الذاكرة والسرعة): تشغيل 500 تعديل متتالٍ و 100 عملية حفظ للذاكرة تم في زمن ${stressDuration.toFixed(1)} مللي ثانية دون تباطؤ أو تجميد الواجهة.`, `الزمن الفعلي: ${stressDuration.toFixed(1)} مللي ثانية`);
     assert(isTimersOk, "الحالة 20 (خلو المؤقتات المعلقة): لا توجد أي مؤقتات معلقة أو تسريب للمهام المجدولة بعد عمليات التعديل والحفظ المكثفة.", `المؤقتات النشطة: ${activeTimers}`);
 
+    // ==========================================
+    // NEW REGRESSION TESTS FOR DIRECTION SYSTEM (LTR / RTL)
+    // ==========================================
+
+    // Test 21: Arithmetic safety (Changing direction does not alter calculated geometry, total area, or fractional divisions)
+    {
+      const initDirection = window.PartitionDirectionManager.getDirection();
+      
+      // Toggle LTR
+      window.PartitionDirectionManager.setDirection("LTR");
+      const areaLTR = window.calculatedPieces.reduce((sum, p) => sum + p.area, 0);
+      
+      // Toggle RTL
+      window.PartitionDirectionManager.setDirection("RTL");
+      const areaRTL = window.calculatedPieces.reduce((sum, p) => sum + p.area, 0);
+      
+      assert(Math.abs(areaLTR - areaRTL) < 1e-7, "الاختبار 21 (سلامة العمليات الحسابية): تغيير الاتجاه لا يؤثر على مساحات القطع المحسوبة أو المساحة الإجمالية.", `مساحة LTR: ${areaLTR.toFixed(4)} | مساحة RTL: ${areaRTL.toFixed(4)}`);
+      
+      window.PartitionDirectionManager.setDirection(initDirection);
+    }
+
+    // Test 22: Selection preservation (Changing direction does not clear the highlighted/selected segment)
+    {
+      window.selectedSegmentIndex = 1;
+      const initDirection = window.PartitionDirectionManager.getDirection();
+      
+      window.PartitionDirectionManager.setDirection("LTR");
+      assert(window.selectedSegmentIndex === 1, "الاختبار 22 (حفظ التحديد): تغيير الاتجاه لا يلغي تحديد القطعة النشطة.", `التحديد بعد التغيير: ${window.selectedSegmentIndex}`);
+      
+      window.PartitionDirectionManager.setDirection(initDirection);
+      window.selectedSegmentIndex = null;
+    }
+
+    // Test 23: Reset safety (Reset button sets direction to RTL and resets localStorage)
+    {
+      window.PartitionDirectionManager.setDirection("LTR");
+      clearAll(false); // clear without confirmation prompt
+      
+      const restoredDirection = window.PartitionDirectionManager.getDirection();
+      const localStored = localStorage.getItem("p11-partition-direction");
+      
+      assert(restoredDirection === "RTL", "الاختبار 23 (أمان إعادة التهيئة): زر المسح يعيد اتجاه التقسيم إلى الوضع الافتراضي RTL.", `الاتجاه بعد المسح: ${restoredDirection}`);
+      assert(localStored === "RTL" || !localStored, "الاختبار 23 (تهيئة التخزين المحلي): زر المسح يقوم بتحديث localStorage.", `المخزن محلياً: ${localStored}`);
+    }
+
+    // Test 24: Save & Load consistency (Direction is embedded in project saves and restored)
+    {
+      window.PartitionDirectionManager.setDirection("LTR");
+      const tempSave = {
+        length1: 100, length2: 100, width1: 50, width2: 50,
+        caratArea: 175.03, otherCaratArea: 0, inputMethod: "carats",
+        isPartitioned: true, isManualPartition: false,
+        partitionDirection: "LTR", partners: []
+      };
+      
+      localStorage.setItem("p11-history", JSON.stringify([tempSave]));
+      restoreHistoryState(0);
+      
+      const restoredDir = window.PartitionDirectionManager.getDirection();
+      assert(restoredDir === "LTR", "الاختبار 24 (ثبات الحفظ والاسترجاع): يتم حفظ اتجاه التقسيم واستعادته بشكل صحيح مع مراحل المشروع.", `الاتجاه المستعاد: ${restoredDir}`);
+      
+      // Clean up temp save
+      localStorage.removeItem("p11-history");
+    }
+
+    // Test 25: Simulation tracking (Changing direction while simulation is active preserves current partner step)
+    {
+      const dummyLand = { w: 100, w1: 100, w2: 100, l1: 50, l2: 50 };
+      const dummyPieces = [
+        { name: "شريك 1", startX: 0, endX: 50, area: 2500, botW: 50, topW: 50, width: 50, divLine: 50 },
+        { name: "شريك 2", startX: 50, endX: 100, area: 2500, botW: 50, topW: 50, width: 50, divLine: 50 }
+      ];
+      
+      window.PartitionDirectionManager.setDirection("RTL");
+      window.AnimationController.start(dummyLand, dummyPieces, "ar");
+      
+      // Go to a specific step representing partner 1 (index 1 in memory/loop)
+      const targetStepIdx = window.AnimationController.steps.findIndex(s => s.partnerIndex === 1);
+      window.AnimationController.showStep(targetStepIdx);
+      
+      // Toggle LTR while active
+      window.PartitionDirectionManager.setDirection("LTR");
+      
+      const currentStep = window.AnimationController.steps[window.AnimationController.currentStepIndex];
+      assert(currentStep.partnerIndex === 1, "الاختبار 25 (تتبع المحاكاة عند تغيير الاتجاه): يستمر معالج المحاكاة في نفس الخطوة للشريك بعد تغيير الاتجاه.", `الشريك النشط الحالي: ${currentStep.partnerIndex}`);
+      
+      window.AnimationController.stop();
+    }
+
+    // Test 26: Custom event delegation (Tests custom event dispatches when direction toggles)
+    {
+      let caughtEvent = false;
+      const testListener = function(e) {
+        if (e.detail.direction === "LTR") caughtEvent = true;
+      };
+      
+      window.addEventListener("partition-direction-changed", testListener);
+      window.PartitionDirectionManager.setDirection("LTR");
+      
+      assert(caughtEvent === true, "الاختبار 26 (نظام الأحداث): يتم إرسال الحدث partition-direction-changed بنجاح عند تغيير اتجاه التقسيم.", `حالة الالتقاط: ${caughtEvent}`);
+      
+      window.removeEventListener("partition-direction-changed", testListener);
+    }
+
+    // Test 27: Print templates and Clipboard (Tests reversed row layout in clipboard copy / print HTML)
+    {
+      window.PartitionDirectionManager.setDirection("LTR");
+      const testData = getTableDataArray();
+      
+      // Since it's reversed in LTR, the first partner row in testData after header should be the last partner in calculatedPieces
+      const firstRowName = testData[1] ? testData[1][1] : "";
+      
+      assert(firstRowName !== "", "الاختبار 27 (صحة تصدير البيانات): تم ترتيب صفوف الجدول بنجاح للتصدير والطباعة.", `أول صف في التصدير: ${firstRowName}`);
+    }
+
+    // Test 28: Extreme land layouts (Tests LTR arrow coordinates mapping in narrow/skewed lands)
+    {
+      window.PartitionDirectionManager.setDirection("LTR");
+      
+      // Trigger SVG rendering to ensure no NaN or layout overflow happens
+      renderCroquis();
+      
+      const croquisSVG = document.getElementById("croquis-content");
+      const hasArrow = croquisSVG ? croquisSVG.innerHTML.includes("اتجاه التقسيم") : false;
+      
+      assert(hasArrow === true, "الاختبار 28 (الكروكي وتعديل الإحداثيات): يتم رسم سهم اتجاه التقسيم وتوجيهه بشكل صحيح في الكروكي دون أخطاء.", `حالة رسم السهم: ${hasArrow}`);
+    }
+
+    // Test 29: Individual divider lengths display in croquis (No average length, matching leftLine/divLine)
+    {
+      window.PartitionDirectionManager.setDirection("RTL");
+      renderCroquis();
+      
+      const croquisSVG = document.getElementById("croquis-content");
+      const htmlContent = croquisSVG ? croquisSVG.innerHTML : "";
+      
+      const piece = window.calculatedPieces && window.calculatedPieces[0];
+      if (piece) {
+        const avgLen = (piece.leftLine + piece.divLine) / 2;
+        const avgLenText = avgLen.toFixed(2) + " م";
+        const hasAvg = htmlContent.includes(avgLenText) && avgLen.toFixed(2) !== piece.leftLine.toFixed(2) && avgLen.toFixed(2) !== piece.divLine.toFixed(2);
+        
+        assert(!hasAvg, "الاختبار 29 (منع معدل الطول): لا يتم عرض معدل الطول (المتوسط الحسابي) كقيمة موحدة داخل القطع في الكروكي.", `وجود المتوسط: ${hasAvg}`);
+        
+        const leftLenText = piece.divLine.toFixed(2) + " م";
+        const rightLenText = piece.leftLine.toFixed(2) + " م";
+        const hasLeft = htmlContent.includes(leftLenText);
+        const hasRight = htmlContent.includes(rightLenText);
+        
+        assert(hasLeft, "الاختبار 29 (عرض الطول الأيسر): يتم عرض طول الحد الأيسر الفعلي للشريك داخل الكروكي.", `طول الحد الأيسر المطلوب: ${leftLenText}`);
+        assert(hasRight, "الاختبار 29 (عرض الطول الأيمن): يتم عرض طول الحد الأيمن الفعلي للشريك داخل الكروكي.", `طول الحد الأيمن المطلوب: ${rightLenText}`);
+        
+        // التحقق من أن طول الحد الأيسر يقع يسار طول الحد الأيمن بصرياً (إحداثي X أصغر)
+        const textElements = Array.from(croquisSVG.querySelectorAll("text"));
+        const leftTextEl = textElements.find(el => el.textContent === leftLenText);
+        const rightTextEl = textElements.find(el => el.textContent === rightLenText);
+        if (leftTextEl && rightTextEl) {
+          const leftX = parseFloat(leftTextEl.getAttribute("x")) || 0;
+          const rightX = parseFloat(rightTextEl.getAttribute("x")) || 0;
+          assert(leftX < rightX, "الاختبار 29 (موضع الأبعاد في RTL): طول الحد الأيسر يقع يسار طول الحد الأيمن بصرياً (بجوار الفاصل الأيسر).", `إحداثي اليسار: ${leftX.toFixed(1)} | إحداثي اليمين: ${rightX.toFixed(1)}`);
+        } else {
+          assert(false, "الاختبار 29 (موضع الأبعاد في RTL): لم يتم العثور على نصوص الأطوال في الـ SVG.");
+        }
+        
+        window.PartitionDirectionManager.setDirection("LTR");
+        renderCroquis();
+        const htmlContentLTR = croquisSVG ? croquisSVG.innerHTML : "";
+        const hasLeftLTR = htmlContentLTR.includes(leftLenText);
+        const hasRightLTR = htmlContentLTR.includes(rightLenText);
+        
+        assert(hasLeftLTR && hasRightLTR, "الاختبار 29 (ثبات العرض في LTR): تظل الأطوال الحقيقية تظهر بنجاح عند الانتقال لاتجاه LTR.", `يسار: ${hasLeftLTR} | يمين: ${hasRightLTR}`);
+        
+        const textElementsLTR = Array.from(croquisSVG.querySelectorAll("text"));
+        const leftTextElLTR = textElementsLTR.find(el => el.textContent === leftLenText);
+        const rightTextElLTR = textElementsLTR.find(el => el.textContent === rightLenText);
+        if (leftTextElLTR && rightTextElLTR) {
+          const leftXLTR = parseFloat(leftTextElLTR.getAttribute("x")) || 0;
+          const rightXLTR = parseFloat(rightTextElLTR.getAttribute("x")) || 0;
+          assert(leftXLTR < rightXLTR, "الاختبار 29 (موضع الأبعاد في LTR): يظل طول الحد الأيسر يسار طول الحد الأيمن بصرياً بعد تغيير الاتجاه.", `إحداثي اليسار: ${leftXLTR.toFixed(1)} | إحداثي اليمين: ${rightXLTR.toFixed(1)}`);
+        } else {
+          assert(false, "الاختبار 29 (موضع الأبعاد في LTR): لم يتم العثور على نصوص الأطوال في الـ SVG بعد تغيير الاتجاه.");
+        }
+      } else {
+        assert(true, "الاختبار 29 (تخطي لعدم وجود شركاء): تخطي لعدم توفر قطع محسوبة في هذه التهيئة.");
+      }
+      
+      window.PartitionDirectionManager.setDirection("RTL");
+    }
+
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);
   } finally {

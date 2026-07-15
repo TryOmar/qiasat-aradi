@@ -25,6 +25,8 @@ window.AnimationEngine = {
     const { w, w1, w2, l1, l2 } = landData;
     const k = (l1 - l2) / w; // معدل تغير الطول
 
+    const isLTR = window.PartitionDirectionManager && window.PartitionDirectionManager.isLTR();
+
     // 1. مقدمة الأرض
     steps.push({
       type: "INTRO_LAND",
@@ -49,13 +51,18 @@ window.AnimationEngine = {
       }
     });
 
+    // عكس ترتيب الشركاء للمحاكاة إذا كان الاتجاه LTR
+    const scenarioPieces = isLTR ? [...pieces].reverse() : pieces;
+
     // 3. توليد الخطوات ديناميكياً لكل شريك
-    pieces.forEach((piece, index) => {
+    scenarioPieces.forEach((piece, index) => {
       const isRem = !!piece.isRemainder;
       const pieceLabel = isRem ? "الجزء المتبقي" : piece.name;
       
-      const prevStartX = piece.startX;
-      const currEndX = piece.endX;
+      const prevStartX = isLTR ? (w - piece.endX) : piece.startX;
+      const currEndX = isLTR ? (w - piece.startX) : piece.endX;
+      
+      const dividerLen = isLTR ? piece.leftLine : piece.divLine;
 
       // أ. قياس الحد السفلي
       steps.push({
@@ -64,7 +71,7 @@ window.AnimationEngine = {
         caption: isRem 
           ? str.measureBottomRemainder(piece.botW.toFixed(2))
           : str.measureBottom(piece.botW.toFixed(2), currEndX.toFixed(2)),
-        partnerIndex: index,
+        partnerIndex: isLTR ? (pieces.length - 1 - index) : index,
         state: {
           showLand: true,
           showStartFlag: true,
@@ -74,7 +81,15 @@ window.AnimationEngine = {
             startX: prevStartX,
             endX: currEndX
           },
-          stakes: pieces.slice(0, index).map(p => ({ x: p.endX, side: "bottom" }))
+          stakes: isLTR 
+            ? scenarioPieces.slice(0, index).flatMap(p => [
+                { x: w - p.startX, side: "bottom" },
+                { x: w - p.startX, side: "top" }
+              ])
+            : pieces.slice(0, index).flatMap(p => [
+                { x: p.endX, side: "bottom" },
+                { x: p.endX, side: "top" }
+              ])
         }
       });
 
@@ -85,7 +100,7 @@ window.AnimationEngine = {
         caption: isRem
           ? str.measureTopRemainder(piece.topW.toFixed(2))
           : str.measureTop(piece.topW.toFixed(2), currEndX.toFixed(2)),
-        partnerIndex: index,
+        partnerIndex: isLTR ? (pieces.length - 1 - index) : index,
         state: {
           showLand: true,
           showStartFlag: true,
@@ -95,32 +110,53 @@ window.AnimationEngine = {
             startX: prevStartX,
             endX: currEndX
           },
-          stakes: [
-            ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "bottom" })),
-            { x: currEndX, side: "bottom" },
-            ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "top" }))
-          ]
+          stakes: isLTR
+            ? [
+                ...scenarioPieces.slice(0, index).flatMap(p => [
+                  { x: w - p.startX, side: "bottom" },
+                  { x: w - p.startX, side: "top" }
+                ]),
+                { x: currEndX, side: "bottom" }
+              ]
+            : [
+                ...pieces.slice(0, index).flatMap(p => [
+                  { x: p.endX, side: "bottom" },
+                  { x: p.endX, side: "top" }
+                ]),
+                { x: currEndX, side: "bottom" }
+              ]
         }
       });
 
       // ج. شد الحبل الفاصل
-      if (!isRem || index < pieces.length - 1) {
+      if (!isRem || index < scenarioPieces.length - 1) {
         steps.push({
           type: "CONNECT_ROPE",
           title: `${str.titleRope} - ${pieceLabel}`,
           caption: str.connectRope,
-          partnerIndex: index,
+          partnerIndex: isLTR ? (pieces.length - 1 - index) : index,
           state: {
             showLand: true,
             showStartFlag: true,
             piecesDrawnCount: index,
             activeRope: currEndX,
-            stakes: [
-              ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "bottom" })),
-              { x: currEndX, side: "bottom" },
-              ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "top" })),
-              { x: currEndX, side: "top" }
-            ]
+            stakes: isLTR
+              ? [
+                  ...scenarioPieces.slice(0, index).flatMap(p => [
+                    { x: w - p.startX, side: "bottom" },
+                    { x: w - p.startX, side: "top" }
+                  ]),
+                  { x: currEndX, side: "bottom" },
+                  { x: currEndX, side: "top" }
+                ]
+              : [
+                  ...pieces.slice(0, index).flatMap(p => [
+                    { x: p.endX, side: "bottom" },
+                    { x: p.endX, side: "top" }
+                  ]),
+                  { x: currEndX, side: "bottom" },
+                  { x: currEndX, side: "top" }
+                ]
           }
         });
 
@@ -128,19 +164,30 @@ window.AnimationEngine = {
         steps.push({
           type: "SHOW_DIVIDER",
           title: `${str.titleDivider} - ${pieceLabel}`,
-          caption: str.showDivider(piece.divLine.toFixed(2)),
-          partnerIndex: index,
+          caption: str.showDivider(dividerLen.toFixed(2)),
+          partnerIndex: isLTR ? (pieces.length - 1 - index) : index,
           state: {
             showLand: true,
             showStartFlag: true,
             piecesDrawnCount: index,
             showDividerLength: currEndX,
-            stakes: [
-              ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "bottom" })),
-              { x: currEndX, side: "bottom" },
-              ...pieces.slice(0, index).map(p => ({ x: p.endX, side: "top" })),
-              { x: currEndX, side: "top" }
-            ]
+            stakes: isLTR
+              ? [
+                  ...scenarioPieces.slice(0, index).flatMap(p => [
+                    { x: w - p.startX, side: "bottom" },
+                    { x: w - p.startX, side: "top" }
+                  ]),
+                  { x: currEndX, side: "bottom" },
+                  { x: currEndX, side: "top" }
+                ]
+              : [
+                  ...pieces.slice(0, index).flatMap(p => [
+                    { x: p.endX, side: "bottom" },
+                    { x: p.endX, side: "top" }
+                  ]),
+                  { x: currEndX, side: "bottom" },
+                  { x: currEndX, side: "top" }
+                ]
           }
         });
       }
@@ -150,16 +197,21 @@ window.AnimationEngine = {
         type: "SHOW_SHARE",
         title: `${str.titleShare} - ${pieceLabel}`,
         caption: str.showShare(piece.name, piece.area.toFixed(2), piece.width.toFixed(2), (piece.area / piece.width).toFixed(2)),
-        partnerIndex: index,
+        partnerIndex: isLTR ? (pieces.length - 1 - index) : index,
         state: {
           showLand: true,
           showStartFlag: true,
           piecesDrawnCount: index + 1,
-          showCardDetails: index,
-          stakes: pieces.slice(0, index + 1).flatMap(p => [
-            { x: p.endX, side: "bottom" },
-            { x: p.endX, side: "top" }
-          ])
+          showCardDetails: isLTR ? (pieces.length - 1 - index) : index,
+          stakes: isLTR
+            ? scenarioPieces.slice(0, index + 1).flatMap(p => [
+                { x: w - p.startX, side: "bottom" },
+                { x: w - p.startX, side: "top" }
+              ])
+            : pieces.slice(0, index + 1).flatMap(p => [
+                { x: p.endX, side: "bottom" },
+                { x: p.endX, side: "top" }
+              ])
         }
       });
     });
@@ -174,10 +226,15 @@ window.AnimationEngine = {
         showStartFlag: true,
         showEndFlag: true,
         piecesDrawnCount: pieces.length,
-        stakes: pieces.flatMap(p => [
-          { x: p.endX, side: "bottom" },
-          { x: p.endX, side: "top" }
-        ])
+        stakes: isLTR
+          ? scenarioPieces.flatMap(p => [
+              { x: w - p.startX, side: "bottom" },
+              { x: w - p.startX, side: "top" }
+            ])
+          : pieces.flatMap(p => [
+              { x: p.endX, side: "bottom" },
+              { x: p.endX, side: "top" }
+            ])
       }
     });
 

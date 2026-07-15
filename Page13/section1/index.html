@@ -271,6 +271,12 @@
         <span style="font-size: 11px; font-weight: normal; color: #666; background: #e8f5e9; padding: 2px 8px; border-radius: 12px; border: 1px dashed #81c784;">تفاعلي: اضغط على أي شريك لتحديده</span>
       </h3>
       
+      <!-- مؤشر اتجاه التقسيم -->
+      <div id="partition-direction-indicator" style="text-align: center; font-weight: bold; font-size: 13px; color: #ef6c00; margin-bottom: 10px; background: #fff3e0; border: 1.5px solid #ffe0b2; border-radius: 8px; padding: 6px 12px; font-family: Cairo, sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <span>اتجاه التنفيذ:</span>
+        <strong id="partition-direction-indicator-text">➡️ من اليسار إلى اليمين</strong>
+      </div>
+
       <!-- شريط مفاتيح الشركاء التفاعلي ملون مع المساحات لتسهيل القراءة السريعة -->
       <div id="croquis-legend" class="croquis-legend" style="display: none;"></div>
 
@@ -285,30 +291,30 @@
           </div>
           <div class="inspector-body">
             <div class="inspector-row">
-              <span class="ins-lbl">المساحة:</span>
-              <strong class="ins-val" id="ins-area">-</strong>
-            </div>
-            <div class="inspector-row">
-              <span class="ins-lbl">النسبة من الأرض:</span>
-              <strong class="ins-val" id="ins-percent">-</strong>
-            </div>
-            <div class="inspector-row">
-              <span class="ins-lbl">العرض الأول (أعلى):</span>
-              <strong class="ins-val" id="ins-w-top">-</strong>
-            </div>
-            <div class="inspector-row">
-              <span class="ins-lbl">العرض الثاني (أسفل):</span>
-              <strong class="ins-val" id="ins-w-bottom">-</strong>
+              <span class="ins-lbl" id="ins-lbl-left">الطول الأيسر:</span>
+              <strong class="ins-val" id="ins-length-left">-</strong>
             </div>
             <div class="inspector-row">
               <span class="ins-lbl" id="ins-lbl-right">الطول الأيمن:</span>
               <strong class="ins-val" id="ins-length-right">-</strong>
             </div>
             <div class="inspector-row">
-              <span class="ins-lbl" id="ins-lbl-left">الطول الأيسر:</span>
-              <strong class="ins-val" id="ins-length-left">-</strong>
+              <span class="ins-lbl">العرض العلوي:</span>
+              <strong class="ins-val" id="ins-w-top">-</strong>
             </div>
-            <div class="inspector-row" id="ins-divider-row">
+            <div class="inspector-row">
+              <span class="ins-lbl">العرض السفلي:</span>
+              <strong class="ins-val" id="ins-w-bottom">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">المساحة:</span>
+              <strong class="ins-val" id="ins-area">-</strong>
+            </div>
+            <div class="inspector-row">
+              <span class="ins-lbl">النسبة:</span>
+              <strong class="ins-val" id="ins-percent">-</strong>
+            </div>
+            <div class="inspector-row" id="ins-divider-row" style="display: none !important;">
               <span class="ins-lbl">طول الفاصل:</span>
               <strong class="ins-val" id="ins-divider">-</strong>
             </div>
@@ -410,6 +416,10 @@
           <input type="checkbox" id="show-actual-dims" onchange="onToggleActualDims()" style="width: 16px; height: 16px; cursor: pointer; accent-color: #01579b;" />
           <label for="show-actual-dims" style="cursor: pointer;">عرض الأبعاد الهندسية الفعلية (الأضلاع المائلة)</label>
         </div>
+        <!-- خيار اتجاه التقسيم: من اليمين للياسر أو اليسار لليمين -->
+        <div id="partition-direction-toggle" style="margin-top: 8px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <button id="btn-partition-direction" class="btn btn-calc btn-sm no-print" onclick="togglePartitionOrderDirection()" style="font-weight: bold; font-size: 12.5px; background-color: #2e7d32; border: none; border-radius: 6px; color: white; padding: 5px 12px; cursor: pointer;"></button>
+        </div>
       </div>
       <div class="heirs-table-wrapper" style="overflow-x: auto;">
         <table id="heirs-table">
@@ -418,8 +428,8 @@
               <th>الاسم</th>
               <th>العرض الأول (أعلى)</th>
               <th>العرض الثاني (أسفل)</th>
-              <th id="th-side-right">الطول الأيمن</th>
               <th id="th-side-left">الطول الأيسر</th>
+              <th id="th-side-right">الطول الأيمن</th>
               <th>النصيب (م²)</th>
               <th>سهم</th>
               <th>قيراط</th>

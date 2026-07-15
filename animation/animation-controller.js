@@ -34,6 +34,8 @@ window.AnimationController = {
    */
   start: function (landData, pieces, lang) {
     try {
+      this.landData = landData;
+      this.pieces = pieces;
       this.locale = lang || "ar";
       const str = window.AnimationStrings[this.locale];
 
@@ -461,3 +463,44 @@ window.AnimationController = {
     this.progressBarFill = null;
   }
 };
+
+// الاستماع لتغييرات اتجاه التقسيم لتحديث المحاكاة الحية دون تصفيرها
+window.addEventListener("partition-direction-changed", function (e) {
+  const controller = window.AnimationController;
+  if (controller.modal && controller.modal.style.display === "flex") {
+    console.log("Trace: updating animation controller due to direction change:", e.detail.direction);
+    
+    // 1. الاحتفاظ بمعلومات الخطوة الحالية (الشريك ونوع الخطوة)
+    const currentStep = controller.steps[controller.currentStepIndex];
+    const partnerIndex = currentStep ? currentStep.partnerIndex : undefined;
+    const type = currentStep ? currentStep.type : undefined;
+    
+    const wasPlaying = controller.isPlaying;
+    controller.pause(); // إيقاف مؤقت للمحاكاة
+    
+    // 2. إعادة توليد خطوات السيناريو بالاتجاه الجديد
+    const landData = controller.landData;
+    const pieces = controller.pieces;
+    controller.steps = window.AnimationEngine.generateScenario(landData, pieces, controller.locale);
+    
+    // 3. إعادة تهيئة الرسام
+    window.AnimationRenderer.init(controller.svg, landData, pieces);
+    
+    // 4. البحث عن الخطوة المقابلة للشريك ونوع المهمة
+    let targetStepIndex = 0;
+    if (type !== undefined) {
+      const found = controller.steps.findIndex(s => s.type === type && s.partnerIndex === partnerIndex);
+      if (found !== -1) {
+        targetStepIndex = found;
+      }
+    }
+    
+    // 5. الانتقال للخطوة الجديدة
+    controller.showStep(targetStepIndex);
+    
+    // 6. استئناف التشغيل إذا كانت تعمل سابقاً
+    if (wasPlaying) {
+      controller.play();
+    }
+  }
+});
