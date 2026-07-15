@@ -1071,8 +1071,9 @@ function printReport() {
     .report-header-center h2 { font-size: 11pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.3; }
     .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.4; }
     
-    .owner-info { margin-bottom: 8px; font-size: 9pt; border-bottom: 1px dashed #ccc; padding-bottom: 3px; display: flex; gap: 8px; }
-    .placeholder-line { color: #aaa; letter-spacing: 1px; }
+    .owner-info { margin-top: 12px; margin-bottom: 12px; font-size: 10pt; display: flex; gap: 8px; align-items: flex-end; width: 100%; direction: rtl; }
+    .owner-info strong { font-weight: bold; white-space: nowrap; color: #222222; }
+    .owner-info::after { content: ""; flex: 1; border-bottom: 2px dotted #222222; margin-bottom: 3px; }
     
     .section { margin-bottom: 8px; }
     .section-title { background: #1b5e20; color: white; font-weight: 700; font-size: 9pt; padding: 3px 10px; border-right: 5px solid #2e7d32; margin-bottom: 4px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1132,7 +1133,6 @@ function printReport() {
   <!-- Owner Info -->
   <div class="owner-info">
     <strong>اسم المورث / المالك:</strong>
-    <span class="placeholder-line">................................................................................................</span>
   </div>
 
   <!-- 1. بيانات الأرض الإجمالية -->
@@ -1316,7 +1316,7 @@ window.downloadReportImage = function() {
   let currentY = 20;
   
   let headerHeight = 130;
-  let ownerInfoHeight = 60;
+  let ownerInfoHeight = 35;
   let sec1Height = 150;
   let secHeirsDetailHeight = 60;
   let sec2Height = 45 + (tableRows.length * 35) + 30; // headers + rows + spacing
@@ -1373,14 +1373,27 @@ window.downloadReportImage = function() {
   ctx.fillText(`رقم التقرير: DL-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`, 50, hY + 55);
   ctx.fillText("إصدار التطبيق: v2.4", 50, hY + 80);
   
-  currentY = hY + 110 + 20;
+  currentY = hY + 110 + 15;
   
   // 2. Owner name block
   ctx.textAlign = "right";
   ctx.fillStyle = "#222222";
-  ctx.font = fontCairo("bold", 15);
-  ctx.fillText("اسم المورث / المالك: ..................................................................................................", canvas.width - 25, currentY + 20);
-  currentY += 50;
+  ctx.font = fontCairo("bold", 16);
+  let labelText = "اسم المورث / المالك: ";
+  ctx.fillText(labelText, canvas.width - 25, currentY + 12);
+  
+  // Draw dotted line from left margin (25) to start of label text
+  let labelWidth = ctx.measureText(labelText).width;
+  ctx.beginPath();
+  ctx.setLineDash([2, 4]); // Beautiful dotted style
+  ctx.strokeStyle = "#222222";
+  ctx.lineWidth = 1.5;
+  ctx.moveTo(25, currentY + 15);
+  ctx.lineTo(canvas.width - 25 - labelWidth - 5, currentY + 15);
+  ctx.stroke();
+  ctx.setLineDash([]); // Reset dash pattern so other lines aren't dashed
+  
+  currentY += 15 + 15;
 
   // Helper function to draw sections titles
   function drawSectionTitle(title, y) {
