@@ -283,6 +283,21 @@
     const parsedVal = parseFloat(rawValue);
     if (isNaN(parsedVal) || !isFinite(parsedVal) || parsedVal < 0) return;
 
+    // تطبيع السهم إذا كان 24 أو أكبر (التحويل التلقائي: كل 24 سهمًا = 1 قيراط)
+    if (sourceField === 'sahm' && parsedVal >= 24) {
+      const targetSqm = ShareConverter.toSqm(rawValue, sourceField, heir.share);
+      if (targetSqm !== null) {
+        const values = ShareConverter.fromSqm(targetSqm);
+        const row = document.querySelector(`tr[data-id="${heirId}"]`);
+        if (row) {
+          const caratInput = row.querySelector(".heir-share-carat");
+          const feddanInput = row.querySelector(".heir-share-feddan");
+          if (caratInput) caratInput.value = values.carats;
+          if (feddanInput) feddanInput.value = values.feddans;
+        }
+      }
+    }
+
     if (sourceField === 'topW' || sourceField === 'botW') {
       const oldVal = heir[sourceField] || 0;
       const diff = parsedVal - oldVal;
@@ -356,6 +371,24 @@
       if (isNaN(parsedVal) || !isFinite(parsedVal) || parsedVal < 0) {
         updateAllHeirsInputsVisuals();
         return;
+      }
+
+      // تطبيع السهم إذا كان 24 أو أكبر (التحويل التلقائي: كل 24 سهمًا = 1 قيراط)
+      if (sourceField === 'sahm' && parsedVal >= 24) {
+        const targetSqm = ShareConverter.toSqm(rawValue, sourceField, heir.share);
+        if (targetSqm !== null) {
+          const values = ShareConverter.fromSqm(targetSqm);
+          const row = document.querySelector(`tr[data-id="${heirId}"]`);
+          if (row) {
+            const caratInput = row.querySelector(".heir-share-carat");
+            const feddanInput = row.querySelector(".heir-share-feddan");
+            const sahmInput = row.querySelector(".heir-share-sahm");
+            if (caratInput) caratInput.value = values.carats;
+            if (feddanInput) feddanInput.value = values.feddans;
+            if (sahmInput) sahmInput.value = values.shares.toFixed(2);
+          }
+          rawValue = values.shares.toFixed(2);
+        }
       }
 
       if (sourceField === 'topW' || sourceField === 'botW') {
