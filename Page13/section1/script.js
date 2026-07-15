@@ -383,7 +383,14 @@ function setupEventListeners() {
   const allInputs = document.querySelectorAll("input, select");
   allInputs.forEach(input => {
     // Avoid double events on custom handlers
-    if (input.id !== "carat-price-display" && input.id !== "heirs-count") {
+    const isExcluded = 
+      input.id === "carat-price-display" || 
+      input.id === "heirs-count" || 
+      input.id === "show-actual-dims" || 
+      input.id.startsWith("settings-") || 
+      input.id === "long-plot-view";
+
+    if (!isExcluded) {
       input.addEventListener("input", () => {
         if (input.closest(".inputs-group")) {
           resetDivision();
@@ -775,6 +782,7 @@ function onToggleActualDims() {
   updateTableHeaders();
   renderHeirsRows();
   updateHeirsUI();
+  calculateAll();
 }
 
 
@@ -2447,7 +2455,7 @@ function loadStateFromSession() {
   document.getElementById("long-plot-view").value = sessionStorage.getItem("longPlotView") || "agricultural";
   
   // استرجاع خيار الأبعاد الهندسية الفعلية
-  showActualDims = sessionStorage.getItem("showActualDims") === "true";
+  showActualDims = sessionStorage.getItem("showActualDims") !== "false";
   const checkbox = document.getElementById('show-actual-dims');
   if (checkbox) checkbox.checked = showActualDims;
 
