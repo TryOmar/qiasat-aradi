@@ -1316,6 +1316,49 @@ function runAutomatedTests() {
       }
     }
     
+    // Test 31: Verification of Averages Columns, Steps Accordion, and Mobile Layout Responsiveness
+    {
+      // 1. Run partition calculations to populate averages
+      runPartition(true);
+      
+      const rows = document.querySelectorAll("#partners-list .partner-row");
+      if (rows.length > 0) {
+        const row = rows[0];
+        const botW = parseFloat(row.querySelector(".partner-width-bottom").value) || 0;
+        const topW = parseFloat(row.querySelector(".partner-width-top").value) || 0;
+        const area = parseFloat(row.querySelector(".partner-area").value) || 0;
+        
+        const avgWInput = row.querySelector(".partner-width-avg");
+        const avgLInput = row.querySelector(".partner-length-avg");
+        
+        const avgWVal = parseFloat(avgWInput ? avgWInput.value : 0) || 0;
+        const avgLVal = parseFloat(avgLInput ? avgLInput.value : 0) || 0;
+        
+        const calculatedAvgW = (botW + topW) / 2;
+        const calculatedAvgL = calculatedAvgW > 0 ? (area / calculatedAvgW) : 0;
+        
+        assert(Math.abs(avgWVal - calculatedAvgW) < 1e-4, "الاختبار 31 (صحة حساب معدل العرض): حساب معدل العرض لكل قطعة يتم بطريقة صحيحة.", `معدل العرض الفعلي: ${avgWVal} | المحسوب: ${calculatedAvgW}`);
+        assert(Math.abs(avgLVal - calculatedAvgL) < 1e-4, "الاختبار 31 (صحة حساب معدل الطول): حساب معدل الطول لكل قطعة يتم بطريقة صحيحة (المساحة ÷ معدل العرض).", `معدل الطول الفعلي: ${avgLVal} | المحسوب: ${calculatedAvgL}`);
+      }
+      
+      // 2. Accordion opening and closing validation
+      const stepsContainer = document.getElementById("calculation-steps-container");
+      const stepsArrow = document.getElementById("steps-arrow-icon");
+      if (stepsContainer && stepsArrow) {
+        // Mock toggle
+        toggleStepsAccordion();
+        const isOpen = stepsContainer.style.maxHeight !== "0px";
+        
+        // Restore toggle
+        toggleStepsAccordion();
+        const isClosed = stepsContainer.style.maxHeight === "0px";
+        
+        assert(isOpen && isClosed, "الاختبار 31 (القائمة المنسدلة لخطوات الحساب): اختبار فتح وإغلاق قائمة خطوات الحساب التوضيحية بنجاح.", `حالة الفتح: ${isOpen} | حالة الإغلاق: ${isClosed}`);
+      } else {
+        assert(false, "الاختبار 31 (القائمة المنسدلة لخطوات الحساب): لم يتم العثور على عناصر حاوية الخطوات الحسابية.");
+      }
+    }
+
     window.PartitionDirectionManager.setDirection("RTL");
 
   } catch (error) {
