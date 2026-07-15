@@ -1279,8 +1279,44 @@ function runAutomatedTests() {
         assert(true, "الاختبار 29 (تخطي لعدم وجود شركاء): تخطي لعدم توفر قطع محسوبة في هذه التهيئة.");
       }
       
-      window.PartitionDirectionManager.setDirection("RTL");
+    // Test 30: Verification of Read-Only Croquis (No Dragging or Accidental Modifications)
+    {
+      const croquisSVG = document.getElementById("croquis-content");
+      
+      // Stage initial values
+      const initialNumPieces = window.calculatedPieces ? window.calculatedPieces.length : 0;
+      const initialAreas = window.calculatedPieces ? window.calculatedPieces.map(p => p.area) : [];
+      
+      // Simulate click and drag events inside the croquis SVG
+      if (croquisSVG && initialNumPieces > 0) {
+        // Find a divider line or segment
+        const dividers = croquisSVG.querySelectorAll("line");
+        const divider = dividers[0] || croquisSVG;
+        
+        // Dispatch mock drag sequence
+        divider.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100, bubbles: true }));
+        document.dispatchEvent(new MouseEvent("mousemove", { clientX: 250, clientY: 100, bubbles: true }));
+        document.dispatchEvent(new MouseEvent("mouseup", { clientX: 250, clientY: 100, bubbles: true }));
+        
+        // Verify state is completely unchanged
+        const postDragNumPieces = window.calculatedPieces ? window.calculatedPieces.length : 0;
+        const postDragAreas = window.calculatedPieces ? window.calculatedPieces.map(p => p.area) : [];
+        
+        let areasMatch = true;
+        for (let i = 0; i < initialAreas.length; i++) {
+          if (initialAreas[i] !== postDragAreas[i]) {
+            areasMatch = false;
+            break;
+          }
+        }
+        
+        assert(postDragNumPieces === initialNumPieces && areasMatch, "الاختبار 30 (ثبات نتائج الكروكي وعدم قابليته للسحب): بقاء المساحات والأنصبة وعدد القطع ثابتة بعد محاكاة عملية سحب الفواصل.", `عدد القطع: ${postDragNumPieces} | حالة تطابق المساحات: ${areasMatch}`);
+      } else {
+        assert(true, "الاختبار 30 (تخطي لعدم وجود شركاء): تخطي لعدم توفر قطع محسوبة في هذه التهيئة.");
+      }
     }
+    
+    window.PartitionDirectionManager.setDirection("RTL");
 
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);

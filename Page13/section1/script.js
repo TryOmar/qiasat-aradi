@@ -580,101 +580,14 @@ function getEventPos(e) {
 }
 
 function handleCanvasPointerDown(e) {
-  if (!isDivisionActive || heirsData.length <= 1) return;
-  const pos = getEventPos(e);
-  const scaleMultiplier = Math.max(0.7, canvas.clientWidth / 600);
-  const hitBox = Math.max(15, 20 * scaleMultiplier);
-  
-  for (let i = 0; i < dividerHandles.length; i++) {
-    const handle = dividerHandles[i];
-    const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
-    if (dist < hitBox) { // Dynamic hitbox
-      isDraggingDivider = true;
-      draggedDividerIdx = handle.index;
-      dragStartX = pos.x;
-      originalShares = heirsData.map(h => h.share);
-      e.preventDefault();
-      return;
-    }
-  }
+  // Dragging vertical dividers has been disabled to prevent accidental modifications to shares/areas.
+  return;
 }
 
 function handleCanvasPointerMove(e) {
-  if (!isDivisionActive || heirsData.length <= 1) return;
-  const pos = getEventPos(e);
-  const scaleMultiplier = Math.max(0.7, canvas.clientWidth / 600);
-  const hitBox = Math.max(15, 20 * scaleMultiplier);
-  
-  if (!isDraggingDivider) {
-    let hover = false;
-    for (let i = 0; i < dividerHandles.length; i++) {
-      const handle = dividerHandles[i];
-      const dist = Math.hypot(pos.x - handle.x, pos.y - handle.y);
-      if (dist < hitBox) {
-        hover = true;
-        break;
-      }
-    }
-    canvas.style.cursor = hover ? "ew-resize" : "default";
-    return;
-  }
-  
-  e.preventDefault();
-  canvas.style.cursor = "ew-resize";
-  
-  if (currentCanvasPoints.length < 4) return;
-  const cpA = currentCanvasPoints[0];
-  const cpB = currentCanvasPoints[1];
-  const cpC = currentCanvasPoints[2];
-  const cpD = currentCanvasPoints[3];
-  
-  const y_m = pos.y;
-  
-  // Left side is cpD to cpA
-  let xLeft = cpD.x;
-  if (Math.abs(cpA.y - cpD.y) > 1) {
-    xLeft = cpD.x + ((y_m - cpD.y) / (cpA.y - cpD.y)) * (cpA.x - cpD.x);
-  }
-  
-  // Right side is cpC to cpB
-  let xRight = cpC.x;
-  if (Math.abs(cpB.y - cpC.y) > 1) {
-    xRight = cpC.x + ((y_m - cpC.y) / (cpB.y - cpC.y)) * (cpB.x - cpC.x);
-  }
-  
-  let t = 0.5;
-  const widthCanvas = xRight - xLeft;
-  if (widthCanvas > 1) {
-    t = (pos.x - xLeft) / widthCanvas;
-  }
-  t = Math.max(0.001, Math.min(0.999, t));
-  
-  const newCumArea = getLeftArea(t);
-  
-  let cumAreaPrev = 0;
-  for (let idx = 0; idx < draggedDividerIdx - 1; idx++) {
-    cumAreaPrev += originalShares[idx]; // Use originalShares to prevent drift during continuous drag
-  }
-  
-  let cumAreaNext = 0;
-  for (let idx = 0; idx < draggedDividerIdx + 1; idx++) {
-    cumAreaNext += originalShares[idx];
-  }
-  
-  const minArea = cumAreaPrev + 1;
-  const maxArea = cumAreaNext - 1;
-  
-  let targetCumArea = Math.max(minArea, Math.min(maxArea, newCumArea));
-  
-  heirsData[draggedDividerIdx - 1].share = targetCumArea - cumAreaPrev;
-  heirsData[draggedDividerIdx].share = cumAreaNext - targetCumArea;
-  
-  // Re-calculate exact widths and side lengths for all heirs since shares changed
-  recalculateHeirsDimensions();
-  
-  saveStateToSession();
-  updateHeirsUI();
-  calculateAll();
+  // Dragging vertical dividers has been disabled to prevent accidental modifications to shares/areas.
+  canvas.style.cursor = "default";
+  return;
 }
 
 function handleCanvasPointerUp(e) {
