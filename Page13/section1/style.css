@@ -885,6 +885,26 @@ body {
   .heirs-table-wrapper table {
     min-width: 480px;
   }
+  .input-row-inline {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  .input-row-inline label {
+    flex: 0 0 auto;
+  }
+  .input-row-inline input {
+    flex: 0 0 60px;
+  }
+  .input-row-inline button {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 110px;
+    height: 38px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+    padding: 0 8px !important;
+  }
 }
 
 /* Print CSS */
