@@ -3203,8 +3203,14 @@ function printReport() {
   const l2 = document.getElementById("length2").value || "-";
   const w1 = document.getElementById("width1").value || "-";
   const w2 = document.getElementById("width2").value || "-";
-  const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "-";
-  const data = getTableDataArray();
+  
+  // جلب البيانات الإجمالية المحدثة مباشرة من نتائج البرنامج لتوحيد القيم
+  const totalArea = document.getElementById("total-area-sqm-res") ? document.getElementById("total-area-sqm-res").innerText.replace(" م²", "") : "-";
+  const totalShares = document.getElementById("total-area-shares-res") ? document.getElementById("total-area-shares-res").innerText : "0";
+  const totalCarats = document.getElementById("total-area-carats-res") ? document.getElementById("total-area-carats-res").innerText : "0";
+  const totalFeddans = document.getElementById("total-area-feddans-res") ? document.getElementById("total-area-feddans-res").innerText : "0";
+  const caratArea = document.getElementById("carat-area-res") ? document.getElementById("carat-area-res").innerText : "0";
+  
   const numPartners = Array.from(document.querySelectorAll("#partners-list .partner-row")).filter(r => !isPartnerRowExcluded(r)).length;
   
   const now = new Date();
@@ -3212,81 +3218,354 @@ function printReport() {
   const timeStr = now.toLocaleTimeString('ar-EG');
   const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  // حساب متوسط العرض ومتوسط الطول
+  // حساب متوسط العرض ومتوسط الطول للمساحة الإجمالية
   const avgWidth = ((parseFloat(w1) || 0) + (parseFloat(w2) || 0)) / 2;
   const avgLength = ((parseFloat(l1) || 0) + (parseFloat(l2) || 0)) / 2;
 
-  const tableRows = data.slice(1).map((row, idx) => {
-    const isTotal = row[1] === "الإجمالي";
-    const isRem = row[1] && row[1].includes("المتبقي");
-    let trClass = '';
-    if (isTotal) trClass = 'row-total';
-    else if (isRem) trClass = 'row-remainder';
-    else if (idx % 2 === 1) trClass = 'row-even';
-    return `<tr class="${trClass}">${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`;
+  const isLTR = window.PartitionDirectionManager.isLTR();
+
+  // دالة لتنسيق نصاب الشريك إلى جملة عربية فصحى مقروءة بدقة عالية
+  function formatArabicFCS(feddan, carat, sahm) {
+    const parts = [];
+    if (feddan > 0) {
+      if (feddan === 1) parts.push("فدان واحد");
+      else if (feddan === 2) parts.push("فدانان");
+      else if (feddan >= 3 && feddan <= 10) parts.push(`${feddan} فدادين`);
+      else parts.push(`${feddan} فدان`);
+    }
+    
+    if (carat > 0) {
+      if (carat === 1) parts.push("قيراط واحد");
+      else if (carat === 2) parts.push("قيراطان");
+      else if (carat >= 3 && carat <= 10) parts.push(`${carat} قراريط`);
+      else parts.push(`${carat} قيراط`);
+    }
+    
+    const sahmInt = Math.floor(sahm);
+    const sahmDec = Math.round((sahm - sahmInt) * 100);
+    
+    if (sahmInt > 0 || sahmDec > 0) {
+      let sahmText = "";
+      if (sahmInt > 0) {
+        if (sahmInt === 1) sahmText = "سهم واحد";
+        else if (sahmInt === 2) sahmText = "سهمان";
+        else if (sahmInt >= 3 && sahmInt <= 10) sahmText = `${sahmInt} أسهم`;
+        else sahmText = `${sahmInt} سهماً`;
+      }
+      
+      if (sahmDec > 0) {
+        const decText = `${sahmDec} جزءاً من السهم`;
+        if (sahmText) {
+          sahmText += ` و ${decText}`;
+        } else {
+          sahmText = decText;
+        }
+      }
+      
+      parts.push(sahmText);
+    }
+    
+    if (parts.length === 0) return "0 سهم";
+    return parts.join(" و ");
+  }
+
+  // بناء بطاقات الشركاء مع كافة البيانات التفصيلية الهندسية
+  const partnerCardsHTML = window.calculatedPieces.map((piece, idx) => {
+    const fcs = convertSquareMetersToFCS(piece.area);
+    const fcsText = formatArabicFCS(fcs.feddan, fcs.carat, fcs.sahm);
+    
+    const w2_val = piece.topW.toFixed(4); // العرض الأول (أعلى)
+    const w1_val = piece.botW.toFixed(4); // العرض الثاني (أسفل)
+    const rightL_val = piece.leftLine.toFixed(4); // الطول الأيمن
+    const leftL_val = piece.divLine.toFixed(4); // الطول الأيسر
+    const avgW_val = piece.width.toFixed(4);
+    const avgL_val = piece.width > 0 ? (piece.area / piece.width).toFixed(4) : "-";
+    
+    const displayIndex = idx + 1;
+    const cardTitle = piece.isRemainder ? "الجزء المتبقي من الأرض" : `الشريك ${displayIndex}: ${piece.name}`;
+    
+    return `
+      <div class="partner-print-card">
+        <div class="partner-card-header">${cardTitle}</div>
+        <table class="partner-card-table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">البيان</th>
+              <th>القيمة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${w2_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${w1_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن</td><td style="font-weight:bold;color:#1b5e20;">${rightL_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر</td><td style="font-weight:bold;color:#1b5e20;">${leftL_val} م</td></tr>
+            <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgW_val} م</td></tr>
+            <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgL_val} م</td></tr>
+          </tbody>
+        </table>
+        <div class="partner-card-area-box">
+          <span class="partner-card-area-lbl">المساحة</span>
+          <span class="partner-card-area-val">${piece.area.toFixed(2)} م²</span>
+          <span class="partner-card-fcs-val">(${fcsText})</span>
+        </div>
+      </div>
+    `;
   }).join("");
 
-  const headerRow = `<tr>${data[0].map(h => `<th>${h}</th>`).join("")}</tr>`;
-
-  // حالة التقسيم
-  const statusEl = document.getElementById("summary-status");
-  const divisionStatus = statusEl ? statusEl.innerText.replace(/\n/g, ' ').trim() : "-";
+  // تحديد توزيع الأعمدة ديناميكياً لتفادي التشوه
+  const numCards = window.calculatedPieces.length;
+  let gridStyle = "grid-template-columns: repeat(3, 1fr);";
+  if (numCards === 1) {
+    gridStyle = "grid-template-columns: 1fr; max-width: 320px; margin: 0 auto;";
+  } else if (numCards === 2) {
+    gridStyle = "grid-template-columns: repeat(2, 1fr); max-width: 640px; margin: 0 auto;";
+  }
 
   const printContent = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="UTF-8">
   <title>تقرير تقسيم الأراضي - الدلال</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
-    body { font-family: 'Tajawal', 'Cairo', 'Noto Sans Arabic', sans-serif; background: #fff; color: #222; font-size: 9.5pt; direction: rtl; padding-bottom: 35px; position: relative; }
-    .report-header { border: 2px solid #1b5e20; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1.2fr 2fr 1.2fr; align-items: center; background: #f1f8e9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .report-header-right { text-align: right; }
-    .report-header-right h1 { font-size: 20pt; color: #1b5e20; font-weight: 800; margin: 0; }
-    .report-header-right p { font-size: 9pt; color: #388e3c; margin: 2px 0 0; font-weight: 600; }
-    .report-header-center { text-align: center; padding: 0 10px; }
-    .report-header-center h2 { font-size: 12.5pt; color: #1b5e20; font-weight: 700; margin: 0; line-height: 1.4; }
-    .report-header-left { text-align: left; font-size: 8pt; color: #333; line-height: 1.5; }
-    .owner-info { margin-bottom: 15px; font-size: 10pt; border-bottom: 1px dashed #ccc; padding-bottom: 6px; display: flex; gap: 10px; }
-    .placeholder-line { color: #aaa; letter-spacing: 1px; }
-    .section { margin-bottom: 15px; }
-    .section-title { background: #1b5e20; color: white; font-weight: 700; font-size: 10.5pt; padding: 5px 12px; border-right: 5px solid #2e7d32; margin-bottom: 8px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 8px; }
-    th { background: #e8f5e9; color: #1b5e20; font-weight: 700; border: 1px solid #1b5e20; padding: 6px 4px; text-align: center; white-space: nowrap; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    td { border: 1px solid #a5d6a7; padding: 5px 4px; text-align: center; vertical-align: middle; }
-    tr.row-even td { background: #f9fbe7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    tr.row-total td { background: #1b5e20 !important; color: white !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    tr.row-remainder td { background: #fffde7 !important; color: #e65100 !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .info-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
-    .info-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-    .info-box { background: #f1f8e9; border: 1.5px solid #1b5e20; border-radius: 6px; padding: 7px 8px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .info-box label { font-size: 8pt; color: #555; display: block; margin-bottom: 2px; }
-    .info-box strong { font-size: 11pt; color: #1b5e20; font-weight: 700; }
-    .summary-box { border: 2px solid #1b5e20; border-radius: 8px; background: #f1f8e9; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .summary-box-row { display: flex; justify-content: space-between; gap: 20px; }
-    .summary-box-cell { flex: 1; font-size: 9.5pt; color: #222; }
-    .summary-box-cell strong { color: #1b5e20; }
-    .status-badge { display: inline-block; padding: 1px 8px; background-color: #c8e6c9; color: #2e7d32; border-radius: 4px; font-weight: bold; font-size: 9pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .watermark-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 26pt; font-weight: 800; color: #000000; opacity: 0.06; white-space: nowrap; pointer-events: none; z-index: -1000; font-family: 'Cairo', Arial, sans-serif; text-align: center; width: 100%; }
-    .report-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 8pt; color: #444; border-top: 1.5px solid #1b5e20; padding: 4px 10px 3px; background: white; gap: 1px; }
-    .footer-main-text { font-size: 8.5pt; font-weight: 700; color: #222; }
-    .footer-sub-text { font-size: 7.5pt; color: #888; }
-    .page-break-inside-avoid { page-break-inside: avoid; }
+    @page { 
+      size: A4 portrait; 
+      margin: 10mm 10mm 10mm 10mm; 
+    }
+    body { 
+      font-family: 'Cairo', sans-serif; 
+      background: #fff; 
+      color: #222; 
+      font-size: 9.5pt; 
+      direction: rtl; 
+      padding-bottom: 25px; 
+      position: relative; 
+      line-height: 1.35;
+    }
+    .watermark-container { 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%) rotate(-25deg); 
+      font-size: 24pt; 
+      font-weight: 800; 
+      color: #000000; 
+      opacity: 0.05; 
+      white-space: nowrap; 
+      pointer-events: none; 
+      z-index: -1000; 
+      text-align: center; 
+      width: 100%; 
+    }
+    .report-title-container {
+      text-align: center;
+      margin-bottom: 12px;
+      border-bottom: 2px double #1b5e20;
+      padding-bottom: 6px;
+    }
+    .report-title-container h1 {
+      font-size: 20pt;
+      color: #1b5e20;
+      font-weight: 800;
+      margin: 0;
+      text-decoration: underline;
+    }
+    .report-title-container p {
+      font-size: 11pt;
+      color: #c62828;
+      font-weight: 700;
+      margin: 4px 0 0;
+    }
+    
+    .section-title { 
+      background: #1b5e20; 
+      color: white; 
+      font-weight: 700; 
+      font-size: 10pt; 
+      padding: 4px 10px; 
+      border-right: 4px solid #2e7d32; 
+      margin-bottom: 6px; 
+      border-radius: 4px; 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact; 
+    }
+    
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      font-size: 9pt; 
+      margin-bottom: 10px; 
+    }
+    th { 
+      background: #e8f5e9; 
+      color: #1b5e20; 
+      font-weight: 700; 
+      border: 1px solid #1b5e20; 
+      padding: 5px; 
+      text-align: center; 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact; 
+    }
+    td { 
+      border: 1px solid #a5d6a7; 
+      padding: 4px; 
+      text-align: center; 
+      vertical-align: middle; 
+    }
+    
+    .partners-grid {
+      display: grid;
+      ${gridStyle}
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .partner-print-card {
+      border: 1.5px solid #1b5e20;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      page-break-inside: avoid;
+    }
+    .partner-card-header {
+      background: #1b5e20;
+      color: white;
+      font-weight: 700;
+      font-size: 9.5pt;
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-align: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .partner-card-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin-bottom: 4px;
+    }
+    .partner-card-table th {
+      background: #e8f5e9;
+      color: #1b5e20;
+      font-weight: 700;
+      border: 1px solid #a5d6a7;
+      padding: 2px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .partner-card-table td {
+      border: 1px solid #a5d6a7;
+      padding: 2px;
+    }
+    .partner-card-area-box {
+      background: #f1f8e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 6px;
+      padding: 4px;
+      text-align: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .partner-card-area-lbl {
+      font-size: 7.5pt;
+      color: #555;
+      display: block;
+    }
+    .partner-card-area-val {
+      font-size: 10pt;
+      color: #c62828;
+      font-weight: 700;
+      display: block;
+    }
+    .partner-card-fcs-val {
+      font-size: 7.5pt;
+      color: #1b5e20;
+      font-weight: bold;
+      display: block;
+    }
+    
+    .totals-and-notes {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+      page-break-inside: avoid;
+    }
+    .totals-box {
+      border: 1.5px solid #1b5e20;
+      border-radius: 8px;
+      background: #f9fbe7;
+      padding: 8px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .totals-box table {
+      margin: 0;
+    }
+    .totals-box td {
+      padding: 3px;
+      font-size: 8.5pt;
+    }
+    .notes-box {
+      border: 1.5px solid #dcdcdc;
+      border-radius: 8px;
+      background: #fafafa;
+      padding: 8px;
+    }
+    .notes-box h3 {
+      font-size: 9pt;
+      color: #444;
+      margin-bottom: 4px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 2px;
+    }
+    .notes-box ul {
+      list-style-type: none;
+      padding-right: 5px;
+    }
+    .notes-box li {
+      font-size: 8pt;
+      color: #555;
+      margin-bottom: 3px;
+    }
+    
+    .report-footer { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      text-align: center; 
+      font-size: 7.5pt; 
+      color: #555; 
+      border-top: 1.5px solid #1b5e20; 
+      padding: 4px 10px 2px; 
+      background: white; 
+    }
+    .footer-sub-text { 
+      font-size: 7pt; 
+      color: #888; 
+    }
+    
     @media print {
-      body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .report-header { border-color: #000 !important; background: #fcfcfc !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .report-title-container { border-bottom-color: #000 !important; }
       .section-title { background: #000 !important; color: #fff !important; border-right-color: #333 !important; }
       th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
       td { border-color: #ccc !important; }
-      .info-box { border-color: #000 !important; background: #fff !important; }
-      .summary-box { border-color: #000 !important; background: #fff !important; }
+      .partner-print-card { border-color: #000 !important; }
+      .partner-card-header { background: #000 !important; color: #fff !important; }
+      .partner-card-table th { background: #f2f2f2 !important; color: #000 !important; border-color: #ccc !important; }
+      .partner-card-table td { border-color: #ccc !important; }
+      .partner-card-area-box { background: #fff !important; border-color: #ccc !important; }
+      .totals-box { border-color: #000 !important; background: #fff !important; }
+      .totals-box td { border-color: #ccc !important; }
       .report-footer { border-top-color: #000 !important; }
-      .status-badge { background: #eee !important; color: #000 !important; border: 1px solid #aaa !important; }
-      .watermark-container { opacity: 0.05 !important; }
-      tr.row-total td { background: #222 !important; color: #fff !important; }
-      tr.row-remainder td { background: #fff9e6 !important; color: #b34000 !important; }
     }
   </style>
 </head>
@@ -3294,99 +3573,81 @@ function printReport() {
 
   <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
 
-  <div class="report-header">
-    <div class="report-header-right">
-      <h1>الدَّلاَّل</h1>
-      <p>تطبيق قياس وتقسيم الأراضي</p>
-    </div>
-    <div class="report-header-center">
-      <h2>تقرير تقسيم أرض باختلاف الأطوال</h2>
-    </div>
-    <div class="report-header-left">
-      <div><strong>تاريخ التقرير:</strong> ${dateStr}</div>
-      <div><strong>وقت الطباعة:</strong> ${timeStr}</div>
-      <div><strong>رقم التقرير:</strong> ${reportId}</div>
-    </div>
-  </div>
-
-  <div class="owner-info">
-    <strong>اسم المالك / المستخدم:</strong>
-    <span class="placeholder-line">................................................................................................</span>
+  <div class="report-title-container">
+    <h1>بيان المساحات</h1>
+    <p>جملة الغيط</p>
   </div>
 
   <div class="section page-break-inside-avoid">
-    <div class="section-title">1. بيانات الأرض الأساسية</div>
-    <div class="info-grid-4">
-      <div class="info-box"><label>العرض الأول (أعلى)</label><strong>${w2} م</strong></div>
-      <div class="info-box"><label>العرض الثاني (أسفل)</label><strong>${w1} م</strong></div>
-      <div class="info-box"><label>الطول الأيمن</label><strong>${l1} م</strong></div>
-      <div class="info-box"><label>الطول الأيسر</label><strong>${l2} م</strong></div>
-    </div>
-  </div>
-
-  <div class="section page-break-inside-avoid">
-    <div class="section-title">2. النتائج الإجمالية للمساحة</div>
-    <div class="info-grid-3">
-      <div class="info-box"><label>المساحة الإجمالية</label><strong>${totalArea} م²</strong></div>
-      <div class="info-box"><label>عدد الشركاء</label><strong>${numPartners} شركاء</strong></div>
-      <div class="info-box"><label>حالة التقسيم</label><strong style="color:#2e7d32;">${divisionStatus}</strong></div>
-    </div>
-  </div>
-
-  <div class="section page-break-inside-avoid">
-    <div class="section-title">3. بيانات تنفيذ التقسيم</div>
-    <div class="summary-box" style="gap: 6px;">
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>اتجاه التقسيم:</strong> <span class="status-badge" style="background-color: #e8f5e9; color: #2e7d32;">➡️ من اليمين إلى اليسار (الاستلام يبدأ من الحد الأيمن للأرض)</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>بداية القياس:</strong> <span>الحد الأيمن للأرض (0 م)</span></div>
-        <div class="summary-box-cell"><strong>نهاية القياس:</strong> <span>الحد الأيسر للأرض (${avgWidth.toFixed(2)} م)</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>عدد الشركاء:</strong> <span>${numPartners} شركاء</span></div>
-        <div class="summary-box-cell"><strong>مساحة الأرض:</strong> <span>${totalArea} م²</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>تاريخ الطباعة:</strong> <span>${dateStr} - ${timeStr}</span></div>
-        <div class="summary-box-cell"><strong>إصدار البرنامج:</strong> <span>v2.4</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section page-break-inside-avoid">
-    <div class="section-title">4. بيانات العرض والارتفاع المحسوبة</div>
+    <div class="section-title">أولاً: جدول بيان المساحات</div>
     <table>
-      <thead><tr><th>البيان المحسوب</th><th>القيمة بالمتـر</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width: 50%;">البيان</th>
+          <th>القيمة</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td style="text-align:right;padding-right:15px;">معدل العرض (متوسط الأعراض)</td><td style="font-weight:bold;color:#1b5e20;">${avgWidth.toFixed(4)} م</td></tr>
-        <tr><td style="text-align:right;padding-right:15px;">متوسط الطول (متوسط الأطوال)</td><td style="font-weight:bold;color:#1b5e20;">${avgLength.toFixed(4)} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${w2} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${w1} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيمن</td><td style="font-weight:bold;color:#1b5e20;">${l1} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيسر</td><td style="font-weight:bold;color:#1b5e20;">${l2} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgWidth.toFixed(4)} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgLength.toFixed(4)} م</td></tr>
+        <tr style="background:#e8f5e9;"><td style="text-align:right;padding-right:15px;font-weight:bold;color:#1b5e20;">جملة المساحة</td><td style="font-weight:bold;color:#c62828;font-size:11pt;">${totalArea} م²</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="section">
-    <div class="section-title">5. جدول تفاصيل التقسيم على الشركاء</div>
-    <table><thead>${headerRow}</thead><tbody>${tableRows}</tbody></table>
+    <div class="section-title">ثانياً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
+    <div class="partners-grid">
+      ${partnerCardsHTML}
+    </div>
   </div>
 
-  <div class="section page-break-inside-avoid">
-    <div class="section-title">6. ملخص نهائي لعملية التقسيم</div>
-    <div class="summary-box">
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>المساحة الإجمالية للأرض:</strong> <span>${totalArea} م²</span></div>
-        <div class="summary-box-cell"><strong>عدد الشركاء:</strong> <span>${numPartners} شركاء</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>متوسط العرض:</strong> <span>${avgWidth.toFixed(4)} م</span></div>
-        <div class="summary-box-cell"><strong>متوسط الطول:</strong> <span>${avgLength.toFixed(4)} م</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell"><strong>اتجاه التقسيم الحالي:</strong> <span class="status-badge" style="background-color: #e8f5e9; color: #2e7d32;">➡️ من اليمين إلى اليسار (بداية القياس: الحد الأيمن)</span></div>
-      </div>
-      <div class="summary-box-row">
-        <div class="summary-box-cell" style="flex:2;"><strong>حالة التقسيم:</strong> <span class="status-badge">${divisionStatus}</span></div>
-      </div>
+  <div class="totals-and-notes">
+    <div class="totals-box">
+      <table style="width: 100%; border: none;">
+        <thead>
+          <tr style="background: #e8f5e9;">
+            <th style="border: 1px solid #1b5e20; padding: 4px; font-weight: bold; color: #1b5e20; font-size: 8.5pt;">البيان</th>
+            <th style="border: 1px solid #1b5e20; padding: 4px; font-weight: bold; color: #1b5e20; font-size: 8.5pt;">القيمة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي المساحة</td>
+            <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #c62828;">${totalArea} م²</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي الفدادين</td>
+            <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totalFeddans}</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي القراريط</td>
+            <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totalCarats}</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي الأسهم</td>
+            <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totalShares}</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">مساحة القيراط المستخدمة</td>
+            <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${caratArea} م²</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notes-box">
+      <h3>ملاحظات:</h3>
+      <ul>
+        <li>1 - جميع الأطوال بالمتر.</li>
+        <li>2 - تم تقسيم الغيط إلى ${numPartners} أجزاء تفصيلية بالطريقة الطولية.</li>
+        <li>3 - اتجاه التقسيم للتنفيذ الميداني: ${isLTR ? "⬅️ من اليسار إلى اليمين" : "➡️ من اليمين إلى اليسار"}.</li>
+        <li>4 - رقم التقرير المرجعي: ${reportId}</li>
+      </ul>
     </div>
   </div>
 
