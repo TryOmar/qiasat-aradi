@@ -42,6 +42,17 @@ document.addEventListener("DOMContentLoaded", function () {
   loadData();
   updateWidthModeDescription();
   
+  // تهيئة الأكورديون للإعدادات
+  initSettingsAccordion();
+  const accordionContent = document.getElementById("settings-accordion-content");
+  if (accordionContent) {
+    accordionContent.addEventListener("transitionend", () => {
+      if (accordionContent.classList.contains("open")) {
+        accordionContent.style.maxHeight = "none";
+      }
+    });
+  }
+  
   // Set up event listeners
   const list = document.getElementById("partners-list");
   if (list.children.length === 0) {
@@ -5942,6 +5953,64 @@ function openAnimationSimulation() {
 
 // ربط الدالة بـ window لضمان وصول أحداث الـ HTML إليها في كافة ظروف التحميل
 window.openAnimationSimulation = openAnimationSimulation;
+
+
+// ---------------------------------------------------------
+// نظام القسم المنسدل للإعدادات (Settings Accordion)
+// ---------------------------------------------------------
+function toggleSettingsAccordion() {
+  const content = document.getElementById("settings-accordion-content");
+  const arrow = document.getElementById("accordion-arrow");
+  const trigger = document.getElementById("settings-accordion-trigger");
+  if (!content || !arrow || !trigger) return;
+
+  const isOpen = content.classList.contains("open");
+  
+  if (isOpen) {
+    // إغلاق القسم المنسدل
+    content.style.maxHeight = content.scrollHeight + "px";
+    content.offsetHeight; // إعادة الحساب الموقعي
+    content.style.maxHeight = "0px";
+    content.style.opacity = "0";
+    arrow.style.transform = "rotate(0deg)";
+    trigger.style.borderRadius = "8px";
+    content.classList.remove("open");
+    localStorage.setItem("settings-accordion-open", "false");
+  } else {
+    // فتح القسم المنسدل
+    content.style.maxHeight = content.scrollHeight + "px";
+    content.style.opacity = "1";
+    arrow.style.transform = "rotate(180deg)";
+    trigger.style.borderRadius = "8px 8px 0 0";
+    content.classList.add("open");
+    localStorage.setItem("settings-accordion-open", "true");
+  }
+}
+
+function initSettingsAccordion() {
+  const content = document.getElementById("settings-accordion-content");
+  const arrow = document.getElementById("accordion-arrow");
+  const trigger = document.getElementById("settings-accordion-trigger");
+  if (!content || !arrow || !trigger) return;
+
+  const isOpen = localStorage.getItem("settings-accordion-open") === "true";
+  if (isOpen) {
+    content.style.maxHeight = "none";
+    content.style.opacity = "1";
+    arrow.style.transform = "rotate(180deg)";
+    trigger.style.borderRadius = "8px 8px 0 0";
+    content.classList.add("open");
+  } else {
+    content.style.maxHeight = "0px";
+    content.style.opacity = "0";
+    arrow.style.transform = "rotate(0deg)";
+    trigger.style.borderRadius = "8px";
+    content.classList.remove("open");
+  }
+}
+
+window.toggleSettingsAccordion = toggleSettingsAccordion;
+window.initSettingsAccordion = initSettingsAccordion;
 
 
 

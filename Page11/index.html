@@ -147,15 +147,6 @@
     <!-- Canvas Section (Interactive Croquis - نفس تنسيق الصفحة 13) -->
     <div class="s canvas-card" id="canvas-container" style="margin-top: 20px;">
       <h3>كروكي الأرض التفاعلي</h3>
-      <div id="croquis-direction-bar" style="background: #fff8e1; border: 1.5px solid #ffe082; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; color: #e65100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center; direction: rtl;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;">
-          <span style="font-size: 14px; color: #ef6c00;">🏁 اتجاه التقسيم للتنفيذ الميداني:</span>
-          <select id="partition-direction-select" onchange="window.PartitionDirectionManager.setDirection(this.value)" style="height: 28px; border-radius: 6px; border: 1.5px solid #ffb74d; font-weight: bold; font-size: 12.5px; color: #e65100; cursor: pointer; padding: 0 8px; background: white; font-family: Cairo, sans-serif;">
-            <option value="RTL">⬅️ من اليمين إلى اليسار (الحد الأيمن هو الصفر)</option>
-            <option value="LTR">➡️ من اليسار إلى اليمين (الحد الأيسر هو الصفر)</option>
-          </select>
-        </div>
-      </div>
       <div id="croquis-deficit-warning" style="display: none; background: #ffebee; border: 1.5px solid #ffcdd2; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; color: #c62828; text-align: center; direction: rtl; align-items: center; justify-content: center; gap: 8px;">
         ⚠️ الكروكي والمخرجات الهندسية معروضة وفق آخر حالة صحيحة، لأن إجمالي الأنصبة يتجاوز مساحة الأرض.
       </div>
@@ -281,66 +272,90 @@
         </div>
       </div>
       
-      <!-- Selection & Main Actions Bar -->
-      <div class="main-actions-bar">
-        <div class="selector-container">
-          <label for="share-input-method">طريقة تحديد الأنصبة:</label>
-          <select id="share-input-method" onchange="handleInputMethodChange()">
-            <option value="carats">بالقراريط والأسهم (مثال: 4 قيراط، 12 سهم)</option>
-            <option value="fractions">بالنسب والكسور (مثال: 1/8 أو 1/4 أو النصف)</option>
-          </select>
-        </div>
-      </div>
-
-      <p style="font-size: 11px; color: gray; margin: -5px 0 10px 0; text-align: center; font-weight: bold;">
-        سيقوم النظام بحساب العرض والحد التراكمي وطول الفاصل والمساحة والنسبة المئوية لكل قطعة تلقائياً.
-      </p>
-
-      <!-- Switch for Keeping Area vs Free Editing -->
-      <div style="display: flex; flex-direction: column; gap: 8px; margin: 10px 0 15px 0; background: #f1f8e9; padding: 12px; border-radius: 10px; border: 1px solid #c8e6c9; direction: rtl; font-family: Cairo, Arial, sans-serif;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; width: 100%;">
-          <span style="font-weight: bold; color: #2e7d32; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-            طريقة تعديل العروض يدوياً:
-            <span style="cursor: pointer; color: #0288d1; display: inline-flex; align-items: center; gap: 2px; font-size: 11px; font-weight: bold; background: #e1f5fe; border: 1px solid #b3e5fc; padding: 2px 6px; border-radius: 4px;" onclick="openWidthModeHelpModal()">ℹ️ شرح طريقة التعديل</span>
+      <!-- Settings Accordion Section -->
+      <div class="settings-accordion-container" style="margin: 10px 0 15px 0; direction: rtl; font-family: Cairo, Arial, sans-serif;">
+        <button type="button" id="settings-accordion-trigger" class="settings-accordion-trigger" onclick="toggleSettingsAccordion()" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 8px; font-family: Cairo, Arial, sans-serif; font-size: 13.5px; font-weight: bold; color: #2e7d32; cursor: pointer; transition: background-color 0.2s, border-radius 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); outline: none;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            ⚙️ إعدادات تقسيم الأنصبة وإدارة الشركاء
           </span>
-          <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;">
-            <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
-              <input type="radio" name="manual-width-mode" id="mode-keep-area" checked style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData(); updateWidthModeDescription();">
-              <strong>الحفاظ على مساحة الشريك</strong>
-              <span style="background-color: #e8f5e9; color: #2e7d32; font-size: 10.5px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #a5d6a7; display: inline-block;">موصى به</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
-              <input type="radio" name="manual-width-mode" id="mode-free" style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData(); updateWidthModeDescription();">
-              <strong>تعديل حر</strong>
-              <span style="background-color: #fff3e0; color: #e65100; font-size: 10.5px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcc80; display: inline-block;">قد يغيّر الأنصبة</span>
-            </label>
-          </div>
-        </div>
-        <div id="manual-width-mode-desc" style="text-align: center; font-size: 11.5px; color: #555; margin-top: 4px; font-weight: bold; border-top: 1px dashed #c8e6c9; padding-top: 6px; min-height: 18px;"></div>
-        <!-- خطوة التعديل السريع -->
-        <div style="margin-top: 6px; border-top: 1px dashed #c8e6c9; padding-top: 8px;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
-            <label for="width-step-value" style="font-weight: bold; color: #2e7d32; font-size: 12.5px;">خطوة التعديل السريع (م):</label>
-            <input type="number" id="width-step-value" value="0.05" step="0.05" min="0.05" max="5"
-              list="step-size-suggestions"
-              style="width: 75px; padding: 4px 6px; border: 1.5px solid #c8e6c9; border-radius: 6px; text-align: center; font-weight: bold; font-family: Cairo, Arial, sans-serif;"
-              oninput="onStepValueChange(this);">
-            <datalist id="step-size-suggestions">
-              <option value="0.05"></option>
-              <option value="0.10"></option>
-              <option value="0.25"></option>
-              <option value="0.50"></option>
-              <option value="1.00"></option>
-            </datalist>
-            <button type="button" onclick="resetStepValue()" title="إعادة إلى القيمة الافتراضية 0.05 م"
-              style="background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 6px; color: #2e7d32; font-size: 11px; font-weight: bold; padding: 3px 8px; cursor: pointer; font-family: Cairo, Arial, sans-serif; white-space: nowrap;">
-              ↺ 0.05
-            </button>
-            <button type="button" onclick="openStepSizeHelpModal()" title="شرح خطوة التعديل السريع"
-              style="background: none; border: none; cursor: pointer; color: #1565c0; font-size: 17px; padding: 0 2px; line-height: 1; display: inline-flex; align-items: center;">ℹ️</button>
-          </div>
-          <div style="text-align: center; font-size: 11px; color: #555; margin-top: 4px; font-weight: bold;">
-            كل ضغطة على <strong style="color:#2e7d32;">(+)</strong> أو <strong style="color:#c62828;">(−)</strong> تغيّر العرض بمقدار هذه القيمة.
+          <span id="accordion-arrow" style="font-size: 11px; transition: transform 0.3s ease; transform: rotate(0deg); display: inline-block;">▼</span>
+        </button>
+        <div id="settings-accordion-content" style="max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out; background: #ffffff; border: 1.5px solid #a5d6a7; border-top: none; border-radius: 0 0 8px 8px; margin-top: -2px;">
+          <div style="padding: 15px 12px; display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- 1. اتجاه التقسيم للتنفيذ الميداني -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-start; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0;">
+              <span style="font-size: 13px; font-weight: bold; color: #e65100;">🏁 اتجاه التقسيم للتنفيذ الميداني:</span>
+              <select id="partition-direction-select" onchange="window.PartitionDirectionManager.setDirection(this.value)" style="height: 28px; border-radius: 6px; border: 1.5px solid #ffb74d; font-weight: bold; font-size: 12.5px; color: #e65100; cursor: pointer; padding: 0 8px; background: white; font-family: Cairo, sans-serif; outline: none;">
+                <option value="RTL">⬅️ من اليمين إلى اليسار (الحد الأيمن هو الصفر)</option>
+                <option value="LTR">➡️ من اليسار إلى اليمين (الحد الأيسر هو الصفر)</option>
+              </select>
+            </div>
+
+            <!-- 2. طريقة تحديد الأنصبة -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-start; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0;">
+              <label for="share-input-method" style="font-size: 13px; font-weight: bold; color: #2e7d32;">طريقة تحديد الأنصبة:</label>
+              <select id="share-input-method" onchange="handleInputMethodChange()" style="height: 28px; border-radius: 6px; border: 1.5px solid #a5d6a7; font-weight: bold; font-size: 12.5px; color: #2e7d32; cursor: pointer; padding: 0 8px; background: white; font-family: Cairo, sans-serif; outline: none;">
+                <option value="carats">بالقراريط والأسهم (مثال: 4 قيراط، 12 سهم)</option>
+                <option value="fractions">بالنسب والكسور (مثال: 1/8 أو 1/4 أو النصف)</option>
+              </select>
+            </div>
+
+            <!-- 3. النص التوضيحي -->
+            <p style="font-size: 11px; color: gray; margin: 0; font-weight: bold; text-align: right;">
+              سيقوم النظام بحساب العرض والحد التراكمي وطول الفاصل والمساحة والنسبة المئوية لكل قطعة تلقائياً.
+            </p>
+
+            <!-- 4. طريقة تعديل العروض يدويًا -->
+            <div style="display: flex; flex-direction: column; gap: 8px; background: #f1f8e9; padding: 12px; border-radius: 10px; border: 1px solid #c8e6c9;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%;">
+                <span style="font-weight: bold; color: #2e7d32; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
+                  طريقة تعديل العروض يدوياً:
+                  <span style="cursor: pointer; color: #0288d1; display: inline-flex; align-items: center; gap: 2px; font-size: 11px; font-weight: bold; background: #e1f5fe; border: 1px solid #b3e5fc; padding: 2px 6px; border-radius: 4px;" onclick="openWidthModeHelpModal()">ℹ️ شرح طريقة التعديل</span>
+                </span>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+                    <input type="radio" name="manual-width-mode" id="mode-keep-area" checked style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData(); updateWidthModeDescription();">
+                    <strong>الحفاظ على مساحة الشريك</strong>
+                    <span style="background-color: #e8f5e9; color: #2e7d32; font-size: 10.5px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #a5d6a7; display: inline-block;">موصى به</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #333; cursor: pointer;">
+                    <input type="radio" name="manual-width-mode" id="mode-free" style="accent-color: #2e7d32; cursor: pointer;" onchange="saveData(); updateWidthModeDescription();">
+                    <strong>تعديل حر</strong>
+                    <span style="background-color: #fff3e0; color: #e65100; font-size: 10.5px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #ffcc80; display: inline-block;">قد يغيّر الأنصبة</span>
+                  </label>
+                </div>
+              </div>
+              <div id="manual-width-mode-desc" style="font-size: 11.5px; color: #555; margin-top: 4px; font-weight: bold; border-top: 1px dashed #c8e6c9; padding-top: 6px; min-height: 18px; text-align: center;"></div>
+              
+              <!-- 5. خطوة التعديل السريع -->
+              <div style="margin-top: 6px; border-top: 1px dashed #c8e6c9; padding-top: 8px;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                  <label for="width-step-value" style="font-weight: bold; color: #2e7d32; font-size: 12.5px;">خطوة التعديل السريع (م):</label>
+                  <input type="number" id="width-step-value" value="0.05" step="0.05" min="0.05" max="5"
+                    list="step-size-suggestions"
+                    style="width: 75px; padding: 4px 6px; border: 1.5px solid #c8e6c9; border-radius: 6px; text-align: center; font-weight: bold; font-family: Cairo, Arial, sans-serif;"
+                    oninput="onStepValueChange(this);">
+                  <datalist id="step-size-suggestions">
+                    <option value="0.05"></option>
+                    <option value="0.10"></option>
+                    <option value="0.25"></option>
+                    <option value="0.50"></option>
+                    <option value="1.00"></option>
+                  </datalist>
+                  <button type="button" onclick="resetStepValue()" title="إعادة إلى القيمة الافتراضية 0.05 م"
+                    style="background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 6px; color: #2e7d32; font-size: 11px; font-weight: bold; padding: 3px 8px; cursor: pointer; font-family: Cairo, Arial, sans-serif; white-space: nowrap;">
+                    ↺ 0.05
+                  </button>
+                  <button type="button" onclick="openStepSizeHelpModal()" title="شرح خطوة التعديل السريع"
+                    style="background: none; border: none; cursor: pointer; color: #1565c0; font-size: 17px; padding: 0 2px; line-height: 1; display: inline-flex; align-items: center;">ℹ️</button>
+                </div>
+                <div style="text-align: center; font-size: 11px; color: #555; margin-top: 4px; font-weight: bold;">
+                  كل ضغطة على <strong style="color:#2e7d32;">(+)</strong> أو <strong style="color:#c62828;">(−)</strong> تغيّر العرض بمقدار هذه القيمة.
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
