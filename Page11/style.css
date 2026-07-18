@@ -1144,7 +1144,7 @@ body {
   .main-container {
     padding: 0 !important;
   }
-  .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details {
+  .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details, .canvas-card {
     display: none !important;
   }
   .print-only-header {
@@ -1178,7 +1178,7 @@ body {
     margin: 0 !important;
     padding: 0 !important;
   }
-  .canvas-card, .results-card, .division-card, .conversion-card {
+  .results-card, .division-card, .conversion-card {
     border: 1px solid #e0e0e0 !important;
     border-radius: 6px !important;
     box-shadow: none !important;

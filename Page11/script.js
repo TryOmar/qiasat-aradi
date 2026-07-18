@@ -3307,36 +3307,6 @@ function printReport() {
 
   const isLTR = window.PartitionDirectionManager.isLTR();
 
-  // جلب وتجهيز الكروكي SVG للطباعة
-  const svgNode = document.getElementById("croquis-svg");
-  let croquisHTML = "";
-  
-  if (svgNode) {
-    // تحديد ارتفاع الكروكي ديناميكياً لتفادي تمدد الصفحة (إذا كان عدد الشركاء >= 3 يتم تصغيره بنسبة 16%)
-    const croquisHeight = numPartners >= 3 ? "210px" : "250px";
-    
-    const clonedSvg = svgNode.cloneNode(true);
-    clonedSvg.removeAttribute("id");
-    clonedSvg.setAttribute("width", "100%");
-    clonedSvg.setAttribute("height", "100%");
-    
-    // إزالة المفتش أو أي عناصر منبثقة إن وجدت بالنسخة
-    const inspector = clonedSvg.querySelector(".croquis-inspector");
-    if (inspector) inspector.remove();
-    
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(clonedSvg);
-    
-    croquisHTML = `
-      <div class="section page-break-inside-avoid">
-        <div class="section-title">ثانياً: كروكي الأرض ومخطط التقسيم</div>
-        <div class="croquis-print-container" style="width: 100%; height: ${croquisHeight}; border: 1.5px solid #1b5e20; border-radius: 6px; padding: 6px; background: #fff; display: flex; justify-content: center; align-items: center; margin: 0 auto 6px; box-sizing: border-box;">
-          ${svgString}
-        </div>
-      </div>
-    `;
-  }
-
   // دالة لتنسيق نصاب الشريك إلى جملة عربية فصحى مقروءة بدقة عالية
   function formatArabicFCS(feddan, carat, sahm) {
     const parts = [];
@@ -3729,10 +3699,8 @@ function printReport() {
     </table>
   </div>
 
-  ${croquisHTML}
-
   <div class="section">
-    <div class="section-title">ثالثاً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
+    <div class="section-title">ثانياً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
     <div class="partners-grid">
       ${partnerCardsHTML}
     </div>
