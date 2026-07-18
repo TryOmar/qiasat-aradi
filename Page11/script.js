@@ -4762,12 +4762,14 @@ function updateConversionsTable() {
 
   let html = '';
 
+  const dirs = getP11Directions();
+
   // الأبعاد الأربعة القابلة للتعديل
   const dims = [
-    { id: 0, field: 'width2', label: 'العرض الأول (أعلى) (C)' },
-    { id: 1, field: 'width1', label: 'العرض الثاني (أسفل) (A)' },
-    { id: 2, field: 'length1', label: 'الطول الأيمن (D)' },
-    { id: 3, field: 'length2', label: 'الطول الأيسر (B)' },
+    { id: 0, field: 'width2', label: `العرض الأول (${dirs.top})` },
+    { id: 1, field: 'width1', label: `العرض الثاني (${dirs.bottom})` },
+    { id: 2, field: 'length1', label: `الطول الأيمن (${dirs.right})` },
+    { id: 3, field: 'length2', label: `الطول الأيسر (${dirs.left})` },
   ];
 
   dims.forEach(dim => {
@@ -4796,14 +4798,14 @@ function updateConversionsTable() {
   if (caratArea > 0 && totalAreaM2 > 0) {
     html += buildCard({
       id: 'topq',
-      label: 'عرض القيراط العلوي',
+      label: `عرض القيراط العلوي (${dirs.top})`,
       meterValue: topQiratWidth,
       isEditable: false,
       isArea: false
     });
     html += buildCard({
       id: 'botq',
-      label: 'عرض القيراط السفلي',
+      label: `عرض القيراط السفلي (${dirs.bottom})`,
       meterValue: botQiratWidth,
       isEditable: false,
       isArea: false
@@ -6553,9 +6555,12 @@ function handleP11DirectionChange(changedId) {
     if (el) localStorage.setItem("p11-dir-" + id, el.value);
   });
 
-  // تحديث الكروكي إن وُجدت بيانات
+  // تحديث الكروكي وجدول التحويلات إن وُجدت بيانات
   if (typeof renderCroquis === "function") {
     renderCroquis();
+  }
+  if (typeof updateConversionsTable === "function") {
+    updateConversionsTable();
   }
 }
 
@@ -6582,6 +6587,9 @@ function resetP11DirectionsToDefault() {
 
   if (typeof renderCroquis === "function") {
     renderCroquis();
+  }
+  if (typeof updateConversionsTable === "function") {
+    updateConversionsTable();
   }
 }
 
