@@ -3633,7 +3633,7 @@ function printReport() {
             <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totalShares}</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">مساحة القيراط المستخدمة</td>
+            <td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">مساحة القيراط بالمتر المربع</td>
             <td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${caratArea} م²</td>
           </tr>
         </tbody>
