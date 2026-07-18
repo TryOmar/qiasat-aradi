@@ -3300,13 +3300,42 @@ function printReport() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('ar-EG');
-  const reportId = `DL-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   // حساب متوسط العرض ومتوسط الطول للمساحة الإجمالية
   const avgWidth = ((parseFloat(w1) || 0) + (parseFloat(w2) || 0)) / 2;
   const avgLength = ((parseFloat(l1) || 0) + (parseFloat(l2) || 0)) / 2;
 
   const isLTR = window.PartitionDirectionManager.isLTR();
+
+  // جلب وتجهيز الكروكي SVG للطباعة
+  const svgNode = document.getElementById("croquis-svg");
+  let croquisHTML = "";
+  
+  if (svgNode) {
+    // تحديد ارتفاع الكروكي ديناميكياً لتفادي تمدد الصفحة (إذا كان عدد الشركاء >= 3 يتم تصغيره بنسبة 16%)
+    const croquisHeight = numPartners >= 3 ? "210px" : "250px";
+    
+    const clonedSvg = svgNode.cloneNode(true);
+    clonedSvg.removeAttribute("id");
+    clonedSvg.setAttribute("width", "100%");
+    clonedSvg.setAttribute("height", "100%");
+    
+    // إزالة المفتش أو أي عناصر منبثقة إن وجدت بالنسخة
+    const inspector = clonedSvg.querySelector(".croquis-inspector");
+    if (inspector) inspector.remove();
+    
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(clonedSvg);
+    
+    croquisHTML = `
+      <div class="section page-break-inside-avoid">
+        <div class="section-title">ثانياً: كروكي الأرض ومخطط التقسيم</div>
+        <div class="croquis-print-container" style="width: 100%; height: ${croquisHeight}; border: 1.5px solid #1b5e20; border-radius: 6px; padding: 6px; background: #fff; display: flex; justify-content: center; align-items: center; margin: 0 auto 6px; box-sizing: border-box;">
+          ${svgString}
+        </div>
+      </div>
+    `;
+  }
 
   // دالة لتنسيق نصاب الشريك إلى جملة عربية فصحى مقروءة بدقة عالية
   function formatArabicFCS(feddan, carat, sahm) {
@@ -3415,27 +3444,27 @@ function printReport() {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { 
       size: A4 portrait; 
-      margin: 10mm 10mm 10mm 10mm; 
+      margin: 6mm 8mm 6mm 8mm; 
     }
     body { 
       font-family: 'Cairo', sans-serif; 
       background: #fff; 
       color: #222; 
-      font-size: 9.5pt; 
+      font-size: 9pt; 
       direction: rtl; 
-      padding-bottom: 25px; 
+      padding-bottom: 20px; 
       position: relative; 
-      line-height: 1.35;
+      line-height: 1.3;
     }
     .watermark-container { 
       position: fixed; 
       top: 50%; 
       left: 50%; 
       transform: translate(-50%, -50%) rotate(-25deg); 
-      font-size: 24pt; 
+      font-size: 20pt; 
       font-weight: 800; 
       color: #000000; 
-      opacity: 0.05; 
+      opacity: 0.04; 
       white-space: nowrap; 
       pointer-events: none; 
       z-index: -1000; 
@@ -3443,33 +3472,37 @@ function printReport() {
       width: 100%; 
     }
     .report-title-container {
-      text-align: center;
-      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 8px;
       border-bottom: 2px double #1b5e20;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
     .report-title-container h1 {
-      font-size: 20pt;
+      font-size: 16pt;
       color: #1b5e20;
       font-weight: 800;
       margin: 0;
-      text-decoration: underline;
     }
     .report-title-container p {
-      font-size: 11pt;
+      font-size: 9.5pt;
       color: #c62828;
       font-weight: 700;
-      margin: 4px 0 0;
+      margin: 2px 0 0;
     }
     
+    .section {
+      margin-bottom: 8px;
+    }
     .section-title { 
       background: #1b5e20; 
       color: white; 
       font-weight: 700; 
-      font-size: 10pt; 
-      padding: 4px 10px; 
+      font-size: 9pt; 
+      padding: 3px 8px; 
       border-right: 4px solid #2e7d32; 
-      margin-bottom: 6px; 
+      margin-bottom: 4px; 
       border-radius: 4px; 
       -webkit-print-color-adjust: exact; 
       print-color-adjust: exact; 
@@ -3478,22 +3511,22 @@ function printReport() {
     table { 
       width: 100%; 
       border-collapse: collapse; 
-      font-size: 9pt; 
-      margin-bottom: 10px; 
+      font-size: 8.5pt; 
+      margin-bottom: 6px; 
     }
     th { 
       background: #e8f5e9; 
       color: #1b5e20; 
       font-weight: 700; 
       border: 1px solid #1b5e20; 
-      padding: 5px; 
+      padding: 4px; 
       text-align: center; 
       -webkit-print-color-adjust: exact; 
       print-color-adjust: exact; 
     }
     td { 
       border: 1px solid #a5d6a7; 
-      padding: 4px; 
+      padding: 3px; 
       text-align: center; 
       vertical-align: middle; 
     }
@@ -3501,25 +3534,25 @@ function printReport() {
     .partners-grid {
       display: grid;
       ${gridStyle}
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 6px;
     }
     .partner-print-card {
       border: 1.5px solid #1b5e20;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #ffffff;
-      padding: 8px;
+      padding: 5px 6px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       page-break-inside: avoid;
     }
     .partner-card-header {
       background: #1b5e20;
       color: white;
       font-weight: 700;
-      font-size: 9.5pt;
-      padding: 3px 6px;
+      font-size: 8.5pt;
+      padding: 2px 4px;
       border-radius: 4px;
       text-align: center;
       -webkit-print-color-adjust: exact;
@@ -3528,61 +3561,64 @@ function printReport() {
     .partner-card-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 8pt;
-      margin-bottom: 4px;
+      font-size: 7.5pt;
+      margin-bottom: 2px;
     }
     .partner-card-table th {
       background: #e8f5e9;
       color: #1b5e20;
       font-weight: 700;
       border: 1px solid #a5d6a7;
-      padding: 2px;
+      padding: 1.5px 2px;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     .partner-card-table td {
       border: 1px solid #a5d6a7;
-      padding: 2px;
+      padding: 1.5px 2px;
     }
     .partner-card-area-box {
       background: #f1f8e9;
       border: 1px solid #a5d6a7;
-      border-radius: 6px;
-      padding: 4px;
+      border-radius: 4px;
+      padding: 2px 4px;
       text-align: center;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     .partner-card-area-lbl {
-      font-size: 7.5pt;
+      font-size: 6.5pt;
       color: #555;
       display: block;
+      line-height: 1.1;
     }
     .partner-card-area-val {
-      font-size: 10pt;
+      font-size: 9pt;
       color: #c62828;
       font-weight: 700;
       display: block;
+      line-height: 1.2;
     }
     .partner-card-fcs-val {
-      font-size: 7.5pt;
+      font-size: 7pt;
       color: #1b5e20;
       font-weight: bold;
       display: block;
+      line-height: 1.1;
     }
     
     .totals-and-notes {
       display: grid;
       grid-template-columns: 1.2fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 6px;
       page-break-inside: avoid;
     }
     .totals-box {
       border: 1.5px solid #1b5e20;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #f9fbe7;
-      padding: 8px;
+      padding: 5px 6px;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
@@ -3590,30 +3626,30 @@ function printReport() {
       margin: 0;
     }
     .totals-box td {
-      padding: 3px;
-      font-size: 8.5pt;
+      padding: 2px 4px;
+      font-size: 7.5pt;
     }
     .notes-box {
       border: 1.5px solid #dcdcdc;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #fafafa;
-      padding: 8px;
+      padding: 5px 6px;
     }
     .notes-box h3 {
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: #444;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       border-bottom: 1px solid #ddd;
-      padding-bottom: 2px;
+      padding-bottom: 1px;
     }
     .notes-box ul {
       list-style-type: none;
       padding-right: 5px;
     }
     .notes-box li {
-      font-size: 8pt;
+      font-size: 7.5pt;
       color: #555;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     
     .report-footer { 
@@ -3627,13 +3663,18 @@ function printReport() {
       text-align: center; 
       font-size: 7.5pt; 
       color: #555; 
-      border-top: 1.5px solid #1b5e20; 
-      padding: 4px 10px 2px; 
+      border-top: 1px solid #1b5e20; 
+      padding: 3px 10px; 
       background: white; 
     }
-    .footer-sub-text { 
-      font-size: 7pt; 
-      color: #888; 
+    .footer-main-text { 
+      font-size: 8pt; 
+      font-weight: bold; 
+      color: #555; 
+    }
+    
+    .page-break-inside-avoid {
+      page-break-inside: avoid;
     }
     
     @media print {
@@ -3655,11 +3696,16 @@ function printReport() {
 </head>
 <body>
 
-  <div class="watermark-container">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
+  <div class="watermark-container">الدَّلاَّل – قياسات الأراضي • متوفر على جوجل بلاي</div>
 
   <div class="report-title-container">
-    <h1>بيان المساحات</h1>
-    <p>جملة الغيط</p>
+    <div>
+      <h1>بيان المساحات</h1>
+      <p>جملة الغيط</p>
+    </div>
+    <div style="font-size: 8.5pt; color: #555; font-weight: bold;">
+      تاريخ الطباعة: ${dateStr} - ${timeStr}
+    </div>
   </div>
 
   <div class="section page-break-inside-avoid">
@@ -3683,8 +3729,10 @@ function printReport() {
     </table>
   </div>
 
+  ${croquisHTML}
+
   <div class="section">
-    <div class="section-title">ثانياً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
+    <div class="section-title">ثالثاً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
     <div class="partners-grid">
       ${partnerCardsHTML}
     </div>
@@ -3730,18 +3778,12 @@ function printReport() {
         <li>1 - جميع الأطوال بالمتر.</li>
         <li>2 - تم تقسيم الغيط إلى ${numPartners} أجزاء تفصيلية بالطريقة الطولية.</li>
         <li>3 - اتجاه التقسيم للتنفيذ الميداني: ${isLTR ? "➡️ من اليسار إلى اليمين" : "⬅️ من اليمين إلى اليسار"}.</li>
-        <li>4 - رقم التقرير المرجعي: ${reportId}</li>
       </ul>
     </div>
   </div>
 
   <div class="report-footer">
-    <div class="footer-main-text">تم تنفيذ هذا التقرير باستخدام تطبيق الدَّلاَّل لقياسات الأراضي، والمتوفر على Google Play.</div>
-    <div class="footer-sub-text">
-      <span>تطبيق الدَّلاَّل لقياسات الأراضي الزراعية © ${now.getFullYear()}</span>
-      <span> | تاريخ الطباعة: ${dateStr} - ${timeStr}</span>
-      <span> | إصدار التطبيق: v2.4</span>
-    </div>
+    <div class="footer-main-text">الدَّلاَّل – قياسات الأراضي • متوفر على جوجل بلاي</div>
   </div>
 
 </body>
