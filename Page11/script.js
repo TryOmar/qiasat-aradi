@@ -479,19 +479,19 @@ function renderHeaderAndFooter() {
     `;
     
     footerContainer.innerHTML = `
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="index-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="name-group"><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="share-group"><input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="carat-group"><input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="feddan-group"><input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="area-group"><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="percent-group"><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-top-group"><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-bottom-group"><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-avg-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="length-avg-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="cum-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="delete-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
     `;
   } else {
     headerContainer.innerHTML = `
@@ -510,18 +510,18 @@ function renderHeaderAndFooter() {
     `;
     
     footerContainer.innerHTML = `
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-fraction-entered" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
-      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="index-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="name-group"><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="fraction-group"><input type="text" id="total-fraction-entered" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="equiv-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="area-group"><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="percent-group"><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-top-group"><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-bottom-group"><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="width-avg-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="length-avg-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="cum-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td class="delete-group"><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
     `;
   }
 }
@@ -4944,35 +4944,35 @@ function updateRemainderRowUI(remainingArea) {
 
   if (currentInputMethod === "carats") {
     row.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${fcs.sahm}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${fcs.carat}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${fcs.feddan}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
-      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="index-group" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="name-group" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="share-group" readonly value="${fcs.sahm}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="carat-group" readonly value="${fcs.carat}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="feddan-group" readonly value="${fcs.feddan}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="area-group" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="percent-group" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-top-group" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-bottom-group" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-avg-group" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="length-avg-group" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <textarea class="cum-group partner-cum-width" readonly>${remCumWidth}</textarea>
+      <input type="text" class="delete-group" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
   } else {
     const fractionVal = totalAreaM2 > 0 ? (absRem / totalAreaM2) : 0;
     row.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${fractionVal.toFixed(4)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${fcs.sahm}س، ${fcs.carat}ق، ${fcs.feddan}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
-      <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
-      <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
-      <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="index-group" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="name-group" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="fraction-group" readonly value="${fractionVal.toFixed(4)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="equiv-group" readonly value="${fcs.sahm}س، ${fcs.carat}ق، ${fcs.feddan}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
+      <input type="text" class="area-group" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="percent-group" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-top-group" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-bottom-group" readonly value="${remBotW > 0 ? remBotW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="width-avg-group" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <input type="text" class="length-avg-group" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
+      <textarea class="cum-group partner-cum-width" readonly>${remCumWidth}</textarea>
+      <input type="text" class="delete-group" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
   }
 

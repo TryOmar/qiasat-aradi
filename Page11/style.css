@@ -2090,263 +2090,7 @@ body {
 /* ============================================================
    Perfect Mobile Card Layout and WebView Focus Fix
    ============================================================ */
-@media screen and (max-width: 768px) {
-  /* Prevent WebView auto-zoom on input focus */
-  .partner-row input, 
-  #remainder-row-table input, 
-  #total input,
-  .input-row input,
-  .selector1,
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
-
-  /* Table and container reset */
-  .table-container {
-    overflow-x: visible !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .table {
-    min-width: unset !important;
-    width: 100% !important;
-    display: block !important;
-  }
-
-  .table-header {
-    display: none !important;
-  }
-
-  /* Partner rows, totals, and remainder rows styled as cards */
-  .partner-row, 
-  #total, 
-  #remainder-row-table {
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    gap: 12px 8px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    margin-bottom: 16px !important;
-    border-radius: 8px !important;
-    padding: 12px !important;
-    align-items: center !important;
-  }
-
-  .partner-row {
-    background: #ffffff !important;
-    border: 1.5px solid #e0e0e0 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
-    position: relative !important;
-  }
-
-  #total {
-    background: #e8f5e9 !important;
-    border: 1.5px solid #2e7d32 !important;
-    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.08) !important;
-    margin-top: 16px !important;
-  }
-
-  #remainder-row-table {
-    background: #fffde7 !important;
-    border: 1.5px dashed #f57f17 !important;
-    box-shadow: 0 2px 8px rgba(245, 127, 23, 0.08) !important;
-    margin-top: 16px !important;
-  }
-
-  /* Inputs and buttons general layout inside cards */
-  .partner-row input, 
-  #remainder-row-table input,
-  #total input {
-    height: 38px !important;
-    border-radius: 6px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Group containers */
-  .col-group {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Show labels on mobile */
-  .mobile-label {
-    display: block !important;
-    font-size: 11.5px !important;
-    color: #2e7d32 !important;
-    font-weight: bold !important;
-    margin-bottom: 4px !important;
-    text-align: right !important;
-  }
-
-  /* Card Grid Columns */
-  .index-group {
-    grid-column: span 2 !important;
-  }
-
-  .name-group {
-    grid-column: span 8 !important;
-  }
-
-  /* Delete row button sits on the top row alongside name */
-  .partner-row .delete-row-btn {
-    grid-column: span 2 !important;
-    height: 38px !important;
-    margin-top: 17px !important; /* aligns with inputs having mobile-label */
-    font-size: 18px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 6px !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Mode: Carats */
-  .table.method-carats .share-group,
-  .table.method-carats .carat-group,
-  .table.method-carats .feddan-group {
-    grid-column: span 4 !important;
-  }
-
-  /* Mode: Fractions */
-  .table.method-fractions .fraction-group,
-  .table.method-fractions .equiv-group {
-    grid-column: span 6 !important;
-  }
-
-  /* Area and Percent row */
-  .area-group,
-  .percent-group {
-    grid-column: span 6 !important;
-  }
-
-  /* Editable width inputs row */
-  .width-bottom-group,
-  .width-top-group {
-    grid-column: span 6 !important;
-  }
-
-  /* Average width and average length row */
-  .width-avg-group,
-  .length-avg-group {
-    grid-column: span 6 !important;
-  }
-
-  /* Outputs row */
-  .cum-group,
-  .border-group {
-    grid-column: span 6 !important;
-  }
-
-  /* Width input container (+ and - buttons layout) */
-  .width-input-container {
-    display: flex !important;
-    gap: 4px !important;
-    width: 100% !important;
-    align-items: center !important;
-  }
-
-  .width-step-btn {
-    height: 38px !important;
-    width: 32px !important;
-    font-size: 16px !important;
-    border-radius: 6px !important;
-  }
-
-  /* --- Totals & Remainder Card Formatting --- */
-  /* Hide index fields */
-  #total input:nth-child(1),
-  #remainder-row-table input:nth-child(1) {
-    display: none !important;
-  }
-
-  /* Section Title styling */
-  #total input:nth-child(2),
-  #remainder-row-table input:nth-child(2) {
-    grid-column: span 12 !important;
-    height: 38px !important;
-    font-size: 15px !important;
-    color: white !important;
-    text-align: center !important;
-    border: none !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-weight: bold !important;
-  }
-  #total input:nth-child(2) {
-    background: #2e7d32 !important;
-  }
-  #remainder-row-table input:nth-child(2) {
-    background: #f57f17 !important;
-  }
-
-  /* Hide display:none placeholder inputs */
-  #total input[style*="display:none"],
-  #total input[style*="display: none"],
-  #remainder-row-table input[style*="display:none"],
-  #remainder-row-table input[style*="display: none"] {
-    display: none !important;
-  }
-
-  /* Columns 3, 4, 5: Carats mode grid spans */
-  .table.method-carats #total input:nth-child(3),
-  .table.method-carats #total input:nth-child(4),
-  .table.method-carats #total input:nth-child(5),
-  .table.method-carats #remainder-row-table input:nth-child(3),
-  .table.method-carats #remainder-row-table input:nth-child(4),
-  .table.method-carats #remainder-row-table input:nth-child(5) {
-    grid-column: span 4 !important;
-  }
-
-  /* Columns 3, 4: Fractions mode grid spans */
-  .table.method-fractions #total #total-fraction-entered,
-  .table.method-fractions #total #total-fraction-entered + input,
-  .table.method-fractions #remainder-row-table input:nth-child(3),
-  .table.method-fractions #remainder-row-table input:nth-child(4) {
-    grid-column: span 6 !important;
-  }
-
-  /* Area (6) & Percent (7) */
-  #total input:nth-child(6),
-  #total input:nth-child(7),
-  #remainder-row-table input:nth-child(6),
-  #remainder-row-table input:nth-child(7) {
-    grid-column: span 6 !important;
-  }
-
-  /* Width Bottom (8) & Width Top (9) */
-  #total input:nth-child(8),
-  #total input:nth-child(9),
-  #remainder-row-table input:nth-child(8),
-  #remainder-row-table input:nth-child(9) {
-    grid-column: span 6 !important;
-  }
-
-  /* Hide trailing unused fields in totals */
-  #total input:nth-child(10),
-  #total input:nth-child(11),
-  #total input:nth-child(12) {
-    display: none !important;
-  }
-
-  /* Remainder long text fields (cum-width and lengths) span full card width */
-  #remainder-row-table input:nth-child(10),
-  #remainder-row-table input:nth-child(11) {
-    grid-column: span 12 !important;
-    font-size: 11px !important;
-    height: 34px !important;
-    background: #fffde7 !important;
-    border: 1px solid #ffd54f !important;
-  }
-}
+/* Mobile query relocated to the bottom of the file to ensure override priority */
 
 /* ============================================================
    INTERACTIVE INSPECTOR & CAD HIGHLIGHTS
@@ -2734,6 +2478,314 @@ body {
   padding: 0 !important;
   box-shadow: none !important;
   pointer-events: none !important;
+}
+
+/* ============================================================
+   Perfect Mobile Card Layout and WebView Focus Fix (relocated to bottom)
+   ============================================================ */
+@media screen and (max-width: 768px) {
+  /* Cairo font and WebView focus fix for mobile */
+  body,
+  body *, 
+  body .partner-row input, 
+  body #remainder-row-table input, 
+  body #total input,
+  body .input-row input,
+  body .selector1,
+  body select,
+  body textarea,
+  body button,
+  body span,
+  body div,
+  body label {
+    font-family: Cairo, Tajawal, "Noto Sans Arabic", sans-serif !important;
+  }
+
+  body .partner-row input, 
+  body #remainder-row-table input, 
+  body #total input,
+  body .input-row input,
+  body .selector1,
+  body select,
+  body textarea {
+    font-size: 16px !important;
+  }
+
+  /* Table and container reset */
+  body .table-container {
+    overflow-x: visible !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+
+  body table.heirs-table {
+    min-width: unset !important;
+    width: 100% !important;
+    display: block !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  body table.heirs-table thead,
+  body table.heirs-table .table-header {
+    display: none !important;
+  }
+
+  body table.heirs-table tbody,
+  body table.heirs-table tfoot {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  body table.heirs-table td {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  /* Partner rows, totals, and remainder rows styled as cards */
+  body .partner-row, 
+  body #total, 
+  body #remainder-row-table {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+    gap: 18px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 22px !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    align-items: center !important;
+    border: 1.5px solid #e0e0e0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  }
+
+  body .partner-row {
+    background: #ffffff !important;
+    position: relative !important;
+  }
+
+  body #total {
+    background: #e8f5e9 !important;
+    border: 1.5px solid #2e7d32 !important;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.08) !important;
+    margin-top: 16px !important;
+  }
+
+  body #remainder-row-table {
+    background: #fffde7 !important;
+    border: 1.5px dashed #f57f17 !important;
+    box-shadow: 0 2px 8px rgba(245, 127, 23, 0.08) !important;
+    margin-top: 16px !important;
+  }
+
+  /* Inputs and buttons general layout inside cards */
+  body .partner-row input, 
+  body #remainder-row-table input,
+  body #total input {
+    height: 44px !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: 1.5px solid #d7ccc8 !important;
+    background-color: #fafafa !important;
+    padding: 8px 12px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  body .partner-row input:focus, 
+  body #remainder-row-table input:focus {
+    border-color: #388e3c !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.15) !important;
+  }
+
+  /* Read-only inputs and totals styles */
+  body .partner-row input[readonly],
+  body #remainder-row-table input[readonly],
+  body #total input[readonly] {
+    background-color: #f5f5f5 !important;
+    color: #333333 !important;
+    border-color: #e0e0e0 !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+  }
+
+  /* Textareas inside cards (cumulative width) */
+  body .partner-row textarea,
+  body #remainder-row-table textarea {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    height: 90px !important;
+    padding: 8px 12px !important;
+    border: 1.5px solid #e0e0e0 !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    resize: none !important;
+    background-color: #f5f5f5 !important;
+    color: #333333 !important;
+    font-weight: bold !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Group containers */
+  body .col-group {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Show labels on mobile */
+  body .mobile-label {
+    display: block !important;
+    font-size: 14px !important;
+    color: #388e3c !important;
+    font-weight: bold !important;
+    margin-bottom: 6px !important;
+    text-align: right !important;
+  }
+
+  /* Card Grid Columns Ordering and Span settings */
+  body .index-group {
+    order: 0 !important;
+    grid-column: span 2 !important;
+  }
+
+  body .name-group {
+    order: 1 !important;
+    grid-column: span 8 !important;
+  }
+
+  /* Delete row button sits on the top row alongside name */
+  body .partner-row .delete-row-btn {
+    order: 2 !important;
+    grid-column: span 2 !important;
+    height: 44px !important;
+    margin-top: 26px !important; /* aligns with labels */
+    font-size: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Delete group placeholder in remainder/totals */
+  body .delete-group {
+    display: none !important;
+  }
+
+  /* Row 2: Area (6) & Percent (6) */
+  body .area-group {
+    order: 20 !important;
+    grid-column: span 6 !important;
+  }
+  body .percent-group {
+    order: 21 !important;
+    grid-column: span 6 !important;
+  }
+
+  /* Row 3: Feddan (4) | Carat (4) | Share (4) */
+  body .feddan-group {
+    order: 30 !important;
+    grid-column: span 4 !important;
+  }
+  body .carat-group {
+    order: 31 !important;
+    grid-column: span 4 !important;
+  }
+  body .share-group {
+    order: 32 !important;
+    grid-column: span 4 !important;
+  }
+
+  /* Mode: Fractions - Order: Fraction (30) | Equiv (31) */
+  body .fraction-group {
+    order: 30 !important;
+    grid-column: span 6 !important;
+  }
+  body .equiv-group {
+    order: 31 !important;
+    grid-column: span 6 !important;
+  }
+
+  /* Row 4: Width Top (6) & Width Bottom (6) */
+  body .width-top-group {
+    order: 40 !important;
+    grid-column: span 6 !important;
+  }
+  body .width-bottom-group {
+    order: 41 !important;
+    grid-column: span 6 !important;
+  }
+
+  /* Row 5: Width Avg (6) & Length Avg (6) */
+  body .width-avg-group {
+    order: 50 !important;
+    grid-column: span 6 !important;
+  }
+  body .length-avg-group {
+    order: 51 !important;
+    grid-column: span 6 !important;
+  }
+
+  /* Row 6: Cumulative Width (12) */
+  body .cum-group {
+    order: 60 !important;
+    grid-column: span 12 !important;
+  }
+
+  /* Width input container (+ and - buttons layout) */
+  body .width-input-container {
+    display: flex !important;
+    gap: 6px !important;
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  body .width-step-btn {
+    height: 44px !important;
+    width: 40px !important;
+    font-size: 18px !important;
+    border-radius: 6px !important;
+  }
+
+  /* --- Totals & Remainder Card Formatting overrides --- */
+  body #total input:nth-child(1),
+  body #remainder-row-table input:nth-child(1) {
+    display: none !important;
+  }
+
+  /* Section Title styling */
+  body #total .name-group input,
+  body #remainder-row-table .name-group input {
+    grid-column: span 12 !important;
+    height: 44px !important;
+    font-size: 16px !important;
+    color: white !important;
+    text-align: center !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: bold !important;
+  }
+  body #total .name-group input {
+    background: #2e7d32 !important;
+  }
+  body #remainder-row-table .name-group input {
+    background: #f57f17 !important;
+  }
 }
 
 
