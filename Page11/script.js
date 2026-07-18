@@ -107,16 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const select = document.getElementById("partition-direction-select");
     if (select) select.value = dir;
 
-    // تحديث بطاقة اتجاه التقسيم فوق الجدول
-    const badge = document.getElementById("table-direction-badge");
-    if (badge) {
-      if (dir === "LTR") {
-        badge.innerHTML = "🏁 اتجاه التقسيم: ➡️ من اليسار إلى اليمين (الحد الأيسر هو نقطة الصفر)";
-      } else {
-        badge.innerHTML = "🏁 اتجاه التقسيم: ⬅️ من اليمين إلى اليسار (الحد الأيمن هو نقطة الصفر)";
-      }
-    }
-
     // رندرة المكونات بصرياً بناءً على الاتجاه المختار
     updateTableRowsUI();
     renderCroquis();
