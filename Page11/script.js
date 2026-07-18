@@ -4527,6 +4527,16 @@ function updateCalculationSteps() {
     if (qiratContent) qiratContent.innerHTML = '<p style="text-align: center; color: #777; font-style: italic;">يرجى إكمال التقسيم لعرض واجهة القيراط</p>';
   }
 
+  if (html && !html.includes("أدخل الأبعاد والشركاء")) {
+    html += `
+      <div style="display: flex; justify-content: flex-end; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+        <button type="button" class="action-btn" onclick="copyCalculationSteps()" style="padding: 10px 20px; font-size: 13.5px; background-color: #134614; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', Arial, sans-serif; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+          📋 نسخ خطوات الحساب
+        </button>
+      </div>
+    `;
+  }
+
   stepsContainer.innerHTML = html;
 
   // إذا كانت اللوحة مفتوحة، نقوم بتحديث ارتفاعها المناسب لتفادي قص المحتوى
@@ -4536,6 +4546,108 @@ function updateCalculationSteps() {
       container.style.maxHeight = container.scrollHeight + "px";
     }
   }
+}
+
+// دالة لنسخ خطوات الحساب بالتفصيل كنص نظيف خالٍ من التنسيقات
+function copyCalculationSteps() {
+  const stepsContent = document.getElementById("calculation-steps-content");
+  if (!stepsContent) return;
+
+  const steps = Array.from(stepsContent.children).filter(el => {
+    return el.tagName === "DIV" && !el.querySelector("button");
+  });
+
+  let textParts = [];
+  steps.forEach(step => {
+    const stepText = step.innerText.trim();
+    if (stepText) {
+      textParts.push(stepText);
+    }
+  });
+
+  const textToCopy = textParts.join("\n\n");
+  if (!textToCopy) return;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+    }).catch(err => {
+      fallbackCopyText(textToCopy);
+    });
+  } else {
+    fallbackCopyText(textToCopy);
+  }
+}
+
+// طريقة بديلة للنسخ في البيئات القديمة أو غير الآمنة
+function fallbackCopyText(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.width = "2em";
+  textArea.style.height = "2em";
+  textArea.style.padding = "0";
+  textArea.style.border = "none";
+  textArea.style.outline = "none";
+  textArea.style.boxShadow = "none";
+  textArea.style.background = "transparent";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand("copy");
+    showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+  } catch (err) {
+    console.error("Fallback copy failed", err);
+  }
+  document.body.removeChild(textArea);
+}
+
+// دالة لعرض إشعار مؤقت (Toast) جذاب
+function showToast(message) {
+  const existing = document.getElementById("page11-copy-toast");
+  if (existing) {
+    existing.remove();
+  }
+  
+  const toast = document.createElement("div");
+  toast.id = "page11-copy-toast";
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #134614;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Cairo, Arial, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    direction: rtl;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  `;
+  toast.innerText = message;
+  document.body.appendChild(toast);
+  
+  toast.offsetHeight; // trigger reflow
+  toast.style.opacity = "1";
+  
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 300);
+  }, 2500);
 }
 
 // ============================================================
