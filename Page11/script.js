@@ -652,14 +652,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}" data-last-val="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </td>
       <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}" data-last-val="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </td>
@@ -699,14 +699,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
+          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}" data-last-val="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </td>
       <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
+          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}" data-last-val="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </td>
@@ -1519,13 +1519,13 @@ function runPartition(shouldRender = true) {
     totalDistributedArea += calculatedGeoArea;
 
     if (widthBotInput && document.activeElement !== widthBotInput) {
-      widthBotInput.value = botWidth.toFixed(2);
+      widthBotInput.value = botWidth.toFixed(4);
       widthBotInput.setAttribute("data-last-val", botWidth.toFixed(4));
     } else if (widthBotInput) {
       widthBotInput.setAttribute("data-last-val", botWidth.toFixed(4));
     }
     if (widthTopInput && document.activeElement !== widthTopInput) {
-      widthTopInput.value = topWidth.toFixed(2);
+      widthTopInput.value = topWidth.toFixed(4);
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
     } else if (widthTopInput) {
       widthTopInput.setAttribute("data-last-val", topWidth.toFixed(4));
