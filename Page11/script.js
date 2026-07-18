@@ -3594,7 +3594,7 @@ function printReport() {
         <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيسر</td><td style="font-weight:bold;color:#1b5e20;">${l2} م</td></tr>
         <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgWidth.toFixed(4)} م</td></tr>
         <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgLength.toFixed(4)} م</td></tr>
-        <tr style="background:#e8f5e9;"><td style="text-align:right;padding-right:15px;font-weight:bold;color:#1b5e20;">جملة المساحة</td><td style="font-weight:bold;color:#c62828;font-size:11pt;">${totalArea} م²</td></tr>
+        <tr style="background:#e8f5e9;"><td style="text-align:right;padding-right:15px;font-weight:bold;color:#1b5e20;">جملة المساحة بالمتر المربع</td><td style="font-weight:bold;color:#c62828;font-size:11pt;">${totalArea} م²</td></tr>
       </tbody>
     </table>
   </div>
