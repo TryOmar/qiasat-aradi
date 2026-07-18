@@ -713,7 +713,7 @@ body {
   margin: 0 auto 10px !important;
 }
 
-/* ط­ط§ظˆظٹط© SVG ط§ظ„ط¯ط§ط®ظ„ظٹط© */
+/* حاوية SVG الداخلية */
 .croquis-inner-container {
   position: absolute !important;
   top: 10px !important;
@@ -722,7 +722,7 @@ body {
   bottom: 10px !important;
   overflow: visible !important;
   cursor: default !important;
-  touch-action: none !important;
+  touch-action: manipulation !important;
   background: white !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
