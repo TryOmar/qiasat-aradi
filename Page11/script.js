@@ -4200,6 +4200,14 @@ function updatePrintStepsClass() {
   }
 }
 
+// دالة مساعدة لتحويل الأرقام الإنجليزية إلى أرقام عربية فصحى (شرقية) مع الحفاظ على الفاصلة العشرية العربية
+function toArabicNumerals(numStr) {
+  if (numStr === undefined || numStr === null) return "";
+  const str = String(numStr);
+  const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  return str.replace(/[0-9]/g, (w) => arabicDigits[+w]).replace(/\./g, "٫");
+}
+
 function updateCalculationSteps() {
   const stepsContainer = document.getElementById("calculation-steps-content");
   if (!stepsContainer) return;
@@ -4220,27 +4228,30 @@ function updateCalculationSteps() {
 
   let html = `
     <!-- الخطوة 1: حساب متوسط العرض -->
-    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 1: حساب متوسط العرض</strong>
-      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: inline-block; direction: ltr; margin-top: 4px;">
-        (${w1} + ${w2}) ÷ 2<br>= ${w.toFixed(4)} م
-      </code>
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ١: حساب متوسط العرض</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        (${toArabicNumerals(w1.toFixed(4))} + ${toArabicNumerals(w2.toFixed(4))}) ÷ ${toArabicNumerals(2)}<br>
+        = ${toArabicNumerals(w.toFixed(4))} م
+      </div>
     </div>
 
     <!-- الخطوة 2: حساب متوسط الطول -->
-    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 2: حساب متوسط الطول</strong>
-      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: inline-block; direction: ltr; margin-top: 4px;">
-        (${l1} + ${l2}) ÷ 2<br>= ${l.toFixed(4)} م
-      </code>
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٢: حساب متوسط الطول</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        (${toArabicNumerals(l1.toFixed(4))} + ${toArabicNumerals(l2.toFixed(4))}) ÷ ${toArabicNumerals(2)}<br>
+        = ${toArabicNumerals(l.toFixed(4))} م
+      </div>
     </div>
 
     <!-- الخطوة 3: حساب المساحة -->
-    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 3: حساب المساحة الإجمالية</strong>
-      <code style="font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: inline-block; direction: ltr; margin-top: 4px;">
-        ${l.toFixed(4)} × ${w.toFixed(4)}<br>= ${totalAreaM2.toFixed(4)} م²
-      </code>
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٣: حساب المساحة الإجمالية</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        ${toArabicNumerals(l.toFixed(4))} × ${toArabicNumerals(w.toFixed(4))}<br>
+        = ${toArabicNumerals(totalAreaM2.toFixed(4))} م²
+      </div>
     </div>
   `;
 
@@ -4249,8 +4260,8 @@ function updateCalculationSteps() {
   if (rows.length > 0) {
     // 4. حساب مساحة كل شريك
     html += `
-      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 4: حساب مساحة كل شريك</strong>
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٤: حساب مساحة كل شريك</strong>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
     `;
     rows.forEach((row, index) => {
@@ -4258,8 +4269,8 @@ function updateCalculationSteps() {
       const partnerAreaValue = parseFloat(row.querySelector(".partner-area").value) || 0;
       html += `
         <div style="border-right: 3px solid #66bb6a; padding-right: 8px;">
-          <span style="font-weight: bold; color: #333;">${partnerName}:</span>
-          <span style="font-size: 13px; color: #1b5e20; font-weight: bold; margin-right: 6px;">${partnerAreaValue.toFixed(2)} م²</span>
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span>
+          <span style="font-size: 13px; color: #1b5e20; font-weight: bold; margin-right: 6px;">${toArabicNumerals(partnerAreaValue.toFixed(2))} م²</span>
         </div>
       `;
     });
@@ -4270,8 +4281,8 @@ function updateCalculationSteps() {
 
     // 5. حساب نسبة كل شريك
     html += `
-      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 5: حساب نسبة كل شريك</strong>
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٥: حساب نسبة كل شريك</strong>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
     `;
     rows.forEach((row, index) => {
@@ -4280,10 +4291,11 @@ function updateCalculationSteps() {
       const partnerPct = totalAreaM2 > 0 ? (partnerAreaValue / totalAreaM2) * 100 : 0;
       html += `
         <div style="border-right: 3px solid #42a5f5; padding-right: 8px;">
-          <span style="font-weight: bold; color: #333;">${partnerName}:</span><br>
-          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-            ${partnerAreaValue.toFixed(2)} ÷ ${totalAreaM2.toFixed(2)} × 100<br>= ${partnerPct.toFixed(2)}%
-          </code>
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #bbdefb; color: #0d47a1;">
+            ${toArabicNumerals(partnerAreaValue.toFixed(2))} ÷ ${toArabicNumerals(totalAreaM2.toFixed(2))} × ${toArabicNumerals(100)}<br>
+            = ${toArabicNumerals(partnerPct.toFixed(2))}٪
+          </div>
         </div>
       `;
     });
@@ -4298,9 +4310,10 @@ function updateCalculationSteps() {
       html += `
         <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
           <span style="font-weight: bold; color: #e65100;">🟡 المتبقي:</span><br>
-          <code style="font-family: monospace; font-size: 12px; background: #fffde7; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-            ${remAreaVal.toFixed(2)} ÷ ${totalAreaM2.toFixed(2)} × 100<br>= ${remPct.toFixed(2)}%
-          </code>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #fffde7; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #ffe082; color: #e65100;">
+            ${toArabicNumerals(remAreaVal.toFixed(2))} ÷ ${toArabicNumerals(totalAreaM2.toFixed(2))} × ${toArabicNumerals(100)}<br>
+            = ${toArabicNumerals(remPct.toFixed(2))}٪
+          </div>
         </div>
       `;
     }
@@ -4315,9 +4328,9 @@ function updateCalculationSteps() {
   if (isPartitioned && window.calculatedPieces && window.calculatedPieces.length > 0) {
     // 6. حساب العرض الأول لكل قطعة (أسفل)
     html += `
-      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 6: حساب العرض الأول لكل قطعة (أسفل)</strong>
-        <p style="font-size: 11px; color: #666; margin-bottom: 4px; line-height: 1.3;">
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٦: حساب العرض الأول لكل قطعة (أسفل)</strong>
+        <p style="font-size: 11.5px; color: #666; margin-bottom: 4px; line-height: 1.3;">
           المعادلة: العرض السفلي الإجمالي (w1) مضروباً في نسبة شريحة الشريك الأفقي (dt):
         </p>
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -4326,10 +4339,11 @@ function updateCalculationSteps() {
       const dt = piece.botW / w1;
       html += `
         <div style="border-right: 3px solid #ab47bc; padding-right: 8px;">
-          <span style="font-weight: bold; color: #333;">${piece.name}:</span><br>
-          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-            ${w1} × ${dt.toFixed(6)}<br>= ${piece.botW.toFixed(4)} م
-          </code>
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(piece.name)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #e1bee7; color: #4a148c;">
+            ${toArabicNumerals(w1.toFixed(4))} × ${toArabicNumerals(dt.toFixed(6))}<br>
+            = ${toArabicNumerals(piece.botW.toFixed(4))} م
+          </div>
         </div>
       `;
     });
@@ -4340,9 +4354,9 @@ function updateCalculationSteps() {
 
     // 7. حساب العرض الثاني لكل قطعة (أعلى)
     html += `
-      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 7: حساب العرض الثاني لكل قطعة (أعلى)</strong>
-        <p style="font-size: 11px; color: #666; margin-bottom: 4px; line-height: 1.3;">
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٧: حساب العرض الثاني لكل قطعة (أعلى)</strong>
+        <p style="font-size: 11.5px; color: #666; margin-bottom: 4px; line-height: 1.3;">
           المعادلة: العرض العلوي الإجمالي (w2) مضروباً في نسبة شريحة الشريك الأفقي (dt):
         </p>
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -4351,10 +4365,11 @@ function updateCalculationSteps() {
       const dt = piece.topW / w2;
       html += `
         <div style="border-right: 3px solid #ab47bc; padding-right: 8px;">
-          <span style="font-weight: bold; color: #333;">${piece.name}:</span><br>
-          <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-            ${w2} × ${dt.toFixed(6)}<br>= ${piece.topW.toFixed(4)} م
-          </code>
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(piece.name)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #e1bee7; color: #4a148c;">
+            ${toArabicNumerals(w2.toFixed(4))} × ${toArabicNumerals(dt.toFixed(6))}<br>
+            = ${toArabicNumerals(piece.topW.toFixed(4))} م
+          </div>
         </div>
       `;
     });
@@ -4366,10 +4381,10 @@ function updateCalculationSteps() {
     // 8. حساب طول الفاصل
     if (window.calculatedPieces.length > 1) {
       html += `
-        <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-          <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 8: حساب طول الفاصل (خطوط القسمة الداخلية)</strong>
-          <p style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.3;">
-            المعادلة المستخدمة: التناسب الخطي المباشر للأطوال: <code style="font-family: monospace; direction: ltr; background: #eee; padding: 0 3px; border-radius: 2px;">L(t) = l1 + t &times; (l2 - l1)</code>
+        <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+          <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٨: حساب طول الفاصل (خطوط القسمة الداخلية)</strong>
+          <p style="font-size: 11.5px; color: #666; margin-bottom: 6px; line-height: 1.3;">
+            المعادلة المستخدمة: التناسب الخطي المباشر للأطوال: <span style="font-family: monospace; direction: ltr; background: #eee; padding: 2px 4px; border-radius: 2px; display: inline-block;">L(t) = l1 + t &times; (l2 - l1)</span>
           </p>
           <div style="display: flex; flex-direction: column; gap: 8px;">
       `;
@@ -4384,10 +4399,11 @@ function updateCalculationSteps() {
           }
           html += `
             <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
-              <span style="font-weight: bold; color: #333;">الفاصل بين قطعة ${index} وقطعة ${index + 1}:</span><br>
-              <code style="font-family: monospace; font-size: 12px; background: #f5f5f5; padding: 2px 4px; border-radius: 3px; direction: ltr; display: inline-block; margin-top: 2px;">
-                ${l1} + ${t.toFixed(4)} × (${l2} - ${l1})<br>= ${piece.leftLine.toFixed(4)} م
-              </code>
+              <span style="font-weight: bold; color: #333;">الفاصل بين قطعة ${toArabicNumerals(index)} وقطعة ${toArabicNumerals(index + 1)}:</span><br>
+              <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #ffe082; color: #e65100;">
+                ${toArabicNumerals(l1.toFixed(4))} + ${toArabicNumerals(t.toFixed(4))} × (${toArabicNumerals(l2.toFixed(4))} - ${toArabicNumerals(l1.toFixed(4))})<br>
+                = ${toArabicNumerals(piece.leftLine.toFixed(4))} م
+              </div>
             </div>
           `;
         }
@@ -4407,15 +4423,15 @@ function updateCalculationSteps() {
     const diffIcon = Math.abs(difference) < 0.01 ? "✔" : "❌";
 
     html += `
-      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px;">
-        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة 9: التحقق النهائي ومطابقة المساحات</strong>
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة ٩: التحقق النهائي ومطابقة المساحات</strong>
         <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; line-height: 1.4;">
-          <div>مجموع مساحات الشركاء الفعلية = <strong style="color: #2e7d32; font-family: monospace;">${totalPiecesArea.toFixed(4)} م²</strong></div>
-          <div>المساحة الإجمالية للأرض = <strong style="color: #2e7d32; font-family: monospace;">${totalAreaM2.toFixed(4)} م²</strong></div>
+          <div>مجموع مساحات الشركاء الفعلية = <strong style="color: #2e7d32; font-family: monospace;">${toArabicNumerals(totalPiecesArea.toFixed(4))} م²</strong></div>
+          <div>المساحة الإجمالية للأرض = <strong style="color: #2e7d32; font-family: monospace;">${toArabicNumerals(totalAreaM2.toFixed(4))} م²</strong></div>
           <div style="margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; font-weight: bold; font-size: 13px;">
             الفرق المتبقي = 
             <span style="color: ${Math.abs(difference) < 0.01 ? "#2e7d32" : "#c62828"}; font-family: monospace;">
-              ${difference.toFixed(4)} م² ${diffIcon}
+              ${toArabicNumerals(difference.toFixed(4))} م² ${diffIcon}
             </span>
           </div>
         </div>
