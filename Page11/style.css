@@ -172,7 +172,7 @@ body {
   display: flex !important;
   gap: 8px !important;
   align-items: center !important;
-  width: 150px !important; /* عرض مساوٍ لعرض حقل الإدخال الأصلي */
+  width: 220px !important; /* زيادة العرض لمنع قص الأرقام */
   flex-shrink: 0 !important;
 }
 

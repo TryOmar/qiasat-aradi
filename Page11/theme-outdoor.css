@@ -363,7 +363,7 @@ div[style*="f1f8e9"] {
   display: flex !important;
   gap: 8px !important;
   align-items: center !important;
-  width: 160px !important; /* يطابق العرض الأصلي لحقل الإدخال في وضع الخارج */
+  width: 220px !important; /* زيادة العرض لمنع قص الأرقام في وضع الخارج */
   flex-shrink: 0 !important;
 }
 
