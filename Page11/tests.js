@@ -1359,7 +1359,78 @@ function runAutomatedTests() {
       }
     }
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 32: Deficit Freezing Verification (lastValidGeometry preservation)
+    // -------------------------------------------------------------------------
+    {
+      // 1. Setup land inputs
+      document.getElementById("length1").value = 100;
+      document.getElementById("length2").value = 100;
+      document.getElementById("width1").value = 100;
+      document.getElementById("width2").value = 100;
+      document.getElementById("input-carat-area").value = 200;
+      document.getElementById("share-input-method").value = "carats";
+      window.currentInputMethod = "carats";
+      window.isManualPartition = false;
+
+      const list32 = document.getElementById("partners-list");
+      list32.innerHTML = "";
+      addNewPartnerRow("شريك 1", 0, 20, 0, ""); // 4000 sqm
+      addNewPartnerRow("شريك 2", 0, 20, 0, ""); // 4000 sqm
+      
+      calculateGeneral();
+      window.runPartition();
+
+      // Verify geometry created successfully and remainder is drawn
+      const validPiecesCount = window.calculatedPieces ? window.calculatedPieces.length : 0;
+      assert(validPiecesCount === 3, "الحالة 32: يجب حساب الكروكي بنجاح بوجود 3 قطع (2 شريك + المتبقي) في الحالة العادية.");
+
+      const preDeficitPieces = JSON.stringify(window.calculatedPieces || []);
+      const preDeficitAvgW = document.querySelectorAll("#partners-list .partner-row")[0].querySelector(".partner-width-avg").value;
+
+      // 2. Create deficit (Partner 2 = 40 carats, Total = 60 carats = 12000 sqm > 10000 sqm)
+      const rows = document.querySelectorAll("#partners-list .partner-row");
+      if (rows[1]) {
+        rows[1].querySelector(".partner-carats").value = 40;
+      }
+      
+      calculateGeneral();
+      window.runPartition();
+
+      // Verify deficit detected and warning banner shown
+      const warningBanner = document.getElementById("croquis-deficit-warning");
+      const isDeficitDetected = window.calcState.hasDeficit;
+      const isWarningShown = warningBanner && warningBanner.style.display === "flex";
+
+      assert(isDeficitDetected, "الحالة 32: يجب اكتشاف العجز وتحديد hasDeficit = true.");
+      assert(isWarningShown, "الحالة 32: يجب إظهار لافتة تحذير العجز بوضوح أعلى الكروكي.");
+
+      // Verify geometry and inputs are frozen to last valid state
+      const postDeficitPieces = JSON.stringify(window.calculatedPieces || []);
+      const postDeficitAvgW = document.querySelectorAll("#partners-list .partner-row")[0].querySelector(".partner-width-avg").value;
+
+      assert(preDeficitPieces === postDeficitPieces, "الحالة 32: تجميد الكروكي؛ يجب ألا تتغير قطع الكروكي الهندسية عند حدوث عجز.");
+      assert(preDeficitAvgW === postDeficitAvgW, "الحالة 32: تجميد الأبعاد؛ يجب ألا تتغير قيم الجدول الهندسية المقروءة عند وجود عجز.");
+
+      // 3. Resolve deficit (Partner 2 = 20 carats)
+      const rowsResolve = document.querySelectorAll("#partners-list .partner-row");
+      if (rowsResolve[1]) {
+        rowsResolve[1].querySelector(".partner-carats").value = 20;
+      }
+      
+      calculateGeneral();
+      window.runPartition();
+
+      // Verify normal state restored
+      const isResolved = !window.calcState.hasDeficit;
+      const isWarningHidden = warningBanner && warningBanner.style.display === "none";
+
+      assert(isResolved, "الحالة 32: يجب زوال العجز عند تصحيح قيم الأنصبة.");
+      assert(isWarningHidden, "الحالة 32: يجب إخفاء لافتة التحذير بمجرد العودة للحالة الصحيحة.");
+    }
+
     window.PartitionDirectionManager.setDirection("RTL");
+
 
   } catch (error) {
     assert(false, "حدث خطأ غير متوقع أثناء تنفيذ الاختبارات التلقائية.", error.message);

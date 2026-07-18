@@ -20,6 +20,8 @@ Object.defineProperty(window, 'isManualPartition', {
   set: (v) => { isManualPartition = v; }
 });
 
+window.lastValidGeometry = null;
+
 function ensureDimensionsAutofill() {
   // Autofill behavior removed to allow manual entry of all 4 dimensions.
 }
@@ -461,71 +463,65 @@ function renderHeaderAndFooter() {
   
   if (currentInputMethod === "carats") {
     headerContainer.innerHTML = `
-      <p>م</p>
-      <p>الشريك</p>
-      <p>سهم</p>
-      <p>قيراط</p>
-      <p>فدان</p>
-      <p>المساحة (م²)</p>
-      <p>النسبة (%)</p>
-      <p>العرض الأول (أعلى)</p>
-      <p>العرض الثاني (أسفل)</p>
-      <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
-      <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
-      <p title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</p>
-      <p title="الفاصل: خط التقسيم الطولي بين هذه القطعة والقطعة المجاورة لها من اليسار" style="cursor: help;">الفاصل (م)</p>
-      <p></p>
+      <th>م</th>
+      <th>الشريك</th>
+      <th>سهم</th>
+      <th>قيراط</th>
+      <th>فدان</th>
+      <th>المساحة (م²)</th>
+      <th>النسبة (%)</th>
+      <th>العرض الأول (أعلى)</th>
+      <th>العرض الثاني (أسفل)</th>
+      <th title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</th>
+      <th title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</th>
+      <th title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</th>
+      <th>حذف</th>
     `;
     
     footerContainer.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
     `;
   } else {
     headerContainer.innerHTML = `
-      <p>م</p>
-      <p>الشريك</p>
-      <p>النسبة / الكسر</p>
-      <p>تعادل (س.ق.ف)</p>
-      <p style="display:none;"></p>
-      <p>المساحة (م²)</p>
-      <p>النسبة (%)</p>
-      <p>العرض الأول (أعلى)</p>
-      <p>العرض الثاني (أسفل)</p>
-      <p title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</p>
-      <p title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</p>
-      <p title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</p>
-      <p title="الفاصل: خط التقسيم الطولي بين هذه القطعة والقطعة المجاورة لها من اليسار" style="cursor: help;">الفاصل (م)</p>
-      <p></p>
+      <th>م</th>
+      <th>الشريك</th>
+      <th>النسبة / الكسر</th>
+      <th>تعادل (س.ق.ف)</th>
+      <th>المساحة (م²)</th>
+      <th>النسبة (%)</th>
+      <th>العرض الأول (أعلى)</th>
+      <th>العرض الثاني (أسفل)</th>
+      <th title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2" style="cursor: help;">معدل العرض (م)</th>
+      <th title="معدل الطول = المساحة ÷ معدل العرض" style="cursor: help;">معدل الطول (م)</th>
+      <th title="العلامة: المدى التراكمي لعرض القطعة من اليمين (نقطة الصفر) إلى اليسار" style="cursor: help;">العلامة (م)</th>
+      <th>حذف</th>
     `;
     
     footerContainer.innerHTML = `
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-fraction-entered" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" style="display:none;" readonly value="-">
-      <input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-top-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" id="total-width-bottom-calculated" readonly value="0" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
-      <input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;">
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-fraction-entered" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
+      <td><input type="text" readonly value="-" style="font-weight: bold; background: #222; color: white;"></td>
     `;
   }
 }
@@ -596,12 +592,19 @@ function handleInputMethodChange() {
 }
 
 function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-", shouldFocus = false) {
+  // If name is not provided, generate default name based on current rows count
+  if (!name) {
+    const list = document.getElementById("partners-list");
+    const currentCount = list ? list.querySelectorAll(".partner-row").length : 0;
+    name = `شريك ${currentCount + 1}`;
+  }
+
   // تصفية وضع التعديل قبل إضافة صف جديد لضمان تحديث الحسابات فوراً
-  if (!name && !feddans && !carats && !shares && !fraction) {
+  if (!feddans && !carats && !shares && !fraction) {
   }
 
   const list = document.getElementById("partners-list");
-  const row = document.createElement("div");
+  const row = document.createElement("tr");
   row.className = "partner-row";
   
   // تهيئة وتنسيق قيم العرض لمنع الكسور الطويلة
@@ -625,128 +628,100 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
 
   if (currentInputMethod === "carats") {
     row.innerHTML = `
-      <div class="col-group index-group">
-        <span class="mobile-label">م</span>
+      <td class="index-group">
         <input type="text" class="partner-index" readonly value="-">
-      </div>
-      <div class="col-group name-group">
-        <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group share-group">
-        <span class="mobile-label">سهم</span>
-        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group carat-group">
-        <span class="mobile-label">قيراط</span>
-        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group feddan-group">
-        <span class="mobile-label">فدان</span>
-        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group area-group">
-        <span class="mobile-label">المساحة (م²)</span>
+      </td>
+      <td class="name-group">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="onPartnerNameInput(this)" onblur="onPartnerNameBlur(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      </td>
+      <td class="share-group">
+        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      </td>
+      <td class="carat-group">
+        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      </td>
+      <td class="feddan-group">
+        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      </td>
+      <td class="area-group">
         <input type="text" inputmode="decimal" class="partner-area" value="-" oninput="onAreaInput(this)" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group percent-group">
-        <span class="mobile-label">نسبة (%)</span>
+      </td>
+      <td class="percent-group">
         <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الأول (أعلى)</span>
+      </td>
+      <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
-      </div>
-      <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الثاني (أسفل)</span>
+      </td>
+      <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
-      </div>
-      <div class="col-group width-avg-group">
-        <span class="mobile-label">معدل العرض (م)</span>
+      </td>
+      <td class="width-avg-group">
         <input type="text" class="partner-width-avg" readonly value="-">
-      </div>
-      <div class="col-group length-avg-group">
-        <span class="mobile-label">معدل الطول (م)</span>
+      </td>
+      <td class="length-avg-group">
         <input type="text" class="partner-length-avg" readonly value="-">
-      </div>
-      <div class="col-group cum-group">
-        <span class="mobile-label">العلامة (م)</span>
+      </td>
+      <td class="cum-group">
         <textarea class="partner-cum-width" readonly>-</textarea>
-      </div>
-      <div class="col-group border-group">
-        <span class="mobile-label">الفاصل (م)</span>
-        <input type="text" class="partner-div-line" readonly value="-">
-      </div>
-      <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
+      </td>
+      <td>
+        <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
+      </td>
     `;
   } else {
     row.innerHTML = `
-      <div class="col-group index-group">
-        <span class="mobile-label">م</span>
+      <td class="index-group">
         <input type="text" class="partner-index" readonly value="-">
-      </div>
-      <div class="col-group name-group">
-        <span class="mobile-label">الشريك</span>
-        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="saveAndCalc()" onblur="saveAndCalc()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group fraction-group">
-        <span class="mobile-label">النسبة / الكسر</span>
+      </td>
+      <td class="name-group">
+        <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="onPartnerNameInput(this)" onblur="onPartnerNameBlur(this)" onkeydown="if(event.key==='Enter')this.blur()">
+      </td>
+      <td class="fraction-group">
         <input type="text" class="partner-fraction" placeholder="مثال: 1/4" value="${fraction}" oninput="onShareInput()" onblur="onShareInput()" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group equiv-group">
-        <span class="mobile-label">تعادل (س.ق.ف)</span>
+      </td>
+      <td class="equiv-group">
         <input type="text" class="partner-equiv" readonly value="-">
-      </div>
-      <div class="col-group" style="display:none;"><input type="hidden"></div>
-      <div class="col-group area-group">
-        <span class="mobile-label">المساحة (م²)</span>
+      </td>
+      <td class="area-group">
         <input type="text" inputmode="decimal" class="partner-area" value="-" oninput="onAreaInput(this)" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group percent-group">
-        <span class="mobile-label">نسبة (%)</span>
+      </td>
+      <td class="percent-group">
         <input type="text" inputmode="decimal" class="partner-percent" value="-" oninput="onPercentInput(this)" onblur="onPercentInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="col-group width-top-group">
-        <span class="mobile-label">العرض الأول (أعلى)</span>
+      </td>
+      <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
-      </div>
-      <div class="col-group width-bottom-group">
-        <span class="mobile-label">العرض الثاني (أسفل)</span>
+      </td>
+      <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
           <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
-      </div>
-      <div class="col-group width-avg-group">
-        <span class="mobile-label">معدل العرض (م)</span>
+      </td>
+      <td class="width-avg-group">
         <input type="text" class="partner-width-avg" readonly value="-">
-      </div>
-      <div class="col-group length-avg-group">
-        <span class="mobile-label">معدل الطول (م)</span>
+      </td>
+      <td class="length-avg-group">
         <input type="text" class="partner-length-avg" readonly value="-">
-      </div>
-      <div class="col-group cum-group">
-        <span class="mobile-label">العلامة (م)</span>
+      </td>
+      <td class="cum-group">
         <textarea class="partner-cum-width" readonly>-</textarea>
-      </div>
-      <div class="col-group border-group">
-        <span class="mobile-label">الفاصل (م)</span>
-        <input type="text" class="partner-div-line" readonly value="-">
-      </div>
-      <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
+      </td>
+      <td>
+        <button type="button" class="delete-row-btn" onclick="deletePartnerRow(this)">×</button>
+      </td>
     `;
   }
   
@@ -919,6 +894,16 @@ function syncExclusionUI() {
     
     const indexInput = row.querySelector(".partner-index");
     if (indexInput) indexInput.value = index + 1;
+    
+    row.setAttribute("data-index", index);
+    
+    if (nameInput) {
+      const currentName = nameInput.value.trim();
+      const defaultNameRegex = /^شريك \d+$/;
+      if (!currentName || defaultNameRegex.test(currentName)) {
+        nameInput.value = `شريك ${index + 1}`;
+      }
+    }
     
     if (isExcluded) {
       row.style.backgroundColor = "#eceff1";
@@ -1104,11 +1089,8 @@ function calculateGeneral(shouldRender = true) {
       return; // Skip area calculations for excluded row
     }
 
-    // تعبئة اسم الشريك تلقائياً إذا كان فارغاً عند الحساب
-    const nameInput = row.querySelector(".partner-name");
-    if (nameInput && !nameInput.value.trim()) {
-      nameInput.value = `شريك ${index + 1}`;
-    }
+    // اسم الشريك لا يُعبّأ تلقائياً أثناء الكتابة — يتم ذلك فقط عند blur إذا كان الحقل فارغاً
+    // (انظر دالة onPartnerNameBlur)
 
     let partnerAreaM2 = 0;
     let partnerCarats = 0;
@@ -1183,8 +1165,20 @@ function calculateGeneral(shouldRender = true) {
     document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
-    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
+    // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
+    const remEl = document.getElementById("summary-rem-area");
+    const remLabel = document.getElementById("summary-rem-area-label");
+    if (remainingArea < -0.05) {
+      if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
+      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.style.color = "#c62828";
+    } else {
+      if (remLabel) remLabel.innerText = "المساحة المتبقية:";
+      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
+      remEl.style.color = "";
+    }
   }
+
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
     if (totalAreaM2 <= 0) {
@@ -1300,6 +1294,78 @@ function calculateGeneral(shouldRender = true) {
   }
 }
 
+function restoreLastValidGeometryValues() {
+  if (!window.lastValidGeometry) return;
+  
+  // 1. Restore calculatedPieces
+  window.calculatedPieces = JSON.parse(JSON.stringify(window.lastValidGeometry.pieces));
+  
+  // 2. Restore geometric values in the partner rows
+  const rows = document.querySelectorAll("#partners-list .partner-row");
+  rows.forEach((row, index) => {
+    const backupRow = window.lastValidGeometry.rowValues[index];
+    if (!backupRow) return;
+    
+    // Only restore width inputs in automatic mode, to avoid locking inputs when user edits manually
+    if (!isManualPartition) {
+      const widthBotInput = row.querySelector(".partner-width-bottom");
+      if (widthBotInput) widthBotInput.value = backupRow.widthBottom;
+      
+      const widthTopInput = row.querySelector(".partner-width-top");
+      if (widthTopInput) widthTopInput.value = backupRow.widthTop;
+    }
+    
+    // Average Width and Length (Readonly)
+    const widthAvgInput = row.querySelector(".partner-width-avg");
+    if (widthAvgInput) widthAvgInput.value = backupRow.widthAvg;
+    
+    const lengthAvgInput = row.querySelector(".partner-length-avg");
+    if (lengthAvgInput) lengthAvgInput.value = backupRow.lengthAvg;
+    
+    // Cumulative width (Readonly textarea)
+    const cumWidthInput = row.querySelector(".partner-cum-width");
+    if (cumWidthInput) cumWidthInput.value = backupRow.cumWidth;
+    
+    // Division line (Readonly)
+    const divLineInput = row.querySelector(".partner-div-line");
+    if (divLineInput) divLineInput.value = backupRow.divLine;
+  });
+  
+  // 3. Restore Remainder row values
+  const remRow = document.getElementById("remainder-row-table");
+  if (remRow && window.lastValidGeometry.remainderRowValues) {
+    const inputs = remRow.querySelectorAll("input, textarea");
+    inputs.forEach((inp, idx) => {
+      if (idx < window.lastValidGeometry.remainderRowValues.length) {
+        inp.value = window.lastValidGeometry.remainderRowValues[idx];
+      }
+    });
+  }
+  
+  // 4. Restore total widths in the footer (only in automatic mode)
+  if (!isManualPartition) {
+    if (document.getElementById("total-width-bottom-calculated")) {
+      document.getElementById("total-width-bottom-calculated").value = window.lastValidGeometry.totals.bottom;
+    }
+    if (document.getElementById("total-width-top-calculated")) {
+      document.getElementById("total-width-top-calculated").value = window.lastValidGeometry.totals.top;
+    }
+    if (document.getElementById("summary-total-width")) {
+      document.getElementById("summary-total-width").innerText = window.lastValidGeometry.summaryTotalWidth;
+    }
+  }
+  
+  if (document.getElementById("info-last-div-line")) {
+    document.getElementById("info-last-div-line").innerText = window.lastValidGeometry.infoLastDivLine;
+  }
+  
+  // 5. Restore steps breakdown HTML
+  const stepsContainer = document.getElementById("calculation-steps-container");
+  if (stepsContainer) {
+    stepsContainer.innerHTML = window.lastValidGeometry.calculationStepsHTML;
+  }
+}
+
 function runPartition(shouldRender = true) {
   ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
@@ -1319,6 +1385,40 @@ function runPartition(shouldRender = true) {
 
   isPartitioned = true;
 
+  // بند ثالثاً وثامناً: تحقق من وجود عجز — إذا كانت الأنصبة تتجاوز مساحة الأرض، جمد جميع المخرجات الهندسية
+  recalculateState();
+  if (window.calcState.hasDeficit) {
+    // إظهار التنبيه بوجود عجز وتجميد الكروكي
+    const warningBanner = document.getElementById("croquis-deficit-warning");
+    if (warningBanner) warningBanner.style.display = "flex";
+    
+    // استعادة آخر حالة هندسية صحيحة (تجميد الكروكي وجميع المخرجات الهندسية)
+    if (window.lastValidGeometry) {
+      restoreLastValidGeometryValues();
+    }
+    
+    // تحديث ملخص التقسيم لإظهار العجز
+    const remainingArea = window.calcState.remainingArea;
+    if (document.getElementById("summary-total-area")) {
+      document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+    }
+    if (document.getElementById("summary-rem-area")) {
+      const remEl = document.getElementById("summary-rem-area");
+      const remLabel = document.getElementById("summary-rem-area-label");
+      if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
+      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.style.color = "#c62828";
+    }
+    if (shouldRender) {
+      renderCroquis(); // يعيد رسم الكروكي المجمد
+    }
+    return; // لا تُعيد حساب الأبعاد الهندسية
+  } else {
+    // إخفاء تنبيه العجز عند زوال العجز
+    const warningBanner = document.getElementById("croquis-deficit-warning");
+    if (warningBanner) warningBanner.style.display = "none";
+  }
+
   const rows = document.querySelectorAll("#partners-list .partner-row");
   let lastT_bot = 0;
   let lastT_top = 0;
@@ -1328,6 +1428,7 @@ function runPartition(shouldRender = true) {
   
   window.calculatedPieces = [];
   const diff = l2 - l1;
+
 
   rows.forEach((row, index) => {
     if (isPartnerRowExcluded(row)) {
@@ -1600,7 +1701,18 @@ function runPartition(shouldRender = true) {
     document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
-    document.getElementById("summary-rem-area").innerText = Number(remainingArea.toFixed(2)) + " م²";
+    // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
+    const remEl = document.getElementById("summary-rem-area");
+    const remLabel = document.getElementById("summary-rem-area-label");
+    if (remainingArea < -0.05) {
+      if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
+      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.style.color = "#c62828";
+    } else {
+      if (remLabel) remLabel.innerText = "المساحة المتبقية:";
+      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
+      remEl.style.color = "";
+    }
   }
   if (document.getElementById("rem-area-m2")) {
     document.getElementById("rem-area-m2").innerText = Number(Math.abs(remainingArea).toFixed(2));
@@ -1737,6 +1849,53 @@ function runPartition(shouldRender = true) {
     renderCroquis();
   }
   updateCalculationSteps();
+
+  // بند أولاً وثامناً: حفظ آخر حالة هندسية صحيحة بالكامل
+  if (window.calcState && !window.calcState.hasDeficit) {
+    const piecesBackup = JSON.parse(JSON.stringify(window.calculatedPieces || []));
+    const rows = document.querySelectorAll("#partners-list .partner-row");
+    const rowValues = Array.from(rows).map(row => {
+      return {
+        widthBottom: row.querySelector(".partner-width-bottom")?.value || "",
+        widthTop: row.querySelector(".partner-width-top")?.value || "",
+        widthAvg: row.querySelector(".partner-width-avg")?.value || "",
+        lengthAvg: row.querySelector(".partner-length-avg")?.value || "",
+        cumWidth: row.querySelector(".partner-cum-width")?.value || "",
+        divLine: row.querySelector(".partner-div-line")?.value || "",
+        area: row.querySelector(".partner-area")?.value || "",
+        percent: row.querySelector(".partner-percent")?.value || "",
+        equiv: row.querySelector(".partner-equiv")?.value || "",
+      };
+    });
+    
+    let remainderRowValues = null;
+    const remRow = document.getElementById("remainder-row-table");
+    if (remRow) {
+      const inputs = remRow.querySelectorAll("input, textarea");
+      remainderRowValues = Array.from(inputs).map(inp => inp.value);
+    }
+    
+    window.lastValidGeometry = {
+      pieces: piecesBackup,
+      rowValues: rowValues,
+      remainderRowValues: remainderRowValues,
+      totalAreaM2: totalAreaM2,
+      totalBotWidthCalculated: totalBotWidthCalculated,
+      totalTopWidthCalculated: totalTopWidthCalculated,
+      summaryTotalWidth: document.getElementById("summary-total-width")?.innerText || "",
+      infoLastDivLine: document.getElementById("info-last-div-line")?.innerText || "",
+      infoDistributedArea: document.getElementById("info-distributed-area")?.innerText || "",
+      infoDistributedPercent: document.getElementById("info-distributed-percent")?.innerText || "",
+      totals: {
+        bottom: document.getElementById("total-width-bottom-calculated")?.value || "",
+        top: document.getElementById("total-width-top-calculated")?.value || "",
+        area: document.getElementById("total-area-distributed")?.value || "",
+        percent: document.getElementById("total-percent-distributed")?.value || ""
+      },
+      calculationStepsHTML: document.getElementById("calculation-steps-container")?.innerHTML || "",
+      timestamp: Date.now()
+    };
+  }
 }
 
 function clearAll(confirmRequired = false) {
@@ -2524,7 +2683,7 @@ function renderCroquis() {
     g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#1b5e20", width: "2" }));
     
     const lMidY = (lY1 + lY2) / 2;
-    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, l2 + " م", {
+    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, l2.toFixed(2) + " م", {
       anchor: "start",
       fill: "#111111", // أسود داكن للقراءة تحت الشمس
       size: "13.5",
@@ -2550,7 +2709,7 @@ function renderCroquis() {
     g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#1b5e20", width: "2" }));
     
     const rMidY = (rY1 + rY2) / 2;
-    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, l1 + " م", {
+    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, l1.toFixed(2) + " م", {
       anchor: "start",
       fill: "#111111", // أسود داكن لقراءة عالية التباين
       size: "13.5",
@@ -2575,7 +2734,7 @@ function renderCroquis() {
     g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w2 + " م", {
+    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w2.toFixed(2) + " م", {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
@@ -2599,7 +2758,7 @@ function renderCroquis() {
     g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w1 + " م", {
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w1.toFixed(2) + " م", {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
@@ -2934,15 +3093,15 @@ function getTableDataArray() {
   if (remRow && remRow.style.display !== "none") {
     const remData = [];
     const inputs = remRow.querySelectorAll("input");
-    if (inputs.length >= 13) {
-      remData.push(inputs[0].value);
-      remData.push(inputs[1].value);
+    if (inputs.length >= 11) {
+      remData.push(inputs[0].value); // م
+      remData.push(inputs[1].value); // الشريك
       if (currentInputMethod === "carats") {
-        remData.push(inputs[2].value);
-        remData.push(inputs[3].value);
-        remData.push(inputs[4].value);
-        remData.push(inputs[5].value);
-        remData.push(inputs[6].value);
+        remData.push(inputs[2].value); // سهم
+        remData.push(inputs[3].value); // قيراط
+        remData.push(inputs[4].value); // فدان
+        remData.push(inputs[5].value); // المساحة
+        remData.push(inputs[6].value); // النسبة
         
         let remW1 = inputs[7].value; // top (العرض الأول)
         let remW2 = inputs[8].value; // bottom (العرض الثاني)
@@ -2955,18 +3114,20 @@ function getTableDataArray() {
         }
         remData.push(remW1);
         remData.push(remW2);
-        remData.push(inputs[9].value);
-        remData.push(inputs[10].value);
-        remData.push(inputs[11].value);
-        remData.push(inputs[12].value);
+        remData.push(inputs[9].value);  // معدل العرض
+        remData.push(inputs[10].value); // معدل الطول
+        
+        const cumTextarea = remRow.querySelector("textarea");
+        remData.push(cumTextarea ? cumTextarea.value : "-"); // العلامة (م)
+        remData.push(inputs[11].value); // التحكم
       } else {
-        remData.push(inputs[2].value);
-        remData.push(inputs[3].value);
-        remData.push(inputs[5].value);
-        remData.push(inputs[6].value);
+        remData.push(inputs[2].value); // النسبة/الكسر
+        remData.push(inputs[3].value); // تعادل
+        remData.push(inputs[4].value); // المساحة
+        remData.push(inputs[5].value); // النسبة
         
-        let remW1 = inputs[7].value; // top (العرض الأول)
-        let remW2 = inputs[8].value; // bottom (العرض الثاني)
+        let remW1 = inputs[6].value; // top (العرض الأول)
+        let remW2 = inputs[7].value; // bottom (العرض الثاني)
         if (window.calculatedPieces) {
           const remPiece = window.calculatedPieces.find(p => p.isRemainder);
           if (remPiece) {
@@ -2976,10 +3137,12 @@ function getTableDataArray() {
         }
         remData.push(remW1);
         remData.push(remW2);
-        remData.push(inputs[9].value);
-        remData.push(inputs[10].value);
-        remData.push(inputs[11].value);
-        remData.push(inputs[12].value);
+        remData.push(inputs[8].value);  // معدل العرض
+        remData.push(inputs[9].value);  // معدل الطول
+        
+        const cumTextarea = remRow.querySelector("textarea");
+        remData.push(cumTextarea ? cumTextarea.value : "-"); // العلامة (م)
+        remData.push(inputs[10].value); // التحكم
       }
       data.push(remData);
     }
@@ -2990,32 +3153,9 @@ function getTableDataArray() {
   if (totalRow) {
     const totData = [];
     const inputs = totalRow.querySelectorAll("input");
-    if (inputs.length >= 13) {
-      totData.push(inputs[0].value);
-      totData.push(inputs[1].value);
-      if (currentInputMethod === "carats") {
-        totData.push(inputs[2].value);
-        totData.push(inputs[3].value);
-        totData.push(inputs[4].value);
-        totData.push(inputs[5].value);
-        totData.push(inputs[6].value);
-        totData.push(inputs[7].value);
-        totData.push(inputs[8].value);
-        totData.push(inputs[9].value);
-        totData.push(inputs[10].value);
-        totData.push(inputs[11].value);
-        totData.push(inputs[12].value);
-      } else {
-        totData.push(inputs[2].value);
-        totData.push(inputs[3].value);
-        totData.push(inputs[5].value);
-        totData.push(inputs[6].value);
-        totData.push(inputs[7].value);
-        totData.push(inputs[8].value);
-        totData.push(inputs[9].value);
-        totData.push(inputs[10].value);
-        totData.push(inputs[11].value);
-        totData.push(inputs[12].value);
+    if (inputs.length >= 12) {
+      for (let i = 0; i < inputs.length; i++) {
+        totData.push(inputs[i].value);
       }
       data.push(totData);
     }
@@ -4618,6 +4758,29 @@ function onShareInput() {
   saveAndCalc();
 }
 
+/**
+ * \u0628\u0646\u062f \u0633\u0627\u0628\u0639\u0627\u064b: \u062a\u062d\u0633\u064a\u0646 \u062a\u062d\u0631\u064a\u0631 \u0627\u0633\u0645 \u0627\u0644\u0634\u0631\u064a\u0643
+ * \u0639\u0646\u062f \u0627\u0644\u0643\u062a\u0627\u0628\u0629 \u0641\u0642\u0637 \u0646\u062d\u0641\u0638 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u062f\u0648\u0646 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0643\u0627\u0645\u0644\u0629 (\u062d\u062a\u0649 \u0644\u0627 \u064a\u064f\u0639\u064a\u062f \u0627\u0644\u0628\u0631\u0646\u0627\u0645\u062c \u0643\u062a\u0627\u0628\u0629 \u0627\u0644\u0627\u0633\u0645 \u0623\u062b\u0646\u0627\u0621 \u0627\u0644\u062a\u062d\u0631\u064a\u0631)
+ */
+function onPartnerNameInput(input) {
+  // \u0646\u062d\u0641\u0638 \u0641\u0642\u0637 — \u0644\u0627 \u0646\u064f\u0639\u064a\u062f \u0627\u0644\u062d\u0633\u0627\u0628 \u062d\u062a\u0649 \u0644\u0627 \u064a\u0638\u0647\u0631 \u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a \u0641\u0648\u0631 \u0645\u0633\u062d \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645
+  saveData();
+}
+
+/**
+ * \u0639\u0646\u062f \u0645\u063a\u0627\u062f\u0631\u0629 \u062d\u0642\u0644 \u0627\u0644\u0627\u0633\u0645:
+ * - \u0625\u0630\u0627 \u0643\u0627\u0646 \u0641\u0627\u0631\u063a\u0627\u064b \u2192 \u064a\u064f\u0639\u064a\u062f \u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a ("\u0634\u0631\u064a\u0643 N")
+ * - \u0625\u0630\u0627 \u0643\u0627\u0646 \u063a\u064a\u0631 \u0641\u0627\u0631\u063a \u2192 \u064a\u062d\u0641\u0638 \u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u062c\u062f\u064a\u062f \u0643\u0645\u0627 \u0647\u0648
+ */
+function onPartnerNameBlur(input) {
+  if (!input.value.trim()) {
+    const row = input.closest('.partner-row');
+    const index = parseInt(row.getAttribute("data-index")) || 0;
+    input.value = `\u0634\u0631\u064a\u0643 ${index + 1}`;
+  }
+  saveAndCalc();
+}
+
 function updatePartnerFromInput(type, value, row) {
   if (window.isUpdatingRow) return;
   window.isUpdatingRow = true;
@@ -4793,7 +4956,6 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
-      <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
   } else {
@@ -4803,7 +4965,6 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="🟡 المتبقي" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${fractionVal.toFixed(4)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${fcs.sahm}س، ${fcs.carat}ق، ${fcs.feddan}ف" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
-      <input type="text" style="display:none;" readonly value="-">
       <input type="text" readonly value="${absRem.toFixed(2)}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remPct.toFixed(2)}%" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remTopW > 0 ? remTopW.toFixed(2) : '-'}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
@@ -4811,7 +4972,6 @@ function updateRemainderRowUI(remainingArea) {
       <input type="text" readonly value="${remAvgW_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <input type="text" readonly value="${remAvgL_str}" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
       <textarea class="partner-cum-width" readonly>${remCumWidth}</textarea>
-      <input type="text" readonly value="${remLengths}" style="font-weight: bold; background: #fffde7; color: #e65100; font-size: 11px; text-align: center;">
       <input type="text" readonly value="-" style="font-weight: bold; background: #fffde7; color: #e65100; text-align: center;">
     `;
   }
@@ -5104,10 +5264,63 @@ function convertSquareMetersToFCS(area) {
     return { feddan: 0, carat: 0, sahm: 0 };
   }
   const totalCarats = area / caratArea;
-  const feddan = Math.floor(totalCarats / 24);
-  const carat = Math.floor(totalCarats % 24);
-  const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
+  let feddan = Math.floor(totalCarats / 24);
+  let carat = Math.floor(totalCarats % 24);
+  let sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
+
+  // Normalize sahm: if it reaches 24 or very close due to rounding
+  if (sahm >= 24 - 0.015) {
+    sahm = 0;
+    carat += 1;
+  }
+
+  // Normalize carat: if it reaches 24
+  if (carat >= 24) {
+    const extraFeddans = Math.floor(carat / 24);
+    carat = carat % 24;
+    feddan += extraFeddans;
+  }
+
   return { feddan, carat, sahm };
+}
+
+/**
+ * بند خامساً: تطبيع وحدات الفدان والقيراط والسهم عند إدخال المستخدم
+ * 24 سهم = 1 قيراط | 24 قيراط = 1 فدان
+ * تُستدعى عند blur من حقول السهم/القيراط/الفدان
+ */
+function normalizeInputFCS(input) {
+  const row = input.closest('.partner-row');
+  if (!row) return;
+  
+  const sInput = row.querySelector(".partner-shares");
+  const cInput = row.querySelector(".partner-carats");
+  const fInput = row.querySelector(".partner-feddans");
+  
+  let s = parseFloat(sInput?.value) || 0;
+  let c = parseFloat(cInput?.value) || 0;
+  let f = parseFloat(fInput?.value) || 0;
+  
+  // تطبيع: كل 24 سهم = 1 قيراط
+  if (s >= 24) {
+    const extraC = Math.floor(s / 24);
+    c += extraC;
+    s = Number((s % 24).toFixed(2));
+  }
+  // تطبيع: كل 24 قيراط = 1 فدان
+  if (c >= 24) {
+    const extraF = Math.floor(c / 24);
+    f += extraF;
+    c = c % 24;
+  }
+  
+  // تحديث الحقول فقط إذا تغيرت القيم
+  if (sInput && document.activeElement !== sInput) sInput.value = s > 0 ? s : (s === 0 && sInput.value ? "0" : "");
+  if (cInput && document.activeElement !== cInput) cInput.value = c > 0 ? c : (c === 0 && cInput.value ? "0" : "");
+  if (fInput && document.activeElement !== fInput) fInput.value = f > 0 ? f : (f === 0 && fInput.value ? "0" : "");
+  
+  // إعادة الحساب بعد التطبيع
+  saveAndCalc();
 }
 
 function updateTableTotals() {

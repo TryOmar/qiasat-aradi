@@ -337,10 +337,25 @@ body {
 
 .table-header, .partner-row, #total, #remainder-row-table {
   display: grid !important;
-  grid-template-columns: 40px var(--name-column-width, 140px) 70px 60px 60px 100px 80px 100px 100px 100px 100px 170px 100px 50px !important;
   gap: 4px !important;
   align-items: center !important;
   width: 100% !important;
+}
+
+/* Carats Mode (13 Columns) */
+.table.method-carats .table-header, 
+.table.method-carats .partner-row, 
+.table.method-carats #total, 
+.table.method-carats #remainder-row-table {
+  grid-template-columns: 40px var(--name-column-width, 140px) 60px 60px 60px 100px 80px 100px 100px 100px 100px 170px 50px !important;
+}
+
+/* Fractions Mode (12 Columns) */
+.table.method-fractions .table-header, 
+.table.method-fractions .partner-row, 
+.table.method-fractions #total, 
+.table.method-fractions #remainder-row-table {
+  grid-template-columns: 40px var(--name-column-width, 140px) 100px 120px 100px 80px 100px 100px 100px 100px 170px 50px !important;
 }
 
 .table-header {
@@ -2087,19 +2102,249 @@ body {
     font-size: 16px !important;
   }
 
-  /* Table and container scrolling layout for mobile */
+  /* Table and container reset */
   .table-container {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    border: 1px solid #e0e0e0 !important;
-    border-radius: 8px !important;
-    background: #ffffff !important;
+    overflow-x: visible !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
   }
 
   .table {
-    min-width: 1350px !important;
+    min-width: unset !important;
     width: 100% !important;
     display: block !important;
+  }
+
+  .table-header {
+    display: none !important;
+  }
+
+  /* Partner rows, totals, and remainder rows styled as cards */
+  .partner-row, 
+  #total, 
+  #remainder-row-table {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+    gap: 12px 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 16px !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    align-items: center !important;
+  }
+
+  .partner-row {
+    background: #ffffff !important;
+    border: 1.5px solid #e0e0e0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    position: relative !important;
+  }
+
+  #total {
+    background: #e8f5e9 !important;
+    border: 1.5px solid #2e7d32 !important;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.08) !important;
+    margin-top: 16px !important;
+  }
+
+  #remainder-row-table {
+    background: #fffde7 !important;
+    border: 1.5px dashed #f57f17 !important;
+    box-shadow: 0 2px 8px rgba(245, 127, 23, 0.08) !important;
+    margin-top: 16px !important;
+  }
+
+  /* Inputs and buttons general layout inside cards */
+  .partner-row input, 
+  #remainder-row-table input,
+  #total input {
+    height: 38px !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Group containers */
+  .col-group {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Show labels on mobile */
+  .mobile-label {
+    display: block !important;
+    font-size: 11.5px !important;
+    color: #2e7d32 !important;
+    font-weight: bold !important;
+    margin-bottom: 4px !important;
+    text-align: right !important;
+  }
+
+  /* Card Grid Columns */
+  .index-group {
+    grid-column: span 2 !important;
+  }
+
+  .name-group {
+    grid-column: span 8 !important;
+  }
+
+  /* Delete row button sits on the top row alongside name */
+  .partner-row .delete-row-btn {
+    grid-column: span 2 !important;
+    height: 38px !important;
+    margin-top: 17px !important; /* aligns with inputs having mobile-label */
+    font-size: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mode: Carats */
+  .table.method-carats .share-group,
+  .table.method-carats .carat-group,
+  .table.method-carats .feddan-group {
+    grid-column: span 4 !important;
+  }
+
+  /* Mode: Fractions */
+  .table.method-fractions .fraction-group,
+  .table.method-fractions .equiv-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Area and Percent row */
+  .area-group,
+  .percent-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Editable width inputs row */
+  .width-bottom-group,
+  .width-top-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Average width and average length row */
+  .width-avg-group,
+  .length-avg-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Outputs row */
+  .cum-group,
+  .border-group {
+    grid-column: span 6 !important;
+  }
+
+  /* Width input container (+ and - buttons layout) */
+  .width-input-container {
+    display: flex !important;
+    gap: 4px !important;
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  .width-step-btn {
+    height: 38px !important;
+    width: 32px !important;
+    font-size: 16px !important;
+    border-radius: 6px !important;
+  }
+
+  /* --- Totals & Remainder Card Formatting --- */
+  /* Hide index fields */
+  #total input:nth-child(1),
+  #remainder-row-table input:nth-child(1) {
+    display: none !important;
+  }
+
+  /* Section Title styling */
+  #total input:nth-child(2),
+  #remainder-row-table input:nth-child(2) {
+    grid-column: span 12 !important;
+    height: 38px !important;
+    font-size: 15px !important;
+    color: white !important;
+    text-align: center !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: bold !important;
+  }
+  #total input:nth-child(2) {
+    background: #2e7d32 !important;
+  }
+  #remainder-row-table input:nth-child(2) {
+    background: #f57f17 !important;
+  }
+
+  /* Hide display:none placeholder inputs */
+  #total input[style*="display:none"],
+  #total input[style*="display: none"],
+  #remainder-row-table input[style*="display:none"],
+  #remainder-row-table input[style*="display: none"] {
+    display: none !important;
+  }
+
+  /* Columns 3, 4, 5: Carats mode grid spans */
+  .table.method-carats #total input:nth-child(3),
+  .table.method-carats #total input:nth-child(4),
+  .table.method-carats #total input:nth-child(5),
+  .table.method-carats #remainder-row-table input:nth-child(3),
+  .table.method-carats #remainder-row-table input:nth-child(4),
+  .table.method-carats #remainder-row-table input:nth-child(5) {
+    grid-column: span 4 !important;
+  }
+
+  /* Columns 3, 4: Fractions mode grid spans */
+  .table.method-fractions #total #total-fraction-entered,
+  .table.method-fractions #total #total-fraction-entered + input,
+  .table.method-fractions #remainder-row-table input:nth-child(3),
+  .table.method-fractions #remainder-row-table input:nth-child(4) {
+    grid-column: span 6 !important;
+  }
+
+  /* Area (6) & Percent (7) */
+  #total input:nth-child(6),
+  #total input:nth-child(7),
+  #remainder-row-table input:nth-child(6),
+  #remainder-row-table input:nth-child(7) {
+    grid-column: span 6 !important;
+  }
+
+  /* Width Bottom (8) & Width Top (9) */
+  #total input:nth-child(8),
+  #total input:nth-child(9),
+  #remainder-row-table input:nth-child(8),
+  #remainder-row-table input:nth-child(9) {
+    grid-column: span 6 !important;
+  }
+
+  /* Hide trailing unused fields in totals */
+  #total input:nth-child(10),
+  #total input:nth-child(11),
+  #total input:nth-child(12) {
+    display: none !important;
+  }
+
+  /* Remainder long text fields (cum-width and lengths) span full card width */
+  #remainder-row-table input:nth-child(10),
+  #remainder-row-table input:nth-child(11) {
+    grid-column: span 12 !important;
+    font-size: 11px !important;
+    height: 34px !important;
+    background: #fffde7 !important;
+    border: 1px solid #ffd54f !important;
   }
 }
 

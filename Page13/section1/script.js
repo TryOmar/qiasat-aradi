@@ -2036,7 +2036,7 @@ function drawLandCanvas(vertices) {
             ctx.save();
             ctx.translate(nameX, nameY);
             ctx.rotate(-Math.PI / 2);
-            const dispName = (showCroquisNumbers ? (heirIdx + 1) + ". " : "") + nameToShow;
+            const dispName = nameToShow;
             ctx.font = `bold ${(baseFontSize + 0.5) * (croquisFontSize / 13)}px Cairo`;
             ctx.fillStyle = "#000000";
             ctx.fillText(dispName, 0, 0);

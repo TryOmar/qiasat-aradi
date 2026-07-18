@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="stylesheet" href="../style.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../shared/table-component.css" />
   <link rel="stylesheet" href="../shared-ui.css" />
   <link rel="stylesheet" href="theme-outdoor.css" />
   <link rel="stylesheet" href="../fraction-helper.css" />
@@ -155,6 +156,10 @@
           </select>
         </div>
       </div>
+      <div id="croquis-deficit-warning" style="display: none; background: #ffebee; border: 1.5px solid #ffcdd2; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; color: #c62828; text-align: center; direction: rtl; align-items: center; justify-content: center; gap: 8px;">
+        ⚠️ الكروكي والمخرجات الهندسية معروضة وفق آخر حالة صحيحة، لأن إجمالي الأنصبة يتجاوز مساحة الأرض.
+      </div>
+
       <!-- قائمة مساحات الشركاء أعلى الخريطة -->
       <div id="croquis-legend" class="croquis-legend" style="display: none;"></div>
       <!-- منطقة الرسم -->
@@ -360,26 +365,25 @@
       </div>
       
       <!-- Responsive Table Container -->
-      <div class="table-container">
-        <div class="table">
-          <div id="table-header-container" class="table-header" style="width: 100%;">
-            <!-- Dynamic Header -->
-          </div>
-
-          <div id="partners-list" style="display: flex; flex-direction: column; width: 100%; gap: 5px;">
+      <div class="table-container heirs-table-wrapper" style="overflow-x: auto;">
+        <table class="heirs-table table" id="partners-table">
+          <thead>
+            <tr id="table-header-container" class="table-header">
+              <!-- Dynamic Header -->
+            </tr>
+          </thead>
+          <tbody id="partners-list">
             <!-- Dynamic rows will be added here -->
-          </div>
-
-          <!-- Totals Row -->
-          <div class="table-input" id="total" style="margin-top: 5px; width: 100%;">
-            <!-- Dynamic Footer -->
-          </div>
-          
-          <!-- Remainder Row inside table -->
-          <div class="table-input" id="remainder-row-table" style="margin-top: 3px; width: 100%; display: none;">
-            <!-- Dynamic Remainder Row -->
-          </div>
-        </div>
+          </tbody>
+          <tfoot>
+            <tr id="total" class="table-input">
+              <!-- Dynamic Footer -->
+            </tr>
+            <tr id="remainder-row-table" class="table-input" style="display: none;">
+              <!-- Dynamic Remainder Row -->
+            </tr>
+          </tfoot>
+        </table>
       </div>
 
       <!-- المتبقي من الأرض (تحت الجدول مباشرة) -->
@@ -422,7 +426,7 @@
             <strong id="summary-total-area">0.00</strong>
           </div>
           <div class="detail-row">
-            <span>المساحة المتبقية:</span>
+            <span id="summary-rem-area-label">المساحة المتبقية:</span>
             <strong id="summary-rem-area">0.00</strong>
           </div>
           <div class="detail-row">
