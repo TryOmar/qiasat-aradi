@@ -4566,17 +4566,85 @@ document.addEventListener("mousedown", (e) => {
 document.addEventListener("mouseup", _lpStop);
 document.addEventListener("mouseleave", _lpStop);
 
+// متغيرات لتسجيل حالة اللمس والتمييز بين السحب والنقر
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActiveBtn = null;
+let touchScrollCancelled = false;
+let longPressTriggered = false;
+let touchStartTimer = null;
+
 document.addEventListener("touchstart", (e) => {
   const btn = e.target.closest(".width-step-btn");
   if (!btn) return;
-  e.preventDefault();
-  const onclick = btn.getAttribute("onclick") || "";
-  const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
-  if (!m) return;
-  _lpStart(btn, m[1], parseInt(m[2]), true); // نستدعيها فوراً لمنع التباطؤ على اللمس
+  
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchActiveBtn = btn;
+  touchScrollCancelled = false;
+  longPressTriggered = false;
+  
+  if (touchStartTimer) clearTimeout(touchStartTimer);
+  touchStartTimer = setTimeout(() => {
+    if (!touchScrollCancelled && touchActiveBtn) {
+      longPressTriggered = true;
+      const onclick = touchActiveBtn.getAttribute("onclick") || "";
+      const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
+      if (m) {
+        _lpStart(touchActiveBtn, m[1], parseInt(m[2]), true);
+      }
+    }
+  }, 350);
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+  if (!touchActiveBtn || touchScrollCancelled) return;
+  
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  
+  if (distance > 8) {
+    touchScrollCancelled = true;
+    if (touchStartTimer) {
+      clearTimeout(touchStartTimer);
+      touchStartTimer = null;
+    }
+    _lpStop();
+    touchActiveBtn = null;
+  }
+});
+
+document.addEventListener("touchend", (e) => {
+  if (touchStartTimer) {
+    clearTimeout(touchStartTimer);
+    touchStartTimer = null;
+  }
+  
+  if (!touchActiveBtn) return;
+  
+  e.preventDefault(); // منع النقرة الافتراضية لمنع التكرار والتأخير
+  
+  if (!touchScrollCancelled && !longPressTriggered) {
+    const onclick = touchActiveBtn.getAttribute("onclick") || "";
+    const m = onclick.match(/adjustWidthStep\(this,\s*'(\w+)',\s*(-?1)\)/);
+    if (m) {
+      adjustWidthStep(touchActiveBtn, m[1], parseInt(m[2]));
+    }
+  }
+  
+  _lpStop();
+  touchActiveBtn = null;
 }, { passive: false });
-document.addEventListener("touchend", _lpStop);
-document.addEventListener("touchcancel", _lpStop);
+
+document.addEventListener("touchcancel", (e) => {
+  if (touchStartTimer) {
+    clearTimeout(touchStartTimer);
+    touchStartTimer = null;
+  }
+  _lpStop();
+  touchActiveBtn = null;
+});
 
 let widthChangeTimer = null;
 
