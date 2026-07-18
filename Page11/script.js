@@ -11,6 +11,18 @@ let showCroquisMeasurements = true;
 let isPartitioned = false;
 let isManualPartition = false;
 
+/**
+ * p11LastDirections - تتبع الاتجاهات السابقة لمنع التكرار والتبديل التلقائي
+ * القيم الافتراضية المعتمدة: شرقي (العرض الأول أعلى)، غربي (العرض الثاني أسفل)، قبلي (الطول الأيمن)، بحري (الطول الأيسر)
+ */
+let p11LastDirections = {
+  "p11-w2-dir": "شرقي",   // العرض الأول (أعلى C)
+  "p11-w1-dir": "غربي",   // العرض الثاني (أسفل A)
+  "p11-l1-dir": "قبلي",  // الطول الأيمن (D)
+  "p11-l2-dir": "بحري"   // الطول الأيسر (B)
+};
+
+
 Object.defineProperty(window, 'isPartitioned', {
   get: () => isPartitioned,
   set: (v) => { isPartitioned = v; }
@@ -334,6 +346,13 @@ function saveData() {
   localStorage.setItem("p11-is-manual-partition", isManualPartition ? "true" : "false");
   localStorage.setItem("p11-partition-direction", window.PartitionDirectionManager.getDirection());
 
+  // حفظ الاتجاهات الأربعة
+  const dirIds = ["p11-w2-dir", "p11-w1-dir", "p11-l1-dir", "p11-l2-dir"];
+  dirIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) localStorage.setItem("p11-dir-" + id, el.value);
+  });
+
   const modeKeepArea = document.getElementById("mode-keep-area");
   if (modeKeepArea) {
     localStorage.setItem("p11-manual-width-mode", modeKeepArea.checked ? "keep-area" : "free");
@@ -446,6 +465,22 @@ function loadData() {
   
   const savedDir = localStorage.getItem("p11-partition-direction") || "RTL";
   window.PartitionDirectionManager.setDirection(savedDir);
+
+  // استرجاع وتطبيق الاتجاهات المحفوظة
+  const defaultDirs = {
+    "p11-w2-dir": "شرقي",
+    "p11-w1-dir": "غربي",
+    "p11-l1-dir": "قبلي",
+    "p11-l2-dir": "بحري"
+  };
+  Object.keys(defaultDirs).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const saved = localStorage.getItem("p11-dir-" + id);
+      el.value = saved || defaultDirs[id];
+      p11LastDirections[id] = el.value;
+    }
+  });
 }
 
 function handleCaratAreaChange(triggerCalculate = true) {
@@ -2838,17 +2873,62 @@ function renderCroquis() {
       c.setAttribute("fill", "#1b5e20");
       g.appendChild(c);
     });
+
+    // --- عرض أسماء الاتجاهات على جوانب الكروكي ---
+    const dirs = getP11Directions();
+    const dirFontSize = Math.max(10, 12 * textScale);
+    const dirColor = "#1565c0";
+    const dirOffset = 38 * textScale;
+
+    // الاتجاه العلوي (أعلى الرسم - العرض الأول C)
+    g.appendChild(svgText(
+      (mapX(0) + mapX(w)) / 2,
+      mapY(0) - dirOffset,
+      dirs.top,
+      { fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true }
+    ));
+
+    // الاتجاه السفلي (أسفل الرسم - العرض الثاني A)
+    const botEdgeY2 = mapY(Math.max(l1, l2)) + dirOffset + 10 * textScale;
+    g.appendChild(svgText(
+      (mapX(0) + mapX(w)) / 2,
+      botEdgeY2,
+      dirs.bottom,
+      { fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true }
+    ));
+
+    // الاتجاه الأيمن (يمين الرسم - الطول الأيمن D)
+    const rDirGroup = svgEl("g");
+    const rDirX = mapX(w) + dirOffset + 10 * textScale;
+    const rDirY = (mapY(0) + mapY(l1)) / 2;
+    rDirGroup.setAttribute("transform", `rotate(-90, ${rDirX}, ${rDirY})`);
+    const tRDir = svgText(rDirX, rDirY, dirs.right, {
+      fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true
+    });
+    rDirGroup.appendChild(tRDir);
+    g.appendChild(rDirGroup);
+
+    // الاتجاه الأيسر (يسار الرسم - الطول الأيسر B)
+    const lDirGroup = svgEl("g");
+    const lDirX = mapX(0) - dirOffset - 10 * textScale;
+    const lDirY = (mapY(0) + mapY(l2)) / 2;
+    lDirGroup.setAttribute("transform", `rotate(-90, ${lDirX}, ${lDirY})`);
+    const tLDir = svgText(lDirX, lDirY, dirs.left, {
+      fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true
+    });
+    lDirGroup.appendChild(tLDir);
+    g.appendChild(lDirGroup);
   }
 
   // === ضبط viewBox على عنصر SVG لعرض كامل المحتوى على جميع الشاشات (الموبايل والكمبيوتر) ===
-  // الأبعاد الإضافية تأخذ بعين الاعتبار نصوص الأبعاد الخارجية التي تتجاوز حدود الشكل
+  // الأبعاد الإضافية تأخذ بعين الاعتبار نصوص الأبعاد الخارجية والاتجاهات التي تتجاوز حدود الشكل
   if (!window.isExporting) {
     const svgEl2 = document.getElementById("croquis-svg");
     if (svgEl2) {
-      const extraLeft = 80;   // مساحة لنصوص الطول الأيسر + خطوط الأبعاد
-      const extraRight = 80;  // مساحة لنصوص الطول الأيمن + خطوط الأبعاد
-      const extraTop = 70;    // مساحة لنصوص العرض العلوي + سهم الاتجاه
-      const extraBottom = 50; // مساحة لنصوص العرض السفلي
+      const extraLeft = 100;   // مساحة لنصوص الطول الأيسر + الاتجاه + خطوط الأبعاد
+      const extraRight = 100;  // مساحة لنصوص الطول الأيمن + الاتجاه + خطوط الأبعاد
+      const extraTop = 90;     // مساحة لنصوص العرض العلوي + الاتجاه + سهم الاتجاه
+      const extraBottom = 70;  // مساحة لنصوص العرض السفلي + الاتجاه
       const vbX = -extraLeft;
       const vbY = -extraTop;
       const vbW = containerW + extraLeft + extraRight;
@@ -2857,6 +2937,7 @@ function renderCroquis() {
       svgEl2.setAttribute("preserveAspectRatio", "xMidYMid meet");
     }
   }
+
 
   // تحديث قائمة مساحات الشركاء أعلى الخريطة
   const legendDiv = document.getElementById("croquis-legend");
@@ -3204,6 +3285,9 @@ function printReport() {
   const w1 = document.getElementById("width1").value || "-";
   const w2 = document.getElementById("width2").value || "-";
   
+  // جلب الاتجاهات الأربعة المختارة من الصفحة أو القيم الافتراضية
+  const dirs = getP11Directions();
+  
   // جلب البيانات الإجمالية المحدثة مباشرة من نتائج البرنامج لتوحيد القيم
   const totalArea = document.getElementById("total-area-sqm-res") ? document.getElementById("total-area-sqm-res").innerText.replace(" م²", "") : "-";
   const totalShares = document.getElementById("total-area-shares-res") ? document.getElementById("total-area-shares-res").innerText : "0";
@@ -3295,10 +3379,10 @@ function printReport() {
             </tr>
           </thead>
           <tbody>
-            <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${w2_val} م</td></tr>
-            <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${w1_val} م</td></tr>
-            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن</td><td style="font-weight:bold;color:#1b5e20;">${rightL_val} م</td></tr>
-            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر</td><td style="font-weight:bold;color:#1b5e20;">${leftL_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (${dirs.top})</td><td style="font-weight:bold;color:#1b5e20;">${w2_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (${dirs.bottom})</td><td style="font-weight:bold;color:#1b5e20;">${w1_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن (${dirs.right})</td><td style="font-weight:bold;color:#1b5e20;">${rightL_val} م</td></tr>
+            <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر (${dirs.left})</td><td style="font-weight:bold;color:#1b5e20;">${leftL_val} م</td></tr>
             <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgW_val} م</td></tr>
             <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgL_val} م</td></tr>
           </tbody>
@@ -3588,10 +3672,10 @@ function printReport() {
         </tr>
       </thead>
       <tbody>
-        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${w2} م</td></tr>
-        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${w1} م</td></tr>
-        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيمن</td><td style="font-weight:bold;color:#1b5e20;">${l1} م</td></tr>
-        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيسر</td><td style="font-weight:bold;color:#1b5e20;">${l2} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الأول (${dirs.top})</td><td style="font-weight:bold;color:#1b5e20;">${w2} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">العرض الثاني (${dirs.bottom})</td><td style="font-weight:bold;color:#1b5e20;">${w1} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيمن (${dirs.right})</td><td style="font-weight:bold;color:#1b5e20;">${l1} م</td></tr>
+        <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">الطول الأيسر (${dirs.left})</td><td style="font-weight:bold;color:#1b5e20;">${l2} م</td></tr>
         <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgWidth.toFixed(4)} م</td></tr>
         <tr><td style="text-align:right;padding-right:15px;font-weight:bold;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgLength.toFixed(4)} م</td></tr>
         <tr style="background:#e8f5e9;"><td style="text-align:right;padding-right:15px;font-weight:bold;color:#1b5e20;">جملة المساحة بالمتر المربع</td><td style="font-weight:bold;color:#c62828;font-size:11pt;">${totalArea} م²</td></tr>
@@ -3982,14 +4066,16 @@ function exportExcel() {
   const w2 = document.getElementById("width2").value || "";
   const totalArea = document.getElementById("calc-area-m2") ? document.getElementById("calc-area-m2").innerText : "";
   
+  const dirs = getP11Directions();
+  
   // ترويسة المعلومات
   const infoRows = [
     ["تقرير تقسيم أرض باختلاف الأطوال - الدلال"],
     ["تاريخ التقرير", new Date().toLocaleDateString('ar-EG')],
     [],
     ["أبعاد الأرض الإجمالية"],
-    ["العرض الأول (م)", w1, "العرض الثاني (م)", w2],
-    ["الطول الأيمن (م)", l1, "الطول الأيسر (م)", l2],
+    [`العرض الأول (${dirs.top}) (م)`, w1, `العرض الثاني (${dirs.bottom}) (م)`, w2],
+    [`الطول الأيمن (${dirs.right}) (م)`, l1, `الطول الأيسر (${dirs.left}) (م)`, l2],
     ["المساحة الإجمالية (م²)", totalArea],
     [],
     ["جدول التقسيم"]
@@ -6274,5 +6360,118 @@ window.toggleSettingsAccordion = toggleSettingsAccordion;
 window.initSettingsAccordion = initSettingsAccordion;
 
 
+/* ================================================================
+   إدارة اتجاهات الحدود (بحري / قبلي / شرقي / غربي)
+   مطابقة للمنطق الموجود في صفحة رسم وتقسيم الأراضي (Page12)
+   ================================================================ */
 
+/**
+ * الأزواج المتقابلة: كل اتجاه وله اتجاهه المقابل
+ */
+const P11_OPPOSITE = {
+  "بحري": "قبلي",
+  "قبلي": "بحري",
+  "شرقي": "غربي",
+  "غربي": "شرقي"
+};
+
+/**
+ * قوائم الاتجاهات المنسدلة: العروض متقابلة فيما بينها، والأطوال متقابلة فيما بينها
+ * - العروض: p11-w2-dir (أعلى C) ↔ p11-w1-dir (أسفل A)
+ * - الأطوال: p11-l1-dir (أيمن D) ↔ p11-l2-dir (أيسر B)
+ */
+const P11_PAIRED = {
+  "p11-w2-dir": "p11-w1-dir",
+  "p11-w1-dir": "p11-w2-dir",
+  "p11-l1-dir": "p11-l2-dir",
+  "p11-l2-dir": "p11-l1-dir"
+};
+
+/**
+ * handleP11DirectionChange - معالجة تغيير اتجاه الضلع مع التبديل التلقائي للضلع المقابل
+ *
+ * @description يضمن أن الاتجاهات دائمًا متقابلة ومنطقية:
+ *              - شرقي ↔ غربي (للأطوال)
+ *              - بحري ↔ قبلي (للعروض)
+ *              عند تغيير أي اتجاه يُحدَّث الاتجاه المقابل تلقائياً.
+ *
+ * @param {string} changedId - معرف القائمة المنسدلة التي تم تغييرها
+ */
+function handleP11DirectionChange(changedId) {
+  const selectEl = document.getElementById(changedId);
+  if (!selectEl) return;
+
+  const newVal = selectEl.value.trim();
+
+  // تحديد القائمة المقابلة وتحديثها تلقائياً بالاتجاه المعاكس
+  const pairedId = P11_PAIRED[changedId];
+  if (pairedId) {
+    const pairedEl = document.getElementById(pairedId);
+    if (pairedEl) {
+      const oppositeVal = P11_OPPOSITE[newVal];
+      if (oppositeVal && pairedEl.value !== oppositeVal) {
+        pairedEl.value = oppositeVal;
+        p11LastDirections[pairedId] = oppositeVal;
+      }
+    }
+  }
+
+  p11LastDirections[changedId] = newVal;
+
+  // حفظ الاتجاهات الجديدة
+  const dirIds = ["p11-w2-dir", "p11-w1-dir", "p11-l1-dir", "p11-l2-dir"];
+  dirIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) localStorage.setItem("p11-dir-" + id, el.value);
+  });
+
+  // تحديث الكروكي إن وُجدت بيانات
+  if (typeof renderCroquis === "function") {
+    renderCroquis();
+  }
+}
+
+/**
+ * resetP11DirectionsToDefault - إعادة جميع الاتجاهات للوضع الافتراضي
+ * الافتراضي: شرقي (أعلى)، غربي (أسفل)، قبلي (أيمن)، بحري (أيسر)
+ */
+function resetP11DirectionsToDefault() {
+  const defaults = {
+    "p11-w2-dir": "شرقي",
+    "p11-w1-dir": "غربي",
+    "p11-l1-dir": "قبلي",
+    "p11-l2-dir": "بحري"
+  };
+
+  Object.keys(defaults).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = defaults[id];
+      p11LastDirections[id] = defaults[id];
+      localStorage.setItem("p11-dir-" + id, defaults[id]);
+    }
+  });
+
+  if (typeof renderCroquis === "function") {
+    renderCroquis();
+  }
+}
+
+/**
+ * getP11Directions - الحصول على قيم الاتجاهات الحالية كـ object
+ * يُستخدم داخل renderCroquis لعرض الاتجاهات على الكروكي
+ */
+function getP11Directions() {
+  return {
+    top:    (document.getElementById("p11-w2-dir") || {}).value || "بحري",   // العرض الأول (أعلى C)
+    bottom: (document.getElementById("p11-w1-dir") || {}).value || "قبلي",  // العرض الثاني (أسفل A)
+    right:  (document.getElementById("p11-l1-dir") || {}).value || "شرقي",  // الطول الأيمن (D)
+    left:   (document.getElementById("p11-l2-dir") || {}).value || "غربي"   // الطول الأيسر (B)
+  };
+}
+
+// تصدير الدوال للنطاق العالمي
+window.handleP11DirectionChange = handleP11DirectionChange;
+window.resetP11DirectionsToDefault = resetP11DirectionsToDefault;
+window.getP11Directions = getP11Directions;
 

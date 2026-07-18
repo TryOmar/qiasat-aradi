@@ -352,3 +352,66 @@ div[style*="f1f8e9"] {
     padding: 12px !important;
   }
 }
+
+/* ---- تنسيق مستوعب حقل الإدخال والاتجاه في وضع الخارج ---- */
+.input-row .input-with-select-wrapper {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+  width: 160px !important; /* يطابق العرض الأصلي لحقل الإدخال في وضع الخارج */
+  flex-shrink: 0 !important;
+}
+
+.input-row .input-with-select-wrapper input {
+  width: 0 !important;
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  min-width: 60px !important;
+  height: 50px !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+}
+
+.input-row .input-with-select-wrapper select {
+  width: 90px !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  height: 50px !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+.direction-select {
+  border: 2px solid #1B5E20 !important;
+  background-color: #e8f5e9 !important; /* استخدام background-color لمنع مسح الصورة الخلفية */
+  color: #1b5e20 !important;
+  border-radius: 8px !important;
+  
+  /* الحفاظ على السهم المخصص لوضع الخارج وثباته */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M2 2l4 4 4-4' stroke='%231b5e20' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: left 8px center !important;
+  padding: 2px 4px 2px 24px !important; /* مساحة للسهم على اليسار ومحاذاة النص */
+}
+
+/* التجاوب على الموبايل لوضع الخارج */
+@media (max-width: 768px) {
+  .input-row .input-with-select-wrapper {
+    width: 100% !important;
+  }
+  .input-row .input-with-select-wrapper input {
+    height: 56px !important;
+    font-size: 22px !important;
+  }
+  .input-row .input-with-select-wrapper select {
+    height: 56px !important;
+    font-size: 20px !important;
+    width: 100px !important;
+    padding-left: 26px !important;
+    background-position: left 10px center !important;
+  }
+}
+

@@ -39,20 +39,59 @@
         <div class="dynamic-inputs-container">
           <div class="input-row">
             <label for="width2">العرض الأول (أعلى) (C) بالمتر:</label>
-            <input tabindex="1" dir="auto" type="text" inputmode="decimal" id="width2" placeholder="مثال: 30" onblur="saveAndCalc()">
+            <div class="input-with-select-wrapper">
+              <input tabindex="1" dir="auto" type="text" inputmode="decimal" id="width2" placeholder="مثال: 30" onblur="saveAndCalc()">
+              <select id="p11-w2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w2-dir')" tabindex="5">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي" selected>شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
           <div class="input-row">
             <label for="width1">العرض الثاني (أسفل) (A) بالمتر:</label>
-            <input tabindex="2" dir="auto" type="text" inputmode="decimal" id="width1" placeholder="مثال: 35" onblur="saveAndCalc()">
+            <div class="input-with-select-wrapper">
+              <input tabindex="2" dir="auto" type="text" inputmode="decimal" id="width1" placeholder="مثال: 35" onblur="saveAndCalc()">
+              <select id="p11-w1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w1-dir')" tabindex="6">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي" selected>غربي</option>
+              </select>
+            </div>
           </div>
           <div class="input-row">
             <label for="length1">الطول الأيمن (D) بالمتر:</label>
-            <input tabindex="3" dir="auto" type="text" inputmode="decimal" id="length1" placeholder="مثال: 50" onblur="saveAndCalc()">
+            <div class="input-with-select-wrapper">
+              <input tabindex="3" dir="auto" type="text" inputmode="decimal" id="length1" placeholder="مثال: 50" onblur="saveAndCalc()">
+              <select id="p11-l1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l1-dir')" tabindex="7">
+                <option value="بحري">بحري</option>
+                <option value="قبلي" selected>قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
           <div class="input-row">
             <label for="length2">الطول الأيسر (B) بالمتر:</label>
-            <input tabindex="4" dir="auto" type="text" inputmode="decimal" id="length2" placeholder="مثال: 45" onblur="saveAndCalc()">
+            <div class="input-with-select-wrapper">
+              <input tabindex="4" dir="auto" type="text" inputmode="decimal" id="length2" placeholder="مثال: 45" onblur="saveAndCalc()">
+              <select id="p11-l2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l2-dir')" tabindex="8">
+                <option value="بحري" selected>بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+        </div>
+
+        <!-- زر إعادة الاتجاهات للوضع الافتراضي -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+          <button type="button" onclick="resetP11DirectionsToDefault()" style="background: none; border: none; color: #1b5e20; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;">
+            🔄 إعادة الاتجاهات للوضع الافتراضي
+          </button>
         </div>
         
         <div style="display: flex; justify-content: center; margin-top: 12px; width: 100%;">
