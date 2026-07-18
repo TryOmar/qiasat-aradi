@@ -2802,7 +2802,7 @@ function renderCroquis() {
     }));
 
     // 5. اتجاه التقسيم (سهم مع كتابة أعلى الرسم)
-    const arrowY = mapY(0) - dimOffset - 25 * textScale;
+    const arrowY = mapY(0) - 78 * textScale;
     const isLTR = window.PartitionDirectionManager.isLTR();
     
     const arrowStartX = isLTR ? (mapX(0) + 40 * textScale) : (mapX(w) - 40 * textScale);
@@ -2868,7 +2868,7 @@ function renderCroquis() {
     const dirs = getP11Directions();
     const dirFontSize = Math.max(10, 12 * textScale);
     const dirColor = "#1565c0";
-    const dirOffset = 38 * textScale;
+    const dirOffset = 52 * textScale;
 
     // الاتجاه العلوي (أعلى الرسم - العرض الأول C)
     g.appendChild(svgText(
@@ -2917,8 +2917,8 @@ function renderCroquis() {
     if (svgEl2) {
       const extraLeft = 100;   // مساحة لنصوص الطول الأيسر + الاتجاه + خطوط الأبعاد
       const extraRight = 100;  // مساحة لنصوص الطول الأيمن + الاتجاه + خطوط الأبعاد
-      const extraTop = 90;     // مساحة لنصوص العرض العلوي + الاتجاه + سهم الاتجاه
-      const extraBottom = 70;  // مساحة لنصوص العرض السفلي + الاتجاه
+      const extraTop = 130;     // مساحة لنصوص العرض العلوي + الاتجاه + سهم الاتجاه
+      const extraBottom = 95;  // مساحة لنصوص العرض السفلي + الاتجاه
       const vbX = -extraLeft;
       const vbY = -extraTop;
       const vbW = containerW + extraLeft + extraRight;
@@ -4614,13 +4614,14 @@ function showToast(message) {
   
   const toast = document.createElement("div");
   toast.id = "page11-copy-toast";
+  toast.className = "outdoor-mode-exempt";
   toast.style.cssText = `
     position: fixed;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #134614;
-    color: #ffffff;
+    color: #ffffff !important;
     padding: 10px 20px;
     border-radius: 8px;
     font-size: 14px;
