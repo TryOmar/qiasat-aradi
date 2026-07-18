@@ -24,7 +24,7 @@ body {
 
 /* --- عناوين البطاقات: أخضر غامق + نص أبيض --- */
 .s h3 {
-  background-color: #1B5E20 !important;
+  background-color: #134614 !important; /* أخضر أغمق لزيادة التباين تحت الشمس */
   color: #FFFFFF !important;
   font-size: 17px !important;
   font-weight: bold !important;
@@ -84,17 +84,22 @@ p, span, label, div, td, th {
 
 /* --- رأس الجدول: أخضر غامق + نص أبيض كبير --- */
 .table-header {
-  background-color: #2E7D32 !important;
+  background-color: #134614 !important; /* أخضر أغمق لزيادة التباين تحت الشمس */
   border-bottom: none !important;
   border-radius: 6px 6px 0 0 !important;
 }
 
-.table-header p {
+#table-header-container th,
+.table-header th,
+.table-header p,
+.table-header span {
   color: #FFFFFF !important;
+  background-color: #134614 !important; /* خلفية متناسقة عالية التباين */
   font-size: 14px !important;
-  font-weight: bold !important;
+  font-weight: 900 !important; /* خط عريض جداً لأشعة الشمس */
   padding: 6px 2px !important;
   margin: 0 !important;
+  text-align: center !important;
 }
 
 /* --- حقول الشركاء في الجدول --- */
