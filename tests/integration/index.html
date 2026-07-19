@@ -324,6 +324,62 @@
       color: var(--text-muted);
       font-size: 0.9rem;
     }
+
+    /* Benchmark styling */
+    .benchmark-box {
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 24px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-premium);
+      padding: 30px;
+      margin-top: 40px;
+    }
+    .benchmark-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #a78bfa;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Cairo', sans-serif;
+    }
+    .benchmark-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.95rem;
+      text-align: right;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .benchmark-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .benchmark-table td {
+      font-family: 'Inter', monospace;
+      color: #e2e8f0;
+    }
+    .btn-download-baseline {
+      background: var(--success-green);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: 'Cairo', sans-serif;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn-download-baseline:hover {
+      opacity: 0.9;
+    }
   </style>
 
   <!-- 1. تحميل ثوابت ونواة الحسابات -->
@@ -345,6 +401,7 @@
   <script src="./page13.js"></script>
   <script src="./loader.js"></script>
   <script src="./compatibility.js"></script>
+  <script src="../benchmark.js"></script>
 </head>
 <body>
 
@@ -358,6 +415,8 @@
       <!--Sidebar-->
       <div class="sidebar-card">
         <button class="btn-run" onclick="runIntegrationSuite()">تشغيل الاختبارات 🚀</button>
+        <button class="btn-run" onclick="runPerformanceBenchmarks()" style="background: #8b5cf6; margin-top: 10px; font-size: 0.95rem; padding: 12px 20px;">تشغيل اختبار الأداء ⚡</button>
+        <div id="benchmark-status" style="font-size: 0.8rem; text-align: center; color: var(--text-muted); margin-top: 8px; font-family: Cairo, sans-serif;"></div>
         
         <div class="stats-container">
           <div class="stat-item">
@@ -526,6 +585,311 @@
         </div>
       `;
       container.appendChild(summaryBox);
+    }
+
+    let lastBenchmarkData = null;
+
+    function runPerformanceBenchmarks() {
+      const btn = document.querySelector("button[onclick='runPerformanceBenchmarks()']");
+      const statusEl = document.getElementById("benchmark-status");
+      
+      btn.disabled = true;
+      btn.style.opacity = "0.5";
+      statusEl.textContent = "جاري تهيئة بيئة القياس...";
+
+      runPerformanceBenchmark(
+        // onProgress
+        (count) => {
+          statusEl.textContent = `جاري قياس الأداء لـ ${count} شريك...`;
+        },
+        // onComplete
+        (results) => {
+          lastBenchmarkData = results;
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          statusEl.textContent = "اكتمل القياس بنجاح! 🎉";
+
+          // Render results in table
+          renderBenchmarkTable(results);
+        }
+      );
+    }
+
+    function renderBenchmarkTable(results) {
+      let box = document.getElementById("benchmark-results-box");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "benchmark-results-box";
+        box.className = "benchmark-box";
+        document.querySelector(".container").appendChild(box);
+      }
+
+      // --- Part 1: Sizing Scaling Benchmark table ---
+      let tableHtml = `
+        <div class="benchmark-title">
+          <span>⚡ نتائج قياس الأداء المرجعي والتوسع (Workload Scaling Benchmarks)</span>
+          <button class="btn-download-baseline" onclick="downloadBaselineJson()">📄 حفظ كـ Baseline JSON</button>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
+          تم قياس الأداء الفعلي في وضع الإنتاج (DALLAL_DEBUG = false) مع تصفية أسرع وأبطأ محاولة من أصل 10 تكرارات.
+        </div>
+        <table class="benchmark-table" style="margin-bottom: 40px;">
+          <thead>
+            <tr>
+              <th style="text-align:right;">عدد الشركاء</th>
+              <th>زمن الحساب (ms)</th>
+              <th>زمن الرسم (ms)</th>
+              <th>الزمن الكلي (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      results.scaling.forEach(run => {
+        tableHtml += `
+          <tr>
+            <td style="text-align:right; font-weight:bold; color:var(--primary-gold);">${run.partnersCount} شريك</td>
+            <td>${run.calcTimeMs.toFixed(2)} ms</td>
+            <td>${run.renderTimeMs.toFixed(2)} ms</td>
+            <td style="font-weight:bold; color:#a78bfa;">${run.totalTimeMs.toFixed(2)} ms</td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          </tbody>
+        </table>
+      `;
+
+    function renderBenchmarkTable(results) {
+      let box = document.getElementById("benchmark-results-box");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "benchmark-results-box";
+        box.className = "benchmark-box";
+        document.querySelector(".container").appendChild(box);
+      }
+
+      // Helper to format memory
+      function formatMemoryDelta(start, end) {
+        if (start === null || end === null) return "غير مدعوم";
+        const diff = end - start;
+        return `${(diff / 1024 / 1024).toFixed(2)} MB`;
+      }
+
+      // Helper to check budget and return diagnostics
+      function getBudgetStatus(value, threshold, type, incStage) {
+        if (value <= threshold) {
+          return "✅";
+        }
+        
+        let reason = "Unknown";
+        if (type === "domCache") {
+          // totalTimeMs failed
+          if (incStage.calcTimeMs > 20) reason = "Calculation (خوارزمية الحساب)";
+          else if (incStage.renderTimeMs > 16) reason = "Rendering (رسم الكروكي)";
+          else reason = "DOM/Layout (تحديث الواجهة)";
+        } else if (type === "docFragment") {
+          reason = "DOM/Layout (إدراج الصفوف)";
+        } else if (type === "dirtyFlag") {
+          reason = "Rendering (الرسم المكرر)";
+        } else if (type === "debounce") {
+          reason = "Debounce/Events (تحديثات المدخلات)";
+        }
+
+        return `❌ <br><small style="color:var(--error-red); font-weight:bold;">Reason: ${reason}</small>`;
+      }
+
+      // --- Part 1: Sizing Scaling Benchmark table ---
+      let tableHtml = `
+        <div class="benchmark-title">
+          <span>⚡ نتائج قياس الأداء المرجعي والتوسع (Workload Scaling Benchmarks)</span>
+          <button class="btn-download-baseline" onclick="downloadBaselineJson()">📄 حفظ كـ Baseline JSON</button>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
+          تم قياس الأداء الفعلي في وضع الإنتاج (DALLAL_DEBUG = false) مع تصفية أسرع وأبطأ محاولة من أصل 10 تكرارات.
+        </div>
+        <table class="benchmark-table" style="margin-bottom: 40px;">
+          <thead>
+            <tr>
+              <th style="text-align:right;">عدد الشركاء</th>
+              <th>زمن الحساب (ms)</th>
+              <th>زمن الرسم (ms)</th>
+              <th>الزمن الكلي (ms)</th>
+              <th>تغير الذاكرة (Memory Delta)</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      results.scaling.forEach(run => {
+        tableHtml += `
+          <tr>
+            <td style="text-align:right; font-weight:bold; color:var(--primary-gold);">${run.partnersCount} شريك</td>
+            <td>${run.calcTimeMs.toFixed(2)} ms</td>
+            <td>${run.renderTimeMs.toFixed(2)} ms</td>
+            <td style="font-weight:bold; color:#a78bfa;">${run.totalTimeMs.toFixed(2)} ms</td>
+            <td>${formatMemoryDelta(run.memBeforeBytes, run.memAfterBytes)}</td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          </tbody>
+        </table>
+      `;
+
+      // --- Part 2: Incremental Optimizations Comparison Table (100 Partners) ---
+      const inc = results.incremental;
+      
+      const beforeDomCache = inc.baseline.totalTimeMs;
+      const afterDomCache = inc.domCache.totalTimeMs;
+      const impDomCache = Math.max(0, Math.round(((beforeDomCache - afterDomCache) / beforeDomCache) * 100));
+
+      const beforeDocFrag = inc.domCache.tableUpdateTimeMs;
+      const afterDocFrag = inc.documentFragment.tableUpdateTimeMs;
+      const impDocFrag = Math.max(0, Math.round(((beforeDocFrag - afterDocFrag) / beforeDocFrag) * 100));
+
+      const beforeDirty = inc.documentFragment.reRenderTimeMs;
+      const afterDirty = inc.dirtyFlag.reRenderTimeMs;
+      const impDirty = Math.max(0, Math.round(((beforeDirty - afterDirty) / beforeDirty) * 100));
+
+      const beforeDebounce = inc.dirtyFlag.debounceCalls;
+      const afterDebounce = inc.debounce.debounceCalls;
+      const impDebounce = Math.max(0, Math.round(((beforeDebounce - afterDebounce) / beforeDebounce) * 100));
+
+      // Budgets check (DOM Cache < 50ms, documentFragment update < 40ms, dirtyFlag reRender < 2ms, debounce calls === 1)
+      const domCacheBudget = getBudgetStatus(afterDomCache, 50, "domCache", inc.domCache);
+      const docFragBudget = getBudgetStatus(afterDocFrag, 40, "docFragment", inc.documentFragment);
+      const dirtyFlagBudget = getBudgetStatus(afterDirty, 2, "dirtyFlag", inc.dirtyFlag);
+      const debounceBudget = getBudgetStatus(afterDebounce, 1, "debounce", inc.debounce);
+
+      // Correctness check
+      const domCacheCorrect = inc.domCache.correctnessPassed ? "✅ سليم (طابق خط الأساس)" : "❌ تراجع (Regression)";
+      const docFragCorrect = inc.documentFragment.correctnessPassed ? "✅ سليم (طابق خط الأساس)" : "❌ تراجع (Regression)";
+      const dirtyFlagCorrect = inc.dirtyFlag.correctnessPassed ? "✅ سليم (طابق خط الأساس)" : "❌ تراجع (Regression)";
+      const debounceCorrect = inc.debounce.correctnessPassed ? "✅ سليم (طابق خط الأساس)" : "❌ تراجع (Regression)";
+
+      // Memory Deltas
+      const memDomCache = formatMemoryDelta(inc.baseline.memBeforeBytes, inc.domCache.memAfterBytes);
+      const memDocFrag = formatMemoryDelta(inc.domCache.memBeforeBytes, inc.documentFragment.memAfterBytes);
+      const memDirty = formatMemoryDelta(inc.documentFragment.memBeforeBytes, inc.dirtyFlag.memAfterBytes);
+      const memDebounce = formatMemoryDelta(inc.dirtyFlag.memBeforeBytes, inc.debounce.memAfterBytes);
+
+      tableHtml += `
+        <div class="benchmark-title" style="margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 25px;">
+          <span>📈 جدول تحليل التحسينات المستقلة (Incremental Improvements - 100 Partners)</span>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
+          يوضح هذا الجدول أثر كل تحسين هندسي بشكل مستقل مقارنة بالخطوة السابقة له لتقييم كفاءة التعديل بدقة، مع فحص التطابق الحسابي لمنع أي تراجع.
+        </div>
+        <table class="benchmark-table" style="margin-bottom: 40px;">
+          <thead>
+            <tr>
+              <th style="text-align:right;">التحسين المطبق (Optimization)</th>
+              <th>قبل التطبيق (Before)</th>
+              <th>بعد التطبيق (After)</th>
+              <th>نسبة التحسن (Improvement)</th>
+              <th>تغير الذاكرة (Memory Delta)</th>
+              <th>الميزانية (Budget)</th>
+              <th>تطابق النتائج (Regression-Free)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:#f59e0b;">DOM Cache (تسريع جلب العناصر)</td>
+              <td>${beforeDomCache.toFixed(2)} ms</td>
+              <td>${afterDomCache.toFixed(2)} ms</td>
+              <td style="font-weight:bold; color:var(--success-green);">${impDomCache}% +</td>
+              <td>${memDomCache}</td>
+              <td>${domCacheBudget}</td>
+              <td style="font-size: 0.85rem; color: ${inc.domCache.correctnessPassed ? 'var(--success-green)' : 'var(--error-red)'};">${domCacheCorrect}</td>
+            </tr>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:#f59e0b;">DocumentFragment (تسريع بناء الجدول)</td>
+              <td>${beforeDocFrag.toFixed(2)} ms</td>
+              <td>${afterDocFrag.toFixed(2)} ms</td>
+              <td style="font-weight:bold; color:var(--success-green);">${impDocFrag}% +</td>
+              <td>${memDocFrag}</td>
+              <td>${docFragBudget}</td>
+              <td style="font-size: 0.85rem; color: ${inc.documentFragment.correctnessPassed ? 'var(--success-green)' : 'var(--error-red)'};">${docFragCorrect}</td>
+            </tr>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:#f59e0b;">Dirty Flag (منع الرسم المكرر)</td>
+              <td>${beforeDirty.toFixed(2)} ms</td>
+              <td>${afterDirty.toFixed(2)} ms</td>
+              <td style="font-weight:bold; color:var(--success-green);">${impDirty}% +</td>
+              <td>${memDirty}</td>
+              <td>${dirtyFlagBudget}</td>
+              <td style="font-size: 0.85rem; color: ${inc.dirtyFlag.correctnessPassed ? 'var(--success-green)' : 'var(--error-red)'};">${dirtyFlagCorrect}</td>
+            </tr>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:#f59e0b;">Debounce (دمج الكتابة وتقليل الضغط)</td>
+              <td>${beforeDebounce} تحديثات</td>
+              <td>${afterDebounce} تحديث</td>
+              <td style="font-weight:bold; color:var(--success-green);">${impDebounce}% +</td>
+              <td>${memDebounce}</td>
+              <td>${debounceBudget}</td>
+              <td style="font-size: 0.85rem; color: ${inc.debounce.correctnessPassed ? 'var(--success-green)' : 'var(--error-red)'};">${debounceCorrect}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      // --- Part 3: Real User Typing Simulation Table (6 rapid keystrokes) ---
+      const typingBaselineCalls = inc.baseline.typingRenderCalls;
+      const typingDebounceCalls = inc.debounce.typingRenderCalls;
+      const typingCallsImprovement = Math.round(((typingBaselineCalls - typingDebounceCalls) / typingBaselineCalls) * 100);
+
+      tableHtml += `
+        <div class="benchmark-title" style="margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 25px;">
+          <span>✍️ نتائج محاكاة الكتابة الفعلية للمستخدم (Real User Typing Simulation - 6 Keystrokes)</span>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
+          يحاكي هذا الاختبار قيام المستخدم بكتابة متتابعة سريعة (مثل 5 -> 50 -> 500 -> 50 -> 5 -> 52) لقياس مدى تقليل الضغط على المعالج وتأخير إعادة الرسم.
+        </div>
+        <table class="benchmark-table">
+          <thead>
+            <tr>
+              <th style="text-align:right;">مستوى التحسين (Optimization Level)</th>
+              <th>الزمن المستهلك (Typing Time)</th>
+              <th>عدد مرات إعادة الرسم (Render Calls)</th>
+              <th>توفير الجهد الحسابي (CPU Render Savings)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:var(--text-muted);">خط الأساس (Baseline - بدون Debounce)</td>
+              <td>${inc.baseline.typingTimeMs.toFixed(2)} ms</td>
+              <td>${typingBaselineCalls} رسومات</td>
+              <td>خط الأساس (0%)</td>
+            </tr>
+            <tr>
+              <td style="text-align:right; font-weight:bold; color:var(--primary-gold);">بعد التفعيل (Debounce 120ms نشط)</td>
+              <td>${inc.debounce.typingTimeMs.toFixed(2)} ms</td>
+              <td>${typingDebounceCalls} رسمة واحدة</td>
+              <td style="font-weight:bold; color:var(--success-green);">${typingCallsImprovement}% أقل رسماً!</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:20px; text-align:right; direction:rtl;">
+          أحداث المهام الطويلة (Long Tasks) الكلية المرصودة: <strong>${results.longTasks.count} مهام</strong> إجمالاً (المدة: ${results.longTasks.totalDurationMs} ms).
+        </div>
+      `;
+
+      box.innerHTML = tableHtml;
+    }
+
+    function downloadBaselineJson() {
+      if (!lastBenchmarkData) return;
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(lastBenchmarkData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "benchmark-baseline.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     }
 
     // تشغيل تلقائي عند التحميل
