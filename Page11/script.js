@@ -3,7 +3,7 @@ console.log("Trace: Start of script.js loading");
 // --- Performance Optimizations & Caching (Phase 14) ---
 window.DALLAL_PERF = window.DALLAL_PERF || {
   domCache: true,
-  documentFragment: false,
+  documentFragment: true,
   dirtyFlag: false,
   debounce: false
 };
@@ -473,9 +473,14 @@ function loadData() {
   if (savedPartners) {
     try {
       const partners = JSON.parse(savedPartners);
+      const isOptimized = window.DALLAL_PERF && window.DALLAL_PERF.documentFragment;
+      const target = isOptimized ? document.createDocumentFragment() : list;
       partners.forEach(p => {
-        addNewPartnerRow(p.name, p.feddans, p.carats, p.shares, p.fraction, p.botW || "-", p.topW || "-");
+        addNewPartnerRow(p.name, p.feddans, p.carats, p.shares, p.fraction, p.botW || "-", p.topW || "-", false, target);
       });
+      if (isOptimized) {
+        list.appendChild(target);
+      }
     } catch (e) {
       console.error("Error parsing saved partners", e);
     }
@@ -652,14 +657,19 @@ function handleInputMethodChange() {
   });
   
   list.innerHTML = "";
+  const isOptimized = window.DALLAL_PERF && window.DALLAL_PERF.documentFragment;
+  const target = isOptimized ? document.createDocumentFragment() : list;
   savedPartners.forEach(p => {
-    addNewPartnerRow(p.name, p.feddans, p.carats, p.shares, p.fraction);
+    addNewPartnerRow(p.name, p.feddans, p.carats, p.shares, p.fraction, "-", "-", false, target);
   });
+  if (isOptimized) {
+    list.appendChild(target);
+  }
   
   saveAndCalc();
 }
 
-function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-", shouldFocus = false) {
+function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fraction = "", botW = "-", topW = "-", shouldFocus = false, appendTarget = null) {
   // If name is not provided, generate default name based on current rows count
   if (!name) {
     const list = document.getElementById("partners-list");
@@ -793,7 +803,10 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
     `;
   }
   
-  list.appendChild(row);
+  const target = appendTarget || document.getElementById("partners-list");
+  if (target) {
+    target.appendChild(row);
+  }
   if (!name && !feddans && !carats && !shares && !fraction) {
     isManualPartition = false;
     saveAndCalcImmediate();
