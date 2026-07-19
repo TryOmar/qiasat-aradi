@@ -194,14 +194,15 @@ const AgriUnitsTests = {
 
   // ============================================================
   // اختبار المقارنة الذهبي (Golden Comparison Tests)
-  // يولد 500 قيمة عشوائية ويقارن الكود القديم بـ AgriUnits
+  // يضم 3 مجموعات اختبار: عشوائية، حدودية، وواقعية مأخوذة من المستخدمين.
   // ============================================================
   testGoldenComparison() {
-    let mathErrors = 0;
-    const count = 500;
+    let randomErrors = 0;
+    let boundaryErrors = 0;
+    let realWorldErrors = 0;
 
-    for (let i = 0; i < count; i++) {
-      // 1. اختبار المساحة التقريبية (trapezoidArea)
+    // ─── 1. الحالات العشوائية (Random Cases - 500 حالة) ───
+    for (let i = 0; i < 500; i++) {
       const l1 = Math.random() * 500;
       const l2 = Math.random() * 500;
       const w1 = Math.random() * 500;
@@ -209,43 +210,134 @@ const AgriUnitsTests = {
 
       const legacyArea = ((l1 + l2) / 2) * ((w1 + w2) / 2);
       const newArea = AgriUnits.trapezoidArea(l1, l2, w1, w2);
-      const areaDiff = Math.abs(legacyArea - newArea);
+      if (Math.abs(legacyArea - newArea) > 0.000001) randomErrors++;
 
-      if (areaDiff > 0.000001) {
-        mathErrors++;
-      }
-
-      // 2. اختبار تحويل المساحة لـ FCS
       const randomSqm = Math.random() * 100000;
       const caratSizes = [168, 171.388, 175, 175.035];
       const randomCaratSize = caratSizes[Math.floor(Math.random() * caratSizes.length)];
 
-      // المنطق القديم الفعلي لـ convertSquareMetersToFCS
       const totalCarats = randomSqm / randomCaratSize;
       let legF = Math.floor(totalCarats / 24);
       let legC = Math.floor(totalCarats % 24);
       let legS = Number(((totalCarats - (legF * 24 + legC)) * 24).toFixed(2));
-      if (legS >= 24 - 0.015) {
-        legS = 0;
-        legC += 1;
-      }
-      if (legC >= 24) {
-        legF += Math.floor(legC / 24);
-        legC = legC % 24;
-      }
+      if (legS >= 24 - 0.015) { legS = 0; legC += 1; }
+      if (legC >= 24) { legF += Math.floor(legC / 24); legC = legC % 24; }
 
       const newFCS = AgriUnits.sqmToFCS(randomSqm, randomCaratSize);
-      
-      const fDiff = Math.abs(legF - newFCS.feddan);
-      const cDiff = Math.abs(legC - newFCS.carat);
-      const sDiff = Math.abs(legS - newFCS.sahm);
-
-      if (fDiff > 0.000001 || cDiff > 0.000001 || sDiff > 0.01) {
-        mathErrors++;
+      if (Math.abs(legF - newFCS.feddan) > 0.000001 || Math.abs(legC - newFCS.carat) > 0.000001 || Math.abs(legS - newFCS.sahm) > 0.01) {
+        randomErrors++;
       }
     }
 
-    this.assert(`Golden Test (500 iterations): Legacy vs AgriUnits math match`, mathErrors === 0);
+    // ─── 2. الحالات الحدودية (Boundary Cases - 100 حالة) ───
+    const boundaryData = [
+      { l1: 10000, l2: 10000, w1: 10000, w2: 10000, cs: 168 }, // أرض ضخمة جداً
+      { l1: 0.1, l2: 0.2, w1: 0.1, w2: 0.2, cs: 168 },       // أرض متناهية الصغر
+      { l1: 500, l2: 500, w1: 0.01, w2: 0.02, cs: 175 },     // شريط ضيق للغاية
+      { l1: 1000, l2: 0, w1: 1000, w2: 0, cs: 171.388 },     // أبعاد صفرية
+      { l1: 1000, l2: 1000, w1: 1000, w2: 1000, cs: 0.001 }  // مساحة قيراط صغيرة جداً
+    ];
+    for (let i = 0; i < 100; i++) {
+      const base = boundaryData[i % boundaryData.length];
+      const l1 = base.l1 + (Math.random() - 0.5) * 0.01;
+      const l2 = base.l2 + (Math.random() - 0.5) * 0.01;
+      const w1 = base.w1 + (Math.random() - 0.5) * 0.01;
+      const w2 = base.w2 + (Math.random() - 0.5) * 0.01;
+      const cs = base.cs;
+
+      const legacyArea = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+      const newArea = AgriUnits.trapezoidArea(l1, l2, w1, w2);
+      if (Math.abs(legacyArea - newArea) > 0.000001) boundaryErrors++;
+
+      const sqm = legacyArea;
+      const totalCarats = sqm / cs;
+      let legF = Math.floor(totalCarats / 24);
+      let legC = Math.floor(totalCarats % 24);
+      let legS = Number(((totalCarats - (legF * 24 + legC)) * 24).toFixed(2));
+      if (legS >= 24 - 0.015) { legS = 0; legC += 1; }
+      if (legC >= 24) { legF += Math.floor(legC / 24); legC = legC % 24; }
+
+      const newFCS = AgriUnits.sqmToFCS(sqm, cs);
+      if (Math.abs(legF - newFCS.feddan) > 0.000001 || Math.abs(legC - newFCS.carat) > 0.000001 || Math.abs(legS - newFCS.sahm) > 0.01) {
+        boundaryErrors++;
+      }
+    }
+
+    // ─── 3. حالات واقعية من المستخدمين (Real World Cases) ───
+    const realWorldScenarios = [
+      { area: 840, cs: 168 },     // مساحة 5 قراريط بالضبط
+      { area: 72576, cs: 168 },   // مساحة 18 فداناً بالضبط
+      { area: 155.82, cs: 175 },  // مساحة مع كسور وشريك يملك 0.25 سهم
+      { area: 5000000, cs: 168 }, // أكبر مساحة أراضي يدعمها التطبيق (5 ملايين م²)
+      { area: 10.5, cs: 171.388 } // مساحة صغيرة جداً مع قيراط غريب
+    ];
+    realWorldScenarios.forEach(sc => {
+      const totalCarats = sc.area / sc.cs;
+      let legF = Math.floor(totalCarats / 24);
+      let legC = Math.floor(totalCarats % 24);
+      let legS = Number(((totalCarats - (legF * 24 + legC)) * 24).toFixed(2));
+      if (legS >= 24 - 0.015) { legS = 0; legC += 1; }
+      if (legC >= 24) { legF += Math.floor(legC / 24); legC = legC % 24; }
+
+      const newFCS = AgriUnits.sqmToFCS(sc.area, sc.cs);
+      if (legF !== newFCS.feddan || legC !== newFCS.carat || Math.abs(legS - newFCS.sahm) > 0.01) {
+        realWorldErrors++;
+      }
+    });
+
+    this.assert(`Golden Test Set 1 (Random - 500 cases): match`, randomErrors === 0);
+    this.assert(`Golden Test Set 2 (Boundary - 100 cases): match`, boundaryErrors === 0);
+    this.assert(`Golden Test Set 3 (Real-World - user cases): match`, realWorldErrors === 0);
+  },
+
+  // ============================================================
+  // اختبار المقارنة الذهبي الخاص بـ Page13 (Page13 Golden Tests)
+  // يقارن منطق التحويل والترميز القديم الخاص بـ Page13 بـ AgriUnits
+  // ============================================================
+  testPage13GoldenComparison() {
+    let p13Errors = 0;
+    const count = 300;
+
+    for (let i = 0; i < count; i++) {
+      // 1. اختبار convertSqmToFeddans
+      const randomSqm = Math.random() * 50000;
+      const caratSize = 168 + Math.random() * 8;
+
+      const feddanSize = caratSize * 24;
+      const legFeddans = Math.floor(randomSqm / feddanSize);
+      const remainingForCarats = randomSqm - (legFeddans * feddanSize);
+      const legCarats = Math.floor(remainingForCarats / caratSize);
+      const remainingForShares = remainingForCarats - (legCarats * caratSize);
+      const legShares = parseFloat(((remainingForShares * 24) / caratSize).toFixed(2));
+
+      const newFCS = AgriUnits.sqmToFCS(randomSqm, caratSize);
+
+      if (legFeddans !== newFCS.feddan || legCarats !== newFCS.carat || Math.abs(legShares - newFCS.sahm) > 0.01) {
+        p13Errors++;
+      }
+
+      // 2. اختبار normalizeQasabaInputs carry
+      const qasaba = Math.floor(Math.random() * 100);
+      const qabda = Math.floor(Math.random() * 100);
+      const fraction = Math.round(Math.random() * 100) / 100;
+
+      let legQas = qasaba;
+      let legQab = qabda;
+      let legFrac = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
+      if (legQab >= 24) {
+        const carry = Math.floor(legQab / 24);
+        legQas += carry;
+        legQab = legQab % 24;
+      }
+
+      const newQas = AgriUnits.normalizeQasabaQabda(qasaba, qabda, fraction);
+
+      if (legQas !== newQas.qasaba || legQab !== newQas.qabda || Math.abs(legFrac - newQas.fraction) > 0.01) {
+        p13Errors++;
+      }
+    }
+
+    this.assert(`Page13 Golden Test (300 cases): Legacy vs AgriUnits math match`, p13Errors === 0);
   },
 
   // ============================================================
@@ -266,6 +358,7 @@ const AgriUnitsTests = {
     this.testSahmsToFCS();
     this.testTrapezoidArea();
     this.testGoldenComparison();
+    this.testPage13GoldenComparison();
 
     return this.report();
   }

@@ -482,7 +482,11 @@
         // 4. شرط الحماية ضد انعدام وجود شركاء مفتوحين (Eligible Check)
         // ==========================================
         if (targetOthers.length === 0) {
-          alert("فشل التعديل: لا يوجد شريك مفتوح ومؤهل لخصم/إضافة فرق المساحة.");
+          if (window.DallalToast) {
+            DallalToast.error("لا يوجد شريك مفتوح ومؤهل لخصم/إضافة فرق المساحة.");
+          } else {
+            alert("فشل التعديل: لا يوجد شريك مفتوح ومؤهل لخصم/إضافة فرق المساحة.");
+          }
           updateAllHeirsInputsVisuals(); // إعادة الواجهة للقيم الفعلية الصحيحة
           return;
         }
@@ -507,7 +511,11 @@
           });
 
           if (!isValidTransaction) {
-            alert("فشل التعديل: التعديل سيؤدي لحصة سالبة لأحد الشركاء. يرجى اختيار جهة خصم مخصصة أو تعديل الأقفال.");
+            if (window.DallalToast) {
+              DallalToast.error("التعديل سيؤدي لحصة سالبة لأحد الشركاء. يرجى اختيار جهة خصم مخصصة أو تعديل الأقفال.");
+            } else {
+              alert("فشل التعديل: التعديل سيؤدي لحصة سالبة لأحد الشركاء. يرجى اختيار جهة خصم مخصصة أو تعديل الأقفال.");
+            }
             updateAllHeirsInputsVisuals(); // Rollback بصري
             return;
           }
@@ -520,7 +528,11 @@
               draftShares[targetIdx] -= diff;
 
               if (draftShares[targetIdx] < 0) {
-                alert(`فشل التعديل: لا توجد مساحة كافية للخصم من ${targetHeir.name}.`);
+                if (window.DallalToast) {
+                  DallalToast.error(`لا توجد مساحة كافية للخصم من ${targetHeir.name}.`);
+                } else {
+                  alert(`فشل التعديل: لا توجد مساحة كافية للخصم من ${targetHeir.name}.`);
+                }
                 updateAllHeirsInputsVisuals(); // Rollback بصري
                 return;
               }

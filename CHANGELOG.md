@@ -8,6 +8,22 @@
 ### 🚀 إعادة الهيكلة للمكونات المشتركة والمكتبات المنطقية (Commit 9)
 تم فصل منطق الأعمال الحسابية وإدارة التنبيهات والتخزين الموحد إلى مكتبات مستقلة تمهيداً لترحيل التطبيق إلى Flutter وضمان سهولة الصيانة.
 
+#### 🌟 المرحلة العاشرة (دمج Page13/section1 وتوسيع الاختبارات الذهبية)
+* **دمج AgriUnits و AgriConstants في Page13/section1:**
+  * تضمين المكتبات المشتركة في [`Page13/section1/index.html`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/Page13/section1/index.html).
+  * ربط حساب مساحة شبه المنحرف بدالة `AgriUnitsCompat.trapezoidArea`.
+  * ربط التحويلات الزراعية لـ FCS و Qasaba/Qabda بـ `AgriUnitsCompat.sqmToFCS` و `AgriUnitsCompat.metersToQasabaQabda` و `AgriUnitsCompat.qasabaQabdaToMeters` و `AgriUnitsCompat.normalizeQasabaQabda` مع عزل كود Fallback القديم في دوال `legacy*` مستقلة.
+* **دمج DallalStorage في Page13/section1:**
+  * ربط حفظ واستعادة مساحة القيراط `carat_area` واتجاه التقسيم `partition_order_direction` بـ `DallalStorage.local`.
+  * إضافة قاعدة ترحيل ومزامنة ثنائية لـ `partition_order_direction` في `shared/storage.js` [v1.0.2].
+* **دمج DallalToast في Page13/section1:**
+  * استبدال كافة التنبيهات التحذيرية (`alert`) في `script.js` و `smart-share-editor.js` بتنبيهات موحدة RTL جذابة (`DallalToast.warning` و `DallalToast.error`) مع تأمين fallback كامل.
+* **تحسين Page11 (الطبقة الموحدة):**
+  * تعريف كائن توافق موحد `AgriUnitsCompat` في `Page11/script.js` وتوحيد استدعاء الـ Wrappers لتبسيط وقابلية صيانة الكود.
+* **توسيع اختبار المقارنة الذهبي (Expanded Golden Tests):**
+  * توسيع `tests/units.test.js` ليشمل ثلاث فئات اختبار (عشوائية، حدودية، وواقعية مستلهمة من بيانات المستخدمين الحقيقية).
+  * إضافة اختبار ذهبي خاص بـ Page13 (`testPage13GoldenComparison`) يقارن منطق تحويل المساحة للقراريط وتطبيع القصبات/القبضات لـ 300 حالة عشوائية وحدودية للتحقق من الأمان المالي والرياضي.
+
 #### 📦 إضافات وتطوير مكتبات جديدة (Core & Shared Libraries)
 * **`core/constants.js` [v1.1.0]:**
   * تجميع **17 ثابتاً زراعياً مشتركاً** (طول القصبة، عدد القبضات، الأسهم، القراريط، الفدادين، وأحجام الضبط المسبق لمساحة القيراط).

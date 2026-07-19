@@ -1,3 +1,35 @@
+// ── AgriUnits Compatibility Layer ────────────────────────
+// كائن وسيط موحد لتفادي تكرار فحص وجود AgriUnits في كل استدعاء بالصفحة
+const AgriUnitsCompat = {
+  metersToQasabaQabda(meters) {
+    if (window.AgriUnits) return AgriUnits.metersToQasabaQabda(meters);
+    return legacyToQasabaAndQabda(meters);
+  },
+  qasabaQabdaToMeters(qasaba, qabda, fraction) {
+    if (window.AgriUnits) return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
+    return legacyFromQasabaToMeters(qasaba, qabda, fraction);
+  },
+  sqmToFCS(area, caratSize) {
+    if (window.AgriUnits) {
+      const res = AgriUnits.sqmToFCS(area, caratSize);
+      return {
+        feddans: res.feddan,
+        carats: res.carat,
+        shares: res.sahm
+      };
+    }
+    return legacyConvertSqmToFeddans(area, caratSize);
+  },
+  normalizeQasabaQabda(qasaba, qabda, fraction) {
+    if (window.AgriUnits) return AgriUnits.normalizeQasabaQabda(qasaba, qabda, fraction);
+    return legacyNormalizeQasabaQabda(qasaba, qabda, fraction);
+  },
+  trapezoidArea(l1, l2, w1, w2) {
+    if (window.AgriUnits) return AgriUnits.trapezoidArea(l1, l2, w1, w2);
+    return 0.5 * (w1 + w2) * 0.5 * (l1 + l2);
+  }
+};
+
 // DOM Elements
 const shapeCards = document.querySelectorAll(".shape-card");
 const inputsGroups = document.querySelectorAll(".inputs-group");
@@ -87,7 +119,11 @@ window.canvasPiecesGeometry = [];
 let oldZoomFactor = 1.0;
 let isPrinting = false;
 
-window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
+if (window.DallalStorage) {
+  window.partitionOrderDirection = DallalStorage.local.getItem('partition_order_direction') || 'rtl';
+} else {
+  window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
+}
 
 function updatePartitionDirectionButtonUI() {
   const btn = document.getElementById('btn-partition-direction');
@@ -120,7 +156,11 @@ function updatePartitionDirectionIndicatorUI() {
 
 function togglePartitionOrderDirection() {
   window.partitionOrderDirection = window.partitionOrderDirection === 'ltr' ? 'rtl' : 'ltr';
-  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection);
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem('partition_order_direction', window.partitionOrderDirection);
+  } else {
+    localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection);
+  }
   updatePartitionDirectionButtonUI();
   updatePartitionDirectionIndicatorUI();
   
@@ -796,14 +836,19 @@ function toggleRoundingMode() {
 
 function convertSqmToFeddans(sqm, caratSize) {
   if (!sqm || sqm <= 0) return { feddans: 0, carats: 0, shares: 0 };
+  return AgriUnitsCompat.sqmToFCS(sqm, caratSize);
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyConvertSqmToFeddans(sqm, caratSize) {
   const feddanSize = caratSize * 24;
-  
   const feddans = Math.floor(sqm / feddanSize);
   const remainingForCarats = sqm - (feddans * feddanSize);
   const carats = Math.floor(remainingForCarats / caratSize);
   const remainingForShares = remainingForCarats - (carats * caratSize);
   const shares = (remainingForShares * 24) / caratSize;
-  
   return {
     feddans: feddans,
     carats: carats,
@@ -813,10 +858,16 @@ function convertSqmToFeddans(sqm, caratSize) {
 
 // Qasaba and Qabda conversion
 function toQasabaAndQabda(meters) {
+  return AgriUnitsCompat.metersToQasabaQabda(meters);
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyToQasabaAndQabda(meters) {
   if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
   const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24; // ~0.1479167
-  
+  const qabdaLength = qasabaLength / 24;
   let qasaba = Math.floor(meters / qasabaLength);
   let rem = meters - (qasaba * qasabaLength);
   let qabda = Math.floor(rem / qabdaLength);
@@ -830,6 +881,13 @@ function toQasabaAndQabda(meters) {
 
 // Convert قصبة + قبضة + أقل من قبضة back to meters
 function fromQasabaToMeters(qasaba, qabda, fraction) {
+  return AgriUnitsCompat.qasabaQabdaToMeters(qasaba, qabda, fraction);
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyFromQasabaToMeters(qasaba, qabda, fraction) {
   const qasabaLength = 3.55;
   const qabdaLength = qasabaLength / 24;
   return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
@@ -852,15 +910,10 @@ function normalizeQasabaInputs(rowIndex) {
   let qabda   = Math.max(0, parseInt(qabdaEl.value)   || 0);
   let fraction = parseFloat(fracRaw) || 0;
 
-  // Clamp fraction to [0, 0.99]
-  fraction = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
-
-  // Carry: 24 قبضة = 1 قصبة
-  if (qabda >= 24) {
-    const carry = Math.floor(qabda / 24);
-    qasaba += carry;
-    qabda = qabda % 24;
-  }
+  let normalized = AgriUnitsCompat.normalizeQasabaQabda(qasaba, qabda, fraction);
+  qasaba = normalized.qasaba;
+  qabda = normalized.qabda;
+  fraction = normalized.fraction;
 
   // Write back normalized values
   qasabaEl.value  = qasaba;
@@ -868,6 +921,21 @@ function normalizeQasabaInputs(rowIndex) {
   fracEl.value    = fraction;
 
   return { qasaba, qabda, fraction };
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyNormalizeQasabaQabda(qasaba, qabda, fraction) {
+  let qas = qasaba;
+  let qab = qabda;
+  let frac = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
+  if (qab >= 24) {
+    const carry = Math.floor(qab / 24);
+    qas += carry;
+    qab = qab % 24;
+  }
+  return { qasaba: qas, qabda: qab, fraction: frac };
 }
 
 // تصدير الكروكي كصورة مقصوصة وبدون فراغات (PNG)
@@ -1034,7 +1102,7 @@ function calculateAll() {
     ];
 
     if (a > 0 && c > 0 && l1 > 0 && l2 > 0) {
-      area = 0.5 * (a + c) * 0.5 * (l1 + l2);
+      area = AgriUnitsCompat.trapezoidArea(l1, l2, a, c);
       
       const w_coord = 0.5 * (a + c);
       const calculatedSide = Math.hypot(w_coord, l1 - l2); // الضلع المائل العلوي
@@ -2652,7 +2720,11 @@ function updateHeirsDistribution() {
 // Session state storage
 function saveStateToSession() {
   sessionStorage.setItem("activeShape", activeShape);
-  localStorage.setItem("dalal-carat-area", caratSizeInput.value);
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("carat_area", caratSizeInput.value);
+  } else {
+    localStorage.setItem("dalal-carat-area", caratSizeInput.value);
+  }
   sessionStorage.setItem("priceDisplay", caratPriceDisplay.value);
   sessionStorage.setItem("priceNumeric", caratPriceNumeric.value);
   
@@ -2690,7 +2762,11 @@ function saveStateToSession() {
   }
 
   // حفظ اتجاه التقسيم في localStorage
-  localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection || 'rtl');
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem('partition_order_direction', window.partitionOrderDirection || 'rtl');
+  } else {
+    localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection || 'rtl');
+  }
 }
 
 function loadStateFromSession() {
@@ -2730,7 +2806,11 @@ function loadStateFromSession() {
 
   loadCroquisSettings();
   activeShape = sessionStorage.getItem("activeShape") || "trapezoid";
-  caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "168";
+  if (window.DallalStorage) {
+    caratSizeInput.value = DallalStorage.local.getItem("carat_area") || "168";
+  } else {
+    caratSizeInput.value = localStorage.getItem("dalal-carat-area") || "168";
+  }
   caratPresetSelect.value = (["168", "171.388", "175", "175.035"].includes(caratSizeInput.value)) ? caratSizeInput.value : "custom";
   
   caratPriceDisplay.value = sessionStorage.getItem("priceDisplay") || "";
@@ -2808,7 +2888,11 @@ function loadStateFromSession() {
   }
 
   // استرجاع اتجاه التقسيم من localStorage
-  window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
+  if (window.DallalStorage) {
+    window.partitionOrderDirection = DallalStorage.local.getItem('partition_order_direction') || 'rtl';
+  } else {
+    window.partitionOrderDirection = localStorage.getItem('partitionOrderDirection') || 'rtl';
+  }
 }
 
 // Print trigger
@@ -3936,7 +4020,11 @@ function buildFieldGuideData() {
 function openFieldGuideModal() {
   const guideData = buildFieldGuideData();
   if (!guideData) {
-    alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
+    if (window.DallalToast) {
+      DallalToast.warning("يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
+    } else {
+      alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
+    }
     return;
   }
   
@@ -4195,7 +4283,11 @@ let isAnimScriptsLoading = false;
 
 function openAnimationSimulation() {
   if (!heirsData || heirsData.length === 0) {
-    alert("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
+    if (window.DallalToast) {
+      DallalToast.warning("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
+    } else {
+      alert("يرجى حساب وتقسيم الأرض أولاً قبل تشغيل شرح التنفيذ.");
+    }
     return;
   }
   
@@ -4220,7 +4312,11 @@ function openAnimationSimulation() {
   }
 
   if (landTop <= 0 || landBottom <= 0 || landLeft <= 0 || landRight <= 0) {
-    alert("يرجى إدخال أبعاد الأرض الأربعة بشكل صحيح أولاً!");
+    if (window.DallalToast) {
+      DallalToast.warning("يرجى إدخال أبعاد الأرض الأربعة بشكل صحيح أولاً!");
+    } else {
+      alert("يرجى إدخال أبعاد الأرض الأربعة بشكل صحيح أولاً!");
+    }
     return;
   }
 

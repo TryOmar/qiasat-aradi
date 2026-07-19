@@ -1,4 +1,34 @@
 console.log("Trace: Start of script.js loading");
+
+// ── AgriUnits Compatibility Layer ────────────────────────
+// كائن وسيط موحد لتفادي تكرار فحص وجود AgriUnits في كل استدعاء بالصفحة
+const AgriUnitsCompat = {
+  metersToQasabaQabda(meters) {
+    if (window.AgriUnits) return AgriUnits.metersToQasabaQabda(meters);
+    return legacyToQasabaAndQabda(meters);
+  },
+  qasabaQabdaToMeters(qasaba, qabda, fraction) {
+    if (window.AgriUnits) return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
+    return legacyFromQasabaToMeters(qasaba, qabda, fraction);
+  },
+  sqmToFCS(area, caratArea) {
+    if (window.AgriUnits) return AgriUnits.sqmToFCS(area, caratArea);
+    return legacyConvertSquareMetersToFCS(area, caratArea);
+  },
+  normalizeFCS(feddan, carat, sahm) {
+    if (window.AgriUnits) return AgriUnits.normalizeFCS(feddan, carat, sahm);
+    return legacyNormalizeFCS(feddan, carat, sahm);
+  },
+  trapezoidArea(l1, l2, w1, w2) {
+    if (window.AgriUnits) return AgriUnits.trapezoidArea(l1, l2, w1, w2);
+    return ((l1 + l2) / 2) * ((w1 + w2) / 2);
+  },
+  fcsToSqm(feddan, carat, sahm, caratArea) {
+    if (window.AgriUnits) return AgriUnits.fcsToSqm(feddan, carat, sahm, caratArea);
+    return ((feddan * 24) + carat + sahm / 24) * caratArea;
+  }
+};
+
 let currentInputMethod = "carats";
 let croquisScale = 1;
 let croquisTranslateX = 0;
@@ -1061,7 +1091,7 @@ function calculateGeneral(shouldRender = true) {
 
   const w = (w1 + w2) / 2;
   const l = (l1 + l2) / 2;
-  const totalAreaM2 = window.AgriUnits ? AgriUnits.trapezoidArea(l1, l2, w1, w2) : (l * w);
+  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
   const perimeter = l1 + l2 + w1 + w2;
 
   const areaM2Elements = document.querySelectorAll("#calc-area-m2");
@@ -1135,13 +1165,8 @@ function calculateGeneral(shouldRender = true) {
       const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
       const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
       const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-      if (window.AgriUnits) {
-        partnerAreaM2 = AgriUnits.fcsToSqm(f, c, s, caratArea);
-        partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
-      } else {
-        partnerCarats = (f * 24) + c + s / 24;
-        partnerAreaM2 = partnerCarats * caratArea;
-      }
+      partnerAreaM2 = AgriUnitsCompat.fcsToSqm(f, c, s, caratArea);
+      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
     } else {
       const fracInput = row.querySelector(".partner-fraction");
       const fracVal = parseFraction(fracInput ? fracInput.value : "");
@@ -4668,11 +4693,7 @@ function showToast(message) {
 //   دوال التحويل للقصبة والقبضة (مأخوذة من صفحة 13)
 // ============================================================
 function toQasabaAndQabda(meters) {
-  if (window.AgriUnits) {
-    return AgriUnits.metersToQasabaQabda(meters);
-  }
-  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for toQasabaAndQabda.");
-  return legacyToQasabaAndQabda(meters);
+  return AgriUnitsCompat.metersToQasabaQabda(meters);
 }
 
 // ── LEGACY CODE ──────────────────────────────────────────
@@ -4882,11 +4903,7 @@ function updateConversionsTable() {
 
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {
-  if (window.AgriUnits) {
-    return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
-  }
-  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for fromQasabaToMeters.");
-  return legacyFromQasabaToMeters(qasaba, qabda, fraction);
+  return AgriUnitsCompat.qasabaQabdaToMeters(qasaba, qabda, fraction);
 }
 
 // ── LEGACY CODE ──────────────────────────────────────────
@@ -5854,11 +5871,7 @@ function convertSquareMetersToFCS(area) {
   if (caratArea <= 0) {
     return { feddan: 0, carat: 0, sahm: 0 };
   }
-  if (window.AgriUnits) {
-    return AgriUnits.sqmToFCS(area, caratArea);
-  }
-  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for convertSquareMetersToFCS.");
-  return legacyConvertSquareMetersToFCS(area, caratArea);
+  return AgriUnitsCompat.sqmToFCS(area, caratArea);
 }
 
 // ── LEGACY CODE ──────────────────────────────────────────
@@ -5899,13 +5912,7 @@ function normalizeInputFCS(input) {
   let c = parseFloat(cInput?.value) || 0;
   let f = parseFloat(fInput?.value) || 0;
   
-  let normalized;
-  if (window.AgriUnits) {
-    normalized = AgriUnits.normalizeFCS(f, c, s);
-  } else {
-    console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for normalizeInputFCS.");
-    normalized = legacyNormalizeFCS(f, c, s);
-  }
+  let normalized = AgriUnitsCompat.normalizeFCS(f, c, s);
   
   f = normalized.feddan;
   c = normalized.carat;
