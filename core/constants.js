@@ -1,15 +1,26 @@
 /**
  * core/constants.js
  * =================
- * مكتبة الثوابت الزراعية المشتركة - مشروع الدَّلاَّل
+ * مكتبة الثوابت الزراعية المشتركة — مشروع الدَّلاَّل
  *
- * الإصدار: 1.0.0
- * تاريخ الإنشاء: 2026-07-19
- * المرحلة: Commit 9 — Phase 2
+ * @version 1.1.0
+ * @date 2026-07-19
+ * @commit Commit 9 — Phase 2 (updated in Phase 3)
  *
- * الغرض:
- *   تجميع جميع الثوابت الزراعية المشتركة في مكان واحد،
- *   لضمان التوافق بين الصفحات ومنع تعارض القيم.
+ * ─────────────────────────────────────────────────────────────
+ * ⚠️ تحذير للمطوّرين المستقبليين — اقرأ هذا أولاً ⚠️
+ * ─────────────────────────────────────────────────────────────
+ * بعض الثوابت في هذا الملف تحتوي على تعريفَيْن مختلفَيْن.
+ * هذا ليس خطأً في الكود، بل توثيق مقصود لاختلاف حقيقي
+ * موجود في قاعدة الكود الأصلية.
+ *
+ * يمنع توحيد هذه الثوابت أو "تصحيحها" إلا بعد:
+ *   1. مراجعة علمية لطريقة القياس الزراعي المعتمدة
+ *   2. تحديث مستند المعمارية (Architecture Baseline)
+ *   3. موافقة صريحة من صاحب المشروع
+ *
+ * مصدر هذا القرار: تقرير Phase 2، Commit 9، تاريخ 2026-07-19
+ * ─────────────────────────────────────────────────────────────
  *
  * القواعد:
  *   - هذا الملف لا يحتوي على أي دوال
@@ -17,16 +28,9 @@
  *   - هذا الملف لا يتعامل مع localStorage
  *   - جميع الثوابت مجمّعة في كائن AgriConstants واحد
  *
- * ⚠️ ملاحظات التوافق بين الصفحات (مكتشفة أثناء التحليل):
- *   - Page11/script.js و Page13/section1/script.js يستخدمان:
- *       qabdaLength = 3.55 / 24  (أي 24 قبضة في القصبة)
- *   - Page13/section2/script.js يستخدم:
- *       QABDA_IN_METERS = 3.55 / 6  (أي 6 قبضات في القصبة)
- *   هذا تعارض حقيقي موثّق يحتاج مراجعة في مرحلة لاحقة.
- *   الحل المؤجّل: توثيق كلا الثابتَين هنا دون تغيير السلوك الحالي.
- *
  * CHANGELOG:
- *   1.0.0 — إنشاء المكتبة: جمع الثوابت من Page10، Page11، Page12، Page13/section1، Page13/section2
+ *   1.0.0 — إنشاء المكتبة: جمع الثوابت من Page10، Page11، Page12، Page13/s1، Page13/s2
+ *   1.1.0 — تحديث التوثيق: إضافة تعليقات Documented Exception للمطوّرين المستقبليين
  */
 
 // ============================================================
@@ -37,103 +41,148 @@ const AgriConstants = {
   // ----------------------------------------------------------
   // الإصدار والتوثيق
   // ----------------------------------------------------------
-  VERSION: "1.0.0",
+  VERSION: "1.1.0",
   CHANGELOG: {
-    "1.0.0": "إنشاء المكتبة — جمع الثوابت الزراعية من جميع الصفحات (Phase 2, Commit 9)"
+    "1.0.0": "إنشاء المكتبة — جمع الثوابت الزراعية من جميع الصفحات (Phase 2, Commit 9)",
+    "1.1.0": "تحسين التوثيق — إضافة تعليقات Documented Exception (Phase 3, Commit 9)"
   },
 
   // ----------------------------------------------------------
-  // ثوابت القصبة والقبضة (وحدات الطول)
+  // ثوابت القصبة (وحدة الطول الزراعية الأساسية)
   // ----------------------------------------------------------
 
   /**
    * QASABA_METERS
-   * طول القصبة الواحدة بالمتر المربع
-   * المصدر: Page11/script.js (السطر 4659)، Page13/section1/script.js (السطر 817)،
-   *         Page13/section2/script.js (السطر 7)
-   * القيمة المعتمدة: 3.55 في جميع الصفحات ✅ متطابقة
+   * طول القصبة الواحدة بالمتر
+   *
+   * المصدر — متطابق في جميع الصفحات ✅:
+   *   - Page11/script.js      السطر 4659: const qasabaLength = 3.55;
+   *   - Page11/script.js      السطر 4862: const qasabaLength = 3.55;
+   *   - Page13/section1       السطر  817: const qasabaLength = 3.55;
+   *   - Page13/section1       السطر  833: const qasabaLength = 3.55;
+   *   - Page13/section2       السطر    7: const QASBA_IN_METERS = 3.55;
    */
   QASABA_METERS: 3.55,
 
   /**
    * QASABA_SQ_METERS
-   * مساحة القصبة المربعة بالمتر المربع (3.55 × 3.55 = 12.6025)
-   * المصدر: Page13/section2/script.js (السطر 10)، Page11/script.js (السطر 4817: يستخدم 12.60250 مباشرة)
-   * القيمة المعتمدة: 12.6025
+   * مساحة القصبة المربعة بالمتر المربع
+   * = 3.55 × 3.55 = 12.6025
+   *
+   * المصدر:
+   *   - Page13/section2  السطر 10: const QASBA_SQ = QASBA_IN_METERS * QASBA_IN_METERS;
+   *   - Page11/script.js السطر 4817: يستخدم القيمة الحرفية 12.60250 مباشرة
    */
   QASABA_SQ_METERS: 3.55 * 3.55, // = 12.602500
 
   /**
+   * CM_IN_METERS
+   * طول السنتيمتر الواحد بالمتر
+   * المصدر: Page13/section2 السطر 9
+   */
+  CM_IN_METERS: 0.01,
+
+  // ----------------------------------------------------------
+  // ⚠️ DOCUMENTED EXCEPTION: تعريف القبضة
+  // ----------------------------------------------------------
+  // الاختلاف: Page11 و section1 يعرّفان القبضة بأنها 1/24 من القصبة
+  //           بينما section2 تعرّفها بأنها 1/6 من القصبة.
+  //
+  // هذا اختلاف في المفهوم، وليس خطأً في الكود.
+  // يُرجَّح أن section2 تستخدم "قبضة" بالمعنى الشائع في بعض المناطق
+  // (≈ 6 قبضات في القصبة = ≈ 59 سم للقبضة)،
+  // بينما Page11 وsection1 تستخدمان تعريفاً فنياً أدق
+  // (24 قبضة في القصبة = ≈ 14.8 سم للقبضة).
+  //
+  // القرار المعتمد (2026-07-19): توثيق كلا التعريفَيْن وعدم توحيدهما
+  // حتى صدور قرار رسمي من صاحب المشروع.
+  //
+  // لا تُعدِّل هذه القيم دون تحديث مستند المعمارية.
+  // ----------------------------------------------------------
+
+  /**
    * QABDA_PER_QASABA
-   * عدد القبضات في القصبة الواحدة — الثابت المستخدم في Page11 و Page13/section1
-   * المصدر: Page11/script.js (السطر 4660): qabdaLength = qasabaLength / 24
-   *         Page13/section1/script.js (السطر 818): qabdaLength = qasabaLength / 24
-   * ⚠️ تعارض مع section2: راجع QABDA_PER_QASABA_SECTION2
+   * عدد القبضات في القصبة — التعريف المستخدم في Page11 و Page13/section1
+   *
+   * المصدر:
+   *   - Page11/script.js السطر 4660: const qabdaLength = qasabaLength / 24;
+   *   - Page11/script.js السطر 4863: const qabdaLength = qasabaLength / 24;
+   *   - Page13/section1  السطر  818: const qabdaLength = qasabaLength / 24; // ~0.1479167
+   *   - Page13/section1  السطر  834: const qabdaLength = qasabaLength / 24;
+   *
+   * ⚠️ DOCUMENTED EXCEPTION: يختلف عن QABDA_PER_QASABA_SECTION2
    */
   QABDA_PER_QASABA: 24,
 
   /**
    * QABDA_METERS
-   * طول القبضة الواحدة بالمتر (مشتقة من QASABA_METERS / QABDA_PER_QASABA)
-   * تُستخدم في Page11 و Page13/section1
+   * طول القبضة بالمتر — وفق تعريف Page11 وsection1
    * = 3.55 / 24 ≈ 0.1479167 م
+   *
+   * ⚠️ DOCUMENTED EXCEPTION: يختلف عن QABDA_METERS_SECTION2
    */
   QABDA_METERS: 3.55 / 24,
 
   /**
    * QABDA_PER_QASABA_SECTION2
-   * ⚠️ قيمة مختلفة مكتشفة في Page13/section2
-   * المصدر: Page13/section2/script.js (السطر 8): QABDA_IN_METERS = 3.55 / 6
-   * هذا يعني أن section2 تعتمد 6 قبضات في القصبة (وليس 24)
-   * الفرق: 0.5917 م للقبضة في section2 مقابل 0.1479 م في Page11 وsection1
-   * ⚠️ يحتاج توضيح من المستخدم في مرحلة لاحقة
+   * عدد القبضات في القصبة — التعريف المستخدم في Page13/section2 فقط
+   *
+   * المصدر:
+   *   - Page13/section2 السطر 8: const QABDA_IN_METERS = 3.55 / 6;
+   *
+   * ⚠️ DOCUMENTED EXCEPTION: هذا التعريف مختلف عن QABDA_PER_QASABA
+   * يمنع استخدام هذه القيمة في أي صفحة أخرى غير section2
+   * دون مراجعة علمية مسبقة.
    */
   QABDA_PER_QASABA_SECTION2: 6,
 
   /**
    * QABDA_METERS_SECTION2
-   * طول القبضة بالمتر وفق section2
+   * طول القبضة بالمتر — وفق تعريف Page13/section2 فقط
    * = 3.55 / 6 ≈ 0.5917 م
+   *
+   * ⚠️ DOCUMENTED EXCEPTION: يختلف عن QABDA_METERS
+   * يمنع استخدام هذه القيمة في أي صفحة أخرى غير section2
+   * دون مراجعة علمية مسبقة.
    */
   QABDA_METERS_SECTION2: 3.55 / 6,
 
-  /**
-   * CM_IN_METERS
-   * طول السنتيمتر الواحد بالمتر
-   * المصدر: Page13/section2/script.js (السطر 9)
-   */
-  CM_IN_METERS: 0.01,
-
   // ----------------------------------------------------------
-  // ثوابت الفدان / القيراط / السهم (وحدات المساحة)
+  // ثوابت الفدان / القيراط / السهم (وحدات المساحة الزراعية)
   // ----------------------------------------------------------
 
   /**
    * CARATS_PER_FEDDAN
    * عدد القراريط في الفدان الواحد
-   * المصدر:
-   *   - Page10/script.js (السطر 379): carat = Math.floor(remaining / 24)
-   *   - Page11/script.js (السطور 597، 610، 1138، 5382، 5824): استخدام 24 باستمرار
-   *   - Page12/script.js (السطران 629، 634): fSize = cSize * 24، carat = Math.floor(remSqm / cSize)
-   *   - Page13/section2/script.js (السطور 186، 187): Math.floor(totalCarats / 24)
+   *
+   * المصدر — متطابق في جميع الصفحات ✅:
+   *   - Page10/script.js  السطر 379: carat = Math.floor(remaining / 24)
+   *   - Page11/script.js  السطور 597، 1138، 5382، 5824
+   *   - Page12/script.js  السطر  629: fSize = cSize * 24
+   *   - Page13/section2   السطر  186: Math.floor(totalCarats / 24)
    */
   CARATS_PER_FEDDAN: 24,
 
   /**
    * SAHMS_PER_CARAT
    * عدد الأسهم في القيراط الواحد
-   * المصدر:
-   *   - Page10/script.js (السطران 379، 398): carat * 24 + shares
-   *   - Page11/script.js (السطران 5863، 5869): استخدام 24 للتحويل
-   *   - Page12/script.js (السطر 630): sSize = cSize / 24
-   *   - Page13/section2/script.js (السطر 188): (totalCarats - (acres * 24 + carats)) * 24
+   *
+   * المصدر — متطابق في جميع الصفحات ✅:
+   *   - Page10/script.js  السطر 379: shares = remaining % 24
+   *   - Page11/script.js  السطور 5826، 5862، 5868
+   *   - Page12/script.js  السطر  630: sSize = cSize / 24
+   *   - Page13/section2   السطر  188: (totalCarats - ...) * 24
    */
   SAHMS_PER_CARAT: 24,
 
   /**
    * SAHMS_PER_FEDDAN
-   * عدد الأسهم في الفدان الواحد (= CARATS_PER_FEDDAN × SAHMS_PER_CARAT)
-   * المصدر: Page10/script.js (السطور 398، 705، 727): ac * 576 + ca * 24 + sh
+   * عدد الأسهم في الفدان الواحد (= CARATS_PER_FEDDAN × SAHMS_PER_CARAT = 576)
+   *
+   * المصدر — متطابق في جميع الصفحات ✅:
+   *   - Page10/script.js  السطور 377، 398، 705، 727:
+   *       const acre = Math.floor(abs / 576);
+   *       const sahms = ac * 576 + ca * 24 + sh;
    */
   SAHMS_PER_FEDDAN: 576, // = 24 × 24
 
@@ -144,10 +193,11 @@ const AgriConstants = {
   /**
    * DEFAULT_CARAT_SQM
    * مساحة القيراط الافتراضية بالمتر المربع
-   * المصدر:
-   *   - Page11/script.js (السطر 397): || "168"
-   *   - Page12/script.js (السطر 283): || 168
-   *   - Page13/section1/script.js (السطور 963، 1773، 2104، 2153، 2204، 3610، 3996، 4072): || 168
+   *
+   * المصدر — متطابق في جميع الصفحات ✅:
+   *   - Page11/script.js      السطر  397: || "168"
+   *   - Page12/script.js      السطر  283: || 168
+   *   - Page13/section1       السطور 963، 1773، 2104، 2153، 2204، 3610: || 168
    */
   DEFAULT_CARAT_SQM: 168,
 
@@ -156,48 +206,50 @@ const AgriConstants = {
   // ----------------------------------------------------------
 
   /**
-   * PRESET_CARAT_SIZES_P11
-   * قيم الضبط المسبق لمساحة القيراط في Page11
-   * المصدر: Page11/index.html (القيم الموجودة في select#input-carat-area)
-   * ملاحظة: تشمل قيم كسرية مثل 171.388
+   * PRESET_CARAT_SIZES
+   * قيم الضبط المسبق المتاحة لمساحة القيراط
+   *
+   * المصدر — متطابقة في جميع الصفحات ✅:
+   *   - Page12/script.js      السطر 6416: ["175.035", "175", "171.388", "168"]
+   *   - Page13/section1       السطر 2734: ["168", "171.388", "175", "175.035"]
    */
-  PRESET_CARAT_SIZES_P11: [168, 171.388, 175, 175.035],
-
-  /**
-   * PRESET_CARAT_SIZES_P12
-   * قيم الضبط المسبق لمساحة القيراط في Page12
-   * المصدر: Page12/script.js (السطر 6416): ["175.035", "175", "171.388", "168"]
-   */
-  PRESET_CARAT_SIZES_P12: [168, 171.388, 175, 175.035],
-
-  /**
-   * PRESET_CARAT_SIZES_P13S1
-   * قيم الضبط المسبق لمساحة القيراط في Page13/section1
-   * المصدر: Page13/section1/script.js (السطر 2734)
-   * ملاحظة: نفس القيم في P12 تقريباً
-   */
-  PRESET_CARAT_SIZES_P13S1: [168, 171.388, 175, 175.035],
+  PRESET_CARAT_SIZES: [168, 171.388, 175, 175.035],
 
   // ----------------------------------------------------------
-  // مفاتيح localStorage المستخدمة (توثيق لمنع التعارض)
+  // ⚠️ DOCUMENTED EXCEPTION: مفاتيح localStorage
+  // ----------------------------------------------------------
+  // اكتُشف أن Page12 تستخدم مفتاحاً مختلفاً لمساحة القيراط:
+  //   - Page11 و section1: "dalal-carat-area"
+  //   - Page12: "dallal_carat_size"  (كتابة مختلفة: dallal بدلاً من dalal)
+  //
+  // هذا يعني أن تغيير مساحة القيراط في Page11 لا يؤثر تلقائياً
+  // على Page12، والعكس صحيح.
+  //
+  // القرار المعتمد (2026-07-19): يمنع تغيير هذه المفاتيح الآن.
+  // التوحيد سيتم في مرحلة لاحقة داخل shared/storage.js
+  // مع وجود Migration يحافظ على بيانات المستخدمين الحالية.
   // ----------------------------------------------------------
 
   /**
    * STORAGE_KEYS
-   * توثيق جميع مفاتيح localStorage المتعلقة بالثوابت
-   * (القيم لم تُوحَّد بعد — توحيدها في مرحلة لاحقة مع shared/storage.js)
+   * توثيق جميع مفاتيح localStorage المتعلقة بالثوابت الزراعية
    *
-   * ⚠️ تعارض في مفتاح مساحة القيراط:
-   *   - Page11: "dalal-carat-area"
-   *   - Page12: "dallal_carat_size"  (كتابة مختلفة: dallal بدلاً من dalal)
-   *   - Page13/section1: "dalal-carat-area"
-   * يعني Page11 وPage13/section1 يتشاركان نفس المفتاح ✅
-   * لكن Page12 لها مفتاح مختلف ⚠️ — يحتاج توحيد في مرحلة لاحقة
+   * ⚠️ DOCUMENTED EXCEPTION: لا تُوحَّد هذه المفاتيح قبل إنشاء shared/storage.js
+   * ⚠️ DOCUMENTED EXCEPTION: أي تغيير يجب أن يشمل Migration للبيانات الموجودة
    */
   STORAGE_KEYS: {
-    CARAT_AREA_P11_P13S1: "dalal-carat-area",       // مشترك: Page11 + Page13/section1
-    CARAT_SIZE_P12: "dallal_carat_size",             // ⚠️ مختلف: Page12 فقط (typo: dallal)
-    SHOW_FEDDAN_P12: "dallal_show_feddan"            // Page12: إظهار/إخفاء تحويل الفدان
+    /** مساحة القيراط — مشترك بين Page11 و Page13/section1 */
+    CARAT_AREA_P11_P13S1: "dalal-carat-area",
+
+    /**
+     * مساحة القيراط لـ Page12 — مفتاح مختلف
+     * ⚠️ DOCUMENTED EXCEPTION: "dallal" بدلاً من "dalal" — محتمل أنه typo تاريخي
+     * لا تُصحّح الكتابة دون إضافة Migration، وإلا سيفقد المستخدمون بياناتهم
+     */
+    CARAT_SIZE_P12: "dallal_carat_size",
+
+    /** إظهار/إخفاء تحويل الفدان في Page12 */
+    SHOW_FEDDAN_P12: "dallal_show_feddan"
   }
 
 };
@@ -208,11 +260,9 @@ const AgriConstants = {
 window.AgriConstants = AgriConstants;
 
 // ----------------------------------------------------------
-// تجميد الكائن لمنع التعديل العرضي (Object.freeze)
+// تجميد الكائن لمنع التعديل العرضي
 // ----------------------------------------------------------
 Object.freeze(AgriConstants.STORAGE_KEYS);
-Object.freeze(AgriConstants.PRESET_CARAT_SIZES_P11);
-Object.freeze(AgriConstants.PRESET_CARAT_SIZES_P12);
-Object.freeze(AgriConstants.PRESET_CARAT_SIZES_P13S1);
+Object.freeze(AgriConstants.PRESET_CARAT_SIZES);
 Object.freeze(AgriConstants.CHANGELOG);
 Object.freeze(AgriConstants);
