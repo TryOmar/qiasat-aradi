@@ -266,3 +266,6 @@ Object.freeze(AgriConstants.STORAGE_KEYS);
 Object.freeze(AgriConstants.PRESET_CARAT_SIZES);
 Object.freeze(AgriConstants.CHANGELOG);
 Object.freeze(AgriConstants);
+
+console.log(`[AgriConstants] v${AgriConstants.VERSION} loaded successfully.`);
+

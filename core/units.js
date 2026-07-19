@@ -376,3 +376,6 @@ window.AgriUnits = AgriUnits;
 // ----------------------------------------------------------
 Object.freeze(AgriUnits.CHANGELOG);
 Object.freeze(AgriUnits);
+
+console.log(`[AgriUnits] v${AgriUnits.VERSION} loaded successfully.`);
+

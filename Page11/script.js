@@ -4570,7 +4570,11 @@ function copyCalculationSteps() {
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(textToCopy).then(() => {
-      showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+      if (window.DallalToast) {
+        DallalToast.success("تم نسخ خطوات الحساب بنجاح.");
+      } else {
+        showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+      }
     }).catch(err => {
       fallbackCopyText(textToCopy);
     });
@@ -4598,7 +4602,11 @@ function fallbackCopyText(text) {
   textArea.select();
   try {
     document.execCommand("copy");
-    showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+    if (window.DallalToast) {
+      DallalToast.success("تم نسخ خطوات الحساب بنجاح.");
+    } else {
+      showToast("✅ تم نسخ خطوات الحساب بنجاح.");
+    }
   } catch (err) {
     console.error("Fallback copy failed", err);
   }
@@ -4655,8 +4663,22 @@ function showToast(message) {
 //   دوال التحويل للقصبة والقبضة (مأخوذة من صفحة 13)
 // ============================================================
 function toQasabaAndQabda(meters) {
-  // استدعاء مكتبة الوحدات المشتركة لتوحيد الحسابات
-  return AgriUnits.metersToQasabaQabda(meters);
+  if (window.AgriUnits) {
+    return AgriUnits.metersToQasabaQabda(meters);
+  }
+  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for toQasabaAndQabda.");
+  if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
+  const qasabaLength = 3.55;
+  const qabdaLength = qasabaLength / 24;
+  let qasaba = Math.floor(meters / qasabaLength);
+  let rem = meters - (qasaba * qasabaLength);
+  let qabda = Math.floor(rem / qabdaLength);
+  let fraction = (rem - (qabda * qabdaLength)) / qabdaLength;
+  return {
+    qasaba: qasaba,
+    qabda: qabda,
+    fraction: parseFloat(fraction.toFixed(2))
+  };
 }
 
 const dimMap = [
@@ -4848,8 +4870,13 @@ function updateConversionsTable() {
 
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {
-  // استدعاء مكتبة الوحدات المشتركة لتوحيد الحسابات
-  return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
+  if (window.AgriUnits) {
+    return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
+  }
+  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for fromQasabaToMeters.");
+  const qasabaLength = 3.55;
+  const qabdaLength = qasabaLength / 24;
+  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
 }
 
 function updateSideFromQasaba(index) {
