@@ -650,44 +650,12 @@ function applyViewportTransform() {
  * @returns {{feddan:number, carat:number, shares:number}} موزعة على الوحدات الثلاث
  */
 function sqmToFeddanCaratShares(sqm) {
-  if (window.AgriUnitsCompat) {
-    const res = AgriUnitsCompat.sqmToFCS(sqm, caratSize);
-    return {
-      feddan: res.feddan,
-      carat: res.carat,
-      shares: res.sahm
-    };
-  }
-  return legacySqmToFeddanCaratShares(sqm);
-}
-
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacySqmToFeddanCaratShares(sqm) {
-  const cSize = caratSize;
-  const fSize = cSize * 24;
-  const sSize = cSize / 24;
-
-  const feddan = Math.floor(sqm / fSize);
-  const remSqm = sqm - (feddan * fSize);
-  const carat = Math.floor(remSqm / cSize);
-  let shares = Math.round((remSqm - (carat * cSize)) / sSize * 100) / 100;
-  
-  let finalCarat = carat;
-  let finalFeddan = feddan;
-  let finalShares = shares;
-
-  if (finalShares >= 24) {
-    finalShares -= 24;
-    finalCarat += 1;
-  }
-  if (finalCarat >= 24) {
-    finalCarat -= 24;
-    finalFeddan += 1;
-  }
-
-  return { feddan: finalFeddan, carat: finalCarat, shares: Math.max(0, finalShares) };
+  const res = AgriUnitsCompat.sqmToFCS(sqm, caratSize);
+  return {
+    feddan: res.feddan,
+    carat: res.carat,
+    shares: res.sahm
+  };
 }
 
 /**

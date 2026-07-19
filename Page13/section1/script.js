@@ -806,62 +806,21 @@ function toggleRoundingMode() {
 
 function convertSqmToFeddans(sqm, caratSize) {
   if (!sqm || sqm <= 0) return { feddans: 0, carats: 0, shares: 0 };
-  return AgriUnitsCompat.sqmToFCS(sqm, caratSize);
+  return AgriUnitsCompat.sqmToFCSPlural(sqm, caratSize);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyConvertSqmToFeddans(sqm, caratSize) {
-  const feddanSize = caratSize * 24;
-  const feddans = Math.floor(sqm / feddanSize);
-  const remainingForCarats = sqm - (feddans * feddanSize);
-  const carats = Math.floor(remainingForCarats / caratSize);
-  const remainingForShares = remainingForCarats - (carats * caratSize);
-  const shares = (remainingForShares * 24) / caratSize;
-  return {
-    feddans: feddans,
-    carats: carats,
-    shares: parseFloat(shares.toFixed(2))
-  };
-}
 
 // Qasaba and Qabda conversion
 function toQasabaAndQabda(meters) {
   return AgriUnitsCompat.metersToQasabaQabda(meters);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyToQasabaAndQabda(meters) {
-  if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  let qasaba = Math.floor(meters / qasabaLength);
-  let rem = meters - (qasaba * qasabaLength);
-  let qabda = Math.floor(rem / qabdaLength);
-  let fraction = (rem - (qabda * qabdaLength)) / qabdaLength;
-  return {
-    qasaba: qasaba,
-    qabda: qabda,
-    fraction: parseFloat(fraction.toFixed(2))
-  };
-}
 
 // Convert قصبة + قبضة + أقل من قبضة back to meters
 function fromQasabaToMeters(qasaba, qabda, fraction) {
   return AgriUnitsCompat.qasabaQabdaToMeters(qasaba, qabda, fraction);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyFromQasabaToMeters(qasaba, qabda, fraction) {
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
-}
 
 // Normalize qabda overflow: if qabda >= 24, carry into qasaba
 function normalizeQasabaInputs(rowIndex) {
@@ -893,20 +852,6 @@ function normalizeQasabaInputs(rowIndex) {
   return { qasaba, qabda, fraction };
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyNormalizeQasabaQabda(qasaba, qabda, fraction) {
-  let qas = qasaba;
-  let qab = qabda;
-  let frac = Math.min(0.99, Math.max(0, parseFloat(fraction.toFixed(2))));
-  if (qab >= 24) {
-    const carry = Math.floor(qab / 24);
-    qas += carry;
-    qab = qab % 24;
-  }
-  return { qasaba: qas, qabda: qab, fraction: frac };
-}
 
 // تصدير الكروكي كصورة مقصوصة وبدون فراغات (PNG)
 function exportCroquisAsImage() {
@@ -998,6 +943,7 @@ function updateSideFromQasaba(sideId, rowIndex) {
 
 // Main calculations controller
 function calculateAll() {
+  console.log("Trace: calculateAll started");
   const caratSize = parseFloat(caratSizeInput.value) || 168;
   const pricePerCarat = parseFloat(caratPriceNumeric.value) || 0;
   
@@ -1212,6 +1158,7 @@ function calculateAll() {
 
   calculatedArea = area;
   calculatedPerimeter = perimeter;
+  console.log("Area =", calculatedArea);
 
   if (isDivisionActive && area > 0) {
     recalculateHeirsDimensions();
@@ -1340,6 +1287,7 @@ function calculateAll() {
   if (typeof SmartLayout !== "undefined" && SmartLayout.prepare) {
     SmartLayout.prepare(canvas, vertices);
   }
+  console.log("Calling drawLandCanvas");
   drawLandCanvas(vertices);
 
   // تحديث واجهة إعدادات التقسيم (يمين/يسار مقابل الطول)
@@ -1529,6 +1477,7 @@ function solveDepthForArea(S, Top, Bottom, H) {
 
 // Canvas Drawer
 function drawLandCanvas(vertices) {
+  console.log("drawLandCanvas started", { vertices: vertices });
   // 1. Calculate shape aspect ratio
   let shapeRatio = 1.5; // Default ratio
   if (vertices && vertices.length >= 3) {
@@ -2134,6 +2083,7 @@ function drawLandCanvas(vertices) {
       }
     }
   }
+  console.log("drawLandCanvas finished");
 }
 
 // Generate heirs input rows

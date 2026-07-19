@@ -1184,7 +1184,7 @@
     const newId = generateUniqueHeirId();
     const newHeir = {
       id: newId,
-      name: "شريك جديد",
+      name: "شريك " + (heirsData.length + 1),
       share: null, // لا يوجد أي حسابات تلقائية في Commit 5E-3
       topW: 0,
       botW: 0,

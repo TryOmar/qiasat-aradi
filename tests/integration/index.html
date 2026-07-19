@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة اختبارات التكامل الموحدة — الدَّلاَّل</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;600;800&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-gold: #f59e0b;
+      --secondary-gold: #fbbf24;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success-green: #10b981;
+      --error-red: #ef4444;
+      --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 40px 20px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header styling */
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      background: linear-gradient(to left, #f59e0b, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 850px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Control Sidebar Card */
+    .sidebar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 30px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-premium);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: fit-content;
+    }
+
+    .btn-run {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+      margin-bottom: 25px;
+    }
+
+    .btn-run:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.6);
+    }
+
+    .btn-run:active {
+      transform: translateY(0);
+    }
+
+    .stats-container {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .stat-value.passed {
+      color: var(--success-green);
+    }
+
+    .stat-value.failed {
+      color: var(--error-red);
+    }
+
+    /* Main Logs Card */
+    .logs-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 35px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-premium);
+    }
+
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+
+    .logs-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .log-suites {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .suite-box {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.4);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .suite-box.passed {
+      border-left: 5px solid var(--success-green);
+    }
+
+    .suite-box.failed {
+      border-left: 5px solid var(--error-red);
+    }
+
+    .suite-title {
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .suite-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .suite-badge.passed {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-green);
+    }
+
+    .suite-badge.failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error-red);
+    }
+
+    .suite-assertions {
+      padding: 15px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .assertion-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.95rem;
+      padding: 4px 0;
+    }
+
+    .assertion-icon {
+      font-size: 1.1rem;
+    }
+
+    .assertion-name {
+      color: #cbd5e1;
+    }
+
+    .assertion-item.failed .assertion-name {
+      color: #fca5a5;
+    }
+
+    /* Summary Box */
+    .summary-box {
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 20px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: right;
+    }
+
+    .summary-box.passed {
+      border: 2px solid var(--success-green);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .summary-box.failed {
+      border: 2px solid var(--error-red);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .summary-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .summary-stats {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .summary-stat-group {
+      font-size: 1.05rem;
+    }
+
+    .summary-status-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    .summary-status-badge.passed {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success-green);
+      border: 1px solid var(--success-green);
+    }
+
+    .summary-status-badge.failed {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error-red);
+      border: 1px solid var(--error-red);
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+
+  <!-- 1. تحميل ثوابت ونواة الحسابات -->
+  <script src="../../core/constants.js"></script>
+  <script src="../../core/units.js"></script>
+  
+  <!-- 2. تحميل الخدمات المشتركة والتخزين الموحد -->
+  <script src="../../shared/toast.js"></script>
+  <script src="../../shared/storage.js"></script>
+  
+  <!-- 3. تحميل طبقة التوافقية الحسابية -->
+  <script src="../../shared/agri-units-compat.js"></script>
+
+  <!-- 4. تحميل ملفات اختبارات التكامل -->
+  <script src="./storage.js"></script>
+  <script src="./toast.js"></script>
+  <script src="./page11.js"></script>
+  <script src="./page12.js"></script>
+  <script src="./page13.js"></script>
+  <script src="./loader.js"></script>
+  <script src="./compatibility.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>لوحة اختبارات التكامل الموحدة</h1>
+      <p>مشروع الدَّلاَّل — اختبارات تراجع تكامل النواة والتخزين والمظهر (Integration Regression Suite)</p>
+    </header>
+
+    <div class="dashboard-grid">
+      <!--Sidebar-->
+      <div class="sidebar-card">
+        <button class="btn-run" onclick="runIntegrationSuite()">تشغيل الاختبارات 🚀</button>
+        
+        <div class="stats-container">
+          <div class="stat-item">
+            <span class="stat-label">إجمالي الحالات:</span>
+            <span class="stat-value" id="stat-total">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">الحالات الناجحة:</span>
+            <span class="stat-value passed" id="stat-passed">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">الحالات الفاشلة:</span>
+            <span class="stat-value failed" id="stat-failed">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">نسبة النجاح:</span>
+            <span class="stat-value" id="stat-ratio" style="color: #60a5fa;">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!--Logs Section-->
+      <div class="logs-card">
+        <div class="logs-header">
+          <h2>تفاصيل تشغيل الاختبارات</h2>
+          <span id="run-timestamp" style="font-size: 0.9rem; color: var(--text-muted);">بانتظار البدء...</span>
+        </div>
+
+        <div class="log-suites" id="suites-container">
+          <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">اضغط على زر "تشغيل الاختبارات" للبدء بالتحقق التكاملي.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      برنامج الدَّلاَّل — وثيقة وتأكيد معمارية Phase 13A (إصدار مستقر)
+    </footer>
+  </div>
+
+  <script>
+    // تفعيل وضع الديباغ لتفعيل الاستثناءات في اختبارات Loader
+    window.DALLAL_DEBUG = true;
+
+    function runIntegrationSuite() {
+      const container = document.getElementById("suites-container");
+      container.innerHTML = ""; // مسح النتائج السابقة
+
+      let totalPassed = 0;
+      let totalFailed = 0;
+      let totalCount = 0;
+
+      const suites = window.DallalIntegrationSuite || {};
+      const suiteKeys = Object.keys(suites);
+
+      if (suiteKeys.length === 0) {
+        container.innerHTML = `<p style="color: var(--error-red); text-align: center;">خطأ: لم يتم تحميل أي اختبارات تكامل!</p>`;
+        return;
+      }
+
+      suiteKeys.forEach(key => {
+        const suite = suites[key];
+        const assertions = [];
+        let suitePassed = true;
+
+        const assertFn = function(name, condition, details = "") {
+          totalCount++;
+          if (condition) {
+            totalPassed++;
+            assertions.push({ status: true, name: name, details: details });
+          } else {
+            totalFailed++;
+            suitePassed = false;
+            assertions.push({ status: false, name: name, details: details });
+            console.error(`❌ Assert failed in ${suite.name}: ${name}. ${details}`);
+          }
+        };
+
+        try {
+          suite.run(assertFn);
+        } catch (err) {
+          suitePassed = false;
+          totalCount++;
+          totalFailed++;
+          assertions.push({ status: false, name: `انفجار تشغيل الاختبار: ${err.message}`, details: err.stack });
+        }
+
+        // بناء بطاقة العرض للـ Suite
+        const suiteBox = document.createElement("div");
+        suiteBox.className = `suite-box ${suitePassed ? 'passed' : 'failed'}`;
+
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "suite-title";
+        headerDiv.innerHTML = `
+          <span>${suite.name}</span>
+          <span class="suite-badge ${suitePassed ? 'passed' : 'failed'}">
+            ${suitePassed ? 'ناجح ✅' : 'فاشل ❌'}
+          </span>
+        `;
+
+        const assertionsDiv = document.createElement("div");
+        assertionsDiv.className = "suite-assertions";
+        
+        assertions.forEach(assertion => {
+          const item = document.createElement("div");
+          item.className = `assertion-item ${assertion.status ? 'passed' : 'failed'}`;
+          item.innerHTML = `
+            <span class="assertion-icon">${assertion.status ? '✅' : '❌'}</span>
+            <div class="assertion-name">
+              <strong>${assertion.name}</strong>
+              ${assertion.details ? `<br><small style="color: var(--text-muted);">${assertion.details}</small>` : ''}
+            </div>
+          `;
+          assertionsDiv.appendChild(item);
+        });
+
+        suiteBox.appendChild(headerDiv);
+        suiteBox.appendChild(assertionsDiv);
+        container.appendChild(suiteBox);
+      });
+
+      // تحديث الإحصائيات
+      document.getElementById("stat-total").textContent = totalCount;
+      document.getElementById("stat-passed").textContent = totalPassed;
+      document.getElementById("stat-failed").textContent = totalFailed;
+      
+      const ratio = totalCount > 0 ? Math.round((totalPassed / totalCount) * 100) : 0;
+      const ratioEl = document.getElementById("stat-ratio");
+      ratioEl.textContent = `${ratio}%`;
+      if (ratio === 100) {
+        ratioEl.style.color = "var(--success-green)";
+      } else {
+        ratioEl.style.color = "var(--error-red)";
+      }
+
+      document.getElementById("run-timestamp").textContent = `تم التشغيل في: ${new Date().toLocaleTimeString("ar-EG")}`;
+
+      // بناء ملخص الاختبار النهائي (Integration Tests Summary)
+      const summaryBox = document.createElement("div");
+      const allPassed = totalFailed === 0;
+      summaryBox.className = `summary-box ${allPassed ? 'passed' : 'failed'}`;
+
+      summaryBox.innerHTML = `
+        <div class="summary-title">ملخص اختبارات التكامل (Integration Tests Summary)</div>
+        <div style="margin-bottom: 15px; font-size: 0.95rem; color: var(--text-muted);">
+          تم فحص ترتيب التحميل، والتوافقية الدفاعية للمكتبات، وإصدارات النظام المشتركة.
+        </div>
+        <div class="summary-stats">
+          <div class="summary-stat-group">
+            <span>الناجحة (Passed): </span>
+            <strong style="color: var(--success-green); font-size: 1.2rem;">${totalPassed}</strong>
+          </div>
+          <div class="summary-stat-group">
+            <span>الفاشلة (Failed): </span>
+            <strong style="color: var(--error-red); font-size: 1.2rem;">${totalFailed}</strong>
+          </div>
+          <div class="summary-stat-group">
+            <span>التحذيرات (Warnings): </span>
+            <strong style="color: var(--primary-gold); font-size: 1.2rem;">0</strong>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 15px;">
+          <span style="font-size: 1rem; color: var(--text-muted);">الحالة العامة (Overall Status):</span><br>
+          <div class="summary-status-badge ${allPassed ? 'passed' : 'failed'}">
+            ${allPassed ? '✅ READY FOR PRODUCTION (جاهز للإنتاج)' : '❌ NOT READY (يوجد أخطاء)'}
+          </div>
+        </div>
+      `;
+      container.appendChild(summaryBox);
+    }
+
+    // تشغيل تلقائي عند التحميل
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(runIntegrationSuite, 300);
+    });
+  </script>
+
+</body>
+</html>
