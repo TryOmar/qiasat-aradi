@@ -8,6 +8,26 @@
 ### 🚀 إعادة الهيكلة للمكونات المشتركة والمكتبات المنطقية (Commit 9)
 تم فصل منطق الأعمال الحسابية وإدارة التنبيهات والتخزين الموحد إلى مكتبات مستقلة تمهيداً لترحيل التطبيق إلى Flutter وضمان سهولة الصيانة.
 
+#### 🌟 المرحلة الثانية عشرة (دمج Page12 وتوسيع اختبار المقارنة الذهبي)
+* **دمج AgriUnits و AgriConstants في Page12:**
+  * تضمين المكتبات المشتركة في [`Page12/index.html`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/Page12/index.html).
+  * ربط دالة تحويل المساحة للقراريط `sqmToFeddanCaratShares` بـ `AgriUnitsCompat.sqmToFCS` وعزل المنطق القديم في `legacySqmToFeddanCaratShares` للتراجع.
+  * ربط دالة حساب المساحة للقراريط والأسهم `calcSmartArea` بـ `AgriUnitsCompat.fcsToSqm`.
+* **دمج DallalStorage في Page12:**
+  * ربط حفظ وقراءة وقيم اتجاه الفدان `show_feddan` ومساحة القيراط `carat_area` والحفظ التلقائي `autosave` بـ `DallalStorage.local`.
+  * إضافة قاعدة ترحيل ومزامنة ثنائية لـ `autosave` في `shared/storage.js` [v1.0.3].
+* **دمج DallalToast في Page12:**
+  * استبدال التنبيهات والأخطاء الحسابية والتحققية في أبعاد الأضلاع والأقطار بتنبيهات RTL متناسقة (`DallalToast.warning` و `DallalToast.error`).
+* **إضافة اختبار المقارنة الذهبي لـ Page12 (`testPage12GoldenComparison`):**
+  * إضافة **300 حالة اختبار** مقارنة حسابية في [`tests/units.test.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/tests/units.test.js) للتأكد من مطابقة منطق تحويل المساحة في الصفحة 12 لـ `AgriUnits` بنسبة 100%.
+
+#### 🌟 المرحلة الحادية عشرة (استخراج Compatibility Layer وتنظيف الأكواد)
+* **إنشاء ملف التوافقية المركزي المشترك:**
+  * استخراج كائن `AgriUnitsCompat` ودوال التراجع والاحتياط القديمة (`legacy*`) بالكامل إلى ملف مشترك [`shared/agri-units-compat.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/agri-units-compat.js).
+* **تنظيف وتطهير الصفحات المرجعية:**
+  * ربط وتحميل الملف الجديد في [`Page11/index.html`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/Page11/index.html) و [`Page13/section1/index.html`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/Page13/section1/index.html).
+  * حذف الإعلانات والتعريفات المحلية لكائن `AgriUnitsCompat` من سكريبتات الصفحات لتبسيط وقابلية صيانة الكود ومنع التكرار.
+
 #### 🌟 المرحلة العاشرة (دمج Page13/section1 وتوسيع الاختبارات الذهبية)
 * **دمج AgriUnits و AgriConstants في Page13/section1:**
   * تضمين المكتبات المشتركة في [`Page13/section1/index.html`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/Page13/section1/index.html).
