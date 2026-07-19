@@ -4655,19 +4655,8 @@ function showToast(message) {
 //   دوال التحويل للقصبة والقبضة (مأخوذة من صفحة 13)
 // ============================================================
 function toQasabaAndQabda(meters) {
-  if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  
-  let qasaba = Math.floor(meters / qasabaLength);
-  let rem = meters - (qasaba * qasabaLength);
-  let qabda = Math.floor(rem / qabdaLength);
-  let fraction = (rem - (qabda * qabdaLength)) / qabdaLength;
-  return {
-    qasaba: qasaba,
-    qabda: qabda,
-    fraction: parseFloat(fraction.toFixed(2))
-  };
+  // استدعاء مكتبة الوحدات المشتركة لتوحيد الحسابات
+  return AgriUnits.metersToQasabaQabda(meters);
 }
 
 const dimMap = [
@@ -4859,9 +4848,8 @@ function updateConversionsTable() {
 
 
 function fromQasabaToMeters(qasaba, qabda, fraction) {
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
+  // استدعاء مكتبة الوحدات المشتركة لتوحيد الحسابات
+  return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
 }
 
 function updateSideFromQasaba(index) {
