@@ -4,7 +4,7 @@ console.log("Trace: Start of script.js loading");
 window.DALLAL_PERF = window.DALLAL_PERF || {
   domCache: true,
   documentFragment: true,
-  dirtyFlag: false,
+  dirtyFlag: true,
   debounce: false
 };
 
@@ -1999,6 +1999,7 @@ function clearAll(confirmRequired = false) {
   isPartitioned = false;
   isManualPartition = false;
   window.calculatedPieces = [];
+  window.lastCroquisSignature = "";
   
   const list = document.getElementById("partners-list");
   if (list) list.innerHTML = "";
@@ -2021,6 +2022,7 @@ function clearPartners(confirmRequired = false) {
   isPartitioned = false;
   isManualPartition = false;
   window.calculatedPieces = [];
+  window.lastCroquisSignature = "";
   
   const list = document.getElementById("partners-list");
   if (list) list.innerHTML = "";
@@ -2202,6 +2204,38 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
 function renderCroquis() {
   console.log("Trace: renderCroquis start");
   try {
+    // State Signature / Dirty Flag Optimization
+    if (window.DALLAL_PERF && window.DALLAL_PERF.dirtyFlag) {
+      const l1 = document.getElementById("length1")?.value || "";
+      const l2 = document.getElementById("length2")?.value || "";
+      const w1 = document.getElementById("width1")?.value || "";
+      const w2 = document.getElementById("width2")?.value || "";
+      const viewType = document.getElementById("long-plot-view")?.value || "";
+      const scaleEl = document.getElementById("scaleRange");
+      const zoomVal = scaleEl ? scaleEl.value : "";
+      
+      // Hash of partner rows
+      const rows = document.querySelectorAll("#partners-list .partner-row");
+      let partnersHash = "";
+      rows.forEach(row => {
+        const name = row.querySelector(".partner-name")?.value || "";
+        const feddans = row.querySelector(".partner-feddans")?.value || "";
+        const carats = row.querySelector(".partner-carats")?.value || "";
+        const shares = row.querySelector(".partner-shares")?.value || "";
+        const fraction = row.querySelector(".partner-fraction")?.value || "";
+        const botW = row.querySelector(".partner-width-bottom")?.value || "";
+        const topW = row.querySelector(".partner-width-top")?.value || "";
+        partnersHash += `|${name}_${feddans}_${carats}_${shares}_${fraction}_${botW}_${topW}`;
+      });
+
+      const currentSignature = `${l1}_${l2}_${w1}_${w2}_${viewType}_${zoomVal}_${isPartitioned}_${isManualPartition}_${partnersHash}`;
+      if (currentSignature === window.lastCroquisSignature) {
+        console.log("[Performance Optimization] renderCroquis skipped (Dirty flag matching)");
+        return;
+      }
+      window.lastCroquisSignature = currentSignature;
+    }
+
     const g = document.getElementById("croquis-content");
   if (!g) return;
   g.innerHTML = "";
