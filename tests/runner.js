@@ -1,11 +1,35 @@
 /**
- * tests/runner.js — Node.js test runner for AgriUnits & DallalToast
- * يحاكي بيئة المتصفح (DOM & Window) ويشغّل الاختبارات برمجياً.
+ * tests/runner.js — Node.js test runner for AgriUnits, DallalToast & DallalStorage
+ * يحاكي بيئة المتصفح (DOM & Storage & Window) ويشغّل الاختبارات برمجياً.
  */
 
 // ----------------------------------------------------------
-// محاكاة بيئة المتصفح (DOM & Window Mocking)
+// محاكاة بيئة المتصفح (DOM & Storage Mocking)
 // ----------------------------------------------------------
+class StorageMock {
+  constructor() {
+    this.store = {};
+  }
+  get length() {
+    return Object.keys(this.store).length;
+  }
+  key(index) {
+    return Object.keys(this.store)[index] || null;
+  }
+  getItem(key) {
+    return this.store[key] === undefined ? null : this.store[key];
+  }
+  setItem(key, value) {
+    this.store[key] = String(value);
+  }
+  removeItem(key) {
+    delete this.store[key];
+  }
+  clear() {
+    this.store = {};
+  }
+}
+
 const mockElement = () => ({
   style: {},
   classList: {
@@ -50,7 +74,11 @@ const mockElement = () => ({
   }
 });
 
-global.window = {};
+global.window = {
+  localStorage: new StorageMock(),
+  sessionStorage: new StorageMock()
+};
+
 global.document = {
   head: {
     appendChild(child) {
@@ -73,7 +101,6 @@ global.document = {
     childNodes: []
   },
   getElementById(id) {
-    // محاكاة للحصول على العناصر في الفحوصات
     if (id === "smart-export-css" || id === "dallal-toast-styles") {
       return null;
     }
@@ -96,14 +123,16 @@ global.window.document = global.document;
 // ----------------------------------------------------------
 const fs = require('fs');
 
-// تحميل الثوابت والوحدات والتنبيهات
+// تحميل الثوابت والوحدات والتنبيهات والتخزين
 eval(fs.readFileSync('../core/constants.js', 'utf8'));
 eval(fs.readFileSync('../core/units.js', 'utf8'));
 eval(fs.readFileSync('../shared/toast.js', 'utf8'));
+eval(fs.readFileSync('../shared/storage.js', 'utf8'));
 
 // تحميل ملفات الاختبارات
 eval(fs.readFileSync('./units.test.js', 'utf8'));
 eval(fs.readFileSync('./toast.test.js', 'utf8'));
+eval(fs.readFileSync('./storage.test.js', 'utf8'));
 
 // ----------------------------------------------------------
 // تشغيل الاختبارات
@@ -115,9 +144,11 @@ console.log('==================================================\n');
 const unitsPassed = global.window.AgriUnitsTests.runAll();
 console.log('\n' + '='.repeat(50) + '\n');
 const toastPassed = global.window.DallalToastTests.runAll();
+console.log('\n' + '='.repeat(50) + '\n');
+const storagePassed = global.window.DallalStorageTests.runAll();
 
 console.log('\n==================================================');
-const allPassed = unitsPassed && toastPassed;
+const allPassed = unitsPassed && toastPassed && storagePassed;
 if (allPassed) {
   console.log('🎉 ALL TEST SUITES PASSED SUCCESSFULLY!');
   process.exit(0);
