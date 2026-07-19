@@ -898,7 +898,7 @@ function recalculateState() {
     }
   });
 
-  const remainingArea = totalAreaM2 - (isManualPartition ? totalDistributedArea : totalTargetArea);
+  const remainingArea = Number((totalAreaM2 - (isManualPartition ? totalDistributedArea : totalTargetArea)).toFixed(9));
   const isKeepAreaMode = window.isManualPartition && document.getElementById("mode-keep-area") && document.getElementById("mode-keep-area").checked;
 
   window.calcState = {
@@ -1406,13 +1406,17 @@ function restoreLastValidGeometryValues() {
 }
 
 function runPartition(shouldRender = true) {
+  console.log("Trace: runPartition started");
   ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
 
-  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) return;
+  if (l1 <= 0 || l2 <= 0 || w1 <= 0 || w2 <= 0) {
+    console.warn("[runPartition] Early return: one of the dimensions is <= 0", {l1, l2, w1, w2});
+    return;
+  }
 
   const w = (w1 + w2) / 2;
   const totalAreaM2 = ((l1 + l2) / 2) * w;
@@ -1427,6 +1431,7 @@ function runPartition(shouldRender = true) {
   // بند ثالثاً وثامناً: تحقق من وجود عجز — إذا كانت الأنصبة تتجاوز مساحة الأرض، جمد جميع المخرجات الهندسية
   recalculateState();
   if (window.calcState.hasDeficit) {
+    console.warn("[runPartition] Early return: deficit detected", window.calcState);
     // إظهار التنبيه بوجود عجز وتجميد الكروكي
     const warningBanner = document.getElementById("croquis-deficit-warning");
     if (warningBanner) warningBanner.style.display = "flex";
@@ -1885,6 +1890,7 @@ function runPartition(shouldRender = true) {
   updateTableTotals();
   saveData();
   if (shouldRender) {
+    console.log("Trace: runPartition completed, drawing croquis...", {calculatedPieces: window.calculatedPieces});
     renderCroquis();
   }
   updateCalculationSteps();
@@ -4669,23 +4675,6 @@ function toQasabaAndQabda(meters) {
   return AgriUnitsCompat.metersToQasabaQabda(meters);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyToQasabaAndQabda(meters) {
-  if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  let qasaba = Math.floor(meters / qasabaLength);
-  let rem = meters - (qasaba * qasabaLength);
-  let qabda = Math.floor(rem / qabdaLength);
-  let fraction = (rem - (qabda * qabdaLength)) / qabdaLength;
-  return {
-    qasaba: qasaba,
-    qabda: qabda,
-    fraction: parseFloat(fraction.toFixed(2))
-  };
-}
 
 const dimMap = [
   { id: 'width1', name: 'العرض الأول (أعلى) (C)' },
@@ -4879,14 +4868,7 @@ function fromQasabaToMeters(qasaba, qabda, fraction) {
   return AgriUnitsCompat.qasabaQabdaToMeters(qasaba, qabda, fraction);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyFromQasabaToMeters(qasaba, qabda, fraction) {
-  const qasabaLength = 3.55;
-  const qabdaLength = qasabaLength / 24;
-  return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
-}
+
 
 function updateSideFromQasaba(index) {
   const qasabaEl = document.getElementById('conv-qasaba-' + index);
@@ -5847,26 +5829,6 @@ function convertSquareMetersToFCS(area) {
   return AgriUnitsCompat.sqmToFCS(area, caratArea);
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyConvertSquareMetersToFCS(area, caratArea) {
-  const totalCarats = area / caratArea;
-  let feddan = Math.floor(totalCarats / 24);
-  let carat = Math.floor(totalCarats % 24);
-  let sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
-
-  if (sahm >= 24 - 0.015) {
-    sahm = 0;
-    carat += 1;
-  }
-  if (carat >= 24) {
-    const extraFeddans = Math.floor(carat / 24);
-    carat = carat % 24;
-    feddan += extraFeddans;
-  }
-  return { feddan, carat, sahm };
-}
 
 /**
  * بند خامساً: تطبيع وحدات الفدان والقيراط والسهم عند إدخال المستخدم
@@ -5900,25 +5862,6 @@ function normalizeInputFCS(input) {
   saveAndCalc();
 }
 
-// ── LEGACY CODE ──────────────────────────────────────────
-// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
-// ──────────────────────────────────────────────────────────
-function legacyNormalizeFCS(feddan, carat, sahm) {
-  let f = feddan;
-  let c = carat;
-  let s = sahm;
-  if (s >= 24) {
-    const extraC = Math.floor(s / 24);
-    c += extraC;
-    s = Number((s % 24).toFixed(2));
-  }
-  if (c >= 24) {
-    const extraF = Math.floor(c / 24);
-    f += extraF;
-    c = c % 24;
-  }
-  return { feddan: f, carat: c, sahm: s };
-}
 
 function updateTableTotals() {
   console.log("Trace: updateTableTotals start");

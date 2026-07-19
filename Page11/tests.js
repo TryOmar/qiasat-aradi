@@ -1429,6 +1429,43 @@ function runAutomatedTests() {
       assert(isWarningHidden, "الحالة 32: يجب إخفاء لافتة التحذير بمجرد العودة للحالة الصحيحة.");
     }
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 33: Floating Point Tolerance Regression Verification
+    // -------------------------------------------------------------------------
+    {
+      // 1. Setup land inputs (length1=55, length2=55, width1=55, width2=55 => total area = 3025 sqm)
+      document.getElementById("length1").value = 55;
+      document.getElementById("length2").value = 55;
+      document.getElementById("width1").value = 55;
+      document.getElementById("width2").value = 55;
+      document.getElementById("input-carat-area").value = 168; // Default carat area
+      document.getElementById("share-input-method").value = "shares";
+      window.currentInputMethod = "shares";
+      window.isManualPartition = false;
+
+      const list33 = document.getElementById("partners-list");
+      list33.innerHTML = "";
+      // Add 3 partners to trigger equal division (3025 sqm / 3 = 1008.3333... sqm per partner)
+      addNewPartnerRow("شريك 1", "", "", "", "");
+      addNewPartnerRow("شريك 2", "", "", "", "");
+      addNewPartnerRow("شريك 3", "", "", "", "");
+
+      // Trigger equal division (carats/shares converted, leading to tiny precision error)
+      divideEqually();
+
+      calculateGeneral();
+      window.runPartition();
+
+      // Verify that this is NOT treated as a deficit
+      const isDeficit = window.calcState.hasDeficit;
+      const piecesCount = window.calculatedPieces ? window.calculatedPieces.length : 0;
+      const firstPartnerAvgW = document.querySelectorAll("#partners-list .partner-row")[0]?.querySelector(".partner-width-avg")?.value || "-";
+
+      assert(!isDeficit, "الحالة 33 (التقارب العشري): يجب ألا يتم اعتبار فروق دقة الفاصلة العائمة عجزاً (hasDeficit = false).");
+      assert(piecesCount === 3, `الحالة 33: يجب استمرار الحساب وإنشاء القطع الهندسية (الفعلي: ${piecesCount} قطع).`);
+      assert(firstPartnerAvgW !== "-", `الحالة 33: يجب تعبئة الجدول بالأبعاد الهندسية وعرض معدل العرض (الفعلي: ${firstPartnerAvgW}).`);
+    }
+
     window.PartitionDirectionManager.setDirection("RTL");
 
 
