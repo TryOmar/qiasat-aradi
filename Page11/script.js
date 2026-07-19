@@ -4667,6 +4667,10 @@ function toQasabaAndQabda(meters) {
     return AgriUnits.metersToQasabaQabda(meters);
   }
   console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for toQasabaAndQabda.");
+  return legacyToQasabaAndQabda(meters);
+}
+
+function legacyToQasabaAndQabda(meters) {
   if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
   const qasabaLength = 3.55;
   const qabdaLength = qasabaLength / 24;
@@ -4874,6 +4878,10 @@ function fromQasabaToMeters(qasaba, qabda, fraction) {
     return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
   }
   console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for fromQasabaToMeters.");
+  return legacyFromQasabaToMeters(qasaba, qabda, fraction);
+}
+
+function legacyFromQasabaToMeters(qasaba, qabda, fraction) {
   const qasabaLength = 3.55;
   const qabdaLength = qasabaLength / 24;
   return (qasaba * qasabaLength) + (qabda * qabdaLength) + (fraction * qabdaLength);
@@ -6468,6 +6476,11 @@ function toggleSettingsAccordion() {
     arrow.style.transform = "rotate(0deg)";
     trigger.style.borderRadius = "8px";
     content.classList.remove("open");
+    
+    // حفظ التفضيلات باستخدام طبقة التخزين الجديدة مع الحفاظ على القيمة القديمة كـ Fallback
+    if (window.DallalStorage) {
+      DallalStorage.local.setItem("settings_accordion_open", "false");
+    }
     localStorage.setItem("settings-accordion-open", "false");
   } else {
     // فتح القسم المنسدل
@@ -6476,6 +6489,10 @@ function toggleSettingsAccordion() {
     arrow.style.transform = "rotate(180deg)";
     trigger.style.borderRadius = "8px 8px 0 0";
     content.classList.add("open");
+    
+    if (window.DallalStorage) {
+      DallalStorage.local.setItem("settings_accordion_open", "true");
+    }
     localStorage.setItem("settings-accordion-open", "true");
   }
 }
@@ -6486,7 +6503,17 @@ function initSettingsAccordion() {
   const trigger = document.getElementById("settings-accordion-trigger");
   if (!content || !arrow || !trigger) return;
 
-  const isOpen = localStorage.getItem("settings-accordion-open") === "true";
+  let isOpen = false;
+  if (window.DallalStorage) {
+    const stored = DallalStorage.local.getItem("settings_accordion_open");
+    if (stored !== null) {
+      isOpen = (stored === "true" || stored === true);
+    } else {
+      isOpen = (localStorage.getItem("settings-accordion-open") === "true");
+    }
+  } else {
+    isOpen = (localStorage.getItem("settings-accordion-open") === "true");
+  }
   if (isOpen) {
     content.style.maxHeight = "none";
     content.style.opacity = "1";

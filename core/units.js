@@ -377,5 +377,7 @@ window.AgriUnits = AgriUnits;
 Object.freeze(AgriUnits.CHANGELOG);
 Object.freeze(AgriUnits);
 
-console.log(`[AgriUnits] v${AgriUnits.VERSION} loaded successfully.`);
+if (typeof window !== "undefined" && window.DALLAL_DEBUG !== false) {
+  console.log(`[AgriUnits] v${AgriUnits.VERSION} loaded successfully.`);
+}
 

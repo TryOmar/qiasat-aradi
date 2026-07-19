@@ -307,6 +307,8 @@
   // تصدير للنطاق العام
   global.DallalToast = DallalToast;
 
-  console.log("[DallalToast] v1.0.0 loaded successfully.");
+  if (typeof window !== "undefined" && window.DALLAL_DEBUG !== false) {
+    console.log("[DallalToast] v1.0.0 loaded successfully.");
+  }
 
 })(typeof window !== "undefined" ? window : global);

@@ -246,6 +246,8 @@
   // تصدير للـ window كـ Compatibility Layer
   global.DallalStorage = DallalStorage;
 
-  console.log(`[DallalStorage] v${DallalStorage.VERSION} loaded successfully.`);
+  if (typeof window !== "undefined" && window.DALLAL_DEBUG !== false) {
+    console.log(`[DallalStorage] v${DallalStorage.VERSION} loaded successfully.`);
+  }
 
 })(typeof window !== "undefined" ? window : global);

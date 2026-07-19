@@ -267,5 +267,7 @@ Object.freeze(AgriConstants.PRESET_CARAT_SIZES);
 Object.freeze(AgriConstants.CHANGELOG);
 Object.freeze(AgriConstants);
 
-console.log(`[AgriConstants] v${AgriConstants.VERSION} loaded successfully.`);
+if (typeof window !== "undefined" && window.DALLAL_DEBUG !== false) {
+  console.log(`[AgriConstants] v${AgriConstants.VERSION} loaded successfully.`);
+}
 
