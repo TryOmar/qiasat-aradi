@@ -1,34 +1,4 @@
-// ── AgriUnits Compatibility Layer ────────────────────────
-// كائن وسيط موحد لتفادي تكرار فحص وجود AgriUnits في كل استدعاء بالصفحة
-const AgriUnitsCompat = {
-  metersToQasabaQabda(meters) {
-    if (window.AgriUnits) return AgriUnits.metersToQasabaQabda(meters);
-    return legacyToQasabaAndQabda(meters);
-  },
-  qasabaQabdaToMeters(qasaba, qabda, fraction) {
-    if (window.AgriUnits) return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
-    return legacyFromQasabaToMeters(qasaba, qabda, fraction);
-  },
-  sqmToFCS(area, caratSize) {
-    if (window.AgriUnits) {
-      const res = AgriUnits.sqmToFCS(area, caratSize);
-      return {
-        feddans: res.feddan,
-        carats: res.carat,
-        shares: res.sahm
-      };
-    }
-    return legacyConvertSqmToFeddans(area, caratSize);
-  },
-  normalizeQasabaQabda(qasaba, qabda, fraction) {
-    if (window.AgriUnits) return AgriUnits.normalizeQasabaQabda(qasaba, qabda, fraction);
-    return legacyNormalizeQasabaQabda(qasaba, qabda, fraction);
-  },
-  trapezoidArea(l1, l2, w1, w2) {
-    if (window.AgriUnits) return AgriUnits.trapezoidArea(l1, l2, w1, w2);
-    return 0.5 * (w1 + w2) * 0.5 * (l1 + l2);
-  }
-};
+
 
 // DOM Elements
 const shapeCards = document.querySelectorAll(".shape-card");

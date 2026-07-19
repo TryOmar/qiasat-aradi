@@ -1,33 +1,6 @@
 console.log("Trace: Start of script.js loading");
 
-// ── AgriUnits Compatibility Layer ────────────────────────
-// كائن وسيط موحد لتفادي تكرار فحص وجود AgriUnits في كل استدعاء بالصفحة
-const AgriUnitsCompat = {
-  metersToQasabaQabda(meters) {
-    if (window.AgriUnits) return AgriUnits.metersToQasabaQabda(meters);
-    return legacyToQasabaAndQabda(meters);
-  },
-  qasabaQabdaToMeters(qasaba, qabda, fraction) {
-    if (window.AgriUnits) return AgriUnits.qasabaQabdaToMeters(qasaba, qabda, fraction);
-    return legacyFromQasabaToMeters(qasaba, qabda, fraction);
-  },
-  sqmToFCS(area, caratArea) {
-    if (window.AgriUnits) return AgriUnits.sqmToFCS(area, caratArea);
-    return legacyConvertSquareMetersToFCS(area, caratArea);
-  },
-  normalizeFCS(feddan, carat, sahm) {
-    if (window.AgriUnits) return AgriUnits.normalizeFCS(feddan, carat, sahm);
-    return legacyNormalizeFCS(feddan, carat, sahm);
-  },
-  trapezoidArea(l1, l2, w1, w2) {
-    if (window.AgriUnits) return AgriUnits.trapezoidArea(l1, l2, w1, w2);
-    return ((l1 + l2) / 2) * ((w1 + w2) / 2);
-  },
-  fcsToSqm(feddan, carat, sahm, caratArea) {
-    if (window.AgriUnits) return AgriUnits.fcsToSqm(feddan, carat, sahm, caratArea);
-    return ((feddan * 24) + carat + sahm / 24) * caratArea;
-  }
-};
+
 
 let currentInputMethod = "carats";
 let croquisScale = 1;
