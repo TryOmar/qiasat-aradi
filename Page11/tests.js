@@ -1464,6 +1464,37 @@ function runAutomatedTests() {
       assert(!isDeficit, "الحالة 33 (التقارب العشري): يجب ألا يتم اعتبار فروق دقة الفاصلة العائمة عجزاً (hasDeficit = false).");
       assert(piecesCount === 3, `الحالة 33: يجب استمرار الحساب وإنشاء القطع الهندسية (الفعلي: ${piecesCount} قطع).`);
       assert(firstPartnerAvgW !== "-", `الحالة 33: يجب تعبئة الجدول بالأبعاد الهندسية وعرض معدل العرض (الفعلي: ${firstPartnerAvgW}).`);
+
+      // 2. Direct validation of tiny floating point discrepancies
+      const backupIsManual = window.isManualPartition;
+      window.isManualPartition = true;
+
+      // Case A: remainingArea = -0.000000001 (extremely small negative remaining area)
+      document.getElementById("length1").value = 10;
+      document.getElementById("length2").value = 10;
+      document.getElementById("width1").value = 10;
+      document.getElementById("width2").value = 10; // Area = 100
+      list33.innerHTML = "";
+      addNewPartnerRow("شريك 1", "", "", "", "");
+      const row = list33.querySelector(".partner-row");
+      row.querySelector(".partner-area").value = "100.000000001";
+      
+      recalculateState();
+      assert(!window.calcState.hasDeficit, "الحالة 33 (التقارب العشري -0.000000001): لا يُعد عجزاً.");
+
+      // Case B: remainingArea = +0.000000001 (extremely small positive remaining area)
+      row.querySelector(".partner-area").value = "99.999999999";
+      
+      recalculateState();
+      assert(!window.calcState.hasDeficit, "الحالة 33 (التقارب العشري +0.000000001): لا يُعد عجزاً.");
+
+      // Case C: remainingArea = -0.06 (legitimate deficit > 0.05 sqm)
+      row.querySelector(".partner-area").value = "100.06";
+      
+      recalculateState();
+      assert(window.calcState.hasDeficit, "الحالة 33 (عجز حقيقي -0.06 م²): يجب تفعيل حالة العجز (hasDeficit = true).");
+      
+      window.isManualPartition = backupIsManual;
     }
 
     window.PartitionDirectionManager.setDirection("RTL");

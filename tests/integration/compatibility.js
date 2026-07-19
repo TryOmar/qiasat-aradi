@@ -13,6 +13,14 @@
   global.DallalIntegrationSuite.compatibility = {
     name: "Compatibility Cleanup & Legacy Deletion Verification",
     run(assert) {
+      // 0. Verify the replacement AgriUnitsCompat exists and works
+      assert("AgriUnitsCompat layer is defined", typeof AgriUnitsCompat !== "undefined");
+      if (typeof AgriUnitsCompat !== "undefined") {
+        assert("AgriUnitsCompat is an object", typeof AgriUnitsCompat === "object");
+        const testFcs = AgriUnitsCompat.sqmToFCS(1000, 168);
+        assert("AgriUnitsCompat.sqmToFCS runs and converts successfully", testFcs && typeof testFcs.feddan === "number");
+      }
+
       // 1. list of functions that must be deleted
       const forbiddenPage11 = [
         "function legacyToQasabaAndQabda",
