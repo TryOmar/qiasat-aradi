@@ -5,7 +5,7 @@ window.DALLAL_PERF = window.DALLAL_PERF || {
   domCache: true,
   documentFragment: true,
   dirtyFlag: true,
-  debounce: false
+  debounce: true
 };
 
 window.lastCroquisSignature = "";
@@ -845,9 +845,17 @@ function saveAndCalc() {
     return;
   }
   if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
+  
+  const isOptimized = window.DALLAL_PERF && window.DALLAL_PERF.debounce;
+  const delay = isOptimized ? 120 : 0;
+  
+  if (delay === 0) {
     saveAndCalcImmediate();
-  }, 250); // 250ms debounce
+  } else {
+    debounceTimer = setTimeout(() => {
+      saveAndCalcImmediate();
+    }, delay);
+  }
 }
 
 
