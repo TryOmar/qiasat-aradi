@@ -1061,7 +1061,7 @@ function calculateGeneral(shouldRender = true) {
 
   const w = (w1 + w2) / 2;
   const l = (l1 + l2) / 2;
-  const totalAreaM2 = l * w;
+  const totalAreaM2 = window.AgriUnits ? AgriUnits.trapezoidArea(l1, l2, w1, w2) : (l * w);
   const perimeter = l1 + l2 + w1 + w2;
 
   const areaM2Elements = document.querySelectorAll("#calc-area-m2");
@@ -1135,8 +1135,13 @@ function calculateGeneral(shouldRender = true) {
       const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
       const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
       const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-      partnerCarats = (f * 24) + c + s / 24;
-      partnerAreaM2 = partnerCarats * caratArea;
+      if (window.AgriUnits) {
+        partnerAreaM2 = AgriUnits.fcsToSqm(f, c, s, caratArea);
+        partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+      } else {
+        partnerCarats = (f * 24) + c + s / 24;
+        partnerAreaM2 = partnerCarats * caratArea;
+      }
     } else {
       const fracInput = row.querySelector(".partner-fraction");
       const fracVal = parseFraction(fracInput ? fracInput.value : "");
@@ -5849,24 +5854,31 @@ function convertSquareMetersToFCS(area) {
   if (caratArea <= 0) {
     return { feddan: 0, carat: 0, sahm: 0 };
   }
+  if (window.AgriUnits) {
+    return AgriUnits.sqmToFCS(area, caratArea);
+  }
+  console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for convertSquareMetersToFCS.");
+  return legacyConvertSquareMetersToFCS(area, caratArea);
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyConvertSquareMetersToFCS(area, caratArea) {
   const totalCarats = area / caratArea;
   let feddan = Math.floor(totalCarats / 24);
   let carat = Math.floor(totalCarats % 24);
   let sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
 
-  // Normalize sahm: if it reaches 24 or very close due to rounding
   if (sahm >= 24 - 0.015) {
     sahm = 0;
     carat += 1;
   }
-
-  // Normalize carat: if it reaches 24
   if (carat >= 24) {
     const extraFeddans = Math.floor(carat / 24);
     carat = carat % 24;
     feddan += extraFeddans;
   }
-
   return { feddan, carat, sahm };
 }
 
@@ -5887,18 +5899,17 @@ function normalizeInputFCS(input) {
   let c = parseFloat(cInput?.value) || 0;
   let f = parseFloat(fInput?.value) || 0;
   
-  // تطبيع: كل 24 سهم = 1 قيراط
-  if (s >= 24) {
-    const extraC = Math.floor(s / 24);
-    c += extraC;
-    s = Number((s % 24).toFixed(2));
+  let normalized;
+  if (window.AgriUnits) {
+    normalized = AgriUnits.normalizeFCS(f, c, s);
+  } else {
+    console.warn("[Dallal Warning] AgriUnits not loaded, using local fallback for normalizeInputFCS.");
+    normalized = legacyNormalizeFCS(f, c, s);
   }
-  // تطبيع: كل 24 قيراط = 1 فدان
-  if (c >= 24) {
-    const extraF = Math.floor(c / 24);
-    f += extraF;
-    c = c % 24;
-  }
+  
+  f = normalized.feddan;
+  c = normalized.carat;
+  s = normalized.sahm;
   
   // تحديث الحقول فقط إذا تغيرت القيم
   if (sInput && document.activeElement !== sInput) sInput.value = s > 0 ? s : (s === 0 && sInput.value ? "0" : "");
@@ -5907,6 +5918,26 @@ function normalizeInputFCS(input) {
   
   // إعادة الحساب بعد التطبيع
   saveAndCalc();
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacyNormalizeFCS(feddan, carat, sahm) {
+  let f = feddan;
+  let c = carat;
+  let s = sahm;
+  if (s >= 24) {
+    const extraC = Math.floor(s / 24);
+    c += extraC;
+    s = Number((s % 24).toFixed(2));
+  }
+  if (c >= 24) {
+    const extraF = Math.floor(c / 24);
+    f += extraF;
+    c = c % 24;
+  }
+  return { feddan: f, carat: c, sahm: s };
 }
 
 function updateTableTotals() {

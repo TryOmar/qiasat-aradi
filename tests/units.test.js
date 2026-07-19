@@ -193,6 +193,62 @@ const AgriUnitsTests = {
   },
 
   // ============================================================
+  // اختبار المقارنة الذهبي (Golden Comparison Tests)
+  // يولد 500 قيمة عشوائية ويقارن الكود القديم بـ AgriUnits
+  // ============================================================
+  testGoldenComparison() {
+    let mathErrors = 0;
+    const count = 500;
+
+    for (let i = 0; i < count; i++) {
+      // 1. اختبار المساحة التقريبية (trapezoidArea)
+      const l1 = Math.random() * 500;
+      const l2 = Math.random() * 500;
+      const w1 = Math.random() * 500;
+      const w2 = Math.random() * 500;
+
+      const legacyArea = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+      const newArea = AgriUnits.trapezoidArea(l1, l2, w1, w2);
+      const areaDiff = Math.abs(legacyArea - newArea);
+
+      if (areaDiff > 0.000001) {
+        mathErrors++;
+      }
+
+      // 2. اختبار تحويل المساحة لـ FCS
+      const randomSqm = Math.random() * 100000;
+      const caratSizes = [168, 171.388, 175, 175.035];
+      const randomCaratSize = caratSizes[Math.floor(Math.random() * caratSizes.length)];
+
+      // المنطق القديم الفعلي لـ convertSquareMetersToFCS
+      const totalCarats = randomSqm / randomCaratSize;
+      let legF = Math.floor(totalCarats / 24);
+      let legC = Math.floor(totalCarats % 24);
+      let legS = Number(((totalCarats - (legF * 24 + legC)) * 24).toFixed(2));
+      if (legS >= 24 - 0.015) {
+        legS = 0;
+        legC += 1;
+      }
+      if (legC >= 24) {
+        legF += Math.floor(legC / 24);
+        legC = legC % 24;
+      }
+
+      const newFCS = AgriUnits.sqmToFCS(randomSqm, randomCaratSize);
+      
+      const fDiff = Math.abs(legF - newFCS.feddan);
+      const cDiff = Math.abs(legC - newFCS.carat);
+      const sDiff = Math.abs(legS - newFCS.sahm);
+
+      if (fDiff > 0.000001 || cDiff > 0.000001 || sDiff > 0.01) {
+        mathErrors++;
+      }
+    }
+
+    this.assert(`Golden Test (500 iterations): Legacy vs AgriUnits math match`, mathErrors === 0);
+  },
+
+  // ============================================================
   // تشغيل جميع الاختبارات
   // ============================================================
   runAll() {
@@ -200,7 +256,7 @@ const AgriUnitsTests = {
     this.failed = 0;
     this.results = [];
 
-    console.log('🚀 AgriUnits Tests — Phase 3, Commit 9 (Edge Cases Added)');
+    console.log('🚀 AgriUnits Tests — Phase 3, Commit 9 (Edge Cases & Golden Tests Added)');
     console.log('─'.repeat(50));
 
     this.testMetersToQasabaQabda();
@@ -209,6 +265,7 @@ const AgriUnitsTests = {
     this.testSqmToFCS();
     this.testSahmsToFCS();
     this.testTrapezoidArea();
+    this.testGoldenComparison();
 
     return this.report();
   }
