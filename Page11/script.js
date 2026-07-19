@@ -4670,6 +4670,9 @@ function toQasabaAndQabda(meters) {
   return legacyToQasabaAndQabda(meters);
 }
 
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
 function legacyToQasabaAndQabda(meters) {
   if (!meters || isNaN(meters) || meters <= 0) return { qasaba: 0, qabda: 0, fraction: 0 };
   const qasabaLength = 3.55;
@@ -4881,6 +4884,9 @@ function fromQasabaToMeters(qasaba, qabda, fraction) {
   return legacyFromQasabaToMeters(qasaba, qabda, fraction);
 }
 
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
 function legacyFromQasabaToMeters(qasaba, qabda, fraction) {
   const qasabaLength = 3.55;
   const qabdaLength = qasabaLength / 24;
@@ -6477,11 +6483,12 @@ function toggleSettingsAccordion() {
     trigger.style.borderRadius = "8px";
     content.classList.remove("open");
     
-    // حفظ التفضيلات باستخدام طبقة التخزين الجديدة مع الحفاظ على القيمة القديمة كـ Fallback
+    // حفظ التفضيلات باستخدام طبقة التخزين الموحدة (التي تتكفل تلقائياً بالتوافق المزدوج)
     if (window.DallalStorage) {
       DallalStorage.local.setItem("settings_accordion_open", "false");
+    } else {
+      localStorage.setItem("settings-accordion-open", "false");
     }
-    localStorage.setItem("settings-accordion-open", "false");
   } else {
     // فتح القسم المنسدل
     content.style.maxHeight = content.scrollHeight + "px";
@@ -6492,8 +6499,9 @@ function toggleSettingsAccordion() {
     
     if (window.DallalStorage) {
       DallalStorage.local.setItem("settings_accordion_open", "true");
+    } else {
+      localStorage.setItem("settings-accordion-open", "true");
     }
-    localStorage.setItem("settings-accordion-open", "true");
   }
 }
 
@@ -6505,12 +6513,9 @@ function initSettingsAccordion() {
 
   let isOpen = false;
   if (window.DallalStorage) {
+    // مكتبة التخزين تتكفل بالبحث في المفاتيح القديمة والترحيل تلقائياً
     const stored = DallalStorage.local.getItem("settings_accordion_open");
-    if (stored !== null) {
-      isOpen = (stored === "true" || stored === true);
-    } else {
-      isOpen = (localStorage.getItem("settings-accordion-open") === "true");
-    }
+    isOpen = (stored === "true" || stored === true);
   } else {
     isOpen = (localStorage.getItem("settings-accordion-open") === "true");
   }

@@ -3,9 +3,9 @@
  * =================
  * نظام التخزين الموحد وآلية الترحيل (Unified Storage & Migration System) — مشروع الدَّلاَّل
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @date 2026-07-19
- * @commit Commit 9 — Phase 5
+ * @commit Commit 9 — Phase 8 (Integration)
  *
  * الغرض:
  *   توفير واجهة برمجة موحدة وآمنة للتعامل مع التخزين المحلي (localStorage)
@@ -28,6 +28,10 @@
  *   - مزامنة خلفية عند الكتابة (Dual-Write) لتحديث المفاتيح القديمة تلقائياً
  *     حتى تقرأ الصفحات غير المعدلة نفس القيم المحدثة بدون كسر التوافق.
  *   - معالجة تلقائية وآمنة لتسلسل البيانات (JSON Serialization) مع دعم القيم الافتراضية.
+ *
+ * CHANGELOG:
+ *   1.0.0 — إنشاء مكتبة التخزين والترحيل (Phase 5).
+ *   1.0.1 — إضافة مفتاح settings_accordion_open لقواعد الترحيل والمزامنة (Phase 8).
  */
 
 (function (global) {
@@ -55,6 +59,11 @@
     },
     "p11_history": {
       legacyKeys: ["p11-history"],
+      storageType: "local",
+      syncLegacyOnWrite: true
+    },
+    "settings_accordion_open": {
+      legacyKeys: ["settings-accordion-open"],
       storageType: "local",
       syncLegacyOnWrite: true
     }
@@ -239,7 +248,7 @@
     session: new StorageEngine(typeof window !== "undefined" ? window.sessionStorage : null, "session"),
 
     /** معرّف الإصدار وقواعد الترحيل الحالية للتوثيق */
-    VERSION: "1.0.0",
+    VERSION: "1.0.1",
     MIGRATION_RULES: Object.freeze(MIGRATION_RULES)
   };
 
