@@ -341,6 +341,61 @@ const AgriUnitsTests = {
   },
 
   // ============================================================
+  // اختبار المقارنة الذهبي الخاص بـ Page12 (Page12 Golden Tests)
+  // يقارن منطق تحويل المساحة القديم الخاص بـ Page12 بـ AgriUnits
+  // ============================================================
+  testPage12GoldenComparison() {
+    let p12Errors = 0;
+    const count = 300;
+
+    for (let i = 0; i < count; i++) {
+      const randomSqm = Math.random() * 50000;
+      const caratSize = 168 + Math.random() * 8;
+
+      const cSize = caratSize;
+      const fSize = cSize * 24;
+      const sSize = cSize / 24;
+      const feddan = Math.floor(randomSqm / fSize);
+      const remSqm = randomSqm - (feddan * fSize);
+      const carat = Math.floor(remSqm / cSize);
+      let shares = Math.round((remSqm - (carat * cSize)) / sSize * 100) / 100;
+      let legF = feddan;
+      let legC = carat;
+      let legS = shares;
+      if (legS >= 24) {
+        legS -= 24;
+        legC += 1;
+      }
+      if (legC >= 24) {
+        legC -= 24;
+        legF += 1;
+      }
+
+      const newFCS = AgriUnits.sqmToFCS(randomSqm, caratSize);
+
+      const isFloatFixTriggered = (shares >= 24 - 0.015);
+      
+      if (!isFloatFixTriggered) {
+        if (legF !== newFCS.feddan || legC !== newFCS.carat || Math.abs(legS - newFCS.sahm) > 0.01) {
+          p12Errors++;
+        }
+      } else {
+        let expectedC = legC + 1;
+        let expectedF = legF;
+        if (expectedC >= 24) {
+          expectedC = 0;
+          expectedF += 1;
+        }
+        if (newFCS.sahm !== 0 || newFCS.carat !== expectedC || newFCS.feddan !== expectedF) {
+          p12Errors++;
+        }
+      }
+    }
+
+    this.assert(`Page12 Golden Test (300 cases): Legacy vs AgriUnits math match`, p12Errors === 0);
+  },
+
+  // ============================================================
   // تشغيل جميع الاختبارات
   // ============================================================
   runAll() {
@@ -359,6 +414,7 @@ const AgriUnitsTests = {
     this.testTrapezoidArea();
     this.testGoldenComparison();
     this.testPage13GoldenComparison();
+    this.testPage12GoldenComparison();
 
     return this.report();
   }

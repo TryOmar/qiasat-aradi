@@ -279,8 +279,18 @@ let saveStateTimeout = null;
 
 // Smart Area Tabs
 let activeSmartAreaTab = 'sqm';
-let showFeddanConversion = localStorage.getItem("dallal_show_feddan") !== "false";
-let caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
+let showFeddanConversion = true;
+if (window.DallalStorage) {
+  showFeddanConversion = DallalStorage.local.getItem("show_feddan") !== "false";
+} else {
+  showFeddanConversion = localStorage.getItem("dallal_show_feddan") !== "false";
+}
+let caratSize = 168;
+if (window.DallalStorage) {
+  caratSize = parseFloat(DallalStorage.local.getItem("carat_area")) || 168;
+} else {
+  caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
+}
 
 // Color Palette for Shapes
 const colorsList = [
@@ -299,7 +309,12 @@ const colorsList = [
 document.addEventListener("DOMContentLoaded", function () {
   const svg = document.getElementById("dallalSvg");
 
-  const savedStateStr = localStorage.getItem("dallal_autosave");
+  let savedStateStr = null;
+  if (window.DallalStorage) {
+    savedStateStr = DallalStorage.local.getItem("autosave");
+  } else {
+    savedStateStr = localStorage.getItem("dallal_autosave");
+  }
   if (savedStateStr) {
     try {
       const state = JSON.parse(savedStateStr);
@@ -382,7 +397,13 @@ document.addEventListener("DOMContentLoaded", function () {
       // الحل: تجاهل البيانات التالفة والبدء بنموذج افتراضي
       console.warn('[Dallal AutoSave] فشل استعادة البيانات المحفوظة:', e.message);
       console.error('[Dallal AutoSave] تفاصيل الخطأ:', e);
-      try { localStorage.removeItem('dallal_autosave'); } catch(_) {}
+      try {
+        if (window.DallalStorage) {
+          DallalStorage.local.removeItem('autosave');
+        } else {
+          localStorage.removeItem('dallal_autosave');
+        }
+      } catch(_) {}
       openStartModal();
       loadDemoDataPreset(false);
     }
@@ -572,7 +593,11 @@ function autoSaveCurrentState() {
     },
     customPartnerWidths, customWaterwayData
   };
-  localStorage.setItem("dallal_autosave", JSON.stringify(state));
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("autosave", state);
+  } else {
+    localStorage.setItem("dallal_autosave", JSON.stringify(state));
+  }
 }
 window.addEventListener('beforeunload', autoSaveCurrentState);// ----------------------------------------------------
 // SVG Coordinate Mapping & Viewport Transforms
@@ -625,6 +650,21 @@ function applyViewportTransform() {
  * @returns {{feddan:number, carat:number, shares:number}} موزعة على الوحدات الثلاث
  */
 function sqmToFeddanCaratShares(sqm) {
+  if (window.AgriUnitsCompat) {
+    const res = AgriUnitsCompat.sqmToFCS(sqm, caratSize);
+    return {
+      feddan: res.feddan,
+      carat: res.carat,
+      shares: res.sahm
+    };
+  }
+  return legacySqmToFeddanCaratShares(sqm);
+}
+
+// ── LEGACY CODE ──────────────────────────────────────────
+// كود قديم للتراجع والاحتياط، لا يُعدَّل إلا عند إزالة التوافقية الخلفية (Backward Compatibility).
+// ──────────────────────────────────────────────────────────
+function legacySqmToFeddanCaratShares(sqm) {
   const cSize = caratSize;
   const fSize = cSize * 24;
   const sSize = cSize / 24;
@@ -828,7 +868,11 @@ function generateCustomLand(useCustomWidths = false) {
     const numPartners = parseInt(document.getElementById("start-partners")?.value) || 1;
 
   if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0 || numPartners < 1) {
-    alert("الرجاء إدخال أبعاد صحيحة أكبر من الصفر للأضلاع الأربعة!");
+    if (window.DallalToast) {
+      DallalToast.warning("الرجاء إدخال أبعاد صحيحة أكبر من الصفر للأضلاع الأربعة!");
+    } else {
+      alert("الرجاء إدخال أبعاد صحيحة أكبر من الصفر للأضلاع الأربعة!");
+    }
     return;
   }
 
@@ -919,14 +963,28 @@ function generateCustomLand(useCustomWidths = false) {
 
     if (diag1 > 0) { // AC
       let cos_alpha = (B*B + A*A - diag1*diag1) / (2 * B * A);
-      if(cos_alpha < -1 || cos_alpha > 1) { alert("القطر الأول غير منطقي مع أبعاد الأضلاع!"); return; }
+      if(cos_alpha < -1 || cos_alpha > 1) {
+        if (window.DallalToast) {
+          DallalToast.error("القطر الأول غير منطقي مع أبعاد الأضلاع!");
+        } else {
+          alert("القطر الأول غير منطقي مع أبعاد الأضلاع!");
+        }
+        return;
+      }
       let alpha = Math.acos(cos_alpha);
       tempP1 = { x: B * Math.cos(alpha), y: -B * Math.sin(alpha) };
 
       let cos_beta1 = (A*A + diag1*diag1 - B*B) / (2 * A * diag1);
       let beta1 = Math.acos(cos_beta1);
       let cos_beta2 = (D*D + diag1*diag1 - C*C) / (2 * D * diag1);
-      if(cos_beta2 < -1 || cos_beta2 > 1) { alert("القطر الأول غير منطقي مع أبعاد الأضلاع!"); return; }
+      if(cos_beta2 < -1 || cos_beta2 > 1) {
+        if (window.DallalToast) {
+          DallalToast.error("القطر الأول غير منطقي مع أبعاد الأضلاع!");
+        } else {
+          alert("القطر الأول غير منطقي مع أبعاد الأضلاع!");
+        }
+        return;
+      }
       let beta2 = Math.acos(cos_beta2);
       let total_beta = beta1 + beta2;
       tempP2 = { x: A - D * Math.cos(total_beta), y: -D * Math.sin(total_beta) };
@@ -938,14 +996,28 @@ function generateCustomLand(useCustomWidths = false) {
       totalArea = area1 + area2;
     } else { // BD
       let cos_beta = (A*A + D*D - diag2*diag2) / (2 * A * D);
-      if(cos_beta < -1 || cos_beta > 1) { alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!"); return; }
+      if(cos_beta < -1 || cos_beta > 1) {
+        if (window.DallalToast) {
+          DallalToast.error("القطر الثاني غير منطقي مع أبعاد الأضلاع!");
+        } else {
+          alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!");
+        }
+        return;
+      }
       let beta = Math.acos(cos_beta);
       tempP2 = { x: A - D * Math.cos(beta), y: -D * Math.sin(beta) };
       
       let cos_alpha1 = (A*A + diag2*diag2 - D*D) / (2 * A * diag2);
       let alpha1 = Math.acos(cos_alpha1);
       let cos_alpha2 = (B*B + diag2*diag2 - C*C) / (2 * B * diag2);
-      if(cos_alpha2 < -1 || cos_alpha2 > 1) { alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!"); return; }
+      if(cos_alpha2 < -1 || cos_alpha2 > 1) {
+        if (window.DallalToast) {
+          DallalToast.error("القطر الثاني غير منطقي مع أبعاد الأضلاع!");
+        } else {
+          alert("القطر الثاني غير منطقي مع أبعاد الأضلاع!");
+        }
+        return;
+      }
       let alpha2 = Math.acos(cos_alpha2);
       let total_alpha = alpha1 + alpha2;
       tempP1 = { x: B * Math.cos(total_alpha), y: -B * Math.sin(total_alpha) };
@@ -4362,7 +4434,11 @@ function applyTotalDimensions() {
   const l1 = parseFloat(document.getElementById("sidebar-total-len-left").value) || 0;
 
   if (w1 <= 0 || w2 <= 0 || l1 <= 0 || l2 <= 0) {
-    alert("الرجاء إدخال قيم صحيحة أكبر من الصفر لجميع الأضلاع الأربعة!");
+    if (window.DallalToast) {
+      DallalToast.warning("الرجاء إدخال قيم صحيحة أكبر من الصفر لجميع الأضلاع الأربعة!");
+    } else {
+      alert("الرجاء إدخال قيم صحيحة أكبر من الصفر لجميع الأضلاع الأربعة!");
+    }
     return;
   }
 
@@ -4946,7 +5022,11 @@ function applyMixedPieceLengths(groupId) {
   const newRight = parseFloat(rightInput.value);
 
   if (isNaN(newLeft) || isNaN(newRight) || newLeft < 0 || newRight < 0) {
-    alert("الرجاء إدخال قيم أطوال صحيحة أكبر من الصفر.");
+    if (window.DallalToast) {
+      DallalToast.warning("الرجاء إدخال قيم أطوال صحيحة أكبر من الصفر.");
+    } else {
+      alert("الرجاء إدخال قيم أطوال صحيحة أكبر من الصفر.");
+    }
     return;
   }
 
@@ -4969,7 +5049,11 @@ function applyWidthsAtWaterway() {
   let eastW = parseArabicFloat(eastInput.value);
 
   if (isNaN(westW) || isNaN(eastW) || westW < 0 || eastW < 0) {
-    alert("الرجاء إدخال قيم عروض صحيحة أكبر من الصفر.");
+    if (window.DallalToast) {
+      DallalToast.warning("الرجاء إدخال قيم عروض صحيحة أكبر من الصفر.");
+    } else {
+      alert("الرجاء إدخال قيم عروض صحيحة أكبر من الصفر.");
+    }
     return;
   }
 
@@ -5139,7 +5223,11 @@ function saveUnifiedWaterwayData() {
 
   if (isNaN(westLen) || isNaN(eastLen) || isNaN(westW) || isNaN(eastW) || isNaN(waterW) ||
       westLen < 0 || eastLen < 0 || westW < 0 || eastW < 0 || waterW < 0) {
-    alert("الرجاء إدخال قيم صحيحة أكبر من أو تساوي الصفر.");
+    if (window.DallalToast) {
+      DallalToast.warning("الرجاء إدخال قيم صحيحة أكبر من أو تساوي الصفر.");
+    } else {
+      alert("الرجاء إدخال قيم صحيحة أكبر من أو تساوي الصفر.");
+    }
     return;
   }
 
@@ -5928,7 +6016,11 @@ function calcSmartArea(mode) {
     feddan = parseInt(document.getElementById("smart-fed").value) || 0;
     carat = parseInt(document.getElementById("smart-car").value) || 0;
     shares = parseFloat(document.getElementById("smart-shares") ? document.getElementById("smart-shares").value : document.getElementById("smart-sahm").value) || 0;
-    sqm = (feddan * 4200.833) + (carat * 175.0347) + (shares * 7.293);
+    if (window.AgriUnitsCompat) {
+      sqm = AgriUnitsCompat.fcsToSqm(feddan, carat, shares, 175.0347);
+    } else {
+      sqm = (feddan * 4200.833) + (carat * 175.0347) + (shares * 7.293);
+    }
   }
 
   // Display outputs
@@ -5971,7 +6063,11 @@ function loadDemoDataPreset(promptConfirm = true) {
 
   activeTemplateType = 'quad_diagonal';
   showFeddanConversion = true;
-  localStorage.setItem("dallal_show_feddan", "true");
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("show_feddan", "true");
+  } else {
+    localStorage.setItem("dallal_show_feddan", "true");
+  }
 
   if (document.getElementById("start-w1")) document.getElementById("start-w1").value = "45";
   if (document.getElementById("start-w2")) document.getElementById("start-w2").value = "50";
@@ -6393,7 +6489,11 @@ function togglePrintAgriBackground() {
 function handleConversionButtonClick() {
   if (!showFeddanConversion) {
     showFeddanConversion = true;
-    localStorage.setItem("dallal_show_feddan", "true");
+    if (window.DallalStorage) {
+      DallalStorage.local.setItem("show_feddan", "true");
+    } else {
+      localStorage.setItem("dallal_show_feddan", "true");
+    }
     renderSVG();
   } else {
     showCaratConversionModal();
@@ -6447,7 +6547,11 @@ function applyCaratConversion() {
   if (select.value === "custom") {
     const customVal = parseFloat(customInput.value);
     if (isNaN(customVal) || customVal <= 0) {
-      alert("الرجاء إدخال مساحة صحيحة للقيراط");
+      if (window.DallalToast) {
+        DallalToast.warning("الرجاء إدخال مساحة صحيحة للقيراط");
+      } else {
+        alert("الرجاء إدخال مساحة صحيحة للقيراط");
+      }
       return;
     }
     selectedVal = customVal;
@@ -6458,8 +6562,13 @@ function applyCaratConversion() {
   caratSize = selectedVal;
   showFeddanConversion = true;
 
-  localStorage.setItem("dallal_carat_size", caratSize);
-  localStorage.setItem("dallal_show_feddan", "true");
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("carat_area", caratSize);
+    DallalStorage.local.setItem("show_feddan", "true");
+  } else {
+    localStorage.setItem("dallal_carat_size", caratSize);
+    localStorage.setItem("dallal_show_feddan", "true");
+  }
 
   // Re-render
   renderSVG();
@@ -6474,7 +6583,11 @@ function applyCaratConversion() {
 
 function disableCaratConversion() {
   showFeddanConversion = false;
-  localStorage.setItem("dallal_show_feddan", "false");
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("show_feddan", "false");
+  } else {
+    localStorage.setItem("dallal_show_feddan", "false");
+  }
 
   // Re-render
   renderSVG();
