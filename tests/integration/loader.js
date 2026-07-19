@@ -68,6 +68,12 @@
         assert("Missing Library Test [DEBUG]: Failed to throw error", false);
       }
 
+      // تجميد كائن التوافقية لضمان عدم التعديل عليه أثناء الاختبارات
+      if (global.AgriUnitsCompat && !Object.isFrozen(global.AgriUnitsCompat)) {
+        Object.freeze(global.AgriUnitsCompat);
+      }
+      assert("AgriUnitsCompat is frozen for stability", Object.isFrozen(global.AgriUnitsCompat));
+
       // ب. محاكاة غياب مكتبة النواة في وضع الإنتاج (DALLAL_DEBUG = false) -> يجب ألا يرمي خطأ بل يرجع fallback
       global.DALLAL_DEBUG = false;
       let returnedFallback = false;
@@ -80,6 +86,28 @@
         assert("Missing Library Test [PRODUCTION]: Safe fallback returned successfully on missing AgriUnits", returnedFallback);
       } catch (e) {
         assert("Missing Library Test [PRODUCTION]: Threw unexpected error: " + e.message, false);
+      }
+
+      // ج. اختبار ترتيب التحميل السلبي (Negative Load Order Test)
+      // محاكاة وضع الإنتاج (DALLAL_DEBUG = false) وغياب المكتبة: يجب تسجيل الخطأ عبر console.error دون إلقاء استثناء
+      global.AgriUnits = undefined;
+      global.DALLAL_DEBUG = false;
+      
+      const originalConsoleError = console.error;
+      let loggedError = false;
+      console.error = (msg) => {
+        if (msg && msg.includes("AgriUnits library was not loaded")) {
+          loggedError = true;
+        }
+      };
+      
+      try {
+        AgriUnitsCompat.metersToQasabaQabda(10);
+        assert("Negative Load Order [PRODUCTION]: console.error was triggered correctly on missing AgriUnits", loggedError);
+      } catch (e) {
+        assert("Negative Load Order [PRODUCTION]: Threw unexpected error", false);
+      } finally {
+        console.error = originalConsoleError;
       }
 
       // استرجاع القيم الأصلية
