@@ -1,5 +1,32 @@
 
 
+// --- Performance Optimizations & Caching (Phase 14) ---
+window.DALLAL_PERF = window.DALLAL_PERF || {
+  domCache: true,
+  documentFragment: true,
+  dirtyFlag: true,
+  debounce: true
+};
+
+const _domCache = {};
+const _originalGetElementById = document.getElementById;
+document.getElementById = function(id) {
+  if (window.DALLAL_PERF && window.DALLAL_PERF.domCache) {
+    const cached = _domCache[id];
+    if (cached && cached.isConnected) {
+      return cached;
+    }
+    const el = _originalGetElementById.call(document, id);
+    if (el) {
+      _domCache[id] = el;
+    } else {
+      delete _domCache[id];
+    }
+    return el;
+  }
+  return _originalGetElementById.call(document, id);
+};
+
 // DOM Elements
 const shapeCards = document.querySelectorAll(".shape-card");
 const inputsGroups = document.querySelectorAll(".inputs-group");
