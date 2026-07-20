@@ -2167,14 +2167,12 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
 }
 
 function renderCroquis() {
-  console.log("renderCroquis() called", {
-    length1: document.getElementById("length1")?.value,
-    length2: document.getElementById("length2")?.value,
-    width1: document.getElementById("width1")?.value,
-    width2: document.getElementById("width2")?.value,
+  console.log({
     isPartitioned: typeof isPartitioned !== 'undefined' ? isPartitioned : false,
-    isManualPartition: typeof isManualPartition !== 'undefined' ? isManualPartition : false,
-    partnersCount: document.querySelectorAll("#partners-list .partner-row").length,
+    calculatedPieces: window.calculatedPieces,
+    calculatedPiecesLength: window.calculatedPieces?.length,
+    svg: document.getElementById("croquis-svg"),
+    placeholder: document.getElementById("croquis-placeholder"),
     lastCroquisSignature: window.lastCroquisSignature
   });
   try {
@@ -3024,6 +3022,7 @@ function renderCroquis() {
   if (typeof applySmartLayout === "function" && !window.isExporting) {
     applySmartLayout();
   }
+  console.log("renderCroquis finished", { piecesCount: window.calculatedPieces ? window.calculatedPieces.length : 0 });
   } catch (e) {
     console.error("Error in renderCroquis:", e);
   }
