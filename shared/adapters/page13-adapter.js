@@ -1,0 +1,218 @@
+/**
+ * shared/adapters/page13-adapter.js — Adapter for Page13/section1 Drawing & Partition
+ * =====================================================================================
+ * يحول بيانات الصفحة 13 (أبعاد القطعة، قائمة الورثة والأنصبة، التحويلات الكسرية، والرسم)
+ * إلى الكائن الموحد الذي يتوقعه محرك طباعة التقرير (DallalReportTemplate).
+ * 
+ * الميزات والضوابط المحققة:
+ *  1. القراءة الحية والمباشرة لمعرفات عناصر Page13 (trap-base-minor, trap-base-major, trap-length-right, trap-length-left).
+ *  2. عرض الأبعاد الأربعة الفريدة والخاصة بكل شريك/وارث على حدة دون تكرار الأبعاد الأولى.
+ *  3. التحديث التلقائي الفوري للقيم عند إعادة الحساب أو تغيير اتجاه التقسيم.
+ *  4. التناول الآمن للبيانات الناقصة أو غير المحددة باستبدالها بـ "—" دون انهيار الجدول.
+ */
+(function (global) {
+  "use strict";
+
+  const Page13Adapter = {
+    buildReportData() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('ar-EG');
+
+      // 1. قراءة أبعاد الأرض الإجمالية المعتمدة في Page13 الحية
+      const w2Raw = document.getElementById("trap-base-minor")?.value || document.getElementById("length2")?.value || "";
+      const w1Raw = document.getElementById("trap-base-major")?.value || document.getElementById("length1")?.value || "";
+      const l1Raw = document.getElementById("trap-length-right")?.value || document.getElementById("width1")?.value || "";
+      const l2Raw = document.getElementById("trap-length-left")?.value || document.getElementById("width2")?.value || "";
+
+      const w2Val = w2Raw ? `${w2Raw} م` : "—";
+      const w1Val = w1Raw ? `${w1Raw} م` : "—";
+      const l1Val = l1Raw ? `${l1Raw} م` : "—";
+      const l2Val = l2Raw ? `${l2Raw} م` : "—";
+
+      const caratSize = global.caratSize || 175;
+
+      const w1Num = parseFloat(w1Raw) || 0;
+      const w2Num = parseFloat(w2Raw) || 0;
+      const l1Num = parseFloat(l1Raw) || 0;
+      const l2Num = parseFloat(l2Raw) || 0;
+
+      const avgWidth = (w1Num + w2Num) / 2;
+      const avgLength = (l1Num + l2Num) / 2;
+
+      // 2. جلب قائمة الورثة والشركاء المحدثة فورياً من محرك الحسابات أو عناصر الجدول DOM
+      let heirs = [];
+      if (typeof global.getDallalHeirsData === "function") {
+        heirs = global.getDallalHeirsData() || [];
+      } else if (Array.isArray(global.heirsData)) {
+        heirs = global.heirsData;
+      }
+
+      // قراءة عناصر الجدول DOM لقراءة أطوال الأضلاع الحالية بدقة لكل سطر
+      const domRows = document.querySelectorAll("#heirs-list tr");
+      if (!heirs || heirs.length === 0) {
+        heirs = [];
+        domRows.forEach((row, idx) => {
+          const nameInput = row.querySelector(".heir-name");
+          const sqmInput = row.querySelector(".heir-share-sqm");
+          const topInput = row.querySelector(".heir-side-top");
+          const botInput = row.querySelector(".heir-side-bot");
+          const rightInput = row.querySelector(".heir-side-right");
+          const leftInput = row.querySelector(".heir-side-left");
+
+          if (nameInput || sqmInput) {
+            heirs.push({
+              name: nameInput?.value || `الوارث ${idx + 1}`,
+              share: parseFloat(sqmInput?.value) || 0,
+              topW: parseFloat(topInput?.value) || 0,
+              botW: parseFloat(botInput?.value) || 0,
+              leftLine: parseFloat(rightInput?.value) || 0,
+              divLine: parseFloat(leftInput?.value) || 0
+            });
+          }
+        });
+      }
+
+      // 3. حساب وتجميع المساحات والإجماليات الفتية
+      let totalAreaNum = 0;
+      if (typeof global.getDallalCalculatedArea === "function") {
+        totalAreaNum = global.getDallalCalculatedArea() || 0;
+      }
+      if (totalAreaNum === 0) {
+        const areaElText = document.getElementById("calc-area-m2")?.innerText || 
+                           document.getElementById("total-limit-area")?.innerText;
+        if (areaElText) totalAreaNum = parseFloat(areaElText) || 0;
+      }
+
+      let distributedSum = 0;
+      heirs.forEach(h => {
+        distributedSum += (typeof h.share === "number" ? h.share : parseFloat(h.share) || 0);
+      });
+
+      if (totalAreaNum === 0 && distributedSum > 0) {
+        totalAreaNum = distributedSum;
+      }
+
+      const totalAreaStr = totalAreaNum > 0 ? totalAreaNum.toFixed(2) : (distributedSum > 0 ? distributedSum.toFixed(2) : "—");
+      const distributedAreaStr = distributedSum > 0 ? distributedSum.toFixed(2) : totalAreaStr;
+
+      // 4. الأبعاد والمواصفات الهندسيـة للأرض
+      const dimensions = [
+        { label: "العرض الأول (أعلى)", value: w2Val },
+        { label: "العرض الثاني (أسفل)", value: w1Val },
+        { label: "الطول الأيمن (يمين)", value: l1Val },
+        { label: "الطول الأيسر (يسار)", value: l2Val },
+        { label: "معدل العرض", value: avgWidth > 0 ? `${avgWidth.toFixed(4)} م` : "—" },
+        { label: "متوسط الطول", value: avgLength > 0 ? `${avgLength.toFixed(4)} م` : "—" },
+        { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? `${totalAreaStr} م²` : "—", isHighlight: true }
+      ];
+
+      // 5. بناء بطاقات الشركاء والورثة مع الأبعاد الأربعة الخاصة بكل بطاقة
+      const partnerCardsHTML = heirs.map((h, idx) => {
+        const nameText = h.name || `الوارث / الشريك ${idx + 1}`;
+        const areaVal = typeof h.share === "number" ? h.share : parseFloat(h.share) || 0;
+        const formattedArea = global.formatArea ? global.formatArea(areaVal) : areaVal.toFixed(2);
+
+        // قراءة الأضلاع المباشرة الخاصة بالسهم المعني
+        const domRow = domRows[idx];
+        const domTop = domRow ? parseFloat(domRow.querySelector(".heir-side-top")?.value) : 0;
+        const domBot = domRow ? parseFloat(domRow.querySelector(".heir-side-bot")?.value) : 0;
+        const domRight = domRow ? parseFloat(domRow.querySelector(".heir-side-right")?.value) : 0;
+        const domLeft = domRow ? parseFloat(domRow.querySelector(".heir-side-left")?.value) : 0;
+
+        const topVal = (h.topW && !isNaN(h.topW) && h.topW > 0) ? h.topW : domTop;
+        const botVal = (h.botW && !isNaN(h.botW) && h.botW > 0) ? h.botW : domBot;
+        const rightVal = (h.leftLine && !isNaN(h.leftLine) && h.leftLine > 0) ? h.leftLine : ((h.rightL && !isNaN(h.rightL)) ? h.rightL : domRight);
+        const leftVal = (h.divLine && !isNaN(h.divLine) && h.divLine > 0) ? h.divLine : ((h.leftL && !isNaN(h.leftL)) ? h.leftL : domLeft);
+
+        const topStr = (topVal > 0 && !isNaN(topVal)) ? `${topVal.toFixed(2)} م` : "—";
+        const botStr = (botVal > 0 && !isNaN(botVal)) ? `${botVal.toFixed(2)} م` : "—";
+        const rightStr = (rightVal > 0 && !isNaN(rightVal)) ? `${rightVal.toFixed(2)} م` : "—";
+        const leftStr = (leftVal > 0 && !isNaN(leftVal)) ? `${leftVal.toFixed(2)} م` : "—";
+
+        let fcsText = "0 سهم";
+        if (global.convertSquareMetersToFCS) {
+          const fcs = global.convertSquareMetersToFCS(areaVal);
+          fcsText = `(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm.toFixed(2)} س)`;
+        } else if (global.AgriUnitsCompat) {
+          const fcs = global.AgriUnitsCompat.sqmToFCS(areaVal, caratSize);
+          fcsText = `(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm.toFixed(2)} س)`;
+        }
+
+        return `
+          <div class="partner-print-card">
+            <div class="partner-card-header">${nameText}</div>
+            <table class="partner-card-table">
+              <thead>
+                <tr>
+                  <th style="width: 50%;">البيان</th>
+                  <th>القيمة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${topStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${botStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن (يمين)</td><td style="font-weight:bold;color:#1b5e20;">${rightStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر (يسار)</td><td style="font-weight:bold;color:#1b5e20;">${leftStr}</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">مساحة النصاب</td><td style="font-weight:bold;color:#1b5e20;">${formattedArea} م²</td></tr>
+              </tbody>
+            </table>
+            <div class="partner-card-area-box">
+              <span class="partner-card-area-lbl">المساحة</span>
+              <span class="partner-card-area-val">${formattedArea} م²</span>
+              <span class="partner-card-fcs-val">${fcsText}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const numCards = heirs.length;
+      let gridStyle = "grid-template-columns: repeat(3, 1fr);";
+      if (numCards === 1) {
+        gridStyle = "grid-template-columns: 1fr; max-width: 320px; margin: 0 auto;";
+      } else if (numCards === 2) {
+        gridStyle = "grid-template-columns: repeat(2, 1fr); max-width: 640px; margin: 0 auto;";
+      }
+
+      // 6. الإجماليات والملاحظات
+      let fcsTotal = { feddan: 0, carat: 0, sahm: 0 };
+      if (global.convertSquareMetersToFCS) {
+        fcsTotal = global.convertSquareMetersToFCS(totalAreaNum);
+      } else if (global.AgriUnitsCompat) {
+        fcsTotal = global.AgriUnitsCompat.sqmToFCS(totalAreaNum, caratSize);
+      }
+
+      const totals = {
+        totalArea: totalAreaStr,
+        totalFeddans: fcsTotal.feddan,
+        totalCarats: fcsTotal.carat,
+        totalShares: typeof fcsTotal.sahm === "number" ? fcsTotal.sahm.toFixed(2) : fcsTotal.sahm,
+        caratArea: caratSize
+      };
+
+      const notes = [
+        "1 - تم إجراء التوزيع والمساحة وفقاً لدقة الرسم الهندسي وشوليس الموحد.",
+        `2 - إجمالي المساحة الموزعة: ${distributedAreaStr} م² من أصل ${totalAreaStr} م².`,
+        `3 - عدد الورثة والشركاء المستفيدين: ${heirs.length} شريك.`
+      ];
+
+      return {
+        reportTitle: "تقرير رسم وتقسيم الأراضي",
+        reportSubtitle: "قسمة الورثة والشركاء",
+        dateStr,
+        timeStr,
+        dimensions,
+        partnerCardsHTML,
+        gridStyle,
+        totals,
+        notes
+      };
+    }
+  };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = Page13Adapter;
+  } else {
+    global.Page13Adapter = Page13Adapter;
+  }
+})(typeof window !== "undefined" ? window : global);

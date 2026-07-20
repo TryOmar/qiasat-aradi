@@ -109,6 +109,7 @@ function preventDoubleTap() {
 // freeTexts:    النصوص الحرة والأبعاد المكتوبة على الكروكي
 // waterways:    بيانات المجرى المائي (الترعة وعروض القطع المجاورة)
 let shapes = [];
+window.getDallalShapes = function() { return shapes; };
 let borderLabels = [];
 let splitLines = [];
 let freeTexts = [];
@@ -6125,6 +6126,11 @@ function exportMapImage() {
 // PDF & Print View Rendering
 // ----------------------------------------------------
 function printDallalMap() {
+  if (window.Page12Adapter && window.DallalReportTemplate) {
+    const reportData = window.Page12Adapter.buildReportData();
+    window.DallalReportTemplate.print(reportData);
+    return;
+  }
   selectedElement = null;
   renderSVG();
   populateSidebarEditor();

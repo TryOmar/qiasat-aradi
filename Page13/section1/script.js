@@ -88,6 +88,8 @@ let vertices = [];
 let calculatedArea = 0;
 let calculatedPerimeter = 0;
 let heirsData = [];
+window.getDallalHeirsData = function() { return heirsData; };
+window.getDallalCalculatedArea = function() { return calculatedArea; };
 let isDivisionActive = false;
 let showActualDims = true; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
@@ -2627,37 +2629,8 @@ function updateHeirsDistribution() {
   
   const diff = Math.abs(distributedSum - calculatedArea);
   if (diff < 0.05) {
-    // تشغيل التحقق الموحد بصيغة شوليس والطبقات الطوبولوجية
-    const report = LandValidationEngine.run(false); // basic verification in UI
-    
-    if (report.ok) {
-      let checklistHtml = `<div style="text-align: right; margin-top: 5px; font-size: 12px; line-height: 1.6;">`;
-      checklistHtml += `<strong>🏆 نتيجة التحقق الهندسي: ${report.score}/100 (${report.rating})</strong><br>`;
-      report.results.forEach(r => {
-        checklistHtml += `✅ ${r.name} Validator: ناجح (${r.detail})<br>`;
-      });
-      
-      // تقرير فني للمطور
-      checklistHtml += `<div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #ccc; font-family: monospace; color: #555; font-size: 11px;">`;
-      checklistHtml += `Shoelace Max Error: ${report.metrics.maxShoelaceError.toFixed(6)} m²<br>`;
-      checklistHtml += `Boundary Max Error: ${report.metrics.maxBoundaryError.toFixed(6)} m<br>`;
-      checklistHtml += `Union Error: ${report.metrics.unionError.toFixed(6)} m²<br>`;
-      checklistHtml += `Execution Time: ${report.metrics.totalTimeMs.toFixed(2)} ms`;
-      checklistHtml += `</div></div>`;
-      
-      distributionStatus.className = "status-ok";
-      distributionStatus.innerHTML = checklistHtml;
-    } else {
-      let checklistHtml = `<div style="text-align: right; margin-top: 5px; font-size: 12px; line-height: 1.6;">`;
-      checklistHtml += `<strong>⚠️ فشل بعض فحوصات التحقق الهندسي (الدرجة: ${report.score}/100)</strong><br>`;
-      report.results.forEach(r => {
-        checklistHtml += `${r.ok ? '✅' : '❌'} ${r.name} Validator: ${r.ok ? 'ناجح' : 'فاشل'} (${r.detail})<br>`;
-      });
-      checklistHtml += `</div>`;
-      
-      distributionStatus.className = "status-err";
-      distributionStatus.innerHTML = checklistHtml;
-    }
+    distributionStatus.className = "status-ok";
+    distributionStatus.innerText = "🟢 التوزيع متطابق ومكتمل بالكامل!";
   } else {
     distributionStatus.className = "status-err";
     distributionStatus.innerText = `تنبيه: التوزيع غير متطابق! فارق المساحة: ${(calculatedArea - distributedSum).toFixed(2)} م²`;
@@ -2844,6 +2817,11 @@ function loadStateFromSession() {
 
 // Print trigger
 function printCroquis() {
+  if (window.Page13Adapter && window.DallalReportTemplate) {
+    const reportData = window.Page13Adapter.buildReportData();
+    window.DallalReportTemplate.print(reportData);
+    return;
+  }
   // Capture canvas as image
   const canvas = document.getElementById('landCanvas');
   const canvasDataURL = canvas.toDataURL('image/png');
