@@ -827,10 +827,10 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
 }
 
 function deletePartnerRow(button) {
-  // إلغاء وضع التعديل وتصفير مؤقت لوحة المفاتيح لتفادي تعارض الحسابات
-
-  const row = button.parentElement;
-  row.remove();
+  const row = button.closest(".partner-row") || button.closest("tr") || button.parentElement;
+  if (row) {
+    row.remove();
+  }
   isManualPartition = false;
   saveAndCalcImmediate();
 }
@@ -1750,6 +1750,46 @@ function runPartition(shouldRender = true) {
       lastDivLine = window.calculatedPieces[window.calculatedPieces.length - 1].divLine;
     }
     document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
+  }
+
+  // Central Final Normalization Phase
+  const sumTargetAreas = Array.from(rows).filter(r => !isPartnerRowExcluded(r)).reduce((sum, r) => sum + getPartnerTargetArea(r), 0);
+  const diffNorm = totalAreaM2 - sumTargetAreas;
+  const toleranceNorm = 0.25;
+  if (!window.isNormalizing && Math.abs(diffNorm) <= toleranceNorm && Math.abs(diffNorm) > 1e-7) {
+    const activeRows = Array.from(rows).filter(r => !isPartnerRowExcluded(r));
+    if (activeRows.length > 0) {
+      const lastActiveRow = activeRows[activeRows.length - 1];
+      
+      const currentTargetArea = getPartnerTargetArea(lastActiveRow);
+      const correctArea = currentTargetArea + diffNorm;
+      
+      window.isNormalizing = true;
+      window.normalizedDiff = diffNorm;
+      
+      if (currentInputMethod === "carats") {
+        const fcs = convertSquareMetersToFCS(correctArea);
+        const feddansInput = lastActiveRow.querySelector(".partner-feddans");
+        const caratsInput = lastActiveRow.querySelector(".partner-carats");
+        const sharesInput = lastActiveRow.querySelector(".partner-shares");
+        if (feddansInput && document.activeElement !== feddansInput) feddansInput.value = fcs.feddan > 0 ? fcs.feddan : "";
+        if (caratsInput && document.activeElement !== caratsInput) caratsInput.value = fcs.carat > 0 ? fcs.carat : "";
+        if (sharesInput && document.activeElement !== sharesInput) sharesInput.value = fcs.sahm > 0 ? fcs.sahm : "";
+      } else {
+        const fracInput = lastActiveRow.querySelector(".partner-fraction");
+        if (fracInput && document.activeElement !== fracInput) {
+          fracInput.value = (correctArea / totalAreaM2).toFixed(6);
+        }
+      }
+      
+      calculateGeneral(false);
+      runPartition(false);
+      window.isNormalizing = false;
+      if (shouldRender) {
+        renderCroquis();
+      }
+      return;
+    }
   }
 
   // update the remaining area card
