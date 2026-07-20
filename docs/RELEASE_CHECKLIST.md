@@ -39,7 +39,26 @@ This document establishes the mandatory **Release Validation Checklist** for ver
 
 ---
 
-## 5. Phase 15 Roadmap Overview
+## 5. Release Candidate 2 (`v2.0.0-rc2`) Resolution Items
+
+Target: Resolve 7 specific edge-case and environment tests to achieve **83 / 83 (100%)** test suite pass rate.
+
+### 🔴 Critical Priority
+- [ ] **Transaction Snapshot Rollback**: Implement state snapshot (`takeStateSnapshot()` / `restoreStateSnapshot()`) on share deductions so invalid states revert completely without partial mutations.
+- [ ] **Event Listener Leak Prevention**: Replace per-element SVG polygon & chip listeners (`mouseenter`, `mouseleave`, `click`) with **Event Delegation** on the parent container.
+- [ ] **DOM Input Focus Preservation**: Maintain active element focus and cursor selection (`selectionStart`/`selectionEnd`) during live input updates instead of full row replacements.
+
+### 🟠 Medium Priority
+- [ ] **Timer Cleanup**: Audit all `setTimeout`/`setInterval` calls to guarantee explicit `clearTimeout` handles before setting new timers.
+- [ ] **Execution Cycle Acceleration**: Target execution cycle `< 200ms` by eliminating event leaks and DOM rebuild overhead.
+
+### 🟡 Low Priority (Mathematical Review)
+- [ ] **Linear Gradient Formula Review**: Review trapezoidal area-proportional partitioning equations vs linear stepping assumptions.
+- [ ] **Asymmetric Partitioning Verification**: Validate area conservation and polygon Shoelace verification for asymmetric shapes.
+
+---
+
+## 6. Phase 15 Roadmap Overview
 
 ### 1. Stress Testing (High Partner Load & Large Areas)
 - Test with **200, 500, and 1000 partners** (Stress Boundary limits).
@@ -53,3 +72,4 @@ This document establishes the mandatory **Release Validation Checklist** for ver
 ### 3. Flutter Migration Preparedness
 - Maintain 100% computational logic inside `core/` and `shared/` pure JavaScript libraries.
 - Keep Web UI decoupled to facilitate seamless Dart/Flutter translation.
+
