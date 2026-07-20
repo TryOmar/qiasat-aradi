@@ -1,8 +1,8 @@
 # 📄 UNIFIED_PRINT_REPORTS_RELEASE.md
-## النسخة المرجعية المستقرة لنظام تقارير الطباعة الموحد (Unified Print Reports v1.0)
+## النسخة المرجعية المستقرة لنظام تقارير الطباعة الموحد (Unified Print Reports v1.0 Release)
 
 - **تاريخ الاعتماد الرسمي:** 20 يوليو 2026
-- **حالة النسخة:** Baseline Release (مستقرة ومجربة 100%)
+- **حالة النسخة:** Baseline Release (تضمن البرامج الأربعة: Page3, Page11, Page12, Page13)
 - **المرجع المرجعي الأحادي (Single Source of Truth):** تصميم تقرير الصفحة 11 (`Page11`).
 
 ---
@@ -12,14 +12,16 @@
 ### 1. الملفات الجديدة (New Modules)
 * [`shared/report-template.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/report-template.js): محرك التقرير الموحد (العرض والطباعة فقط).
 * [`shared/report-print.css`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/report-print.css): أنماط الخطوط والتنسيقات للطباعة و PDF.
+* [`shared/adapters/page3-adapter.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/adapters/page3-adapter.js): محول بيانات برنامج فصل الحد بين المزارعين.
 * [`shared/adapters/page11-adapter.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/adapters/page11-adapter.js): محول بيانات برنامج تقسيم أرض باختلاف الأطوال.
 * [`shared/adapters/page12-adapter.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/adapters/page12-adapter.js): محول بيانات برنامج حساب وتقسيم الأراضي.
 * [`shared/adapters/page13-adapter.js`](file:///f:/برمجة%20تطبيق%20الدلال/qiasat-aradi-master/shared/adapters/page13-adapter.js): محول بيانات برنامج رسم وتقسيم الأراضي.
 
-### 2. الملفات المعدلة (Modified Pages)
+### 2. الملفات المعدلة والمدمجة (Modified & Integrated Modules)
+* `Page3/index.html` & `Page3/script.js`
 * `Page11/index.html` & `Page11/script.js`
 * `Page12/index.html` & `Page12/script.js`
-* `Page13/section1/index.html` & `Page13/section1/script.js`
+* `Page13/section1/index.html`, `Page13/section1/script.js` & `Page13/section1/smart-export.js`
 
 ---
 
@@ -37,10 +39,12 @@
 ## 🧪 إجراءات اختبار وسير العمل التفتيشي (Testing Procedure)
 
 1. **اختبار التقرير الموحد:**
+   - فتح `Page3` والضغط على زر (🖨️ طباعة التقرير).
    - فتح `Page11` والضغط على زر (🖨️ طباعة التقرير).
    - فتح `Page12` والضغط على زر (🖨️ طباعة).
    - فتح `Page13/section1` والضغط على زر (🖨️ طباعة).
-2. **التحقق البصري:**
-   - مطابقة الترويسة، جدول أبعاد الموقع، بطاقات الشركاء، الإجماليات، والملاحظات بالتقرير المطبوع.
+2. **التحقق البصري والعملي:**
+   - مطابقة الترويسة، جدول أبعاد الموقع، بطاقات الشركاء والمزارعين، الإجماليات، والملاحظات بالتقرير المطبوع.
    - التأكد من قراءة الأبعاد الحية واستخدام الرمز `—` للقيم غير المحددة.
+   - التأكد من تحديث الأبعاد والأنصبة فورياً بعد التعديل أو إعادة فتح الجلسة.
    - التأكد من عدم قص البطاقات بين الصفحات بفضل `page-break-inside: avoid`.

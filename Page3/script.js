@@ -1,4 +1,4 @@
-﻿// Select input elements and other relevant elements
+// Select input elements and other relevant elements
 let shares = document.querySelector("#share-input");
 let carat = document.querySelector("#carat-input");
 let acre = document.querySelector("#acre-input");
@@ -262,5 +262,14 @@ function getfloor(num) {
     return Number(result);
   } else {
     return 0;
+  }
+}
+
+function printPage3Report() {
+  const reportData = window.Page3Adapter ? window.Page3Adapter.buildReportData() : {};
+  if (window.DallalReportTemplate) {
+    window.DallalReportTemplate.print(reportData);
+  } else {
+    window.print();
   }
 }
