@@ -719,13 +719,13 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
         <input type="text" class="partner-name" placeholder="اسم الشريك" value="${name}" oninput="onPartnerNameInput(this)" onblur="onPartnerNameBlur(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </td>
       <td class="share-group">
-        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-shares" placeholder="0" value="${formattedShares}" oninput="onShareInput(this)" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </td>
       <td class="carat-group">
-        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-carats" placeholder="0" value="${formattedCarats}" oninput="onShareInput(this)" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </td>
       <td class="feddan-group">
-        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput()" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
+        <input type="text" inputmode="decimal" class="partner-feddans" placeholder="0" value="${feddans}" oninput="onShareInput(this)" onblur="normalizeInputFCS(this)" onkeydown="if(event.key==='Enter')this.blur()">
       </td>
       <td class="area-group">
         <input type="text" inputmode="decimal" class="partner-area" value="-" oninput="onAreaInput(this)" onblur="onAreaInput(this)" onkeydown="if(event.key==='Enter')this.blur()">
@@ -2093,8 +2093,7 @@ function divideEqually() {
     return;
   }
   
-  const w = (w1 + w2) / 2;
-  const totalAreaM2 = ((l1 + l2) / 2) * w;
+  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
   
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
   if (caratArea === 0) {
@@ -2106,22 +2105,26 @@ function divideEqually() {
     return;
   }
   
+  const exactAreaPerPartner = totalAreaM2 / numPartners;
+
   if (currentInputMethod === "carats") {
     const totalCarats = totalAreaM2 / caratArea;
     const partnerCarats = totalCarats / numPartners;
     
-    // حساب قيم الشريك مع تقريب الأسهم لرقمتين عشريتين
+    // حساب قيم الشريك مع تقريب الأسهم لرقمتين عشريتين للعرض الفعلي في الواجهة
     const f = Math.floor(partnerCarats / 24);
     const c = Math.floor(partnerCarats % 24);
     const s = Number(((partnerCarats - (f * 24 + c)) * 24).toFixed(2));
 
     rows.forEach((row, index) => {
+      row.dataset.exactArea = exactAreaPerPartner;
       if (row.querySelector(".partner-feddans")) row.querySelector(".partner-feddans").value = f > 0 ? f : "";
       if (row.querySelector(".partner-carats")) row.querySelector(".partner-carats").value = c > 0 ? c : "";
       if (row.querySelector(".partner-shares")) row.querySelector(".partner-shares").value = s > 0 ? s : "";
     });
   } else {
     rows.forEach((row, index) => {
+      row.dataset.exactArea = exactAreaPerPartner;
       if (row.querySelector(".partner-fraction")) {
         row.querySelector(".partner-fraction").value = `1/${numPartners}`;
       }
@@ -5048,12 +5051,23 @@ function getPartnerTargetArea(row) {
   const l2 = parseFloat(document.getElementById("length2").value) || 0;
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
-  const w = (w1 + w2) / 2;
-  const totalAreaM2 = ((l1 + l2) / 2) * w;
+  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
 
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
   if (caratArea === 0) {
     caratArea = parseFloat(document.getElementById("other-carat-area").value) || 0;
+  }
+
+  // المصدر الوحيد للحقيقة (Single Source of Truth): في حال وجود مساحة دقيقة محددة برمجياً للقطعة
+  if (row.dataset.exactArea && !isNaN(parseFloat(row.dataset.exactArea))) {
+    const exact = parseFloat(row.dataset.exactArea);
+    const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+    const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+    const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+    const fcsArea = (f * 24 + c + s / 24) * (caratArea || 168);
+    if (Math.abs(fcsArea - exact) < 0.25) {
+      return exact;
+    }
   }
 
   if (currentInputMethod === "carats") {
@@ -5406,7 +5420,11 @@ function onWidthChangeActual(input, type) {
   runPartition();
 }
 
-function onShareInput() {
+function onShareInput(input) {
+  if (input) {
+    const row = input.closest('.partner-row');
+    if (row) delete row.dataset.exactArea;
+  }
   isManualPartition = false;
   saveAndCalc();
 }
