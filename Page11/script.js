@@ -2074,6 +2074,13 @@ function onCalculateBtnClick() {
   runPartition();
 }
 
+/**
+ * IMPORTANT ARCHITECTURAL RULE:
+ * exactArea (m²) is the ONLY authoritative value (Single Source of Truth).
+ * All Feddan/Qirat/Sahm (FCS) conversions are display-only.
+ * Never perform internal calculations using displayed FCS values,
+ * otherwise cumulative rounding errors will occur.
+ */
 function divideEqually() {
   ensureDimensionsAutofill();
   const l1 = parseFloat(document.getElementById("length1").value) || 0;

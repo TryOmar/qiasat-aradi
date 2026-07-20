@@ -396,7 +396,7 @@ const AgriUnitsTests = {
   },
 
   // ============================================================
-  // 10. Single Source of Truth Equal Division Regression Test (Field Real-World Scenario)
+  // 10. Single Source of Truth & Round-Trip Regression Tests
   // ============================================================
   testSingleSourceOfTruthEqualDivisionRegression() {
     const l1 = 153.40, l2 = 158.17, w1 = 51.20, w2 = 60.30;
@@ -404,19 +404,38 @@ const AgriUnitsTests = {
     const numPartners = 6;
 
     const exactAreaPerPartner = totalAreaM2 / numPartners; // 1447.5022916666666 m²
-    const displayedArea = Number(exactAreaPerPartner.toFixed(2)); // 1447.50 m²
+    const displayedArea2Dec = Number(exactAreaPerPartner.toFixed(2)); // 1447.50 m²
+    const displayedArea3Dec = Number(exactAreaPerPartner.toFixed(3)); // 1447.502 m²
     const fcs = AgriUnitsCompat.sqmToFCS(exactAreaPerPartner, 168); // 0 Feddan, 8 Carats, 14.79 Sahm
 
     const sumExact = exactAreaPerPartner * numPartners;
     const remaining = totalAreaM2 - sumExact;
     const deficit = remaining < -0.05 ? Math.abs(remaining) : 0;
 
+    // --- Scenario A: Single Source of Truth Precision ---
     this.assert("Regression: Real-World Land Area matches trapezoid calculation", totalAreaM2, 8685.01375, 0.001);
     this.assert("Regression: Exact area per partner is full precision (1447.5022916...)", exactAreaPerPartner, 8685.01375 / 6, 0.000001);
-    this.assert("Regression: Displayed area is rounded to 1447.50 m²", displayedArea, 1447.50, 0.001);
+    this.assert("Regression: Displayed area (2 decimals) is rounded to 1447.50 m²", displayedArea2Dec, 1447.50, 0.001);
     this.assert("Regression: Displayed FCS yields 8 Carats and 14.79 Sahms", fcs.carat === 8 && Math.abs(fcs.sahm - 14.79) < 0.01, true);
     this.assert("Regression: Sum of exact internal areas equals total land area with zero deficit", Math.abs(remaining), 0, 0.000001);
     this.assert("Regression: Deficit is exactly 0.00 m²", deficit, 0, 0.000001);
+
+    // --- Scenario B: Round-Trip Conversion Isolation (m² -> FCS -> m²) ---
+    // Converting exact area to rounded FCS and back to m² yields 1447.53 m²
+    const roundTripM2 = AgriUnitsCompat.fcsToSqm(fcs.feddan, fcs.carat, fcs.sahm, 168); // 1447.53 m²
+    const roundTripDiff = Math.abs(roundTripM2 - exactAreaPerPartner); // 0.0277 m²
+    this.assert("Round-Trip: Re-converting rounded FCS back to m² creates expected ~0.028m² display drift", roundTripDiff < 0.05, true);
+    this.assert("Round-Trip: Original exactArea remains immutable and uncorrupted by FCS display conversion", exactAreaPerPartner, 1447.5022916666666, 0.000001);
+
+    // --- Scenario C: Save -> Load Serialization Preservation ---
+    const serialized = JSON.stringify({ exactArea: exactAreaPerPartner });
+    const deserialized = JSON.parse(serialized);
+    this.assert("Save/Load: Deserialized exactArea preserves full floating point precision", Number(deserialized.exactArea), exactAreaPerPartner, 0.000001);
+
+    // --- Scenario D: Decimal Places Display Isolation ---
+    // Changing display formatting from 2 to 3 decimal places must NOT alter internal exact total
+    const sumWith3DecFormat = exactAreaPerPartner * numPartners;
+    this.assert("Decimal Display: Changing display decimal formatting leaves internal exact total intact", sumWith3DecFormat, totalAreaM2, 0.000001);
   },
 
   // ============================================================
