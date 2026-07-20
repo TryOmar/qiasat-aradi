@@ -1654,14 +1654,20 @@ function runPartition(shouldRender = true) {
       divLineInput.value = `يمين: ${rightLength.toFixed(4)} م | يسار: ${leftLength.toFixed(4)} م`;
     }
     
+    // displayArea: عند التقسيم التلقائي (divideEqually)، يُستخدم exactArea للعرض
+    // لضمان توحيد القيم المعروضة بدلاً من calculatedGeoArea المتفاوت هندسياً
+    const displayArea = (!isManualPartition && row.dataset.exactArea && !isNaN(parseFloat(row.dataset.exactArea)))
+      ? parseFloat(row.dataset.exactArea)
+      : calculatedGeoArea;
+
     const areaInput = row.querySelector(".partner-area");
     if (areaInput && document.activeElement !== areaInput) {
-      areaInput.value = Number(calculatedGeoArea.toFixed(2));
+      areaInput.value = Number(displayArea.toFixed(2));
     }
 
     const percentInput = row.querySelector(".partner-percent");
     if (percentInput && document.activeElement !== percentInput) {
-      const pct = totalAreaM2 > 0 ? (calculatedGeoArea / totalAreaM2) * 100 : 0;
+      const pct = totalAreaM2 > 0 ? (displayArea / totalAreaM2) * 100 : 0;
       percentInput.value = Number(pct.toFixed(2)) + " %";
     }
     
@@ -1688,6 +1694,10 @@ function runPartition(shouldRender = true) {
     }
     
     const partnerName = row.querySelector(".partner-name").value || `شريك ${index + 1}`;
+    // exactArea من dataset (يُعيّنه divideEqually) لضمان عرض القيمة الموحدة في الكروكي
+    const pieceExactArea = (!isManualPartition && row.dataset.exactArea && !isNaN(parseFloat(row.dataset.exactArea)))
+      ? parseFloat(row.dataset.exactArea)
+      : undefined;
     window.calculatedPieces.push({
         name: partnerName,
         startX: tPrev_top * w,
@@ -1700,9 +1710,11 @@ function runPartition(shouldRender = true) {
         topW: topWidth,
         width: (botWidth + topWidth) / 2,
         area: calculatedGeoArea,
+        exactArea: pieceExactArea,
         divLine: leftLength,
         leftLine: rightLength 
     });
+
 
     lastT_bot = tCurr_bot;
     lastT_top = tCurr_top;
@@ -2586,7 +2598,11 @@ function renderCroquis() {
           
           // 2. عرض المساحة رأسي (دوران -90 درجة) تحت طول الحد الأيسر في المنتصف
           if (showCroquisMeasurements) {
-            const areaVal = Number(piece.area.toFixed(2));
+            // displayArea في الكروكي: استخدام exactArea إذا كان متاحاً لضمان توحيد القيم
+            const pieceDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
+              ? piece.exactArea
+              : piece.area;
+            const areaVal = Number(pieceDisplayArea.toFixed(2));
             const areaGroup = svgEl("g");
             areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);
             
@@ -3061,7 +3077,12 @@ function renderCroquis() {
         dot.style.backgroundColor = color.stroke;
         
         const text = document.createElement("span");
-        text.innerText = `${piece.name || `شريك ${index + 1}`}: ${Number(piece.area.toFixed(2))} م²`;
+        // استخدام exactArea للأسطورة إذا كان متاحاً لضمان توحيد القيم
+        const legendDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
+          ? piece.exactArea
+          : piece.area;
+        text.innerText = `${piece.name || `شريك ${index + 1}`}: ${Number(legendDisplayArea.toFixed(2))} م²`;
+
         
         chip.appendChild(dot);
         chip.appendChild(text);
@@ -3453,7 +3474,11 @@ function printReport() {
 
   // بناء بطاقات الشركاء مع كافة البيانات التفصيلية الهندسية
   const partnerCardsHTML = window.calculatedPieces.map((piece, idx) => {
-    const fcs = convertSquareMetersToFCS(piece.area);
+    // displayArea للطباعة: استخدام exactArea إذا كان متاحاً لضمان توحيد القيم
+    const pieceDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
+      ? piece.exactArea
+      : piece.area;
+    const fcs = convertSquareMetersToFCS(pieceDisplayArea);
     const fcsText = formatArabicFCS(fcs.feddan, fcs.carat, fcs.sahm);
     
     const w2_val = piece.topW.toFixed(4); // العرض الأول (أعلى)
@@ -3487,12 +3512,13 @@ function printReport() {
         </table>
         <div class="partner-card-area-box">
           <span class="partner-card-area-lbl">المساحة</span>
-          <span class="partner-card-area-val">${piece.area.toFixed(2)} م²</span>
+          <span class="partner-card-area-val">${pieceDisplayArea.toFixed(2)} م²</span>
           <span class="partner-card-fcs-val">(${fcsText})</span>
         </div>
       </div>
     `;
   }).join("");
+
 
   // تحديد توزيع الأعمدة ديناميكياً لتفادي التشوه
   const numCards = window.calculatedPieces.length;
