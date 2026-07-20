@@ -79,6 +79,15 @@ This document records the key architectural decisions, design rationales, and en
 
 ---
 
+## ADR-009: Canonical Business Data Model Isolation (No Derived Presentation State)
+
+- **Context**: Storing derived visual presentation properties (e.g. `displayArea`, `roundedFCS`, formatted string labels) inside the core business model creates dual sources of truth. If the canonical area changes without updating derived fields, state desynchronization bugs occur.
+- **Decision**: The Data Model shall store ONLY canonical business data (`partner.exactArea`, `partner.id`, `partner.locks`). Any formatted or presentation-specific values (`displayArea`, `formattedFCS`, localized strings) must be dynamically derived at render time and must NEVER be persisted within business state.
+- **Rationale**:
+  1. Enforces strict Single Source of Truth architecture: `exactArea` is the unique canonical value.
+  2. Eliminates state desynchronization bugs between internal math state and presentation fields.
+  3. Provides a clean, unpolluted Data Model optimized for 1-to-1 Dart/Flutter migration.
+
 ## ADR-008: Elimination of Display-Rounding Last-Item Adjustment & Full-Precision Model Isolation
 
 - **Context**: Systems sometimes apply "Last-Item Adjustment" (loading rounding differences onto final items) or re-derive internal calculations from rounded UI text values. In land partitioning (whether equal division, custom ratio splits, or locked partner adjustments), reading from rounded UI text creates cumulative rounding drift and artificial land deficits.

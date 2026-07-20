@@ -437,22 +437,27 @@ const AgriUnitsTests = {
     const sumWith3DecFormat = exactAreaPerPartner * numPartners;
     this.assert("Decimal Display: Changing display decimal formatting leaves internal exact total intact", sumWith3DecFormat, totalAreaM2, 0.000001);
 
-    // --- Scenario E: Model-First BDD Isolation Assertion ---
-    // Given 6 equal partners, all displayed areas are equal (1447.50 m²), internal exact areas are equal, and displayed total is never used for calculations.
-    const partnerModels = Array.from({ length: 6 }, (_, idx) => ({
+    // --- Scenario E: Canonical Model Isolation (No Derived State Persisted) ---
+    // Model stores ONLY canonical exactArea. Derived visual presentation properties (displayArea, fcs) are generated dynamically at render time.
+    const canonicalPartnerModels = Array.from({ length: 6 }, (_, idx) => ({
       id: idx + 1,
-      exactArea: exactAreaPerPartner,
-      displayArea: displayedArea2Dec,
-      fcs: fcs
+      exactArea: exactAreaPerPartner
     }));
 
-    const allDisplayedEqual = partnerModels.every(p => p.displayArea === 1447.50);
-    const allExactEqual = partnerModels.every(p => p.exactArea === 1447.5022916666666);
-    const modelSumExact = partnerModels.reduce((acc, p) => acc + p.exactArea, 0);
+    // Dynamic Render-time Formatter Helpers
+    const renderDisplayArea = (exactArea) => Number(exactArea.toFixed(2));
+    const renderFCS = (exactArea) => AgriUnitsCompat.sqmToFCS(exactArea, 168);
 
-    this.assert("BDD Model Isolation: All displayed areas are visually equal (1447.50 m²)", allDisplayedEqual, true);
-    this.assert("BDD Model Isolation: All internal exact areas are mathematically equal (1447.5022916... m²)", allExactEqual, true);
-    this.assert("BDD Model Isolation: Internal calculation uses exactArea exclusively with zero deficit", Math.abs(modelSumExact - totalAreaM2), 0, 0.000001);
+    const allDisplayedEqual = canonicalPartnerModels.every(p => renderDisplayArea(p.exactArea) === 1447.50);
+    const allExactEqual = canonicalPartnerModels.every(p => p.exactArea === 1447.5022916666666);
+    const allFCSEqual = canonicalPartnerModels.every(p => renderFCS(p.exactArea).carat === 8 && Math.abs(renderFCS(p.exactArea).sahm - 14.79) < 0.01);
+    const modelSumExact = canonicalPartnerModels.reduce((acc, p) => acc + p.exactArea, 0);
+
+    this.assert("Canonical Model Isolation: Model contains only canonical exactArea without derived display properties", Object.keys(canonicalPartnerModels[0]).join(","), "id,exactArea");
+    this.assert("Canonical Model Isolation: Render-time displayArea is visually equal across all partners (1447.50 m²)", allDisplayedEqual, true);
+    this.assert("Canonical Model Isolation: Internal exactAreas remain 100% mathematically equal (1447.5022916... m²)", allExactEqual, true);
+    this.assert("Canonical Model Isolation: Render-time FCS formatting yields identical 8 Carats & 14.79 Sahms", allFCSEqual, true);
+    this.assert("Canonical Model Isolation: Total calculation sums exactArea exclusively with zero deficit", Math.abs(modelSumExact - totalAreaM2), 0, 0.000001);
   },
 
   // ============================================================
