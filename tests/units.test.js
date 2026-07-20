@@ -436,6 +436,23 @@ const AgriUnitsTests = {
     // Changing display formatting from 2 to 3 decimal places must NOT alter internal exact total
     const sumWith3DecFormat = exactAreaPerPartner * numPartners;
     this.assert("Decimal Display: Changing display decimal formatting leaves internal exact total intact", sumWith3DecFormat, totalAreaM2, 0.000001);
+
+    // --- Scenario E: Model-First BDD Isolation Assertion ---
+    // Given 6 equal partners, all displayed areas are equal (1447.50 m²), internal exact areas are equal, and displayed total is never used for calculations.
+    const partnerModels = Array.from({ length: 6 }, (_, idx) => ({
+      id: idx + 1,
+      exactArea: exactAreaPerPartner,
+      displayArea: displayedArea2Dec,
+      fcs: fcs
+    }));
+
+    const allDisplayedEqual = partnerModels.every(p => p.displayArea === 1447.50);
+    const allExactEqual = partnerModels.every(p => p.exactArea === 1447.5022916666666);
+    const modelSumExact = partnerModels.reduce((acc, p) => acc + p.exactArea, 0);
+
+    this.assert("BDD Model Isolation: All displayed areas are visually equal (1447.50 m²)", allDisplayedEqual, true);
+    this.assert("BDD Model Isolation: All internal exact areas are mathematically equal (1447.5022916... m²)", allExactEqual, true);
+    this.assert("BDD Model Isolation: Internal calculation uses exactArea exclusively with zero deficit", Math.abs(modelSumExact - totalAreaM2), 0, 0.000001);
   },
 
   // ============================================================

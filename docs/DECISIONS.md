@@ -79,12 +79,12 @@ This document records the key architectural decisions, design rationales, and en
 
 ---
 
-## ADR-008: Elimination of Last-Item Adjustment in Equal Division
+## ADR-008: Elimination of Display-Rounding Last-Item Adjustment & Full-Precision Model Isolation
 
-- **Context**: Accounting systems sometimes apply "Last-Item Adjustment" (loading rounding differences onto the final partner's share). In land partitioning, this causes user perceived unfairness (e.g. partner 6 receiving less area than partners 1-5).
-- **Decision**: Reject "Last-Item Adjustment" in favor of uniform full-precision internal floating-point values (`exactAreaPerPartner = totalAreaM2 / numPartners`) for ALL partners.
+- **Context**: Systems sometimes apply "Last-Item Adjustment" (loading rounding differences onto final items) or re-derive internal calculations from rounded UI text values. In land partitioning (whether equal division, custom ratio splits, or locked partner adjustments), reading from rounded UI text creates cumulative rounding drift and artificial land deficits.
+- **Decision**: Eliminate all Last-Item Adjustments caused by display rounding. All calculations, canvas drawings, area totals, and validation routines shall use full-precision floating-point values stored in the Data Model (`partner.exactArea`), while UI values are formatted for presentation only. Displayed values must NEVER be used as inputs to business logic.
 - **Rationale**:
-  1. Guarantees 100% mathematical fairness across all partners during equal division.
-  2. Display precision (`1447.50 m²` and `14.79 sahm`) remains formatted for visual UI rendering only.
-  3. Internal canvas geometry, total area sums, and validation routines preserve exact floating-point accuracy with zero artificial deficit.
+  1. Guarantees 100% mathematical precision and fairness across all partitioning scenarios (equal division, ratio splits, manual edits, locked partners).
+  2. Ensures UI formatting changes (e.g. 2 vs 3 decimal places) have zero impact on internal geometric or computational accuracy.
+  3. Establishes a pure Model-First architecture (`Model -> Business Logic -> Renderer -> DOM`) essential for clean Flutter/Dart translation.
 
