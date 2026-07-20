@@ -8,11 +8,23 @@
 (function (global) {
   "use strict";
 
-  // Helper function: runs warmups, then 10 iterations, drops fastest and slowest, returns average
-  function measureAverageTime(fn, runs = 10, warmups = 2) {
+  // Calculates the median of an array of numbers
+  function calculateMedian(arr) {
+    if (arr.length === 0) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 !== 0) {
+      return sorted[mid];
+    }
+    return (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  // Measures both Average and Median execution times, with optional memory tracking
+  function measureMetrics(fn, runs = 10, warmups = 2, trackPeakMemoryFn = null) {
     // Warm-up runs (unmeasured)
     for (let w = 0; w < warmups; w++) {
       fn();
+      if (trackPeakMemoryFn) trackPeakMemoryFn();
     }
     // Measurement runs
     const times = [];
@@ -21,13 +33,17 @@
       fn();
       const tEnd = performance.now();
       times.push(tEnd - tStart);
+      if (trackPeakMemoryFn) trackPeakMemoryFn();
     }
-    // Sort ascending
-    times.sort((a, b) => a - b);
-    // Slice out the first (min) and last (max) elements
-    const middle = times.slice(1, -1);
+    // Sort to calculate average (excluding fastest & slowest) and median
+    const sortedTimes = [...times].sort((a, b) => a - b);
+    const middle = sortedTimes.slice(1, -1);
     const sum = middle.reduce((a, b) => a + b, 0);
-    return sum / middle.length;
+    const average = sum / middle.length;
+
+    const median = calculateMedian(times);
+
+    return { average, median };
   }
 
   global.runPerformanceBenchmark = function(onProgress, onComplete) {
@@ -80,6 +96,28 @@
       // RULE 1: Run benchmarks in production mode to avoid debug log / assertion overhead
       win.DALLAL_DEBUG = false;
 
+      // Helper to retrieve memory usage
+      function getMemoryUsage() {
+        if (win.performance && win.performance.memory) {
+          return win.performance.memory.usedJSHeapSize;
+        }
+        return null;
+      }
+
+      // Helper to reset performance and page state (Recommendation 1: stability)
+      function resetPerformanceState() {
+        if (win.resetDallalCaches) {
+          win.resetDallalCaches();
+        }
+        win.DALLAL_PERF = {
+          domCache: false,
+          documentFragment: false,
+          dirtyFlag: false,
+          debounce: false
+        };
+        win.clearPartners(false);
+      }
+
       // Helper to configure optimizations dynamically inside the iframe
       function setOptimizations(opts) {
         win.DALLAL_PERF = {
@@ -88,8 +126,6 @@
           dirtyFlag: !!opts.dirtyFlag,
           debounce: !!opts.debounce
         };
-        // Reset cache signatures to prevent interference
-        win.lastCroquisSignature = "";
       }
 
       const scalingResults = [];
@@ -97,8 +133,6 @@
 
       try {
         // --- Part 1: Sizing Scaling Benchmarks (All Optimizations ON) ---
-        setOptimizations({ domCache: true, documentFragment: true, dirtyFlag: true, debounce: true });
-        
         const partnerCounts = [10, 50, 100, 200];
         for (let i = 0; i < partnerCounts.length; i++) {
           const count = partnerCounts[i];
@@ -106,11 +140,19 @@
             onProgress(`قياس زمن التوسع الحجمي مع ${count} شريك (جميع التحسينات نشطة)...`);
           }
 
-          // Measure memory start if supported
-          const memStart = win.performance && win.performance.memory ? win.performance.memory.usedJSHeapSize : null;
+          resetPerformanceState();
+          setOptimizations({ domCache: true, documentFragment: true, dirtyFlag: true, debounce: true });
 
-          // Reset page state
-          win.clearPartners(false);
+          const memStart = getMemoryUsage();
+          let peakMem = memStart || 0;
+          const trackPeak = () => {
+            const current = getMemoryUsage();
+            if (current !== null && current > peakMem) {
+              peakMem = current;
+            }
+          };
+
+          // Configure standard layout dimensions
           doc.getElementById("length1").value = 100;
           doc.getElementById("length2").value = 100;
           doc.getElementById("width1").value = 100;
@@ -125,35 +167,42 @@
             win.addNewPartnerRow(`شريك ${p + 1}`, "", "", "", "", "-", "-", false, frag);
           }
           doc.getElementById("partners-list").appendChild(frag);
+          trackPeak();
 
           win.divideEqually();
           win.calculateGeneral();
+          trackPeak();
 
-          // Measure calculations time (10 runs, 2 warm-ups)
-          const calcTime = measureAverageTime(() => {
+          // Measure calculations metrics
+          const calcMetrics = measureMetrics(() => {
             win.runPartition();
-          });
+          }, 10, 2, trackPeak);
 
-          // Measure render time (10 runs, 2 warm-ups)
-          const renderTime = measureAverageTime(() => {
+          // Measure render metrics
+          const renderMetrics = measureMetrics(() => {
             win.renderCroquis();
-          });
+          }, 10, 2, trackPeak);
 
-          // Measure total update loop time (10 runs, 2 warm-ups)
-          const totalTime = measureAverageTime(() => {
+          // Measure total update loop metrics
+          const totalMetrics = measureMetrics(() => {
             win.calculateGeneral();
             win.runPartition();
-          });
+          }, 10, 2, trackPeak);
 
-          const memEnd = win.performance && win.performance.memory ? win.performance.memory.usedJSHeapSize : null;
+          const memEnd = getMemoryUsage();
+          trackPeak();
 
           scalingResults.push({
             partnersCount: count,
-            calcTimeMs: parseFloat(calcTime.toFixed(2)),
-            renderTimeMs: parseFloat(renderTime.toFixed(2)),
-            totalTimeMs: parseFloat(totalTime.toFixed(2)),
+            calcTimeMs: parseFloat(calcMetrics.average.toFixed(2)),
+            calcMedianMs: parseFloat(calcMetrics.median.toFixed(2)),
+            renderTimeMs: parseFloat(renderMetrics.average.toFixed(2)),
+            renderMedianMs: parseFloat(renderMetrics.median.toFixed(2)),
+            totalTimeMs: parseFloat(totalMetrics.average.toFixed(2)),
+            totalMedianMs: parseFloat(totalMetrics.median.toFixed(2)),
             memBeforeBytes: memStart,
-            memAfterBytes: memEnd
+            memAfterBytes: memEnd,
+            memPeakBytes: peakMem
           });
 
           // Brief delay to breathe thread
@@ -201,18 +250,26 @@
             onProgress(`قياس خطوة التحسين التراكمية: ${stage.label}...`);
           }
 
+          resetPerformanceState();
           setOptimizations(stage.opts);
 
-          // Measure memory start for the stage
-          const memStart = win.performance && win.performance.memory ? win.performance.memory.usedJSHeapSize : null;
+          const memStart = getMemoryUsage();
+          let peakMem = memStart || 0;
+          const trackPeak = () => {
+            const current = getMemoryUsage();
+            if (current !== null && current > peakMem) {
+              peakMem = current;
+            }
+          };
 
-          // Measure table creation / row generation speed
-          win.clearPartners(false);
+          // Setup standard layout inputs
           doc.getElementById("length1").value = 100;
           doc.getElementById("length2").value = 100;
           doc.getElementById("width1").value = 100;
           doc.getElementById("width2").value = 100;
+          trackPeak();
 
+          // Measure table creation / row generation speed
           const tTableStart = performance.now();
           const target = stage.opts.documentFragment ? doc.createDocumentFragment() : doc.getElementById("partners-list");
           for (let p = 0; p < Workload; p++) {
@@ -223,9 +280,11 @@
           }
           const tTableEnd = performance.now();
           const tableUpdateTimeMs = tTableEnd - tTableStart;
+          trackPeak();
 
           win.divideEqually();
           win.calculateGeneral();
+          trackPeak();
 
           // Capture outputs at the baseline stage to check for regressions
           if (stage.key === "baseline") {
@@ -236,27 +295,27 @@
             }).join("|");
           }
 
-          // Measure calc time (10 runs, 2 warm-ups)
-          const calcTimeMs = measureAverageTime(() => {
+          // Measure calc metrics (10 runs, 2 warm-ups)
+          const calcMetrics = measureMetrics(() => {
             win.runPartition();
-          });
+          }, 10, 2, trackPeak);
 
-          // Measure render time (10 runs, 2 warm-ups)
-          const renderTimeMs = measureAverageTime(() => {
+          // Measure render metrics (10 runs, 2 warm-ups)
+          const renderMetrics = measureMetrics(() => {
             win.renderCroquis();
-          });
+          }, 10, 2, trackPeak);
 
-          // Measure re-render time (Dirty Flag check: call renderCroquis twice without changes)
+          // Measure re-render metrics (Dirty Flag check: call renderCroquis twice without changes)
           win.renderCroquis(); // First call
-          const reRenderTimeMs = measureAverageTime(() => {
-            win.renderCroquis(); // Second call: should be 0ms if dirty flag is enabled
-          });
+          const reRenderMetrics = measureMetrics(() => {
+            win.renderCroquis(); // Second call: should be ~0ms if dirty flag is enabled
+          }, 10, 2, trackPeak);
 
-          // Measure total loop time
-          const totalTimeMs = measureAverageTime(() => {
+          // Measure total loop
+          const totalMetrics = measureMetrics(() => {
             win.calculateGeneral();
             win.runPartition();
-          });
+          }, 10, 2, trackPeak);
 
           // Correctness Check: verify results are identical to baseline
           const currentCalculatedPieces = normalizeCalculatedPieces(win.calculatedPieces);
@@ -290,14 +349,17 @@
 
           // Restore original function
           win.saveAndCalcImmediate = origImmediate;
+          trackPeak();
 
-          // --- Real User Typing Scenario: typing '5' -> '50' -> '500' -> '50' -> '5' -> '52' ---
+          // --- Part 3: Real User Typing Scenario: typing 5 -> 50 -> 500 -> 50 -> 5 -> empty -> 5 -> 52 ---
           win.clearPartners(false);
           win.addNewPartnerRow("شريك 1", "", "", "", "");
           win.divideEqually();
           win.calculateGeneral();
+          trackPeak();
 
-          const keystrokes = ["5", "0", "0", "", "", "2"]; // Backspace represented by empty string
+          // Keystroke array: "5", "0", "0", "" (backspace), "" (backspace), "" (backspace), "5", "2"
+          const keystrokes = ["5", "0", "0", "", "", "", "5", "2"];
           const inputEl = doc.querySelector(".partner-shares") || doc.getElementById("length1");
           inputEl.value = "";
 
@@ -325,19 +387,25 @@
 
           win.renderCroquis = origRender;
           const typingTimeMs = tTypingEnd - tTypingStart;
+          trackPeak();
 
-          const memEnd = win.performance && win.performance.memory ? win.performance.memory.usedJSHeapSize : null;
+          const memEnd = getMemoryUsage();
 
           incrementalResults[stage.key] = {
-            calcTimeMs: parseFloat(calcTimeMs.toFixed(2)),
-            renderTimeMs: parseFloat(renderTimeMs.toFixed(2)),
-            reRenderTimeMs: parseFloat(reRenderTimeMs.toFixed(2)),
-            totalTimeMs: parseFloat(totalTimeMs.toFixed(2)),
+            calcTimeMs: parseFloat(calcMetrics.average.toFixed(2)),
+            calcMedianMs: parseFloat(calcMetrics.median.toFixed(2)),
+            renderTimeMs: parseFloat(renderMetrics.average.toFixed(2)),
+            renderMedianMs: parseFloat(renderMetrics.median.toFixed(2)),
+            reRenderTimeMs: parseFloat(reRenderMetrics.average.toFixed(2)),
+            reRenderMedianMs: parseFloat(reRenderMetrics.median.toFixed(2)),
+            totalTimeMs: parseFloat(totalMetrics.average.toFixed(2)),
+            totalMedianMs: parseFloat(totalMetrics.median.toFixed(2)),
             tableUpdateTimeMs: parseFloat(tableUpdateTimeMs.toFixed(2)),
             debounceCalls: immediateCalls,
             correctnessPassed: regressionFree,
             memBeforeBytes: memStart,
             memAfterBytes: memEnd,
+            memPeakBytes: peakMem,
             typingTimeMs: parseFloat(typingTimeMs.toFixed(2)),
             typingRenderCalls: typingRenderCalls
           };
@@ -357,6 +425,11 @@
       if (onComplete) {
         onComplete({
           timestamp: new Date().toISOString(),
+          environment: {
+            cpuCores: win.navigator.hardwareConcurrency || "Unknown",
+            deviceMemory: win.navigator.deviceMemory ? (win.navigator.deviceMemory + " GB") : "Not Supported",
+            userAgent: win.navigator.userAgent
+          },
           longTasks: {
             count: longTaskCount,
             totalDurationMs: parseFloat(longTaskTotalDuration.toFixed(2))

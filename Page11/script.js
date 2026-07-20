@@ -11,6 +11,12 @@ window.DALLAL_PERF = window.DALLAL_PERF || {
 window.lastCroquisSignature = "";
 
 const _domCache = {};
+window.resetDallalCaches = function() {
+  for (let key in _domCache) {
+    delete _domCache[key];
+  }
+  window.lastCroquisSignature = "";
+};
 const _originalGetElementById = document.getElementById;
 document.getElementById = function(id) {
   if (window.DALLAL_PERF && window.DALLAL_PERF.domCache) {

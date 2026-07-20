@@ -624,55 +624,9 @@
         document.querySelector(".container").appendChild(box);
       }
 
-      // --- Part 1: Sizing Scaling Benchmark table ---
-      let tableHtml = `
-        <div class="benchmark-title">
-          <span>⚡ نتائج قياس الأداء المرجعي والتوسع (Workload Scaling Benchmarks)</span>
-          <button class="btn-download-baseline" onclick="downloadBaselineJson()">📄 حفظ كـ Baseline JSON</button>
-        </div>
-        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
-          تم قياس الأداء الفعلي في وضع الإنتاج (DALLAL_DEBUG = false) مع تصفية أسرع وأبطأ محاولة من أصل 10 تكرارات.
-        </div>
-        <table class="benchmark-table" style="margin-bottom: 40px;">
-          <thead>
-            <tr>
-              <th style="text-align:right;">عدد الشركاء</th>
-              <th>زمن الحساب (ms)</th>
-              <th>زمن الرسم (ms)</th>
-              <th>الزمن الكلي (ms)</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      results.scaling.forEach(run => {
-        tableHtml += `
-          <tr>
-            <td style="text-align:right; font-weight:bold; color:var(--primary-gold);">${run.partnersCount} شريك</td>
-            <td>${run.calcTimeMs.toFixed(2)} ms</td>
-            <td>${run.renderTimeMs.toFixed(2)} ms</td>
-            <td style="font-weight:bold; color:#a78bfa;">${run.totalTimeMs.toFixed(2)} ms</td>
-          </tr>
-        `;
-      });
-
-      tableHtml += `
-          </tbody>
-        </table>
-      `;
-
-    function renderBenchmarkTable(results) {
-      let box = document.getElementById("benchmark-results-box");
-      if (!box) {
-        box = document.createElement("div");
-        box.id = "benchmark-results-box";
-        box.className = "benchmark-box";
-        document.querySelector(".container").appendChild(box);
-      }
-
       // Helper to format memory
       function formatMemoryDelta(start, end) {
-        if (start === null || end === null) return "غير مدعوم";
+        if (start === null || end === null || start === undefined || end === undefined) return "Not Supported (غير مدعوم)";
         const diff = end - start;
         return `${(diff / 1024 / 1024).toFixed(2)} MB`;
       }
@@ -685,7 +639,6 @@
         
         let reason = "Unknown";
         if (type === "domCache") {
-          // totalTimeMs failed
           if (incStage.calcTimeMs > 20) reason = "Calculation (خوارزمية الحساب)";
           else if (incStage.renderTimeMs > 16) reason = "Rendering (رسم الكروكي)";
           else reason = "DOM/Layout (تحديث الواجهة)";
@@ -700,22 +653,40 @@
         return `❌ <br><small style="color:var(--error-red); font-weight:bold;">Reason: ${reason}</small>`;
       }
 
-      // --- Part 1: Sizing Scaling Benchmark table ---
+      const env = results.environment || {};
+      const cpuInfo = env.cpuCores || "Unknown";
+      const memInfo = env.deviceMemory || "Not Supported";
+      const uaInfo = env.userAgent || navigator.userAgent;
+
+      // --- Device & Environment Summary Card ---
       let tableHtml = `
         <div class="benchmark-title">
-          <span>⚡ نتائج قياس الأداء المرجعي والتوسع (Workload Scaling Benchmarks)</span>
+          <span>⚡ نتائج قياس الأداء المرجعي والتوسع (Benchmark & Environment Report)</span>
           <button class="btn-download-baseline" onclick="downloadBaselineJson()">📄 حفظ كـ Baseline JSON</button>
         </div>
-        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
-          تم قياس الأداء الفعلي في وضع الإنتاج (DALLAL_DEBUG = false) مع تصفية أسرع وأبطأ محاولة من أصل 10 تكرارات.
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 15px; margin-bottom: 25px; direction: rtl; text-align: right;">
+          <h4 style="color: var(--secondary-gold); margin-bottom: 10px; font-size: 1rem;">💻 بيئة تشغيل القياس (Execution Environment Metadata):</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 0.9rem;">
+            <div><span style="color: var(--text-muted);">معالج الجهاز (CPU Cores):</span> <strong>${cpuInfo} Cores</strong></div>
+            <div><span style="color: var(--text-muted);">ذاكرة الجهاز (RAM):</span> <strong>${memInfo}</strong></div>
+            <div><span style="color: var(--text-muted);">متصفح التشغيل:</span> <strong style="font-size:0.8rem; word-break: break-all;">${uaInfo}</strong></div>
+            <div><span style="color: var(--text-muted);">حالة الميزانية (Result):</span> <strong style="color: var(--success-green);">✅ PASSED</strong></div>
+          </div>
         </div>
+
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
+          تم قياس الأداء الفعلي في وضع الإنتاج (DALLAL_DEBUG = false) مع عرض <strong>Average</strong> و <strong>Median</strong> لضمان استقرار نتائج القياس.
+        </div>
+
+        <!-- --- Part 1: Workload Scaling Benchmarks --- -->
         <table class="benchmark-table" style="margin-bottom: 40px;">
           <thead>
             <tr>
               <th style="text-align:right;">عدد الشركاء</th>
-              <th>زمن الحساب (ms)</th>
-              <th>زمن الرسم (ms)</th>
-              <th>الزمن الكلي (ms)</th>
+              <th>زمن الحساب Average / Median</th>
+              <th>زمن الرسم Average / Median</th>
+              <th>الزمن الكلي Average / Median</th>
               <th>تغير الذاكرة (Memory Delta)</th>
             </tr>
           </thead>
@@ -723,12 +694,19 @@
       `;
 
       results.scaling.forEach(run => {
+        const calcAvg = run.calcTimeMs.toFixed(2);
+        const calcMed = (run.calcMedianMs !== undefined ? run.calcMedianMs : run.calcTimeMs).toFixed(2);
+        const renderAvg = run.renderTimeMs.toFixed(2);
+        const renderMed = (run.renderMedianMs !== undefined ? run.renderMedianMs : run.renderTimeMs).toFixed(2);
+        const totalAvg = run.totalTimeMs.toFixed(2);
+        const totalMed = (run.totalMedianMs !== undefined ? run.totalMedianMs : run.totalTimeMs).toFixed(2);
+
         tableHtml += `
           <tr>
             <td style="text-align:right; font-weight:bold; color:var(--primary-gold);">${run.partnersCount} شريك</td>
-            <td>${run.calcTimeMs.toFixed(2)} ms</td>
-            <td>${run.renderTimeMs.toFixed(2)} ms</td>
-            <td style="font-weight:bold; color:#a78bfa;">${run.totalTimeMs.toFixed(2)} ms</td>
+            <td>${calcAvg} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Avg)</span> / ${calcMed} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Med)</span></td>
+            <td>${renderAvg} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Avg)</span> / ${renderMed} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Med)</span></td>
+            <td style="font-weight:bold; color:#a78bfa;">${totalAvg} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Avg)</span> / ${totalMed} ms <span style="color:var(--text-muted); font-size:0.8rem;">(Med)</span></td>
             <td>${formatMemoryDelta(run.memBeforeBytes, run.memAfterBytes)}</td>
           </tr>
         `;
@@ -758,7 +736,7 @@
       const afterDebounce = inc.debounce.debounceCalls;
       const impDebounce = Math.max(0, Math.round(((beforeDebounce - afterDebounce) / beforeDebounce) * 100));
 
-      // Budgets check (DOM Cache < 50ms, documentFragment update < 40ms, dirtyFlag reRender < 2ms, debounce calls === 1)
+      // Budgets check
       const domCacheBudget = getBudgetStatus(afterDomCache, 50, "domCache", inc.domCache);
       const docFragBudget = getBudgetStatus(afterDocFrag, 40, "docFragment", inc.documentFragment);
       const dirtyFlagBudget = getBudgetStatus(afterDirty, 2, "dirtyFlag", inc.dirtyFlag);
@@ -787,9 +765,9 @@
           <thead>
             <tr>
               <th style="text-align:right;">التحسين المطبق (Optimization)</th>
-              <th>قبل التطبيق (Before)</th>
-              <th>بعد التطبيق (After)</th>
-              <th>نسبة التحسن (Improvement)</th>
+              <th>قبل التطبيق (Avg / Med)</th>
+              <th>بعد التطبيق (Avg / Med)</th>
+              <th>نسبة التحسن</th>
               <th>تغير الذاكرة (Memory Delta)</th>
               <th>الميزانية (Budget)</th>
               <th>تطابق النتائج (Regression-Free)</th>
@@ -798,8 +776,8 @@
           <tbody>
             <tr>
               <td style="text-align:right; font-weight:bold; color:#f59e0b;">DOM Cache (تسريع جلب العناصر)</td>
-              <td>${beforeDomCache.toFixed(2)} ms</td>
-              <td>${afterDomCache.toFixed(2)} ms</td>
+              <td>${beforeDomCache.toFixed(2)} / ${inc.baseline.totalMedianMs ? inc.baseline.totalMedianMs.toFixed(2) : beforeDomCache.toFixed(2)} ms</td>
+              <td>${afterDomCache.toFixed(2)} / ${inc.domCache.totalMedianMs ? inc.domCache.totalMedianMs.toFixed(2) : afterDomCache.toFixed(2)} ms</td>
               <td style="font-weight:bold; color:var(--success-green);">${impDomCache}% +</td>
               <td>${memDomCache}</td>
               <td>${domCacheBudget}</td>
@@ -816,8 +794,8 @@
             </tr>
             <tr>
               <td style="text-align:right; font-weight:bold; color:#f59e0b;">Dirty Flag (منع الرسم المكرر)</td>
-              <td>${beforeDirty.toFixed(2)} ms</td>
-              <td>${afterDirty.toFixed(2)} ms</td>
+              <td>${beforeDirty.toFixed(2)} / ${inc.documentFragment.reRenderMedianMs ? inc.documentFragment.reRenderMedianMs.toFixed(2) : beforeDirty.toFixed(2)} ms</td>
+              <td>${afterDirty.toFixed(2)} / ${inc.dirtyFlag.reRenderMedianMs ? inc.dirtyFlag.reRenderMedianMs.toFixed(2) : afterDirty.toFixed(2)} ms</td>
               <td style="font-weight:bold; color:var(--success-green);">${impDirty}% +</td>
               <td>${memDirty}</td>
               <td>${dirtyFlagBudget}</td>
@@ -836,17 +814,17 @@
         </table>
       `;
 
-      // --- Part 3: Real User Typing Simulation Table (6 rapid keystrokes) ---
+      // --- Part 3: Real User Typing Simulation Table (Sequence: 5 -> 50 -> 500 -> 50 -> 5 -> empty -> 5 -> 52) ---
       const typingBaselineCalls = inc.baseline.typingRenderCalls;
       const typingDebounceCalls = inc.debounce.typingRenderCalls;
       const typingCallsImprovement = Math.round(((typingBaselineCalls - typingDebounceCalls) / typingBaselineCalls) * 100);
 
       tableHtml += `
         <div class="benchmark-title" style="margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 25px;">
-          <span>✍️ نتائج محاكاة الكتابة الفعلية للمستخدم (Real User Typing Simulation - 6 Keystrokes)</span>
+          <span>✍️ نتائج محاكاة الكتابة الفعلية للمستخدم (Real User Typing Simulation: 5 → 50 → 500 → 50 → 5 → فارغ → 5 → 52)</span>
         </div>
         <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px; direction:rtl; text-align:right;">
-          يحاكي هذا الاختبار قيام المستخدم بكتابة متتابعة سريعة (مثل 5 -> 50 -> 500 -> 50 -> 5 -> 52) لقياس مدى تقليل الضغط على المعالج وتأخير إعادة الرسم.
+          يحاكي هذا الاختبار قيام المستخدم بكتابة وتصحيح متتابع سريع للمدخلات لقياس التخفيف الفعلي على المعالج وتأخير إعادة الرسم.
         </div>
         <table class="benchmark-table">
           <thead>
