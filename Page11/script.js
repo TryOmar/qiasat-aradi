@@ -4096,7 +4096,11 @@ function printFieldGuideDirect() {
   scenarioPieces.forEach((piece, loopIdx) => {
     const idx = window.calculatedPieces.indexOf(piece);
     const isLast = loopIdx === scenarioPieces.length - 1;
-    const fcs = convertSquareMetersToFCS(piece.area);
+    // displayArea في الدليل الميداني: exactArea للتوحيد
+    const pieceDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
+      ? piece.exactArea
+      : piece.area;
+    const fcs = convertSquareMetersToFCS(pieceDisplayArea);
     const label = piece.isRemainder ? "الجزء المتبقي" : (piece.name || 'شريك ' + (idx + 1));
     
     let dividerHTML = "";
@@ -4114,7 +4118,7 @@ function printFieldGuideDirect() {
       <div class="step-num">${loopIdx + 1}</div>
       <div class="step-content">
         <div class="step-title">${label}</div>
-        <div class="step-area">${piece.area.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
+        <div class="step-area">${pieceDisplayArea.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
         <div class="step-widths">أعلى: ${piece.topW.toFixed(2)} م | أسفل: ${piece.botW.toFixed(2)} م</div>
         ${dividerHTML}
       </div>
@@ -6412,12 +6416,16 @@ function updateInspector(index) {
   const w1 = parseFloat(document.getElementById("width1").value) || 0;
   const w2 = parseFloat(document.getElementById("width2").value) || 0;
   const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
-  const pct = totalAreaM2 > 0 ? (piece.area / totalAreaM2) * 100 : 0;
+  // displayArea في لوحة التفاصيل: exactArea للتوحيد
+  const segDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
+    ? piece.exactArea
+    : piece.area;
+  const pct = totalAreaM2 > 0 ? (segDisplayArea / totalAreaM2) * 100 : 0;
   
-  const fcs = convertSquareMetersToFCS(piece.area);
+  const fcs = convertSquareMetersToFCS(segDisplayArea);
   
   if (insAreaEl) {
-    insAreaEl.innerHTML = `${Number(piece.area.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
+    insAreaEl.innerHTML = `${Number(segDisplayArea.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
   }
   
   // حساب متوسط العرض ومتوسط الطول بدقة كاملة وعرض المعادلة وفرق التقريب
