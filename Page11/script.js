@@ -1,5 +1,17 @@
 console.log("Trace: Start of script.js loading");
 
+/**
+ * formatArea(value) — دالة موحدة لعرض المساحات بتنسيق ثابت (رقمان عشريان دائماً)
+ * مثال: 1447.5 → "1447.50" | 8685 → "8685.00" | 8685.01 → "8685.01"
+ * لا تُستخدم في الحسابات الداخلية — للعرض فقط.
+ */
+function formatArea(value) {
+  if (value === null || value === undefined || value === "") return "0.00";
+  const num = Number(value);
+  if (isNaN(num)) return "0.00";
+  return num.toFixed(2);
+}
+
 // --- Performance Optimizations & Caching (Phase 14) ---
 window.DALLAL_PERF = window.DALLAL_PERF || {
   domCache: true,
@@ -1125,7 +1137,7 @@ function calculateGeneral(shouldRender = true) {
 
   const areaM2Elements = document.querySelectorAll("#calc-area-m2");
   areaM2Elements.forEach(el => {
-    el.innerText = Number(totalAreaM2.toFixed(2));
+    el.innerText = formatArea(totalAreaM2);
   });
   
   if (document.getElementById("calc-avg-width")) {
@@ -1160,7 +1172,7 @@ function calculateGeneral(shouldRender = true) {
   }
 
   if (document.getElementById("total-area-sqm-res")) {
-    document.getElementById("total-area-sqm-res").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+    document.getElementById("total-area-sqm-res").innerText = formatArea(totalAreaM2) + " م²";
   }
   if (document.getElementById("carat-area-res")) {
     document.getElementById("carat-area-res").innerText = caratArea;
@@ -1219,7 +1231,7 @@ function calculateGeneral(shouldRender = true) {
     if (!isManualPartition) {
       const areaInput = row.querySelector(".partner-area");
       if (areaInput && document.activeElement !== areaInput) {
-        areaInput.value = Number(partnerAreaM2.toFixed(2));
+        areaInput.value = formatArea(partnerAreaM2);
       }
 
       // 3. Update Percentage (النسبة)
@@ -1257,7 +1269,7 @@ function calculateGeneral(shouldRender = true) {
   
   // Update summaries
   if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+    document.getElementById("summary-total-area").innerText = formatArea(totalAreaM2) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
     // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
@@ -1265,11 +1277,11 @@ function calculateGeneral(shouldRender = true) {
     const remLabel = document.getElementById("summary-rem-area-label");
     if (remainingArea < -0.05) {
       if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
-      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.innerText = formatArea(Math.abs(remainingArea)) + " م²";
       remEl.style.color = "#c62828";
     } else {
       if (remLabel) remLabel.innerText = "المساحة المتبقية:";
-      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
+      remEl.innerText = formatArea(remainingArea) + " م²";
       remEl.style.color = "";
     }
   }
@@ -1289,15 +1301,15 @@ function calculateGeneral(shouldRender = true) {
         statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية.";
         statusEl.style.color = "#2e7d32";
       } else if (remainingArea > 0) {
-        statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${absRem.toFixed(2)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
+        statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${formatArea(absRem)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
         statusEl.style.color = "#e65100";
       } else {
         // remainingArea < 0 (deficit)
         if (isKeepAreaMode) {
-          statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${absRem.toFixed(2)} م²</strong>، ويرجى مراجعة الحسابات.`;
+          statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${formatArea(absRem)} م²</strong>، ويرجى مراجعة الحسابات.`;
           statusEl.style.color = "#c62828";
         } else {
-          statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong><br>قيمة العجز: <strong>${absRem.toFixed(2)} م²</strong><br>تعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
+          statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong><br>قيمة العجز: <strong>${formatArea(absRem)} م²</strong><br>تعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.<br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
           statusEl.style.color = "#c62828";
         }
       }
@@ -1311,18 +1323,18 @@ function calculateGeneral(shouldRender = true) {
     document.getElementById("info-partners-count").innerText = window.calcState.activePartnersCount;
   }
   if (document.getElementById("info-distributed-area")) {
-    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
+    document.getElementById("info-distributed-area").innerText = formatArea(totalDistributedArea) + " م²";
   }
   if (document.getElementById("info-distributed-percent")) {
     const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+    document.getElementById("info-distributed-percent").innerText = distPct.toFixed(2) + " %";
   }
   if (document.getElementById("info-last-div-line")) {
     document.getElementById("info-last-div-line").innerText = "-";
   }
 
   if (document.getElementById("rem-area-m2")) {
-    document.getElementById("rem-area-m2").innerText = Number(Math.abs(remainingArea).toFixed(2));
+    document.getElementById("rem-area-m2").innerText = formatArea(Math.abs(remainingArea));
   }
 
   if (caratArea > 0) {
@@ -1500,13 +1512,13 @@ function runPartition(shouldRender = true) {
     // تحديث ملخص التقسيم لإظهار العجز
     const remainingArea = window.calcState.remainingArea;
     if (document.getElementById("summary-total-area")) {
-      document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+      document.getElementById("summary-total-area").innerText = formatArea(totalAreaM2) + " م²";
     }
     if (document.getElementById("summary-rem-area")) {
       const remEl = document.getElementById("summary-rem-area");
       const remLabel = document.getElementById("summary-rem-area-label");
       if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
-      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.innerText = formatArea(Math.abs(remainingArea)) + " م²";
       remEl.style.color = "#c62828";
     }
     if (shouldRender) {
@@ -1662,13 +1674,13 @@ function runPartition(shouldRender = true) {
 
     const areaInput = row.querySelector(".partner-area");
     if (areaInput && document.activeElement !== areaInput) {
-      areaInput.value = Number(displayArea.toFixed(2));
+      areaInput.value = formatArea(displayArea);
     }
 
     const percentInput = row.querySelector(".partner-percent");
     if (percentInput && document.activeElement !== percentInput) {
       const pct = totalAreaM2 > 0 ? (displayArea / totalAreaM2) * 100 : 0;
-      percentInput.value = Number(pct.toFixed(2)) + " %";
+      percentInput.value = pct.toFixed(2) + " %";
     }
     
     // Update shares/fractions to match the calculated geometric area (only in manual partition mode)
@@ -1810,7 +1822,7 @@ function runPartition(shouldRender = true) {
 
   // Update summaries to match actual layout partition
   if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+    document.getElementById("summary-total-area").innerText = formatArea(totalAreaM2) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
     // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
@@ -1818,16 +1830,16 @@ function runPartition(shouldRender = true) {
     const remLabel = document.getElementById("summary-rem-area-label");
     if (remainingArea < -0.05) {
       if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
-      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.innerText = formatArea(Math.abs(remainingArea)) + " م²";
       remEl.style.color = "#c62828";
     } else {
       if (remLabel) remLabel.innerText = "المساحة المتبقية:";
-      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
+      remEl.innerText = formatArea(remainingArea) + " م²";
       remEl.style.color = "";
     }
   }
   if (document.getElementById("rem-area-m2")) {
-    document.getElementById("rem-area-m2").innerText = Number(Math.abs(remainingArea).toFixed(2));
+    document.getElementById("rem-area-m2").innerText = formatArea(Math.abs(remainingArea));
   }
   if (document.getElementById("summary-status")) {
     const statusEl = document.getElementById("summary-status");
@@ -1844,24 +1856,24 @@ function runPartition(shouldRender = true) {
       statusEl.innerHTML = "🟢 تم التقسيم بالكامل، ولا يوجد عجز أو مساحة متبقية." + normText;
       statusEl.style.color = "#2e7d32";
     } else if (remainingArea > 0) {
-      statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${absRem.toFixed(2)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
+      statusEl.innerHTML = `🟡 يوجد جزء غير مقسم من الأرض<br>المساحة المتبقية: <strong>${formatArea(absRem)} م²</strong><br>وتعادل: ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم.`;
       statusEl.style.color = "#e65100";
     } else {
       // remainingArea < 0 (deficit)
       if (isKeepAreaMode) {
-        statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${absRem.toFixed(2)} م²</strong>، ويرجى مراجعة الحسابات.`;
+        statusEl.innerHTML = `🔴 خطأ داخلي في الحسابات.<br>يوجد عجز مقداره <strong>${formatArea(absRem)} م²</strong>، ويرجى مراجعة الحسابات.`;
         statusEl.style.color = "#c62828";
       } else {
         const targetTotal = sumTargetAreas || (totalAreaM2 - remainingArea);
         const targetPct = totalAreaM2 > 0 ? (targetTotal / totalAreaM2) * 100 : 0;
         statusEl.innerHTML = `🔴 <strong>احترس! يوجد عجز في الأرض.</strong>
-<br><br>مساحة الأرض الفعلية: <strong>${totalAreaM2.toFixed(2)} م²</strong>
+<br><br>مساحة الأرض الفعلية: <strong>${formatArea(totalAreaM2)} م²</strong>
 <br>────────────────
-<br>إجمالي الأنصبة المطلوبة: <strong>${targetTotal.toFixed(2)} م²</strong>
+<br>إجمالي الأنصبة المطلوبة: <strong>${formatArea(targetTotal)} م²</strong>
 <br>────────────────
 <br>نسبة الأنصبة المطلوبة: <strong>${targetPct.toFixed(2)} %</strong>
 <br>────────────────
-<br>العجز: <strong>${absRem.toFixed(2)} م²</strong>
+<br>العجز: <strong>${formatArea(absRem)} م²</strong>
 <br>≈ ${fcs.feddan} فدان، ${fcs.carat} قيراط، ${fcs.sahm} سهم
 <br><span style="font-size: 11.5px; font-weight: bold; display: block; margin-top: 4px;">يجب مراجعة الأنصبة قبل اعتماد أو طباعة التقسيم.</span>`;
         statusEl.style.color = "#c62828";
@@ -1869,11 +1881,11 @@ function runPartition(shouldRender = true) {
     }
   }
   if (document.getElementById("info-distributed-area")) {
-    document.getElementById("info-distributed-area").innerText = Number(totalDistributedArea.toFixed(2)) + " م²";
+    document.getElementById("info-distributed-area").innerText = formatArea(totalDistributedArea) + " م²";
   }
   if (document.getElementById("info-distributed-percent")) {
     const distPct = totalAreaM2 > 0 ? (totalDistributedArea / totalAreaM2) * 100 : 0;
-    document.getElementById("info-distributed-percent").innerText = Number(distPct.toFixed(2)) + " %";
+    document.getElementById("info-distributed-percent").innerText = distPct.toFixed(2) + " %";
   }
 
   // إظهار / إخفاء صفوف إجمالي الأنصبة المطلوبة والعجز
@@ -1892,9 +1904,9 @@ function runPartition(shouldRender = true) {
     if (rowTP) rowTP.style.display = isDeficit ? "flex" : "none";
     if (rowDN) rowDN.style.display = isDeficit ? "flex" : "none";
     if (isDeficit) {
-      if (elTA) elTA.innerText = targetTotal.toFixed(2) + " م²";
+      if (elTA) elTA.innerText = formatArea(targetTotal) + " م²";
       if (elTP) elTP.innerText = targetPct.toFixed(2) + " %";
-      if (elDN) elDN.innerText = deficitM2.toFixed(2) + " م²";
+      if (elDN) elDN.innerText = formatArea(deficitM2) + " م²";
     }
   }
 
@@ -2602,11 +2614,11 @@ function renderCroquis() {
             const pieceDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
               ? piece.exactArea
               : piece.area;
-            const areaVal = Number(pieceDisplayArea.toFixed(2));
+            const areaValStr = formatArea(pieceDisplayArea);
             const areaGroup = svgEl("g");
             areaGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yArea})`);
             
-            const tAreaVal = svgText(cx, yArea + 4 * textScale, areaVal + " م²", {
+            const tAreaVal = svgText(cx, yArea + 4 * textScale, areaValStr + " م²", {
               fill: "#000000",
               size: (fontSize / textScale).toString(),
               weight: "bold"
@@ -3081,7 +3093,7 @@ function renderCroquis() {
         const legendDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
           ? piece.exactArea
           : piece.area;
-        text.innerText = `${piece.name || `شريك ${index + 1}`}: ${Number(legendDisplayArea.toFixed(2))} م²`;
+        text.innerText = `${piece.name || `شريك ${index + 1}`}: ${formatArea(legendDisplayArea)} م²`;
 
         
         chip.appendChild(dot);
@@ -3512,7 +3524,7 @@ function printReport() {
         </table>
         <div class="partner-card-area-box">
           <span class="partner-card-area-lbl">المساحة</span>
-          <span class="partner-card-area-val">${pieceDisplayArea.toFixed(2)} م²</span>
+          <span class="partner-card-area-val">${formatArea(pieceDisplayArea)} م²</span>
           <span class="partner-card-fcs-val">(${fcsText})</span>
         </div>
       </div>
@@ -4118,7 +4130,7 @@ function printFieldGuideDirect() {
       <div class="step-num">${loopIdx + 1}</div>
       <div class="step-content">
         <div class="step-title">${label}</div>
-        <div class="step-area">${pieceDisplayArea.toFixed(2)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
+        <div class="step-area">${formatArea(pieceDisplayArea)} م² &nbsp;(${fcs.feddan} فدان ${fcs.carat} ق ${fcs.sahm} س)</div>
         <div class="step-widths">أعلى: ${piece.topW.toFixed(2)} م | أسفل: ${piece.botW.toFixed(2)} م</div>
         ${dividerHTML}
       </div>
@@ -6035,7 +6047,7 @@ function updateTableTotals() {
   // Update Area Total
   const totalAreaEl = document.getElementById("total-area-distributed");
   if (totalAreaEl) {
-    totalAreaEl.value = Number(totalArea.toFixed(2));
+    totalAreaEl.value = formatArea(totalArea);
   }
   
   // Calculate totalAreaM2
@@ -6050,7 +6062,7 @@ function updateTableTotals() {
   const totalPctEl = document.getElementById("total-percent-distributed");
   if (totalPctEl) {
     const totalPct = totalAreaM2 > 0 ? (totalArea / totalAreaM2) * 100 : 0;
-    totalPctEl.value = Number(totalPct.toFixed(2)) + " %";
+    totalPctEl.value = totalPct.toFixed(2) + " %";
   }
   
   // 2. Calculate Shares or Fraction Sum
@@ -6425,7 +6437,7 @@ function updateInspector(index) {
   const fcs = convertSquareMetersToFCS(segDisplayArea);
   
   if (insAreaEl) {
-    insAreaEl.innerHTML = `${Number(segDisplayArea.toFixed(2))} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
+    insAreaEl.innerHTML = `${formatArea(segDisplayArea)} م² <br><span style="font-size: 10.5px; color: #1565c0; font-weight: normal;">(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm} س)</span>`;
   }
   
   // حساب متوسط العرض ومتوسط الطول بدقة كاملة وعرض المعادلة وفرق التقريب

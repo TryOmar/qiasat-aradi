@@ -1497,6 +1497,111 @@ function runAutomatedTests() {
       window.isManualPartition = backupIsManual;
     }
 
+    // -------------------------------------------------------------------------
+    // TEST CASE 34: 20 Benchmark Reference Cases (حالات الاختبار المرجعية العشرين)
+    // -------------------------------------------------------------------------
+    {
+      const benchmarks = [
+        { name: "1. أرض صغيرة مربع 10×10 (100 م²) - شريكان متساويان", l1: 10, l2: 10, w1: 10, w2: 10, partners: 2, equal: true },
+        { name: "2. أرض صغيرة شبه منحرف (150 م²) - 3 شركاء", l1: 15, l2: 15, w1: 12, w2: 8, partners: 3, equal: true },
+        { name: "3. أرض متوسطة مستطيل 100×50 (5000 م²) - 4 شركاء", l1: 100, l2: 100, w1: 50, w2: 50, partners: 4, equal: true },
+        { name: "4. أرض متوسطة شبه منحرف (8800 م²) - 5 شركاء", l1: 120, l2: 110, w1: 90, w2: 70, partners: 5, equal: true },
+        { name: "5. أرض كبيرة مستطيل 500×400 (200,000 م²) - 6 شركاء", l1: 500, l2: 500, w1: 400, w2: 400, partners: 6, equal: true },
+        { name: "6. أرض كبيرة شبه منحرف منحرف جداً (75,000 م²) - 8 شركاء", l1: 400, l2: 350, w1: 250, w2: 150, partners: 8, equal: true },
+        { name: "7. أطوال متقاربة جداً (100×101) - 3 شركاء", l1: 100, l2: 101, w1: 50, w2: 51, partners: 3, equal: true },
+        { name: "8. أطوال مختلفة جداً (L1=200, L2=50, W1=150, W2=30) - 4 شركاء", l1: 200, l2: 50, w1: 150, w2: 30, partners: 4, equal: true },
+        { name: "9. شريك واحد فقط (80×40 = 3200 م²)", l1: 80, l2: 80, w1: 40, w2: 40, partners: 1, equal: true },
+        { name: "10. تقسيم بأنصبة 12 قيراط و 12 قيراط (مناصفة)", l1: 100, l2: 100, w1: 50, w2: 50, shares: [12, 12] },
+        { name: "11. تقسيم بأنصبة غير متساوية (12، 8، 4 قراريط)", l1: 100, l2: 100, w1: 50, w2: 50, shares: [12, 8, 4] },
+        { name: "12. تقسيم بأنصبة غير متساوية (10، 7، 5، 2 قراريط)", l1: 120, l2: 120, w1: 60, w2: 60, shares: [10, 7, 5, 2] },
+        { name: "13. تقسيم كسور 5 شركاء متساويين", l1: 100, l2: 100, w1: 50, w2: 50, method: "fractions", fractions: ["1/5", "1/5", "1/5", "1/5", "1/5"] },
+        { name: "14. أرض 8685 م² - 6 شركاء لضمان توحيد 1447.50 م²", l1: 120, l2: 110, w1: 90, w2: 67.9090909, partners: 6, equal: true },
+        { name: "15. تقسيم على عدد أولي من الشركاء (7 شركاء)", l1: 140, l2: 140, w1: 70, w2: 70, partners: 7, equal: true },
+        { name: "16. تقسيم 10 شركاء متساويين", l1: 200, l2: 200, w1: 100, w2: 100, partners: 10, equal: true },
+        { name: "17. تقسيم 12 شريك متساوي", l1: 240, l2: 240, w1: 120, w2: 120, partners: 12, equal: true },
+        { name: "18. إجهاد 20 شريك", l1: 300, l2: 300, w1: 150, w2: 150, partners: 20, equal: true },
+        { name: "19. إجهاد 50 شريك", l1: 500, l2: 500, w1: 200, w2: 200, partners: 50, equal: true },
+        { name: "20. تعديل العرض يدوياً وضبط الكروكي والمساحات", l1: 100, l2: 100, w1: 50, w2: 50, manualWidths: [25, 25] }
+      ];
+
+      benchmarks.forEach(bm => {
+        document.getElementById("length1").value = bm.l1;
+        document.getElementById("length2").value = bm.l2;
+        document.getElementById("width1").value = bm.w1;
+        document.getElementById("width2").value = bm.w2;
+        document.getElementById("input-carat-area").value = 168;
+
+        const listBM = document.getElementById("partners-list");
+        listBM.innerHTML = "";
+        window.isManualPartition = false;
+
+        if (bm.method === "fractions") {
+          document.getElementById("share-input-method").value = "fractions";
+          window.currentInputMethod = "fractions";
+          bm.fractions.forEach((fVal, idx) => {
+            addNewPartnerRow(`شريك ${idx + 1}`, "", "", "", fVal);
+          });
+        } else if (bm.shares) {
+          document.getElementById("share-input-method").value = "carats";
+          window.currentInputMethod = "carats";
+          bm.shares.forEach((sVal, idx) => {
+            addNewPartnerRow(`شريك ${idx + 1}`, 0, sVal, 0, "");
+          });
+        } else if (bm.manualWidths) {
+          document.getElementById("share-input-method").value = "carats";
+          window.currentInputMethod = "carats";
+          window.isManualPartition = true;
+          bm.manualWidths.forEach((wVal, idx) => {
+            addNewPartnerRow(`شريك ${idx + 1}`, 0, 0, 0, "");
+          });
+          const partnerRows = listBM.querySelectorAll(".partner-row");
+          partnerRows.forEach((r, idx) => {
+            r.querySelector(".partner-width-bottom").value = bm.manualWidths[idx];
+          });
+        } else {
+          document.getElementById("share-input-method").value = "carats";
+          window.currentInputMethod = "carats";
+          for (let i = 0; i < bm.partners; i++) {
+            addNewPartnerRow(`شريك ${i + 1}`, "", "", "", "");
+          }
+          if (bm.equal) divideEqually();
+        }
+
+        calculateGeneral();
+        window.runPartition();
+
+        const landArea = ((bm.l1 + bm.l2) / 2) * ((bm.w1 + bm.w2) / 2);
+        const pieces = window.calculatedPieces || [];
+
+        // 1. Croquis verification
+        assert(pieces.length > 0, `حالة المرجعية (${bm.name}): الكروكي يظهر برسم القطع الهندسية (العدد: ${pieces.length}).`);
+
+        // 2. Area total verification
+        const sumPiecesArea = pieces.reduce((sum, p) => sum + p.area, 0);
+        assert(Math.abs(sumPiecesArea - landArea) < 0.01, `حالة المرجعية (${bm.name}): مجموع المساحات صحيح ويطابق المساحة الإجمالية (${landArea.toFixed(2)} م²).`);
+
+        // 3. Remainder & Deficit verification
+        const remVal = Math.abs(window.calcState.remainingArea || 0);
+        assert(remVal < 0.05, `حالة المرجعية (${bm.name}): المتبقي / العجز = 0.00 م² (الفعلي: ${remVal.toFixed(4)} م²).`);
+        assert(!window.calcState.hasDeficit, `حالة المرجعية (${bm.name}): عدم وجود عجز (hasDeficit = false).`);
+
+        // 4. Formatting verification (.toFixed(2) / formatArea match)
+        const allFormatted = pieces.every(p => {
+          const areaToTest = p.exactArea !== undefined ? p.exactArea : p.area;
+          const fmt = formatArea(areaToTest);
+          return /^\d+\.\d{2}$/.test(fmt);
+        });
+        assert(allFormatted, `حالة المرجعية (${bm.name}): جميع المساحات تظهر بتنسيق رقمين عشريين ثابتين (0.00).`);
+
+        // 5. Equal partition verification (no last partner penalty)
+        if (bm.equal && pieces.length > 1) {
+          const firstArea = pieces[0].exactArea !== undefined ? pieces[0].exactArea : pieces[0].area;
+          const lastArea = pieces[pieces.length - 1].exactArea !== undefined ? pieces[pieces.length - 1].exactArea : pieces[pieces.length - 1].area;
+          assert(Math.abs(firstArea - lastArea) < 0.0001, `حالة المرجعية (${bm.name}): الشريك الأخير يطابق الشريك الأول تماماً دون أي خصم أو تفاوت.`);
+        }
+      });
+    }
+
     window.PartitionDirectionManager.setDirection("RTL");
 
 
