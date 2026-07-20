@@ -1206,14 +1206,14 @@ function calculateGeneral(shouldRender = true) {
     if (!isManualPartition) {
       const areaInput = row.querySelector(".partner-area");
       if (areaInput && document.activeElement !== areaInput) {
-        areaInput.value = Number(partnerAreaM2.toFixed(2));
+        areaInput.value = partnerAreaM2.toFixed(2);
       }
 
       // 3. Update Percentage (النسبة)
       const percentInput = row.querySelector(".partner-percent");
       if (percentInput && document.activeElement !== percentInput) {
         const pct = totalAreaM2 > 0 ? (partnerAreaM2 / totalAreaM2) * 100 : 0;
-        percentInput.value = Number(pct.toFixed(2)) + " %";
+        percentInput.value = pct.toFixed(2) + " %";
       }
       
       totalDistributedArea += partnerAreaM2;
@@ -1244,7 +1244,7 @@ function calculateGeneral(shouldRender = true) {
   
   // Update summaries
   if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
+    document.getElementById("summary-total-area").innerText = totalAreaM2.toFixed(2) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
     // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
@@ -1252,11 +1252,11 @@ function calculateGeneral(shouldRender = true) {
     const remLabel = document.getElementById("summary-rem-area-label");
     if (remainingArea < -0.05) {
       if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
-      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
+      remEl.innerText = Math.abs(remainingArea).toFixed(2) + " م²";
       remEl.style.color = "#c62828";
     } else {
       if (remLabel) remLabel.innerText = "المساحة المتبقية:";
-      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
+      remEl.innerText = remainingArea.toFixed(2) + " م²";
       remEl.style.color = "";
     }
   }
@@ -2075,6 +2075,7 @@ function divideEqually() {
   }
   
   isManualPartition = false;
+  window.lastCroquisSignature = null;
   saveAndCalcImmediate();
 }
 
@@ -5438,7 +5439,7 @@ function updatePartnerFromInput(type, value, row) {
         const totalCarats = areaVal / caratArea;
         const feddan = Math.floor(totalCarats / 24);
         const carat = Math.floor(totalCarats % 24);
-        const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(4));
+        const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
         
         const feddansInput = row.querySelector(".partner-feddans");
         const caratsInput = row.querySelector(".partner-carats");
