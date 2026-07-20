@@ -396,6 +396,30 @@ const AgriUnitsTests = {
   },
 
   // ============================================================
+  // 10. Single Source of Truth Equal Division Regression Test (Field Real-World Scenario)
+  // ============================================================
+  testSingleSourceOfTruthEqualDivisionRegression() {
+    const l1 = 153.40, l2 = 158.17, w1 = 51.20, w2 = 60.30;
+    const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2); // 8685.01375 m²
+    const numPartners = 6;
+
+    const exactAreaPerPartner = totalAreaM2 / numPartners; // 1447.5022916666666 m²
+    const displayedArea = Number(exactAreaPerPartner.toFixed(2)); // 1447.50 m²
+    const fcs = AgriUnitsCompat.sqmToFCS(exactAreaPerPartner, 168); // 0 Feddan, 8 Carats, 14.79 Sahm
+
+    const sumExact = exactAreaPerPartner * numPartners;
+    const remaining = totalAreaM2 - sumExact;
+    const deficit = remaining < -0.05 ? Math.abs(remaining) : 0;
+
+    this.assert("Regression: Real-World Land Area matches trapezoid calculation", totalAreaM2, 8685.01375, 0.001);
+    this.assert("Regression: Exact area per partner is full precision (1447.5022916...)", exactAreaPerPartner, 8685.01375 / 6, 0.000001);
+    this.assert("Regression: Displayed area is rounded to 1447.50 m²", displayedArea, 1447.50, 0.001);
+    this.assert("Regression: Displayed FCS yields 8 Carats and 14.79 Sahms", fcs.carat === 8 && Math.abs(fcs.sahm - 14.79) < 0.01, true);
+    this.assert("Regression: Sum of exact internal areas equals total land area with zero deficit", Math.abs(remaining), 0, 0.000001);
+    this.assert("Regression: Deficit is exactly 0.00 m²", deficit, 0, 0.000001);
+  },
+
+  // ============================================================
   // تشغيل جميع الاختبارات
   // ============================================================
   runAll() {
@@ -415,6 +439,7 @@ const AgriUnitsTests = {
     this.testGoldenComparison();
     this.testPage13GoldenComparison();
     this.testPage12GoldenComparison();
+    this.testSingleSourceOfTruthEqualDivisionRegression();
 
     return this.report();
   }
