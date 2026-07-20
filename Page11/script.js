@@ -2078,6 +2078,7 @@ function divideEqually() {
   }
   
   isManualPartition = false;
+  isPartitioned = true;
   window.lastCroquisSignature = null;
   saveAndCalcImmediate();
 }
