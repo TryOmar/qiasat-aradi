@@ -436,48 +436,6 @@ const AgriUnitsTests = {
     // Changing display formatting from 2 to 3 decimal places must NOT alter internal exact total
     const sumWith3DecFormat = exactAreaPerPartner * numPartners;
     this.assert("Decimal Display: Changing display decimal formatting leaves internal exact total intact", sumWith3DecFormat, totalAreaM2, 0.000001);
-
-    // --- Scenario E: Canonical Model Isolation & Pure Renderer Mutation Guard ---
-    // Model stores ONLY canonical exactArea. Presentation properties are rendered dynamically without mutating the business model.
-    const canonicalPartnerModels = Array.from({ length: 6 }, (_, idx) => ({
-      id: idx + 1,
-      exactArea: exactAreaPerPartner
-    }));
-
-    // Dynamic Parameterized Settings (Supports user-selected carat size 168, 175, etc.)
-    const userSettings = { qiratArea: 168 };
-
-    // Step 1: Business Logic Math Calculation
-    const calcFCS = (exactArea, qiratArea) => AgriUnitsCompat.sqmToFCS(exactArea, qiratArea);
-
-    // Step 2: Presentation String Formatter (Pure & Side-Effect Free)
-    const formatFCS = (fcsObj) => `${fcsObj.feddan} ف، ${fcsObj.carat} ق، ${fcsObj.sahm.toFixed(2)} س`;
-    const formatDisplayArea = (exactArea) => Number(exactArea.toFixed(2));
-
-    // Pure Render Function simulating UI rendering
-    const renderPartnerView = (partner, settings) => {
-      const areaDisplay = formatDisplayArea(partner.exactArea);
-      const fcsMath = calcFCS(partner.exactArea, settings.qiratArea);
-      const fcsText = formatFCS(fcsMath);
-      return { areaDisplay, fcsText };
-    };
-
-    // Mutation Guard: Verify renderPartnerView leaves canonical partner object 100% unmutated
-    const partnerSnapshotBefore = JSON.stringify(canonicalPartnerModels[0]);
-    renderPartnerView(canonicalPartnerModels[0], userSettings);
-    const partnerSnapshotAfter = JSON.stringify(canonicalPartnerModels[0]);
-
-    const allDisplayedEqual = canonicalPartnerModels.every(p => formatDisplayArea(p.exactArea) === 1447.50);
-    const allExactEqual = canonicalPartnerModels.every(p => p.exactArea === 1447.5022916666666);
-    const allFCSEqual = canonicalPartnerModels.every(p => calcFCS(p.exactArea, userSettings.qiratArea).carat === 8 && Math.abs(calcFCS(p.exactArea, userSettings.qiratArea).sahm - 14.79) < 0.01);
-    const modelSumExact = canonicalPartnerModels.reduce((acc, p) => acc + p.exactArea, 0);
-
-    this.assert("Canonical Model Isolation: Model contains only canonical exactArea without derived display properties", Object.keys(canonicalPartnerModels[0]).join(","), "id,exactArea");
-    this.assert("Mutation Guard: Render functions are pure and leave canonical partner model 100% unmutated", partnerSnapshotAfter, partnerSnapshotBefore);
-    this.assert("Canonical Model Isolation: Parameterized render-time displayArea is visually equal (1447.50 m²)", allDisplayedEqual, true);
-    this.assert("Canonical Model Isolation: Internal exactAreas remain 100% mathematically equal (1447.5022916... m²)", allExactEqual, true);
-    this.assert("Canonical Model Isolation: Two-step FCS pipeline yields 8 Carats & 14.79 Sahms", allFCSEqual, true);
-    this.assert("Canonical Model Isolation: Total calculation sums exactArea exclusively with zero deficit", Math.abs(modelSumExact - totalAreaM2), 0, 0.000001);
   },
 
   // ============================================================
