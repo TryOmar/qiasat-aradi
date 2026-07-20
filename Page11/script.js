@@ -935,7 +935,7 @@ function recalculateState() {
   const l2 = parseFloat(document.getElementById("length2") ? document.getElementById("length2").value : 0) || 0;
   const w1 = parseFloat(document.getElementById("width1") ? document.getElementById("width1").value : 0) || 0;
   const w2 = parseFloat(document.getElementById("width2") ? document.getElementById("width2").value : 0) || 0;
-  const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
+  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
 
   const rows = document.querySelectorAll("#partners-list .partner-row");
   let totalTargetArea = 0;
@@ -1465,7 +1465,7 @@ function runPartition(shouldRender = true) {
   }
 
   const w = (w1 + w2) / 2;
-  const totalAreaM2 = ((l1 + l2) / 2) * w;
+  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
 
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
   if (caratArea === 0) {
