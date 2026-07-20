@@ -69,6 +69,15 @@
       assert("Field Case: Partner 6 internal exact area is 1447.5022916... m²", Math.abs(p6Exact - (8685.01375 / 6)) < 0.000001);
       assert("Field Case: Zero Last-Item Adjustment (All 6 partners equal)", partnersList.every(p => p.displayArea === 1447.50));
       assert("Field Case: Deficit is 0.00 m²", fieldDeficit === 0);
+
+      // 7. Formatted Presentation Display Strings (Exact 2 Decimal Strings, e.g. "1447.50", "8685.01", "14.79")
+      const formattedAreaString = exactPerPartner.toFixed(2);
+      const formattedTotalString = fieldTotalArea.toFixed(2);
+      const formattedSahmsString = AgriUnitsCompat.sqmToFCS(exactPerPartner, 168).sahm.toFixed(2);
+
+      assert("Presentation: Area formatted string retains trailing zero (1447.50)", formattedAreaString === "1447.50");
+      assert("Presentation: Total land area string retains trailing two decimals (8685.01)", formattedTotalString === "8685.01");
+      assert("Presentation: Sahms formatted string is uniformly 2 decimals (14.79)", formattedSahmsString === "14.79");
     }
   };
 
