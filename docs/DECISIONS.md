@@ -85,8 +85,9 @@ This document records the key architectural decisions, design rationales, and en
 - **Decision**: The Data Model shall store ONLY canonical business data (`partner.exactArea`, `partner.id`, `partner.locks`). Any formatted or presentation-specific values (`displayArea`, `formattedFCS`, localized strings) must be dynamically derived at render time and must NEVER be persisted within business state.
 - **Rationale**:
   1. Enforces strict Single Source of Truth architecture: `exactArea` is the unique canonical value.
-  2. Eliminates state desynchronization bugs between internal math state and presentation fields.
-  3. Provides a clean, unpolluted Data Model optimized for 1-to-1 Dart/Flutter migration.
+  2. Rendering functions shall be pure and side-effect free. Rendering must never mutate the business model or introduce presentation fields into canonical state.
+  3. Separates mathematical calculation (`sqmToFCS`) from string formatting (`formatFCS`).
+  4. Provides a clean, unpolluted Data Model optimized for 1-to-1 Dart/Flutter migration.
 
 ## ADR-008: Elimination of Display-Rounding Last-Item Adjustment & Full-Precision Model Isolation
 
