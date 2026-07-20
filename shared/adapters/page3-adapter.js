@@ -29,6 +29,7 @@
       // 2. استخراج وقراءة بيانات جدول المزارعين وفروق الحدود
       const farmerRows = document.querySelectorAll(".table-input:not(#total)");
       const farmerItems = [];
+      let activeFarmerCount = 0;
 
       farmerRows.forEach((row, idx) => {
         const inputs = row.querySelectorAll("input");
@@ -38,9 +39,15 @@
         const prevWidth = inputs[3]?.value || "";
         const diffVal = inputs[4]?.value || "";
 
-        // يتجاهل الصفوف الفارغة بالكامل
-        if (!sahm && !carat && !prevWidth && !currWidth) return;
+        const sahmNum = parseFloat(sahm) || 0;
+        const caratNum = parseFloat(carat) || 0;
+        const currWidthNum = parseFloat(currWidth) || 0;
+        const prevWidthNum = parseFloat(prevWidth) || 0;
 
+        // يتجاهل الصفوف التي قيمها 0 أو فارغة بالكامل (لا داعي لظهور المزارع ذو القيم الصفرية)
+        if (sahmNum === 0 && caratNum === 0 && currWidthNum === 0 && prevWidthNum === 0) return;
+
+        activeFarmerCount++;
         const diffNum = parseFloat(diffVal) || 0;
         let diffType = "neutral";
         let diffFormatted = diffVal ? `${diffVal} م` : "0.000 م";
@@ -56,8 +63,8 @@
         }
 
         farmerItems.push({
-          id: idx + 1,
-          name: `المزارع ${idx + 1}`,
+          id: activeFarmerCount,
+          name: `المزارع ${activeFarmerCount}`,
           sahm: sahm || "0",
           carat: carat || "0",
           currWidth: currWidth ? `${currWidth} م` : "—",
@@ -67,7 +74,7 @@
         });
       });
 
-      // بناء بطاقات المزارعين بالتنسيق القياسي الأحادي
+      // بناء بطاقات المزارعين الفعليين بالتنسيق القياسي الأحادي
       const partnerCardsHTML = farmerItems.map((f) => {
         let diffColor = "#1b5e20";
         if (f.diffType === "decrease") diffColor = "#c62828";
