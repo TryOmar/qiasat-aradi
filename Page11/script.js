@@ -935,7 +935,7 @@ function recalculateState() {
   const l2 = parseFloat(document.getElementById("length2") ? document.getElementById("length2").value : 0) || 0;
   const w1 = parseFloat(document.getElementById("width1") ? document.getElementById("width1").value : 0) || 0;
   const w2 = parseFloat(document.getElementById("width2") ? document.getElementById("width2").value : 0) || 0;
-  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
+  const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
   const rows = document.querySelectorAll("#partners-list .partner-row");
   let totalTargetArea = 0;
@@ -969,18 +969,15 @@ function recalculateState() {
 }
 
 function isPartnerRowExcluded(row) {
-  if (!row) return true;
-  if (row.dataset && row.dataset.excluded === "true") return true;
-  if (row.dataset && row.dataset.exactArea && parseFloat(row.dataset.exactArea) > 0) return false;
   let area = 0;
   if (isManualPartition) {
     const w1 = parseFloat(row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : 0) || 0;
     const w2 = parseFloat(row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : 0) || 0;
-    area = w1 + w2;
+    area = w1 + w2; // if both widths are 0, area is 0
   } else {
     area = getPartnerTargetArea(row);
   }
-  return area < 0.0001;
+  return area < 0.05;
 }
 
 function syncExclusionUI() {
@@ -1190,8 +1187,21 @@ function calculateGeneral(shouldRender = true) {
     // اسم الشريك لا يُعبّأ تلقائياً أثناء الكتابة — يتم ذلك فقط عند blur إذا كان الحقل فارغاً
     // (انظر دالة onPartnerNameBlur)
 
-    let partnerAreaM2 = getPartnerTargetArea(row);
-    let partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+    let partnerAreaM2 = 0;
+    let partnerCarats = 0;
+    
+    if (currentInputMethod === "carats") {
+      const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+      const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+      const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+      partnerAreaM2 = AgriUnitsCompat.fcsToSqm(f, c, s, caratArea);
+      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+    } else {
+      const fracInput = row.querySelector(".partner-fraction");
+      const fracVal = parseFraction(fracInput ? fracInput.value : "");
+      partnerAreaM2 = fracVal * totalAreaM2;
+      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+    }
     
     if (currentInputMethod === "fractions") {
       const equivInput = row.querySelector(".partner-equiv");
@@ -1209,14 +1219,14 @@ function calculateGeneral(shouldRender = true) {
     if (!isManualPartition) {
       const areaInput = row.querySelector(".partner-area");
       if (areaInput && document.activeElement !== areaInput) {
-        areaInput.value = partnerAreaM2.toFixed(2);
+        areaInput.value = Number(partnerAreaM2.toFixed(2));
       }
 
       // 3. Update Percentage (النسبة)
       const percentInput = row.querySelector(".partner-percent");
       if (percentInput && document.activeElement !== percentInput) {
         const pct = totalAreaM2 > 0 ? (partnerAreaM2 / totalAreaM2) * 100 : 0;
-        percentInput.value = pct.toFixed(2) + " %";
+        percentInput.value = Number(pct.toFixed(2)) + " %";
       }
       
       totalDistributedArea += partnerAreaM2;
@@ -1247,7 +1257,7 @@ function calculateGeneral(shouldRender = true) {
   
   // Update summaries
   if (document.getElementById("summary-total-area")) {
-    document.getElementById("summary-total-area").innerText = totalAreaM2.toFixed(2) + " م²";
+    document.getElementById("summary-total-area").innerText = Number(totalAreaM2.toFixed(2)) + " م²";
   }
   if (document.getElementById("summary-rem-area")) {
     // بند رابعاً: لا تظهر قيمة سالبة — عند العجز تُستبدل العبارة بالكامل
@@ -1255,11 +1265,11 @@ function calculateGeneral(shouldRender = true) {
     const remLabel = document.getElementById("summary-rem-area-label");
     if (remainingArea < -0.05) {
       if (remLabel) remLabel.innerText = "الزيادة عن مساحة الأرض:";
-      remEl.innerText = Math.abs(remainingArea).toFixed(2) + " م²";
+      remEl.innerText = Number(Math.abs(remainingArea).toFixed(2)) + " م²";
       remEl.style.color = "#c62828";
     } else {
       if (remLabel) remLabel.innerText = "المساحة المتبقية:";
-      remEl.innerText = remainingArea.toFixed(2) + " م²";
+      remEl.innerText = Number(remainingArea.toFixed(2)) + " م²";
       remEl.style.color = "";
     }
   }
@@ -1465,7 +1475,7 @@ function runPartition(shouldRender = true) {
   }
 
   const w = (w1 + w2) / 2;
-  const totalAreaM2 = AgriUnitsCompat.trapezoidArea(l1, l2, w1, w2);
+  const totalAreaM2 = ((l1 + l2) / 2) * w;
 
   let caratArea = parseFloat(document.getElementById("input-carat-area").value);
   if (caratArea === 0) {
@@ -1554,8 +1564,21 @@ function runPartition(shouldRender = true) {
       calculatedGeoArea = ((rightLength + leftLength) / 2) * ((botWidth + topWidth) / 2);
     } else {
       // Automatic area partition: calculate widths to match shares
-      let partnerAreaM2 = getPartnerTargetArea(row);
-      let partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+      let partnerAreaM2 = 0;
+      let partnerCarats = 0;
+      
+      if (currentInputMethod === "carats") {
+        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
+        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
+        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
+        partnerCarats = (f * 24) + c + s / 24;
+        partnerAreaM2 = partnerCarats * caratArea;
+      } else {
+        const fracInput = row.querySelector(".partner-fraction");
+        const fracVal = parseFraction(fracInput ? fracInput.value : "");
+        partnerAreaM2 = fracVal * totalAreaM2;
+        partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
+      }
 
       // Solves for tCurr_top and tCurr_bot to match partnerAreaM2 exactly
       const L_right = l1 + lastT_top * diff;
@@ -1728,8 +1751,6 @@ function runPartition(shouldRender = true) {
     }
     document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
   }
-
-  // Eliminating legacy Last-Item Adjustment normalization phase to guarantee uniform full-precision equality across all partners
 
   // update the remaining area card
   recalculateState();
@@ -2078,8 +2099,6 @@ function divideEqually() {
   }
   
   isManualPartition = false;
-  isPartitioned = true;
-  window.lastCroquisSignature = null;
   saveAndCalcImmediate();
 }
 
@@ -2167,14 +2186,7 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
 }
 
 function renderCroquis() {
-  console.log({
-    isPartitioned: typeof isPartitioned !== 'undefined' ? isPartitioned : false,
-    calculatedPieces: window.calculatedPieces,
-    calculatedPiecesLength: window.calculatedPieces?.length,
-    svg: document.getElementById("croquis-svg"),
-    placeholder: document.getElementById("croquis-placeholder"),
-    lastCroquisSignature: window.lastCroquisSignature
-  });
+  console.log("Trace: renderCroquis start");
   try {
     // State Signature / Dirty Flag Optimization
     if (window.DALLAL_PERF && window.DALLAL_PERF.dirtyFlag) {
@@ -3022,7 +3034,6 @@ function renderCroquis() {
   if (typeof applySmartLayout === "function" && !window.isExporting) {
     applySmartLayout();
   }
-  console.log("renderCroquis finished", { piecesCount: window.calculatedPieces ? window.calculatedPieces.length : 0 });
   } catch (e) {
     console.error("Error in renderCroquis:", e);
   }
@@ -5451,7 +5462,7 @@ function updatePartnerFromInput(type, value, row) {
         const totalCarats = areaVal / caratArea;
         const feddan = Math.floor(totalCarats / 24);
         const carat = Math.floor(totalCarats % 24);
-        const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(2));
+        const sahm = Number(((totalCarats - (feddan * 24 + carat)) * 24).toFixed(4));
         
         const feddansInput = row.querySelector(".partner-feddans");
         const caratsInput = row.querySelector(".partner-carats");
