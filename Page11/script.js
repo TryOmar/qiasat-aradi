@@ -969,15 +969,18 @@ function recalculateState() {
 }
 
 function isPartnerRowExcluded(row) {
+  if (!row) return true;
+  if (row.dataset && row.dataset.excluded === "true") return true;
+  if (row.dataset && row.dataset.exactArea && parseFloat(row.dataset.exactArea) > 0) return false;
   let area = 0;
   if (isManualPartition) {
     const w1 = parseFloat(row.querySelector(".partner-width-bottom") ? row.querySelector(".partner-width-bottom").value : 0) || 0;
     const w2 = parseFloat(row.querySelector(".partner-width-top") ? row.querySelector(".partner-width-top").value : 0) || 0;
-    area = w1 + w2; // if both widths are 0, area is 0
+    area = w1 + w2;
   } else {
     area = getPartnerTargetArea(row);
   }
-  return area < 0.05;
+  return area < 0.0001;
 }
 
 function syncExclusionUI() {
@@ -2163,7 +2166,16 @@ function svgLine(x1, y1, x2, y2, opts = {}) {
 }
 
 function renderCroquis() {
-  console.log("Trace: renderCroquis start");
+  console.log("renderCroquis() called", {
+    length1: document.getElementById("length1")?.value,
+    length2: document.getElementById("length2")?.value,
+    width1: document.getElementById("width1")?.value,
+    width2: document.getElementById("width2")?.value,
+    isPartitioned: typeof isPartitioned !== 'undefined' ? isPartitioned : false,
+    isManualPartition: typeof isManualPartition !== 'undefined' ? isManualPartition : false,
+    partnersCount: document.querySelectorAll("#partners-list .partner-row").length,
+    lastCroquisSignature: window.lastCroquisSignature
+  });
   try {
     // State Signature / Dirty Flag Optimization
     if (window.DALLAL_PERF && window.DALLAL_PERF.dirtyFlag) {
