@@ -1187,21 +1187,8 @@ function calculateGeneral(shouldRender = true) {
     // اسم الشريك لا يُعبّأ تلقائياً أثناء الكتابة — يتم ذلك فقط عند blur إذا كان الحقل فارغاً
     // (انظر دالة onPartnerNameBlur)
 
-    let partnerAreaM2 = 0;
-    let partnerCarats = 0;
-    
-    if (currentInputMethod === "carats") {
-      const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-      const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-      const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-      partnerAreaM2 = AgriUnitsCompat.fcsToSqm(f, c, s, caratArea);
-      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
-    } else {
-      const fracInput = row.querySelector(".partner-fraction");
-      const fracVal = parseFraction(fracInput ? fracInput.value : "");
-      partnerAreaM2 = fracVal * totalAreaM2;
-      partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
-    }
+    let partnerAreaM2 = getPartnerTargetArea(row);
+    let partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
     
     if (currentInputMethod === "fractions") {
       const equivInput = row.querySelector(".partner-equiv");
@@ -1564,21 +1551,8 @@ function runPartition(shouldRender = true) {
       calculatedGeoArea = ((rightLength + leftLength) / 2) * ((botWidth + topWidth) / 2);
     } else {
       // Automatic area partition: calculate widths to match shares
-      let partnerAreaM2 = 0;
-      let partnerCarats = 0;
-      
-      if (currentInputMethod === "carats") {
-        const f = parseFloat(row.querySelector(".partner-feddans") ? row.querySelector(".partner-feddans").value : 0) || 0;
-        const c = parseFloat(row.querySelector(".partner-carats") ? row.querySelector(".partner-carats").value : 0) || 0;
-        const s = parseFloat(row.querySelector(".partner-shares") ? row.querySelector(".partner-shares").value : 0) || 0;
-        partnerCarats = (f * 24) + c + s / 24;
-        partnerAreaM2 = partnerCarats * caratArea;
-      } else {
-        const fracInput = row.querySelector(".partner-fraction");
-        const fracVal = parseFraction(fracInput ? fracInput.value : "");
-        partnerAreaM2 = fracVal * totalAreaM2;
-        partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
-      }
+      let partnerAreaM2 = getPartnerTargetArea(row);
+      let partnerCarats = caratArea > 0 ? (partnerAreaM2 / caratArea) : 0;
 
       // Solves for tCurr_top and tCurr_bot to match partnerAreaM2 exactly
       const L_right = l1 + lastT_top * diff;
@@ -1752,45 +1726,7 @@ function runPartition(shouldRender = true) {
     document.getElementById("info-last-div-line").innerText = lastDivLine.toFixed(4) + " م";
   }
 
-  // Central Final Normalization Phase
-  const sumTargetAreas = Array.from(rows).filter(r => !isPartnerRowExcluded(r)).reduce((sum, r) => sum + getPartnerTargetArea(r), 0);
-  const diffNorm = totalAreaM2 - sumTargetAreas;
-  const toleranceNorm = 0.25;
-  if (!window.isNormalizing && Math.abs(diffNorm) <= toleranceNorm && Math.abs(diffNorm) > 1e-7) {
-    const activeRows = Array.from(rows).filter(r => !isPartnerRowExcluded(r));
-    if (activeRows.length > 0) {
-      const lastActiveRow = activeRows[activeRows.length - 1];
-      
-      const currentTargetArea = getPartnerTargetArea(lastActiveRow);
-      const correctArea = currentTargetArea + diffNorm;
-      
-      window.isNormalizing = true;
-      window.normalizedDiff = diffNorm;
-      
-      if (currentInputMethod === "carats") {
-        const fcs = convertSquareMetersToFCS(correctArea);
-        const feddansInput = lastActiveRow.querySelector(".partner-feddans");
-        const caratsInput = lastActiveRow.querySelector(".partner-carats");
-        const sharesInput = lastActiveRow.querySelector(".partner-shares");
-        if (feddansInput && document.activeElement !== feddansInput) feddansInput.value = fcs.feddan > 0 ? fcs.feddan : "";
-        if (caratsInput && document.activeElement !== caratsInput) caratsInput.value = fcs.carat > 0 ? fcs.carat : "";
-        if (sharesInput && document.activeElement !== sharesInput) sharesInput.value = fcs.sahm > 0 ? fcs.sahm : "";
-      } else {
-        const fracInput = lastActiveRow.querySelector(".partner-fraction");
-        if (fracInput && document.activeElement !== fracInput) {
-          fracInput.value = (correctArea / totalAreaM2).toFixed(6);
-        }
-      }
-      
-      calculateGeneral(false);
-      runPartition(false);
-      window.isNormalizing = false;
-      if (shouldRender) {
-        renderCroquis();
-      }
-      return;
-    }
-  }
+  // Eliminating legacy Last-Item Adjustment normalization phase to guarantee uniform full-precision equality across all partners
 
   // update the remaining area card
   recalculateState();
