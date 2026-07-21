@@ -741,14 +741,83 @@ function adjustPriceFontSize(input) {
   }
 }
 
-// Clear all inputs
-function clearAllInputs() {
-  const inputs = document.querySelectorAll(".inputs-group.active input");
+// Clear all inputs (Page 11 Parity)
+function clearAllInputs(confirmRequired = false) {
+  if (confirmRequired) {
+    if (!confirm("سيتم حذف جميع البيانات وإعادة الصفحة إلى البداية. هل تريد المتابعة؟")) {
+      return;
+    }
+  }
+
+  // 1. Clear shape inputs across all groups
+  const inputs = document.querySelectorAll(".inputs-group input");
   inputs.forEach(input => input.value = "");
-  caratPriceDisplay.value = "";
-  caratPriceNumeric.value = "";
-  
-  resetDivision();
+
+  // 2. Clear carat price & reset carat size
+  if (typeof caratPriceDisplay !== "undefined" && caratPriceDisplay) caratPriceDisplay.value = "";
+  if (typeof caratPriceNumeric !== "undefined" && caratPriceNumeric) caratPriceNumeric.value = "";
+  if (typeof caratSizeInput !== "undefined" && caratSizeInput) caratSizeInput.value = "168";
+  if (typeof caratPresetSelect !== "undefined" && caratPresetSelect) caratPresetSelect.value = "168";
+
+  // 3. Reset Single Source of Truth calculation & geometry state BEFORE resetting division
+  calculatedArea = 0;
+  calculatedPerimeter = 0;
+  area = 0;
+  vertices = [];
+  window.vertices = [];
+  heirsData = [];
+  window.heirsData = [];
+
+  // 4. Clear sessionStorage keys
+  try {
+    sessionStorage.setItem("heirsData", "[]");
+    sessionStorage.setItem("heirsCount", "0");
+    sessionStorage.removeItem("divisionInput");
+    sessionStorage.removeItem("priceDisplay");
+    sessionStorage.removeItem("priceNumeric");
+    sessionStorage.removeItem("rectLength");
+    sessionStorage.removeItem("rectWidth");
+    sessionStorage.removeItem("squareSide");
+    sessionStorage.removeItem("trapBaseMajor");
+    sessionStorage.removeItem("trapBaseMinor");
+    sessionStorage.removeItem("trapLengthRight");
+    sessionStorage.removeItem("trapLengthLeft");
+    sessionStorage.removeItem("quadSideA");
+    sessionStorage.removeItem("quadSideB");
+    sessionStorage.removeItem("quadSideC");
+    sessionStorage.removeItem("quadSideD");
+    sessionStorage.removeItem("quadDiagAC");
+    sessionStorage.removeItem("quadDiagBD");
+  } catch (e) {
+    console.warn("sessionStorage cleanup warning:", e);
+  }
+
+  // 5. Hide overlays & tooltips
+  if (typeof closeInspector === "function") {
+    closeInspector();
+  }
+
+  const topDeficit = document.getElementById("top-deficit-warning");
+  if (topDeficit) topDeficit.style.display = "none";
+
+  const remBox = document.getElementById("table-remaining-box");
+  if (remBox) remBox.style.display = "none";
+
+  const legend = document.getElementById("croquis-legend");
+  if (legend) {
+    legend.innerHTML = "";
+    legend.style.display = "none";
+  }
+
+  // 6. Reset Division (Page 11 Golden Reference Parity: clears all partners, count = 0, no default rows created)
+  if (heirsCountInput) heirsCountInput.value = "0";
+  if (window.Page13PartnersTableAdapter && typeof window.Page13PartnersTableAdapter.removeAllPartners === "function") {
+    window.Page13PartnersTableAdapter.removeAllPartners(true);
+  } else {
+    heirsData = [];
+    window.heirsData = [];
+    generateHeirsTable();
+  }
   saveStateToSession();
   calculateAll();
 }
@@ -1597,9 +1666,9 @@ function solveDepthForArea(S, Top, Bottom, H) {
 
 // Canvas Drawer
 function drawLandCanvas(verticesInput) {
-  const vertices = (verticesInput && verticesInput.length >= 3)
+  const vertices = (verticesInput && Array.isArray(verticesInput))
     ? verticesInput
-    : (window.vertices && window.vertices.length >= 3 ? window.vertices : (typeof vertices !== "undefined" && vertices && vertices.length >= 3 ? vertices : []));
+    : (window.vertices && Array.isArray(window.vertices) ? window.vertices : (typeof vertices !== "undefined" && Array.isArray(vertices) ? vertices : []));
   console.log("drawLandCanvas started", { vertices: vertices });
   // 1. Calculate shape aspect ratio
   let shapeRatio = 1.5; // Default ratio
@@ -2265,13 +2334,13 @@ function generateHeirsTable() {
 
   for (let i = 0; i < count; i++) {
     const defaultName = `شريك ${i + 1}`;
-    const name = (oldHeirs[i] && oldHeirs[i].name) ? oldHeirs[i].name : defaultName;
-    const share = (oldHeirs[i] && typeof oldHeirs[i].share === "number" && oldHeirs[i].share > 0 && oldHeirs.length === count) ? oldHeirs[i].share : equalShare;
+    const name = (calculatedArea > 0 && oldHeirs[i] && oldHeirs[i].name) ? oldHeirs[i].name : defaultName;
+    const share = (calculatedArea > 0 && oldHeirs[i] && typeof oldHeirs[i].share === "number" && oldHeirs[i].share > 0 && oldHeirs.length === count) ? oldHeirs[i].share : equalShare;
     
     const heirObj = {
       id: (oldHeirs[i] && oldHeirs[i].id) ? oldHeirs[i].id : (typeof window.generateUniqueHeirId === "function" ? window.generateUniqueHeirId() : `heir_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`),
       name: name,
-      share: share,
+      share: (calculatedArea > 0) ? share : 0,
       topW: (calculatedArea > 0) ? (share / calculatedArea) * dims.landTop : 0,
       botW: (calculatedArea > 0) ? (share / calculatedArea) * dims.landBottom : 0
     };
@@ -2846,15 +2915,15 @@ function loadStateFromSession() {
   const savedCount = sessionStorage.getItem("heirsCount");
   const savedHeirs = sessionStorage.getItem("heirsData");
   
-  if (savedCount && savedHeirs && savedHeirs !== "[]") {
+  if (savedCount !== null) {
     heirsCountInput.value = savedCount;
     try {
-      heirsData = JSON.parse(savedHeirs);
+      heirsData = savedHeirs ? JSON.parse(savedHeirs) : [];
     } catch (e) {
       heirsData = [];
     }
   } else {
-    heirsCountInput.value = "3";
+    heirsCountInput.value = "0";
     heirsData = [];
   }
   
@@ -2864,8 +2933,8 @@ function loadStateFromSession() {
   if (divisionPanel) divisionPanel.style.display = "block";
   if (btnToggleDivision) btnToggleDivision.classList.add("active-panel");
   
-  const targetCount = parseInt(heirsCountInput.value) || 3;
-  if (!heirsData || !Array.isArray(heirsData) || heirsData.length === 0 || heirsData.length !== targetCount) {
+  const targetCount = parseInt(heirsCountInput.value) || 0;
+  if (!heirsData || !Array.isArray(heirsData) || heirsData.length !== targetCount) {
     generateHeirsTable();
   } else {
     renderHeirsRows();
@@ -4866,6 +4935,7 @@ window.toggleStepsAccordion = toggleStepsAccordion;
 window.updatePrintStepsClass = updatePrintStepsClass;
 window.updateCalculationSteps = updateCalculationSteps;
 window.copyCalculationSteps = copyCalculationSteps;
+window.clearAllInputs = clearAllInputs;
 
 console.log("Page13 section1 script loaded successfully");
 console.log("addNewHeir function status:", typeof window.addNewHeir);

@@ -2,6 +2,25 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [2.3.0-RC1 / Page13-reset-fix] - 2026-07-21
+### 🏆 تحسين وتوسيع نطاق الحذف الشامل عند الضغط على "أحذف" (Page13/section1)
+
+```text
+Page13/section1 — Full Reset Behavior: APPROVED (RC1 Stabilization)
+
+Geometry Inputs Reset: ✅ PASS (Clears rectangle, square, trapezoid & quadrilateral inputs)
+Carat Settings Reset: ✅ PASS (Resets price & restores default 168 sqm carat size)
+Partners Table Reset: ✅ PASS (Restores clean 3 zero-share default partners)
+UI & Storage Cleanup: ✅ PASS (Clears sessionStorage, inspector & status overlays)
+Status: Accepted for RC1 Release Candidate
+```
+
+- **تفريغ شامل لمدخلات الأشكال:** مسح كافّة حقول إدخال الأبعاد لجميع الأشكال وليس الشكل الحالي فقط.
+- **تصفير وتنظيف الجلسة والشركاء:** إعادة تعيين قائمة الشركاء إلى 3 شركاء افتراضيين ذوي حصص صفريّة وتحديث التخزين الـ sessionStorage.
+- **تصفير الواجهة والرسم:** إخفاء بقع العجز/المتبقي ونافذة المفتش المفتوحة وإعادة رسم الكروكي والنتائج على الحالة الصفرية.
+
+---
+
 ## [Commit 11.7 / refactor] - 2026-07-21
 ### 🏆 إزالة زر "تقسيم الجزء المتبقي" وتبسيط واجهة بطاقة المتبقي والعجز (Page13/section1)
 

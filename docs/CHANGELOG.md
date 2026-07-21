@@ -75,6 +75,17 @@
 
 ---
 
+### Fixed 🛠️
+
+- **Page13 Full Reset Behavior**:
+  - Improved `clearAllInputs()` in `Page13/section1/script.js` to perform complete project reset on clicking "أحذف".
+  - Clears geometry inputs across all shape groups (rectangle, square, trapezoid, quadrilateral).
+  - Resets carat price and resets carat area size to default 168 m².
+  - Resets partners/heirs state to default 3 zero-share partners.
+  - Clears `sessionStorage`, closes inspector tooltip, hides deficit/remainder overlays, and recalculates zero state.
+
+---
+
 ### Added (System Architecture) ➕
 
 - إنشاء البنية المعمارية الجديدة:

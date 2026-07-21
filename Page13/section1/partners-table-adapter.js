@@ -297,9 +297,10 @@
       }
     },
 
-    removeAllPartners: function () {
-      if (confirm("هل أنت متأكد من حذف جميع الشركاء؟")) {
+    removeAllPartners: function (skipConfirm = false) {
+      if (skipConfirm || confirm("هل أنت متأكد من حذف جميع الشركاء؟")) {
         global.heirsData = [];
+        if (typeof window !== "undefined") window.heirsData = [];
         const countInput = document.getElementById("heirs-count");
         if (countInput) countInput.value = 0;
         if (typeof global.generateHeirsTable === "function") global.generateHeirsTable();
