@@ -1233,6 +1233,7 @@ function calculateAll() {
 
   calculatedArea = area;
   calculatedPerimeter = perimeter;
+  window.vertices = vertices;
   console.log("Area =", calculatedArea);
 
   if (isDivisionActive && area > 0) {
@@ -1595,7 +1596,10 @@ function solveDepthForArea(S, Top, Bottom, H) {
 }
 
 // Canvas Drawer
-function drawLandCanvas(vertices) {
+function drawLandCanvas(verticesInput) {
+  const vertices = (verticesInput && verticesInput.length >= 3)
+    ? verticesInput
+    : (window.vertices && window.vertices.length >= 3 ? window.vertices : (typeof vertices !== "undefined" && vertices && vertices.length >= 3 ? vertices : []));
   console.log("drawLandCanvas started", { vertices: vertices });
   // 1. Calculate shape aspect ratio
   let shapeRatio = 1.5; // Default ratio
@@ -4422,12 +4426,13 @@ window.renderHeirsRows = renderHeirsRows;
 window.saveStateToSession = saveStateToSession;
 window.loadStateFromSession = loadStateFromSession;
 function drawCroquis() {
+  const currentVertices = window.vertices || (typeof vertices !== "undefined" ? vertices : []);
   if (window.CroquisEngine && typeof window.CroquisEngine.render === "function") {
-    window.CroquisEngine.render("landCanvas", { vertices: window.vertices });
+    window.CroquisEngine.render("landCanvas", { vertices: currentVertices });
     return;
   }
   if (typeof drawLandCanvas === "function") {
-    drawLandCanvas(window.vertices);
+    drawLandCanvas(currentVertices);
   }
 }
 window.drawCroquis = drawCroquis;

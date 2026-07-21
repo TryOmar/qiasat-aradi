@@ -105,7 +105,7 @@
 
       // استدعاء دالة الرسم الحرة لـ Page13 إذا كانت متاحة
       if (typeof global.drawLandCanvas === "function" && options.useLegacy !== false) {
-        const vertices = data ? data.vertices : undefined;
+        const vertices = (data && data.vertices && data.vertices.length >= 3) ? data.vertices : global.vertices;
         global.drawLandCanvas(vertices);
         return;
       }
