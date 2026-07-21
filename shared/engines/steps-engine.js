@@ -80,14 +80,62 @@
         const b = parseFloat(dimensions.quadSideB) || 0;
         const c = parseFloat(dimensions.quadSideC) || 0;
         const d = parseFloat(dimensions.quadSideD) || 0;
-        const avgW = (a + c) / 2;
-        const avgL = (b + d) / 2;
-        html += `
-            قانون الشكل الرباعي العام: متوسط الضلعين المتقابلين الأولين × متوسط الضلعين المتقابلين الآخرين<br>
-            متوسط العرض = (${toAr(a)} + ${toAr(c)}) ÷ 2 = ${toAr(avgW.toFixed(2))} م<br>
-            متوسط الطول = (${toAr(b)} + ${toAr(d)}) ÷ 2 = ${toAr(avgL.toFixed(2))} م<br>
-            المساحة الإجمالية = ${toAr(avgW.toFixed(2))} × ${toAr(avgL.toFixed(2))} = <strong style="color: #1b5e20;">${toAr(totalAreaM2.toFixed(2))} م²</strong>
-        `;
+        const d_ac = parseFloat(dimensions.quadDiagAC) || 0;
+        const d_bd = parseFloat(dimensions.quadDiagBD) || 0;
+
+        function heron(s1, s2, s3) {
+          if (s1 <= 0 || s2 <= 0 || s3 <= 0) return 0;
+          const s = (s1 + s2 + s3) / 2;
+          const val = s * (s - s1) * (s - s2) * (s - s3);
+          return val > 0 ? Math.sqrt(val) : 0;
+        }
+
+        if (d_ac > 0) {
+          const area1 = heron(a, d, d_ac);
+          const area2 = heron(b, c, d_ac);
+          const s1 = (a + d + d_ac) / 2;
+          const s2 = (b + c + d_ac) / 2;
+          html += `
+            <strong>طريقة الحساب: تقسيم الأرض الرباعية إلى مثلثين باستخدام القطر المختار (AC = ${toAr(d_ac)} م) وحساب مساحة كل مثلث بقانون هيرون (Heron's Formula):</strong><br><br>
+            • <strong>المثلث الأول ABC (أضلاعه: A=${toAr(a)} م، D=${toAr(d)} م، القطر AC=${toAr(d_ac)} م):</strong><br>
+            &nbsp;&nbsp; نصف المحيط (s₁) = (${toAr(a)} + ${toAr(d)} + ${toAr(d_ac)}) ÷ 2 = <strong>${toAr(s1.toFixed(2))} م</strong><br>
+            &nbsp;&nbsp; المساحة₁ = √[s₁ × (s₁ - A) × (s₁ - D) × (s₁ - AC)]<br>
+            &nbsp;&nbsp; المساحة₁ = <strong style="color: #1b5e20;">${toAr(area1.toFixed(2))} م²</strong><br><br>
+            • <strong>المثلث الثاني ADC (أضلاعه: B=${toAr(b)} م، C=${toAr(c)} م، القطر AC=${toAr(d_ac)} م):</strong><br>
+            &nbsp;&nbsp; نصف المحيط (s₂) = (${toAr(b)} + ${toAr(c)} + ${toAr(d_ac)}) ÷ 2 = <strong>${toAr(s2.toFixed(2))} م</strong><br>
+            &nbsp;&nbsp; المساحة₂ = √[s₂ × (s₂ - B) × (s₂ - C) × (s₂ - AC)]<br>
+            &nbsp;&nbsp; المساحة₂ = <strong style="color: #1b5e20;">${toAr(area2.toFixed(2))} م²</strong><br><br>
+            • <strong>المساحة الكلية للأرض = مساحة المثلث الأول + مساحة المثلث الثاني:</strong><br>
+            &nbsp;&nbsp; المساحة الإجمالية = ${toAr(area1.toFixed(2))} م² + ${toAr(area2.toFixed(2))} م² = <strong style="color: #1b5e20; font-size: 15px;">${toAr(totalAreaM2.toFixed(2))} م²</strong>
+          `;
+        } else if (d_bd > 0) {
+          const area1 = heron(a, b, d_bd);
+          const area2 = heron(c, d, d_bd);
+          const s1 = (a + b + d_bd) / 2;
+          const s2 = (c + d + d_bd) / 2;
+          html += `
+            <strong>طريقة الحساب: تقسيم الأرض الرباعية إلى مثلثين باستخدام القطر المختار (BD = ${toAr(d_bd)} م) وحساب مساحة كل مثلث بقانون هيرون (Heron's Formula):</strong><br><br>
+            • <strong>المثلث الأول ABD (أضلاعه: A=${toAr(a)} م، B=${toAr(b)} م، القطر BD=${toAr(d_bd)} م):</strong><br>
+            &nbsp;&nbsp; نصف المحيط (s₁) = (${toAr(a)} + ${toAr(b)} + ${toAr(d_bd)}) ÷ 2 = <strong>${toAr(s1.toFixed(2))} م</strong><br>
+            &nbsp;&nbsp; المساحة₁ = √[s₁ × (s₁ - A) × (s₁ - B) × (s₁ - BD)]<br>
+            &nbsp;&nbsp; المساحة₁ = <strong style="color: #1b5e20;">${toAr(area1.toFixed(2))} م²</strong><br><br>
+            • <strong>المثلث الثاني BCD (أضلاعه: C=${toAr(c)} م، D=${toAr(d)} م، القطر BD=${toAr(d_bd)} م):</strong><br>
+            &nbsp;&nbsp; نصف المحيط (s₂) = (${toAr(c)} + ${toAr(d)} + ${toAr(d_bd)}) ÷ 2 = <strong>${toAr(s2.toFixed(2))} م</strong><br>
+            &nbsp;&nbsp; المساحة₂ = √[s₂ × (s₂ - C) × (s₂ - D) × (s₂ - BD)]<br>
+            &nbsp;&nbsp; المساحة₂ = <strong style="color: #1b5e20;">${toAr(area2.toFixed(2))} م²</strong><br><br>
+            • <strong>المساحة الكلية للأرض = مساحة المثلث الأول + مساحة المثلث الثاني:</strong><br>
+            &nbsp;&nbsp; المساحة الإجمالية = ${toAr(area1.toFixed(2))} م² + ${toAr(area2.toFixed(2))} م² = <strong style="color: #1b5e20; font-size: 15px;">${toAr(totalAreaM2.toFixed(2))} م²</strong>
+          `;
+        } else {
+          const avgW = (a + c) / 2;
+          const avgL = (b + d) / 2;
+          html += `
+              قانون الشكل الرباعي العام: متوسط الضلعين المتقابلين الأولين × متوسط الضلعين المتقابلين الآخرين<br>
+              متوسط العرض = (${toAr(a)} + ${toAr(c)}) ÷ 2 = ${toAr(avgW.toFixed(2))} م<br>
+              متوسط الطول = (${toAr(b)} + ${toAr(d)}) ÷ 2 = ${toAr(avgL.toFixed(2))} م<br>
+              المساحة الإجمالية = ${toAr(avgW.toFixed(2))} × ${toAr(avgL.toFixed(2))} = <strong style="color: #1b5e20;">${toAr(totalAreaM2.toFixed(2))} م²</strong>
+          `;
+        }
       } else {
         html += `المساحة الإجمالية المحسوبة = <strong style="color: #1b5e20;">${toAr(totalAreaM2.toFixed(2))} م²</strong>`;
       }

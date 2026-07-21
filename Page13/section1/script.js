@@ -514,6 +514,7 @@ function setupEventListeners() {
       shapeCards.forEach(c => c.classList.remove("active"));
       card.classList.add("active");
       activeShape = card.getAttribute("data-shape");
+      window.activeShape = activeShape;
       
       // Toggle inputs group
       inputsGroups.forEach(group => group.classList.remove("active"));
@@ -4711,8 +4712,9 @@ function updatePrintStepsClass() {
 function updateCalculationSteps() {
   try {
     console.log("updateCalculationSteps called");
-    if (window.StepsEngine && typeof window.StepsEngine.updateUI === "function") {
-      const activeShape = window.activeShape || "rectangle";
+    if (window.StepsEngine && (typeof window.StepsEngine.generateHTML === "function" || typeof window.StepsEngine.updateUI === "function")) {
+      const currentShape = (typeof activeShape !== "undefined" && activeShape) ? activeShape : (window.activeShape || "trapezoid");
+      window.activeShape = currentShape;
       const totalAreaM2 = (typeof calculatedArea === "number" && calculatedArea > 0)
         ? calculatedArea
         : (parseFloat(window.calculatedArea) || parseFloat(document.getElementById("total-sqm")?.innerText) || 0);
@@ -4728,15 +4730,29 @@ function updateCalculationSteps() {
         quadSideA: document.getElementById("quad-side-a")?.value,
         quadSideB: document.getElementById("quad-side-b")?.value,
         quadSideC: document.getElementById("quad-side-c")?.value,
-        quadSideD: document.getElementById("quad-side-d")?.value
+        quadSideD: document.getElementById("quad-side-d")?.value,
+        quadDiagAC: document.getElementById("quad-diag-ac")?.value,
+        quadDiagBD: document.getElementById("quad-diag-bd")?.value
       };
 
-      window.StepsEngine.updateUI("calculation-steps-content", "calculation-steps-container", {
-        shape: activeShape,
-        dimensions: dims,
-        calculatedArea: totalAreaM2,
-        heirsData: window.heirsData || []
-      });
+      if (typeof window.StepsEngine.updateUI === "function") {
+        window.StepsEngine.updateUI("calculation-steps-content", "calculation-steps-container", {
+          shape: currentShape,
+          dimensions: dims,
+          calculatedArea: totalAreaM2,
+          heirsData: window.heirsData || []
+        });
+      } else {
+        const stepsContainer = document.getElementById("calculation-steps-content");
+        if (stepsContainer) {
+          stepsContainer.innerHTML = window.StepsEngine.generateHTML({
+            shape: currentShape,
+            dimensions: dims,
+            calculatedArea: totalAreaM2,
+            heirsData: window.heirsData || []
+          });
+        }
+      }
       return;
     }
     const stepsContainer = document.getElementById("calculation-steps-content");
