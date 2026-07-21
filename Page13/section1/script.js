@@ -2889,6 +2889,13 @@ function loadStateFromSession() {
 
 // Print trigger
 function printCroquis() {
+  if (window.ReportEngine && typeof window.ReportEngine.print === "function") {
+    const reportData = (window.Page13Adapter && typeof window.Page13Adapter.buildReportData === "function") 
+      ? window.Page13Adapter.buildReportData() 
+      : null;
+    window.ReportEngine.print(reportData);
+    return;
+  }
   if (window.Page13Adapter && window.DallalReportTemplate) {
     const reportData = window.Page13Adapter.buildReportData();
     window.DallalReportTemplate.print(reportData);
@@ -4414,7 +4421,15 @@ window.recalculateHeirsDimensions = recalculateHeirsDimensions;
 window.renderHeirsRows = renderHeirsRows;
 window.saveStateToSession = saveStateToSession;
 window.loadStateFromSession = loadStateFromSession;
-window.updateHeirsUI = updateHeirsUI;
+function drawCroquis() {
+  if (window.CroquisEngine && typeof window.CroquisEngine.render === "function") {
+    window.CroquisEngine.render("landCanvas", { vertices: window.vertices });
+    return;
+  }
+  if (typeof drawLandCanvas === "function") {
+    drawLandCanvas(window.vertices);
+  }
+}
 window.drawCroquis = drawCroquis;
 
 // ==========================================================
@@ -4493,6 +4508,34 @@ function updatePrintStepsClass() {
 function updateCalculationSteps() {
   try {
     console.log("updateCalculationSteps called");
+    if (window.StepsEngine && typeof window.StepsEngine.updateUI === "function") {
+      const activeShape = window.activeShape || "rectangle";
+      const totalAreaM2 = (typeof calculatedArea === "number" && calculatedArea > 0)
+        ? calculatedArea
+        : (parseFloat(window.calculatedArea) || parseFloat(document.getElementById("total-sqm")?.innerText) || 0);
+
+      const dims = {
+        rectLength: document.getElementById("rect-length")?.value,
+        rectWidth: document.getElementById("rect-width")?.value,
+        squareSide: document.getElementById("square-side")?.value,
+        trapBaseMinor: document.getElementById("trap-base-minor")?.value,
+        trapBaseMajor: document.getElementById("trap-base-major")?.value,
+        trapLengthRight: document.getElementById("trap-length-right")?.value,
+        trapLengthLeft: document.getElementById("trap-length-left")?.value,
+        quadSideA: document.getElementById("quad-side-a")?.value,
+        quadSideB: document.getElementById("quad-side-b")?.value,
+        quadSideC: document.getElementById("quad-side-c")?.value,
+        quadSideD: document.getElementById("quad-side-d")?.value
+      };
+
+      window.StepsEngine.updateUI("calculation-steps-content", "calculation-steps-container", {
+        shape: activeShape,
+        dimensions: dims,
+        calculatedArea: totalAreaM2,
+        heirsData: window.heirsData || []
+      });
+      return;
+    }
     const stepsContainer = document.getElementById("calculation-steps-content");
     if (!stepsContainer) return;
 
@@ -4744,6 +4787,10 @@ function updateCalculationSteps() {
 
 function copyCalculationSteps() {
   try {
+    if (window.StepsEngine && typeof window.StepsEngine.copyText === "function") {
+      window.StepsEngine.copyText("calculation-steps-content");
+      return;
+    }
     const stepsContent = document.getElementById("calculation-steps-content");
     if (!stepsContent) return;
 

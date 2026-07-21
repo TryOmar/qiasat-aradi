@@ -3413,6 +3413,10 @@ function printReport() {
     return;
   }
   const reportData = window.Page11Adapter ? window.Page11Adapter.buildReportData() : {};
+  if (window.ReportEngine && typeof window.ReportEngine.print === "function") {
+    window.ReportEngine.print(reportData);
+    return;
+  }
   if (window.DallalReportTemplate) {
     window.DallalReportTemplate.print(reportData);
   } else {
@@ -3886,6 +3890,31 @@ function toArabicNumerals(numStr) {
 
 function updateCalculationSteps() {
   console.log("updateCalculationSteps called");
+  if (window.StepsEngine && typeof window.StepsEngine.updateUI === "function") {
+    const l1 = parseFloat(document.getElementById("length1")?.value) || 0;
+    const l2 = parseFloat(document.getElementById("length2")?.value) || 0;
+    const w1 = parseFloat(document.getElementById("width1")?.value) || 0;
+    const w2 = parseFloat(document.getElementById("width2")?.value) || 0;
+
+    const totalAreaM2 = (typeof calculatedArea === "number" && calculatedArea > 0)
+      ? calculatedArea
+      : ((l1 + l2) / 2) * ((w1 + w2) / 2);
+
+    const dims = {
+      trapBaseMinor: w2,
+      trapBaseMajor: w1,
+      trapLengthRight: l1,
+      trapLengthLeft: l2
+    };
+
+    window.StepsEngine.updateUI("calculation-steps-content", "calculation-steps-container", {
+      shape: "trapezoid",
+      dimensions: dims,
+      calculatedArea: totalAreaM2,
+      heirsData: window.heirsData || []
+    });
+    return;
+  }
   const stepsContainer = document.getElementById("calculation-steps-content");
   if (!stepsContainer) return;
 
@@ -4229,6 +4258,10 @@ window.updateCalculationSteps = updateCalculationSteps;
 
 // دالة لنسخ خطوات الحساب بالتفصيل كنص نظيف خالٍ من التنسيقات
 function copyCalculationSteps() {
+  if (window.StepsEngine && typeof window.StepsEngine.copyText === "function") {
+    window.StepsEngine.copyText("calculation-steps-content");
+    return;
+  }
   const stepsContent = document.getElementById("calculation-steps-content");
   if (!stepsContent) return;
 
