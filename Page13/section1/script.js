@@ -2347,12 +2347,12 @@ function drawLandCanvas(verticesInput) {
     }
   }
 
-  // --- Render Direction Labels matching Page 11 Golden Reference ---
-  if (canvasPoints && canvasPoints.length >= 4 && (activeShape === "trapezoid" || activeShape === "quadrilateral")) {
+  // --- Render Direction Labels matching Page 11 Golden Reference 100% ---
+  if (canvasPoints && canvasPoints.length >= 4) {
     const dirs = getP13Directions();
-    const dirFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
+    const dirFontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
     const dirColor = "#1565c0";
-    const dirOffset = Math.max(38, 48 * scaleMultiplier);
+    const dirOffset = Math.max(40, 50 * scaleMultiplier);
 
     const topPts = canvasPoints.filter((_, idx) => idx === 2 || idx === 3);
     const botPts = canvasPoints.filter((_, idx) => idx === 0 || idx === 1);
@@ -2376,17 +2376,11 @@ function drawLandCanvas(verticesInput) {
       ctx.save();
       ctx.translate(x, y);
       if (rotateAngle) ctx.rotate(rotateAngle);
-      ctx.font = `bold ${dirFontSize}px Cairo`;
-      const tw = ctx.measureText(text).width;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.fillRect(-tw / 2 - 5, -dirFontSize / 2 - 2, tw + 10, dirFontSize + 4);
-      ctx.strokeStyle = "#90caf9";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-tw / 2 - 5, -dirFontSize / 2 - 2, tw + 10, dirFontSize + 4);
+      ctx.font = `bold ${dirFontSize}px Cairo, Arial, sans-serif`;
       ctx.fillStyle = dirColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, 0, 1);
+      ctx.fillText(text, 0, 0);
       ctx.restore();
     }
 
