@@ -78,11 +78,15 @@
 ### Fixed 🛠️
 
 - **Page13 Full Reset Behavior**:
-  - Improved `clearAllInputs()` in `Page13/section1/script.js` to perform complete project reset on clicking "أحذف".
+  - Improved `clearAllInputs()` in `Page13/section1/script.js` to perform complete project reset on clicking "🧹 مسح بيانات الأرض" with 100% Page11 Golden Reference parity.
   - Clears geometry inputs across all shape groups (rectangle, square, trapezoid, quadrilateral).
   - Resets carat price and resets carat area size to default 168 m².
-  - Resets partners/heirs state to default 3 zero-share partners.
+  - Clears all partners completely (0 partners, empty table, count = 0), matching Page11.
   - Clears `sessionStorage`, closes inspector tooltip, hides deficit/remainder overlays, and recalculates zero state.
+
+- **Page13 Dimension Input UI Parity**:
+  - Unified field labels, order, and structure for Trapezoid and Quadrilateral shapes in `Page13/section1/index.html` with Page11 Golden Reference.
+  - Same field ordering: العرض الأول (أعلى) (C), العرض الثاني (أسفل) (A), الطول الأيمن (D), الطول الأيسر (B).
 
 ---
 

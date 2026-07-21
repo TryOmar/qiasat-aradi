@@ -822,6 +822,69 @@ function clearAllInputs(confirmRequired = false) {
   calculateAll();
 }
 
+// Opposite direction mapping (Page 11 Golden Reference Parity)
+const P13_OPPOSITE = {
+  "بحري": "قبلي",
+  "قبلي": "بحري",
+  "شرقي": "غربي",
+  "غربي": "شرقي"
+};
+
+const P13_PAIRED = {
+  "p13-trap-c-dir": "p13-trap-a-dir",
+  "p13-trap-a-dir": "p13-trap-c-dir",
+  "p13-trap-d-dir": "p13-trap-b-dir",
+  "p13-trap-b-dir": "p13-trap-d-dir",
+
+  "p13-quad-c-dir": "p13-quad-a-dir",
+  "p13-quad-a-dir": "p13-quad-c-dir",
+  "p13-quad-d-dir": "p13-quad-b-dir",
+  "p13-quad-b-dir": "p13-quad-d-dir"
+};
+
+function handleP13DirectionChange(changedId) {
+  const selectEl = document.getElementById(changedId);
+  if (!selectEl) return;
+
+  const newVal = selectEl.value.trim();
+  const pairedId = P13_PAIRED[changedId];
+
+  if (pairedId) {
+    const pairedEl = document.getElementById(pairedId);
+    if (pairedEl) {
+      const oppositeVal = P13_OPPOSITE[newVal];
+      if (oppositeVal && pairedEl.value !== oppositeVal) {
+        pairedEl.value = oppositeVal;
+      }
+    }
+  }
+
+  if (typeof saveStateToSession === "function") saveStateToSession();
+  if (typeof calculateAll === "function") calculateAll();
+}
+window.handleP13DirectionChange = handleP13DirectionChange;
+
+// Reset direction selects to Page 11 Golden Reference defaults
+function resetP13DirectionsToDefault() {
+  const ids = [
+    { id: "p13-trap-c-dir", def: "شرقي" },
+    { id: "p13-trap-a-dir", def: "غربي" },
+    { id: "p13-trap-d-dir", def: "قبلي" },
+    { id: "p13-trap-b-dir", def: "بحري" },
+    { id: "p13-quad-c-dir", def: "شرقي" },
+    { id: "p13-quad-a-dir", def: "غربي" },
+    { id: "p13-quad-d-dir", def: "قبلي" },
+    { id: "p13-quad-b-dir", def: "بحري" }
+  ];
+  ids.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el) el.value = item.def;
+  });
+  if (typeof saveStateToSession === "function") saveStateToSession();
+  if (typeof calculateAll === "function") calculateAll();
+}
+window.resetP13DirectionsToDefault = resetP13DirectionsToDefault;
+
 // Show/Hide Division Panel
 function toggleDivisionPanel() {
   isDivisionActive = true;
@@ -2282,8 +2345,74 @@ function drawLandCanvas(verticesInput) {
       }
     }
   }
+
+  // --- Render Direction Labels matching Page 11 Golden Reference ---
+  if (canvasPoints && canvasPoints.length >= 4 && (activeShape === "trapezoid" || activeShape === "quadrilateral")) {
+    const dirs = getP13Directions();
+    const dirFontSize = Math.round(Math.max(11, 13 * scaleMultiplier));
+    const dirColor = "#1565c0";
+    const dirOffset = Math.max(38, 48 * scaleMultiplier);
+
+    const topPts = canvasPoints.filter((_, idx) => idx === 2 || idx === 3);
+    const botPts = canvasPoints.filter((_, idx) => idx === 0 || idx === 1);
+    const rightPts = canvasPoints.filter((_, idx) => idx === 1 || idx === 2);
+    const leftPts = canvasPoints.filter((_, idx) => idx === 0 || idx === 3);
+
+    const topMidX = topPts.reduce((s, p) => s + p.x, 0) / (topPts.length || 1);
+    const topMinY = Math.min(...topPts.map(p => p.y));
+
+    const botMidX = botPts.reduce((s, p) => s + p.x, 0) / (botPts.length || 1);
+    const botMaxY = Math.max(...botPts.map(p => p.y));
+
+    const rightMaxX = Math.max(...rightPts.map(p => p.x));
+    const rightMidY = rightPts.reduce((s, p) => s + p.y, 0) / (rightPts.length || 1);
+
+    const leftMinX = Math.min(...leftPts.map(p => p.x));
+    const leftMidY = leftPts.reduce((s, p) => s + p.y, 0) / (leftPts.length || 1);
+
+    function drawDirText(text, x, y, rotateAngle) {
+      if (!text) return;
+      ctx.save();
+      ctx.translate(x, y);
+      if (rotateAngle) ctx.rotate(rotateAngle);
+      ctx.font = `bold ${dirFontSize}px Cairo`;
+      const tw = ctx.measureText(text).width;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.fillRect(-tw / 2 - 5, -dirFontSize / 2 - 2, tw + 10, dirFontSize + 4);
+      ctx.strokeStyle = "#90caf9";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-tw / 2 - 5, -dirFontSize / 2 - 2, tw + 10, dirFontSize + 4);
+      ctx.fillStyle = dirColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, 0, 1);
+      ctx.restore();
+    }
+
+    drawDirText(dirs.top, topMidX, topMinY - dirOffset, 0);
+    drawDirText(dirs.bottom, botMidX, botMaxY + dirOffset, 0);
+    drawDirText(dirs.right, rightMaxX + dirOffset, rightMidY, -Math.PI / 2);
+    drawDirText(dirs.left, leftMinX - dirOffset, leftMidY, -Math.PI / 2);
+  }
+
   console.log("drawLandCanvas finished");
 }
+
+function getP13Directions() {
+  const isTrap = (activeShape === "trapezoid");
+  const isQuad = (activeShape === "quadrilateral");
+  return {
+    top: isTrap ? (document.getElementById("p13-trap-c-dir") || {}).value || "شرقي"
+                : (isQuad ? (document.getElementById("p13-quad-c-dir") || {}).value || "شرقي" : "أعلى"),
+    bottom: isTrap ? (document.getElementById("p13-trap-a-dir") || {}).value || "غربي"
+                   : (isQuad ? (document.getElementById("p13-quad-a-dir") || {}).value || "غربي" : "أسفل"),
+    right: isTrap ? (document.getElementById("p13-trap-d-dir") || {}).value || "قبلي"
+                  : (isQuad ? (document.getElementById("p13-quad-d-dir") || {}).value || "قبلي" : "يمين"),
+    left: isTrap ? (document.getElementById("p13-trap-b-dir") || {}).value || "بحري"
+                 : (isQuad ? (document.getElementById("p13-quad-b-dir") || {}).value || "بحري" : "يسار")
+  };
+}
+window.getP13Directions = getP13Directions;
 
 // Add partner function for "أضف شريك" button
 function addNewHeir(e) {

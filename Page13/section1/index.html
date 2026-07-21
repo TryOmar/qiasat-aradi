@@ -168,20 +168,57 @@
       <!-- Trapezoid Inputs -->
       <div id="inputs-trapezoid" class="inputs-group active">
         <div class="input-row">
-          <label for="trap-base-minor">العرض العلوي (C) بالمتر:</label>
-          <input type="text" inputmode="decimal" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+          <label for="trap-base-minor">العرض الأول (أعلى) (C) بالمتر:</label>
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+            <select id="p13-trap-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-c-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي" selected>شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
-          <label for="trap-base-major">العرض السفلي (A) بالمتر:</label>
-          <input type="text" inputmode="decimal" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
+          <label for="trap-base-major">العرض الثاني (أسفل) (A) بالمتر:</label>
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
+            <select id="p13-trap-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-a-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي" selected>غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="trap-length-right">الطول الأيمن (D) بالمتر:</label>
-          <input type="text" inputmode="decimal" id="trap-length-right" placeholder="مثال: 30" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="trap-length-right" placeholder="مثال: 30" dir="auto" />
+            <select id="p13-trap-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-d-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي" selected>قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="trap-length-left">الطول الأيسر (B) بالمتر:</label>
-          <input type="text" inputmode="decimal" id="trap-length-left" placeholder="مثال: 30" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="trap-length-left" placeholder="مثال: 30" dir="auto" />
+            <select id="p13-trap-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-b-dir')">
+              <option value="بحري" selected>بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+          <button type="button" onclick="resetP13DirectionsToDefault()" style="background: none; border: none; color: #1b5e20; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;">
+            🔄 إعادة الاتجاهات للوضع الافتراضي
+          </button>
         </div>
       </div>
 
@@ -189,27 +226,68 @@
       <div id="inputs-quadrilateral" class="inputs-group">
         <div class="input-row">
           <label for="quad-side-c">العرض الأول (أعلى) <span style="color: #d32f2f; font-weight: bold;">(C)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
+            <select id="p13-quad-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-c-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي" selected>شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="quad-side-a">العرض الثاني (أسفل) <span style="color: #d32f2f; font-weight: bold;">(A)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
+            <select id="p13-quad-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-a-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي" selected>غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="quad-side-d">الطول الأيمن <span style="color: #2e7d32; font-weight: bold;">(D)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
+            <select id="p13-quad-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-d-dir')">
+              <option value="بحري">بحري</option>
+              <option value="قبلي" selected>قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="quad-side-b">الطول الأيسر <span style="color: #2e7d32; font-weight: bold;">(B)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
+            <select id="p13-quad-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-b-dir')">
+              <option value="بحري" selected>بحري</option>
+              <option value="قبلي">قبلي</option>
+              <option value="شرقي">شرقي</option>
+              <option value="غربي">غربي</option>
+            </select>
+          </div>
         </div>
         <div class="input-row">
           <label for="quad-diag-ac">القطر الأول <span style="color: #0288d1; font-weight: bold;">(AC)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
+          </div>
         </div>
         <div class="input-row">
           <label for="quad-diag-bd">القطر الثاني <span style="color: #0288d1; font-weight: bold;">(BD)</span> بالمتر:</label>
-          <input type="text" inputmode="decimal" id="quad-diag-bd" placeholder="مثال: 55" dir="auto" />
+          <div class="input-with-select-wrapper">
+            <input type="text" inputmode="decimal" id="quad-diag-bd" placeholder="مثال: 55" dir="auto" />
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+          <button type="button" onclick="resetP13DirectionsToDefault()" style="background: none; border: none; color: #1b5e20; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;">
+            🔄 إعادة الاتجاهات للوضع الافتراضي
+          </button>
         </div>
         <div style="font-size: 9.5pt; color: #c62828; background-color: #ffebee; border-right: 4px solid #c62828; padding: 8px; margin-top: 10px; border-radius: 4px; font-weight: bold; width: 100%; box-sizing: border-box;">
           * يجب إدخال أحد القطرين (AC) أو (BD) لإجراء الحساب والتقسيم الدقيق.

@@ -131,12 +131,16 @@
       const totalAreaStr = totalAreaNum > 0 ? totalAreaNum.toFixed(2) : (distributedSum > 0 ? distributedSum.toFixed(2) : "—");
       const distributedAreaStr = distributedSum > 0 ? distributedSum.toFixed(2) : totalAreaStr;
 
-      // 4. الأبعاد والمواصفات الهندسيـة للأرض
+      const dirs = typeof global.getP13Directions === "function"
+        ? global.getP13Directions()
+        : (typeof global.getP11Directions === "function" ? global.getP11Directions() : { top: "شرقي", bottom: "غربي", right: "قبلي", left: "بحري" });
+
+      // 4. الأبعاد والمواصفات الهندسيـة للأرض (تضمين الاتجاهات الأربعة للطباعة كما في الصفحة 11)
       const dimensions = [
-        { label: "العرض الأول (أعلى)", value: w2Val },
-        { label: "العرض الثاني (أسفل)", value: w1Val },
-        { label: "الطول الأيمن (يمين)", value: l1Val },
-        { label: "الطول الأيسر (يسار)", value: l2Val },
+        { label: `العرض الأول (${dirs.top || "أعلى"})`, value: w2Val },
+        { label: `العرض الثاني (${dirs.bottom || "أسفل"})`, value: w1Val },
+        { label: `الطول الأيمن (${dirs.right || "يمين"})`, value: l1Val },
+        { label: `الطول الأيسر (${dirs.left || "يسار"})`, value: l2Val },
         { label: "معدل العرض", value: avgWidth > 0 ? `${avgWidth.toFixed(4)} م` : "—" },
         { label: "متوسط الطول", value: avgLength > 0 ? `${avgLength.toFixed(4)} م` : "—" },
         { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? `${totalAreaStr} م²` : "—", isHighlight: true }
@@ -174,6 +178,9 @@
           fcsText = `(${fcs.feddan} فدان، ${fcs.carat} ق، ${fcs.sahm.toFixed(2)} س)`;
         }
 
+        const avgW = (topVal + botVal) / 2;
+        const avgL = (rightVal + leftVal) / 2;
+
         return `
           <div class="partner-print-card">
             <div class="partner-card-header">${nameText}</div>
@@ -185,11 +192,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (أعلى)</td><td style="font-weight:bold;color:#1b5e20;">${topStr}</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (أسفل)</td><td style="font-weight:bold;color:#1b5e20;">${botStr}</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن (يمين)</td><td style="font-weight:bold;color:#1b5e20;">${rightStr}</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر (يسار)</td><td style="font-weight:bold;color:#1b5e20;">${leftStr}</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">مساحة النصاب</td><td style="font-weight:bold;color:#1b5e20;">${formattedArea} م²</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (${dirs.top || "أعلى"})</td><td style="font-weight:bold;color:#1b5e20;">${topStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (${dirs.bottom || "أسفل"})</td><td style="font-weight:bold;color:#1b5e20;">${botStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن (${dirs.right || "يمين"})</td><td style="font-weight:bold;color:#1b5e20;">${rightStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر (${dirs.left || "يسار"})</td><td style="font-weight:bold;color:#1b5e20;">${leftStr}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgW > 0 ? avgW.toFixed(4) + " م" : "—"}</td></tr>
+                <tr><td style="text-align: right; padding-right: 8px;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgL > 0 ? avgL.toFixed(4) + " م" : "—"}</td></tr>
               </tbody>
             </table>
             <div class="partner-card-area-box">
