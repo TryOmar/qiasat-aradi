@@ -3838,21 +3838,31 @@ function adjustNameColumnWidth() {
 let isStepsOpen = false;
 
 function toggleStepsAccordion() {
+  console.log("toggleStepsAccordion called");
   const container = document.getElementById("calculation-steps-container");
   const arrow = document.getElementById("steps-arrow-icon");
-  if (!container || !arrow) return;
+  if (!container) return;
 
-  isStepsOpen = !isStepsOpen;
-  if (isStepsOpen) {
-    container.style.maxHeight = container.scrollHeight + "px";
+  const isCurrentlyClosed = (container.style.maxHeight === "0px" || container.style.opacity === "0" || !container.style.maxHeight);
+
+  if (isCurrentlyClosed) {
+    isStepsOpen = true;
+    if (typeof updateCalculationSteps === "function") {
+      updateCalculationSteps();
+    }
+    const targetHeight = container.scrollHeight > 50 ? (container.scrollHeight + 300) : 3000;
+    container.style.maxHeight = targetHeight + "px";
     container.style.opacity = "1";
-    arrow.style.transform = "rotate(-90deg)"; // تدور لتشير للأسفل
+    container.style.display = "block";
+    if (arrow) arrow.style.transform = "rotate(-90deg)"; // تدور لتشير للأسفل
   } else {
+    isStepsOpen = false;
     container.style.maxHeight = "0px";
     container.style.opacity = "0";
-    arrow.style.transform = "rotate(0deg)"; // تعود لليمين
+    if (arrow) arrow.style.transform = "rotate(0deg)"; // تعود لليمين
   }
 }
+window.toggleStepsAccordion = toggleStepsAccordion;
 
 function updatePrintStepsClass() {
   const card = document.querySelector(".steps-card");
@@ -3875,6 +3885,7 @@ function toArabicNumerals(numStr) {
 }
 
 function updateCalculationSteps() {
+  console.log("updateCalculationSteps called");
   const stepsContainer = document.getElementById("calculation-steps-content");
   if (!stepsContainer) return;
 
@@ -4209,10 +4220,12 @@ function updateCalculationSteps() {
   if (isStepsOpen) {
     const container = document.getElementById("calculation-steps-container");
     if (container) {
-      container.style.maxHeight = container.scrollHeight + "px";
+      const targetHeight = container.scrollHeight > 50 ? (container.scrollHeight + 200) : 3000;
+      container.style.maxHeight = targetHeight + "px";
     }
   }
 }
+window.updateCalculationSteps = updateCalculationSteps;
 
 // دالة لنسخ خطوات الحساب بالتفصيل كنص نظيف خالٍ من التنسيقات
 function copyCalculationSteps() {

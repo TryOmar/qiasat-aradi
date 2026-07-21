@@ -424,11 +424,7 @@
             <input type="text" inputmode="decimal" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" style="width: 50px; text-align: center; font-weight: bold; border-radius: 6px; border: 1.5px solid #ccc; height: 28px;" />
           </div>
         </div>
-        <!-- خيار متقدم: يظهر فقط لنموذج شبه المنحرف -->
-        <div id="actual-dims-toggle" style="display: none !important; margin-top: 8px; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; color: #01579b; font-weight: bold;">
-          <input type="checkbox" id="show-actual-dims" onchange="onToggleActualDims()" style="width: 16px; height: 16px; cursor: pointer; accent-color: #01579b;" />
-          <label for="show-actual-dims" style="cursor: pointer;"></label>
-        </div>
+
         <!-- خيار اتجاه التقسيم: تلقائي من اليمين إلى اليسار -->
         <div id="partition-direction-toggle" style="display: none !important; margin-top: 8px; justify-content: center; align-items: center; gap: 8px;">
           <button id="btn-partition-direction" class="btn btn-calc btn-sm no-print" onclick="togglePartitionOrderDirection()" style="font-weight: bold; font-size: 12.5px; background-color: #2e7d32; border: none; border-radius: 6px; color: white; padding: 5px 12px; cursor: pointer;"></button>
@@ -549,13 +545,26 @@
 
 
 
-    <!-- Calculation Steps (Details) -->
-    <details class="steps-details">
-      <summary>عرض خطوات الحساب بالتفصيل</summary>
-      <div class="steps-content" id="steps-content">
-        لم يتم إجراء حسابات بعد. يرجى ملء الحقول والضغط على زر "احسب".
+    <!-- Card: Calculation Steps (خطوات الحساب بالتفصيل - 100% Page11 Parity) -->
+    <div class="s summary-card-item steps-card print-visible" style="width: 100%; margin-top: 15px; grid-column: span 2; border-right: 4px solid #2e7d32; padding: 0; overflow: hidden; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <!-- Accordion Header -->
+      <div class="steps-header" id="steps-header-toggle" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fbfdfb; cursor: pointer; user-select: none; transition: background 0.2s;">
+        <h4 style="display: flex; align-items: center; gap: 8px; color: #2e7d32; font-size: 15px; font-family: Cairo, Arial, sans-serif; font-weight: bold; margin: 0;">
+          <span id="steps-arrow-icon" style="color: #2e7d32; font-size: 12px; display: inline-block; transition: transform 0.2s; transform: rotate(0deg); line-height: 1;">◀</span>
+          📐 خطوات الحساب بالتفصيل
+        </h4>
+        <label style="font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; font-family: Cairo, Arial, sans-serif;" onclick="event.stopPropagation()">
+          <input type="checkbox" id="print-steps-checkbox" checked onchange="updatePrintStepsClass()" style="cursor: pointer; width: 14px; height: 14px; accent-color: #2e7d32;">
+          تضمين في الطباعة
+        </label>
       </div>
-    </details>
+      <!-- Accordion Content (مغلق افتراضياً) -->
+      <div id="calculation-steps-container" style="max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease; padding: 0 16px;">
+        <div id="calculation-steps-content" class="steps-content-area steps-content" style="font-family: Cairo, Arial, sans-serif; direction: rtl; font-size: 13px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px;">
+          <p style="text-align: center; color: #777; font-style: italic;">أدخل الأبعاد والشركاء لعرض تفاصيل الخطوات الحسابية</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Legacy / Conversions table (Qasaba & Qabda) -->
     <div class="s conversion-card">
@@ -715,6 +724,27 @@
   <script src="smart-share-editor.js"></script>
   <script src="partners-table-adapter.js"></script>
   <script src="script.js"></script>
+  <!-- DIAGNOSTIC: Temporary accordion debug - remove after fix confirmed -->
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      console.error("[DIAG] JS Error:", msg, "| File:", src, "| Line:", line, "| Error:", err);
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("[DIAG] DOMContentLoaded fired");
+      console.log("[DIAG] toggleStepsAccordion type:", typeof window.toggleStepsAccordion);
+      var cont = document.getElementById("calculation-steps-container");
+      var header = document.querySelector(".steps-header");
+      console.log("[DIAG] #calculation-steps-container:", cont ? "FOUND" : "NULL");
+      console.log("[DIAG] .steps-header:", header ? "FOUND" : "NULL");
+      if (cont) {
+        console.log("[DIAG] container maxHeight:", cont.style.maxHeight);
+        console.log("[DIAG] container opacity:", cont.style.opacity);
+      }
+      if (header) {
+        console.log("[DIAG] header onclick attr:", header.getAttribute("onclick"));
+      }
+    });
+  </script>
   <script src="../../fraction-helper.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -740,6 +770,56 @@
       const commit7Results = await runCommit7Tests();
       showUnifiedTestResultsReport(shareResults, layoutResults, guideResults, commit7Results);
     }
+  </script>
+  <!-- ✅ Accordion Guarantee Script: يضمن عمل الأكورديون بعد تحميل كل الملفات -->
+  <script>
+  (function() {
+    // تعريف الدالة الضامنة - تُشغَّل بعد كل الملفات
+    function _accordionToggle() {
+      var container = document.getElementById("calculation-steps-container");
+      if (!container) { console.error("[Accordion] container not found"); return; }
+      var arrow = document.getElementById("steps-arrow-icon");
+      var isOpen = container.getAttribute("data-open") === "1";
+      if (!isOpen) {
+        container.setAttribute("data-open", "1");
+        if (typeof window.isStepsOpen !== "undefined") window.isStepsOpen = true;
+        try { if (typeof window.updateCalculationSteps === "function") window.updateCalculationSteps(); } catch(e) {}
+        container.style.maxHeight = "6000px";
+        container.style.opacity = "1";
+        if (arrow) arrow.style.transform = "rotate(-90deg)";
+        console.log("[Accordion] OPENED via guarantee script");
+      } else {
+        container.setAttribute("data-open", "0");
+        if (typeof window.isStepsOpen !== "undefined") window.isStepsOpen = false;
+        container.style.maxHeight = "0px";
+        container.style.opacity = "0";
+        if (arrow) arrow.style.transform = "rotate(0deg)";
+        console.log("[Accordion] CLOSED via guarantee script");
+      }
+    }
+
+    // دائماً نُحدِّث window.toggleStepsAccordion لتأكيد صحة التعريف
+    window.toggleStepsAccordion = _accordionToggle;
+
+    // ربط الحدث مباشرةً بعد تحميل الصفحة
+    document.addEventListener("DOMContentLoaded", function() {
+      var header = document.querySelector(".steps-header");
+      if (header) {
+        // إزالة أي onclick قديم وإضافة listener نظيف
+        header.onclick = null;
+        header.removeAttribute("onclick");
+        header.addEventListener("click", function(e) {
+          // تجاهل الضغط على checkbox أو label
+          if (e.target.tagName === "INPUT" || e.target.tagName === "LABEL") return;
+          if (e.target.closest && e.target.closest("label")) return;
+          _accordionToggle();
+        });
+        console.log("[Accordion] Event listener attached to .steps-header");
+      } else {
+        console.error("[Accordion] .steps-header NOT FOUND");
+      }
+    });
+  })();
   </script>
 </body>
 </html>

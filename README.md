@@ -42,8 +42,21 @@ Qiasat Aradi is a comprehensive agricultural land measurement and calculation to
 ## 💻 Technologies Used
 - HTML5
 - CSS3
-- JavaScript
-- [Add other technologies used in your project]
+- JavaScript (ES6 Modules & Global Compatibility Wrappers)
+
+## 🏛️ Shared Infrastructure (v2.0 Architecture)
+The project utilizes a modular, single-source-of-truth shared architecture located under `shared/`:
+
+```
+shared/
+├── partition-table.js      # Unified Partners Table Logic & UI Helpers
+├── formatters.js           # Unified String & Number Formatted Display Engine
+├── report-template.js      # Dallal Unified Print Report Engine
+├── storage.js              # Dallal Unified Storage & Migration Layer
+├── toast.js                # Unified Toast Notification System
+├── agri-units-compat.js    # Compatibility Bridge for Traditional Egyptian Agricultural Units
+└── adapters/               # Page Data Adapters (page11-adapter.js, page13-adapter.js, etc.)
+```
 
 ## 📱 Target Users
 - Farmers

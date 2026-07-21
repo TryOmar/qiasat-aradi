@@ -825,6 +825,18 @@ body {
 }
 
 /* Steps details */
+.steps-header {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 2;
+}
+
+#calculation-steps-container {
+  position: relative;
+  z-index: 1;
+}
+
 .steps-details {
   width: 100%;
   max-width: 600px;
@@ -921,8 +933,17 @@ body {
   .main-container {
     padding: 0 !important;
   }
-  .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details {
+  .no-print, .nav, .dec1, .shape-selector, .dynamic-inputs-container, .settings-card, .action-buttons, .canvas-controls, #btn-toggle-division, .division-settings, .heirs-table-wrapper td select, .steps-details, .steps-card.print-steps-hidden {
     display: none !important;
+  }
+  .steps-card.print-visible {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+  .steps-card.print-visible #calculation-steps-container {
+    max-height: none !important;
+    opacity: 1 !important;
+    padding: 12px 16px !important;
   }
   .print-only-header {
     display: block !important;
@@ -1597,5 +1618,84 @@ tr.drag-over-below {
   border-color: #e0e0e0 !important;
 }
 
+/* ==========================================================================
+   Commit 11.1: Unified Partners Table Styling (Page11 Exact Match & Parity)
+   ========================================================================== */
 
+#heirs-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-family: Cairo, system-ui, Arial, sans-serif !important;
+  background: white !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
 
+#heirs-table thead tr {
+  background: #1b5e20 !important; /* أخضر غامق معتمد */
+  color: white !important;
+}
+
+#heirs-table th {
+  padding: 8px 4px !important;
+  font-size: 11.5px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  white-space: nowrap !important;
+}
+
+#heirs-table td {
+  padding: 4px 3px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.partner-row input {
+  width: 100% !important;
+  height: 28px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  color: black !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.partner-row input:focus {
+  border-color: #2e7d32 !important;
+  box-shadow: 0 0 4px rgba(46, 125, 50, 0.3) !important;
+  outline: none !important;
+}
+
+.btn-step {
+  background: #e8f5e9 !important;
+  color: #1b5e20 !important;
+  border: 1px solid #a5d6a7 !important;
+  border-radius: 3px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  height: 24px !important;
+  width: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background 0.2s !important;
+}
+
+.btn-step:hover {
+  background: #c8e6c9 !important;
+}
+
+/* Responsive Touch Container */
+.heirs-table-wrapper {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}

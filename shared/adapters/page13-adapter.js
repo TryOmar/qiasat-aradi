@@ -19,11 +19,46 @@
       const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
       const timeStr = now.toLocaleTimeString('ar-EG');
 
-      // 1. قراءة أبعاد الأرض الإجمالية المعتمدة في Page13 الحية
-      const w2Raw = document.getElementById("trap-base-minor")?.value || document.getElementById("length2")?.value || "";
-      const w1Raw = document.getElementById("trap-base-major")?.value || document.getElementById("length1")?.value || "";
-      const l1Raw = document.getElementById("trap-length-right")?.value || document.getElementById("width1")?.value || "";
-      const l2Raw = document.getElementById("trap-length-left")?.value || document.getElementById("width2")?.value || "";
+      // 1. قراءة أبعاد الأرض الإجمالية بناءً على الشكل الهندسي النشط
+      let activeShape = "trapezoid";
+      if (document.getElementById("inputs-rectangle")?.classList.contains("active")) {
+        activeShape = "rectangle";
+      } else if (document.getElementById("inputs-square")?.classList.contains("active")) {
+        activeShape = "square";
+      } else if (document.getElementById("inputs-trapezoid")?.classList.contains("active")) {
+        activeShape = "trapezoid";
+      } else if (document.getElementById("inputs-quadrilateral")?.classList.contains("active")) {
+        activeShape = "quadrilateral";
+      } else {
+        activeShape = sessionStorage.getItem("activeShape") || global.activeShape || "trapezoid";
+      }
+
+      let w2Raw = "", w1Raw = "", l1Raw = "", l2Raw = "";
+
+      if (activeShape === "rectangle") {
+        const w = document.getElementById("rect-width")?.value || "";
+        const l = document.getElementById("rect-length")?.value || "";
+        w2Raw = w;
+        w1Raw = w;
+        l1Raw = l;
+        l2Raw = l;
+      } else if (activeShape === "square") {
+        const s = document.getElementById("square-side")?.value || "";
+        w2Raw = s;
+        w1Raw = s;
+        l1Raw = s;
+        l2Raw = s;
+      } else if (activeShape === "trapezoid") {
+        w2Raw = document.getElementById("trap-base-minor")?.value || "";
+        w1Raw = document.getElementById("trap-base-major")?.value || "";
+        l1Raw = document.getElementById("trap-length-right")?.value || "";
+        l2Raw = document.getElementById("trap-length-left")?.value || "";
+      } else if (activeShape === "quadrilateral") {
+        w2Raw = document.getElementById("quad-side-c")?.value || "";
+        w1Raw = document.getElementById("quad-side-a")?.value || "";
+        l1Raw = document.getElementById("quad-side-d")?.value || "";
+        l2Raw = document.getElementById("quad-side-b")?.value || "";
+      }
 
       const w2Val = w2Raw ? `${w2Raw} م` : "—";
       const w1Val = w1Raw ? `${w1Raw} م` : "—";

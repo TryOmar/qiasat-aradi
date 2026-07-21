@@ -34,7 +34,7 @@ const caratSizeInput = document.getElementById("carat-size");
 const caratPresetSelect = document.getElementById("carat-preset");
 const caratPriceDisplay = document.getElementById("carat-price-display");
 const caratPriceNumeric = document.getElementById("carat-price-numeric");
-const stepsContent = document.getElementById("steps-content");
+const stepsContent = document.getElementById("calculation-steps-content") || document.getElementById("steps-content");
 
 // Results Elements
 const totalSqmResult = document.getElementById("total-sqm");
@@ -795,20 +795,8 @@ function resetDivision() {
 // إظهار/إخفاء خيار "الأبعاد الهندسية الفعلية" بناءً على الشكل المختار
 function updateDivisionSettingsUI() {
   const toggleDiv = document.getElementById('actual-dims-toggle');
-  const checkbox = document.getElementById('show-actual-dims');
-  if (!toggleDiv || !checkbox) return;
-  
-  if (activeShape === 'trapezoid') {
-    // للنموذج المبسط: أظهر خيار الأبعاد الهندسية
-    toggleDiv.style.display = 'flex';
-    checkbox.checked = showActualDims;
-  } else {
-    // للأشكال الأخرى: أخفِ الخيار وأعِد showActualDims إلى true (يعرض يمين/يسار كالمعتاد)
-    toggleDiv.style.display = 'none';
-    showActualDims = true;
-    checkbox.checked = true;
-  }
-  
+  if (toggleDiv) toggleDiv.style.display = 'none';
+  showActualDims = true;
   updateTableHeaders();
 }
 
@@ -1265,8 +1253,7 @@ function calculateAll() {
   const totalPrice = totalCarats * pricePerCarat;
   totalPriceResult.innerText = area > 0 && totalPrice > 0 ? Math.floor(totalPrice).toLocaleString() : "0";
 
-  // Steps
-  stepsContent.innerText = stepsText || "لم يتم إدخال بيانات كافية لإجراء الحسابات.";
+  // Steps handled via updateCalculationSteps() below to maintain rich HTML parity
 
   // Map dimensionInputs index to the corresponding side input ID
   const sideIds = ["quad-side-a", "quad-side-b", "quad-side-c", "quad-side-d",
@@ -1383,6 +1370,15 @@ function calculateAll() {
   if (isDivisionActive && area > 0) {
     updateHeirsDistribution();
     updateHeirsUI();
+  }
+
+  // تحديث خطوات الحساب بالتفصيل الموحدة (Single Source of Truth مع الحماية التامة)
+  try {
+    if (typeof updateCalculationSteps === "function") {
+      updateCalculationSteps();
+    }
+  } catch (e) {
+    console.error("Calculation Steps Error:", e);
   }
 }
 
@@ -2281,6 +2277,7 @@ function generateHeirsTable() {
     heirsData.push(heirObj);
   }
 
+  window.heirsData = heirsData;
   renderHeirsRows();
   updateHeirsDistribution();
   calculateAll();
@@ -2872,10 +2869,7 @@ function loadStateFromSession() {
 
   document.getElementById("long-plot-view").value = sessionStorage.getItem("longPlotView") || "agricultural";
   
-  // استرجاع خيار الأبعاد الهندسية الفعلية
-  showActualDims = sessionStorage.getItem("showActualDims") !== "false";
-  const checkbox = document.getElementById('show-actual-dims');
-  if (checkbox) checkbox.checked = showActualDims;
+  showActualDims = true;
 
   // استرجاع خيار طريقة عرض الأرقام العشرية
   const savedRounding = sessionStorage.getItem("numberRoundingMode") || "round";
@@ -4422,6 +4416,404 @@ window.saveStateToSession = saveStateToSession;
 window.loadStateFromSession = loadStateFromSession;
 window.updateHeirsUI = updateHeirsUI;
 window.drawCroquis = drawCroquis;
+
+// ==========================================================
+// قسم خطوات الحساب بالتفصيل - 100% Page11 Parity
+// ==========================================================
+
+let isStepsOpen = false;
+
+function toArabicNumerals(numStr) {
+  if (numStr === undefined || numStr === null) return "";
+  try {
+    const str = String(numStr);
+    const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return str.replace(/[0-9]/g, (w) => arabicDigits[+w]).replace(/\./g, "٫");
+  } catch (e) {
+    return String(numStr || "");
+  }
+}
+
+function toggleStepsAccordion() {
+  console.log("toggleStepsAccordion called");
+  var container = document.getElementById("calculation-steps-container");
+  if (!container) {
+    console.error("toggleStepsAccordion: #calculation-steps-container NOT FOUND");
+    return;
+  }
+  var arrow = document.getElementById("steps-arrow-icon");
+  // data-open هو مصدر الحقيقة للحالة - موثوق 100% ولا يتأثر بـ CSS
+  var isCurrentlyOpen = (container.getAttribute("data-open") === "1");
+  console.log("toggleStepsAccordion: isCurrentlyOpen =", isCurrentlyOpen);
+
+  if (!isCurrentlyOpen) {
+    // الفتح
+    container.setAttribute("data-open", "1");
+    isStepsOpen = true;
+    if (typeof updateCalculationSteps === "function") {
+      updateCalculationSteps();
+    }
+    container.style.maxHeight = "6000px";
+    container.style.opacity = "1";
+    if (arrow) arrow.style.transform = "rotate(-90deg)";
+    console.log("toggleStepsAccordion: OPENED");
+  } else {
+    // الإغلاق
+    container.setAttribute("data-open", "0");
+    isStepsOpen = false;
+    container.style.maxHeight = "0px";
+    container.style.opacity = "0";
+    if (arrow) arrow.style.transform = "rotate(0deg)";
+    console.log("toggleStepsAccordion: CLOSED");
+  }
+}
+window.toggleStepsAccordion = toggleStepsAccordion;
+
+// NOTE: The steps-header accordion is handled by onclick="toggleStepsAccordion()" directly in HTML.
+// No additional DOMContentLoaded listener is needed here (it was causing double-call and breaking the accordion).
+// This matches Page11 behavior exactly.
+
+function updatePrintStepsClass() {
+  try {
+    const card = document.querySelector(".steps-card");
+    const checkbox = document.getElementById("print-steps-checkbox");
+    if (!card || !checkbox) return;
+    if (checkbox.checked) {
+      card.classList.remove("print-steps-hidden");
+      card.classList.add("print-visible");
+    } else {
+      card.classList.remove("print-visible");
+      card.classList.add("print-steps-hidden");
+    }
+  } catch (e) {
+    console.error("updatePrintStepsClass Error:", e);
+  }
+}
+
+function updateCalculationSteps() {
+  try {
+    console.log("updateCalculationSteps called");
+    const stepsContainer = document.getElementById("calculation-steps-content");
+    if (!stepsContainer) return;
+
+    const totalAreaM2 = (typeof calculatedArea === "number" && calculatedArea > 0)
+      ? calculatedArea
+      : (parseFloat(window.calculatedArea) || parseFloat(document.getElementById("total-sqm")?.innerText) || 0);
+
+    const dims = (typeof getLandDimensions === "function") ? getLandDimensions() : { landTop: 0, landBottom: 0 };
+    const w1 = dims.landBottom;
+    const w2 = dims.landTop;
+
+  if (totalAreaM2 <= 0) {
+    stepsContainer.innerHTML = `<p style="text-align: center; color: #777; font-style: italic;">أدخل الأبعاد والشركاء لعرض تفاصيل الخطوات الحسابية</p>`;
+    return;
+  }
+
+  const wAvg = (w1 > 0 && w2 > 0) ? (w1 + w2) / 2 : (w1 || w2 || Math.sqrt(totalAreaM2));
+  const lAvg = wAvg > 0 ? (totalAreaM2 / wAvg) : 0;
+
+  let html = `
+    <!-- الخطوة (١): حساب متوسط العرض -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (١): حساب متوسط العرض</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        (${toArabicNumerals(w1.toFixed(4))} + ${toArabicNumerals(w2.toFixed(4))}) ÷ ${toArabicNumerals(2)}<br>
+        = ${toArabicNumerals(wAvg.toFixed(4))} م
+      </div>
+    </div>
+
+    <!-- الخطوة (٢): حساب متوسط الطول -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٢): حساب متوسط الطول</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        ${toArabicNumerals(totalAreaM2.toFixed(4))} ÷ ${toArabicNumerals(wAvg.toFixed(4))}<br>
+        = ${toArabicNumerals(lAvg.toFixed(4))} م
+      </div>
+    </div>
+
+    <!-- الخطوة (٣): حساب المساحة الإجمالية -->
+    <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+      <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٣): حساب المساحة الإجمالية للأرض</strong>
+      <div style="font-family: Cairo, Arial, sans-serif; font-size: 14px; font-weight: bold; background: #f5f5f5; padding: 6px 10px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #c8e6c9; color: #1b5e20;">
+        ${toArabicNumerals(lAvg.toFixed(4))} × ${toArabicNumerals(wAvg.toFixed(4))}<br>
+        = ${toArabicNumerals(totalAreaM2.toFixed(4))} م²
+      </div>
+    </div>
+  `;
+
+  // الخطوة (٤) والخطوة (٥): الشركاء والأنصبة والنسب
+  const heirs = (Array.isArray(window.heirsData) && window.heirsData.length > 0)
+    ? window.heirsData
+    : ((typeof heirsData !== "undefined" && Array.isArray(heirsData)) ? heirsData : []);
+  if (heirs.length > 0) {
+    // 4. مساحة كل شريك
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٤): حساب مساحة كل شريك</strong>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+    heirs.forEach((h, index) => {
+      const partnerName = h.name || `شريك ${index + 1}`;
+      const shareVal = parseFloat(h.share) || 0;
+      html += `
+        <div style="border-right: 3px solid #66bb6a; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span>
+          <span style="font-size: 13px; color: #1b5e20; font-weight: bold; margin-right: 6px;">${toArabicNumerals(shareVal.toFixed(2))} م²</span>
+        </div>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+
+    // 5. نسبة كل شريك
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٥): حساب نسبة كل شريك</strong>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+    heirs.forEach((h, index) => {
+      const partnerName = h.name || `شريك ${index + 1}`;
+      const shareVal = parseFloat(h.share) || 0;
+      const pctVal = totalAreaM2 > 0 ? (shareVal / totalAreaM2) * 100 : 0;
+      html += `
+        <div style="border-right: 3px solid #42a5f5; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #bbdefb; color: #0d47a1;">
+            ${toArabicNumerals(shareVal.toFixed(2))} ÷ ${toArabicNumerals(totalAreaM2.toFixed(2))} × ${toArabicNumerals(100)}<br>
+            = ${toArabicNumerals(pctVal.toFixed(2))}٪
+          </div>
+        </div>
+      `;
+    });
+
+    const remPiece = window.remainderPiece;
+    if (remPiece && remPiece.share > 0.01) {
+      const remPct = totalAreaM2 > 0 ? (remPiece.share / totalAreaM2) * 100 : 0;
+      html += `
+        <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
+          <span style="font-weight: bold; color: #e65100;">🟡 المتبقي:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #fffde7; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #ffe082; color: #e65100;">
+            ${toArabicNumerals(remPiece.share.toFixed(2))} ÷ ${toArabicNumerals(totalAreaM2.toFixed(2))} × ${toArabicNumerals(100)}<br>
+            = ${toArabicNumerals(remPct.toFixed(2))}٪
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  // الخطوات 6، 7، 8، 9: هندسية التقسيم
+  if (heirs.length > 0) {
+    // 6. العرض الأول (أسفل)
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٦): حساب العرض الأول لكل قطعة (أسفل)</strong>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+    heirs.forEach((h, index) => {
+      const partnerName = h.name || `شريك ${index + 1}`;
+      const botW = parseFloat(h.botW) || 0;
+      html += `
+        <div style="border-right: 3px solid #ab47bc; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #e1bee7; color: #4a148c;">
+            العرض السفلي = ${toArabicNumerals(botW.toFixed(4))} م
+          </div>
+        </div>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+
+    // 7. العرض الثاني (أعلى)
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٧): حساب العرض الثاني لكل قطعة (أعلى)</strong>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+    `;
+    heirs.forEach((h, index) => {
+      const partnerName = h.name || `شريك ${index + 1}`;
+      const topW = parseFloat(h.topW) || 0;
+      html += `
+        <div style="border-right: 3px solid #ab47bc; padding-right: 8px;">
+          <span style="font-weight: bold; color: #333;">${toArabicNumerals(partnerName)}:</span><br>
+          <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #e1bee7; color: #4a148c;">
+            العرض العلوي = ${toArabicNumerals(topW.toFixed(4))} م
+          </div>
+        </div>
+      `;
+    });
+    html += `
+        </div>
+      </div>
+    `;
+
+    // 8. أطوال الفواصل الداخلية
+    if (heirs.length > 1) {
+      html += `
+        <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+          <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٨): حساب طول الفاصل (خطوط القسمة الداخلية)</strong>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+      `;
+      heirs.forEach((h, index) => {
+        if (index > 0) {
+          const rightL = parseFloat(h.leftL || h.rightL) || 0;
+          html += `
+            <div style="border-right: 3px solid #ffa726; padding-right: 8px;">
+              <span style="font-weight: bold; color: #333;">الفاصل بين قطعة ${toArabicNumerals(index)} وقطعة ${toArabicNumerals(index + 1)}:</span><br>
+              <div style="font-family: Cairo, Arial, sans-serif; font-size: 13px; font-weight: bold; background: #f5f5f5; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 2px; border: 1px solid #ffe082; color: #e65100;">
+                طول الفاصل = ${toArabicNumerals(rightL.toFixed(4))} م
+              </div>
+            </div>
+          `;
+        }
+      });
+      html += `
+          </div>
+        </div>
+      `;
+    }
+
+    // 9. التحقق النهائي
+    let totalDistributed = 0;
+    heirs.forEach(h => { totalDistributed += (parseFloat(h.share) || 0); });
+    const diff = totalAreaM2 - totalDistributed;
+    const isMatched = Math.abs(diff) < 0.01;
+    const diffIcon = isMatched ? "✔" : "❌";
+
+    let diffText = "";
+    if (isMatched) {
+      diffText = `التوزيع متطابق بالكامل مع مساحة الأرض ${diffIcon}`;
+    } else if (diff > 0) {
+      diffText = `المساحة المتبقية = ${toArabicNumerals(diff.toFixed(2))} م² 🟡`;
+    } else {
+      diffText = `يوجد عجز مقداره ${toArabicNumerals(Math.abs(diff).toFixed(2))} م² 🔴`;
+    }
+
+    html += `
+      <div style="background: #fdfdfd; padding: 10px; border: 1px dashed #e0e0e0; border-radius: 6px; direction: rtl; text-align: right;">
+        <strong style="color: #2e7d32; display: block; margin-bottom: 4px;">الخطوة (٩): التحقق النهائي ومطابقة المساحات</strong>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; line-height: 1.4;">
+          <div>مجموع مساحات الشركاء الموزعة = <strong style="color: #2e7d32; font-family: monospace;">${toArabicNumerals(totalDistributed.toFixed(4))} م²</strong></div>
+          <div>المساحة الإجمالية للأرض = <strong style="color: #2e7d32; font-family: monospace;">${toArabicNumerals(totalAreaM2.toFixed(4))} م²</strong></div>
+          <div style="margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; font-weight: bold; font-size: 13px;">
+            حالة المطابقة: 
+            <span style="color: ${isMatched ? "#2e7d32" : (diff > 0 ? "#e65100" : "#c62828")}; font-family: Cairo, Arial, sans-serif;">
+              ${diffText}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (html && !html.includes("أدخل الأبعاد والشركاء")) {
+    html += `
+      <div style="display: flex; justify-content: flex-end; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+        <button type="button" class="action-btn" onclick="copyCalculationSteps()" style="padding: 10px 20px; font-size: 13.5px; background-color: #134614; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', Arial, sans-serif; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+          📋 نسخ خطوات الحساب
+        </button>
+      </div>
+    `;
+  }
+
+  stepsContainer.innerHTML = html;
+
+  // Update container height if accordion is open (e.g., user recalculated after opening)
+  if (isStepsOpen) {
+    setTimeout(function() {
+      const container = document.getElementById("calculation-steps-container");
+      if (container) {
+        const targetHeight = container.scrollHeight > 50 ? (container.scrollHeight + 300) : 3000;
+        container.style.maxHeight = targetHeight + "px";
+      }
+    }, 0);
+  }
+  } catch (e) {
+    console.error("updateCalculationSteps Error:", e);
+  }
+}
+
+function copyCalculationSteps() {
+  try {
+    const stepsContent = document.getElementById("calculation-steps-content");
+    if (!stepsContent) return;
+
+    const steps = Array.from(stepsContent.children).filter(el => {
+      return el.tagName === "DIV" && !el.querySelector("button");
+    });
+
+    let textParts = [];
+    steps.forEach(step => {
+      const stepText = step.innerText.trim();
+      if (stepText) {
+        textParts.push(stepText);
+      }
+    });
+
+    const textToCopy = textParts.join("\n\n");
+    if (!textToCopy) return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        if (window.DallalToast) {
+          DallalToast.success("تم نسخ خطوات الحساب بنجاح.");
+        } else {
+          alert("✅ تم نسخ خطوات الحساب بنجاح.");
+        }
+      }).catch(() => {
+        fallbackCopyText(textToCopy);
+      });
+    } else {
+      fallbackCopyText(textToCopy);
+    }
+  } catch (e) {
+    console.error("copyCalculationSteps Error:", e);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.width = "2em";
+  textArea.style.height = "2em";
+  textArea.style.padding = "0";
+  textArea.style.border = "none";
+  textArea.style.outline = "none";
+  textArea.style.boxShadow = "none";
+  textArea.style.background = "transparent";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand("copy");
+    if (window.DallalToast) {
+      DallalToast.success("تم نسخ خطوات الحساب بنجاح.");
+    } else {
+      alert("✅ تم نسخ خطوات الحساب بنجاح.");
+    }
+  } catch (err) {
+    console.error("Fallback copy failed", err);
+  }
+  document.body.removeChild(textArea);
+}
+
+window.toArabicNumerals = toArabicNumerals;
+window.toggleStepsAccordion = toggleStepsAccordion;
+window.updatePrintStepsClass = updatePrintStepsClass;
+window.updateCalculationSteps = updateCalculationSteps;
+window.copyCalculationSteps = copyCalculationSteps;
 
 console.log("Page13 section1 script loaded successfully");
 console.log("addNewHeir function status:", typeof window.addNewHeir);

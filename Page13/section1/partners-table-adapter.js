@@ -74,18 +74,10 @@
             <input type="text" inputmode="decimal" value="% ${pct.toFixed(2)}" class="heir-share-pct" oninput="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, true)" onchange="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, false)" onblur="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, false)" style="text-align: center; font-weight: bold;" />
           </td>
           <td class="width-top-group">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
-              <button type="button" class="btn-step" onclick="Page13PartnersTableAdapter.adjustWidth('${heir.id}', 'top', 0.5)" style="padding: 0 4px; font-weight: bold; cursor: pointer;">+</button>
-              <input type="text" inputmode="decimal" value="${topW.toFixed(4)}" class="heir-side-top" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" style="width: 65px; text-align: center; font-weight: bold; color: #1b5e20;" />
-              <button type="button" class="btn-step" onclick="Page13PartnersTableAdapter.adjustWidth('${heir.id}', 'top', -0.5)" style="padding: 0 4px; font-weight: bold; cursor: pointer;">-</button>
-            </div>
+            <input type="text" inputmode="decimal" value="${topW.toFixed(4)}" class="heir-side-top" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
           </td>
           <td class="width-bottom-group">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
-              <button type="button" class="btn-step" onclick="Page13PartnersTableAdapter.adjustWidth('${heir.id}', 'bot', 0.5)" style="padding: 0 4px; font-weight: bold; cursor: pointer;">+</button>
-              <input type="text" inputmode="decimal" value="${botW.toFixed(4)}" class="heir-side-bot" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" style="width: 65px; text-align: center; font-weight: bold; color: #1b5e20;" />
-              <button type="button" class="btn-step" onclick="Page13PartnersTableAdapter.adjustWidth('${heir.id}', 'bot', -0.5)" style="padding: 0 4px; font-weight: bold; cursor: pointer;">-</button>
-            </div>
+            <input type="text" inputmode="decimal" value="${botW.toFixed(4)}" class="heir-side-bot" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
           </td>
           <td class="width-avg-group">
             <input type="text" readonly value="${avgW.toFixed(4)}" style="text-align: center; font-weight: bold; color: #1b5e20; background: #e8f5e9;" />
@@ -196,6 +188,14 @@
         // إعادة رسم الكروكي (مطابق لـ renderCroquis() في Page11/runPartition السطر 1974)
         if (typeof global.drawCroquis === "function") {
           global.drawCroquis();
+        }
+        // تحديث خطوات الحساب بالتفصيل اللحظي (مع حماية الحسابات)
+        try {
+          if (typeof global.updateCalculationSteps === "function") {
+            global.updateCalculationSteps();
+          }
+        } catch (e) {
+          console.error("Calculation Steps Error in adapter:", e);
         }
 
         if (!isLiveInput) {

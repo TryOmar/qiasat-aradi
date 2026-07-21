@@ -636,6 +636,28 @@ window.runCommit7Tests = function(options) {
       assert(ltrFirst_leftL > 0 && rtlFirst_leftL > 0, "3e-5: قيم أطوال الحدود حقيقية وغير صفرية في كلا الاتجاهين", `LTR أيسر شريك1: ${ltrFirst_leftL.toFixed(2)}, RTL أيسر شريك1: ${rtlFirst_leftL.toFixed(2)}`);
       assert(ltrLast_rightL > 0 && rtlLast_rightL > 0, "3e-6: قيم أطوال الحدود الأيمنة حقيقية في كلا الاتجاهين", `LTR أيمن آخر شريك: ${ltrLast_rightL.toFixed(2)}, RTL أيمن آخر شريك: ${rtlLast_rightL.toFixed(2)}`);
 
+      // اختبار إعادة التقسيم بعد حذف شريك
+      console.log("%c[C7-INFO] اختبار إعادة التقسيم بعد حذف شريك (أرض شبه منحرف 40×60×30×30)", "color: blue;");
+      window.activeShape = "trapezoid";
+      setVal("trap-base-minor", 40);
+      setVal("trap-base-major", 60);
+      setVal("trap-length-right", 30);
+      setVal("trap-length-left", 30);
+      setVal("heirs-count", 6);
+      if (typeof window.generateHeirsTable === "function") window.generateHeirsTable();
+      if (typeof window.calculateAll === "function") window.calculateAll();
+      
+      assert(window.heirsData.length === 6, "3e-7: تم إنشاء 6 شركاء", `العدد: ${window.heirsData.length}`);
+      const initialArea = window.calculatedArea;
+      assert(Math.abs(window.heirsData[0].share - (initialArea / 6)) < 0.5, "3e-8: نصيب الشريك الأولي صحيح", `النصيب: ${window.heirsData[0].share.toFixed(2)}`);
+      
+      if (window.heirsData.length > 0) {
+          Page13PartnersTableAdapter.removePartner(window.heirsData[0].id);
+      }
+      
+      assert(window.heirsData.length === 5, "3e-9: تم حذف شريك بنجاح وبقي 5", `العدد: ${window.heirsData.length}`);
+      assert(Math.abs(window.heirsData[0].share - (initialArea / 5)) < 0.5, "3e-10: تم إعادة توزيع الأنصبة بالتساوي", `النصيب الجديد: ${window.heirsData[0].share.toFixed(2)}`);
+
       // استعادة الاتجاه الأصلي
       window.partitionOrderDirection = originalDir || 'ltr';
       localStorage.setItem('partitionOrderDirection', window.partitionOrderDirection);
