@@ -85,12 +85,32 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 // State variables
 let activeShape = "trapezoid";
 let vertices = [];
-let calculatedArea = 0;
+var calculatedArea = 0;
+window.calculatedArea = calculatedArea;
+try {
+  Object.defineProperty(window, "calculatedArea", {
+    get: function() { return calculatedArea; },
+    set: function(val) { calculatedArea = val; },
+    configurable: true
+  });
+} catch(e) {
+  window.calculatedArea = calculatedArea;
+}
 let calculatedPerimeter = 0;
-let heirsData = [];
+var heirsData = [];
+window.heirsData = heirsData;
+try {
+  Object.defineProperty(window, "heirsData", {
+    get: function() { return heirsData; },
+    set: function(val) { heirsData = val; },
+    configurable: true
+  });
+} catch(e) {
+  window.heirsData = heirsData;
+}
 window.getDallalHeirsData = function() { return heirsData; };
 window.getDallalCalculatedArea = function() { return calculatedArea; };
-let isDivisionActive = false;
+let isDivisionActive = true;
 let showActualDims = true; // متغير لإظهار الأبعاد الهندسية الفعلية (الأضلاع المائلة) في جدول التقسيم
 let useTruncateRounding = false; // متغير للتحكم في قص الأرقام العشرية دون تقريب
 let zoomFactor = 1.0;
@@ -438,6 +458,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadStateFromSession();
   setupEventListeners();
   resizeCanvasToFit();
+  calculateAll();
   if (typeof updatePartitionDirectionButtonUI === "function") {
     updatePartitionDirectionButtonUI();
   }
@@ -449,7 +470,44 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+let debounceTimer = null;
+
+function saveAndCalc() {
+  if (window.__RUNNING_TESTS__) {
+    saveAndCalcImmediate();
+    return;
+  }
+  if (debounceTimer) clearTimeout(debounceTimer);
+  
+  const isOptimized = window.DALLAL_PERF && window.DALLAL_PERF.debounce;
+  const delay = isOptimized ? 120 : 0;
+  
+  if (delay === 0) {
+    saveAndCalcImmediate();
+  } else {
+    debounceTimer = setTimeout(() => {
+      saveAndCalcImmediate();
+    }, delay);
+  }
+}
+
+function saveAndCalcImmediate() {
+  saveStateToSession();
+  calculateAll();
+  if (typeof drawCroquis === "function") {
+    drawCroquis();
+  }
+}
+
+window.saveAndCalc = saveAndCalc;
+window.saveAndCalcImmediate = saveAndCalcImmediate;
+
 function setupEventListeners() {
+  const btnAddPartner = document.getElementById("addPartnerBtn") || document.querySelector(".btn-add-heir");
+  if (btnAddPartner) {
+    btnAddPartner.addEventListener("click", addNewHeir);
+  }
+
   // Shape card clicks
   shapeCards.forEach(card => {
     card.addEventListener("click", () => {
@@ -462,8 +520,7 @@ function setupEventListeners() {
       document.getElementById(`inputs-${activeShape}`).classList.add("active");
       
       resetDivision();
-      saveStateToSession();
-      calculateAll();
+      saveAndCalcImmediate();
     });
   });
 
@@ -479,13 +536,15 @@ function setupEventListeners() {
       input.id === "long-plot-view";
 
     if (!isExcluded) {
-      input.addEventListener("input", () => {
+      const handleEvent = () => {
         if (input.closest(".inputs-group")) {
           resetDivision();
         }
-        saveStateToSession();
-        calculateAll();
-      });
+        saveAndCalc();
+      };
+      input.addEventListener("input", handleEvent);
+      input.addEventListener("change", handleEvent);
+      input.addEventListener("blur", handleEvent);
     }
   });
 
@@ -696,21 +755,20 @@ function clearAllInputs() {
 
 // Show/Hide Division Panel
 function toggleDivisionPanel() {
-  isDivisionActive = !isDivisionActive;
+  isDivisionActive = true;
   const sketchPanel = document.getElementById('division-sketch-panel');
-  if (isDivisionActive) {
-    divisionPanel.style.display = "block";
-    if (sketchPanel) sketchPanel.style.display = "block";
-    btnToggleDivision.classList.add("active-panel");
+  if (divisionPanel) divisionPanel.style.display = "block";
+  if (sketchPanel) sketchPanel.style.display = "block";
+  if (btnToggleDivision) btnToggleDivision.classList.add("active-panel");
+  const targetCount = parseInt(heirsCountInput ? heirsCountInput.value : 3) || 3;
+  if (!heirsData || !Array.isArray(heirsData) || heirsData.length === 0 || heirsData.length !== targetCount) {
     generateHeirsTable();
-    // [Commit 4 – Division Direction] إظهار زر تبديل الاتجاه
-    if (typeof DivisionDirection !== "undefined" && DivisionDirection.init) {
-      DivisionDirection.init();
-    }
   } else {
-    divisionPanel.style.display = "none";
-    if (sketchPanel) sketchPanel.style.display = "none";
-    btnToggleDivision.classList.remove("active-panel");
+    renderHeirsRows();
+  }
+  // [Commit 4 – Division Direction] إظهار زر تبديل الاتجاه
+  if (typeof DivisionDirection !== "undefined" && DivisionDirection.init) {
+    DivisionDirection.init();
   }
   calculateAll();
   if (typeof window.updateFieldGuide === "function") {
@@ -720,14 +778,14 @@ function toggleDivisionPanel() {
 
 // Reset Smart Division panel
 function resetDivision() {
-  isDivisionActive = false;
-  heirsData = [];
+  isDivisionActive = true;
   const sketchPanel = document.getElementById('division-sketch-panel');
-  if (divisionPanel) divisionPanel.style.display = "none";
-  if (sketchPanel) sketchPanel.style.display = "none";
-  if (btnToggleDivision) btnToggleDivision.classList.remove("active-panel");
-  if (heirsListTbody) heirsListTbody.innerHTML = "";
+  if (divisionPanel) divisionPanel.style.display = "block";
+  if (sketchPanel) sketchPanel.style.display = "block";
+  if (btnToggleDivision) btnToggleDivision.classList.add("active-panel");
   if (heirsCountInput) heirsCountInput.value = "3";
+  heirsData = [];
+  generateHeirsTable();
   saveStateToSession();
   if (typeof window.updateFieldGuide === "function") {
     window.updateFieldGuide();
@@ -1427,20 +1485,37 @@ function getPieceRealSides(tPrev, tCurr) {
 function recalculateHeirsDimensions() {
   if (calculatedArea <= 0 || heirsData.length === 0) return;
   
-  const shares = (window.partitionOrderDirection === 'rtl')
-    ? heirsData.map(h => h.share || 0).reverse()
-    : heirsData.map(h => h.share || 0);
+  let sumDistributed = 0;
+  heirsData.forEach(h => sumDistributed += (h.share || 0));
 
+  const remainingArea = Number((calculatedArea - sumDistributed).toFixed(4));
+  const hasRemainder = remainingArea > 0.01;
+
+  const rawShares = heirsData.map(h => h.share || 0);
+  const shares = (window.partitionOrderDirection === 'rtl')
+    ? rawShares.slice().reverse()
+    : rawShares.slice();
+
+  const sliceShares = shares.slice();
+  if (hasRemainder) {
+    if (window.partitionOrderDirection === 'rtl') {
+      sliceShares.unshift(remainingArea);
+    } else {
+      sliceShares.push(remainingArea);
+    }
+  }
+
+  const piecesCount = sliceShares.length;
   const exactTs = [0];
   let tempCumArea = 0;
-  for (let i = 0; i < heirsData.length - 1; i++) {
-    tempCumArea += shares[i];
+  for (let i = 0; i < piecesCount - 1; i++) {
+    tempCumArea += sliceShares[i];
     exactTs.push(findTForArea(tempCumArea, calculatedArea));
   }
   exactTs.push(1.0);
   
   const slicesDims = [];
-  for (let i = 0; i < heirsData.length; i++) {
+  for (let i = 0; i < piecesCount; i++) {
     const tPrev = exactTs[i];
     const tCurr = exactTs[i + 1];
     const realSides = getPieceRealSides(tPrev, tCurr);
@@ -1454,14 +1529,33 @@ function recalculateHeirsDimensions() {
 
   heirsData.forEach((h, idx) => {
     const sliceIdx = (window.partitionOrderDirection === 'rtl')
-      ? heirsData.length - 1 - idx
+      ? (hasRemainder ? piecesCount - 1 - idx : heirsData.length - 1 - idx)
       : idx;
     const dims = slicesDims[sliceIdx];
-    h.topW = dims.top;
-    h.botW = dims.bottom;
-    h.leftL = dims.left;
-    h.rightL = dims.right;
+    if (dims) {
+      h.topW = dims.top;
+      h.botW = dims.bottom;
+      h.leftL = dims.left;
+      h.rightL = dims.right;
+    }
   });
+
+  if (hasRemainder) {
+    const remSliceIdx = (window.partitionOrderDirection === 'rtl') ? 0 : piecesCount - 1;
+    const remDims = slicesDims[remSliceIdx];
+    window.remainderPiece = {
+      isRemainder: true,
+      name: "المتبقي",
+      share: remainingArea,
+      topW: remDims.top,
+      botW: remDims.bottom,
+      leftL: remDims.left,
+      rightL: remDims.right,
+      color: { fill: "#FFFDF0", stroke: "#ff8f00" }
+    };
+  } else {
+    window.remainderPiece = null;
+  }
 }
 
 // Circle intersection helper
@@ -1831,21 +1925,24 @@ function drawLandCanvas(vertices) {
       cpD = transformed[3];
     }
 
-    // Ensure all heirs have their exact area-based widths computed
-    if (heirsData.some(h => h.topW === undefined || h.botW === undefined || isNaN(h.topW) || isNaN(h.botW))) {
-      recalculateHeirsDimensions();
-    }
+    // Always compute exact area-based widths for all heirs to guarantee 100% geometric sync with updated shares
+    recalculateHeirsDimensions();
 
     // Calculate cumulative t values for top and bottom sides separately.
     // slices are always accumulated left→right on the canvas.
     // Under RTL, slice i from the left is owned by heir[N-1-i], so we reverse the order of widths.
-    const N_pre = heirsData.length;
+    const piecesToDraw = heirsData.slice();
+    if (window.remainderPiece && window.remainderPiece.share > 0.01) {
+      piecesToDraw.push(window.remainderPiece);
+    }
+
+    const N_pre = piecesToDraw.length;
     const topWOrder = (window.partitionOrderDirection === 'rtl')
-      ? heirsData.map(h => h.topW || 0).reverse()
-      : heirsData.map(h => h.topW || 0);
+      ? piecesToDraw.map(p => p.topW || 0).reverse()
+      : piecesToDraw.map(p => p.topW || 0);
     const botWOrder = (window.partitionOrderDirection === 'rtl')
-      ? heirsData.map(h => h.botW || 0).reverse()
-      : heirsData.map(h => h.botW || 0);
+      ? piecesToDraw.map(p => p.botW || 0).reverse()
+      : piecesToDraw.map(p => p.botW || 0);
 
     let cumTop = 0;
     const splitTsTop = [0];
@@ -1870,11 +1967,11 @@ function drawLandCanvas(vertices) {
     // Reset geometry check array
     window.canvasPiecesGeometry = [];
 
-    const N = heirsData.length;
+    const N = piecesToDraw.length;
 
     // Draw each physical slice left-to-right (i=0 is leftmost slice on canvas).
     // Under LTR heir[i] owns slice i; under RTL heir[N-1-i] owns slice i.
-    for (let i = 0; i < heirsData.length; i++) {
+    for (let i = 0; i < piecesToDraw.length; i++) {
       const tPrevTop = splitTsTop[i];
       const tCurrTop = splitTsTop[i + 1];
       const tPrevBot = splitTsBot[i];
@@ -1882,7 +1979,7 @@ function drawLandCanvas(vertices) {
 
       // Resolve which heir owns this physical slice
       const heirIdx = (window.partitionOrderDirection === 'rtl') ? (N - 1 - i) : i;
-      const heir = heirsData[heirIdx];
+      const heir = piecesToDraw[heirIdx];
       if (!heir) continue;
 
       // Canvas coordinates for vertical slice (interpolated separately along the top and bottom sides)
@@ -1903,7 +2000,7 @@ function drawLandCanvas(vertices) {
       const pieceRightL = heir.rightL || 0;
 
       // Draw slice background fill
-      const color = heir.color || PIECE_COLORS[heirIdx % PIECE_COLORS.length];
+      const color = heir.color || (heir.isRemainder ? { fill: "#FFFDF0", stroke: "#ff8f00" } : PIECE_COLORS[heirIdx % PIECE_COLORS.length]);
       ctx.fillStyle = color.fill;
       ctx.beginPath();
       ctx.moveTo(cpTopPrev.x, cpTopPrev.y);
@@ -1935,6 +2032,10 @@ function drawLandCanvas(vertices) {
         ctx.strokeStyle = color.stroke;
         ctx.lineJoin = "round";
 
+        if (heir.isRemainder) {
+          ctx.setLineDash([4, 4]);
+        }
+
         // 1. الحد العلوي (سميك)
         ctx.lineWidth = Math.max(3.5, 4.5 * scaleMultiplier);
         ctx.beginPath();
@@ -1957,7 +2058,7 @@ function drawLandCanvas(vertices) {
         }
 
         // 4. الحد الأيمن الخارجي (لآخر شريك فقط، سميك)
-        if (i === heirsData.length - 1) {
+        if (i === piecesToDraw.length - 1) {
           ctx.beginPath();
           ctx.moveTo(cpTopCurr.x, cpTopCurr.y);
           ctx.lineTo(cpBottomCurr.x, cpBottomCurr.y);
@@ -2115,30 +2216,69 @@ function drawLandCanvas(vertices) {
   console.log("drawLandCanvas finished");
 }
 
+// Add partner function for "أضف شريك" button
+function addNewHeir(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const countInput = document.getElementById("heirs-count");
+  let currentCount = parseInt(countInput ? countInput.value : (heirsData ? heirsData.length : 0));
+  if (isNaN(currentCount) || currentCount < 0) currentCount = heirsData ? heirsData.length : 0;
+  if (currentCount >= 50) {
+    if (window.DallalToast) window.DallalToast.show("الحد الأقصى لعدد الشركاء هو 50", "warning");
+    return;
+  }
+  currentCount++;
+  if (countInput) countInput.value = currentCount;
+  generateHeirsTable();
+  saveStateToSession();
+}
+window.addNewHeir = addNewHeir;
+
+function deleteHeir(id) {
+  if (window.Page13PartnersTableAdapter && typeof window.Page13PartnersTableAdapter.removePartner === "function") {
+    window.Page13PartnersTableAdapter.removePartner(id);
+  }
+}
+window.deleteHeir = deleteHeir;
+
 // Generate heirs input rows
 function generateHeirsTable() {
-  const count = parseInt(heirsCountInput.value) || 1;
-  const caratSize = parseFloat(caratSizeInput.value) || 168;
-  heirsListTbody.innerHTML = "";
+  const countInput = document.getElementById("heirs-count");
+  let count = parseInt(countInput ? countInput.value : 0);
+  if (isNaN(count) || count < 0) count = 0;
   
+  if (heirsListTbody) heirsListTbody.innerHTML = "";
+
+  if (count === 0) {
+    heirsData = [];
+    renderHeirsRows();
+    updateHeirsDistribution();
+    calculateAll();
+    return;
+  }
+
   // Re-build heirsData array keeping names if possible
-  const oldHeirs = [...heirsData];
+  const oldHeirs = Array.isArray(heirsData) ? [...heirsData] : [];
   heirsData = [];
   
-  const equalShare = calculatedArea / count;
+  const equalShare = (calculatedArea > 0 && count > 0) ? (calculatedArea / count) : 0;
   const dims = getLandDimensions();
 
   for (let i = 0; i < count; i++) {
     const defaultName = `شريك ${i + 1}`;
     const name = (oldHeirs[i] && oldHeirs[i].name) ? oldHeirs[i].name : defaultName;
-    const share = (oldHeirs[i] && oldHeirs[i].share > 0 && oldHeirs.length === count) ? oldHeirs[i].share : equalShare;
+    const share = (oldHeirs[i] && typeof oldHeirs[i].share === "number" && oldHeirs[i].share > 0 && oldHeirs.length === count) ? oldHeirs[i].share : equalShare;
     
-    heirsData.push({
+    const heirObj = {
+      id: (oldHeirs[i] && oldHeirs[i].id) ? oldHeirs[i].id : (typeof window.generateUniqueHeirId === "function" ? window.generateUniqueHeirId() : `heir_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`),
       name: name,
       share: share,
-      topW: (share / (calculatedArea || 1)) * dims.landTop,
-      botW: (share / (calculatedArea || 1)) * dims.landBottom
-    });
+      topW: (calculatedArea > 0) ? (share / calculatedArea) * dims.landTop : 0,
+      botW: (calculatedArea > 0) ? (share / calculatedArea) * dims.landBottom : 0
+    };
+    if (typeof window.initHeirProperties === "function") {
+      window.initHeirProperties(heirObj, i);
+    }
+    heirsData.push(heirObj);
   }
 
   renderHeirsRows();
@@ -2218,92 +2358,9 @@ function updateHeirsUI() {
 }
 
 function renderHeirsRows() {
-  const caratSize = parseFloat(caratSizeInput.value) || 168;
-  
-  // Sides are calculated inside drawLandCanvas which is called by calculateAll
-  
-  // هل نعرض عمود الطول الثابت (للمبسط) أم عمودي يمين/يسار؟
-  const showHeightOnly = (activeShape === 'trapezoid' && !showActualDims);
-  // الطول الثابت الذي أدخله المستخدم
-  const trapHeight = showHeightOnly
-    ? (parseFloat(document.getElementById('trap-length-right')?.value) || 0)
-    : 0;
-
-  let html = "";
-
-  heirsData.forEach((heir, idx) => {
-    const conv = convertSqmToFeddans(heir.share, caratSize);
-    
-    // Build select dropdown option for other heirs (overwritten by smart-share-editor.js)
-    let optionsHtml = `<option value="all">باقي الشركاء بالتساوي</option>`;
-
-    // عمودا يمين/يسار: إما عمود "الطول" الواحد (colspan=2) أو عمودين مستقلين
-    let sidesCells = '';
-    if (showHeightOnly) {
-      // عمود واحد: الطول الثابت (colspan=2 ليتوافق مع رأس الجدول)
-      sidesCells = `
-        <td colspan="2" style="text-align:center;">
-          <input type="text" inputmode="decimal" class="heir-side-height" style="width:75px; background-color: #f1f3f4; cursor: default;" value="${trapHeight.toFixed(2)}" readonly />
-        </td>`;
-    } else {
-      // عمودان: الطول الأيسر ثم الأيمن (ترتيب ثابت يوافق رأس الجدول)
-      sidesCells = `
-        <td>
-          <input type="text" inputmode="decimal" class="heir-side-left" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.leftL || 0).toFixed(2)}" readonly />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-side-right" style="width:60px; background-color: #f1f3f4; cursor: default;" value="${(heir.rightL || 0).toFixed(2)}" readonly />
-        </td>`;
-    }
-
-    html += `
-      <tr data-index="${idx}">
-        <td>
-          <input type="text" class="heir-name" value="${heir.name}" onchange="updateHeirName(${idx}, this.value)" />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-side-top" style="width:65px;" value="${(heir.topW || 0).toFixed(2)}" 
-            oninput="updateHeirSide(${idx}, 'topW', this.value)" />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-side-bot" style="width:65px;" value="${(heir.botW || 0).toFixed(2)}" 
-            oninput="updateHeirSide(${idx}, 'botW', this.value)" />
-        </td>
-        ${sidesCells}
-        <td>
-          <input type="text" inputmode="decimal" class="heir-share heir-share-sqm" value="${(heir.share || 0).toFixed(2)}" 
-            oninput="debouncedUpdateHeirShare(${idx}, 'sqm', this.value)" 
-            onblur="commitHeirShareImmediately(${idx}, 'sqm', this.value)" 
-            onkeydown="if(event.key === 'Enter') { commitHeirShareImmediately(${idx}, 'sqm', this.value); this.blur(); }" />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-share heir-share-sahm" value="${conv.shares.toFixed(2)}" 
-            oninput="debouncedUpdateHeirSplitShare(${idx}, 'sahm', this.value)" 
-            onblur="commitHeirSplitShareImmediately(${idx}, 'sahm', this.value)" 
-            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'sahm', this.value); this.blur(); }" />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-share heir-share-carat" value="${conv.carats}" 
-            oninput="debouncedUpdateHeirSplitShare(${idx}, 'carat', this.value)" 
-            onblur="commitHeirSplitShareImmediately(${idx}, 'carat', this.value)" 
-            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'carat', this.value); this.blur(); }" />
-        </td>
-        <td>
-          <input type="text" inputmode="decimal" class="heir-share heir-share-feddan" value="${conv.feddans}" 
-            oninput="debouncedUpdateHeirSplitShare(${idx}, 'feddan', this.value)" 
-            onblur="commitHeirSplitShareImmediately(${idx}, 'feddan', this.value)" 
-            onkeydown="if(event.key === 'Enter') { commitHeirSplitShareImmediately(${idx}, 'feddan', this.value); this.blur(); }" />
-        </td>
-        <td>
-          <select class="heir-offset" id="offset-dest-${idx}">
-            ${optionsHtml}
-          </select>
-        </td>
-      </tr>
-    `;
-  });
-
-  heirsListTbody.innerHTML = html;
+  if (window.Page13PartnersTableAdapter && typeof window.Page13PartnersTableAdapter.renderTable === "function") {
+    window.Page13PartnersTableAdapter.renderTable();
+  }
 }
 
 
@@ -2623,17 +2680,28 @@ window.validatePartitionAreasShoelace = function(runAdvanced) {
 
 function updateHeirsDistribution() {
   let distributedSum = 0;
-  heirsData.forEach(h => distributedSum += h.share);
+  let topSum = 0;
+  let botSum = 0;
+  let fSum = 0, cSum = 0, sSum = 0;
 
-  distributedAreaSpan.innerText = distributedSum.toFixed(2);
-  
-  const diff = Math.abs(distributedSum - calculatedArea);
-  if (diff < 0.05) {
-    distributionStatus.className = "status-ok";
-    distributionStatus.innerText = "🟢 التوزيع متطابق ومكتمل بالكامل!";
-  } else {
-    distributionStatus.className = "status-err";
-    distributionStatus.innerText = `تنبيه: التوزيع غير متطابق! فارق المساحة: ${(calculatedArea - distributedSum).toFixed(2)} م²`;
+  const caratSize = parseFloat(document.getElementById("carat-size")?.value) || 168;
+
+  if (Array.isArray(heirsData)) {
+    heirsData.forEach(h => {
+      distributedSum += (h.share || 0);
+      topSum += (h.topW || 0);
+      botSum += (h.botW || 0);
+      if (typeof convertSqmToFeddans === "function") {
+        const conv = convertSqmToFeddans(h.share || 0, caratSize);
+        fSum += conv.feddans;
+        cSum += conv.carats;
+        sSum += conv.shares;
+      }
+    });
+  }
+
+  if (window.Page13PartnersTableAdapter && typeof window.Page13PartnersTableAdapter.updateSummary === "function") {
+    window.Page13PartnersTableAdapter.updateSummary(distributedSum, fSum, cSum, sSum, topSum, botSum);
   }
 }
 
@@ -2774,22 +2842,32 @@ function loadStateFromSession() {
   document.getElementById("quad-diag-bd").value = sessionStorage.getItem("quadDiagBD") || "";
 
   // Division panel state
-  heirsCountInput.value = sessionStorage.getItem("heirsCount") || "3";
-  isDivisionActive = sessionStorage.getItem("isDivisionActive") === "true";
+  const savedCount = sessionStorage.getItem("heirsCount");
+  const savedHeirs = sessionStorage.getItem("heirsData");
   
-  if (isDivisionActive) {
-    divisionPanel.style.display = "block";
-    btnToggleDivision.classList.add("active-panel");
-    const savedHeirs = sessionStorage.getItem("heirsData");
-    if (savedHeirs) {
+  if (savedCount && savedHeirs && savedHeirs !== "[]") {
+    heirsCountInput.value = savedCount;
+    try {
       heirsData = JSON.parse(savedHeirs);
-      renderHeirsRows();
-    } else {
-      generateHeirsTable();
+    } catch (e) {
+      heirsData = [];
     }
   } else {
-    divisionPanel.style.display = "none";
-    btnToggleDivision.classList.remove("active-panel");
+    heirsCountInput.value = "3";
+    heirsData = [];
+  }
+  
+  isDivisionActive = true;
+  sessionStorage.setItem("isDivisionActive", "true");
+  
+  if (divisionPanel) divisionPanel.style.display = "block";
+  if (btnToggleDivision) btnToggleDivision.classList.add("active-panel");
+  
+  const targetCount = parseInt(heirsCountInput.value) || 3;
+  if (!heirsData || !Array.isArray(heirsData) || heirsData.length === 0 || heirsData.length !== targetCount) {
+    generateHeirsTable();
+  } else {
+    renderHeirsRows();
   }
 
   document.getElementById("long-plot-view").value = sessionStorage.getItem("longPlotView") || "agricultural";
@@ -4331,5 +4409,22 @@ function openAnimationSimulation() {
 }
 
 window.openAnimationSimulation = openAnimationSimulation;
+window.addNewHeir = addNewHeir;
+window.deleteHeir = deleteHeir;
+window.generateHeirsTable = generateHeirsTable;
+window.distributeEqually = distributeEqually;
+window.toggleDivisionPanel = toggleDivisionPanel;
+window.resetDivision = resetDivision;
+window.calculateAll = calculateAll;
+window.recalculateHeirsDimensions = recalculateHeirsDimensions;
+window.renderHeirsRows = renderHeirsRows;
+window.saveStateToSession = saveStateToSession;
+window.loadStateFromSession = loadStateFromSession;
+window.updateHeirsUI = updateHeirsUI;
+window.drawCroquis = drawCroquis;
+
+console.log("Page13 section1 script loaded successfully");
+console.log("addNewHeir function status:", typeof window.addNewHeir);
+console.log("heirsData initial status:", window.heirsData);
 
 

@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../../shared/table-component.css" />
   <link rel="stylesheet" href="../../shared-ui.css" />
   <link rel="stylesheet" href="../../fraction-helper.css" />
+  <link rel="stylesheet" href="../../responsive-global.css" />
   <title>حساب وتقسيم مساحة الأراضي</title>
   <style>
     /* Highlight effect for input interactive elements inside SVG card */
@@ -397,55 +399,114 @@
           <button class="btn btn-secondary btn-sm" onclick="printFieldGuide()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="طباعة خطوات التنفيذ الميداني">🧭 دليل التنفيذ الحقلي</button>
           <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulation()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="تشغيل المحاكاة المتحركة لشرح التنفيذ ميدانياً">🎬 شرح التنفيذ</button>
         </div>
-        <button class="btn btn-divide btn-sm" id="btn-toggle-division" onclick="toggleDivisionPanel()" style="margin-top: 8px;">تقسيم الأرض</button>
       </div>
     </div>
 
     <!-- Division Controls Panel -->
-    <div class="s division-card" id="division-panel" style="display: none;">
-      <h3>لوحة تقسيم الأرض الذكي</h3>
+    <div class="s division-card" id="division-panel" style="display: block;">
+      <h3 style="background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white; padding: 10px 16px; border-radius: 8px; font-size: 15px; display: inline-block; margin-bottom: 12px; font-weight: bold;">جدول تقسيم الأنصبة وإدارة الشركاء</h3>
       <div class="division-settings">
-        <div class="input-row-inline">
-          <label for="heirs-count">عدد الشركاء:</label>
-          <input type="text" inputmode="decimal" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" />
-          <button class="btn btn-calc btn-sm" onclick="distributeEqually()">تقسيم بالتساوي</button>
-          <button class="btn btn-add-heir btn-sm no-print" onclick="addNewHeir(event)" style="font-weight: bold; font-size: 13px; margin-right: 8px;">إضافة شريك</button>
+        <div class="input-row-inline" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+          <div style="font-weight: bold; color: #333; font-size: 13px;">إدارة الشركاء:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-add-heir btn-sm no-print" id="addPartnerBtn" style="font-weight: bold; font-size: 13px; background: #2e7d32; color: white; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <span>👤+</span> أضف شريك
+            </button>
+            <button type="button" class="btn btn-calc btn-sm" onclick="distributeEqually()" style="font-weight: bold; font-size: 13px; background: #1565c0; color: white; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <span>🌐</span> تقسيم بالتساوي
+            </button>
+            <button type="button" class="btn btn-clear btn-sm no-print" onclick="Page13PartnersTableAdapter.removeAllPartners()" style="font-weight: bold; font-size: 13px; background: #424242; color: white; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <span>🗑️</span> حذف جميع الشركاء
+            </button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-right: auto;">
+            <label for="heirs-count" style="font-size: 12px; font-weight: bold;">عدد الشركاء:</label>
+            <input type="text" inputmode="decimal" inputmode="numeric" id="heirs-count" min="1" max="50" value="3" oninput="generateHeirsTable(); saveStateToSession();" onchange="generateHeirsTable(); saveStateToSession();" style="width: 50px; text-align: center; font-weight: bold; border-radius: 6px; border: 1.5px solid #ccc; height: 28px;" />
+          </div>
         </div>
         <!-- خيار متقدم: يظهر فقط لنموذج شبه المنحرف -->
-        <div id="actual-dims-toggle" style="display: none; margin-top: 8px; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; color: #01579b; font-weight: bold;">
+        <div id="actual-dims-toggle" style="display: none !important; margin-top: 8px; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; color: #01579b; font-weight: bold;">
           <input type="checkbox" id="show-actual-dims" onchange="onToggleActualDims()" style="width: 16px; height: 16px; cursor: pointer; accent-color: #01579b;" />
-          <label for="show-actual-dims" style="cursor: pointer;">عرض الأبعاد الهندسية الفعلية (الأضلاع المائلة)</label>
+          <label for="show-actual-dims" style="cursor: pointer;"></label>
         </div>
-        <!-- خيار اتجاه التقسيم: من اليمين للياسر أو اليسار لليمين -->
-        <div id="partition-direction-toggle" style="margin-top: 8px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+        <!-- خيار اتجاه التقسيم: تلقائي من اليمين إلى اليسار -->
+        <div id="partition-direction-toggle" style="display: none !important; margin-top: 8px; justify-content: center; align-items: center; gap: 8px;">
           <button id="btn-partition-direction" class="btn btn-calc btn-sm no-print" onclick="togglePartitionOrderDirection()" style="font-weight: bold; font-size: 12.5px; background-color: #2e7d32; border: none; border-radius: 6px; color: white; padding: 5px 12px; cursor: pointer;"></button>
         </div>
       </div>
-      <div class="heirs-table-wrapper" style="overflow-x: auto;">
-        <table id="heirs-table">
+      <!-- لافتة تنبيه العجز / المتبقي العلوي -->
+      <div id="top-deficit-warning" class="no-print" style="display: none; margin-top: 10px; margin-bottom: 6px; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 13.5px; line-height: 1.5;"></div>
+      <div class="heirs-table-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #e0e0e0; margin-top: 8px;">
+        <table id="heirs-table" class="heirs-table table" style="min-width: 900px; width: 100%;">
           <thead>
-            <tr id="heirs-table-header-row">
-              <th>الاسم</th>
-              <th>العرض الأول (أعلى)</th>
-              <th>العرض الثاني (أسفل)</th>
-              <th id="th-side-left">الطول الأيسر</th>
-              <th id="th-side-right">الطول الأيمن</th>
-              <th>النصيب (م²)</th>
+            <tr id="heirs-table-header-row" class="table-header">
+              <th>م</th>
+              <th>الشريك</th>
               <th>سهم</th>
               <th>قيراط</th>
               <th>فدان</th>
-              <th>خصم الفرق من</th>
-              <th class="actions-header no-print">التحكم</th>
+              <th>المساحة (م²)</th>
+              <th>النسبة (%)</th>
+              <th>العرض الأول (أعلى)</th>
+              <th>العرض الثاني (أسفل)</th>
+              <th title="معدل العرض = (العرض الأول + العرض الثاني) ÷ 2">معدل العرض (م)</th>
+              <th title="معدل الطول = المساحة ÷ معدل العرض">معدل الطول (م)</th>
+              <th class="no-print">حذف</th>
             </tr>
           </thead>
           <tbody id="heirs-list">
             <!-- Dynamic Heirs Rows -->
           </tbody>
+          <tfoot>
+            <tr id="total" class="table-input" style="background: #fff8e1; border-top: 2px solid #ffe082;">
+              <td><input type="text" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" readonly value="الإجمالي" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-shares-entered" readonly value="0" style="font-weight: bold; background: #fff3e0; color: #000; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-carats-entered" readonly value="0" style="font-weight: bold; background: #fff3e0; color: #000; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-feddans-entered" readonly value="0" style="font-weight: bold; background: #fff3e0; color: #000; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-area-distributed" readonly value="0" style="font-weight: bold; background: #fff3e0; color: #000; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-percent-distributed" readonly value="0%" style="font-weight: bold; background: #fff3e0; color: #000; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-width-top-calculated" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" id="total-width-bottom-calculated" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+              <td><input type="text" readonly value="-" style="font-weight: bold; background: #fff3e0; color: #333; border: 1px solid #ffe082;"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
-      <div class="division-info">
-        <p>المساحة الموزعة: <span id="distributed-area">0</span> م² من إجمالي <span id="total-limit-area">0</span> م²<span id="calc-area-m2" style="display:none;">0</span></p>
-        <p id="distribution-status" class="status-ok">التوزيع متطابق 100%</p>
+      <div class="division-info" style="margin-top: 12px; padding: 10px 16px; background: #f9f9f9; border-radius: 8px; border: 1.5px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-weight: bold;">
+        <div style="font-size: 13.5px; color: #333;">
+          المساحة الموزعة: <span id="distributed-area" style="color: #1b5e20;">0</span> م² من إجمالي <span id="total-limit-area" style="color: #1b5e20;">0</span> م²<span id="calc-area-m2" style="display:none;">0</span>
+        </div>
+        <div id="distribution-status" style="font-size: 13.5px; color: #2e7d32; display: flex; align-items: center; gap: 6px;">
+          <span>🟢</span> التوزيع متطابق ومكتمل بالكامل!
+        </div>
+      </div>
+
+      <!-- بطاقة المتبقي والعجز القياسية (مطابقة لـ Page11) -->
+      <div class="table-remaining-box no-print" id="table-remaining-box" style="display: none; margin-top: 15px; padding: 14px 16px; border: 1.5px solid #ffcdd2; background-color: #ffebee; border-radius: 10px; flex-direction: column; align-items: center; gap: 10px; justify-content: center; max-width: 440px; margin-left: auto; margin-right: auto; box-sizing: border-box; width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <span id="rem-box-title" style="font-size: 14px; font-weight: bold; color: #c62828; font-family: Cairo, Arial, sans-serif; display: flex; align-items: center; gap: 6px;">
+          <span id="rem-box-icon" style="font-size: 16px;">🟡</span>
+          <span id="rem-box-label">يوجد جزء متبقٍ من الأرض يعادل:</span>
+        </span>
+        <div style="font-size: 20px; font-weight: bold; color: #c62828; font-family: Cairo, Arial, sans-serif;">
+          <span id="rem-area-m2">0.00</span> م²
+        </div>
+        <div style="display: flex; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box;">
+          <div class="unit-box-mini" style="background: #e8f5e9; border: 1.5px solid #2e7d32; padding: 6px 10px; border-radius: 8px; text-align: center; flex: 1; min-width: 0;">
+            <span class="unit-val-mini" id="rem-shares" style="font-weight: bold; font-size: 15px; color: #c62828; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">0.00</span>
+            <span class="unit-lbl-mini" style="font-size: 12px; color: #1b5e20; font-family: Cairo, Arial, sans-serif; font-weight: bold;">السهم</span>
+          </div>
+          <div class="unit-box-mini" style="background: #e8f5e9; border: 1.5px solid #2e7d32; padding: 6px 10px; border-radius: 8px; text-align: center; flex: 1; min-width: 0;">
+            <span class="unit-val-mini" id="rem-carats" style="font-weight: bold; font-size: 15px; color: #c62828; display: block;">0</span>
+            <span class="unit-lbl-mini" style="font-size: 12px; color: #1b5e20; font-family: Cairo, Arial, sans-serif; font-weight: bold;">القيراط</span>
+          </div>
+          <div class="unit-box-mini" style="background: #e8f5e9; border: 1.5px solid #2e7d32; padding: 6px 10px; border-radius: 8px; text-align: center; flex: 1; min-width: 0;">
+            <span class="unit-val-mini" id="rem-acres" style="font-weight: bold; font-size: 15px; color: #c62828; display: block;">0</span>
+            <span class="unit-lbl-mini" style="font-size: 12px; color: #1b5e20; font-family: Cairo, Arial, sans-serif; font-weight: bold;">الفدان</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -651,8 +712,9 @@
   <script src="../../shared/report-template.js"></script>
   <script src="../../shared/adapters/page13-adapter.js"></script>
   <script src="division-direction.js"></script>
-  <script src="script.js"></script>
   <script src="smart-share-editor.js"></script>
+  <script src="partners-table-adapter.js"></script>
+  <script src="script.js"></script>
   <script src="../../fraction-helper.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
