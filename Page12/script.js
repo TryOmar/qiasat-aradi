@@ -313,12 +313,13 @@ if (window.DallalStorage) {
 } else {
   showFeddanConversion = localStorage.getItem("dallal_show_feddan") !== "false";
 }
-let caratSize = 168;
+let caratSize = 175;
 if (window.DallalStorage) {
-  caratSize = parseFloat(DallalStorage.local.getItem("carat_area")) || 168;
+  caratSize = parseFloat(DallalStorage.local.getItem("carat_area")) || 175;
 } else {
-  caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 168;
+  caratSize = parseFloat(localStorage.getItem("dallal_carat_size")) || 175;
 }
+window.caratSize = caratSize;
 
 // Color Palette for Shapes
 const colorsList = [
@@ -5660,7 +5661,7 @@ function deleteSelectedElement() {
 }
 
 function resetCanvasToDefault() {
-  if (confirm("هل أنت متأكد من مسح اللوحة الحالية والبدء من جديد؟")) {
+  if (confirm("هل أنت متأكد من مسح اللوحة والبيانات والبدء من جديد؟")) {
     shapes = [];
     borderLabels = [];
     splitLines = [];
@@ -5670,17 +5671,64 @@ function resetCanvasToDefault() {
     zoomScale = 1.0;
     panX = 0;
     panY = 0;
+    activeTemplateType = 'rectangle';
+    customPartnerWidths = null;
+    customWaterwayData = null;
+    mixedPiecesTree = null;
+
+    if (window.DallalStorage) {
+      DallalStorage.local.removeItem("autosave");
+    } else {
+      localStorage.removeItem("dallal_autosave");
+    }
+
+    const w1Input = document.getElementById("start-w1");
+    const w2Input = document.getElementById("start-w2");
+    const l2Input = document.getElementById("start-l2");
+    const l1Input = document.getElementById("start-l1");
+    const d1Input = document.getElementById("start-d1");
+    const d2Input = document.getElementById("start-d2");
+    const pInput = document.getElementById("start-partners");
+
+    if (w1Input) w1Input.value = "30";
+    if (w2Input) w2Input.value = "30";
+    if (l2Input) l2Input.value = "60";
+    if (l1Input) l1Input.value = "60";
+    if (d1Input) d1Input.value = "";
+    if (d2Input) d2Input.value = "";
+    if (pInput) pInput.value = "1";
+
+    const w1Dir = document.getElementById("start-w1-dir");
+    const w2Dir = document.getElementById("start-w2-dir");
+    const l2Dir = document.getElementById("start-l2-dir");
+    const l1Dir = document.getElementById("start-l1-dir");
+
+    if (w1Dir) w1Dir.value = "بحري";
+    if (w2Dir) w2Dir.value = "قبلي";
+    if (l2Dir) l2Dir.value = "شرقي";
+    if (l1Dir) l1Dir.value = "غربي";
+
     applyViewportTransform();
-    renderSVG();
+
+    if (typeof generateCustomLand === "function") {
+      generateCustomLand(false);
+    } else {
+      renderSVG();
+    }
+
+    closeStartModal();
+    if (typeof closeModal === "function") closeModal();
+
     populateSidebarEditor();
     saveState();
-    
-    // Open start screen modal again
-    openStartModal();
-    
+
     // Close FAB menu if open
     const fab = document.getElementById("fabContainer");
     if (fab) fab.classList.remove("open");
+
+    if (window.DallalToast) {
+      DallalToast.success("تم مسح الكروكي وإعادة ضبط المستطيل الافتراضي");
+    }
   }
 }
 
@@ -6529,14 +6577,80 @@ function closeCaratConversionModal() {
   if (modal) modal.style.display = "none";
 }
 
+function updateCaratConversionLive(newVal) {
+  if (!newVal || isNaN(newVal) || newVal <= 0) return;
+  caratSize = newVal;
+  window.caratSize = newVal;
+  showFeddanConversion = true;
+
+  if (window.DallalStorage) {
+    DallalStorage.local.setItem("carat_area", caratSize);
+    DallalStorage.local.setItem("show_feddan", "true");
+  } else {
+    localStorage.setItem("dallal_carat_size", caratSize);
+    localStorage.setItem("dallal_show_feddan", "true");
+  }
+
+  // Update feddan/carat/shares for all existing shapes dynamically
+  if (Array.isArray(shapes)) {
+    shapes.forEach(s => {
+      let sqmVal = 0;
+      if (s.area && typeof s.area.sqm === "number") sqmVal = s.area.sqm;
+      else if (typeof s.area === "number") sqmVal = s.area;
+
+      if (sqmVal > 0 && typeof s.area === "object" && s.area !== null) {
+        const fcs = sqmToFeddanCaratShares(sqmVal);
+        s.area.feddan = fcs.feddan;
+        s.area.carat = fcs.carat;
+        s.area.shares = fcs.shares;
+      }
+    });
+  }
+
+  // 1. Re-render live SVG croquis on screen instantly
+  renderSVG();
+  
+  // 2. Re-populate editor panel if an element is selected
+  if (selectedElement && selectedElement.type === 'shape') {
+    populateSidebarEditor();
+  }
+
+  // 3. Re-generate print overlay if print view is currently open
+  const printOverlay = document.getElementById("printOverlay");
+  if (printOverlay && printOverlay.style.display === "block") {
+    if (window.Page12Adapter && window.DallalReportTemplate) {
+      const reportData = window.Page12Adapter.buildReportData();
+      window.DallalReportTemplate.print(reportData);
+    }
+  }
+}
+
 function handleModalCaratSelectChange() {
   const select = document.getElementById("modal-carat-select");
   const customInput = document.getElementById("modal-carat-custom");
   if (select.value === "custom") {
     customInput.style.display = "inline-block";
     customInput.focus();
+    const val = parseFloat(customInput.value);
+    if (!isNaN(val) && val > 0) {
+      updateCaratConversionLive(val);
+    }
   } else {
     customInput.style.display = "none";
+    const val = parseFloat(select.value);
+    if (!isNaN(val) && val > 0) {
+      updateCaratConversionLive(val);
+    }
+  }
+}
+
+function handleCustomCaratInputLive() {
+  const customInput = document.getElementById("modal-carat-custom");
+  if (customInput) {
+    const val = parseFloat(customInput.value);
+    if (!isNaN(val) && val > 0) {
+      updateCaratConversionLive(val);
+    }
   }
 }
 
@@ -6544,7 +6658,7 @@ function applyCaratConversion() {
   const select = document.getElementById("modal-carat-select");
   const customInput = document.getElementById("modal-carat-custom");
   
-  let selectedVal = 168;
+  let selectedVal = 175;
   if (select.value === "custom") {
     const customVal = parseFloat(customInput.value);
     if (isNaN(customVal) || customVal <= 0) {
@@ -6560,25 +6674,7 @@ function applyCaratConversion() {
     selectedVal = parseFloat(select.value);
   }
 
-  caratSize = selectedVal;
-  showFeddanConversion = true;
-
-  if (window.DallalStorage) {
-    DallalStorage.local.setItem("carat_area", caratSize);
-    DallalStorage.local.setItem("show_feddan", "true");
-  } else {
-    localStorage.setItem("dallal_carat_size", caratSize);
-    localStorage.setItem("dallal_show_feddan", "true");
-  }
-
-  // Re-render
-  renderSVG();
-  
-  // Re-populate editor panel if an element is selected
-  if (selectedElement && selectedElement.type === 'shape') {
-    populateSidebarEditor();
-  }
-
+  updateCaratConversionLive(selectedVal);
   closeCaratConversionModal();
 }
 

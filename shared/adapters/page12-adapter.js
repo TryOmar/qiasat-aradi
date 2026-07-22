@@ -13,7 +13,7 @@
       const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
       const timeStr = now.toLocaleTimeString('ar-EG');
 
-      const caratSize = global.caratSize || 168;
+      const caratSize = (typeof global.caratSize === 'number' && global.caratSize > 0) ? global.caratSize : 175;
 
       // 1. جلب عناصر الإدخال الرئيسية للأبعاد من واجهة الصفحة 12
       const w1Val = document.getElementById("start-w1")?.value || "-";
@@ -48,16 +48,20 @@
 
         if (s.area && typeof s.area.sqm === "number") {
           sqmVal = s.area.sqm;
-          feddanVal = s.area.feddan || 0;
-          caratVal = s.area.carat || 0;
-          sahmVal = s.area.shares || 0;
         } else if (typeof s.area === "number") {
           sqmVal = s.area;
+        }
+
+        if (sqmVal > 0) {
           if (global.AgriUnitsCompat) {
             const fcs = global.AgriUnitsCompat.sqmToFCS(sqmVal, caratSize);
             feddanVal = fcs.feddan;
             caratVal = fcs.carat;
             sahmVal = fcs.sahm;
+          } else if (s.area && typeof s.area.feddan === "number") {
+            feddanVal = s.area.feddan || 0;
+            caratVal = s.area.carat || 0;
+            sahmVal = s.area.shares || 0;
           }
         }
 
