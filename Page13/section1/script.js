@@ -641,38 +641,17 @@ function setupEventListeners() {
     inputEl.addEventListener('mouseleave', removeHighlight);
   });
 
-  // Commit 11.2: Handle "Next" / "Enter" key on dimension input fields only
-  document.addEventListener('keydown', function(e) {
-    const isNextKey = e.key === 'Enter' || e.key === 'Next' || e.keyCode === 13 || e.code === 'Enter';
-    if (!isNextKey) return;
+  // Commit 11.2: Mobile Virtual Keyboard Next/Enter dimension navigation
+  function focusNextDimensionInput(currentEl) {
+    // 1. Run calculations first
+    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
+    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
 
-    const activeEl = document.activeElement;
-    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
-
-    // Check if active element is a dimension input field
-    const isDimensionInput = activeEl.classList.contains('heir-side-top') ||
-                             activeEl.classList.contains('heir-side-bot') ||
-                             activeEl.classList.contains('partner-width-top') ||
-                             activeEl.classList.contains('partner-width-bottom') ||
-                             activeEl.classList.contains('partner-dimension') ||
-                             activeEl.classList.contains('heir-side-length-right') ||
-                             activeEl.classList.contains('heir-side-length-left');
-
-    if (!isDimensionInput) return;
-
-    // 1. Prevent default (stop keyboard collapse / form submit)
-    e.preventDefault();
-
-    // 2. Trigger input & change events to run calculations first
-    activeEl.dispatchEvent(new Event('input', { bubbles: true }));
-    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
-
-    // 3. Find all visible, editable dimension inputs in partner table rows
+    // 2. Find all visible editable dimension inputs in partner table rows
     const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
     let dimensionInputs = [];
 
     rows.forEach(row => {
-      // Dimension sequence: Top Width -> Bottom Width -> Right Length (if editable) -> Left Length (if editable)
       const topInput = row.querySelector('.heir-side-top, .partner-width-top');
       const botInput = row.querySelector('.heir-side-bot, .partner-width-bottom');
       const rightLengthInput = row.querySelector('.heir-side-length-right, .partner-length-right');
@@ -690,40 +669,59 @@ function setupEventListeners() {
 
     if (dimensionInputs.length === 0) return;
 
-    const idx = dimensionInputs.indexOf(activeEl);
+    const idx = dimensionInputs.indexOf(currentEl);
+    const targetInput = (idx > -1 && idx < dimensionInputs.length - 1) ? dimensionInputs[idx + 1] : currentEl;
 
-    if (idx > -1 && idx < dimensionInputs.length - 1) {
-      const nextInput = dimensionInputs[idx + 1];
-
-      // Focus next input
-      nextInput.focus();
-
-      // Scroll into view (keep centered above soft keyboard)
+    const doFocusAndSelect = () => {
+      targetInput.focus();
       try {
-        nextInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      } catch (err) {
-        // Fallback
+        targetInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } catch (err) {}
+      if (typeof targetInput.select === 'function') {
+        targetInput.select();
       }
+      if (typeof targetInput.setSelectionRange === 'function' && targetInput.value) {
+        try { targetInput.setSelectionRange(0, targetInput.value.length); } catch(e) {}
+      }
+    };
 
-      // Select all text for instant overwrite
-      if (typeof nextInput.select === 'function') {
-        nextInput.select();
-      }
+    doFocusAndSelect();
+    setTimeout(doFocusAndSelect, 30);
+    setTimeout(doFocusAndSelect, 120);
+  }
 
-      // Frame delay selection to guarantee text stays selected across mobile browsers
-      requestAnimationFrame(() => {
-        if (document.activeElement === nextInput && typeof nextInput.select === 'function') {
-          nextInput.select();
-        }
-      });
-    } else if (idx === dimensionInputs.length - 1) {
-      // Last row, last dimension input: hold focus, select text, keep keyboard open, don't scroll top
-      activeEl.focus();
-      if (typeof activeEl.select === 'function') {
-        activeEl.select();
-      }
+  function handleNextMobileEvent(e) {
+    const activeEl = document.activeElement;
+    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
+
+    const isDimensionInput = activeEl.classList.contains('heir-side-top') ||
+                             activeEl.classList.contains('heir-side-bot') ||
+                             activeEl.classList.contains('partner-width-top') ||
+                             activeEl.classList.contains('partner-width-bottom') ||
+                             activeEl.classList.contains('partner-dimension') ||
+                             activeEl.classList.contains('heir-side-length-right') ||
+                             activeEl.classList.contains('heir-side-length-left');
+
+    if (!isDimensionInput) return;
+
+    let isNextTrigger = false;
+    if (e.type === 'keydown') {
+      isNextTrigger = e.key === 'Enter' || e.key === 'Next' || e.key === 'Done' ||
+                      e.keyCode === 13 || e.keyCode === 10 || e.code === 'Enter';
+    } else if (e.type === 'beforeinput') {
+      isNextTrigger = e.inputType === 'insertLineBreak' || e.data === '\n';
     }
-  });
+
+    if (isNextTrigger) {
+      e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      focusNextDimensionInput(activeEl);
+    }
+  }
+
+  document.addEventListener('keydown', handleNextMobileEvent, true);
+  document.addEventListener('beforeinput', handleNextMobileEvent, true);
 }
 
 // Canvas events for division dragging (returns coordinates in CSS pixels)

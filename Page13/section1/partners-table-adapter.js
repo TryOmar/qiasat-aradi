@@ -13,6 +13,17 @@
       const listEl = document.getElementById("heirs-list");
       if (!listEl) return;
 
+      const activeEl = document.activeElement;
+      let activeHeirId = null;
+      let activeClassName = null;
+      if (activeEl && activeEl.tagName === 'INPUT' && listEl.contains(activeEl)) {
+        const parentTr = activeEl.closest('tr');
+        if (parentTr) {
+          activeHeirId = parentTr.getAttribute('data-id');
+          activeClassName = activeEl.className;
+        }
+      }
+
       listEl.innerHTML = "";
 
       if (!global.heirsData || !Array.isArray(global.heirsData)) {
@@ -74,10 +85,10 @@
             <input type="text" inputmode="decimal" value="% ${pct.toFixed(2)}" class="heir-share-pct" oninput="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, true)" onchange="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, false)" onblur="Page13PartnersTableAdapter.onPercentChange('${heir.id}', this.value, false)" style="text-align: center; font-weight: bold;" />
           </td>
           <td class="width-top-group">
-            <input type="text" inputmode="decimal" value="${topW.toFixed(4)}" class="heir-side-top" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" value="${topW.toFixed(4)}" class="heir-side-top" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'top', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
           </td>
           <td class="width-bottom-group">
-            <input type="text" inputmode="decimal" value="${botW.toFixed(4)}" class="heir-side-bot" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" value="${botW.toFixed(4)}" class="heir-side-bot" oninput="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, true)" onchange="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" onblur="Page13PartnersTableAdapter.onWidthDirectChange('${heir.id}', 'bot', this.value, false)" style="width: 75px; text-align: center; font-weight: bold; color: #1b5e20;" />
           </td>
           <td class="width-avg-group">
             <input type="text" readonly value="${avgW.toFixed(4)}" style="text-align: center; font-weight: bold; color: #1b5e20; background: #e8f5e9;" />
@@ -128,6 +139,19 @@
       }
 
       this.updateSummary(totalSqmSum, totalFeddansSum, totalCaratsSum, totalSharesSum, cumulativeTop, cumulativeBot);
+
+      // Restore active focus if table was rebuilt
+      if (activeHeirId && activeClassName) {
+        const targetTr = listEl.querySelector(`tr[data-id="${activeHeirId}"]`);
+        if (targetTr) {
+          const firstClass = activeClassName.split(' ').filter(c => c.trim()).join('.');
+          const targetInput = targetTr.querySelector(`input.${firstClass}`);
+          if (targetInput) {
+            targetInput.focus();
+            if (typeof targetInput.select === 'function') targetInput.select();
+          }
+        }
+      }
     },
 
     adjustWidth: function(id, type, delta) {

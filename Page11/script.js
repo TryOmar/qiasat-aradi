@@ -131,24 +131,9 @@ document.addEventListener("DOMContentLoaded", function () {
   renderHistory();
 
   // Commit 11.2 & 11.3 Parity: Dimension Keyboard Navigation for Page11
-  document.addEventListener('keydown', function(e) {
-    const isNextKey = e.key === 'Enter' || e.key === 'Next' || e.keyCode === 13 || e.code === 'Enter';
-    if (!isNextKey) return;
-
-    const activeEl = document.activeElement;
-    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
-
-    const isDimensionInput = activeEl.classList.contains('partner-width-top') ||
-                             activeEl.classList.contains('partner-width-bottom') ||
-                             activeEl.classList.contains('heir-side-top') ||
-                             activeEl.classList.contains('heir-side-bot');
-
-    if (!isDimensionInput) return;
-
-    e.preventDefault();
-
-    activeEl.dispatchEvent(new Event('input', { bubbles: true }));
-    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+  function focusNextPage11DimensionInput(currentEl) {
+    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
+    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
 
     const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
     let dimensionInputs = [];
@@ -169,25 +154,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (dimensionInputs.length === 0) return;
 
-    const idx = dimensionInputs.indexOf(activeEl);
+    const idx = dimensionInputs.indexOf(currentEl);
+    const targetInput = (idx > -1 && idx < dimensionInputs.length - 1) ? dimensionInputs[idx + 1] : currentEl;
 
-    if (idx > -1 && idx < dimensionInputs.length - 1) {
-      const nextInput = dimensionInputs[idx + 1];
-      nextInput.focus();
+    const doFocusAndSelect = () => {
+      targetInput.focus();
       try {
-        nextInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        targetInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
       } catch (err) {}
-      if (typeof nextInput.select === 'function') nextInput.select();
-      requestAnimationFrame(() => {
-        if (document.activeElement === nextInput && typeof nextInput.select === 'function') {
-          nextInput.select();
-        }
-      });
-    } else if (idx === dimensionInputs.length - 1) {
-      activeEl.focus();
-      if (typeof activeEl.select === 'function') activeEl.select();
+      if (typeof targetInput.select === 'function') {
+        targetInput.select();
+      }
+      if (typeof targetInput.setSelectionRange === 'function' && targetInput.value) {
+        try { targetInput.setSelectionRange(0, targetInput.value.length); } catch(e) {}
+      }
+    };
+
+    doFocusAndSelect();
+    setTimeout(doFocusAndSelect, 30);
+    setTimeout(doFocusAndSelect, 120);
+  }
+
+  function handleNextMobileEventPage11(e) {
+    const activeEl = document.activeElement;
+    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
+
+    const isDimensionInput = activeEl.classList.contains('partner-width-top') ||
+                             activeEl.classList.contains('partner-width-bottom') ||
+                             activeEl.classList.contains('heir-side-top') ||
+                             activeEl.classList.contains('heir-side-bot');
+
+    if (!isDimensionInput) return;
+
+    let isNextTrigger = false;
+    if (e.type === 'keydown') {
+      isNextTrigger = e.key === 'Enter' || e.key === 'Next' || e.key === 'Done' ||
+                      e.keyCode === 13 || e.keyCode === 10 || e.code === 'Enter';
+    } else if (e.type === 'beforeinput') {
+      isNextTrigger = e.inputType === 'insertLineBreak' || e.data === '\n';
     }
-  });
+
+    if (isNextTrigger) {
+      e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      focusNextPage11DimensionInput(activeEl);
+    }
+  }
+
+  document.addEventListener('keydown', handleNextMobileEventPage11, true);
+  document.addEventListener('beforeinput', handleNextMobileEventPage11, true);
 
   // Setup inputs saveAndCalc listeners
   const inputs = ["length1", "length2", "width1", "width2", "other-carat-area"];
@@ -807,14 +823,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}" data-last-val="${topW}">
+          <input type="text" inputmode="decimal" enterkeyhint="next" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" value="${topW}" data-last-val="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </td>
       <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}" data-last-val="${botW}">
+          <input type="text" inputmode="decimal" enterkeyhint="next" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" value="${botW}" data-last-val="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </td>
@@ -854,14 +870,14 @@ function addNewPartnerRow(name = "", feddans = "", carats = "", shares = "", fra
       <td class="width-top-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" onkeydown="if(event.key==='Enter')this.blur()" value="${topW}" data-last-val="${topW}">
+          <input type="text" inputmode="decimal" enterkeyhint="next" class="partner-width-top" oninput="onWidthChange(this, 'top')" onblur="onWidthChange(this, 'top')" value="${topW}" data-last-val="${topW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'top', 1)">+</button>
         </div>
       </td>
       <td class="width-bottom-group">
         <div class="width-input-container">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', -1)">-</button>
-          <input type="text" inputmode="decimal" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" onkeydown="if(event.key==='Enter')this.blur()" value="${botW}" data-last-val="${botW}">
+          <input type="text" inputmode="decimal" enterkeyhint="next" class="partner-width-bottom" oninput="onWidthChange(this, 'bottom')" onblur="onWidthChange(this, 'bottom')" value="${botW}" data-last-val="${botW}">
           <button type="button" class="width-step-btn" onclick="adjustWidthStep(this, 'bottom', 1)">+</button>
         </div>
       </td>

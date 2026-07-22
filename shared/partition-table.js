@@ -1,4 +1,4 @@
-﻿/**
+/**
  * shared/partition-table.js — Dallal Partition Table Engine
  * ==========================================================
  * محرك موحد لإدارة جدول الشركاء في تقسيم الأراضي.
@@ -115,9 +115,8 @@
         : "adjustWidthStep(this, '" + side + "', 1)";
       return '<div class="width-input-container">' +
         '<button type="button" class="width-step-btn" onclick="' + cbMin + '">-</button>' +
-        '<input type="text" inputmode="decimal" class="' + cls + '"' +
+        '<input type="text" inputmode="decimal" enterkeyhint="next" class="' + cls + '"' +
           ' oninput="' + cbCh + '" onblur="' + cbCh + '"' +
-          ' onkeydown="if(event.key===\'Enter\')this.blur()"' +
           ' value="' + valW + '" data-last-val="' + valW + '">' +
         '<button type="button" class="width-step-btn" onclick="' + cbPlus + '">+</button>' +
         '</div>';
