@@ -1907,12 +1907,10 @@ function drawLandCanvas(verticesInput) {
 
   // 2. Scale and Fit visual vertices inside Canvas bounding box (85% to 90% footprint, with extra space for printing)
   // [Commit 2 – Smart Layout] يستخدم window.smartMarginHint إن توفَّر، وإلا يرجع للحساب الأصلي
-  const margin = isPrinting ? 110
-    : (typeof window.smartMarginHint === "number" && window.smartMarginHint > 0
-        ? window.smartMarginHint
-        : Math.max(50, Math.min(60 * scaleMultiplier, 80)));
-  const drawW = cssW - 2 * margin;
-  const drawH = cssH - 2 * margin;
+  const marginTop = isPrinting ? 125 : Math.max(115, Math.min(125 * scaleMultiplier, 135));
+  const marginSide = isPrinting ? 85 : Math.max(75, Math.min(85 * scaleMultiplier, 95));
+  const drawW = cssW - 2 * marginSide;
+  const drawH = cssH - (marginTop + marginSide);
 
   const xs = visualVertices.map(v => v.x);
   const ys = visualVertices.map(v => v.y);
@@ -1930,9 +1928,9 @@ function drawLandCanvas(verticesInput) {
   // Transform coordinates to canvas space
   const canvasPoints = visualVertices.map(v => {
     return {
-      x: margin + (v.x - minX) * scale + (drawW - dx * scale) / 2,
+      x: marginSide + (v.x - minX) * scale + (drawW - dx * scale) / 2,
       // Invert Y because canvas goes down, math coordinates go up
-      y: cssH - (margin + (v.y - minY) * scale + (drawH - dy * scale) / 2)
+      y: cssH - (marginSide + (v.y - minY) * scale + (drawH - dy * scale) / 2)
     };
   });
 
@@ -2067,14 +2065,7 @@ function drawLandCanvas(verticesInput) {
       angle += Math.PI;
     }
 
-    const p13Dirs = typeof getP13Directions === "function" ? getP13Directions() : {};
-    let sideDirName = "";
-    if (i === 0) sideDirName = p13Dirs.bottom || "";
-    else if (i === 1) sideDirName = p13Dirs.right || "";
-    else if (i === 2) sideDirName = p13Dirs.top || "";
-    else if (i === 3) sideDirName = p13Dirs.left || "";
-
-    const labelText = sideDirName ? `${len.toFixed(2)} م (${sideDirName})` : `${len.toFixed(2)} م`;
+    const labelText = `${len.toFixed(2)} م`;
 
     ctx.save();
     ctx.translate(labelX, labelY);
@@ -2431,12 +2422,11 @@ function drawLandCanvas(verticesInput) {
     }
   }
 
-  // --- Render Direction Labels matching Page 11 Golden Reference 100% ---
+  // --- Render Direction Labels & Orange Partition Arrow matching Page 11 Golden Reference 100% ---
   if (canvasPoints && canvasPoints.length >= 4) {
     const dirs = getP13Directions();
     const dirFontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
     const dirColor = "#1565c0";
-    const dirOffset = Math.max(22, 28 * scaleMultiplier);
 
     const topPts = canvasPoints.filter((_, idx) => idx === 2 || idx === 3);
     const botPts = canvasPoints.filter((_, idx) => idx === 0 || idx === 1);
@@ -2455,38 +2445,68 @@ function drawLandCanvas(verticesInput) {
     const leftMinX = Math.min(...leftPts.map(p => p.x));
     const leftMidY = leftPts.reduce((s, p) => s + p.y, 0) / (leftPts.length || 1);
 
-    function drawDirBadge(text, x, y, rotateAngle) {
+    function drawDirText(text, x, y, rotateAngle) {
       if (!text) return;
       ctx.save();
       ctx.translate(x, y);
       if (rotateAngle) ctx.rotate(rotateAngle);
       ctx.font = `bold ${dirFontSize}px Cairo, Arial, sans-serif`;
-      const tw = ctx.measureText(text).width;
-      
-      // Draw background pill badge
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.strokeStyle = "#1565c0";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(-tw / 2 - 6, -dirFontSize / 2 - 3, tw + 12, dirFontSize + 6, 6);
-      } else {
-        ctx.rect(-tw / 2 - 6, -dirFontSize / 2 - 3, tw + 12, dirFontSize + 6);
-      }
-      ctx.fill();
-      ctx.stroke();
-
       ctx.fillStyle = dirColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, 0, 1);
+      ctx.fillText(text, 0, 0);
       ctx.restore();
     }
 
-    drawDirBadge(dirs.top, topMidX, Math.max(dirFontSize + 10, topMinY - dirOffset), 0);
-    drawDirBadge(dirs.bottom, botMidX, Math.min(cssH - (dirFontSize + 10), botMaxY + dirOffset), 0);
-    drawDirBadge(dirs.right, Math.min(cssW - (dirFontSize + 10), rightMaxX + dirOffset), rightMidY, -Math.PI / 2);
-    drawDirBadge(dirs.left, Math.max(dirFontSize + 10, leftMinX - dirOffset), leftMidY, -Math.PI / 2);
+    // 1. Cardinal Directions (matching Page 11 distances)
+    drawDirText(dirs.top, topMidX, topMinY - 60, 0);
+    drawDirText(dirs.bottom, botMidX, botMaxY + 60, 0);
+    drawDirText(dirs.right, rightMaxX + 60, rightMidY, -Math.PI / 2);
+    drawDirText(dirs.left, leftMinX - 60, leftMidY, -Math.PI / 2);
+
+    // 2. Orange Partition Arrow (100% Page 11 Parity)
+    const isRTL = (window.partitionOrderDirection === 'rtl');
+    const arrowY = topMinY - 92;
+    const arrowStartX = isRTL ? (topMidX + 110 * scaleMultiplier) : (topMidX - 110 * scaleMultiplier);
+    const arrowEndX = isRTL ? (topMidX - 110 * scaleMultiplier) : (topMidX + 110 * scaleMultiplier);
+
+    ctx.strokeStyle = "#ef6c00";
+    ctx.lineWidth = Math.max(2, 2.5 * scaleMultiplier);
+    ctx.beginPath();
+    ctx.moveTo(arrowStartX, arrowY);
+    ctx.lineTo(arrowEndX, arrowY);
+    ctx.stroke();
+
+    // Arrow Head
+    const headSize = Math.max(6, 7 * scaleMultiplier);
+    ctx.fillStyle = "#ef6c00";
+    ctx.beginPath();
+    if (isRTL) {
+      ctx.moveTo(arrowEndX, arrowY);
+      ctx.lineTo(arrowEndX + headSize, arrowY - headSize / 1.5);
+      ctx.lineTo(arrowEndX + headSize, arrowY + headSize / 1.5);
+    } else {
+      ctx.moveTo(arrowEndX, arrowY);
+      ctx.lineTo(arrowEndX - headSize, arrowY - headSize / 1.5);
+      ctx.lineTo(arrowEndX - headSize, arrowY + headSize / 1.5);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Text above arrow - 2 lines
+    ctx.save();
+    ctx.font = `bold ${Math.round(Math.max(11, 12 * scaleMultiplier))}px Cairo, sans-serif`;
+    ctx.fillStyle = "#ef6c00";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("اتجاه التقسيم", topMidX, arrowY - 14);
+
+    ctx.font = `${Math.round(Math.max(10, 10.5 * scaleMultiplier))}px Cairo, sans-serif`;
+    ctx.fillStyle = "#f57c00";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(isRTL ? "من اليمين الى اليسار" : "من اليسار الى اليمين", topMidX, arrowY - 2);
+    ctx.restore();
   }
 
   console.log("drawLandCanvas finished");
