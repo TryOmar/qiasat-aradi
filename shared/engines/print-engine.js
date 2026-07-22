@@ -49,27 +49,26 @@
      * @param {Object} options خيارات إضافية
      */
     print: function (data, options) {
-      options = options || {};
-      this.applyPrintMargins(options.margin);
-
-      if (global.SmartExport && typeof global.SmartExport.printReport === "function") {
-        global.SmartExport.printReport();
+      if (this._inPrint) {
+        console.warn("[PrintEngine] Re-entrant print request blocked.");
         return;
       }
+      this._inPrint = true;
+      try {
+        options = options || {};
+        this.applyPrintMargins(options.margin);
 
-      if (global.ReportEngine && typeof global.ReportEngine.print === "function") {
-        global.ReportEngine.print(data);
-        return;
+        if (global.DallalReportTemplate && typeof global.DallalReportTemplate.print === "function") {
+          global.DallalReportTemplate.print(data);
+          return;
+        }
+
+        // Direct fallback print execution
+        window.print();
+      } finally {
+        this.restoreMargins();
+        this._inPrint = false;
       }
-
-      if (global.DallalReportTemplate && typeof global.DallalReportTemplate.print === "function") {
-        global.DallalReportTemplate.print(data);
-        return;
-      }
-
-      // Direct fallback
-      window.print();
-      this.restoreMargins();
     },
 
     /**

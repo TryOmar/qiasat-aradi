@@ -2113,32 +2113,68 @@ function runPartition(shouldRender = true) {
   }
 }
 
-function clearAll(confirmRequired = false) {
+// Page11 Central Reset & Clear Function
+function resetPage11(confirmRequired = false) {
   if (confirmRequired) {
     if (!confirm("سيتم حذف جميع البيانات وإعادة الصفحة إلى البداية. هل تريد المتابعة؟")) {
       return;
     }
   }
-  document.getElementById("length1").value = "";
-  document.getElementById("length2").value = "";
-  document.getElementById("width1").value = "";
-  document.getElementById("width2").value = "";
-  
+
+  console.log("RESET PAGE11: START");
+
+  // 1. Clear input elements
+  ["length1", "length2", "width1", "width2", "other-carat-area"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+
+  // 2. Reset state variables
   isPartitioned = false;
   isManualPartition = false;
   window.calculatedPieces = [];
   window.lastCroquisSignature = "";
-  
+  if (Array.isArray(window.partners)) window.partners = [];
+
+  // 3. Clear partners list DOM
   const list = document.getElementById("partners-list");
   if (list) list.innerHTML = "";
-  
-  // إعادة خطوة التعديل إلى القيمة الافتراضية عند مسح بيانات الأرض
-  resetStepValue();
 
+  // 4. Remove all Page11 localStorage keys
+  const p11Keys = [
+    "p11-long-plot-view",
+    "p11-length1", "p11-length2", "p11-width1", "p11-width2",
+    "dalal-carat-area", "p11-other-carat-area",
+    "p11-input-method", "p11-is-partitioned", "p11-is-manual-partition",
+    "p11-partition-direction",
+    "p11-dir-length1", "p11-dir-length2", "p11-dir-width1", "p11-dir-width2",
+    "p11-manual-width-mode", "p11-width-step-value",
+    "p11-partners"
+  ];
+  p11Keys.forEach(k => {
+    try {
+      localStorage.removeItem(k);
+      if (window.DallalStorage && DallalStorage.local) {
+        DallalStorage.local.removeItem(k);
+      }
+    } catch(e) {}
+  });
+
+  // 5. Reset direction defaults & step value
+  if (typeof resetStepValue === "function") resetStepValue();
+  if (typeof resetP11DirectionsToDefault === "function") resetP11DirectionsToDefault();
+
+  // 6. Reset header/footer & recalculate cleanly
   renderHeaderAndFooter();
-  saveData();
   calculateGeneral(true);
+  console.log("RESET PAGE11: COMPLETED");
 }
+
+function clearAll(confirmRequired = false) {
+  resetPage11(confirmRequired);
+}
+
+window.resetPage11 = resetPage11;
 
 function clearPartners(confirmRequired = false) {
   if (confirmRequired) {
@@ -3497,22 +3533,48 @@ function hasDeficit() {
   return window.calcState.hasDeficit;
 }
 
+// Page11 Hotfix — Prepare Printable Data
+function preparePrintPage11() {
+  console.log("PRINT PREPARE START (Page11)");
+  const reportData = window.Page11Adapter ? window.Page11Adapter.buildReportData() : {};
+  return reportData;
+}
+
 function printReport() {
+  if (window._isPage11Printing) {
+    console.warn("[Page11 Print] Re-entrant print request blocked.");
+    return;
+  }
+
   if (hasDeficit()) {
     alert("🔴 لا يمكن اعتماد أو طباعة التقرير لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
     return;
   }
-  const reportData = window.Page11Adapter ? window.Page11Adapter.buildReportData() : {};
-  if (window.ReportEngine && typeof window.ReportEngine.print === "function") {
-    window.ReportEngine.print(reportData);
-    return;
-  }
-  if (window.DallalReportTemplate) {
-    window.DallalReportTemplate.print(reportData);
-  } else {
+
+  window._isPage11Printing = true;
+  console.log("PRINT START");
+
+  try {
+    const reportData = preparePrintPage11();
+    console.log("PRINT READY");
+
+    if (window.DallalReportTemplate && typeof window.DallalReportTemplate.print === "function") {
+      window.DallalReportTemplate.print(reportData);
+      return;
+    }
     window.print();
+  } catch (err) {
+    console.error("[Page11 Print Error]:", err);
+  } finally {
+    console.log("PRINT END");
+    setTimeout(function() {
+      window._isPage11Printing = false;
+    }, 500);
   }
 }
+
+window.preparePrintPage11 = preparePrintPage11;
+window.printReport = printReport;
 
 function exportPDF() {
   // نستخدم طباعة المتصفح للـ PDF - هي الطريقة الأكثر موثوقية بدون مكتبات خارجية

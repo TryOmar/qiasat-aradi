@@ -2,6 +2,23 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [v3.0.0-RC1 Hotfix] - 2026-07-22
+### 🛠️ Hotfix 1: Page11 & Page13 Reset & Print Performance Stability Fix
+
+```text
+Status: HOTFIX CERTIFIED & VERIFIED (Post AUD-002B)
+Audited Modules: Page11 (VarLengthPartition), Page13 (ReportsPrint), PrintEngine (shared/engines/print-engine.js)
+AUD-002B Visual Regression Baseline: 100% PASS (Preserved & Intact)
+```
+
+- **إصلاح Reset الشامل لصفحة 13 (`resetPage13()`):** تنظيف كامل لجميع حقول الإدخال، الجداول، الكروكي، المتغيرات، و `localStorage`/`sessionStorage` وإعادة الصفحة للوضع الافتراضي بدون Reload.
+- **إصلاح Reset الشامل لصفحة 11 (`resetPage11()`):** تنظيف كامل لجميع حقول الإدخال، جدول الشركاء، أبعاد الأرض، وحذف جميع المفاتيح المحفوظة في `localStorage` لمنع استرجاع البيانات عند إعادة التعيين.
+- **فصل تجهيز الطباعة ومنع التجميد (`preparePrintPage13()` / `preparePrintPage11()`):** فصل بناء التقرير الهيكلي عن استدعاء `window.print()` وإضافة أقفال تمنع التكرار اللانهائي (`_isPage13Printing`, `_isPage11Printing`, `_inPrint`).
+- **حماية محرك الطباعة (`shared/engines/print-engine.js`):** تزويد محرك الطباعة بأقفال الحماية ومنع استدعاء `SmartExport.printReport()` بشكل دائر متكرر.
+- **حماية إضافة الشريك في Page13:** منع التجميد والتحميل المتكرر عند النقر السريع على "إضافة شريك".
+
+---
+
 ## [v3.0.0-RC1 Release Candidate Audit] - 2026-07-22
 ### 🛡️ تدشين حزمة المراجعة والتدقيق الشاملة للإصدار المرشح Release Candidate Audit (v3.0-RC1)
 

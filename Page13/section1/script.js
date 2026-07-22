@@ -502,6 +502,34 @@ function saveAndCalcImmediate() {
 window.saveAndCalc = saveAndCalc;
 window.saveAndCalcImmediate = saveAndCalcImmediate;
 
+// Synchronize shape cards UI and dynamic input groups visibility
+function syncShapeUI(targetShape) {
+  const shape = targetShape || activeShape || "trapezoid";
+  activeShape = shape;
+  window.activeShape = shape;
+
+  const cards = document.querySelectorAll(".shape-card");
+  cards.forEach(card => {
+    if (card.getAttribute("data-shape") === shape) {
+      card.classList.add("active");
+    } else {
+      card.classList.remove("active");
+    }
+  });
+
+  const groups = document.querySelectorAll(".inputs-group");
+  groups.forEach(group => {
+    if (group.id === `inputs-${shape}`) {
+      group.classList.add("active");
+      group.style.display = "flex";
+    } else {
+      group.classList.remove("active");
+      group.style.display = "none";
+    }
+  });
+}
+window.syncShapeUI = syncShapeUI;
+
 function setupEventListeners() {
   const btnAddPartner = document.getElementById("addPartnerBtn") || document.querySelector(".btn-add-heir");
   if (btnAddPartner) {
@@ -509,17 +537,11 @@ function setupEventListeners() {
   }
 
   // Shape card clicks
-  shapeCards.forEach(card => {
+  const cards = document.querySelectorAll(".shape-card");
+  cards.forEach(card => {
     card.addEventListener("click", () => {
-      shapeCards.forEach(c => c.classList.remove("active"));
-      card.classList.add("active");
-      activeShape = card.getAttribute("data-shape");
-      window.activeShape = activeShape;
-      
-      // Toggle inputs group
-      inputsGroups.forEach(group => group.classList.remove("active"));
-      document.getElementById(`inputs-${activeShape}`).classList.add("active");
-      
+      const selectedShape = card.getAttribute("data-shape");
+      syncShapeUI(selectedShape);
       resetDivision();
       saveAndCalcImmediate();
     });
@@ -818,25 +840,36 @@ function adjustPriceFontSize(input) {
   }
 }
 
-// Clear all inputs (Page 11 Parity)
-function clearAllInputs(confirmRequired = false) {
+// Page13 Central Reset & Clear Function
+function resetPage13(confirmRequired = false) {
   if (confirmRequired) {
     if (!confirm("سيتم حذف جميع البيانات وإعادة الصفحة إلى البداية. هل تريد المتابعة؟")) {
       return;
     }
   }
 
-  // 1. Clear shape inputs across all groups
-  const inputs = document.querySelectorAll(".inputs-group input");
-  inputs.forEach(input => input.value = "");
+  console.log("RESET PAGE13: START");
 
-  // 2. Clear carat price & reset carat size
+  // 1. Clear ALL input elements across form groups, partners, and conversion tables
+  const allInputs = document.querySelectorAll(".inputs-group input, input[type='text'], input[type='number'], input[inputmode='decimal']");
+  allInputs.forEach(input => {
+    if (input.id === "carat-size") {
+      input.value = "168";
+    } else if (input.id === "carat-preset") {
+      input.value = "168";
+    } else if (input.id === "heirs-count") {
+      input.value = "0";
+    } else {
+      input.value = "";
+    }
+  });
+
   if (typeof caratPriceDisplay !== "undefined" && caratPriceDisplay) caratPriceDisplay.value = "";
   if (typeof caratPriceNumeric !== "undefined" && caratPriceNumeric) caratPriceNumeric.value = "";
   if (typeof caratSizeInput !== "undefined" && caratSizeInput) caratSizeInput.value = "168";
   if (typeof caratPresetSelect !== "undefined" && caratPresetSelect) caratPresetSelect.value = "168";
 
-  // 3. Reset Single Source of Truth calculation & geometry state BEFORE resetting division
+  // 2. Reset Single Source of Truth calculation & geometry state
   calculatedArea = 0;
   calculatedPerimeter = 0;
   area = 0;
@@ -845,34 +878,72 @@ function clearAllInputs(confirmRequired = false) {
   heirsData = [];
   window.heirsData = [];
 
-  // 4. Clear sessionStorage keys
-  try {
-    sessionStorage.setItem("heirsData", "[]");
-    sessionStorage.setItem("heirsCount", "0");
-    sessionStorage.removeItem("divisionInput");
-    sessionStorage.removeItem("priceDisplay");
-    sessionStorage.removeItem("priceNumeric");
-    sessionStorage.removeItem("rectLength");
-    sessionStorage.removeItem("rectWidth");
-    sessionStorage.removeItem("squareSide");
-    sessionStorage.removeItem("trapBaseMajor");
-    sessionStorage.removeItem("trapBaseMinor");
-    sessionStorage.removeItem("trapLengthRight");
-    sessionStorage.removeItem("trapLengthLeft");
-    sessionStorage.removeItem("quadSideA");
-    sessionStorage.removeItem("quadSideB");
-    sessionStorage.removeItem("quadSideC");
-    sessionStorage.removeItem("quadSideD");
-    sessionStorage.removeItem("quadDiagAC");
-    sessionStorage.removeItem("quadDiagBD");
-  } catch (e) {
-    console.warn("sessionStorage cleanup warning:", e);
+  // 3. Clear Canvas & SVG overlays
+  const canvas = document.getElementById("landCanvas");
+  if (canvas && canvas.getContext) {
+    const ctx = canvas.getContext("2d");
+    if (ctx.resetTransform) {
+      ctx.resetTransform();
+    } else {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // 5. Hide overlays & tooltips
-  if (typeof closeInspector === "function") {
-    closeInspector();
-  }
+  // 4. Clear output table displays
+  const resultDisplayIds = [
+    "total-sqm", "total-perimeter", "total-price",
+    "area-shares", "area-carats", "area-feddans",
+    "distributed-area", "total-limit-area"
+  ];
+  resultDisplayIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = "0";
+  });
+
+  const convBody = document.getElementById("conversions-tbody");
+  if (convBody) convBody.innerHTML = "";
+
+  // 5. Clear localStorage & sessionStorage for Page13
+  const p13LocalStorageKeys = [
+    "p13-s2-data",
+    "p13-division-direction",
+    "partitionOrderDirection",
+    "partition_order_direction",
+    "p13-show-dimensions",
+    "p13-show-dividers",
+    "p13-show-names",
+    "p13-show-areas",
+    "p13-show-numbers",
+    "p13-show-badges",
+    "p13-font-size",
+    "p13-measurement-size",
+    "p13-settings-expanded",
+    "p13-trap-a-dir", "p13-trap-b-dir", "p13-trap-c-dir", "p13-trap-d-dir",
+    "p13-quad-a-dir", "p13-quad-b-dir", "p13-quad-c-dir", "p13-quad-d-dir"
+  ];
+  p13LocalStorageKeys.forEach(key => {
+    try {
+      localStorage.removeItem(key);
+      if (window.DallalStorage && DallalStorage.local) {
+        DallalStorage.local.removeItem(key);
+      }
+    } catch(e) {}
+  });
+
+  const p13SessionStorageKeys = [
+    "heirsData", "heirsCount", "divisionInput", "priceDisplay", "priceNumeric",
+    "rectLength", "rectWidth", "squareSide",
+    "trapBaseMajor", "trapBaseMinor", "trapLengthRight", "trapLengthLeft",
+    "quadSideA", "quadSideB", "quadSideC", "quadSideD", "quadDiagAC", "quadDiagBD",
+    "page13_active_shape"
+  ];
+  p13SessionStorageKeys.forEach(key => {
+    try { sessionStorage.removeItem(key); } catch (e) {}
+  });
+
+  // 6. Reset UI overlays, tooltips & direction defaults
+  if (typeof closeInspector === "function") closeInspector();
 
   const topDeficit = document.getElementById("top-deficit-warning");
   if (topDeficit) topDeficit.style.display = "none";
@@ -886,17 +957,26 @@ function clearAllInputs(confirmRequired = false) {
     legend.style.display = "none";
   }
 
-  // 6. Reset Division (Page 11 Golden Reference Parity: clears all partners, count = 0, no default rows created)
   if (heirsCountInput) heirsCountInput.value = "0";
   if (window.Page13PartnersTableAdapter && typeof window.Page13PartnersTableAdapter.removeAllPartners === "function") {
     window.Page13PartnersTableAdapter.removeAllPartners(true);
   } else {
     heirsData = [];
     window.heirsData = [];
-    generateHeirsTable();
+    if (typeof generateHeirsTable === "function") generateHeirsTable();
   }
+
+  if (typeof resetP13DirectionsToDefault === "function") resetP13DirectionsToDefault();
+  if (typeof resetCroquisSettings === "function") resetCroquisSettings();
+
   saveStateToSession();
+  syncShapeUI(activeShape || "trapezoid");
   calculateAll();
+  console.log("RESET PAGE13: COMPLETED");
+}
+
+function clearAllInputs(confirmRequired = false) {
+  resetPage13(confirmRequired);
 }
 
 // Opposite direction mapping (Page 11 Golden Reference Parity)
@@ -3075,23 +3155,8 @@ function loadStateFromSession() {
   caratPriceNumeric.value = sessionStorage.getItem("priceNumeric") || "";
   adjustPriceFontSize(caratPriceDisplay);
 
-  // Set active card UI
-  shapeCards.forEach(card => {
-    if (card.getAttribute("data-shape") === activeShape) {
-      card.classList.add("active");
-    } else {
-      card.classList.remove("active");
-    }
-  });
-
-  // Set inputs group UI
-  inputsGroups.forEach(group => {
-    if (group.id === `inputs-${activeShape}`) {
-      group.classList.add("active");
-    } else {
-      group.classList.remove("active");
-    }
-  });
+  // Sync active card and inputs group UI
+  syncShapeUI(activeShape);
 
   // Restore fields
   document.getElementById("rect-length").value = sessionStorage.getItem("rectLength") || "";
@@ -3160,23 +3225,13 @@ function loadStateFromSession() {
   }
 }
 
-// Print trigger
-function printCroquis() {
-  if (window.ReportEngine && typeof window.ReportEngine.print === "function") {
-    const reportData = (window.Page13Adapter && typeof window.Page13Adapter.buildReportData === "function") 
-      ? window.Page13Adapter.buildReportData() 
-      : null;
-    window.ReportEngine.print(reportData);
-    return;
-  }
-  if (window.Page13Adapter && window.DallalReportTemplate) {
-    const reportData = window.Page13Adapter.buildReportData();
-    window.DallalReportTemplate.print(reportData);
-    return;
-  }
+// Page13 Hotfix — Prepare Printable Data & HTML Layout
+function preparePrintPage13() {
+  console.log("PRINT PREPARE START");
+
   // Capture canvas as image
   const canvas = document.getElementById('landCanvas');
-  const canvasDataURL = canvas.toDataURL('image/png');
+  const canvasDataURL = canvas ? canvas.toDataURL('image/png') : '';
 
   // Helper to sync current input/select values into their HTML attributes before serializing
   function syncInputValues(container) {
@@ -3246,8 +3301,8 @@ function printCroquis() {
   if (activeShape === 'rectangle') {
     shapeNameAr = 'أرض مستطيلة';
     paramsList = [
-      { label: 'الطول (م)', value: document.getElementById('rect-length').value || '0' },
-      { label: 'العرض (م)', value: document.getElementById('rect-width').value || '0' }
+      { label: 'الطول (م)', value: document.getElementById('rect-length')?.value || '0' },
+      { label: 'العرض (م)', value: document.getElementById('rect-width')?.value || '0' }
     ];
   } else if (activeShape === 'square') {
     shapeNameAr = 'أرض مربعة';
@@ -3696,6 +3751,49 @@ function printCroquis() {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+    
+    return { html: printHTML, reportId, dateStr, timeStr };
+}
+
+// Print trigger (Freeze Prevention & Cycle Protection)
+function printCroquis() {
+  if (window._isPage13Printing) {
+    console.warn("[Page13 Print] Print operation already in progress. Ignoring duplicate request.");
+    return;
+  }
+
+  window._isPage13Printing = true;
+  console.log("PRINT START");
+
+  try {
+    const printData = preparePrintPage13();
+    console.log("PRINT READY");
+
+    if (window.DallalReportTemplate && typeof window.DallalReportTemplate.print === "function") {
+      const adapterData = (window.Page13Adapter && typeof window.Page13Adapter.buildReportData === "function") 
+        ? window.Page13Adapter.buildReportData() 
+        : printData;
+      window.DallalReportTemplate.print(adapterData);
+      return;
+    }
+
+    const printWin = window.open('', '_blank', 'width=800,height=650,scrollbars=yes');
+    if (!printWin) {
+      window.print();
+      return;
+    }
+    printWin.document.open();
+    printWin.document.write(printData.html);
+    printWin.document.close();
+  } catch (err) {
+    console.error("[Page13 Print Error]:", err);
+  } finally {
+    console.log("PRINT END");
+    setTimeout(function() {
+      window._isPage13Printing = false;
+    }, 500);
+  }
+}
 
     /* ── العلامة المائية ──────────────────────── */
     .watermark-container {
