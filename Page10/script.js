@@ -60,13 +60,13 @@ function renderAreas() {
       <tr id="area-block-${i}">
         <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="area-shares" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="${area.shares || ''}">
+          <input type="text" inputmode="decimal" class="area-shares" data-index="${i}" placeholder="مثال: 6.25" onchange="onAreaInput(${i})" value="${area.shares || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="area-carat" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="${area.carat || ''}">
+          <input type="text" inputmode="decimal" class="area-carat" data-index="${i}" placeholder="مثال: 12" onchange="onAreaInput(${i})" value="${area.carat || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="area-acre" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="${area.acre || ''}">
+          <input type="text" inputmode="decimal" class="area-acre" data-index="${i}" placeholder="مثال: 1" onchange="onAreaInput(${i})" value="${area.acre || ''}">
         </td>
         <td style="vertical-align: middle;">
           <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" onchange="onAreaInput(${i})" value="${area.name || ''}">
@@ -116,13 +116,13 @@ function appendAreaRow(i) {
   tr.innerHTML = `
     <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="area-shares" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="area-shares" data-index="${i}" placeholder="مثال: 6.25" onchange="onAreaInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="area-carat" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="area-carat" data-index="${i}" placeholder="مثال: 12" onchange="onAreaInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="area-acre" data-index="${i}" placeholder="0" onchange="onAreaInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="area-acre" data-index="${i}" placeholder="مثال: 1" onchange="onAreaInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
       <input type="text" class="area-name-input" data-index="${i}" placeholder="مثال: الغيط الكبير" onchange="onAreaInput(${i})" value="">
@@ -193,13 +193,13 @@ function renderDiscounts() {
       <tr id="discount-block-${i}">
         <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="discount-shares" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="${d.shares || ''}">
+          <input type="text" inputmode="decimal" class="discount-shares" data-index="${i}" placeholder="مثال: 6.25" onchange="onDiscountInput(${i})" value="${d.shares || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="discount-carat" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="${d.carat || ''}">
+          <input type="text" inputmode="decimal" class="discount-carat" data-index="${i}" placeholder="مثال: 12" onchange="onDiscountInput(${i})" value="${d.carat || ''}">
         </td>
         <td style="vertical-align: middle;">
-          <input type="text" inputmode="decimal" class="discount-acre" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="${d.acre || ''}">
+          <input type="text" inputmode="decimal" class="discount-acre" data-index="${i}" placeholder="مثال: 1" onchange="onDiscountInput(${i})" value="${d.acre || ''}">
         </td>
         <td style="vertical-align: middle;">
           <input type="text" class="discount-name-input" data-index="${i}" placeholder="مثال: مشروع صرف" onchange="onDiscountInput(${i})" value="${d.name || ''}">
@@ -245,13 +245,13 @@ function appendDiscountRow(i) {
   tr.innerHTML = `
     <td style="vertical-align: middle; font-weight: bold; color: #666; font-size: 13px;">${i + 1}</td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="discount-shares" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="discount-shares" data-index="${i}" placeholder="مثال: 6.25" onchange="onDiscountInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="discount-carat" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="discount-carat" data-index="${i}" placeholder="مثال: 12" onchange="onDiscountInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
-      <input type="text" inputmode="decimal" class="discount-acre" data-index="${i}" placeholder="0" onchange="onDiscountInput(${i})" value="">
+      <input type="text" inputmode="decimal" class="discount-acre" data-index="${i}" placeholder="مثال: 1" onchange="onDiscountInput(${i})" value="">
     </td>
     <td style="vertical-align: middle;">
       <input type="text" class="discount-name-input" data-index="${i}" placeholder="مثال: مشروع صرف" onchange="onDiscountInput(${i})" value="">

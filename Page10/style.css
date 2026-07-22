@@ -192,26 +192,43 @@ body {
   font-weight: bold !important;
 }
 
-#lands-table td input {
+#lands-table td input,
+#discount-table td input,
+.input-group-custom input,
+.input1,
+input[type="text"] {
   width: 100% !important;
-  height: 34px !important;
-  border: 1px solid #cccccc !important;
-  border-radius: 6px !important;
+  height: 38px !important;
+  border: 2px solid #000000 !important;
+  border-radius: 9px !important;
   text-align: center !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: bold !important;
-  background-color: #fafafa !important;
-  color: #333333 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
   transition: all 0.2s !important;
   position: static !important;
   right: auto !important;
+  box-sizing: border-box !important;
 }
 
-#lands-table td input:focus {
-  border-color: #2e7d32 !important;
+#lands-table td input:focus,
+#discount-table td input:focus,
+.input-group-custom input:focus,
+.input1:focus,
+input[type="text"]:focus {
+  border-color: #1b5e20 !important;
   background-color: #ffffff !important;
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15) !important;
   outline: none !important;
+}
+
+::placeholder {
+  color: #777777 !important;
+  opacity: 0.75 !important;
+  font-weight: normal !important;
+  font-size: 13px !important;
+  text-align: center !important;
 }
 
 /* Area Name Input */
