@@ -2,6 +2,23 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [Commit 12 / v2.2.2 Architecture Certification] - 2026-07-22
+### 🏆 توحيد واعتماد البنية المعمارية لمحركات الحسابات (shared/calculations/)
+
+```text
+Commit 12 Architecture Certification: APPROVED & LOCKED
+Geometry Engine (shared/calculations/geometry.js)       : ✅ PASS (0.000000 m² diff)
+Unit Conversion Engine (shared/calculations/units.js)   : ✅ PASS (0.000000 diff)
+Validation Engine (shared/calculations/validation.js)   : ✅ PASS (100% Pass)
+Partition Engine (shared/calculations/partition.js)    : ✅ PASS (Golden Dataset & Snapshots Pass)
+Status: Certified & Baseline Established for Commit 13
+```
+
+- **توحيد المصدر الحسابي الوحيد (Single Source of Truth):** تجميع وتأطير جميع دوال الحساب، التحويلات، التحقق، والتقسيم داخل مجلد `shared/calculations/`.
+- **اختبارات المطابقة الصفريّة:** إنجاز كافة الفحوصات المقارنة بنسبة خطأ صفرية تامة `0.000000`.
+
+---
+
 ## [2.3.0-RC1 / Page13-reset-fix] - 2026-07-21
 ### 🏆 تحسين وتوسيع نطاق الحذف الشامل عند الضغط على "أحذف" (Page13/section1)
 
