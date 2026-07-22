@@ -2422,7 +2422,7 @@ function drawLandCanvas(verticesInput) {
     }
   }
 
-  // --- Render Direction Labels & Orange Partition Arrow matching Page 11 Golden Reference 100% ---
+  // --- Render Direction Labels & Orange Partition Arrow matching Page 11 Golden Reference 100% (Certified v3.0.2) ---
   if (canvasPoints && canvasPoints.length >= 4) {
     const dirs = getP13Directions();
     const dirFontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
