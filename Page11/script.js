@@ -130,6 +130,65 @@ document.addEventListener("DOMContentLoaded", function () {
   setupSVGInteractions();
   renderHistory();
 
+  // Commit 11.2 & 11.3 Parity: Dimension Keyboard Navigation for Page11
+  document.addEventListener('keydown', function(e) {
+    const isNextKey = e.key === 'Enter' || e.key === 'Next' || e.keyCode === 13 || e.code === 'Enter';
+    if (!isNextKey) return;
+
+    const activeEl = document.activeElement;
+    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
+
+    const isDimensionInput = activeEl.classList.contains('partner-width-top') ||
+                             activeEl.classList.contains('partner-width-bottom') ||
+                             activeEl.classList.contains('heir-side-top') ||
+                             activeEl.classList.contains('heir-side-bot');
+
+    if (!isDimensionInput) return;
+
+    e.preventDefault();
+
+    activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
+    let dimensionInputs = [];
+
+    rows.forEach(row => {
+      const topInput = row.querySelector('.partner-width-top, .heir-side-top');
+      const botInput = row.querySelector('.partner-width-bottom, .heir-side-bot');
+
+      [topInput, botInput].forEach(inp => {
+        if (inp && !inp.disabled && !inp.readOnly && inp.type !== 'hidden') {
+          const rect = inp.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            dimensionInputs.push(inp);
+          }
+        }
+      });
+    });
+
+    if (dimensionInputs.length === 0) return;
+
+    const idx = dimensionInputs.indexOf(activeEl);
+
+    if (idx > -1 && idx < dimensionInputs.length - 1) {
+      const nextInput = dimensionInputs[idx + 1];
+      nextInput.focus();
+      try {
+        nextInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } catch (err) {}
+      if (typeof nextInput.select === 'function') nextInput.select();
+      requestAnimationFrame(() => {
+        if (document.activeElement === nextInput && typeof nextInput.select === 'function') {
+          nextInput.select();
+        }
+      });
+    } else if (idx === dimensionInputs.length - 1) {
+      activeEl.focus();
+      if (typeof activeEl.select === 'function') activeEl.select();
+    }
+  });
+
   // Setup inputs saveAndCalc listeners
   const inputs = ["length1", "length2", "width1", "width2", "other-carat-area"];
   inputs.forEach(id => {
