@@ -2,6 +2,23 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [Commit 14 / v2.4.0 UX Architecture Certification] - 2026-07-22
+### 🏆 توحيد واعتماد البنية المعمارية لمحركات تجربة المستخدم والواجهات (shared/ui/)
+
+```text
+Commit 14 UX Architecture Certification: APPROVED & LOCKED
+Guidance Engine (shared/ui/guidance-engine.js)       : ✅ PASS (Central Decision Engine & Deduplication)
+Focus Manager (shared/ui/focus-manager.js)           : ✅ PASS (Soft Keyboard Persistence & Next Key Navigation)
+Modal & Inspector (shared/ui/modal-inspector.js)     : ✅ PASS (Unified Dialogs, Bottom Sheets & Inspector)
+Accessibility (shared/ui/accessibility.js)          : ✅ PASS (ARIA Attributes, Focus Traps & Touch Targets)
+Status: Certified & Baseline Established for Commit 15 (New Features)
+```
+
+- **تأسيس كبسولات محرك تجربة المستخدم الموحدة:** تجميع وتوثيق محركات اتخاذ القرار الإرشادي، إدارة مفاتيح لوحة المفاتيح والتركيز التتابعي، النوافذ المنبثقة، ومفتش الشركاء محلياً داخل `shared/ui/`.
+- **اعتماد البنية المستقرة:** اكتملت كلياً عملية إعادة الهيكلة الشاملة للمشروع (`shared/calculations`, `shared/croquis`, `shared/ui`).
+
+---
+
 ## [Commit 13 / v2.3.0 Croquis Engine Certification] - 2026-07-22
 ### 🏆 توحيد واعتماد البنية المعمارية لمحرك الرسم الكروكي والتفاعل (shared/croquis/)
 
