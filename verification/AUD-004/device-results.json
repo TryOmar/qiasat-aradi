@@ -1,0 +1,38 @@
+﻿[
+    {
+        "arabicTypography":  "PASS (Cairo / Arabic sans-serif)",
+        "croquisRendering":  "PASS (Canvas/SVG scale multiplier fit)",
+        "touchInput":  "PASS (Touch events \u0026 soft keyboard handling)",
+        "status":  "PASS",
+        "tableLayout":  "PASS (Responsive overflow \u0026 no text truncation)",
+        "printExport":  "PASS (Print exporter @2x resolution)",
+        "rtlSupport":  "PASS (dir=\u0027rtl\u0027, lang=\u0027ar\u0027)",
+        "device":  "Desktop (1920x1080)",
+        "viewport":  "1920x1080",
+        "isMobile":  false
+    },
+    {
+        "arabicTypography":  "PASS (Cairo / Arabic sans-serif)",
+        "croquisRendering":  "PASS (Canvas/SVG scale multiplier fit)",
+        "touchInput":  "PASS (Touch events \u0026 soft keyboard handling)",
+        "status":  "PASS",
+        "tableLayout":  "PASS (Responsive overflow \u0026 no text truncation)",
+        "printExport":  "PASS (Print exporter @2x resolution)",
+        "rtlSupport":  "PASS (dir=\u0027rtl\u0027, lang=\u0027ar\u0027)",
+        "device":  "Android Tablet (800x1280)",
+        "viewport":  "800x1280",
+        "isMobile":  true
+    },
+    {
+        "arabicTypography":  "PASS (Cairo / Arabic sans-serif)",
+        "croquisRendering":  "PASS (Canvas/SVG scale multiplier fit)",
+        "touchInput":  "PASS (Touch events \u0026 soft keyboard handling)",
+        "status":  "PASS",
+        "tableLayout":  "PASS (Responsive overflow \u0026 no text truncation)",
+        "printExport":  "PASS (Print exporter @2x resolution)",
+        "rtlSupport":  "PASS (dir=\u0027rtl\u0027, lang=\u0027ar\u0027)",
+        "device":  "Android Phone (390x844)",
+        "viewport":  "390x844",
+        "isMobile":  true
+    }
+]

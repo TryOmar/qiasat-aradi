@@ -1,0 +1,16 @@
+﻿[
+    {
+        "browser":  "Microsoft Edge (Chromium)",
+        "status":  "PASS",
+        "engine":  "Blink/V8",
+        "errors":  0,
+        "totalChecked":  36
+    },
+    {
+        "browser":  "Google Chrome (Headless)",
+        "status":  "PASS",
+        "engine":  "Blink/V8",
+        "errors":  0,
+        "totalChecked":  36
+    }
+]

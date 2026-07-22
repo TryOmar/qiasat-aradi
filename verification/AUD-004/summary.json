@@ -1,0 +1,10 @@
+﻿{
+    "totalDevicesChecked":  3,
+    "version":  "v3.0-RC1 Baseline",
+    "audit":  "AUD-004",
+    "name":  "Cross-Browser \u0026 Mobile QA Audit",
+    "status":  "PASS",
+    "totalBrowsersChecked":  2,
+    "totalPagesAuditedPerDevice":  12,
+    "date":  "2026-07-22 13:40:03"
+}
