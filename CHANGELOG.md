@@ -1,6 +1,47 @@
-# سجل التغييرات الرسمي (CHANGELOG) - تطبيق الدَّلاَّل (Release 2026.1 - v2.0.0-rc2)
+# سجل التغييرات الرسمي (CHANGELOG) - تطبيق الدَّلاَّل (v3.0.0-stable)
 
-يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
+يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية لتطبيق **الدَّلاَّل — قياسات الأراضي**. الإصدار الحالي المستقر: **v3.0.0-stable**.
+
+## [v3.0.0-stable Production Stable Release] - 2026-07-22
+### 🏆 الإصدار المستقر النهائي — الدَّلاَّل v3.0.0
+
+```text
+Status: PRODUCTION STABLE — CERTIFIED & RELEASED
+Git Tag: v3.0.0-stable
+Branch: master
+AUD Chain: AUD-000 → AUD-005: 206/206 PASS (100%)
+Phase 14 Performance Certification: CERTIFIED
+UI Freeze: MAINTAINED — Page11 & Page13 Locked as Golden Baseline
+Project Status: HTML/JavaScript version OFFICIALLY CLOSED
+Next Project: Flutter Migration (Page11 & Page13 as Golden Reference)
+```
+
+- **إصدار الإصدار المستقر النهائي (v3.0.0-stable):** اعتماد النسخة المستقرة رسميًا وإغلاق مشروع HTML/JavaScript.
+- **شهادة الاعتماد الشاملة:** جميع الاختبارات (206/206) ناجحة بنسبة 100%.
+- **تجميد الواجهة:** Page11 وPage13 مقفلتان كمرجع ذهبي لمشروع Flutter القادم.
+- **الوثائق النهائية:** `verification/PROJECT_CERTIFICATION.md`، `verification/RC-Final/production-release.md`.
+
+---
+
+## [v3.0.0 Phase 14 Performance Certification] - 2026-07-22
+### ⚡ اعتماد تحسينات الأداء (Phase 14) رسميًا
+
+```text
+Status: CERTIFIED ✅
+Optimizations Applied: 4 (DOM Cache, DocumentFragment, Dirty Flag, Debounce)
+All Performance Budgets: PASSED
+Regression-Free: CONFIRMED (correctnessPassed = true for all stages)
+Benchmark Results: tests/benchmark-results.json
+Perf Report: verification/Phase14-Perf/perf-summary.md
+```
+
+- **DOM Cache (تسريع جلب العناصر):** تحسين 70% في الزمن الكلي (95.40ms → 28.60ms لـ 100 شريك).
+- **DocumentFragment (تسريع بناء الجدول):** تحسين 64% في تحديث الجدول (32.10ms → 11.40ms).
+- **Dirty Flag / State Signature (منع الرسم المكرر):** تحسين 99% في إعادة الرسم (8.85ms → 0.12ms).
+- **Debounce 120ms (إدخال البيانات):** تقليل 80% في استدعاءات الحساب أثناء الكتابة (5 → 1 استدعاء).
+- **جميع التحسينات Regression-Free:** النتائج متطابقة مع خط الأساس في جميع المراحل.
+
+---
 
 ## [v3.0.0-RC1 Stable Baseline Certification] - 2026-07-22
 ### 🏛️ Stable Baseline — Page11/Page13 Recovery Certified
