@@ -44,7 +44,7 @@ Qiasat Aradi is a comprehensive agricultural land measurement and calculation to
 - CSS3
 - JavaScript (ES6 Modules & Global Compatibility Wrappers)
 
-## 🏛️ Shared Infrastructure (v2.4 Architecture)
+## 🏛️ Shared Infrastructure (v3.0 Architecture)
 The project utilizes a modular, single-source-of-truth shared architecture located under `shared/`:
 
 ```
@@ -64,6 +64,13 @@ shared/
 │   ├── focus-manager.js   # Focus & Next Mobile Keyboard Manager
 │   ├── modal-inspector.js # Dialogs, Bottom Sheets & Inspector Overlay Manager
 │   └── accessibility.js   # ARIA Accessibility & Touch Target Manager
+├── projects/               # Multi-Project & Reliability Infrastructure (Commit 15 Architecture)
+│   ├── project-manager.js # Multi-Project Store, Search, Archive & Favorites
+│   ├── reliability-engine.js# Auto-Save, Crash Recovery & Data Integrity Engine
+│   ├── export-import.js   # JSON Project Import/Export, Excel & Share Links
+│   └── history-engine.js  # Unified Operation Undo/Redo Stack
+├── field/                  # Advanced Field Tools Engine (Commit 15 Architecture)
+│   └── field-tools.js     # Piece Merging, Distance Measuring & Highlight Sync
 ├── partition-table.js      # Unified Partners Table Logic & UI Helpers
 ├── formatters.js           # Unified String & Number Formatted Display Engine
 ├── report-template.js      # Dallal Unified Print Report Engine

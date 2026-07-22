@@ -2,6 +2,24 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [Commit 15 / v3.0.0 Dallal Major Release Certification] - 2026-07-22
+### 🏆 الاعتماد الرسمي النهائي لإصدار تطبيق الدَّلاَّل v3.0 وتدشين المزايا الجديدة ومحركات المشاريع الميدانية
+
+```text
+Dallal v3.0 Major Release Certification: APPROVED, CERTIFIED & LOCKED
+Multi-Project Manager (shared/projects/project-manager.js) : ✅ PASS (Storage, Search, Archive & Favorites)
+Project Reliability (shared/projects/reliability-engine.js): ✅ PASS (Auto-Save, Crash Recovery & Version Migration)
+Export & Import (shared/projects/export-import.js)         : ✅ PASS (JSON, Excel, High-Res PNG & Share Links)
+History Engine (shared/projects/history-engine.js)         : ✅ PASS (100 Capped Undo/Redo Stack)
+Field Tools Engine (shared/field/field-tools.js)            : ✅ PASS (Piece Merging, Distance Measurement & Sync)
+Status: Certified & Full Release Approved for Dallal v3.0
+```
+
+- **تدشين محرك المشاريع المتعددة وموثوقية البيانات:** إضافة نظام الحفظ التلقائي والتعافي الفوري من الأعطال والنسخ الاحتياطي في `shared/projects/`.
+- **أدوات الميدان المتقدمة والتصدير الشامل:** تمكين تصدير واستيراد المشاريع والتفاعل المباشر بين جداول الشركاء ورسم الكروكي في `shared/field/`.
+
+---
+
 ## [Commit 14 / v2.4.0 UX Architecture Certification] - 2026-07-22
 ### 🏆 توحيد واعتماد البنية المعمارية لمحركات تجربة المستخدم والواجهات (shared/ui/)
 
