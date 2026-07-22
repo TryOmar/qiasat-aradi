@@ -223,9 +223,14 @@
         }
 
         if (!isLiveInput) {
-          // بعد انتهاء الإدخال: إعادة الحساب الكامل وإعادة بناء الجدول والحفظ
+          // بعد انتهاء الإدخال: إعادة الحساب الكامل والحفظ
           if (typeof global.calculateAll === "function") global.calculateAll();
-          this.renderTable();
+          const activeEl = document.activeElement;
+          const listEl = document.getElementById("heirs-list");
+          const isInputActive = activeEl && activeEl.tagName === 'INPUT' && listEl && listEl.contains(activeEl);
+          if (!isInputActive) {
+            this.renderTable();
+          }
           if (typeof global.saveStateToSession === "function") global.saveStateToSession();
         }
       }
@@ -266,9 +271,14 @@
         }
 
         if (!isLiveInput) {
-          // بعد انتهاء الإدخال: إعادة الحساب الكامل وإعادة بناء الجدول والحفظ
+          // بعد انتهاء الإدخال: إعادة الحساب الكامل والحفظ
           if (typeof global.calculateAll === "function") global.calculateAll();
-          this.renderTable();
+          const activeEl = document.activeElement;
+          const listEl = document.getElementById("heirs-list");
+          const isInputActive = activeEl && activeEl.tagName === 'INPUT' && listEl && listEl.contains(activeEl);
+          if (!isInputActive) {
+            this.renderTable();
+          }
           if (typeof global.saveStateToSession === "function") global.saveStateToSession();
         }
       }
@@ -297,9 +307,19 @@
         }
 
         if (typeof global.calculateAll === "function") global.calculateAll();
-        if (!isLiveInput) {
-          this.renderTable();
+
+        // In-place UI update for average width & length cells without wiping innerHTML
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (row) {
+          const avgWInput = row.querySelector('.width-avg-group input');
+          const avgLInput = row.querySelector('.length-avg-group input');
+          if (avgWInput) avgWInput.value = avgW.toFixed(4);
+          if (avgLInput) {
+            const avgLVal = avgW > 0 ? (heir.share || 0) / avgW : 0;
+            avgLInput.value = avgLVal.toFixed(4);
+          }
         }
+
         if (typeof global.saveStateToSession === "function") global.saveStateToSession();
         if (typeof global.drawCroquis === "function") global.drawCroquis();
       }
