@@ -1,0 +1,59 @@
+﻿category,test,expected,got,diff,pass
+Geometry,"Rectangle 30x50",1500,1500,0,True
+Geometry,"Rectangle 0.5x0.5",0.25,0.25,0,True
+Geometry,"Square 40",1600,1600,0,True
+Geometry,"Square 0.001",0.000001,0.000001,0,True
+Geometry,"Trapezoid 40,60,30,30",1500,1500,0,True
+Geometry,"Trapezoid 100,200,50,50",7500,7500,0,True
+Geometry,"Heron 30,40,50",600,600,0,True
+Geometry,"Heron 3,4,5",6,6,0,True
+Geometry,"Shoelace rectangle",1500,1500,0,True
+Geometry,"Shoelace irregular",40,40,0,True
+Geometry,"AvgWidth 45.5,55.5",50.5,50.5,0,True
+Geometry,"AvgLength 32.25,28.75",30.5,30.5,0,True
+Geometry,"EdgeCase: zero width",0,0,0,True
+Geometry,"EdgeCase: zero input shoelace",0,0,0,True
+Geometry,"Heron degenerate (0,0,0)",0,0,0,True
+Geometry,"Heron invalid (1,2,10)",0,0,0,True
+Units,"SqmToFeddans 5251.05",1,6,1,6,0,True
+Units,"FeddansToSqm 1f6c round-trip",5251.05,5251.05,0,True
+Units,"Round-trip 3500.7 sqm",3500.7,3500.7,0,True
+Units,"parseFraction 1/4",0.25,0.25,0,True
+Units,"parseFraction 3/8",0.375,0.375,0,True
+Units,"parseFraction 0",0,0,0,True
+Units,"Qasaba 10 to meters",35.5,35.5,0,True
+Units,"Meters 35.5 to Qasaba",10,10,0,True
+Units,"Percentage 437.5875/1750.35",25,25,0,True
+Partition,"EqualShare sum Rect 1500 2p",1500,1500,0,True
+Partition,"EqualShare sum Sq 1600 3p",1600,1600,0,True
+Partition,"EqualShare sum Trap 1500 10p",1500,1500,0,True
+Partition,"EqualShare sum Large 10000 50p",10000,10000,0,True
+Partition,"EqualShare sum Huge 250000 100p",250000,250000,0,True
+Partition,"PieceWidths ratio",0.5,0.5,0,True
+Partition,"PieceWidths topW",50,50,0,True
+Partition,"InterpLength t=0",30,30,0,True
+Partition,"InterpLength t=1",50,50,0,True
+Partition,"InterpLength t=0.5",40,40,0,True
+Partition,"Rebalance unlocked share",500,500,0,True
+Partition,"OrderRTL preserves",1,2,3,4,5,1,2,3,4,5,0,True
+Partition,"OrderLTR reverses",5,4,3,2,1,5,4,3,2,1,0,True
+EdgeCases+Stability,"EdgeCase Partition 1p",1500,1500,0,True
+EdgeCases+Stability,"EdgeCase Partition 0count guard (returns total/1)",1500,1500,0,True
+EdgeCases+Stability,"EdgeCase Partition 0area",0,0,0,True
+EdgeCases+Stability,"LongDecimal 1000/3 6dp",333.333333,333.333333,0,True
+EdgeCases+Stability,"Validation invalid area 0",False,False,0,True
+EdgeCases+Stability,"Validation invalid area -5",False,False,0,True
+EdgeCases+Stability,"Geometry very large 999999^2",999998000001,999998000001,0,True
+EdgeCases+Stability,"Stability: 100x share sum",10000,10000,0,True
+EdgeCases+Stability,"Stability: Heron 1000x",True,True,0,True
+EdgeCases+Stability,"6dp precision 33.333333x30",999.9999900000001,999.9999900000001,0,True
+GoldenDatasetRegression,"G001 Rect 30x50 2p share diff",0,0,0,True
+GoldenDatasetRegression,"G001 Rect 30x50 2p sum=area",1500,1500,0,True
+GoldenDatasetRegression,"G002 Sq 40x40 3p share diff",0,0,0,True
+GoldenDatasetRegression,"G002 Sq 40x40 3p sum=area",1600,1600,0,True
+GoldenDatasetRegression,"G003 Trap 40-60 10p share diff",0,0,0,True
+GoldenDatasetRegression,"G003 Trap 40-60 10p sum=area",1500,1500,0,True
+GoldenDatasetRegression,"G004 100x100 50p share diff",0,0,0,True
+GoldenDatasetRegression,"G004 100x100 50p sum=area",10000,10000,0,True
+GoldenDatasetRegression,"G005 500x500 100p share diff",0,0,0,True
+GoldenDatasetRegression,"G005 500x500 100p sum=area",250000,250000,0,True

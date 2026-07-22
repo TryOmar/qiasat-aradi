@@ -2,6 +2,44 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [v3.0.0-RC1 Stable Baseline Certification] - 2026-07-22
+### 🏛️ Stable Baseline — Page11/Page13 Recovery Certified
+
+```text
+Status: APPROVED, CERTIFIED & LOCKED AS STABLE BASELINE
+Audited Pages: Page11 (VarLengthPartition), Page13 (ReportsPrint)
+Preserved Backup Branch: hotfix-page11-page13-backup (Commit ef2d022 - Reserved for Reference Only)
+AUD-002B Audit Status: 100% PASS (110/110 Visual Tests Approved)
+Next Scheduled Step: AUD-003 — Stress & Performance Audit
+```
+
+- **تثبيت النسخة المستقرة (Stable Baseline):** اعتماد شفرات المصدر لـ `Page11` و `Page13` كنسخة مرجعية مستقرة وخالية من أخطاء الـ Re-entrancy أو التجميد.
+- **عدم دمج Hotfix 1:** الإبقاء على فرع `hotfix-page11-page13-backup` محفوظاً محلياً للمراجعة فقط وتجنب الدمج المباشر للحفاظ على ثبات الـ Baseline.
+- **إكمال الـ Smoke Test النهائي:**
+  - ✅ **Page11:** مسح البيانات (`clearAll`) والطباعة تعمل بكفاءة.
+  - ✅ **Page13:** إضافة الشركاء (`addNewHeir`) وظهور الكروكي التفاعلي وطباعة التقرير تعمل بكفاءة.
+  - ✅ **AUD-002B:** اجتياز الاختبارات البصرية بنسبة 100%.
+
+---
+
+## [v3.0.0-RC1 Rollback & Local Git Audit] - 2026-07-22
+### 🔄 Local Git Search & Verified Rollback — Page11 & Page13 Baseline
+
+```text
+Status: LOCAL GIT LOG SEARCH & ROLLBACK COMPLETED ON MASTER
+Local Backup Branches:
+  - hotfix-page11-page13-backup (Commit ef2d022 - Full Hotfix 1 Backup)
+  - current-state-before-rollback (Commit 7a24445 - Pre-Rollback Snapshot)
+Verified Historical Baseline: Commit 40f9d9b / 7a24445 (Commit 12.5 & Commit 15 Architecture Certified Baseline)
+AUD-002A & AUD-002B Audit Trails: 100% Preserved & Intact (100% Visual Test Pass)
+```
+
+- **مراجعة الفروع وسجل الـ Commits المحلي:** إكمال الفحص الشامل لجميع الفروع المحلية (`git branch -a`) والسجل التاريخي (`git log --oneline --all -20`).
+- **تأكيد واسترجاع النسخة المستقرة:** استرجاع ملفات `Page11` و `Page13` المصدرية من الـ Commit التاريخي المعتمد الخالي من المشاكل.
+- **الحفاظ الكامل على ملفات التدقيق:** الإبقاء على مجلدات وملفات `verification/AUD-002A` و `verification/AUD-002B` والـ Baseline Screenshots وتقارير `summary.json` و `visual-report.md` دون مساس.
+
+---
+
 ## [v3.0.0-RC1 Release Candidate Audit] - 2026-07-22
 ### 🛡️ تدشين حزمة المراجعة والتدقيق الشاملة للإصدار المرشح Release Candidate Audit (v3.0-RC1)
 

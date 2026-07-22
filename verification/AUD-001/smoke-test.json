@@ -1,0 +1,100 @@
+﻿{
+    "audId":  "AUD-001",
+    "totalPages":  13,
+    "timestamp":  "2026-07-22T11:03:41.4021931+03:00",
+    "passedPages":  13,
+    "results":  [
+                    {
+                        "status":  "PASS",
+                        "path":  "index.html",
+                        "titleState":  "الدَّلاَّل|complete",
+                        "errorDetail":  "",
+                        "pageId":  "index"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page1\\section1\\index.html",
+                        "titleState":  "Home|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page1"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page1\\section1\\help2\\index.html",
+                        "titleState":  "🎓 دليل ومركز تدريب كتابة الكسور|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page1help"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page3\\index.html",
+                        "titleState":  "Home|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page3"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page4\\index.html",
+                        "titleState":  "نزع وطرح الأراضي|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page4"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page5\\index.html",
+                        "titleState":  "Home|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page5"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page6\\index.html",
+                        "titleState":  "Home|loading",
+                        "errorDetail":  "",
+                        "pageId":  "page6"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page7\\index.html",
+                        "titleState":  "Home|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page7"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page8\\index.html",
+                        "titleState":  "من سيربح الفدادين - لعبة كروكي الأراضي|loading",
+                        "errorDetail":  "",
+                        "pageId":  "page8"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page10\\index.html",
+                        "titleState":  "جمع وطرح الأراضي الزراعية|loading",
+                        "errorDetail":  "",
+                        "pageId":  "page10"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page11\\index.html",
+                        "titleState":  "تقسيم أرض باختلاف الأطوال|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page11"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page12\\index.html",
+                        "titleState":  "الدَّلاَّل – رسم وتقسيم الأراضي|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page12"
+                    },
+                    {
+                        "status":  "PASS",
+                        "path":  "Page13\\section1\\index.html",
+                        "titleState":  "حساب وتقسيم مساحة الأراضي|complete",
+                        "errorDetail":  "",
+                        "pageId":  "page13"
+                    }
+                ],
+    "status":  "PASS"
+}
