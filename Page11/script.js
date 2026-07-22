@@ -2951,7 +2951,9 @@ function renderCroquis() {
     g.appendChild(svgLine(lX - dimOffset - 4 * textScale, lY2, lX - dimOffset + 4 * textScale, lY2, { stroke: "#1b5e20", width: "2" }));
     
     const lMidY = (lY1 + lY2) / 2;
-    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, l2.toFixed(2) + " م", {
+    const p11Dirs = typeof getP11Directions === "function" ? getP11Directions() : {};
+    const lLabelText = l2.toFixed(2) + " م" + (p11Dirs.left ? " " + p11Dirs.left : "");
+    g.appendChild(svgText(lX - dimOffset - 4 * textScale, lMidY, lLabelText, {
       anchor: "start",
       fill: "#111111", // أسود داكن للقراءة تحت الشمس
       size: "13.5",
@@ -2977,7 +2979,8 @@ function renderCroquis() {
     g.appendChild(svgLine(rX + dimOffset - 4 * textScale, rY2, rX + dimOffset + 4 * textScale, rY2, { stroke: "#1b5e20", width: "2" }));
     
     const rMidY = (rY1 + rY2) / 2;
-    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, l1.toFixed(2) + " م", {
+    const rLabelText = l1.toFixed(2) + " م" + (p11Dirs.right ? " " + p11Dirs.right : "");
+    g.appendChild(svgText(rX + dimOffset + 4 * textScale, rMidY, rLabelText, {
       anchor: "start",
       fill: "#111111", // أسود داكن لقراءة عالية التباين
       size: "13.5",
@@ -3002,7 +3005,8 @@ function renderCroquis() {
     g.appendChild(svgLine(bX1, bY - 4 * textScale, bX1, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(bX2, bY - 4 * textScale, bX2, bY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, w2.toFixed(2) + " م", {
+    const topLabelText = w2.toFixed(2) + " م" + (p11Dirs.top ? " " + p11Dirs.top : "");
+    g.appendChild(svgText((bX1 + bX2) / 2, bY - 6 * textScale, topLabelText, {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
@@ -3026,7 +3030,8 @@ function renderCroquis() {
     g.appendChild(svgLine(topX1, topEdgeY - 4 * textScale, topX1, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     g.appendChild(svgLine(topX2, topEdgeY - 4 * textScale, topX2, topEdgeY + 4 * textScale, { stroke: "#1b5e20", width: "2" }));
     
-    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, w1.toFixed(2) + " م", {
+    const botLabelText = w1.toFixed(2) + " م" + (p11Dirs.bottom ? " " + p11Dirs.bottom : "");
+    g.appendChild(svgText((topX1 + topX2) / 2, topEdgeY + 16 * textScale, botLabelText, {
       fill: "#111111", // أسود داكن
       size: "13.5",
       weight: "bold",
@@ -3096,50 +3101,7 @@ function renderCroquis() {
       g.appendChild(c);
     });
 
-    // --- عرض أسماء الاتجاهات على جوانب الكروكي ---
-    const dirs = getP11Directions();
-    const dirFontSize = Math.max(10, 12 * textScale);
-    const dirColor = "#1565c0";
-    const dirOffset = 52 * textScale;
-
-    // الاتجاه العلوي (أعلى الرسم - العرض الأول C)
-    g.appendChild(svgText(
-      (mapX(0) + mapX(w)) / 2,
-      mapY(0) - dirOffset,
-      dirs.top,
-      { fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true }
-    ));
-
-    // الاتجاه السفلي (أسفل الرسم - العرض الثاني A)
-    const botEdgeY2 = mapY(Math.max(l1, l2)) + dirOffset + 10 * textScale;
-    g.appendChild(svgText(
-      (mapX(0) + mapX(w)) / 2,
-      botEdgeY2,
-      dirs.bottom,
-      { fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true }
-    ));
-
-    // الاتجاه الأيمن (يمين الرسم - الطول الأيمن D)
-    const rDirGroup = svgEl("g");
-    const rDirX = mapX(w) + dirOffset + 10 * textScale;
-    const rDirY = (mapY(0) + mapY(l1)) / 2;
-    rDirGroup.setAttribute("transform", `rotate(-90, ${rDirX}, ${rDirY})`);
-    const tRDir = svgText(rDirX, rDirY, dirs.right, {
-      fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true
-    });
-    rDirGroup.appendChild(tRDir);
-    g.appendChild(rDirGroup);
-
-    // الاتجاه الأيسر (يسار الرسم - الطول الأيسر B)
-    const lDirGroup = svgEl("g");
-    const lDirX = mapX(0) - dirOffset - 10 * textScale;
-    const lDirY = (mapY(0) + mapY(l2)) / 2;
-    lDirGroup.setAttribute("transform", `rotate(-90, ${lDirX}, ${lDirY})`);
-    const tLDir = svgText(lDirX, lDirY, dirs.left, {
-      fill: dirColor, size: dirFontSize.toString(), weight: "bold", bg: true
-    });
-    lDirGroup.appendChild(tLDir);
-    g.appendChild(lDirGroup);
+    // --- عرض أسماء الاتجاهات تم دمجها مباشرة بجوار الأبعاد لتوحيد الشاشة ---
   }
 
   // === ضبط viewBox على عنصر SVG لعرض كامل المحتوى على جميع الشاشات (الموبايل والكمبيوتر) ===
