@@ -641,16 +641,24 @@ function setupEventListeners() {
     inputEl.addEventListener('mouseleave', removeHighlight);
   });
 
-  // Commit 11.2: Mobile Virtual Keyboard Next/Enter dimension navigation
-  function focusNextDimensionInput(currentEl) {
-    // 1. Run calculations first
-    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
-    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
+  // Commit 11.2 & 11.3: Unified Mobile Virtual Keyboard Next/Enter dimension navigation
+  function getAllDimensionInputsInOrder() {
+    let list = [];
 
-    // 2. Find all visible editable dimension inputs in partner table rows
+    // 1. Active Main Land Inputs (Trapezoid, Rectangle, Square, Quadrilateral)
+    const activeGroup = document.querySelector('.dynamic-inputs-container .inputs-group.active');
+    if (activeGroup) {
+      const mainInputs = Array.from(activeGroup.querySelectorAll('input[type="text"]:not([readonly]):not([disabled])'));
+      mainInputs.forEach(inp => {
+        const rect = inp.getBoundingClientRect();
+        if (rect.width > 0 || rect.height > 0 || inp.offsetParent !== null) {
+          list.push(inp);
+        }
+      });
+    }
+
+    // 2. Partner Table Dimension Inputs
     const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
-    let dimensionInputs = [];
-
     rows.forEach(row => {
       const topInput = row.querySelector('.heir-side-top, .partner-width-top');
       const botInput = row.querySelector('.heir-side-bot, .partner-width-bottom');
@@ -659,14 +667,22 @@ function setupEventListeners() {
 
       [topInput, botInput, rightLengthInput, leftLengthInput].forEach(inp => {
         if (inp && !inp.disabled && !inp.readOnly && inp.type !== 'hidden') {
-          const rect = inp.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            dimensionInputs.push(inp);
+          if (!list.includes(inp)) {
+            list.push(inp);
           }
         }
       });
     });
 
+    return list;
+  }
+
+  function focusNextDimensionInput(currentEl) {
+    // 1. Run calculations first
+    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
+    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const dimensionInputs = getAllDimensionInputsInOrder();
     if (dimensionInputs.length === 0) return;
 
     const idx = dimensionInputs.indexOf(currentEl);
@@ -694,13 +710,12 @@ function setupEventListeners() {
     const activeEl = document.activeElement;
     if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
 
-    const isDimensionInput = activeEl.classList.contains('heir-side-top') ||
+    const dimensionInputs = getAllDimensionInputsInOrder();
+    const isDimensionInput = dimensionInputs.includes(activeEl) ||
+                             activeEl.classList.contains('heir-side-top') ||
                              activeEl.classList.contains('heir-side-bot') ||
                              activeEl.classList.contains('partner-width-top') ||
-                             activeEl.classList.contains('partner-width-bottom') ||
-                             activeEl.classList.contains('partner-dimension') ||
-                             activeEl.classList.contains('heir-side-length-right') ||
-                             activeEl.classList.contains('heir-side-length-left');
+                             activeEl.classList.contains('partner-width-bottom');
 
     if (!isDimensionInput) return;
 

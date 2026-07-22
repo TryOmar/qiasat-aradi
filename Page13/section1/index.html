@@ -149,11 +149,11 @@
       <div id="inputs-rectangle" class="inputs-group">
         <div class="input-row">
           <label for="rect-width">العرض بالمتر:</label>
-          <input type="text" inputmode="decimal" id="rect-width" placeholder="مثال: 30" dir="auto" />
+          <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-width" placeholder="مثال: 30" dir="auto" />
         </div>
         <div class="input-row">
           <label for="rect-length">الطول بالمتر:</label>
-          <input type="text" inputmode="decimal" id="rect-length" placeholder="مثال: 50" dir="auto" />
+          <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-length" placeholder="مثال: 50" dir="auto" />
         </div>
       </div>
 
@@ -161,7 +161,7 @@
       <div id="inputs-square" class="inputs-group">
         <div class="input-row">
           <label for="square-side">ادخل طول اي ضلع (بالمتر):</label>
-          <input type="text" inputmode="decimal" id="square-side" placeholder="مثال: 30" dir="auto" />
+          <input type="text" inputmode="decimal" enterkeyhint="next" id="square-side" placeholder="مثال: 30" dir="auto" />
         </div>
       </div>
 
@@ -170,7 +170,7 @@
         <div class="input-row">
           <label for="trap-base-minor">العرض الأول (أعلى) (C) بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
             <select id="p13-trap-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-c-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -182,7 +182,7 @@
         <div class="input-row">
           <label for="trap-base-major">العرض الثاني (أسفل) (A) بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
             <select id="p13-trap-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-a-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -194,7 +194,7 @@
         <div class="input-row">
           <label for="trap-length-right">الطول الأيمن (D) بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="trap-length-right" placeholder="مثال: 30" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-right" placeholder="مثال: 30" dir="auto" />
             <select id="p13-trap-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-d-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي" selected>قبلي</option>
@@ -206,7 +206,7 @@
         <div class="input-row">
           <label for="trap-length-left">الطول الأيسر (B) بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="trap-length-left" placeholder="مثال: 30" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-left" placeholder="مثال: 30" dir="auto" />
             <select id="p13-trap-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-b-dir')">
               <option value="بحري" selected>بحري</option>
               <option value="قبلي">قبلي</option>
@@ -227,7 +227,7 @@
         <div class="input-row">
           <label for="quad-side-c">العرض الأول (أعلى) <span style="color: #d32f2f; font-weight: bold;">(C)</span> بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
             <select id="p13-quad-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-c-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -239,7 +239,7 @@
         <div class="input-row">
           <label for="quad-side-a">العرض الثاني (أسفل) <span style="color: #d32f2f; font-weight: bold;">(A)</span> بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
             <select id="p13-quad-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-a-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -251,7 +251,7 @@
         <div class="input-row">
           <label for="quad-side-d">الطول الأيمن <span style="color: #2e7d32; font-weight: bold;">(D)</span> بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
             <select id="p13-quad-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-d-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي" selected>قبلي</option>
@@ -263,7 +263,7 @@
         <div class="input-row">
           <label for="quad-side-b">الطول الأيسر <span style="color: #2e7d32; font-weight: bold;">(B)</span> بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
             <select id="p13-quad-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-b-dir')">
               <option value="بحري" selected>بحري</option>
               <option value="قبلي">قبلي</option>
@@ -275,7 +275,7 @@
         <div class="input-row">
           <label for="quad-diag-ac">القطر الأول <span style="color: #0288d1; font-weight: bold;">(AC)</span> بالمتر:</label>
           <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
           </div>
         </div>
         <div class="input-row">

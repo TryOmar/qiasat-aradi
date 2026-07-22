@@ -131,27 +131,40 @@ document.addEventListener("DOMContentLoaded", function () {
   renderHistory();
 
   // Commit 11.2 & 11.3 Parity: Dimension Keyboard Navigation for Page11
-  function focusNextPage11DimensionInput(currentEl) {
-    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
-    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
+  function getAllPage11DimensionInputsInOrder() {
+    let list = [];
 
+    // 1. Main Land Inputs (width2, width1, length1, length2)
+    ['width2', 'width1', 'length1', 'length2'].forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp && !inp.disabled && !inp.readOnly) {
+        list.push(inp);
+      }
+    });
+
+    // 2. Partner Table Dimension Inputs
     const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
-    let dimensionInputs = [];
-
     rows.forEach(row => {
       const topInput = row.querySelector('.partner-width-top, .heir-side-top');
       const botInput = row.querySelector('.partner-width-bottom, .heir-side-bot');
 
       [topInput, botInput].forEach(inp => {
         if (inp && !inp.disabled && !inp.readOnly && inp.type !== 'hidden') {
-          const rect = inp.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            dimensionInputs.push(inp);
+          if (!list.includes(inp)) {
+            list.push(inp);
           }
         }
       });
     });
 
+    return list;
+  }
+
+  function focusNextPage11DimensionInput(currentEl) {
+    currentEl.dispatchEvent(new Event('input', { bubbles: true }));
+    currentEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const dimensionInputs = getAllPage11DimensionInputsInOrder();
     if (dimensionInputs.length === 0) return;
 
     const idx = dimensionInputs.indexOf(currentEl);
@@ -179,7 +192,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const activeEl = document.activeElement;
     if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
 
-    const isDimensionInput = activeEl.classList.contains('partner-width-top') ||
+    const dimensionInputs = getAllPage11DimensionInputsInOrder();
+    const isDimensionInput = dimensionInputs.includes(activeEl) ||
+                             activeEl.classList.contains('partner-width-top') ||
                              activeEl.classList.contains('partner-width-bottom') ||
                              activeEl.classList.contains('heir-side-top') ||
                              activeEl.classList.contains('heir-side-bot');
