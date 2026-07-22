@@ -2366,7 +2366,12 @@ function renderCroquis() {
         partnersHash += `|${name}_${feddans}_${carats}_${shares}_${fraction}_${botW}_${topW}`;
       });
 
-      const currentSignature = `${l1}_${l2}_${w1}_${w2}_${viewType}_${zoomVal}_${isPartitioned}_${isManualPartition}_${partnersHash}`;
+      const dirW2 = document.getElementById("p11-w2-dir")?.value || "";
+      const dirW1 = document.getElementById("p11-w1-dir")?.value || "";
+      const dirL1 = document.getElementById("p11-l1-dir")?.value || "";
+      const dirL2 = document.getElementById("p11-l2-dir")?.value || "";
+
+      const currentSignature = `${l1}_${l2}_${w1}_${w2}_${dirW2}_${dirW1}_${dirL1}_${dirL2}_${viewType}_${zoomVal}_${isPartitioned}_${isManualPartition}_${partnersHash}`;
       if (currentSignature === window.lastCroquisSignature) {
         console.log("[Performance Optimization] renderCroquis skipped (Dirty flag matching)");
         return;
@@ -6369,6 +6374,9 @@ function handleP11DirectionChange(changedId) {
     if (el) localStorage.setItem("p11-dir-" + id, el.value);
   });
 
+  // إعادة تعيين توقيع الكروكي لضمان تحديث الرسم فوراً
+  window.lastCroquisSignature = "";
+
   // تحديث الكروكي وجدول التحويلات إن وُجدت بيانات
   if (typeof renderCroquis === "function") {
     renderCroquis();
@@ -6399,6 +6407,9 @@ function resetP11DirectionsToDefault() {
     }
   });
 
+  // إعادة تعيين توقيع الكروكي لضمان تحديث الرسم فوراً
+  window.lastCroquisSignature = "";
+
   if (typeof renderCroquis === "function") {
     renderCroquis();
   }
@@ -6413,10 +6424,10 @@ function resetP11DirectionsToDefault() {
  */
 function getP11Directions() {
   return {
-    top:    (document.getElementById("p11-w2-dir") || {}).value || "بحري",   // العرض الأول (أعلى C)
-    bottom: (document.getElementById("p11-w1-dir") || {}).value || "قبلي",  // العرض الثاني (أسفل A)
-    right:  (document.getElementById("p11-l1-dir") || {}).value || "شرقي",  // الطول الأيمن (D)
-    left:   (document.getElementById("p11-l2-dir") || {}).value || "غربي"   // الطول الأيسر (B)
+    top:    (document.getElementById("p11-w2-dir") || {}).value || "شرقي",   // العرض الأول (أعلى C)
+    bottom: (document.getElementById("p11-w1-dir") || {}).value || "غربي",   // العرض الثاني (أسفل A)
+    right:  (document.getElementById("p11-l1-dir") || {}).value || "قبلي",   // الطول الأيمن (D)
+    left:   (document.getElementById("p11-l2-dir") || {}).value || "بحري"    // الطول الأيسر (B)
   };
 }
 

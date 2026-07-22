@@ -938,6 +938,7 @@ function handleP13DirectionChange(changedId) {
 
   if (typeof saveStateToSession === "function") saveStateToSession();
   if (typeof calculateAll === "function") calculateAll();
+  if (typeof drawCroquis === "function") drawCroquis();
 }
 window.handleP13DirectionChange = handleP13DirectionChange;
 
@@ -2066,7 +2067,14 @@ function drawLandCanvas(verticesInput) {
       angle += Math.PI;
     }
 
-    const labelText = `${len.toFixed(2)} م`;
+    const p13Dirs = typeof getP13Directions === "function" ? getP13Directions() : {};
+    let sideDirName = "";
+    if (i === 0) sideDirName = p13Dirs.bottom || "";
+    else if (i === 1) sideDirName = p13Dirs.right || "";
+    else if (i === 2) sideDirName = p13Dirs.top || "";
+    else if (i === 3) sideDirName = p13Dirs.left || "";
+
+    const labelText = sideDirName ? `${len.toFixed(2)} م (${sideDirName})` : `${len.toFixed(2)} م`;
 
     ctx.save();
     ctx.translate(labelX, labelY);
@@ -2076,7 +2084,7 @@ function drawLandCanvas(verticesInput) {
     const fontSize = Math.round(Math.max(10, 13 * scaleMultiplier));
     ctx.font = `bold ${fontSize}px Cairo`;
     const tw = ctx.measureText(labelText).width;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
     ctx.fillRect(-tw / 2 - 4 * scaleMultiplier, -fontSize / 2 - 2, tw + 8 * scaleMultiplier, fontSize + 4);
 
     // Draw text
@@ -2428,7 +2436,7 @@ function drawLandCanvas(verticesInput) {
     const dirs = getP13Directions();
     const dirFontSize = Math.round(Math.max(12, 14 * scaleMultiplier));
     const dirColor = "#1565c0";
-    const dirOffset = Math.max(40, 50 * scaleMultiplier);
+    const dirOffset = Math.max(22, 28 * scaleMultiplier);
 
     const topPts = canvasPoints.filter((_, idx) => idx === 2 || idx === 3);
     const botPts = canvasPoints.filter((_, idx) => idx === 0 || idx === 1);
@@ -2447,23 +2455,38 @@ function drawLandCanvas(verticesInput) {
     const leftMinX = Math.min(...leftPts.map(p => p.x));
     const leftMidY = leftPts.reduce((s, p) => s + p.y, 0) / (leftPts.length || 1);
 
-    function drawDirText(text, x, y, rotateAngle) {
+    function drawDirBadge(text, x, y, rotateAngle) {
       if (!text) return;
       ctx.save();
       ctx.translate(x, y);
       if (rotateAngle) ctx.rotate(rotateAngle);
       ctx.font = `bold ${dirFontSize}px Cairo, Arial, sans-serif`;
+      const tw = ctx.measureText(text).width;
+      
+      // Draw background pill badge
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.strokeStyle = "#1565c0";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-tw / 2 - 6, -dirFontSize / 2 - 3, tw + 12, dirFontSize + 6, 6);
+      } else {
+        ctx.rect(-tw / 2 - 6, -dirFontSize / 2 - 3, tw + 12, dirFontSize + 6);
+      }
+      ctx.fill();
+      ctx.stroke();
+
       ctx.fillStyle = dirColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, 0, 0);
+      ctx.fillText(text, 0, 1);
       ctx.restore();
     }
 
-    drawDirText(dirs.top, topMidX, topMinY - dirOffset, 0);
-    drawDirText(dirs.bottom, botMidX, botMaxY + dirOffset, 0);
-    drawDirText(dirs.right, rightMaxX + dirOffset, rightMidY, -Math.PI / 2);
-    drawDirText(dirs.left, leftMinX - dirOffset, leftMidY, -Math.PI / 2);
+    drawDirBadge(dirs.top, topMidX, Math.max(dirFontSize + 10, topMinY - dirOffset), 0);
+    drawDirBadge(dirs.bottom, botMidX, Math.min(cssH - (dirFontSize + 10), botMaxY + dirOffset), 0);
+    drawDirBadge(dirs.right, Math.min(cssW - (dirFontSize + 10), rightMaxX + dirOffset), rightMidY, -Math.PI / 2);
+    drawDirBadge(dirs.left, Math.max(dirFontSize + 10, leftMinX - dirOffset), leftMidY, -Math.PI / 2);
   }
 
   console.log("drawLandCanvas finished");
