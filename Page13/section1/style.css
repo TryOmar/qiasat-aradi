@@ -736,6 +736,26 @@ body {
   transition: all 0.2s ease-in-out !important;
 }
 
+.partner-row input {
+  width: 100% !important;
+  height: 28px !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  color: black !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.partner-row input:focus {
+  border-color: #2e7d32 !important;
+  box-shadow: 0 0 4px rgba(46, 125, 50, 0.3) !important;
+  outline: none !important;
+}
+
 .heirs-table-wrapper input:focus {
   border-color: #2e7d32 !important;
   box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1) !important;
@@ -1866,6 +1886,23 @@ tr.drag-over-below {
   border-color: #2e7d32 !important;
   box-shadow: 0 0 4px rgba(46, 125, 50, 0.3) !important;
   outline: none !important;
+}
+
+/* Commit 11.3.1: Responsive font-size for dimension input fields ONLY (16px Mobile / 15px Desktop) */
+.heir-side-top,
+.heir-side-bot,
+.partner-width-top,
+.partner-width-bottom {
+  font-size: 16px !important;
+}
+
+@media (min-width: 992px) {
+  .heir-side-top,
+  .heir-side-bot,
+  .partner-width-top,
+  .partner-width-bottom {
+    font-size: 15px !important;
+  }
 }
 
 .btn-step {

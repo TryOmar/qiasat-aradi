@@ -641,23 +641,86 @@ function setupEventListeners() {
     inputEl.addEventListener('mouseleave', removeHighlight);
   });
 
-  // Handle "Enter" / "Next" key to jump to the next input field
+  // Commit 11.2: Handle "Next" / "Enter" key on dimension input fields only
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      const activeEl = document.activeElement;
-      if (activeEl && activeEl.tagName === 'INPUT' && (activeEl.type === 'number' || activeEl.inputMode === 'decimal' || activeEl.inputMode === 'numeric')) {
-        // Find all visible input elements
-        const inputs = Array.from(document.querySelectorAll('input:not([readonly]):not([disabled]):not([type="hidden"])'))
-          .filter(el => {
-            const rect = el.getBoundingClientRect();
-            return rect.width > 0 && rect.height > 0; // visible
-          });
-        
-        const idx = inputs.indexOf(activeEl);
-        if (idx > -1 && idx < inputs.length - 1) {
-          e.preventDefault();
-          inputs[idx + 1].focus();
+    const isNextKey = e.key === 'Enter' || e.key === 'Next' || e.keyCode === 13 || e.code === 'Enter';
+    if (!isNextKey) return;
+
+    const activeEl = document.activeElement;
+    if (!activeEl || activeEl.tagName !== 'INPUT' || activeEl.readOnly || activeEl.disabled) return;
+
+    // Check if active element is a dimension input field
+    const isDimensionInput = activeEl.classList.contains('heir-side-top') ||
+                             activeEl.classList.contains('heir-side-bot') ||
+                             activeEl.classList.contains('partner-width-top') ||
+                             activeEl.classList.contains('partner-width-bottom') ||
+                             activeEl.classList.contains('partner-dimension') ||
+                             activeEl.classList.contains('heir-side-length-right') ||
+                             activeEl.classList.contains('heir-side-length-left');
+
+    if (!isDimensionInput) return;
+
+    // 1. Prevent default (stop keyboard collapse / form submit)
+    e.preventDefault();
+
+    // 2. Trigger input & change events to run calculations first
+    activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+    activeEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // 3. Find all visible, editable dimension inputs in partner table rows
+    const rows = Array.from(document.querySelectorAll('.partner-row, .table-input'));
+    let dimensionInputs = [];
+
+    rows.forEach(row => {
+      // Dimension sequence: Top Width -> Bottom Width -> Right Length (if editable) -> Left Length (if editable)
+      const topInput = row.querySelector('.heir-side-top, .partner-width-top');
+      const botInput = row.querySelector('.heir-side-bot, .partner-width-bottom');
+      const rightLengthInput = row.querySelector('.heir-side-length-right, .partner-length-right');
+      const leftLengthInput = row.querySelector('.heir-side-length-left, .partner-length-left');
+
+      [topInput, botInput, rightLengthInput, leftLengthInput].forEach(inp => {
+        if (inp && !inp.disabled && !inp.readOnly && inp.type !== 'hidden') {
+          const rect = inp.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            dimensionInputs.push(inp);
+          }
         }
+      });
+    });
+
+    if (dimensionInputs.length === 0) return;
+
+    const idx = dimensionInputs.indexOf(activeEl);
+
+    if (idx > -1 && idx < dimensionInputs.length - 1) {
+      const nextInput = dimensionInputs[idx + 1];
+
+      // Focus next input
+      nextInput.focus();
+
+      // Scroll into view (keep centered above soft keyboard)
+      try {
+        nextInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } catch (err) {
+        // Fallback
+      }
+
+      // Select all text for instant overwrite
+      if (typeof nextInput.select === 'function') {
+        nextInput.select();
+      }
+
+      // Frame delay selection to guarantee text stays selected across mobile browsers
+      requestAnimationFrame(() => {
+        if (document.activeElement === nextInput && typeof nextInput.select === 'function') {
+          nextInput.select();
+        }
+      });
+    } else if (idx === dimensionInputs.length - 1) {
+      // Last row, last dimension input: hold focus, select text, keep keyboard open, don't scroll top
+      activeEl.focus();
+      if (typeof activeEl.select === 'function') {
+        activeEl.select();
       }
     }
   });

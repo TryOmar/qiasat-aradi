@@ -1,0 +1,197 @@
+/* ==========================================================================
+   shared/partition-table.css — Unified Partners Table Styling (Single Source of Truth)
+   Matches Page11 & Page13 exactly with CSS variables for responsive perfection.
+   ========================================================================== */
+
+:root {
+  --partition-input-height: 38px;
+  --partition-font-size: 16px;
+  --partition-header-font-size: 13px;
+  --partition-border: 2px solid #000000;
+  --partition-radius: 8px;
+  --name-column-width: 140px;
+}
+
+/* Grid layout for table rows */
+.table-header, .partner-row, #total, #remainder-row-table {
+  display: grid !important;
+  gap: 4px !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* Carats Mode (13 Columns) */
+.table.method-carats .table-header, 
+.table.method-carats .partner-row, 
+.table.method-carats #total, 
+.table.method-carats #remainder-row-table {
+  grid-template-columns: 40px var(--name-column-width, 140px) 60px 60px 60px 100px 80px 100px 100px 100px 100px 170px 50px !important;
+}
+
+/* Fractions Mode (12 Columns) */
+.table.method-fractions .table-header, 
+.table.method-fractions .partner-row, 
+.table.method-fractions #total, 
+.table.method-fractions #remainder-row-table {
+  grid-template-columns: 40px var(--name-column-width, 140px) 100px 120px 100px 80px 100px 100px 100px 100px 170px 50px !important;
+}
+
+.table-header {
+  background-color: #f5f5f5 !important;
+  border-bottom: 2px solid #134614 !important;
+  padding: 5px 0 !important;
+  border-radius: 6px 6px 0 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+}
+
+#table-header-container th,
+.table-header th,
+.table-header p,
+#heirs-table th {
+  text-align: center !important;
+  font-size: var(--partition-header-font-size, 13px) !important;
+  font-weight: bold !important;
+  color: #134614 !important;
+  margin: 0 !important;
+  padding: 6px 4px !important;
+}
+
+.col-group {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+/* Single Source of Truth for all partner table input fields */
+.partner-row input, 
+#remainder-row-table input,
+.heir-side-top,
+.heir-side-bot,
+.heir-share-sqm,
+.heir-share-pct,
+.partner-name-input,
+.heir-share-sahm,
+.heir-share-carat,
+.heir-share-feddan,
+.partner-shares,
+.partner-carats,
+.partner-feddans,
+.partner-area,
+.partner-percent,
+.partner-width-top,
+.partner-width-bottom {
+  width: 100% !important;
+  height: var(--partition-input-height, 38px) !important;
+  border: var(--partition-border, 2px solid #000000) !important;
+  border-radius: var(--partition-radius, 8px) !important;
+  font-size: var(--partition-font-size, 16px) !important;
+  color: #000000 !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease-in-out !important;
+  padding: 6px 10px !important;
+}
+
+/* Active focus state with high contrast border */
+.partner-row input:focus,
+#remainder-row-table input:focus,
+.heir-side-top:focus,
+.heir-side-bot:focus,
+.heir-share-sqm:focus,
+.heir-share-pct:focus,
+.partner-name-input:focus,
+.heir-share-sahm:focus,
+.heir-share-carat:focus,
+.heir-share-feddan:focus,
+.partner-shares:focus,
+.partner-carats:focus,
+.partner-feddans:focus,
+.partner-area:focus,
+.partner-percent:focus,
+.partner-width-top:focus,
+.partner-width-bottom:focus {
+  border-color: #000000 !important;
+  border-width: 2.5px !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2) !important;
+  background-color: #ffffff !important;
+}
+
+/* Partner name right-alignment */
+.partner-row input.partner-name,
+.partner-name-input,
+.heir-name {
+  text-align: right !important;
+}
+
+/* Readonly fields */
+.partner-row input[readonly],
+#remainder-row-table input[readonly],
+#heirs-table input[readonly] {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border-color: #777777 !important;
+}
+
+/* Delete row button */
+.partner-row .delete-row-btn,
+.btn-delete-row {
+  background-color: #c62828 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--partition-radius, 8px) !important;
+  width: 100% !important;
+  height: var(--partition-input-height, 38px) !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  font-size: var(--partition-font-size, 16px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.2s !important;
+}
+
+.partner-row .delete-row-btn:hover,
+.btn-delete-row:hover {
+  background-color: #b71c1c !important;
+}
+
+/* Cumulative Width Textarea */
+.partner-row textarea.partner-cum-width,
+#remainder-row-table textarea.partner-cum-width {
+  width: 100% !important;
+  height: 65px !important;
+  border: 1px solid #777777 !important;
+  border-radius: 4px !important;
+  font-size: 10.5px !important;
+  color: #1b5e20 !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #f5f5f5 !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+  font-family: inherit !important;
+  line-height: 1.35 !important;
+  padding: 4px 2px !important;
+  overflow: hidden !important;
+  white-space: pre-wrap !important;
+}
+
+#remainder-row-table textarea.partner-cum-width {
+  background-color: #fffde7 !important;
+  color: #e65100 !important;
+  border-color: #ffe082 !important;
+}
+
+/* Table mobile wrapper overflow preservation */
+.table-responsive-container,
+.table-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
+}
