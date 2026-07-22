@@ -2,6 +2,21 @@
 
 يوثق هذا الملف التحسينات، الإصلاحات، والترقيات الهيكلية التي تم إدخالها في إصدار تطبيق **الدَّلاَّل Release 2026.1 (v2.0.0-rc2)** والمكوّن الموحد **FractionHelper v2.0.0**.
 
+## [v3.0.0-RC1 Release Candidate Audit] - 2026-07-22
+### 🛡️ تدشين حزمة المراجعة والتدقيق الشاملة للإصدار المرشح Release Candidate Audit (v3.0-RC1)
+
+```text
+Status: RELEASE CANDIDATE 1 (v3.0-RC1) - READY FOR MANUAL & SYSTEM AUDIT
+Master Test Runner (shared/master-rc-test.js): Installed & Integrated across all 13 Test Suites
+Code Base Architecture                        : Clean Separation (Calculations / Croquis / UI / Projects / Field)
+View Layer Decoupling (Page11 & Page13)       : View-Only Routing Baseline Prepared for v3.1
+```
+
+- **تفعيل حزمة المراجعة المركزية (`shared/master-rc-test.js`):** تجميع 13 حزمة اختبارية تشغيلية ومطابقتها محلياً.
+- **تأطير الصفحات كطبقة عرض (View Layer):** تجهيز البنية التحتية لتصبح صفحات التطبيق مجرد طبقة عرض بدون منطق حسابي متداخل.
+
+---
+
 ## [Commit 15 / v3.0.0 Dallal Major Release Certification] - 2026-07-22
 ### 🏆 الاعتماد الرسمي النهائي لإصدار تطبيق الدَّلاَّل v3.0 وتدشين المزايا الجديدة ومحركات المشاريع الميدانية
 
