@@ -73,7 +73,7 @@
       color: #222; 
       font-size: 9pt; 
       direction: rtl; 
-      padding-bottom: 20px; 
+      padding-bottom: 25px; 
       position: relative; 
       line-height: 1.3;
     }
@@ -96,18 +96,26 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 8px;
-      border-bottom: 2px double #1b5e20;
+      margin-bottom: 6px;
       padding-bottom: 4px;
     }
+    .header-divider {
+      width: 100%;
+      height: 2px;
+      background: #000000;
+      margin-bottom: 8px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     .report-title-container h1 {
-      font-size: 16pt;
+      font-size: 18pt;
       color: #1b5e20;
       font-weight: 800;
       margin: 0;
+      line-height: 1.1;
     }
     .report-title-container p {
-      font-size: 9.5pt;
+      font-size: 11pt;
       color: #c62828;
       font-weight: 700;
       margin: 2px 0 0;
@@ -117,13 +125,12 @@
       margin-bottom: 8px;
     }
     .section-title { 
-      background: #1b5e20; 
+      background: #000000; 
       color: white; 
       font-weight: 700; 
-      font-size: 9pt; 
-      padding: 3px 8px; 
-      border-right: 4px solid #2e7d32; 
-      margin-bottom: 4px; 
+      font-size: 9.5pt; 
+      padding: 4px 10px; 
+      margin-bottom: 5px; 
       border-radius: 4px; 
       -webkit-print-color-adjust: exact; 
       print-color-adjust: exact; 
@@ -134,20 +141,21 @@
       border-collapse: collapse; 
       font-size: 8.5pt; 
       margin-bottom: 6px; 
+      border: 1px solid #000000;
     }
     th { 
-      background: #e8f5e9; 
-      color: #1b5e20; 
+      background: #000000; 
+      color: #ffffff; 
       font-weight: 700; 
-      border: 1px solid #1b5e20; 
+      border: 1px solid #000000; 
       padding: 4px; 
       text-align: center; 
       -webkit-print-color-adjust: exact; 
       print-color-adjust: exact; 
     }
     td { 
-      border: 1px solid #a5d6a7; 
-      padding: 3px; 
+      border: 1px solid #000000; 
+      padding: 3.5px 6px; 
       text-align: center; 
       vertical-align: middle; 
     }
@@ -159,22 +167,23 @@
       margin-bottom: 6px;
     }
     .partner-print-card {
-      border: 1.5px solid #1b5e20;
+      border: 1.5px solid #000000;
       border-radius: 6px;
       background: #ffffff;
-      padding: 5px 6px;
+      padding: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 4px;
       page-break-inside: avoid;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     .partner-card-header {
-      background: #1b5e20;
+      background: #000000;
       color: white;
       font-weight: 700;
       font-size: 8.5pt;
-      padding: 2px 4px;
-      border-radius: 4px;
+      padding: 3px 4px;
       text-align: center;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -183,45 +192,45 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 7.5pt;
-      margin-bottom: 2px;
+      margin: 0;
+      border: none;
     }
     .partner-card-table th {
-      background: #e8f5e9;
-      color: #1b5e20;
+      background: #f2f2f2;
+      color: #000000;
       font-weight: 700;
-      border: 1px solid #a5d6a7;
-      padding: 1.5px 2px;
+      border: 1px solid #ccc;
+      padding: 2px 4px;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     .partner-card-table td {
-      border: 1px solid #a5d6a7;
-      padding: 1.5px 2px;
+      border: 1px solid #ccc;
+      padding: 2px 4px;
     }
     .partner-card-area-box {
-      background: #f1f8e9;
-      border: 1px solid #a5d6a7;
-      border-radius: 4px;
-      padding: 2px 4px;
+      background: #fafafa;
+      border-top: 1px solid #000000;
+      padding: 3px 4px;
       text-align: center;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     .partner-card-area-lbl {
-      font-size: 6.5pt;
-      color: #555;
+      font-size: 7pt;
+      color: #666;
       display: block;
       line-height: 1.1;
     }
     .partner-card-area-val {
-      font-size: 9pt;
+      font-size: 9.5pt;
       color: #c62828;
       font-weight: 700;
       display: block;
       line-height: 1.2;
     }
     .partner-card-fcs-val {
-      font-size: 7pt;
+      font-size: 7.5pt;
       color: #1b5e20;
       font-weight: bold;
       display: block;
@@ -230,46 +239,58 @@
     
     .totals-and-notes {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr 1.2fr;
       gap: 8px;
       margin-top: 6px;
       page-break-inside: avoid;
     }
     .totals-box {
-      border: 1.5px solid #1b5e20;
+      border: 1.5px solid #000000;
       border-radius: 6px;
-      background: #f9fbe7;
-      padding: 5px 6px;
+      background: #ffffff;
+      padding: 0;
+      overflow: hidden;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     .totals-box table {
       margin: 0;
+      border: none;
+    }
+    .totals-box th {
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 3px 4px;
+      font-size: 8pt;
+      font-weight: bold;
     }
     .totals-box td {
-      padding: 2px 4px;
+      border: 1px solid #ccc;
+      padding: 2px 5px;
       font-size: 7.5pt;
     }
     .notes-box {
-      border: 1.5px solid #dcdcdc;
+      border: 1.5px solid #ccc;
       border-radius: 6px;
-      background: #fafafa;
-      padding: 5px 6px;
+      background: #ffffff;
+      padding: 6px 8px;
     }
     .notes-box h3 {
       font-size: 8.5pt;
-      color: #444;
-      margin-bottom: 2px;
+      color: #000;
+      font-weight: bold;
+      margin-bottom: 4px;
       border-bottom: 1px solid #ddd;
-      padding-bottom: 1px;
+      padding-bottom: 2px;
     }
     .notes-box ul {
       list-style-type: none;
-      padding-right: 5px;
+      padding-right: 0;
     }
     .notes-box li {
       font-size: 7.5pt;
-      color: #555;
+      color: #333;
       margin-bottom: 2px;
     }
     
@@ -282,16 +303,16 @@
       flex-direction: column; 
       align-items: center; 
       text-align: center; 
-      font-size: 7.5pt; 
-      color: #555; 
-      border-top: 1px solid #1b5e20; 
-      padding: 3px 10px; 
+      font-size: 8pt; 
+      color: #444; 
+      border-top: 1.5px solid #000000; 
+      padding: 4px 10px; 
       background: white; 
     }
     .footer-main-text { 
-      font-size: 8pt; 
+      font-size: 8.5pt; 
       font-weight: bold; 
-      color: #555; 
+      color: #444; 
     }
     
     .page-break-inside-avoid {
@@ -300,17 +321,19 @@
     
     @media print {
       body { background: #fff !important; color: #000 !important; }
-      .report-title-container { border-bottom-color: #000 !important; }
-      .section-title { background: #000 !important; color: #fff !important; border-right-color: #333 !important; }
-      th { background: #f2f2f2 !important; color: #000 !important; border-color: #000 !important; }
-      td { border-color: #ccc !important; }
+      .header-divider { background: #000 !important; }
+      .section-title { background: #000 !important; color: #fff !important; }
+      th { background: #000 !important; color: #fff !important; border-color: #000 !important; }
+      td { border-color: #000 !important; }
       .partner-print-card { border-color: #000 !important; }
       .partner-card-header { background: #000 !important; color: #fff !important; }
       .partner-card-table th { background: #f2f2f2 !important; color: #000 !important; border-color: #ccc !important; }
       .partner-card-table td { border-color: #ccc !important; }
-      .partner-card-area-box { background: #fff !important; border-color: #ccc !important; }
+      .partner-card-area-box { background: #fafafa !important; border-color: #000 !important; }
       .totals-box { border-color: #000 !important; background: #fff !important; }
+      .totals-box th { background: #000 !important; color: #fff !important; }
       .totals-box td { border-color: #ccc !important; }
+      .notes-box { border-color: #ccc !important; }
       .report-footer { border-top-color: #000 !important; }
     }
   </style>
@@ -328,6 +351,7 @@
       تاريخ الطباعة: ${dateStr} - ${timeStr}
     </div>
   </div>
+  <div class="header-divider"></div>
 
   <div class="section page-break-inside-avoid">
     <div class="section-title">أولاً: جدول بيان المساحات</div>
@@ -355,9 +379,9 @@
     <div class="totals-box">
       <table style="width: 100%; border: none;">
         <thead>
-          <tr style="background: #e8f5e9;">
-            <th style="border: 1px solid #1b5e20; padding: 4px; font-weight: bold; color: #1b5e20; font-size: 8.5pt;">البيان</th>
-            <th style="border: 1px solid #1b5e20; padding: 4px; font-weight: bold; color: #1b5e20; font-size: 8.5pt;">القيمة</th>
+          <tr style="background: #000000;">
+            <th style="border: 1px solid #000000; padding: 4px; font-weight: bold; color: #ffffff; font-size: 8.5pt;">البيان</th>
+            <th style="border: 1px solid #000000; padding: 4px; font-weight: bold; color: #ffffff; font-size: 8.5pt;">القيمة</th>
           </tr>
         </thead>
         <tbody>
