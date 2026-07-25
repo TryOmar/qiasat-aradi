@@ -2341,16 +2341,6 @@ function drawLandCanvas(verticesInput) {
           // Dynamic font size based on piece width
           const baseFontSize = Math.min(13.5, Math.max(9.5, pieceWidth * 0.28)) * scaleMultiplier;
 
-          // 1. طول الحد الأيسر رأسي (دوران -90 درجة) في الجزء العلوي
-          if (showCroquisDimensions) {
-            ctx.save();
-            ctx.translate(leftLenX, leftLenY);
-            ctx.rotate(-Math.PI / 2);
-            ctx.font = `bold ${baseFontSize * (croquisMeasurementSize / 12)}px Cairo`;
-            ctx.fillStyle = "#000000";
-            ctx.fillText(`${pieceLeftL.toFixed(2)} م`, 0, 0);
-            ctx.restore();
-          }
 
           // 2. المساحة رأسي (دوران -90 درجة) تحت طول الحد الأيسر
           if (showCroquisAreas) {

@@ -117,6 +117,10 @@
 
     var targetEl = container.querySelector(".a4-page-container") || container;
 
+    // [RIE Diagnostic Stage 3]: Log tempContainer.innerHTML before html2canvas
+    console.log("=== [RIE Diagnostic Stage 3: tempContainer.innerHTML] ===");
+    console.log(container.innerHTML);
+
     setTimeout(function () {
       if (typeof global.html2canvas !== "function") {
         _err(4, "html2canvas NOT loaded");
@@ -140,6 +144,8 @@
         scrollY:         0
       })
       .then(function (canvas) {
+        // [RIE Diagnostic Stage 4]: Log after canvas creation
+        console.log("=== [RIE Diagnostic Stage 4: Canvas created] ===");
         _log(4, "html2canvas SUCCESS page " + pageIndex + " ✓ size: " + canvas.width + "x" + canvas.height);
 
         _removeEl(container);
@@ -156,6 +162,8 @@
           }
 
           var pageName = filename + "-" + pageIndex + ".png";
+          // [RIE Diagnostic Stage 5]: Log final image blob export
+          console.log("=== [RIE Diagnostic Stage 5: Final Image Exported] ===", pageName, blob.size + " bytes");
           _downloadBlob(blob, pageName, pageIndex, totalPages);
 
           setTimeout(function () {
@@ -199,6 +207,10 @@
         return;
       }
 
+      // [RIE Diagnostic Stage 1]: Log reportData
+      console.log("=== [RIE Diagnostic Stage 1: reportData] ===");
+      console.log(reportData);
+
       _log(2, "Generating pages via DallalReportTemplate.renderPagesHTML...");
 
       var pagesHTML = [];
@@ -206,6 +218,13 @@
         pagesHTML = global.DallalReportTemplate.renderPagesHTML(reportData);
       } else if (global.DallalReportTemplate && typeof global.DallalReportTemplate.renderHTML === "function") {
         pagesHTML = [global.DallalReportTemplate.renderHTML(reportData)];
+      }
+
+      // [RIE Diagnostic Stage 2]: Log renderHTML/renderPagesHTML output
+      console.log("=== [RIE Diagnostic Stage 2: renderHTML()] ===");
+      console.log("Total pages generated:", pagesHTML ? pagesHTML.length : 0);
+      if (pagesHTML && pagesHTML[0]) {
+        console.log("Sample page 1 HTML snippet:", pagesHTML[0].substring(0, 400));
       }
 
       if (!pagesHTML || pagesHTML.length === 0 || !pagesHTML[0]) {

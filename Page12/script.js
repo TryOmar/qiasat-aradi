@@ -153,14 +153,25 @@ function getDirEmoji(dir) {
   return "";
 }
 
+// PIECE_COLORS palette matching Page 11
+const PIECE_COLORS = [
+  { fill: "#FFF0C9", stroke: "#EF6C00", text: "#111111" },
+  { fill: "#D7E9FF", stroke: "#1565C0", text: "#111111" },
+  { fill: "#DCEFD9", stroke: "#2E7D32", text: "#111111" },
+  { fill: "#F8DDE8", stroke: "#C2185B", text: "#111111" },
+  { fill: "#E9DDF8", stroke: "#6A1B9A", text: "#111111" },
+  { fill: "#D8F3EF", stroke: "#00796B", text: "#111111" },
+  { fill: "#FBE9E7", stroke: "#D84315", text: "#111111" },
+  { fill: "#F1F8E9", stroke: "#558B2F", text: "#111111" }
+];
+
 /**
  * formatBorderText - توليد النص النهائي للحد بناءً على نموذج البيانات
  */
 function formatBorderText(b) {
-  const emoji = getDirEmoji(b.direction);
   const lenVal = parseFloat(b.length);
   const lenStr = isNaN(lenVal) ? "0.00" : lenVal.toFixed(2);
-  let text = `${emoji} ${b.direction} ${lenStr} م`;
+  let text = `${lenStr} م ${b.direction}`;
   if (b.description) {
     text += ` ${b.description}`;
   }
@@ -1046,12 +1057,16 @@ function generateCustomLand(useCustomWidths = false) {
     const drawW2 = w2;
     const drawL1 = l1;
     const drawL2 = l2;
-    const avgHeight = (drawL1 + drawL2) / 2;
+    const maxW = Math.max(drawW1, drawW2);
+    const maxL = Math.max(drawL1, drawL2);
 
-    p1 = { x: -drawW1 / 2, y: -avgHeight / 2 };
-    p2 = { x: drawW1 / 2, y: -avgHeight / 2 };
-    p3 = { x: drawW2 / 2, y: avgHeight / 2 };
-    p4 = { x: -drawW2 / 2, y: avgHeight / 2 };
+    const x1 = -maxW / 2;
+    const y1 = -maxL / 2;
+
+    p1 = { x: x1, y: y1 };                          // Top-Left (0, 0)
+    p2 = { x: x1 + drawW1, y: y1 };                 // Top-Right (drawW1, 0) - top edge horizontal
+    p4 = { x: x1, y: y1 + drawL2 };                 // Bottom-Left (0, drawL2) - left edge vertical
+    p3 = { x: x1 + drawW2, y: y1 + drawL1 };        // Bottom-Right (drawW2, drawL1) - right edge vertical, bottom sloped
 
     totalArea = ((w1 + w2) / 2) * ((l1 + l2) / 2);
   }
@@ -1121,15 +1136,14 @@ function generateCustomLand(useCustomWidths = false) {
       let partArea = area1 + area2;
       const partDetailed = sqmToFeddanCaratShares(partArea);
 
-
-      const colorIndex = (i + 1) % colorsList.length;
+      const colorObj = PIECE_COLORS[i % PIECE_COLORS.length];
       shapes.push({
         id: "shape_" + (i + 1),
         points: [p_tl, p_tr, p_br, p_bl],
-        owner: "الشريك " + (i + 1),
+        owner: "شريك " + (i + 1),
         area: { feddan: partDetailed.feddan, carat: partDetailed.carat, shares: partDetailed.shares, sqm: partArea },
-        notes: "نصيب الشريك " + (i + 1),
-        color: "#ffffff",
+        notes: "نصيب شريك " + (i + 1),
+        color: colorObj ? colorObj.fill : "#ffffff",
         textX: (p_tl.x + p_tr.x + p_br.x + p_bl.x) / 4,
         textY: (p_tl.y + p_tr.y + p_br.y + p_bl.y) / 4
       });
@@ -2364,6 +2378,65 @@ function renderSVG() {
     });
     shapesGroup.appendChild(polygon);
 
+    // Render Start ("البداية") and End ("النهاية") badges for land partner parcels
+    if (shapes.length > 1) {
+      const isStart = (index === 0);
+      const isEnd = (index === shapes.length - 1);
+      if (isStart || isEnd) {
+        const badgeEmoji = isStart ? "🏁" : "🚩";
+        const badgeLabel = isStart ? "البداية" : "النهاية";
+        const badgeFill = isStart ? "#1b5e20" : "#b71c1c";
+        const badgeBorder = isStart ? "#2e7d32" : "#c62828";
+        const badgeBg = isStart ? "#e8f5e9" : "#ffebee";
+
+        const badgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        badgeGroup.setAttribute("style", "pointer-events: none;");
+
+        const sMinX = Math.min(...s.points.map(p => p.x));
+        const sMaxX = Math.max(...s.points.map(p => p.x));
+        const sMinY = Math.min(...s.points.map(p => p.y));
+        const sMaxY = Math.max(...s.points.map(p => p.y));
+
+        const bCX = getVisualX((sMinX + sMaxX) / 2);
+        const bCY = getVisualY(sMaxY - (sMaxY - sMinY) * 0.18);
+        badgeGroup.setAttribute("transform", `rotate(-90, ${bCX}, ${bCY})`);
+
+        const bRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bRect.setAttribute("x", bCX - 25);
+        bRect.setAttribute("y", bCY - 16);
+        bRect.setAttribute("width", 50);
+        bRect.setAttribute("height", 32);
+        bRect.setAttribute("rx", "4");
+        bRect.setAttribute("ry", "4");
+        bRect.setAttribute("fill", badgeBg);
+        bRect.setAttribute("stroke", badgeBorder);
+        bRect.setAttribute("stroke-width", "1");
+        badgeGroup.appendChild(bRect);
+
+        const bTxt1 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        bTxt1.setAttribute("x", bCX);
+        bTxt1.setAttribute("y", bCY - 2);
+        bTxt1.setAttribute("fill", badgeFill);
+        bTxt1.setAttribute("font-size", "11");
+        bTxt1.setAttribute("font-weight", "bold");
+        bTxt1.setAttribute("text-anchor", "middle");
+        bTxt1.textContent = badgeEmoji;
+        badgeGroup.appendChild(bTxt1);
+
+        const bTxt2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        bTxt2.setAttribute("x", bCX);
+        bTxt2.setAttribute("y", bCY + 11);
+        bTxt2.setAttribute("fill", badgeFill);
+        bTxt2.setAttribute("font-size", "9");
+        bTxt2.setAttribute("font-weight", "bold");
+        bTxt2.setAttribute("text-anchor", "middle");
+        bTxt2.textContent = badgeLabel;
+        badgeGroup.appendChild(bTxt2);
+
+        shapesGroup.appendChild(badgeGroup);
+      }
+    }
+
     // Parcel inner Text (Owner, Area and Notes)
     const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     textGroup.setAttribute("class", "draggable-label");
@@ -2937,10 +3010,9 @@ function renderSVG() {
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute("cx", getVisualX(p.x));
             c.setAttribute("cy", getVisualY(p.y));
-            c.setAttribute("r", 5.5);
-            c.setAttribute("fill", "#ffffff");
-            c.setAttribute("stroke", "#1a1a1a");
-            c.setAttribute("stroke-width", "1.8");
+            c.setAttribute("r", "5");
+            c.setAttribute("fill", "#1b5e20");
+            c.setAttribute("stroke", "none");
             c.style.pointerEvents = "none";
             shapesGroup.appendChild(c);
           }
