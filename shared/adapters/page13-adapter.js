@@ -47,7 +47,6 @@
         w2Raw = s;
         w1Raw = s;
         l1Raw = s;
-        l2Raw = s;
       } else if (activeShape === "trapezoid") {
         w2Raw = document.getElementById("trap-base-minor")?.value || "";
         w1Raw = document.getElementById("trap-base-major")?.value || "";
@@ -60,12 +59,10 @@
         l2Raw = document.getElementById("quad-side-b")?.value || "";
       }
 
-      const w2Val = w2Raw ? `${w2Raw} م` : "—";
-      const w1Val = w1Raw ? `${w1Raw} م` : "—";
-      const l1Val = l1Raw ? `${l1Raw} م` : "—";
-      const l2Val = l2Raw ? `${l2Raw} م` : "—";
-
-      const caratSize = global.caratSize || 175;
+      const w2Val = w2Raw ? `م ${w2Raw}` : "—";
+      const w1Val = w1Raw ? `م ${w1Raw}` : "—";
+      const l1Val = l1Raw ? `م ${l1Raw}` : "—";
+      const l2Val = l2Raw ? `م ${l2Raw}` : "—";
 
       const w1Num = parseFloat(w1Raw) || 0;
       const w2Num = parseFloat(w2Raw) || 0;
@@ -83,7 +80,7 @@
         heirs = global.heirsData;
       }
 
-      // قراءة عناصر الجدول DOM لقراءة أطوال الأضلاع الحالية بدقة لكل سطر
+      // قراءة عناصر الجدول DOM لقراءة أطوال الأضلع الحالية بدقة لكل سطر
       const domRows = document.querySelectorAll("#heirs-list tr");
       if (!heirs || heirs.length === 0) {
         heirs = [];
@@ -141,9 +138,9 @@
         { label: `العرض الثاني (${dirs.bottom || "أسفل"})`, value: w1Val },
         { label: `الطول الأيمن (${dirs.right || "يمين"})`, value: l1Val },
         { label: `الطول الأيسر (${dirs.left || "يسار"})`, value: l2Val },
-        { label: "معدل العرض", value: avgWidth > 0 ? `${avgWidth.toFixed(4)} م` : "—" },
-        { label: "متوسط الطول", value: avgLength > 0 ? `${avgLength.toFixed(4)} م` : "—" },
-        { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? `${totalAreaStr} م²` : "—", isHighlight: true }
+        { label: "معدل العرض", value: avgWidth > 0 ? `م ${avgWidth.toFixed(4)}` : "—" },
+        { label: "متوسط الطول", value: avgLength > 0 ? `م ${avgLength.toFixed(4)}` : "—" },
+        { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? `2 م ${totalAreaStr}` : "—", isHighlight: true }
       ];
 
       // 5. بناء بطاقات الشركاء والورثة مع الأبعاد الأربعة الخاصة بكل بطاقة
@@ -164,10 +161,10 @@
         const rightVal = (h.leftLine && !isNaN(h.leftLine) && h.leftLine > 0) ? h.leftLine : ((h.rightL && !isNaN(h.rightL)) ? h.rightL : domRight);
         const leftVal = (h.divLine && !isNaN(h.divLine) && h.divLine > 0) ? h.divLine : ((h.leftL && !isNaN(h.leftL)) ? h.leftL : domLeft);
 
-        const topStr = (topVal > 0 && !isNaN(topVal)) ? `${topVal.toFixed(2)} م` : "—";
-        const botStr = (botVal > 0 && !isNaN(botVal)) ? `${botVal.toFixed(2)} م` : "—";
-        const rightStr = (rightVal > 0 && !isNaN(rightVal)) ? `${rightVal.toFixed(2)} م` : "—";
-        const leftStr = (leftVal > 0 && !isNaN(leftVal)) ? `${leftVal.toFixed(2)} م` : "—";
+        const topStr = (topVal > 0 && !isNaN(topVal)) ? `م ${topVal.toFixed(2)}` : "—";
+        const botStr = (botVal > 0 && !isNaN(botVal)) ? `م ${botVal.toFixed(2)}` : "—";
+        const rightStr = (rightVal > 0 && !isNaN(rightVal)) ? `م ${rightVal.toFixed(2)}` : "—";
+        const leftStr = (leftVal > 0 && !isNaN(leftVal)) ? `م ${leftVal.toFixed(2)}` : "—";
 
         let fcsText = "0 سهم";
         if (global.convertSquareMetersToFCS) {
@@ -197,13 +194,13 @@
                 <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom || "أسفل"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${botStr}</td></tr>
                 <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right || "يمين"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${rightStr}</td></tr>
                 <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left || "يسار"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${leftStr}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgW > 0 ? avgW.toFixed(4) + " م" : "—"}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgL > 0 ? avgL.toFixed(4) + " م" : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgW > 0 ? "م " + avgW.toFixed(4) : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgL > 0 ? "م " + avgL.toFixed(4) : "—"}</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">
               <span class="pcard-foot-lbl">جملة المساحة بالمتر المربع</span>
-              <span class="pcard-foot-area">${formattedArea} م²</span>
+              <span class="pcard-foot-area">2 م ${formattedArea}</span>
               <span class="pcard-foot-fcs">${fcsText}</span>
             </div>
           </div>

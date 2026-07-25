@@ -39,13 +39,13 @@
 
       // 1. جدول الأبعاد والمساحة الإجمالية
       const dimensions = [
-        { label: `العرض الأول (${dirs.top})`, value: `${w2} م` },
-        { label: `العرض الثاني (${dirs.bottom})`, value: `${w1} م` },
-        { label: `الطول الأيمن (${dirs.right})`, value: `${l1} م` },
-        { label: `الطول الأيسر (${dirs.left})`, value: `${l2} م` },
-        { label: "معدل العرض", value: `${avgWidth.toFixed(4)} م` },
-        { label: "متوسط الطول", value: `${avgLength.toFixed(4)} م` },
-        { label: "جملة المساحة بالمتر المربع", value: `${totalArea} م²`, isHighlight: true }
+        { label: `العرض الأول (${dirs.top})`, value: `م ${w2}` },
+        { label: `العرض الثاني (${dirs.bottom})`, value: `م ${w1}` },
+        { label: `الطول الأيمن (${dirs.right})`, value: `م ${l1}` },
+        { label: `الطول الأيسر (${dirs.left})`, value: `م ${l2}` },
+        { label: "معدل العرض", value: `م ${avgWidth.toFixed(4)}` },
+        { label: "متوسط الطول", value: `م ${avgLength.toFixed(4)}` },
+        { label: "جملة المساحة بالمتر المربع", value: `2 م ${totalArea}`, isHighlight: true }
       ];
 
       // 2. بطاقات الشركاء
@@ -112,17 +112,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${w2_val} م</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${w1_val} م</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${rightL_val} م</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${leftL_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${avgW_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${avgL_val} م</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${w2_val}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${w1_val}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${rightL_val}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${leftL_val}</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">م ${avgW_val}</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">م ${avgL_val}</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">
               <span class="pcard-foot-lbl">جملة المساحة بالمتر المربع</span>
-              <span class="pcard-foot-area">${formattedArea} م²</span>
+              <span class="pcard-foot-area">2 م ${formattedArea}</span>
               <span class="pcard-foot-fcs">(${fcsText})</span>
             </div>
           </div>

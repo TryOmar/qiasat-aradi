@@ -209,11 +209,11 @@
     th, td {
       text-align: center !important;
       vertical-align: middle !important;
+      direction: rtl !important;
     }
 
-    .td-val, .val-highlight, .totals-table .td-val, .main-table td:last-child {
-      direction: ltr !important;
-      unicode-bidi: embed !important;
+    .td-val, .val-highlight, .totals-table .td-val, .main-table td {
+      direction: rtl !important;
       text-align: center !important;
     }
 
@@ -245,7 +245,7 @@
     .main-table tr:nth-child(even) td { background: #f8fafc; }
     .val-highlight {
       color: #b91c1c; font-weight: 800; font-size: 10pt;
-      text-align: center !important; direction: ltr !important; unicode-bidi: embed !important;
+      text-align: center !important; direction: rtl !important;
     }
 
     /* ── شبكة بطاقات الشركاء ────────────────────────────────── */
@@ -273,7 +273,7 @@
       text-align: center !important; vertical-align: middle !important;
     }
     .pcard-table .td-val {
-      font-weight: 700; color: #1b5e20; direction: ltr !important; unicode-bidi: embed !important;
+      font-weight: 700; color: #1b5e20; direction: rtl !important;
       text-align: center !important; background: #f0fdf4;
     }
 
@@ -284,7 +284,7 @@
     .pcard-foot-lbl  { font-size: 7pt; color: #64748b; display: block; margin-bottom: 1px; text-align: center; }
     .pcard-foot-area {
       font-size: 10pt; color: #991b1b; font-weight: 800; display: block; text-align: center;
-      direction: ltr !important; unicode-bidi: embed !important;
+      direction: rtl !important;
     }
     .pcard-foot-fcs  { font-size: 7.5pt; color: #15803d; font-weight: 700; display: block; margin-top: 1px; text-align: center; }
 
