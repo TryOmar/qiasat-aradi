@@ -350,3 +350,17 @@
   gap: 10px !important;
   flex-wrap: wrap !important;
 }
+
+/* --- Realtime Arabic Measurement Helper Display --- */
+.realtime-measurement-helper {
+  font-size: 11.5px;
+  color: #475569;
+  margin-top: 2px;
+  text-align: right;
+  font-family: Cairo, Arial, sans-serif;
+  font-weight: bold;
+  min-height: 16px;
+  display: none;
+  padding-right: 4px;
+}
+

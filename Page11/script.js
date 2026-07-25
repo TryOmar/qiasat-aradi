@@ -3289,7 +3289,16 @@ function exportCroquis() {
 }
 
 function exportReportImage() {
-  exportCroquis();
+  if (typeof hasDeficit === "function" && hasDeficit()) {
+    alert("🔴 لا يمكن اعتماد أو طباعة التقرير أو تصديره لوجود عجز في الأنصبة. يرجى تعديل الأنصبة أولاً.");
+    return;
+  }
+
+  const reportData = window.Page11Adapter ? window.Page11Adapter.buildReportData() : {};
+  if (window.ReportImageExporter && typeof window.ReportImageExporter.export === "function") {
+    window.ReportImageExporter.export(reportData, "تقرير-الدَّلاَّل");
+    return;
+  }
 }
 
 // ===================================================
@@ -6406,72 +6415,18 @@ function getP11Directions() {
 window.handleP11DirectionChange = handleP11DirectionChange;
 
 /**
- * updateRealtimeMeasurementHelper - القراءة الفورية للقياس باللغة العربية أسفل كل حقل
+ * initAllRealtimeHelpers - تهيئة وتحديث القراءة الفورية للقياسات في Page11
  */
-function updateRealtimeMeasurementHelper(inputId, helperId) {
-  const inputEl = document.getElementById(inputId);
-  const helperEl = document.getElementById(helperId);
-  if (!inputEl || !helperEl) return;
-
-  const valStr = inputEl.value.trim();
-  if (!valStr || isNaN(parseFloat(valStr)) || parseFloat(valStr) <= 0) {
-    helperEl.style.display = "none";
-    helperEl.innerText = "";
-    return;
-  }
-
-  let text = "";
-  if (window.FractionHelper && typeof window.FractionHelper.parseInputToDetails === "function") {
-    try {
-      const details = window.FractionHelper.parseInputToDetails(valStr);
-      if (details && details.fullText) {
-        text = details.fullText;
-      }
-    } catch (e) {
-      console.log("FractionHelper error", e);
-    }
-  }
-
-  if (!text) {
-    // Standalone fallback conversion
-    const num = parseFloat(valStr);
-    if (!isNaN(num) && num > 0) {
-      const parts = valStr.split(".");
-      const m = parseInt(parts[0]) || 0;
-      let cms = 0;
-      if (parts.length > 1 && parts[1]) {
-        let decStr = parts[1];
-        if (decStr.length === 1) cms = parseInt(decStr) * 10;
-        else cms = parseInt(decStr.slice(0, 2));
-      }
-      if (m > 0 && cms > 0) text = m + " مترًا و" + cms + " سنتيمترًا.";
-      else if (m > 0) text = m + " مترًا.";
-      else if (cms > 0) text = cms + " سنتيمترًا.";
-    }
-  }
-
-  if (text) {
-    helperEl.innerText = text;
-    helperEl.style.display = "block";
-  } else {
-    helperEl.style.display = "none";
-    helperEl.innerText = "";
-  }
-}
-
 function initAllRealtimeHelpers() {
-  updateRealtimeMeasurementHelper('width2', 'width2-helper');
-  updateRealtimeMeasurementHelper('width1', 'width1-helper');
-  updateRealtimeMeasurementHelper('length1', 'length1-helper');
-  updateRealtimeMeasurementHelper('length2', 'length2-helper');
+  if (window.RealtimeMeasurement && typeof window.RealtimeMeasurement.refresh === "function") {
+    window.RealtimeMeasurement.refresh();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  setTimeout(initAllRealtimeHelpers, 200);
+  setTimeout(initAllRealtimeHelpers, 100);
 });
 
-window.updateRealtimeMeasurementHelper = updateRealtimeMeasurementHelper;
-window.initAllRealtimeHelpers = initAllRealtimeHelpers;
 window.resetP11DirectionsToDefault = resetP11DirectionsToDefault;
 window.getP11Directions = getP11Directions;
 

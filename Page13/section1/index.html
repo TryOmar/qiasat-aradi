@@ -147,74 +147,99 @@
     <div class="dynamic-inputs-container">
       <!-- Rectangle Inputs -->
       <div id="inputs-rectangle" class="inputs-group">
-        <div class="input-row">
-          <label for="rect-width">العرض بالمتر:</label>
-          <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-width" placeholder="مثال: 30" dir="auto" />
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="rect-width">العرض بالمتر:</label>
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-width" placeholder="مثال: 30" dir="auto" data-measurement-helper="rect-width-helper" />
+          </div>
+          <div id="rect-width-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="rect-length">الطول بالمتر:</label>
-          <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-length" placeholder="مثال: 50" dir="auto" />
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="rect-length">الطول بالمتر:</label>
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="rect-length" placeholder="مثال: 50" dir="auto" data-measurement-helper="rect-length-helper" />
+          </div>
+          <div id="rect-length-helper" class="realtime-measurement-helper"></div>
         </div>
       </div>
 
       <!-- Square Inputs -->
       <div id="inputs-square" class="inputs-group">
-        <div class="input-row">
-          <label for="square-side">ادخل طول اي ضلع (بالمتر):</label>
-          <input type="text" inputmode="decimal" enterkeyhint="next" id="square-side" placeholder="مثال: 30" dir="auto" />
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="square-side">ادخل طول اي ضلع (بالمتر):</label>
+            <input type="text" inputmode="decimal" enterkeyhint="next" id="square-side" placeholder="مثال: 30" dir="auto" data-measurement-helper="square-side-helper" />
+          </div>
+          <div id="square-side-helper" class="realtime-measurement-helper"></div>
         </div>
       </div>
 
       <!-- Trapezoid Inputs -->
       <div id="inputs-trapezoid" class="inputs-group active">
-        <div class="input-row">
-          <label for="trap-base-minor">العرض الأول (أعلى) (C) بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-minor" placeholder="مثال: 40" dir="auto" />
-            <select id="p13-trap-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-c-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي" selected>شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="trap-base-minor">العرض الأول (أعلى) (C) بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-minor" placeholder="مثال: 40" dir="auto" data-measurement-helper="trap-base-minor-helper" />
+              <select id="p13-trap-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-c-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي" selected>شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="trap-base-minor-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="trap-base-major">العرض الثاني (أسفل) (A) بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-major" placeholder="مثال: 60" dir="auto" />
-            <select id="p13-trap-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-a-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي" selected>غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="trap-base-major">العرض الثاني (أسفل) (A) بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-base-major" placeholder="مثال: 60" dir="auto" data-measurement-helper="trap-base-major-helper" />
+              <select id="p13-trap-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-a-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي" selected>غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="trap-base-major-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="trap-length-right">الطول الأيمن (D) بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-right" placeholder="مثال: 30" dir="auto" />
-            <select id="p13-trap-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-d-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي" selected>قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="trap-length-right">الطول الأيمن (D) بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-right" placeholder="مثال: 30" dir="auto" data-measurement-helper="trap-length-right-helper" />
+              <select id="p13-trap-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-d-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي" selected>قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="trap-length-right-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="trap-length-left">الطول الأيسر (B) بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-left" placeholder="مثال: 30" dir="auto" />
-            <select id="p13-trap-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-b-dir')">
-              <option value="بحري" selected>بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="trap-length-left">الطول الأيسر (B) بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="trap-length-left" placeholder="مثال: 30" dir="auto" data-measurement-helper="trap-length-left-helper" />
+              <select id="p13-trap-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-trap-b-dir')">
+                <option value="بحري" selected>بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="trap-length-left-helper" class="realtime-measurement-helper"></div>
         </div>
+
         <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
           <button type="button" onclick="resetP13DirectionsToDefault()" style="background: none; border: none; color: #1b5e20; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;">
             🔄 إعادة الاتجاهات للوضع الافتراضي
@@ -224,66 +249,90 @@
 
       <!-- Quadrilateral Inputs -->
       <div id="inputs-quadrilateral" class="inputs-group">
-        <div class="input-row">
-          <label for="quad-side-c">العرض الأول (أعلى) <span style="color: #d32f2f; font-weight: bold;">(C)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-c" placeholder="مثال: 45" dir="auto" />
-            <select id="p13-quad-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-c-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي" selected>شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-side-c">العرض الأول (أعلى) <span style="color: #d32f2f; font-weight: bold;">(C)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-c" placeholder="مثال: 45" dir="auto" data-measurement-helper="quad-side-c-helper" />
+              <select id="p13-quad-c-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-c-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي" selected>شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="quad-side-c-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="quad-side-a">العرض الثاني (أسفل) <span style="color: #d32f2f; font-weight: bold;">(A)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-a" placeholder="مثال: 50" dir="auto" />
-            <select id="p13-quad-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-a-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي" selected>غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-side-a">العرض الثاني (أسفل) <span style="color: #d32f2f; font-weight: bold;">(A)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-a" placeholder="مثال: 50" dir="auto" data-measurement-helper="quad-side-a-helper" />
+              <select id="p13-quad-a-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-a-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي" selected>غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="quad-side-a-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="quad-side-d">الطول الأيمن <span style="color: #2e7d32; font-weight: bold;">(D)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-d" placeholder="مثال: 35" dir="auto" />
-            <select id="p13-quad-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-d-dir')">
-              <option value="بحري">بحري</option>
-              <option value="قبلي" selected>قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-side-d">الطول الأيمن <span style="color: #2e7d32; font-weight: bold;">(D)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-d" placeholder="مثال: 35" dir="auto" data-measurement-helper="quad-side-d-helper" />
+              <select id="p13-quad-d-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-d-dir')">
+                <option value="بحري">بحري</option>
+                <option value="قبلي" selected>قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="quad-side-d-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="quad-side-b">الطول الأيسر <span style="color: #2e7d32; font-weight: bold;">(B)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-b" placeholder="مثال: 40" dir="auto" />
-            <select id="p13-quad-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-b-dir')">
-              <option value="بحري" selected>بحري</option>
-              <option value="قبلي">قبلي</option>
-              <option value="شرقي">شرقي</option>
-              <option value="غربي">غربي</option>
-            </select>
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-side-b">الطول الأيسر <span style="color: #2e7d32; font-weight: bold;">(B)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-side-b" placeholder="مثال: 40" dir="auto" data-measurement-helper="quad-side-b-helper" />
+              <select id="p13-quad-b-dir" class="direction-select" onchange="handleP13DirectionChange('p13-quad-b-dir')">
+                <option value="بحري" selected>بحري</option>
+                <option value="قبلي">قبلي</option>
+                <option value="شرقي">شرقي</option>
+                <option value="غربي">غربي</option>
+              </select>
+            </div>
           </div>
+          <div id="quad-side-b-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="quad-diag-ac">القطر الأول <span style="color: #0288d1; font-weight: bold;">(AC)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" />
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-diag-ac">القطر الأول <span style="color: #0288d1; font-weight: bold;">(AC)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" enterkeyhint="next" id="quad-diag-ac" placeholder="مثال: 60" dir="auto" data-measurement-helper="quad-diag-ac-helper" />
+            </div>
           </div>
+          <div id="quad-diag-ac-helper" class="realtime-measurement-helper"></div>
         </div>
-        <div class="input-row">
-          <label for="quad-diag-bd">القطر الثاني <span style="color: #0288d1; font-weight: bold;">(BD)</span> بالمتر:</label>
-          <div class="input-with-select-wrapper">
-            <input type="text" inputmode="decimal" id="quad-diag-bd" placeholder="مثال: 55" dir="auto" />
+
+        <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
+          <div class="input-row">
+            <label for="quad-diag-bd">القطر الثاني <span style="color: #0288d1; font-weight: bold;">(BD)</span> بالمتر:</label>
+            <div class="input-with-select-wrapper">
+              <input type="text" inputmode="decimal" id="quad-diag-bd" placeholder="مثال: 55" dir="auto" data-measurement-helper="quad-diag-bd-helper" />
+            </div>
           </div>
+          <div id="quad-diag-bd-helper" class="realtime-measurement-helper"></div>
         </div>
+
         <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
           <button type="button" onclick="resetP13DirectionsToDefault()" style="background: none; border: none; color: #1b5e20; font-family: 'Cairo'; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;">
             🔄 إعادة الاتجاهات للوضع الافتراضي
@@ -479,14 +528,27 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
             <span id="btn-fullscreen-text">ملء الشاشة</span>
           </button>
-          <!-- [Commit 3 – Smart Export] SmartExport wrappers with loading state, toast, and watermark -->
-          <button class="btn btn-secondary btn-sm" onclick="typeof SmartExport !== 'undefined' ? SmartExport.exportImage() : exportCroquisAsImage()" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 14px; padding: 4px 12px; height: 32px;" title="تحميل صورة الكروكي">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            تحميل الصورة
-          </button>
           <button class="btn btn-secondary btn-sm" onclick="printFieldGuide()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="طباعة خطوات التنفيذ الميداني">🧭 دليل التنفيذ الحقلي</button>
           <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulation()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="تشغيل المحاكاة المتحركة لشرح التنفيذ ميدانياً">🎬 شرح التنفيذ</button>
         </div>
+      </div>
+
+      <!-- Card Export Actions: Page11 Standard Buttons -->
+      <div class="s card-export-actions" style="margin-top: 15px; margin-bottom: 20px; padding: 15px; background: white; border-radius: 12px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+          <button type="button" onclick="exportCroquis()" style="flex: 1; min-width: 140px; height: 44px; background: #0288d1; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Cairo; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(2,136,209,0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            تحميل الخريطة
+          </button>
+          <button type="button" onclick="exportPDF()" style="flex: 1; min-width: 140px; height: 44px; background: #0d233a; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Cairo; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(13,35,58,0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            تحميل التقرير PDF
+          </button>
+        </div>
+        <button type="button" onclick="exportReportImage()" style="width: 100%; height: 44px; background: #00897b; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; font-family: Cairo; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,137,123,0.3);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          حفظ التقرير صورة
+        </button>
       </div>
     </div>
 
@@ -816,6 +878,8 @@
   <script src="../../shared/engines/report-engine.js"></script>
   <script src="../../shared/engines/steps-engine.js"></script>
   <script src="../../shared/engines/print-engine.js"></script>
+  <script src="../../shared/engines/report-image-exporter.js"></script>
+  <script src="../../shared/realtime-measurement.js"></script>
   <script src="script.js"></script>
   <!-- DIAGNOSTIC: Temporary accordion debug - remove after fix confirmed -->
   <script>

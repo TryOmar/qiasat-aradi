@@ -231,26 +231,7 @@
 }
 
 .fh-activator-btn {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  color: white;
-  border: 2px solid #a5d6a7;
-  border-radius: 30px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: bold;
-  cursor: grab;
-  user-select: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 99998;
-  font-family: 'Cairo', sans-serif;
-  direction: rtl;
-  display: flex;
-  align-items: center;
-  white-space: nowrap !important;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease !important;
+  display: none !important;
 }
 
 .fh-activator-btn.fh-fading-out {

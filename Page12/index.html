@@ -183,7 +183,7 @@
         <div class="editor-form-group">
           <label>العرض الأول (أعلى) (C) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-w1" value="30" placeholder="مثال: 30" style="flex: 1; text-align: center;">
+            <input type="text" inputmode="decimal" id="start-w1" value="30" placeholder="مثال: 30" style="flex: 1; text-align: center;" data-measurement-helper="start-w1-helper">
             <select id="start-w1-dir" style="flex: 1; text-align: center;" onchange="if(typeof handleDirectionChange === 'function') handleDirectionChange('start-w1-dir')">
               <option value="بحري" selected>بحري</option>
               <option value="قبلي">قبلي</option>
@@ -191,11 +191,12 @@
               <option value="غربي">غربي</option>
             </select>
           </div>
+          <div id="start-w1-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group">
           <label>العرض الثاني (أسفل) (A) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-w2" value="35" placeholder="مثال: 35" style="flex: 1; text-align: center;">
+            <input type="text" inputmode="decimal" id="start-w2" value="35" placeholder="مثال: 35" style="flex: 1; text-align: center;" data-measurement-helper="start-w2-helper">
             <select id="start-w2-dir" style="flex: 1; text-align: center;" onchange="if(typeof handleDirectionChange === 'function') handleDirectionChange('start-w2-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي" selected>قبلي</option>
@@ -203,11 +204,12 @@
               <option value="غربي">غربي</option>
             </select>
           </div>
+          <div id="start-w2-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيمن (D) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-l2" value="50" placeholder="مثال: 50" style="flex: 1; text-align: center;">
+            <input type="text" inputmode="decimal" id="start-l2" value="50" placeholder="مثال: 50" style="flex: 1; text-align: center;" data-measurement-helper="start-l2-helper">
             <select id="start-l2-dir" style="flex: 1; text-align: center;" onchange="if(typeof handleDirectionChange === 'function') handleDirectionChange('start-l2-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -215,11 +217,12 @@
               <option value="غربي">غربي</option>
             </select>
           </div>
+          <div id="start-l2-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group">
           <label>الطول الأيسر (B) بالمتر:</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" inputmode="decimal" id="start-l1" value="45" placeholder="مثال: 45" style="flex: 1; text-align: center;">
+            <input type="text" inputmode="decimal" id="start-l1" value="45" placeholder="مثال: 45" style="flex: 1; text-align: center;" data-measurement-helper="start-l1-helper">
             <select id="start-l1-dir" style="flex: 1; text-align: center;" onchange="if(typeof handleDirectionChange === 'function') handleDirectionChange('start-l1-dir')">
               <option value="بحري">بحري</option>
               <option value="قبلي">قبلي</option>
@@ -227,6 +230,7 @@
               <option value="غربي" selected>غربي</option>
             </select>
           </div>
+          <div id="start-l1-helper" class="realtime-measurement-helper"></div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; margin-top: 2px; margin-bottom: 12px;">
@@ -239,14 +243,16 @@
           <div class="editor-form-group">
             <label>القطر الأول (AC) بالمتر:</label>
             <div style="display: flex; gap: 8px;">
-              <input type="text" inputmode="decimal" id="start-d1" placeholder="مثال: 60" style="flex: 1;">
+              <input type="text" inputmode="decimal" id="start-d1" placeholder="مثال: 60" style="flex: 1;" data-measurement-helper="start-d1-helper">
             </div>
+            <div id="start-d1-helper" class="realtime-measurement-helper"></div>
           </div>
           <div class="editor-form-group">
             <label>القطر الثاني (BD) بالمتر:</label>
             <div style="display: flex; gap: 8px;">
-              <input type="text" inputmode="decimal" id="start-d2" placeholder="مثال: 55" style="flex: 1;">
+              <input type="text" inputmode="decimal" id="start-d2" placeholder="مثال: 55" style="flex: 1;" data-measurement-helper="start-d2-helper">
             </div>
+            <div id="start-d2-helper" class="realtime-measurement-helper"></div>
           </div>
           <p style="font-size: 11.5px; color: #558b2f; margin: 5px 0 0 0; font-weight: bold; text-align: center;">* يكفي إدخال أحد القطرين (AC) أو (BD) فقط للحصول على حساب وتقسيم أكثر دقة.</p>
         </div>
@@ -312,23 +318,28 @@
         </div>
         <div class="editor-form-group mobile-field">
           <label for="unified-west-len">طول القطعة الغربية (متر):</label>
-          <input type="text" inputmode="decimal" id="unified-west-len" class="mobile-input">
+          <input type="text" inputmode="decimal" id="unified-west-len" class="mobile-input" data-measurement-helper="unified-west-len-helper">
+          <div id="unified-west-len-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group mobile-field">
           <label for="unified-east-len">طول القطعة الشرقية (متر):</label>
-          <input type="text" inputmode="decimal" id="unified-east-len" class="mobile-input">
+          <input type="text" inputmode="decimal" id="unified-east-len" class="mobile-input" data-measurement-helper="unified-east-len-helper">
+          <div id="unified-east-len-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group mobile-field">
           <label for="unified-west-width-at-waterway">عرض القطعة الغربية عند المجرى (متر):</label>
-          <input type="text" inputmode="decimal" id="unified-west-width-at-waterway" class="mobile-input">
+          <input type="text" inputmode="decimal" id="unified-west-width-at-waterway" class="mobile-input" data-measurement-helper="unified-west-width-at-waterway-helper">
+          <div id="unified-west-width-at-waterway-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group mobile-field">
           <label for="unified-east-width-at-waterway">عرض القطعة الشرقية عند المجرى (متر):</label>
-          <input type="text" inputmode="decimal" id="unified-east-width-at-waterway" class="mobile-input">
+          <input type="text" inputmode="decimal" id="unified-east-width-at-waterway" class="mobile-input" data-measurement-helper="unified-east-width-at-waterway-helper">
+          <div id="unified-east-width-at-waterway-helper" class="realtime-measurement-helper"></div>
         </div>
         <div class="editor-form-group mobile-field">
           <label>عرض المجرى المائي (متر):</label>
-          <input type="text" inputmode="decimal" id="unified-waterway-width" class="mobile-input">
+          <input type="text" inputmode="decimal" id="unified-waterway-width" class="mobile-input" data-measurement-helper="unified-waterway-width-helper">
+          <div id="unified-waterway-width-helper" class="realtime-measurement-helper"></div>
         </div>
       </div>
       <div class="modal-actions">
@@ -669,6 +680,7 @@
   <script src="../shared/report-template.js"></script>
   <script src="../shared/adapters/page12-adapter.js"></script>
   <script src="agri_bg_b64.js"></script>
+  <script src="../shared/realtime-measurement.js"></script>
   <script src="script.js?v=3.8"></script>
   <script src="../fraction-helper.js"></script>
   <script>

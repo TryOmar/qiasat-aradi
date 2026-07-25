@@ -5159,6 +5159,31 @@ function fallbackCopyText(text) {
   document.body.removeChild(textArea);
 }
 
+function exportCroquis() {
+  exportCroquisAsImage();
+}
+
+function exportPDF() {
+  printCroquis();
+  setTimeout(() => {
+    alert('💡 في نافذة الطباعة، اختر "حفظ كـ PDF" من قائمة الطابعات لتصدير الملف كـ PDF.');
+  }, 1000);
+}
+
+function exportReportImage() {
+  const reportData = (window.Page13Adapter && typeof window.Page13Adapter.buildReportData === "function") 
+    ? window.Page13Adapter.buildReportData() 
+    : null;
+
+  if (window.ReportImageExporter && typeof window.ReportImageExporter.export === "function") {
+    window.ReportImageExporter.export(reportData, "تقرير-الدَّلاَّل");
+    return;
+  }
+}
+
+window.exportCroquis = exportCroquis;
+window.exportPDF = exportPDF;
+window.exportReportImage = exportReportImage;
 window.toArabicNumerals = toArabicNumerals;
 window.toggleStepsAccordion = toggleStepsAccordion;
 window.updatePrintStepsClass = updatePrintStepsClass;
@@ -5167,7 +5192,5 @@ window.copyCalculationSteps = copyCalculationSteps;
 window.clearAllInputs = clearAllInputs;
 
 console.log("Page13 section1 script loaded successfully");
-console.log("addNewHeir function status:", typeof window.addNewHeir);
-console.log("heirsData initial status:", window.heirsData);
 
 

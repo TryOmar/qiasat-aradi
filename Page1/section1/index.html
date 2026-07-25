@@ -7,8 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../../shared-ui.css" />
   <link rel="stylesheet" href="../../fraction-helper.css" />
-  <title>Home</title>
+  <title>حساب مساحة الأراضي بالمتر</title>
 </head>
 
 <body>
@@ -20,17 +21,20 @@
       <img src="../../imgs/1.png" alt="" />
     </div>
     <div class="input">
-      <div class="input-s1">
+      <div class="input-s1" style="display: flex; flex-direction: column; width: 100%;">
         <p> أدخل العرض الاول</p>
-        <input tabindex="1" type="text" inputmode="decimal" placeholder="مثال 18.87" id="but5" dir="auto" />
+        <input tabindex="1" type="text" inputmode="decimal" placeholder="مثال 18.87" id="but5" dir="auto" data-measurement-helper="p1-w1-helper" />
+        <div id="p1-w1-helper" class="realtime-measurement-helper"></div>
       </div>
-      <div class="input-s2">
+      <div class="input-s2" style="display: flex; flex-direction: column; width: 100%;">
         <p>أدخل العرض الاخر</p>
-        <input tabindex="2" type="text" inputmode="decimal" placeholder="مثال 18.50" dir="auto" />
+        <input tabindex="2" type="text" inputmode="decimal" placeholder="مثال 18.50" id="but6" dir="auto" data-measurement-helper="p1-w2-helper" />
+        <div id="p1-w2-helper" class="realtime-measurement-helper"></div>
       </div>
-      <div class="input-s3">
+      <div class="input-s3" style="display: flex; flex-direction: column; width: 100%;">
         <p>أدخل الطول</p>
-        <input tabindex="3" type="text" inputmode="decimal" placeholder="مثال 180.75" dir="auto" />
+        <input tabindex="3" type="text" inputmode="decimal" placeholder="مثال 180.75" id="but7" dir="auto" data-measurement-helper="p1-l1-helper" />
+        <div id="p1-l1-helper" class="realtime-measurement-helper"></div>
       </div>
     </div>
     <div class="row-buttons-small">
@@ -175,6 +179,7 @@
       </a>
     </div>
   </div>
+  <script src="../../shared/realtime-measurement.js"></script>
   <script src="script.js"></script>
   <script src="../../fraction-helper.js"></script>
   <script>

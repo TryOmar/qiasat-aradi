@@ -97,6 +97,15 @@
       if (num === 0) return "صفر";
       
       let parts = [];
+      if (num >= 1000) {
+        let th = Math.floor(num / 1000);
+        if (th === 1) parts.push("ألف");
+        else if (th === 2) parts.push("ألفان");
+        else if (th >= 3 && th <= 10) parts.push(units[th] + " آلاف");
+        else parts.push(numberToArabicWords(th) + " ألف");
+        num %= 1000;
+      }
+
       if (num >= 100) {
         let h = Math.floor(num / 100);
         parts.push(hundreds[h]);
@@ -647,6 +656,20 @@
     } catch (err) {
       logError("normalizeNumerals", err);
       return str;
+    }
+  }
+
+  /**
+   * إزالة وإلغاء زر التنشيط العائم عند إخفاء المساعد بناءً على طلب المستخدم.
+   */
+  function showActivatorButton() {
+    try {
+      const existingBtn = document.getElementById("fh-activator-btn");
+      if (existingBtn && existingBtn.parentNode) {
+        existingBtn.parentNode.removeChild(existingBtn);
+      }
+    } catch (err) {
+      logError("showActivatorButton", err);
     }
   }
 

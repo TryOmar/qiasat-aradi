@@ -35,18 +35,13 @@
       
       <!-- Card 1: Input Dimensions -->
       <div class="s card-dimensions">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
-          <button type="button" onclick="printFieldGuide()" style="background: #fff8e1; color: #b78103; border: 1.5px solid #ffe082; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: bold; font-family: Cairo, Arial, sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            🤖 المساعد الذكي
-          </button>
-          <h3 style="margin: 0;">أدخل أبعاد الأرض الإجمالية</h3>
-        </div>
+        <h3 style="margin: 0; margin-bottom: 15px;">أدخل أبعاد الأرض الإجمالية</h3>
         <div class="dynamic-inputs-container">
           <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
             <div class="input-row">
               <label for="width2">العرض الأول (أعلى) (C) بالمتر:</label>
               <div class="input-with-select-wrapper">
-                <input tabindex="1" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width2" placeholder="30" oninput="updateRealtimeMeasurementHelper('width2', 'width2-helper')" onblur="saveAndCalc()">
+                <input tabindex="1" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width2" placeholder="30" data-measurement-helper="width2-helper" onblur="saveAndCalc()">
                 <select id="p11-w2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w2-dir')" tabindex="5">
                   <option value="بحري">بحري</option>
                   <option value="قبلي">قبلي</option>
@@ -55,14 +50,14 @@
                 </select>
               </div>
             </div>
-            <div id="width2-helper" class="realtime-measurement-helper" style="font-size: 11.5px; color: #475569; margin-top: 2px; text-align: right; font-family: Cairo, Arial, sans-serif; font-weight: bold; min-height: 16px; display: none; padding-right: 4px;"></div>
+            <div id="width2-helper" class="realtime-measurement-helper"></div>
           </div>
 
           <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
             <div class="input-row">
               <label for="width1">العرض الثاني (أسفل) (A) بالمتر:</label>
               <div class="input-with-select-wrapper">
-                <input tabindex="2" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width1" placeholder="35" oninput="updateRealtimeMeasurementHelper('width1', 'width1-helper')" onblur="saveAndCalc()">
+                <input tabindex="2" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width1" placeholder="35" data-measurement-helper="width1-helper" onblur="saveAndCalc()">
                 <select id="p11-w1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w1-dir')" tabindex="6">
                   <option value="بحري">بحري</option>
                   <option value="قبلي">قبلي</option>
@@ -71,15 +66,15 @@
                 </select>
               </div>
             </div>
-            <div id="width1-helper" class="realtime-measurement-helper" style="font-size: 11.5px; color: #475569; margin-top: 2px; text-align: right; font-family: Cairo, Arial, sans-serif; font-weight: bold; min-height: 16px; display: none; padding-right: 4px;"></div>
+            <div id="width1-helper" class="realtime-measurement-helper"></div>
           </div>
 
           <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
             <div class="input-row">
               <label for="length1">الطول الأيمن (D) بالمتر:</label>
               <div class="input-with-select-wrapper">
-                <input tabindex="3" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length1" placeholder="50" oninput="updateRealtimeMeasurementHelper('length1', 'length1-helper')" onblur="saveAndCalc()">
-                <select id="p11-l1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l1-dir')" tabindex="7">
+                <input tabindex="3" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length1" placeholder="50" data-measurement-helper="length1-helper" onblur="saveAndCalc()">
+                <select id="p11-l1-dir" class="direction-select" onchange="handleP13DirectionChange('p11-l1-dir')" tabindex="7">
                   <option value="بحري">بحري</option>
                   <option value="قبلي" selected>قبلي</option>
                   <option value="شرقي">شرقي</option>
@@ -87,14 +82,14 @@
                 </select>
               </div>
             </div>
-            <div id="length1-helper" class="realtime-measurement-helper" style="font-size: 11.5px; color: #475569; margin-top: 2px; text-align: right; font-family: Cairo, Arial, sans-serif; font-weight: bold; min-height: 16px; display: none; padding-right: 4px;"></div>
+            <div id="length1-helper" class="realtime-measurement-helper"></div>
           </div>
 
           <div class="input-row-container" style="display: flex; flex-direction: column; width: 100%; margin-bottom: 8px;">
             <div class="input-row">
               <label for="length2">الطول الأيسر (B) بالمتر:</label>
               <div class="input-with-select-wrapper">
-                <input tabindex="4" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length2" placeholder="45" oninput="updateRealtimeMeasurementHelper('length2', 'length2-helper')" onblur="saveAndCalc()">
+                <input tabindex="4" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length2" placeholder="45" data-measurement-helper="length2-helper" onblur="saveAndCalc()">
                 <select id="p11-l2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l2-dir')" tabindex="8">
                   <option value="بحري" selected>بحري</option>
                   <option value="قبلي">قبلي</option>
@@ -103,7 +98,7 @@
                 </select>
               </div>
             </div>
-            <div id="length2-helper" class="realtime-measurement-helper" style="font-size: 11.5px; color: #475569; margin-top: 2px; text-align: right; font-family: Cairo, Arial, sans-serif; font-weight: bold; min-height: 16px; display: none; padding-right: 4px;"></div>
+            <div id="length2-helper" class="realtime-measurement-helper"></div>
           </div>
         </div>
 
@@ -1064,6 +1059,8 @@
   <script src="../shared/engines/report-engine.js"></script>
   <script src="../shared/engines/steps-engine.js"></script>
   <script src="../shared/engines/print-engine.js"></script>
+  <script src="../shared/engines/report-image-exporter.js"></script>
+  <script src="../shared/realtime-measurement.js"></script>
   <script src="script.js?v=3.0"></script>
   <script src="croquis-layout.js"></script>
   <script src="../fraction-helper.js"></script>

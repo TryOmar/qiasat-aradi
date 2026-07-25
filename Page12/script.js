@@ -5865,6 +5865,10 @@ function openStartModal(skipPopulate = false, focusFieldId = null) {
   if (focusFieldId) {
     focusInputHelper(focusFieldId);
   }
+
+  if (window.RealtimeMeasurement && typeof window.RealtimeMeasurement.refresh === 'function') {
+    window.RealtimeMeasurement.refresh();
+  }
 }
 
 // Load default mock values if they click "رسم الأرض" with empty values
