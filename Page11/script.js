@@ -534,6 +534,7 @@ function loadData() {
   document.getElementById("length2").value = localStorage.getItem("p11-length2") || "";
   document.getElementById("width1").value = localStorage.getItem("p11-width1") || "";
   document.getElementById("width2").value = localStorage.getItem("p11-width2") || "";
+  if (typeof initAllRealtimeHelpers === "function") initAllRealtimeHelpers();
   const storedCarat = localStorage.getItem("dalal-carat-area") || "168";
   const selectElement = document.getElementById("input-carat-area");
   const otherInputField = document.getElementById("other-carat-area");
@@ -6431,6 +6432,24 @@ function updateRealtimeMeasurementHelper(inputId, helperId) {
     }
   }
 
+  if (!text) {
+    // Standalone fallback conversion
+    const num = parseFloat(valStr);
+    if (!isNaN(num) && num > 0) {
+      const parts = valStr.split(".");
+      const m = parseInt(parts[0]) || 0;
+      let cms = 0;
+      if (parts.length > 1 && parts[1]) {
+        let decStr = parts[1];
+        if (decStr.length === 1) cms = parseInt(decStr) * 10;
+        else cms = parseInt(decStr.slice(0, 2));
+      }
+      if (m > 0 && cms > 0) text = m + " مترًا و" + cms + " سنتيمترًا.";
+      else if (m > 0) text = m + " مترًا.";
+      else if (cms > 0) text = cms + " سنتيمترًا.";
+    }
+  }
+
   if (text) {
     helperEl.innerText = text;
     helperEl.style.display = "block";
@@ -6440,7 +6459,19 @@ function updateRealtimeMeasurementHelper(inputId, helperId) {
   }
 }
 
+function initAllRealtimeHelpers() {
+  updateRealtimeMeasurementHelper('width2', 'width2-helper');
+  updateRealtimeMeasurementHelper('width1', 'width1-helper');
+  updateRealtimeMeasurementHelper('length1', 'length1-helper');
+  updateRealtimeMeasurementHelper('length2', 'length2-helper');
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(initAllRealtimeHelpers, 200);
+});
+
 window.updateRealtimeMeasurementHelper = updateRealtimeMeasurementHelper;
+window.initAllRealtimeHelpers = initAllRealtimeHelpers;
 window.resetP11DirectionsToDefault = resetP11DirectionsToDefault;
 window.getP11Directions = getP11Directions;
 
