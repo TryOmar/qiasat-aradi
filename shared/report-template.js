@@ -1,7 +1,7 @@
 /**
  * @file shared/report-template.js
  * @description قالب تقرير الدَّلاَّل الموحد المتوافق 100% مع مخرجات وتسليمات تطبيق Flutter (1:1)
- * @version 3.1.0
+ * @version 3.2.0
  */
 
 (function (global) {
@@ -9,22 +9,78 @@
 
   const DallalReportTemplate = {
     /**
+     * تطبيع وتوحيد شكل البيانات الواردة من المحولات المختلفة إلى بنية قياسية موحدة
+     * @param {Object} rawData 
+     * @returns {Object} Normalized Data Schema
+     */
+    normalizeReportData(rawData) {
+      rawData = rawData || {};
+
+      const normalized = {
+        reportTitle: rawData.reportTitle || "بيان المساحات",
+        reportSubtitle: rawData.reportSubtitle || "جملة الغيط",
+        dateStr: rawData.dateStr || new Date().toLocaleDateString("ar-EG"),
+        timeStr: rawData.timeStr || new Date().toLocaleTimeString("ar-EG"),
+        dimensions: [],
+        partners: [],
+        partnerCardsHTML: rawData.partnerCardsHTML || "",
+        gridStyle: rawData.gridStyle || "",
+        totals: [],
+        notes: []
+      };
+
+      // 1. تطبيع الأبعاد
+      if (Array.isArray(rawData.dimensions)) {
+        normalized.dimensions = rawData.dimensions;
+      }
+
+      // 2. تطبيع الشركاء
+      if (Array.isArray(rawData.partners)) {
+        normalized.partners = rawData.partners;
+      }
+
+      // 3. تطبيع الإجماليات (تحويل الكائن أو المصفوفة إلى نمط قياسي موحد)
+      if (Array.isArray(rawData.totals)) {
+        normalized.totals = rawData.totals;
+      } else if (rawData.totals && typeof rawData.totals === "object") {
+        const t = rawData.totals;
+        normalized.totals = [
+          { label: "إجمالي المساحة", value: (t.totalArea ? `${t.totalArea} م²` : "—"), isHighlight: true },
+          { label: "إجمالي الفدادين", value: (t.totalFeddans !== undefined ? t.totalFeddans.toString() : "—") },
+          { label: "إجمالي القراريط", value: (t.totalCarats !== undefined ? t.totalCarats.toString() : "—") },
+          { label: "إجمالي الأسهم", value: (t.totalShares !== undefined ? t.totalShares.toString() : "—") },
+          { label: "مساحة القيراط (2p)", value: (t.caratArea ? `${t.caratArea}` : "168") }
+        ];
+      }
+
+      // 4. تطبيع الملاحظات
+      if (Array.isArray(rawData.notes)) {
+        normalized.notes = rawData.notes;
+      } else if (typeof rawData.notes === "string") {
+        normalized.notes = [rawData.notes];
+      } else {
+        normalized.notes = [
+          "جميع الأطوال بالمتر.",
+          "تم تقسيم الغيط إلى 6 أجزاء تفصيلية بالطريقة الطولية.",
+          "اتجاه التقسيم للتنفيذ الميداني: من اليمين إلى اليسار."
+        ];
+      }
+
+      return normalized;
+    },
+
+    /**
      * توليد كود HTML القياسي للتقرير بمطابقة تامة لتصميم Flutter
-     * @param {Object} data كائن بيانات التقرير
+     * @param {Object} rawData كائن بيانات التقرير الخريطة
      * @returns {string} كود HTML كامل ومستقل
      */
-    renderHTML(data) {
-      data = data || {};
-      const reportTitle = data.reportTitle || "بيان المساحات";
-      const reportSubtitle = data.reportSubtitle || "جملة الغيط";
-      const dateStr = data.dateStr || new Date().toLocaleDateString("ar-EG");
-      const timeStr = data.timeStr || new Date().toLocaleTimeString("ar-EG");
+    renderHTML(rawData) {
+      const data = this.normalizeReportData(rawData);
 
       // 1. جدول أبعاد الأرض والمساحة الكلية
-      const dimensions = data.dimensions || [];
       let dimensionsRowsHTML = "";
-      if (dimensions.length > 0) {
-        dimensionsRowsHTML = dimensions.map(d => {
+      if (data.dimensions.length > 0) {
+        dimensionsRowsHTML = data.dimensions.map(d => {
           const isHighlight = d.isHighlight ? "color: #b71c1c; font-weight: 800; font-size: 10pt;" : "color: #1e293b;";
           return `
             <tr>
@@ -34,19 +90,19 @@
         }).join("");
       }
 
-      // 2. بطاقات الشركاء (دعم المصفوفة والتمرير المباشر لـ partnerCardsHTML)
-      let partnerCardsHTML = data.partnerCardsHTML || "";
-      const partners = data.partners || [];
-      const totalPartners = partners.length || (partnerCardsHTML ? 3 : 0);
+      // 2. بطاقات الشركاء (استخدام partnerCardsHTML أو توليدها من مصفوفة الشركاء)
+      let partnerCardsHTML = data.partnerCardsHTML;
+      const totalPartners = data.partners.length || (partnerCardsHTML ? 3 : 0);
 
-      let gridStyle = data.gridStyle || "grid-template-columns: repeat(3, 1fr);";
-      if (!data.gridStyle) {
+      let gridStyle = data.gridStyle;
+      if (!gridStyle) {
         if (totalPartners === 1) gridStyle = "grid-template-columns: 1fr;";
         else if (totalPartners === 2) gridStyle = "grid-template-columns: repeat(2, 1fr);";
+        else gridStyle = "grid-template-columns: repeat(3, 1fr);";
       }
 
-      if (!partnerCardsHTML && partners.length > 0) {
-        partnerCardsHTML = partners.map((p, idx) => {
+      if (!partnerCardsHTML && data.partners.length > 0) {
+        partnerCardsHTML = data.partners.map((p, idx) => {
           let pDimsHTML = "";
           if (p.dimensions && p.dimensions.length > 0) {
             pDimsHTML = p.dimensions.map(pd => `
@@ -82,41 +138,19 @@
         }).join("");
       }
 
-      // 3. ملخص التقسيم الموحد (دعم المصفوفات والكائنات)
+      // 3. ملخص التقسيم الموحد
       let totalsRowsHTML = "";
-      if (Array.isArray(data.totals) && data.totals.length > 0) {
+      if (data.totals.length > 0) {
         totalsRowsHTML = data.totals.map(t => `
           <tr>
             <td style="text-align: right; font-weight: 600; padding: 4px 8px;">${t.label}</td>
             <td style="text-align: left; direction: ltr; padding: 4px 8px; font-weight: 700; color: ${t.isHighlight ? '#b71c1c' : '#1e293b'};">${t.value}</td>
           </tr>
         `).join("");
-      } else if (data.totals && typeof data.totals === "object") {
-        const t = data.totals;
-        const totalsList = [
-          { label: "إجمالي المساحة", value: (t.totalArea ? `${t.totalArea} م²` : "—"), isHighlight: true },
-          { label: "إجمالي الفدادين", value: (t.totalFeddans !== undefined ? t.totalFeddans.toString() : "—") },
-          { label: "إجمالي القراريط", value: (t.totalCarats !== undefined ? t.totalCarats.toString() : "—") },
-          { label: "إجمالي الأسهم", value: (t.totalShares !== undefined ? t.totalShares.toString() : "—") },
-          { label: "مساحة القيراط (2p)", value: (t.caratArea ? `${t.caratArea}` : "168") }
-        ];
-        totalsRowsHTML = totalsList.map(item => `
-          <tr>
-            <td style="text-align: right; font-weight: 600; padding: 4px 8px;">${item.label}</td>
-            <td style="text-align: left; direction: ltr; padding: 4px 8px; font-weight: 700; color: ${item.isHighlight ? '#b71c1c' : '#1e293b'};">${item.value}</td>
-          </tr>
-        `).join("");
       }
 
       // 4. الملاحظات
-      const rawNotes = data.notes || [
-        "جميع الأطوال بالمتر.",
-        "تم تقسيم الغيط إلى 6 أجزاء تفصيلية بالطريقة الطولية.",
-        "اتجاه التقسيم للتنفيذ الميداني: من اليمين إلى اليسار."
-      ];
-      const notesHTML = Array.isArray(rawNotes)
-        ? rawNotes.map(n => `<li style="margin-bottom: 4px;">• ${n}</li>`).join("")
-        : `<li style="margin-bottom: 4px;">• ${rawNotes}</li>`;
+      const notesHTML = data.notes.map(n => `<li style="margin-bottom: 4px;">• ${n}</li>`).join("");
 
       return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -347,9 +381,9 @@
 <body>
 
   <div class="report-header">
-    <div class="print-date-top">تاريخ الطباعة: ${dateStr} - ${timeStr}</div>
-    <div class="report-title-main">${reportTitle}</div>
-    <div class="report-subtitle-main">${reportSubtitle}</div>
+    <div class="print-date-top">تاريخ الطباعة: ${data.dateStr} - ${data.timeStr}</div>
+    <div class="report-title-main">${data.reportTitle}</div>
+    <div class="report-subtitle-main">${data.reportSubtitle}</div>
     <div class="header-line"></div>
   </div>
 
