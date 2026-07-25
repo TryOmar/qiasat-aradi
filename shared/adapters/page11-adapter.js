@@ -102,28 +102,28 @@
         const formattedArea = global.formatArea ? global.formatArea(pieceDisplayArea) : pieceDisplayArea.toFixed(2);
 
         return `
-          <div class="partner-print-card">
-            <div class="partner-card-header">${cardTitle}</div>
-            <table class="partner-card-table">
+          <div class="pcard">
+            <div class="pcard-hdr">${cardTitle}</div>
+            <table class="pcard-table">
               <thead>
                 <tr>
-                  <th style="width: 50%;">البيان</th>
-                  <th>القيمة</th>
+                  <th style="text-align:right;width:55%;">البيان</th>
+                  <th style="text-align:left;">القيمة</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align: right; padding-right: 8px;">العرض الأول (${dirs.top})</td><td style="font-weight:bold;color:#1b5e20;">${w2_val} م</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">العرض الثاني (${dirs.bottom})</td><td style="font-weight:bold;color:#1b5e20;">${w1_val} م</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيمن (${dirs.right})</td><td style="font-weight:bold;color:#1b5e20;">${rightL_val} م</td></tr>
-                <tr><td style="text-align: right; padding-right: 8px;">الطول الأيسر (${dirs.left})</td><td style="font-weight:bold;color:#1b5e20;">${leftL_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">معدل العرض</td><td style="font-weight:bold;color:#1b5e20;">${avgW_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align: right; padding-right: 8px;">متوسط الطول</td><td style="font-weight:bold;color:#1b5e20;">${avgL_val} م</td></tr>
+                <tr><td style="text-align:right;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="padding:3px 6px;">${w2_val} م</td></tr>
+                <tr><td style="text-align:right;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="padding:3px 6px;">${w1_val} م</td></tr>
+                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="padding:3px 6px;">${rightL_val} م</td></tr>
+                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="padding:3px 6px;">${leftL_val} م</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:right;padding:3px 6px;">معدل العرض</td><td class="td-val" style="padding:3px 6px;background:#e8f5e9;">${avgW_val} م</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:right;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="padding:3px 6px;background:#e8f5e9;">${avgL_val} م</td></tr>
               </tbody>
             </table>
-            <div class="partner-card-area-box">
-              <span class="partner-card-area-lbl">المساحة</span>
-              <span class="partner-card-area-val">${formattedArea} م²</span>
-              <span class="partner-card-fcs-val">(${fcsText})</span>
+            <div class="pcard-foot">
+              <span class="pcard-foot-lbl">جملة المساحة بالمتر المربع</span>
+              <span class="pcard-foot-area">${formattedArea} م²</span>
+              <span class="pcard-foot-fcs">(${fcsText})</span>
             </div>
           </div>
         `;

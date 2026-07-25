@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>اختبار html2canvas</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; background: #f0f4f8; }
+    h1 { color: #0f172a; }
+    #status { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 14px; line-height: 2; }
+    .ok  { color: #16a34a; font-weight: bold; }
+    .err { color: #dc2626; font-weight: bold; }
+    .warn { color: #d97706; font-weight: bold; }
+    button { background: #0f172a; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; cursor: pointer; margin: 8px 4px; }
+    button:hover { background: #1e293b; }
+    #preview-box { border: 2px solid #334155; border-radius: 8px; padding: 16px; margin: 12px 0; background: white; direction: rtl; width: 400px; }
+    #preview-box h2 { color: #991b1b; font-size: 18px; text-align: center; margin-bottom: 8px; }
+    #preview-box table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #preview-box td, #preview-box th { border: 1px solid #cbd5e1; padding: 6px 10px; }
+    #preview-box th { background: #f8fafc; font-weight: 700; }
+    #result-img { max-width: 300px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+
+<h1>🔬 اختبار html2canvas الميداني</h1>
+<p>هذه الصفحة تختبر كل مرحلة من مراحل تصدير التقرير بشكل مستقل.</p>
+
+<div id="status">جارٍ الفحص...</div>
+
+<div id="preview-box">
+  <h2>بيان المساحات — تقرير الاختبار</h2>
+  <table>
+    <thead><tr><th>البيان</th><th>القيمة</th></tr></thead>
+    <tbody>
+      <tr><td>العرض الأول</td><td style="color:#991b1b;font-weight:700;">30.00 م</td></tr>
+      <tr><td>الطول الأيمن</td><td style="color:#991b1b;font-weight:700;">300.00 م</td></tr>
+      <tr><td>جملة المساحة</td><td style="color:#b91c1c;font-weight:800;font-size:15px;">9000.00 م²</td></tr>
+    </tbody>
+  </table>
+  <div style="text-align:center;margin-top:10px;background:#f8fafc;border-top:1.5px solid #334155;padding:8px;">
+    <span style="font-size:12px;color:#64748b;">جملة المساحة بالمتر المربع</span><br>
+    <span style="font-size:18px;color:#991b1b;font-weight:800;">9000.00 م²</span><br>
+    <span style="font-size:11px;color:#15803d;font-weight:700;">(0 فدان، 42 ق، 21.43 س)</span>
+  </div>
+</div>
+
+<img id="result-img" alt="نتيجة الالتقاط">
+
+<div>
+  <button onclick="runFullTest()">▶ تشغيل الاختبار الكامل</button>
+  <button onclick="testStep3Only()">⚡ اختبار html2canvas فقط</button>
+</div>
+
+<!-- تحميل html2canvas من مسار المشروع -->
+<script src="../../shared/html2canvas.min.js"></script>
+
+<script>
+var log = document.getElementById("status");
+
+function addLine(msg, cls) {
+  var line = document.createElement("div");
+  line.className = cls || "";
+  line.textContent = msg;
+  log.appendChild(line);
+  console.log("[TEST]", msg);
+}
+
+function clearLog() {
+  log.innerHTML = "";
+}
+
+// ═══════════════════════════════════════════════
+// اختبار Step 3 فقط: html2canvas على div بسيط
+// ═══════════════════════════════════════════════
+function testStep3Only() {
+  clearLog();
+  addLine("═══ اختبار html2canvas على div بسيط ═══");
+
+  addLine("Step 3: typeof html2canvas = " + typeof html2canvas,
+    typeof html2canvas === "function" ? "ok" : "err");
+
+  if (typeof html2canvas !== "function") {
+    addLine("⛔ html2canvas غير محمّل — تحقق من المسار ../../shared/html2canvas.min.js", "err");
+    return;
+  }
+
+  var target = document.getElementById("preview-box");
+  addLine("Step 3: target element found, size: "
+    + target.offsetWidth + " × " + target.offsetHeight + " px");
+
+  addLine("Step 4: Calling html2canvas...", "warn");
+
+  html2canvas(target, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    logging: true
+  })
+  .then(function(canvas) {
+    addLine("Step 4: html2canvas returned canvas: "
+      + canvas.width + " × " + canvas.height + " px",
+      canvas.width > 0 && canvas.height > 0 ? "ok" : "err");
+
+    if (canvas.width === 0 || canvas.height === 0) {
+      addLine("⛔ Canvas 0×0 — html2canvas التقط لا شيء!", "err");
+      return;
+    }
+
+    // عرض الصورة في الصفحة
+    var img = document.getElementById("result-img");
+    img.src = canvas.toDataURL("image/png");
+    img.style.display = "block";
+    addLine("Step 4b: Preview image shown below ✓", "ok");
+
+    addLine("Step 5: Calling toBlob...", "warn");
+    canvas.toBlob(function(blob) {
+      if (!blob) {
+        addLine("⛔ toBlob returned null!", "err");
+        return;
+      }
+      addLine("Step 5: Blob size = " + blob.size + " bytes",
+        blob.size > 0 ? "ok" : "err");
+
+      addLine("Step 6: Creating download link...", "warn");
+      var url = URL.createObjectURL(blob);
+      var a   = document.createElement("a");
+      a.style.cssText = "position:fixed;opacity:0;pointer-events:none;";
+      a.href     = url;
+      a.download = "test-html2canvas.png";
+
+      addLine("Step 6: link.download = " + a.download, "ok");
+      addLine("Step 6: link.href = " + url.substring(0, 50) + "...", "ok");
+
+      document.body.appendChild(a);
+
+      addLine("Step 7: Calling link.click()...", "warn");
+      a.click();
+
+      addLine("Step 7: Download request sent ✓", "ok");
+      addLine("✅ إذا بدأ التنزيل = html2canvas يعمل بشكل كامل!", "ok");
+      addLine("❌ إذا لم يبدأ التنزيل = المتصفح يمنع التنزيل التلقائي", "warn");
+
+      setTimeout(function() {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1000);
+
+    }, "image/png");
+  })
+  .catch(function(err) {
+    addLine("⛔ html2canvas FAILED: " + (err.message || err), "err");
+    console.error("[TEST] html2canvas error:", err);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// اختبار الكامل: يتحقق من جميع المكتبات
+// ═══════════════════════════════════════════════
+function runFullTest() {
+  clearLog();
+  addLine("═══ الاختبار الميداني الكامل ═══");
+  addLine("");
+
+  // Step 1: Dependencies
+  addLine("── Step 1: فحص المكتبات ──");
+  var deps = {
+    "html2canvas":        typeof html2canvas,
+    "ReportImageExporter":typeof window.ReportImageExporter,
+    "DallalReportTemplate":typeof window.DallalReportTemplate,
+    "Page13Adapter":      typeof window.Page13Adapter
+  };
+
+  var allOk = true;
+  for (var k in deps) {
+    var t = deps[k];
+    var ok = (t === "function" || t === "object") && t !== "undefined";
+    addLine("  " + k + " = " + t, ok ? "ok" : "err");
+    if (!ok) allOk = false;
+  }
+
+  if (!allOk) {
+    addLine("⛔ بعض المكتبات غير محمّلة — لا يمكن الاستمرار", "err");
+    addLine("► جرب testStep3Only() للتحقق من html2canvas فقط", "warn");
+    return;
+  }
+  addLine("Step 1: All dependencies OK ✓", "ok");
+
+  // Step 2: buildReportData
+  addLine("── Step 2: buildReportData() ──");
+  var reportData;
+  try {
+    reportData = window.Page13Adapter.buildReportData();
+    addLine("  reportData = " + JSON.stringify(reportData).substring(0, 120) + "...");
+    addLine("Step 2: reportData ready ✓", reportData ? "ok" : "err");
+  } catch(e) {
+    addLine("⛔ buildReportData threw: " + e.message, "err");
+    return;
+  }
+  if (!reportData) {
+    addLine("⛔ reportData is null", "err"); return;
+  }
+
+  // Step 3: renderHTML
+  addLine("── Step 3: renderHTML() ──");
+  var html;
+  try {
+    html = window.DallalReportTemplate.renderHTML(reportData);
+    addLine("  html.length = " + (html ? html.length : 0) + " chars",
+      html && html.length > 100 ? "ok" : "err");
+  } catch(e) {
+    addLine("⛔ renderHTML threw: " + e.message, "err"); return;
+  }
+  if (!html || html.length < 100) {
+    addLine("⛔ HTML فارغ أو قصير جداً", "err"); return;
+  }
+  addLine("Step 3: HTML generated ✓", "ok");
+
+  // Step 4–7: Export
+  addLine("── Step 4–7: ReportImageExporter.export() ──");
+  addLine("  (راقب Console لمزيد من التفاصيل)", "warn");
+  try {
+    window.ReportImageExporter.export({
+      reportData: reportData,
+      filename: "تقرير-اختبار",
+      scale: 2
+    });
+    addLine("Step 4: export() called ✓", "ok");
+    addLine("راقب Console → ابحث عن [RIE Step 5] و [RIE Step 6] و [RIE Step 7]", "warn");
+  } catch(e) {
+    addLine("⛔ export() threw: " + e.message, "err");
+    console.error("[TEST] export error:", e);
+  }
+}
+
+// فحص أولي عند تحميل الصفحة
+window.addEventListener("load", function() {
+  clearLog();
+  addLine("═══ فحص أولي عند تحميل الصفحة ═══");
+  addLine("  html2canvas = " + typeof html2canvas,
+    typeof html2canvas === "function" ? "ok" : "err");
+
+  if (typeof html2canvas !== "function") {
+    addLine("⚠️ html2canvas غير محمّل من: ../../shared/html2canvas.min.js", "err");
+    addLine("تحقق من وجود الملف وصحة المسار.", "warn");
+  } else {
+    addLine("html2canvas محمّلة ✓ — اضغط 'تشغيل الاختبار الكامل'", "ok");
+  }
+});
+</script>
+</body>
+</html>

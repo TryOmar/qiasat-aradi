@@ -1,4 +1,4 @@
-
+﻿
 
 // --- Performance Optimizations & Caching (Phase 14) ---
 window.DALLAL_PERF = window.DALLAL_PERF || {
@@ -5171,13 +5171,109 @@ function exportPDF() {
 }
 
 function exportReportImage() {
-  const reportData = (window.Page13Adapter && typeof window.Page13Adapter.buildReportData === "function") 
-    ? window.Page13Adapter.buildReportData() 
-    : null;
+  // ════════════════════════════════════════════════════════════════
+  // Step 1: Button Clicked
+  // ════════════════════════════════════════════════════════════════
+  console.log("Step 1: Button Clicked ✓");
+  console.log("Step 1: Checking all dependencies...");
 
-  if (window.ReportImageExporter && typeof window.ReportImageExporter.export === "function") {
-    window.ReportImageExporter.export(reportData, "تقرير-الدَّلاَّل");
+  // فحص window.html2canvas
+  console.log("  window.html2canvas       =", typeof window.html2canvas);
+  console.log("  window.ReportImageExporter=", typeof window.ReportImageExporter);
+  console.log("  window.DallalReportTemplate=", typeof window.DallalReportTemplate);
+  console.log("  window.Page13Adapter     =", typeof window.Page13Adapter);
+
+  // التحقق من الضروريات
+  if (typeof window.DallalReportTemplate === "undefined" ||
+      typeof window.DallalReportTemplate.renderHTML !== "function") {
+    console.error("Step 1 FAILED: DallalReportTemplate not loaded");
+    if (window.DallalToast) window.DallalToast.error("DallalReportTemplate غير محمّل");
     return;
+  }
+
+  if (typeof window.ReportImageExporter === "undefined" ||
+      typeof window.ReportImageExporter.export !== "function") {
+    console.error("Step 1 FAILED: ReportImageExporter not loaded");
+    if (window.DallalToast) window.DallalToast.error("ReportImageExporter غير محمّل");
+    return;
+  }
+
+  // html2canvas تحذير فقط (الـ exporter يتعامل معها)
+  if (typeof window.html2canvas !== "function") {
+    console.warn("Step 1 WARNING: html2canvas not loaded — export may fail");
+  }
+
+  console.log("Step 1: All required dependencies OK ✓");
+
+  // ════════════════════════════════════════════════════════════════
+  // Step 2: Build reportData
+  // ════════════════════════════════════════════════════════════════
+  console.log("Step 2: Building reportData via Page13Adapter...");
+
+  if (typeof window.Page13Adapter === "undefined" ||
+      typeof window.Page13Adapter.buildReportData !== "function") {
+    console.error("Step 2 FAILED: Page13Adapter not loaded");
+    if (window.DallalToast) window.DallalToast.error("Page13Adapter غير محمّل");
+    return;
+  }
+
+  let reportData;
+  try {
+    reportData = window.Page13Adapter.buildReportData();
+    console.log("Step 2: reportData =", reportData);
+  } catch (adapterErr) {
+    console.error("Step 2 FAILED: buildReportData threw:", adapterErr);
+    if (window.DallalToast) window.DallalToast.error("خطأ في بناء بيانات التقرير: " + adapterErr.message);
+    return;
+  }
+
+  if (!reportData) {
+    console.error("Step 2 FAILED: reportData is null/undefined");
+    if (window.DallalToast) window.DallalToast.error("بيانات التقرير فارغة — يرجى حساب الأرض أولاً");
+    return;
+  }
+
+  console.log("Step 2: reportData ready ✓");
+
+  // ════════════════════════════════════════════════════════════════
+  // Step 3: Verify renderHTML produces valid output
+  // ════════════════════════════════════════════════════════════════
+  console.log("Step 3: Testing DallalReportTemplate.renderHTML()...");
+
+  let testHTML;
+  try {
+    testHTML = window.DallalReportTemplate.renderHTML(reportData);
+    console.log("Step 3: renderHTML returned", testHTML ? testHTML.length + " chars ✓" : "EMPTY ✗");
+  } catch (renderErr) {
+    console.error("Step 3 FAILED: renderHTML threw:", renderErr);
+    if (window.DallalToast) window.DallalToast.error("خطأ في توليد HTML: " + renderErr.message);
+    return;
+  }
+
+  if (!testHTML || testHTML.trim().length < 100) {
+    console.error("Step 3 FAILED: HTML is empty or too short:", testHTML && testHTML.length);
+    if (window.DallalToast) window.DallalToast.error("HTML التقرير فارغ — تحقق من بيانات الأرض");
+    return;
+  }
+
+  console.log("Step 3: HTML generated ✓");
+
+  // ════════════════════════════════════════════════════════════════
+  // Step 4–7: Delegate to ReportImageExporter
+  // (iframe → html2canvas → canvas → blob → download)
+  // ════════════════════════════════════════════════════════════════
+  console.log("Step 4+: Handing off to ReportImageExporter.export()...");
+  if (window.DallalToast) window.DallalToast.success("جارٍ إعداد صورة التقرير...");
+
+  try {
+    window.ReportImageExporter.export({
+      reportData: reportData,
+      filename:   "تقرير-الدلال",
+      scale:      2
+    });
+  } catch (exportErr) {
+    console.error("Step 4 FAILED: ReportImageExporter.export() threw:", exportErr);
+    if (window.DallalToast) window.DallalToast.error("فشل التصدير: " + exportErr.message);
   }
 }
 
