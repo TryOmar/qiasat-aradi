@@ -40,7 +40,7 @@
           <div class="input-row">
             <label for="width2">العرض الأول (أعلى) (C) بالمتر:</label>
             <div class="input-with-select-wrapper">
-              <input tabindex="1" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width2" placeholder="مثال: 30" onblur="saveAndCalc()">
+              <input tabindex="1" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width2" placeholder="30" onblur="saveAndCalc()">
               <select id="p11-w2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w2-dir')" tabindex="5">
                 <option value="بحري">بحري</option>
                 <option value="قبلي">قبلي</option>
@@ -52,7 +52,7 @@
           <div class="input-row">
             <label for="width1">العرض الثاني (أسفل) (A) بالمتر:</label>
             <div class="input-with-select-wrapper">
-              <input tabindex="2" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width1" placeholder="مثال: 35" onblur="saveAndCalc()">
+              <input tabindex="2" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width1" placeholder="35" onblur="saveAndCalc()">
               <select id="p11-w1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w1-dir')" tabindex="6">
                 <option value="بحري">بحري</option>
                 <option value="قبلي">قبلي</option>
@@ -64,7 +64,7 @@
           <div class="input-row">
             <label for="length1">الطول الأيمن (D) بالمتر:</label>
             <div class="input-with-select-wrapper">
-              <input tabindex="3" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length1" placeholder="مثال: 50" onblur="saveAndCalc()">
+              <input tabindex="3" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length1" placeholder="50" onblur="saveAndCalc()">
               <select id="p11-l1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l1-dir')" tabindex="7">
                 <option value="بحري">بحري</option>
                 <option value="قبلي" selected>قبلي</option>
@@ -76,7 +76,7 @@
           <div class="input-row">
             <label for="length2">الطول الأيسر (B) بالمتر:</label>
             <div class="input-with-select-wrapper">
-              <input tabindex="4" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length2" placeholder="مثال: 45" onblur="saveAndCalc()">
+              <input tabindex="4" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length2" placeholder="45" onblur="saveAndCalc()">
               <select id="p11-l2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l2-dir')" tabindex="8">
                 <option value="بحري" selected>بحري</option>
                 <option value="قبلي">قبلي</option>
@@ -291,7 +291,7 @@
           <button class="btn btn-secondary btn-sm" onclick="zoomCroquis(0.8)" style="font-weight: bold; font-size: 16px; padding: 0 12px;">-</button>
           <button class="btn btn-secondary btn-sm" onclick="exportCroquis()" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 14px; padding: 4px 12px; height: 32px;" title="تحميل صورة الكروكي">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            تحميل الصورة
+            تحميل الخريطة
           </button>
           <button class="btn btn-secondary btn-sm" onclick="printFieldGuide()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="طباعة خطوات التنفيذ الميداني">🧭 دليل التنفيذ الحقلي</button>
           <button class="btn btn-secondary btn-sm" onclick="openAnimationSimulation()" style="font-weight: bold; font-size: 14px; padding: 0 12px; height: 32px; background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32;" title="تشغيل المحاكاة المتحركة لشرح التنفيذ ميدانياً">🎬 شرح التنفيذ</button>
