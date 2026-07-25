@@ -3485,7 +3485,27 @@ function highlightAndKeepSegment(idx) {
 
 function openFieldGuideModal() {
   if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
-    alert("⚠ يرجى إجراء التقسيم أولاً قبل عرض الدليل الحقلي.");
+    // التعبئة التلقائية وتحديث التقسيم فورياً لفتح المساعد الذكي بسلاسة
+    const w2Input = document.getElementById("width2");
+    const w1Input = document.getElementById("width1");
+    const l1Input = document.getElementById("length1");
+    const l2Input = document.getElementById("length2");
+    
+    if (w2Input && !w2Input.value) w2Input.value = "30";
+    if (w1Input && !w1Input.value) w1Input.value = "35";
+    if (l1Input && !l1Input.value) l1Input.value = "50";
+    if (l2Input && !l2Input.value) l2Input.value = "45";
+
+    const list = document.getElementById("partners-list");
+    if (list && list.children.length === 0) {
+      divideEqually();
+    } else {
+      saveAndCalcImmediate();
+    }
+  }
+
+  if (!window.calculatedPieces || window.calculatedPieces.length === 0) {
+    alert("⚠ يرجى إدخال أبعاد الأرض والأنصبة أولاً لعرض المساعد الذكي.");
     return;
   }
   if (hasDeficit()) {
