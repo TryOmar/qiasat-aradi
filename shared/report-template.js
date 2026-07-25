@@ -1,7 +1,7 @@
 /**
  * @file shared/report-template.js
  * @description قالب تقرير الدَّلاَّل الموحد المتوافق 100% مع مخرجات وتسليمات تطبيق Flutter (1:1)
- * @version 3.0.0
+ * @version 3.1.0
  */
 
 (function (global) {
@@ -34,21 +34,24 @@
         }).join("");
       }
 
-      // 2. بطاقات الشركاء
+      // 2. بطاقات الشركاء (دعم المصفوفة والتمرير المباشر لـ partnerCardsHTML)
+      let partnerCardsHTML = data.partnerCardsHTML || "";
       const partners = data.partners || [];
-      const totalPartners = partners.length;
-      let gridStyle = "grid-template-columns: repeat(3, 1fr);";
-      if (totalPartners === 1) gridStyle = "grid-template-columns: 1fr;";
-      else if (totalPartners === 2) gridStyle = "grid-template-columns: repeat(2, 1fr);";
+      const totalPartners = partners.length || (partnerCardsHTML ? 3 : 0);
 
-      let partnerCardsHTML = "";
-      if (partners.length > 0) {
+      let gridStyle = data.gridStyle || "grid-template-columns: repeat(3, 1fr);";
+      if (!data.gridStyle) {
+        if (totalPartners === 1) gridStyle = "grid-template-columns: 1fr;";
+        else if (totalPartners === 2) gridStyle = "grid-template-columns: repeat(2, 1fr);";
+      }
+
+      if (!partnerCardsHTML && partners.length > 0) {
         partnerCardsHTML = partners.map((p, idx) => {
           let pDimsHTML = "";
           if (p.dimensions && p.dimensions.length > 0) {
             pDimsHTML = p.dimensions.map(pd => `
               <tr>
-                <td style="text-align: right; font-weight: 600; padding: 3px 6px;">${pd.label}</td>
+                <td style="text-align: right; padding: 3px 6px;">${pd.label}</td>
                 <td style="text-align: left; direction: ltr; padding: 3px 6px;">${pd.value}</td>
               </tr>
             `).join("");
@@ -79,25 +82,41 @@
         }).join("");
       }
 
-      // 3. ملخص التقسيم الموحد
-      const totals = data.totals || [];
+      // 3. ملخص التقسيم الموحد (دعم المصفوفات والكائنات)
       let totalsRowsHTML = "";
-      if (totals.length > 0) {
-        totalsRowsHTML = totals.map(t => `
+      if (Array.isArray(data.totals) && data.totals.length > 0) {
+        totalsRowsHTML = data.totals.map(t => `
           <tr>
             <td style="text-align: right; font-weight: 600; padding: 4px 8px;">${t.label}</td>
             <td style="text-align: left; direction: ltr; padding: 4px 8px; font-weight: 700; color: ${t.isHighlight ? '#b71c1c' : '#1e293b'};">${t.value}</td>
           </tr>
         `).join("");
+      } else if (data.totals && typeof data.totals === "object") {
+        const t = data.totals;
+        const totalsList = [
+          { label: "إجمالي المساحة", value: (t.totalArea ? `${t.totalArea} م²` : "—"), isHighlight: true },
+          { label: "إجمالي الفدادين", value: (t.totalFeddans !== undefined ? t.totalFeddans.toString() : "—") },
+          { label: "إجمالي القراريط", value: (t.totalCarats !== undefined ? t.totalCarats.toString() : "—") },
+          { label: "إجمالي الأسهم", value: (t.totalShares !== undefined ? t.totalShares.toString() : "—") },
+          { label: "مساحة القيراط (2p)", value: (t.caratArea ? `${t.caratArea}` : "168") }
+        ];
+        totalsRowsHTML = totalsList.map(item => `
+          <tr>
+            <td style="text-align: right; font-weight: 600; padding: 4px 8px;">${item.label}</td>
+            <td style="text-align: left; direction: ltr; padding: 4px 8px; font-weight: 700; color: ${item.isHighlight ? '#b71c1c' : '#1e293b'};">${item.value}</td>
+          </tr>
+        `).join("");
       }
 
       // 4. الملاحظات
-      const notes = data.notes || [
+      const rawNotes = data.notes || [
         "جميع الأطوال بالمتر.",
-        "تم تقسيم الغيط إلى " + (totalPartners || 6) + " أجزاء تفصيلية.",
-        "اتجاه التنفيذ الميداني: من اليمين إلى اليسار."
+        "تم تقسيم الغيط إلى 6 أجزاء تفصيلية بالطريقة الطولية.",
+        "اتجاه التقسيم للتنفيذ الميداني: من اليمين إلى اليسار."
       ];
-      const notesHTML = notes.map(n => `<li style="margin-bottom: 4px;">• ${n}</li>`).join("");
+      const notesHTML = Array.isArray(rawNotes)
+        ? rawNotes.map(n => `<li style="margin-bottom: 4px;">• ${n}</li>`).join("")
+        : `<li style="margin-bottom: 4px;">• ${rawNotes}</li>`;
 
       return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -105,7 +124,13 @@
   <meta charset="UTF-8">
   <title>بيان المساحات - الدلال</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      letter-spacing: normal !important;
+      word-spacing: normal !important;
+    }
     @page { 
       size: A4 portrait; 
       margin: 8mm 10mm 8mm 10mm; 
@@ -118,6 +143,9 @@
       direction: rtl; 
       padding: 12px;
       line-height: 1.35;
+      letter-spacing: normal !important;
+      word-spacing: normal !important;
+      font-feature-settings: "liga" 1, "calt" 1;
     }
     
     /* الهيدر العلوي النقي المطابق لـ Flutter */
@@ -140,13 +168,14 @@
       color: #0f172a;
       font-weight: 800;
       margin-bottom: 2px;
-      letter-spacing: -0.5px;
+      letter-spacing: normal !important;
     }
     .report-subtitle-main {
       font-size: 13pt;
       color: #991b1b;
       font-weight: 700;
       margin-bottom: 6px;
+      letter-spacing: normal !important;
     }
     .header-line {
       width: 140px;
@@ -336,9 +365,7 @@
     </tbody>
   </table>
 
-  <div class="partners-grid">
-    ${partnerCardsHTML}
-  </div>
+  ${partnerCardsHTML ? `<div class="partners-grid">${partnerCardsHTML}</div>` : ''}
 
   <div class="totals-and-notes">
     <div class="totals-box">
