@@ -1,389 +1,349 @@
 /**
- * shared/report-template.js — Dallal Unified Print Report Engine
- * ================================================================
- * المصدر المرجعي الأحادي لتصميم تقارير الطباعة في تطبيق الدلال.
- * مستخرج حرفياً 100% من تصميم وتخفيضات تقرير Page11.
- *
- * ملاحظة معمارية (Commit 9.3):
- * يعتمد هذا الملف على CSS مضمّن inline داخل renderHTML()، وليس على
- * shared/report-print.css. هذا هو المسار المعتمد في Page11 وجميع
- * الصفحات المستخدِمة لهذا المحرك، لأن الطباعة تفتح نافذة جديدة
- * منعزلة تحتاج أن تحمل تنسيقاتها معها دون اعتماد على ملفات خارجية.
- * shared/report-print.css متاح للصفحات التي تطبع نفسها مباشرةً
- * (window.print() على الصفحة الحالية) وليس عبر نافذة منبثقة.
+ * @file shared/report-template.js
+ * @description قالب تقرير الدَّلاَّل الموحد المتوافق 100% مع مخرجات وتسليمات تطبيق Flutter (1:1)
+ * @version 3.0.0
  */
+
 (function (global) {
   "use strict";
 
   const DallalReportTemplate = {
+    /**
+     * توليد كود HTML القياسي للتقرير بمطابقة تامة لتصميم Flutter
+     * @param {Object} data كائن بيانات التقرير
+     * @returns {string} كود HTML كامل ومستقل
+     */
     renderHTML(data) {
-      const {
-        reportTitle = "بيان المساحات",
-        reportSubtitle = "جملة الغيط",
-        dateStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }),
-        timeStr = new Date().toLocaleTimeString('ar-EG'),
-        dimensions = [],
-        partnerCardsHTML = "",
-        gridStyle = "grid-template-columns: repeat(3, 1fr);",
-        totals = {},
-        notes = []
-      } = data;
+      data = data || {};
+      const reportTitle = data.reportTitle || "بيان المساحات";
+      const reportSubtitle = data.reportSubtitle || "جملة الغيط";
+      const dateStr = data.dateStr || new Date().toLocaleDateString("ar-EG");
+      const timeStr = data.timeStr || new Date().toLocaleTimeString("ar-EG");
 
-      // 1. بناء جدول المساحات والأبعاد
+      // 1. جدول أبعاد الأرض والمساحة الكلية
+      const dimensions = data.dimensions || [];
       let dimensionsRowsHTML = "";
-      if (Array.isArray(dimensions)) {
+      if (dimensions.length > 0) {
         dimensionsRowsHTML = dimensions.map(d => {
-          const rowStyle = d.isHighlight ? `style="background:#e8f5e9;"` : "";
-          const valStyle = d.isHighlight ? `style="font-weight:bold;color:#c62828;font-size:11pt;"` : `style="font-weight:bold;color:#1b5e20;"`;
-          return `<tr ${rowStyle}><td style="text-align:right;padding-right:15px;font-weight:bold;">${d.label}</td><td ${valStyle}>${d.value}</td></tr>`;
+          const isHighlight = d.isHighlight ? "color: #b71c1c; font-weight: 800; font-size: 10pt;" : "color: #1e293b;";
+          return `
+            <tr>
+              <td style="text-align: right; font-weight: 600; padding: 5px 10px;">${d.label}</td>
+              <td style="text-align: left; direction: ltr; padding: 5px 10px; ${isHighlight}">${d.value}</td>
+            </tr>`;
         }).join("");
       }
 
-      // 2. بناء جدول الإجماليات
-      let totalsRowsHTML = "";
-      if (totals) {
-        if (totals.totalArea !== undefined) totalsRowsHTML += `<tr><td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي المساحة</td><td style="border: 1px solid #a5d6a7; font-weight: bold; color: #c62828;">${totals.totalArea} م²</td></tr>`;
-        if (totals.totalFeddans !== undefined) totalsRowsHTML += `<tr><td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي الفدادين</td><td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totals.totalFeddans}</td></tr>`;
-        if (totals.totalCarats !== undefined) totalsRowsHTML += `<tr><td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي القراريط</td><td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totals.totalCarats}</td></tr>`;
-        if (totals.totalShares !== undefined) totalsRowsHTML += `<tr><td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">إجمالي الأسهم</td><td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totals.totalShares}</td></tr>`;
-        if (totals.caratArea !== undefined) totalsRowsHTML += `<tr><td style="border: 1px solid #a5d6a7; text-align: right; padding-right: 8px; font-weight: bold;">مساحة القيراط بالمتر المربع</td><td style="border: 1px solid #a5d6a7; font-weight: bold; color: #1b5e20;">${totals.caratArea} م²</td></tr>`;
+      // 2. بطاقات الشركاء
+      const partners = data.partners || [];
+      const totalPartners = partners.length;
+      let gridStyle = "grid-template-columns: repeat(3, 1fr);";
+      if (totalPartners === 1) gridStyle = "grid-template-columns: 1fr;";
+      else if (totalPartners === 2) gridStyle = "grid-template-columns: repeat(2, 1fr);";
+
+      let partnerCardsHTML = "";
+      if (partners.length > 0) {
+        partnerCardsHTML = partners.map((p, idx) => {
+          let pDimsHTML = "";
+          if (p.dimensions && p.dimensions.length > 0) {
+            pDimsHTML = p.dimensions.map(pd => `
+              <tr>
+                <td style="text-align: right; font-weight: 600; padding: 3px 6px;">${pd.label}</td>
+                <td style="text-align: left; direction: ltr; padding: 3px 6px;">${pd.value}</td>
+              </tr>
+            `).join("");
+          }
+
+          const fcsText = p.fcsText ? `<span class="partner-card-fcs-val">(${p.fcsText})</span>` : "";
+
+          return `
+            <div class="partner-print-card">
+              <div class="partner-card-header">${p.name || ("شريك " + (idx + 1))}</div>
+              <table class="partner-card-table">
+                <thead>
+                  <tr>
+                    <th style="text-align: right; padding: 3px 6px; width: 60%;">البيان</th>
+                    <th style="text-align: left; padding: 3px 6px; width: 40%;">القيمة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${pDimsHTML}
+                </tbody>
+              </table>
+              <div class="partner-card-area-box">
+                <span class="partner-card-area-lbl">جملة المساحة بالمتر المربع</span>
+                <span class="partner-card-area-val">${p.areaSqMeters || "0.00"} م²</span>
+                ${fcsText}
+              </div>
+            </div>`;
+        }).join("");
       }
 
-      // 3. بناء قائمة الملاحظات
-      let notesHTML = "";
-      if (Array.isArray(notes)) {
-        notesHTML = notes.map((n) => `<li>${n}</li>`).join("");
+      // 3. ملخص التقسيم الموحد
+      const totals = data.totals || [];
+      let totalsRowsHTML = "";
+      if (totals.length > 0) {
+        totalsRowsHTML = totals.map(t => `
+          <tr>
+            <td style="text-align: right; font-weight: 600; padding: 4px 8px;">${t.label}</td>
+            <td style="text-align: left; direction: ltr; padding: 4px 8px; font-weight: 700; color: ${t.isHighlight ? '#b71c1c' : '#1e293b'};">${t.value}</td>
+          </tr>
+        `).join("");
       }
+
+      // 4. الملاحظات
+      const notes = data.notes || [
+        "جميع الأطوال بالمتر.",
+        "تم تقسيم الغيط إلى " + (totalPartners || 6) + " أجزاء تفصيلية.",
+        "اتجاه التنفيذ الميداني: من اليمين إلى اليسار."
+      ];
+      const notesHTML = notes.map(n => `<li style="margin-bottom: 4px;">• ${n}</li>`).join("");
 
       return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تقرير تقسيم الأراضي - الدلال</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>بيان المساحات - الدلال</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { 
       size: A4 portrait; 
-      margin: 6mm 8mm 6mm 8mm; 
+      margin: 8mm 10mm 8mm 10mm; 
     }
     body { 
-      font-family: 'Cairo', sans-serif; 
-      background: #fff; 
-      color: #222; 
-      font-size: 9pt; 
-      direction: rtl; 
-      padding-bottom: 25px; 
-      position: relative; 
-      line-height: 1.3;
-    }
-    .watermark-container { 
-      position: fixed; 
-      top: 50%; 
-      left: 50%; 
-      transform: translate(-50%, -50%) rotate(-25deg); 
-      font-size: 20pt; 
-      font-weight: 800; 
-      color: #000000; 
-      opacity: 0.04; 
-      white-space: nowrap; 
-      pointer-events: none; 
-      z-index: -1000; 
-      text-align: center; 
-      width: 100%; 
-    }
-    .report-title-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 6px;
-      padding-bottom: 4px;
-    }
-    .header-divider {
-      width: 100%;
-      height: 2px;
-      background: #000000;
-      margin-bottom: 8px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .report-title-container h1 {
-      font-size: 18pt;
-      color: #1b5e20;
-      font-weight: 800;
-      margin: 0;
-      line-height: 1.1;
-    }
-    .report-title-container p {
-      font-size: 11pt;
-      color: #c62828;
-      font-weight: 700;
-      margin: 2px 0 0;
-    }
-    
-    .section {
-      margin-bottom: 8px;
-    }
-    .section-title { 
-      background: #000000; 
-      color: white; 
-      font-weight: 700; 
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif; 
+      background: #ffffff; 
+      color: #1e293b; 
       font-size: 9.5pt; 
-      padding: 4px 10px; 
-      margin-bottom: 5px; 
-      border-radius: 4px; 
-      -webkit-print-color-adjust: exact; 
-      print-color-adjust: exact; 
+      direction: rtl; 
+      padding: 12px;
+      line-height: 1.35;
     }
     
+    /* الهيدر العلوي النقي المطابق لـ Flutter */
+    .report-header {
+      text-align: center;
+      margin-bottom: 12px;
+      position: relative;
+      padding-bottom: 8px;
+    }
+    .print-date-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 8pt;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .report-title-main {
+      font-size: 22pt;
+      color: #0f172a;
+      font-weight: 800;
+      margin-bottom: 2px;
+      letter-spacing: -0.5px;
+    }
+    .report-subtitle-main {
+      font-size: 13pt;
+      color: #991b1b;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .header-line {
+      width: 140px;
+      height: 2.5px;
+      background: #0f172a;
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+    
+    /* الجداول الرئيسية المطابقة لـ Flutter */
     table { 
       width: 100%; 
       border-collapse: collapse; 
-      font-size: 8.5pt; 
-      margin-bottom: 6px; 
-      border: 1px solid #000000;
+      font-size: 9pt; 
+      margin-bottom: 10px; 
+      border: 1.5px solid #334155;
+      border-radius: 6px;
+      overflow: hidden;
     }
     th { 
-      background: #000000; 
-      color: #ffffff; 
+      background: #ffffff; 
+      color: #0f172a; 
       font-weight: 700; 
-      border: 1px solid #000000; 
-      padding: 4px; 
+      border: 1.5px solid #334155; 
+      padding: 6px; 
       text-align: center; 
-      -webkit-print-color-adjust: exact; 
-      print-color-adjust: exact; 
     }
     td { 
-      border: 1px solid #000000; 
-      padding: 3.5px 6px; 
-      text-align: center; 
+      border: 1px solid #cbd5e1; 
+      padding: 5px 8px; 
       vertical-align: middle; 
     }
     
+    /* شبكة بطاقات الشركاء */
     .partners-grid {
       display: grid;
       ${gridStyle}
-      gap: 8px;
-      margin-bottom: 6px;
+      gap: 10px;
+      margin-bottom: 12px;
     }
     .partner-print-card {
-      border: 1.5px solid #000000;
-      border-radius: 6px;
+      border: 1.5px solid #334155;
+      border-radius: 8px;
       background: #ffffff;
       padding: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       page-break-inside: avoid;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
     }
     .partner-card-header {
-      background: #000000;
-      color: white;
+      background: #ffffff;
+      color: #0f172a;
       font-weight: 700;
-      font-size: 8.5pt;
-      padding: 3px 4px;
+      font-size: 9.5pt;
+      padding: 5px 6px;
       text-align: center;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      border-bottom: 1.5px solid #334155;
     }
     .partner-card-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 7.5pt;
+      font-size: 8pt;
       margin: 0;
       border: none;
     }
     .partner-card-table th {
-      background: #f2f2f2;
-      color: #000000;
+      background: #ffffff;
+      color: #475569;
       font-weight: 700;
-      border: 1px solid #ccc;
-      padding: 2px 4px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      border: 1px solid #cbd5e1;
+      padding: 3px 6px;
     }
     .partner-card-table td {
-      border: 1px solid #ccc;
-      padding: 2px 4px;
+      border: 1px solid #cbd5e1;
+      padding: 3px 6px;
     }
     .partner-card-area-box {
-      background: #fafafa;
-      border-top: 1px solid #000000;
-      padding: 3px 4px;
+      background: #f8fafc;
+      border-top: 1.5px solid #334155;
+      padding: 5px 6px;
       text-align: center;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
     }
     .partner-card-area-lbl {
-      font-size: 7pt;
-      color: #666;
+      font-size: 7.5pt;
+      color: #64748b;
       display: block;
-      line-height: 1.1;
+      margin-bottom: 2px;
     }
     .partner-card-area-val {
-      font-size: 9.5pt;
-      color: #c62828;
-      font-weight: 700;
+      font-size: 10.5pt;
+      color: #991b1b;
+      font-weight: 800;
       display: block;
-      line-height: 1.2;
     }
     .partner-card-fcs-val {
-      font-size: 7.5pt;
-      color: #1b5e20;
-      font-weight: bold;
+      font-size: 8pt;
+      color: #15803d;
+      font-weight: 700;
       display: block;
-      line-height: 1.1;
+      margin-top: 2px;
     }
     
+    /* ملخص التقسيم والملاحظات */
     .totals-and-notes {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 8px;
-      margin-top: 6px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
       page-break-inside: avoid;
     }
     .totals-box {
-      border: 1.5px solid #000000;
-      border-radius: 6px;
+      border: 1.5px solid #334155;
+      border-radius: 8px;
       background: #ffffff;
       padding: 0;
       overflow: hidden;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    }
+    .totals-box-header {
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 9.5pt;
+      padding: 5px;
+      text-align: center;
+      border-bottom: 1.5px solid #334155;
     }
     .totals-box table {
       margin: 0;
       border: none;
     }
-    .totals-box th {
-      background: #000000;
-      color: #ffffff;
-      border: 1px solid #000000;
-      padding: 3px 4px;
-      font-size: 8pt;
-      font-weight: bold;
-    }
-    .totals-box td {
-      border: 1px solid #ccc;
-      padding: 2px 5px;
-      font-size: 7.5pt;
-    }
     .notes-box {
-      border: 1.5px solid #ccc;
-      border-radius: 6px;
+      border: 1.5px solid #334155;
+      border-radius: 8px;
       background: #ffffff;
-      padding: 6px 8px;
+      padding: 8px 10px;
     }
     .notes-box h3 {
-      font-size: 8.5pt;
-      color: #000;
-      font-weight: bold;
-      margin-bottom: 4px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 2px;
+      font-size: 9.5pt;
+      color: #0f172a;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: center;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 4px;
     }
     .notes-box ul {
       list-style-type: none;
       padding-right: 0;
     }
     .notes-box li {
-      font-size: 7.5pt;
-      color: #333;
-      margin-bottom: 2px;
+      font-size: 8.5pt;
+      color: #334155;
+      margin-bottom: 4px;
     }
     
+    /* الفوتر */
     .report-footer { 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      width: 100%; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
       text-align: center; 
-      font-size: 8pt; 
-      color: #444; 
-      border-top: 1.5px solid #000000; 
-      padding: 4px 10px; 
-      background: white; 
-    }
-    .footer-main-text { 
-      font-size: 8.5pt; 
-      font-weight: bold; 
-      color: #444; 
-    }
-    
-    .page-break-inside-avoid {
-      page-break-inside: avoid;
-    }
-    
-    @media print {
-      body { background: #fff !important; color: #000 !important; }
-      .header-divider { background: #000 !important; }
-      .section-title { background: #000 !important; color: #fff !important; }
-      th { background: #000 !important; color: #fff !important; border-color: #000 !important; }
-      td { border-color: #000 !important; }
-      .partner-print-card { border-color: #000 !important; }
-      .partner-card-header { background: #000 !important; color: #fff !important; }
-      .partner-card-table th { background: #f2f2f2 !important; color: #000 !important; border-color: #ccc !important; }
-      .partner-card-table td { border-color: #ccc !important; }
-      .partner-card-area-box { background: #fafafa !important; border-color: #000 !important; }
-      .totals-box { border-color: #000 !important; background: #fff !important; }
-      .totals-box th { background: #000 !important; color: #fff !important; }
-      .totals-box td { border-color: #ccc !important; }
-      .notes-box { border-color: #ccc !important; }
-      .report-footer { border-top-color: #000 !important; }
+      font-size: 9pt; 
+      color: #475569; 
+      font-weight: 600;
+      border-top: 1.5px solid #334155; 
+      padding-top: 8px; 
+      margin-top: 16px;
     }
   </style>
 </head>
 <body>
 
-  <div class="watermark-container">الدَّلاَّل – قياسات الأراضي • متوفر على جوجل بلاي</div>
-
-  <div class="report-title-container">
-    <div>
-      <h1>${reportTitle}</h1>
-      <p>${reportSubtitle}</p>
-    </div>
-    <div style="font-size: 8.5pt; color: #555; font-weight: bold;">
-      تاريخ الطباعة: ${dateStr} - ${timeStr}
-    </div>
-  </div>
-  <div class="header-divider"></div>
-
-  <div class="section page-break-inside-avoid">
-    <div class="section-title">أولاً: جدول بيان المساحات</div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 50%;">البيان</th>
-          <th>القيمة</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${dimensionsRowsHTML}
-      </tbody>
-    </table>
+  <div class="report-header">
+    <div class="print-date-top">تاريخ الطباعة: ${dateStr} - ${timeStr}</div>
+    <div class="report-title-main">${reportTitle}</div>
+    <div class="report-subtitle-main">${reportSubtitle}</div>
+    <div class="header-line"></div>
   </div>
 
-  <div class="section">
-    <div class="section-title">ثانياً: بطاقات الشركاء وتفاصيل تقسيم الأنصبة</div>
-    <div class="partners-grid">
-      ${partnerCardsHTML}
-    </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 50%; text-align: right;">البيان</th>
+        <th style="width: 50%; text-align: left;">القيمة</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${dimensionsRowsHTML}
+    </tbody>
+  </table>
+
+  <div class="partners-grid">
+    ${partnerCardsHTML}
   </div>
 
   <div class="totals-and-notes">
     <div class="totals-box">
-      <table style="width: 100%; border: none;">
-        <thead>
-          <tr style="background: #000000;">
-            <th style="border: 1px solid #000000; padding: 4px; font-weight: bold; color: #ffffff; font-size: 8.5pt;">البيان</th>
-            <th style="border: 1px solid #000000; padding: 4px; font-weight: bold; color: #ffffff; font-size: 8.5pt;">القيمة</th>
-          </tr>
-        </thead>
+      <div class="totals-box-header">ملخص التقسيم</div>
+      <table>
         <tbody>
           ${totalsRowsHTML}
         </tbody>
@@ -391,7 +351,7 @@
     </div>
 
     <div class="notes-box">
-      <h3>ملاحظات:</h3>
+      <h3>ملاحظات</h3>
       <ul>
         ${notesHTML}
       </ul>
@@ -399,7 +359,7 @@
   </div>
 
   <div class="report-footer">
-    <div class="footer-main-text">الدَّلاَّل – قياسات الأراضي • متوفر على جوجل بلاي</div>
+    الدَّلاَّل - قياسات الأراضي • متوفر على جوجل بلاي
   </div>
 
 </body>
