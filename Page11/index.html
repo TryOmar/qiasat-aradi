@@ -35,20 +35,10 @@
       
       <!-- Card 1: Input Dimensions -->
       <div class="s card-dimensions">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3 style="margin: 0;">أدخل أبعاد الأرض الإجمالية</h3>
-          <button type="button" onclick="printFieldGuide()" style="background: #e8f5e9; color: #1b5e20; border: 1.5px solid #2e7d32; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: bold; font-family: Cairo; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-            🤖 المساعد الذكي
-          </button>
-        </div>
+        <h3>أدخل أبعاد الأرض الإجمالية</h3>
         <div class="dynamic-inputs-container">
           <div class="input-row">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;">
-              <label for="width2" style="margin: 0;">العرض الأول (أعلى) (C) بالمتر:</label>
-              <button type="button" onclick="printFieldGuide()" style="background: #1b5e20; color: white; border: none; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: bold; font-family: Cairo; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                🤖 تشغيل المساعد
-              </button>
-            </div>
+            <label for="width2">العرض الأول (أعلى) (C) بالمتر:</label>
             <div class="input-with-select-wrapper">
               <input tabindex="1" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width2" placeholder="30" onblur="saveAndCalc()">
               <select id="p11-w2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w2-dir')" tabindex="5">
@@ -60,12 +50,7 @@
             </div>
           </div>
           <div class="input-row">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;">
-              <label for="width1" style="margin: 0;">العرض الثاني (أسفل) (A) بالمتر:</label>
-              <button type="button" onclick="printFieldGuide()" style="background: #1b5e20; color: white; border: none; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: bold; font-family: Cairo; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                🤖 تشغيل المساعد
-              </button>
-            </div>
+            <label for="width1">العرض الثاني (أسفل) (A) بالمتر:</label>
             <div class="input-with-select-wrapper">
               <input tabindex="2" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="width1" placeholder="35" onblur="saveAndCalc()">
               <select id="p11-w1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-w1-dir')" tabindex="6">
@@ -77,12 +62,7 @@
             </div>
           </div>
           <div class="input-row">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;">
-              <label for="length1" style="margin: 0;">الطول الأيمن (D) بالمتر:</label>
-              <button type="button" onclick="printFieldGuide()" style="background: #1b5e20; color: white; border: none; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: bold; font-family: Cairo; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                🤖 تشغيل المساعد
-              </button>
-            </div>
+            <label for="length1">الطول الأيمن (D) بالمتر:</label>
             <div class="input-with-select-wrapper">
               <input tabindex="3" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length1" placeholder="50" onblur="saveAndCalc()">
               <select id="p11-l1-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l1-dir')" tabindex="7">
@@ -94,12 +74,7 @@
             </div>
           </div>
           <div class="input-row">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px;">
-              <label for="length2" style="margin: 0;">الطول الأيسر (B) بالمتر:</label>
-              <button type="button" onclick="printFieldGuide()" style="background: #1b5e20; color: white; border: none; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: bold; font-family: Cairo; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                🤖 تشغيل المساعد
-              </button>
-            </div>
+            <label for="length2">الطول الأيسر (B) بالمتر:</label>
             <div class="input-with-select-wrapper">
               <input tabindex="4" dir="auto" type="text" inputmode="decimal" enterkeyhint="next" id="length2" placeholder="45" onblur="saveAndCalc()">
               <select id="p11-l2-dir" class="direction-select" onchange="handleP11DirectionChange('p11-l2-dir')" tabindex="8">
