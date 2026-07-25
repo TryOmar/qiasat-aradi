@@ -6403,6 +6403,44 @@ function getP11Directions() {
 
 // تصدير الدوال للنطاق العالمي
 window.handleP11DirectionChange = handleP11DirectionChange;
+
+/**
+ * updateRealtimeMeasurementHelper - القراءة الفورية للقياس باللغة العربية أسفل كل حقل
+ */
+function updateRealtimeMeasurementHelper(inputId, helperId) {
+  const inputEl = document.getElementById(inputId);
+  const helperEl = document.getElementById(helperId);
+  if (!inputEl || !helperEl) return;
+
+  const valStr = inputEl.value.trim();
+  if (!valStr || isNaN(parseFloat(valStr)) || parseFloat(valStr) <= 0) {
+    helperEl.style.display = "none";
+    helperEl.innerText = "";
+    return;
+  }
+
+  let text = "";
+  if (window.FractionHelper && typeof window.FractionHelper.parseInputToDetails === "function") {
+    try {
+      const details = window.FractionHelper.parseInputToDetails(valStr);
+      if (details && details.fullText) {
+        text = details.fullText;
+      }
+    } catch (e) {
+      console.log("FractionHelper error", e);
+    }
+  }
+
+  if (text) {
+    helperEl.innerText = text;
+    helperEl.style.display = "block";
+  } else {
+    helperEl.style.display = "none";
+    helperEl.innerText = "";
+  }
+}
+
+window.updateRealtimeMeasurementHelper = updateRealtimeMeasurementHelper;
 window.resetP11DirectionsToDefault = resetP11DirectionsToDefault;
 window.getP11Directions = getP11Directions;
 
