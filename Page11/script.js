@@ -2674,36 +2674,20 @@ function renderCroquis() {
           });
           labelGroup.appendChild(tIdx);
         } else {
-          // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة
-          const yLeftLen   = topY + pieceH * 0.16;
-          const yArea      = topY + pieceH * 0.36;
-          const yName      = topY + pieceH * 0.56;
-          const yRightLen  = topY + pieceH * 0.76;
-          const yDirection = topY + pieceH * 0.86;
+          // توزيع النصوص رأسياً وتدويرها 90 درجة عكس عقارب الساعة (3 عناصر فقط: المساحة، الاسم، الطول السفلي)
+          const yArea      = topY + pieceH * 0.28;
+          const yName      = topY + pieceH * 0.50;
+          const yRightLen  = topY + pieceH * 0.72;
+          const yDirection = topY + pieceH * 0.85;
           
-          // إزاحة أفقية لوضع النص بجانب الفاصل المقابل له (الحد الأيسر X2 والحد الأيمن X1)
+          // إزاحة أفقية لوضع النص بجانب الفاصل المقابل له
           const padX = Math.min(16 * textScale, pieceWidth * 0.22);
-          const xLeft = x2 + padX;
           const xRight = x1 - padX;
           
           // حجم خط ديناميكي يناسب عرض العمود
           const fontSize = Math.min(13.5, Math.max(7.5, pieceWidth * 0.30)) * textScale;
           
-          // 1. عرض طول الحد الأيسر رأسي (دوران -90 درجة) بجانب الفاصل الأيسر
-          if (showCroquisMeasurements) {
-            const lenGroup = svgEl("g");
-            lenGroup.setAttribute("transform", `rotate(-90, ${xLeft}, ${yLeftLen})`);
-            
-            const tLenVal = svgText(xLeft, yLeftLen + 4 * textScale, piece.divLine.toFixed(2) + " م", {
-              fill: "#000000",
-              size: (fontSize / textScale).toString(),
-              weight: "bold"
-            });
-            lenGroup.appendChild(tLenVal);
-            labelGroup.appendChild(lenGroup);
-          }
-          
-          // 2. عرض المساحة رأسي (دوران -90 درجة) تحت طول الحد الأيسر في المنتصف
+          // 1. عرض المساحة رأسي (دوران -90 درجة) في الجزء العلوي
           if (showCroquisMeasurements) {
             // displayArea في الكروكي: استخدام exactArea إذا كان متاحاً لضمان توحيد القيم
             const pieceDisplayArea = (piece.exactArea !== undefined && !isNaN(piece.exactArea))
@@ -2722,7 +2706,7 @@ function renderCroquis() {
             labelGroup.appendChild(areaGroup);
           }
           
-          // 3. عرض الاسم رأسي (دوران -90 درجة) في المنتصف
+          // 2. عرض الاسم رأسي (دوران -90 درجة) في المنتصف
           if (showCroquisNames) {
             const nameGroup = svgEl("g");
             nameGroup.setAttribute("transform", `rotate(-90, ${cx}, ${yName})`);
@@ -2736,7 +2720,7 @@ function renderCroquis() {
             labelGroup.appendChild(nameGroup);
           }
           
-          // 4. عرض طول الحد الأيمن رأسي (دوران -90 درجة) بجانب الفاصل الأيمن
+          // 3. عرض طول الحد السفلي رأسي (دوران -90 درجة) بجانب الفاصل السفلي
           if (showCroquisMeasurements) {
             const lenGroup = svgEl("g");
             lenGroup.setAttribute("transform", `rotate(-90, ${xRight}, ${yRightLen})`);
