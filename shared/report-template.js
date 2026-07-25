@@ -81,8 +81,8 @@
           const valClass = d.isHighlight ? "val-highlight" : "";
           return `
             <tr>
-              <td style="text-align:right;font-weight:600;">${d.label}</td>
-              <td class="${valClass}" style="text-align:left;direction:ltr;">${d.value}</td>
+              <td style="text-align:center;vertical-align:middle;font-weight:600;">${d.label}</td>
+              <td class="${valClass}" style="text-align:center;vertical-align:middle;direction:ltr;">${d.value}</td>
             </tr>`;
         }).join("");
       }
@@ -103,8 +103,8 @@
           if (p.dimensions && p.dimensions.length > 0) {
             dimsRows = p.dimensions.map(pd => `
               <tr>
-                <td style="text-align:right;padding:3px 6px;">${pd.label}</td>
-                <td class="td-val" style="padding:3px 6px;">${pd.value}</td>
+                <td style="text-align:center;vertical-align:middle;padding:3px 6px;">${pd.label}</td>
+                <td class="td-val" style="text-align:center;vertical-align:middle;padding:3px 6px;">${pd.value}</td>
               </tr>`).join("");
           }
           const fcsSpan = p.fcsText
@@ -115,8 +115,8 @@
               <table class="pcard-table">
                 <thead>
                   <tr>
-                    <th style="text-align:right;width:55%;">البيان</th>
-                    <th style="text-align:left;">القيمة</th>
+                    <th style="text-align:center;vertical-align:middle;width:55%;">البيان</th>
+                    <th style="text-align:center;vertical-align:middle;">القيمة</th>
                   </tr>
                 </thead>
                 <tbody>${dimsRows}</tbody>
@@ -168,14 +168,19 @@
       line-height: 1.4;
     }
 
+    th, td {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+
     /* ── الهيدر ─────────────────────────────────────────────── */
     .rh { text-align: center; margin-bottom: 14px; position: relative; padding-bottom: 10px; }
     .rh-date {
       position: absolute; top: 0; left: 0;
       font-size: 7.5pt; color: #64748b; font-weight: 600; text-align: left;
     }
-    .rh-title { font-size: 24pt; color: #0f172a; font-weight: 800; margin-bottom: 4px; }
-    .rh-sub   { font-size: 13pt; color: #0f172a; font-weight: 700; margin-bottom: 8px; }
+    .rh-title { font-size: 24pt; color: #0f172a; font-weight: 800; margin-bottom: 4px; text-align: center; }
+    .rh-sub   { font-size: 13pt; color: #0f172a; font-weight: 700; margin-bottom: 8px; text-align: center; }
     .rh-line  { width: 200px; height: 1.5px; background: #0f172a; margin: 0 auto; border-radius: 2px; }
 
     /* ── جدول الأبعاد الرئيسي ───────────────────────────────── */
@@ -187,12 +192,14 @@
     .main-table th {
       background: #ffffff; color: #0f172a; font-weight: 700;
       border: 1.5px solid #334155; padding: 7px 10px; font-size: 9.5pt;
+      text-align: center !important; vertical-align: middle !important;
     }
     .main-table td {
-      border: 1px solid #cbd5e1; padding: 5px 10px; vertical-align: middle;
+      border: 1px solid #cbd5e1; padding: 5px 10px;
+      text-align: center !important; vertical-align: middle !important;
     }
     .main-table tr:nth-child(even) td { background: #f8fafc; }
-    .val-highlight { color: #b91c1c; font-weight: 800; font-size: 10.5pt; }
+    .val-highlight { color: #b91c1c; font-weight: 800; font-size: 10.5pt; text-align: center !important; }
 
     /* ── شبكة بطاقات الشركاء ────────────────────────────────── */
     .partners-grid { display: grid; ${gridStyle} gap: 10px; margin-bottom: 12px; }
@@ -206,19 +213,30 @@
     .pcard-hdr {
       background: #ffffff; color: #0f172a; font-weight: 700; font-size: 9.5pt;
       padding: 6px 8px; text-align: center; border-bottom: 1.5px solid #334155;
+      display: flex; justify-content: center; align-items: center;
     }
     .pcard-table { width: 100%; border-collapse: collapse; font-size: 8pt; flex: 1; }
     .pcard-table th {
       background: #ffffff; color: #475569; font-weight: 700;
       border: 1px solid #cbd5e1; padding: 3px 6px; font-size: 8pt;
+      text-align: center !important; vertical-align: middle !important;
     }
-    .pcard-table td { border: 1px solid #cbd5e1; padding: 3px 6px; }
-    .pcard-table .td-val { font-weight: 700; color: #1b5e20; direction: ltr; text-align: left; background: #f0fdf4; }
+    .pcard-table td {
+      border: 1px solid #cbd5e1; padding: 3px 6px;
+      text-align: center !important; vertical-align: middle !important;
+    }
+    .pcard-table .td-val {
+      font-weight: 700; color: #1b5e20; direction: ltr;
+      text-align: center !important; background: #f0fdf4;
+    }
 
-    .pcard-foot { background: #f8fafc; border-top: 1.5px solid #334155; padding: 6px 8px; text-align: center; }
-    .pcard-foot-lbl  { font-size: 7.5pt; color: #64748b; display: block; margin-bottom: 2px; }
-    .pcard-foot-area { font-size: 11pt; color: #991b1b; font-weight: 800; display: block; }
-    .pcard-foot-fcs  { font-size: 8pt; color: #15803d; font-weight: 700; display: block; margin-top: 2px; }
+    .pcard-foot {
+      background: #f8fafc; border-top: 1.5px solid #334155; padding: 6px 8px;
+      text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .pcard-foot-lbl  { font-size: 7.5pt; color: #64748b; display: block; margin-bottom: 2px; text-align: center; }
+    .pcard-foot-area { font-size: 11pt; color: #991b1b; font-weight: 800; display: block; text-align: center; }
+    .pcard-foot-fcs  { font-size: 8pt; color: #15803d; font-weight: 700; display: block; margin-top: 2px; text-align: center; }
 
     /* ── القسم السفلي: ملخص + ملاحظات ─────────────────────── */
     .bottom-grid {
@@ -229,20 +247,25 @@
     .totals-box-hdr {
       background: #ffffff; color: #0f172a; font-weight: 700; font-size: 9.5pt;
       padding: 6px; text-align: center; border-bottom: 1.5px solid #334155;
+      display: flex; justify-content: center; align-items: center;
     }
     .totals-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-    .totals-table td { border: 1px solid #e2e8f0; padding: 5px 10px; }
-    .totals-table .td-lbl { font-weight: 600; text-align: right; color: #334155; }
-    .totals-table .td-val { font-weight: 700; text-align: left; direction: ltr; color: #0f172a; }
-    .totals-table .td-val.red { color: #b91c1c; font-size: 10.5pt; }
+    .totals-table td {
+      border: 1px solid #e2e8f0; padding: 5px 10px;
+      text-align: center !important; vertical-align: middle !important;
+    }
+    .totals-table .td-lbl { font-weight: 600; text-align: center !important; color: #334155; }
+    .totals-table .td-val { font-weight: 700; text-align: center !important; direction: ltr; color: #0f172a; }
+    .totals-table .td-val.red { color: #b91c1c; font-size: 10.5pt; text-align: center !important; }
 
     .notes-box { border: 1.5px solid #334155; border-radius: 8px; padding: 10px 12px; }
     .notes-box-hdr {
       font-size: 9.5pt; color: #0f172a; font-weight: 700;
       margin-bottom: 8px; text-align: center;
       border-bottom: 1.5px solid #cbd5e1; padding-bottom: 5px;
+      display: flex; justify-content: center; align-items: center;
     }
-    .notes-list { list-style: none; padding: 0; }
+    .notes-list { list-style: none; padding: 0; text-align: right; }
     .notes-list li { font-size: 8.5pt; color: #334155; margin-bottom: 5px; line-height: 1.5; }
     .notes-list li:last-child { color: #1d4ed8; background: #eff6ff; padding: 3px 6px; border-radius: 4px; border-right: 3px solid #3b82f6; }
 
@@ -265,8 +288,8 @@
   <table class="main-table">
     <thead>
       <tr>
-        <th style="width:55%;text-align:right;">البيان</th>
-        <th style="width:45%;text-align:left;">القيمة</th>
+        <th style="width:55%;text-align:center;">البيان</th>
+        <th style="width:45%;text-align:center;">القيمة</th>
       </tr>
     </thead>
     <tbody>

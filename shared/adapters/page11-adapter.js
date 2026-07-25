@@ -107,17 +107,17 @@
             <table class="pcard-table">
               <thead>
                 <tr>
-                  <th style="text-align:right;width:55%;">البيان</th>
-                  <th style="text-align:left;">القيمة</th>
+                  <th style="text-align:center;width:55%;">البيان</th>
+                  <th style="text-align:center;">القيمة</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align:right;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="padding:3px 6px;">${w2_val} م</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="padding:3px 6px;">${w1_val} م</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="padding:3px 6px;">${rightL_val} م</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="padding:3px 6px;">${leftL_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:right;padding:3px 6px;">معدل العرض</td><td class="td-val" style="padding:3px 6px;background:#e8f5e9;">${avgW_val} م</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:right;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="padding:3px 6px;background:#e8f5e9;">${avgL_val} م</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${w2_val} م</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${w1_val} م</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${rightL_val} م</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${leftL_val} م</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${avgW_val} م</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${avgL_val} م</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">

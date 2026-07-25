@@ -188,17 +188,17 @@
             <table class="pcard-table">
               <thead>
                 <tr>
-                  <th style="text-align:right;width:55%;">البيان</th>
-                  <th style="text-align:left;">القيمة</th>
+                  <th style="text-align:center;width:55%;">البيان</th>
+                  <th style="text-align:center;">القيمة</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align:right;padding:3px 6px;">العرض الأول (${dirs.top || "أعلى"})</td><td class="td-val" style="padding:3px 6px;">${topStr}</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">العرض الثاني (${dirs.bottom || "أسفل"})</td><td class="td-val" style="padding:3px 6px;">${botStr}</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيمن (${dirs.right || "يمين"})</td><td class="td-val" style="padding:3px 6px;">${rightStr}</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">الطول الأيسر (${dirs.left || "يسار"})</td><td class="td-val" style="padding:3px 6px;">${leftStr}</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">معدل العرض</td><td class="td-val" style="padding:3px 6px;">${avgW > 0 ? avgW.toFixed(4) + " م" : "—"}</td></tr>
-                <tr><td style="text-align:right;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="padding:3px 6px;">${avgL > 0 ? avgL.toFixed(4) + " م" : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top || "أعلى"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${topStr}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom || "أسفل"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${botStr}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right || "يمين"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${rightStr}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left || "يسار"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${leftStr}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgW > 0 ? avgW.toFixed(4) + " م" : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgL > 0 ? avgL.toFixed(4) + " م" : "—"}</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">
