@@ -37,15 +37,18 @@
       const avgLength = ((parseFloat(l1) || 0) + (parseFloat(l2) || 0)) / 2;
       const isLTR = global.PartitionDirectionManager ? global.PartitionDirectionManager.isLTR() : true;
 
+      const fmtMeter   = global.formatMeter || function(v) { return '<span class="measure-value"><bdi>' + v + '</bdi>&nbsp;م</span>'; };
+      const fmtSqMeter = global.formatSquareMeter || function(v) { return '<span class="measure-value"><bdi>' + v + '</bdi>&nbsp;م²</span>'; };
+
       // 1. جدول الأبعاد والمساحة الإجمالية
       const dimensions = [
-        { label: `العرض الأول (${dirs.top})`, value: `م ${w2}` },
-        { label: `العرض الثاني (${dirs.bottom})`, value: `م ${w1}` },
-        { label: `الطول الأيمن (${dirs.right})`, value: `م ${l1}` },
-        { label: `الطول الأيسر (${dirs.left})`, value: `م ${l2}` },
-        { label: "معدل العرض", value: `م ${avgWidth.toFixed(4)}` },
-        { label: "متوسط الطول", value: `م ${avgLength.toFixed(4)}` },
-        { label: "جملة المساحة بالمتر المربع", value: `2 م ${totalArea}`, isHighlight: true }
+        { label: `العرض الأول (${dirs.top})`, value: fmtMeter(w2) },
+        { label: `العرض الثاني (${dirs.bottom})`, value: fmtMeter(w1) },
+        { label: `الطول الأيمن (${dirs.right})`, value: fmtMeter(l1) },
+        { label: `الطول الأيسر (${dirs.left})`, value: fmtMeter(l2) },
+        { label: "معدل العرض", value: fmtMeter(avgWidth.toFixed(4)) },
+        { label: "متوسط الطول", value: fmtMeter(avgLength.toFixed(4)) },
+        { label: "جملة المساحة بالمتر المربع", value: fmtSqMeter(totalArea), isHighlight: true }
       ];
 
       // 2. بطاقات الشركاء
@@ -112,17 +115,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${w2_val}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${w1_val}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${rightL_val}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="text-align:center;padding:3px 6px;">م ${leftL_val}</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">م ${avgW_val}</td></tr>
-                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">م ${avgL_val}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الأول (${dirs.top})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${fmtMeter(w2_val)}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${fmtMeter(w1_val)}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${fmtMeter(rightL_val)}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${fmtMeter(leftL_val)}</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${fmtMeter(avgW_val)}</td></tr>
+                <tr style="background:#e8f5e9;"><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;background:#e8f5e9;">${fmtMeter(avgL_val)}</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">
               <span class="pcard-foot-lbl">جملة المساحة بالمتر المربع</span>
-              <span class="pcard-foot-area">2 م ${formattedArea}</span>
+              <span class="pcard-foot-area">${fmtSqMeter(formattedArea)}</span>
               <span class="pcard-foot-fcs">(${fcsText})</span>
             </div>
           </div>

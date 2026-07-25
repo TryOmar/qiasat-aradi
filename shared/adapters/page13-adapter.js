@@ -59,10 +59,15 @@
         l2Raw = document.getElementById("quad-side-b")?.value || "";
       }
 
-      const w2Val = w2Raw ? `م ${w2Raw}` : "—";
-      const w1Val = w1Raw ? `م ${w1Raw}` : "—";
-      const l1Val = l1Raw ? `م ${l1Raw}` : "—";
-      const l2Val = l2Raw ? `م ${l2Raw}` : "—";
+      const fmtMeter   = global.formatMeter || function(v) { return '<span class="measure-value"><bdi>' + v + '</bdi>&nbsp;م</span>'; };
+      const fmtSqMeter = global.formatSquareMeter || function(v) { return '<span class="measure-value"><bdi>' + v + '</bdi>&nbsp;م²</span>'; };
+
+      const w2Val = w2Raw ? fmtMeter(w2Raw) : "—";
+      const w1Val = w1Raw ? fmtMeter(w1Raw) : "—";
+      const l1Val = l1Raw ? fmtMeter(l1Raw) : "—";
+      const l2Val = l2Raw ? fmtMeter(l2Raw) : "—";
+
+      const caratSize = global.caratSize || 175;
 
       const w1Num = parseFloat(w1Raw) || 0;
       const w2Num = parseFloat(w2Raw) || 0;
@@ -138,9 +143,9 @@
         { label: `العرض الثاني (${dirs.bottom || "أسفل"})`, value: w1Val },
         { label: `الطول الأيمن (${dirs.right || "يمين"})`, value: l1Val },
         { label: `الطول الأيسر (${dirs.left || "يسار"})`, value: l2Val },
-        { label: "معدل العرض", value: avgWidth > 0 ? `م ${avgWidth.toFixed(4)}` : "—" },
-        { label: "متوسط الطول", value: avgLength > 0 ? `م ${avgLength.toFixed(4)}` : "—" },
-        { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? `2 م ${totalAreaStr}` : "—", isHighlight: true }
+        { label: "معدل العرض", value: avgWidth > 0 ? fmtMeter(avgWidth.toFixed(4)) : "—" },
+        { label: "متوسط الطول", value: avgLength > 0 ? fmtMeter(avgLength.toFixed(4)) : "—" },
+        { label: "جملة المساحة بالمتر المربع", value: totalAreaStr !== "—" ? fmtSqMeter(totalAreaStr) : "—", isHighlight: true }
       ];
 
       // 5. بناء بطاقات الشركاء والورثة مع الأبعاد الأربعة الخاصة بكل بطاقة
@@ -161,10 +166,10 @@
         const rightVal = (h.leftLine && !isNaN(h.leftLine) && h.leftLine > 0) ? h.leftLine : ((h.rightL && !isNaN(h.rightL)) ? h.rightL : domRight);
         const leftVal = (h.divLine && !isNaN(h.divLine) && h.divLine > 0) ? h.divLine : ((h.leftL && !isNaN(h.leftL)) ? h.leftL : domLeft);
 
-        const topStr = (topVal > 0 && !isNaN(topVal)) ? `م ${topVal.toFixed(2)}` : "—";
-        const botStr = (botVal > 0 && !isNaN(botVal)) ? `م ${botVal.toFixed(2)}` : "—";
-        const rightStr = (rightVal > 0 && !isNaN(rightVal)) ? `م ${rightVal.toFixed(2)}` : "—";
-        const leftStr = (leftVal > 0 && !isNaN(leftVal)) ? `م ${leftVal.toFixed(2)}` : "—";
+        const topStr = (topVal > 0 && !isNaN(topVal)) ? fmtMeter(topVal.toFixed(2)) : "—";
+        const botStr = (botVal > 0 && !isNaN(botVal)) ? fmtMeter(botVal.toFixed(2)) : "—";
+        const rightStr = (rightVal > 0 && !isNaN(rightVal)) ? fmtMeter(rightVal.toFixed(2)) : "—";
+        const leftStr = (leftVal > 0 && !isNaN(leftVal)) ? fmtMeter(leftVal.toFixed(2)) : "—";
 
         let fcsText = "0 سهم";
         if (global.convertSquareMetersToFCS) {
@@ -194,8 +199,8 @@
                 <tr><td style="text-align:center;padding:3px 6px;">العرض الثاني (${dirs.bottom || "أسفل"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${botStr}</td></tr>
                 <tr><td style="text-align:center;padding:3px 6px;">الطول الأيمن (${dirs.right || "يمين"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${rightStr}</td></tr>
                 <tr><td style="text-align:center;padding:3px 6px;">الطول الأيسر (${dirs.left || "يسار"})</td><td class="td-val" style="text-align:center;padding:3px 6px;">${leftStr}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgW > 0 ? "م " + avgW.toFixed(4) : "—"}</td></tr>
-                <tr><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgL > 0 ? "م " + avgL.toFixed(4) : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">معدل العرض</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgW > 0 ? fmtMeter(avgW.toFixed(4)) : "—"}</td></tr>
+                <tr><td style="text-align:center;padding:3px 6px;">متوسط الطول</td><td class="td-val" style="text-align:center;padding:3px 6px;">${avgL > 0 ? fmtMeter(avgL.toFixed(4)) : "—"}</td></tr>
               </tbody>
             </table>
             <div class="pcard-foot">

@@ -217,6 +217,18 @@
       text-align: center !important;
     }
 
+    .measure-value {
+      display: inline-block;
+      direction: rtl !important;
+      unicode-bidi: isolate !important;
+      white-space: nowrap;
+    }
+    .measure-value bdi {
+      direction: ltr !important;
+      unicode-bidi: isolate !important;
+      font-weight: inherit;
+    }
+
     /* ── الهيدر ─────────────────────────────────────────────── */
     .rh { text-align: center; margin-bottom: 6px; position: relative; padding-bottom: 6px; }
     .rh-date {

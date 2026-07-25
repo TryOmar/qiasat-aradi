@@ -42,6 +42,28 @@
     },
 
     /**
+     * تنسيق الأطوال بالمتر مع عزل الاتجاه اللاتيني/العربي لتجنب انقلاب BiDi
+     * مثال: formatMeter("55.0000") → '<span class="measure-value"><bdi>55.0000</bdi>&nbsp;م</span>'
+     */
+    formatMeter(value) {
+      if (value === null || value === undefined || value === "" || value === "—") return "—";
+      var str = String(value).replace(/[^\d.\-]/g, "");
+      if (!str) str = String(value);
+      return '<span class="measure-value"><bdi>' + str + '</bdi>&nbsp;م</span>';
+    },
+
+    /**
+     * تنسيق المساحات بالمتر المربع مع عزل الاتجاه اللاتيني/العربي لتجنب انقلاب BiDi
+     * مثال: formatSquareMeter("5500.00") → '<span class="measure-value"><bdi>5500.00</bdi>&nbsp;م²</span>'
+     */
+    formatSquareMeter(value) {
+      if (value === null || value === undefined || value === "" || value === "—") return "—";
+      var str = String(value).replace(/[^\d.\-]/g, "");
+      if (!str) str = String(value);
+      return '<span class="measure-value"><bdi>' + str + '</bdi>&nbsp;م²</span>';
+    },
+
+    /**
      * تنسيق أسهم وقراريط وفدادين بنص عربي موحد
      * مثال: formatShares(1, 5, 18.29) → "1 فدان، 5 ق، 18.29 س"
      */
@@ -59,15 +81,10 @@
     module.exports = DallalFormatters;
   } else {
     global.DallalFormatters = DallalFormatters;
-    // إتاحة formatArea و formatPercent و formatLength على النطاق العام إذا لم تكن معرفة
-    if (!global.formatArea) {
-      global.formatArea = DallalFormatters.formatArea;
-    }
-    if (!global.formatPercent) {
-      global.formatPercent = DallalFormatters.formatPercent;
-    }
-    if (!global.formatLength) {
-      global.formatLength = DallalFormatters.formatLength;
-    }
+    if (!global.formatArea)        global.formatArea = DallalFormatters.formatArea;
+    if (!global.formatPercent)     global.formatPercent = DallalFormatters.formatPercent;
+    if (!global.formatLength)      global.formatLength = DallalFormatters.formatLength;
+    if (!global.formatMeter)       global.formatMeter = DallalFormatters.formatMeter;
+    if (!global.formatSquareMeter) global.formatSquareMeter = DallalFormatters.formatSquareMeter;
   }
 })(typeof window !== "undefined" ? window : global);
