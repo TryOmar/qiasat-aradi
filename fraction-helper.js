@@ -784,7 +784,7 @@
    */
   function showActivatorButton() {
     try {
-      if (isSessionClosed) {
+      if (window.location.href.indexOf("Page11") !== -1 || isSessionClosed) {
         const existingBtn = document.getElementById("fh-activator-btn");
         if (existingBtn) {
           existingBtn.style.display = "none";
