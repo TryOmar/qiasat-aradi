@@ -211,6 +211,12 @@
       vertical-align: middle !important;
     }
 
+    .td-val, .val-highlight, .totals-table .td-val, .main-table td:last-child {
+      direction: ltr !important;
+      unicode-bidi: embed !important;
+      text-align: center !important;
+    }
+
     /* ── الهيدر ─────────────────────────────────────────────── */
     .rh { text-align: center; margin-bottom: 6px; position: relative; padding-bottom: 6px; }
     .rh-date {
@@ -237,7 +243,10 @@
       text-align: center !important; vertical-align: middle !important;
     }
     .main-table tr:nth-child(even) td { background: #f8fafc; }
-    .val-highlight { color: #b91c1c; font-weight: 800; font-size: 10pt; text-align: center !important; }
+    .val-highlight {
+      color: #b91c1c; font-weight: 800; font-size: 10pt;
+      text-align: center !important; direction: ltr !important; unicode-bidi: embed !important;
+    }
 
     /* ── شبكة بطاقات الشركاء ────────────────────────────────── */
     .partners-grid { display: grid; ${gridStyle} gap: 8px; margin-bottom: 8px; }
@@ -264,7 +273,7 @@
       text-align: center !important; vertical-align: middle !important;
     }
     .pcard-table .td-val {
-      font-weight: 700; color: #1b5e20; direction: ltr;
+      font-weight: 700; color: #1b5e20; direction: ltr !important; unicode-bidi: embed !important;
       text-align: center !important; background: #f0fdf4;
     }
 
@@ -273,7 +282,10 @@
       text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .pcard-foot-lbl  { font-size: 7pt; color: #64748b; display: block; margin-bottom: 1px; text-align: center; }
-    .pcard-foot-area { font-size: 10pt; color: #991b1b; font-weight: 800; display: block; text-align: center; }
+    .pcard-foot-area {
+      font-size: 10pt; color: #991b1b; font-weight: 800; display: block; text-align: center;
+      direction: ltr !important; unicode-bidi: embed !important;
+    }
     .pcard-foot-fcs  { font-size: 7.5pt; color: #15803d; font-weight: 700; display: block; margin-top: 1px; text-align: center; }
 
     /* ── القسم السفلي: ملخص + ملاحظات ─────────────────────── */
@@ -293,8 +305,13 @@
       text-align: center !important; vertical-align: middle !important;
     }
     .totals-table .td-lbl { font-weight: 600; text-align: center !important; color: #334155; }
-    .totals-table .td-val { font-weight: 700; text-align: center !important; direction: ltr; color: #0f172a; }
-    .totals-table .td-val.red { color: #b91c1c; font-size: 10pt; text-align: center !important; }
+    .totals-table .td-val {
+      font-weight: 700; text-align: center !important; direction: ltr !important; unicode-bidi: embed !important; color: #0f172a;
+    }
+    .totals-table .td-val.red {
+      color: #b91c1c; font-size: 10pt; text-align: center !important;
+      direction: ltr !important; unicode-bidi: embed !important;
+    }
 
     .notes-box { border: 1.5px solid #334155; border-radius: 8px; padding: 8px 10px; }
     .notes-box-hdr {
