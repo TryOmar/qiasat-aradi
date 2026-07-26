@@ -421,22 +421,22 @@ body {
   background: #ffffff;
   border: 2.5px solid #000000;
   border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   box-sizing: border-box;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .conv-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.11);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .conv-card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   color: #333333;
   font-family: Cairo, Arial, sans-serif;
@@ -455,21 +455,22 @@ body {
 .conv-card-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 8px;
   font-family: Cairo, Arial, sans-serif;
 }
 
 .conv-card-table th {
-  font-size: 12px;
+  font-size: 13px;
   color: #555555;
   border-bottom: 2px solid #000000;
-  padding: 5px 4px;
+  padding: 6px 4px;
   font-weight: bold;
 }
 
 .conv-card-table td {
   font-size: 14px;
   color: #000000;
-  padding: 7px 4px;
+  padding: 8px 4px;
   border-bottom: 1px solid #eeeeee;
   vertical-align: middle;
 }
@@ -491,35 +492,45 @@ body {
 /* ── صف أفقي لعناوين وقيم التحويل ──────────────────────────── */
 .conv-card-row-header,
 .conv-card-row-values {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   align-items: center;
-  gap: 6px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .conv-card-row-header {
-  padding: 4px 0;
+  padding: 6px 0;
   border-bottom: 2px solid #000000;
 }
 
 .conv-card-row-header > span {
-  flex: 1;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #555555;
   font-family: Cairo, Arial, sans-serif;
+  white-space: nowrap;
+  width: 100%;
+  display: block;
 }
 
 .conv-card-row-values {
-  padding: 4px 0;
+  padding: 6px 0 2px;
 }
 
 .conv-card-row-values > div {
-  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+}
+
+.conv-card-row-values .conv-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: center !important;
 }
 
 /* Editable inputs inside conversion table */

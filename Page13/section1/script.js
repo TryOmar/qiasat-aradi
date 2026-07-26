@@ -1,4 +1,4 @@
-﻿
+
 
 // --- Performance Optimizations & Caching (Phase 14) ---
 window.DALLAL_PERF = window.DALLAL_PERF || {
@@ -1132,7 +1132,7 @@ function normalizeQasabaInputs(rowIndex) {
   // Write back normalized values
   qasabaEl.value  = qasaba;
   qabdaEl.value   = qabda;
-  fracEl.value    = fraction;
+  fracEl.value    = Number(fraction).toFixed(3);
 
   return { qasaba, qabda, fraction };
 }
@@ -1485,9 +1485,9 @@ function calculateAll() {
     conversionsTbody.innerHTML = "";
     if (dimensionInputs.length > 0) {
 
-      // دالة لبناء بطاقة تحويل واحدة
+            // دالة لبناء بطاقة تحويل واحدة
       function buildConvCard(label, meterValue, qConv, sideId, index, isEditable) {
-        const meterLabel = `${parseFloat(meterValue || 0).toFixed(2)} م`;
+        const meterLabel = `${parseFloat(meterValue || 0).toFixed(3)} م`;
 
         const qasabaInput = isEditable
           ? `<input type="text" inputmode="decimal" class="conv-input conv-qasaba"
@@ -1507,11 +1507,11 @@ function calculateAll() {
 
         const fracInput = isEditable
           ? `<input type="text" inputmode="decimal" class="conv-input conv-fraction"
-               id="conv-fraction-${index}" value="${qConv.fraction}"
+               id="conv-fraction-${index}" value="${(qConv.fraction !== undefined && qConv.fraction !== null && !isNaN(Number(qConv.fraction))) ? Number(qConv.fraction).toFixed(3) : qConv.fraction}"
                min="0" max="0.99" step="0.01" title="جزء أقل من القبضة (0 - 0.99)"
                oninput="updateSideFromQasaba('${sideId}', ${index})"
                onchange="updateSideFromQasaba('${sideId}', ${index})">`
-          : `<input type="text" inputmode="decimal" class="conv-input conv-fraction" value="${qConv.fraction}" readonly>`;
+          : `<input type="text" inputmode="decimal" class="conv-input conv-fraction" value="${(qConv.fraction !== undefined && qConv.fraction !== null && !isNaN(Number(qConv.fraction))) ? Number(qConv.fraction).toFixed(3) : qConv.fraction}" readonly>`;
 
         return `
           <div class="conv-card">
@@ -1530,34 +1530,77 @@ function calculateAll() {
           </div>`;
       }
 
-      dimensionInputs.forEach((dim, i) => {
+            dimensionInputs.forEach((dim, i) => {
         const qConv = toQasabaAndQabda(dim.value);
         const sid = activeSideIds[i] || "";
         conversionsTbody.innerHTML += buildConvCard(dim.name, dim.value, qConv, sid, i, true);
       });
 
-      // Add square qasba card
-      const qasba_sq = area / 12.60250;
-      const reedValue = Math.floor(qasba_sq);
-      const fistValue = Math.floor((qasba_sq - reedValue) * 24);
-      const lessThanFistValue = parseFloat((qasba_sq - reedValue - (fistValue / 24)).toFixed(2));
+      // Add Qirat width cards (عرض القيراط العلوي والسفلي)
+      const caratSize = caratSizeInput ? (parseFloat(caratSizeInput.value) || 168) : 168;
+      const dims = (typeof getLandDimensions === "function") ? getLandDimensions() : { landTop: 0, landBottom: 0 };
+      const dirs = (typeof getP13Directions === "function") ? getP13Directions() : { top: "شرقي", bottom: "غربي" };
 
-      const areaCardHtml = `
-        <div class="conv-card">
-          <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
-          <div class="conv-card-main-val">${area.toFixed(2)} م²</div>
-          <div class="conv-card-row-header">
-            <span>أقل من القبضة</span>
-            <span>قبضة</span>
-            <span>قصبة</span>
-          </div>
-          <div class="conv-card-row-values">
-            <div><input type="text" class="conv-input conv-fraction" value="${lessThanFistValue}" readonly></div>
-            <div><input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly></div>
-            <div><input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly></div>
-          </div>
-        </div>`;
-      conversionsTbody.innerHTML += areaCardHtml;
+      if (caratSize > 0 && area > 0) {
+        const totalQirats = area / caratSize;
+        const topQiratWidth = totalQirats > 0 ? (dims.landTop / totalQirats) : 0;
+        const botQiratWidth = totalQirats > 0 ? (dims.landBottom / totalQirats) : 0;
+
+        const topQConv = toQasabaAndQabda(topQiratWidth);
+        const botQConv = toQasabaAndQabda(botQiratWidth);
+
+        const topLabelDir = dirs.top || "شرقي";
+        const botLabelDir = dirs.bottom || "غربي";
+
+        conversionsTbody.innerHTML += buildConvCard(
+          `عرض القيراط العلوي (${topLabelDir})`,
+          topQiratWidth,
+          topQConv,
+          'topq',
+          'topq',
+          false
+        );
+
+        conversionsTbody.innerHTML += buildConvCard(
+          `عرض القيراط السفلي (${botLabelDir})`,
+          botQiratWidth,
+          botQConv,
+          'botq',
+          'botq',
+          false
+        );
+      }
+
+
+      // Add square qasba card
+      if (area > 0) {
+        const qasba_sq = area / 12.60250;
+        const reedValue = Math.floor(qasba_sq);
+        const fistValue = Math.floor((qasba_sq - reedValue) * 24);
+        const lessThanFistValue = (qasba_sq - reedValue - (fistValue / 24));
+        const formattedFrac = (lessThanFistValue !== undefined && lessThanFistValue !== null && !isNaN(Number(lessThanFistValue)))
+          ? Number(lessThanFistValue).toFixed(3)
+          : '0.000';
+
+        const areaCardHtml = `
+          <div class="conv-card">
+            <div class="conv-card-title">النتيجة بالقصبة المربعة</div>
+            <div class="conv-card-main-val">${area.toFixed(2)} م²</div>
+            <div class="conv-card-row-header">
+              <span>أقل من القبضة</span>
+              <span>قبضة</span>
+              <span>قصبة</span>
+            </div>
+            <div class="conv-card-row-values">
+              <div><input type="text" class="conv-input conv-fraction" value="${formattedFrac}" readonly></div>
+              <div><input type="text" class="conv-input conv-qabda" value="${fistValue}" readonly></div>
+              <div><input type="text" class="conv-input conv-qasaba" value="${reedValue}" readonly></div>
+            </div>
+          </div>`;
+
+        conversionsTbody.innerHTML += areaCardHtml;
+      }
+
 
     } else {
       conversionsTbody.innerHTML = `<p style="text-align:center;color:#888;padding:12px;font-family:Cairo,Arial,sans-serif;">أدخل الأبعاد أعلاه لعرض التحويلات</p>`;
@@ -2474,17 +2517,15 @@ function drawLandCanvas(verticesInput) {
 }
 
 function getP13Directions() {
-  const isTrap = (activeShape === "trapezoid");
-  const isQuad = (activeShape === "quadrilateral");
+  const topVal = (document.getElementById('p13-trap-c-dir') || {}).value || (document.getElementById('p13-quad-c-dir') || {}).value || 'شرقي';
+  const botVal = (document.getElementById('p13-trap-a-dir') || {}).value || (document.getElementById('p13-quad-a-dir') || {}).value || 'غربي';
+  const rightVal = (document.getElementById('p13-trap-d-dir') || {}).value || (document.getElementById('p13-quad-d-dir') || {}).value || 'قبلي';
+  const leftVal = (document.getElementById('p13-trap-b-dir') || {}).value || (document.getElementById('p13-quad-b-dir') || {}).value || 'بحري';
   return {
-    top: isTrap ? (document.getElementById("p13-trap-c-dir") || {}).value || "شرقي"
-                : (isQuad ? (document.getElementById("p13-quad-c-dir") || {}).value || "شرقي" : "أعلى"),
-    bottom: isTrap ? (document.getElementById("p13-trap-a-dir") || {}).value || "غربي"
-                   : (isQuad ? (document.getElementById("p13-quad-a-dir") || {}).value || "غربي" : "أسفل"),
-    right: isTrap ? (document.getElementById("p13-trap-d-dir") || {}).value || "قبلي"
-                  : (isQuad ? (document.getElementById("p13-quad-d-dir") || {}).value || "قبلي" : "يمين"),
-    left: isTrap ? (document.getElementById("p13-trap-b-dir") || {}).value || "بحري"
-                 : (isQuad ? (document.getElementById("p13-quad-b-dir") || {}).value || "بحري" : "يسار")
+    top: (topVal && topVal.trim()) ? topVal.trim() : 'شرقي',
+    bottom: (botVal && botVal.trim()) ? botVal.trim() : 'غربي',
+    right: (rightVal && rightVal.trim()) ? rightVal.trim() : 'قبلي',
+    left: (leftVal && leftVal.trim()) ? leftVal.trim() : 'بحري'
   };
 }
 window.getP13Directions = getP13Directions;
@@ -5278,5 +5319,6 @@ window.copyCalculationSteps = copyCalculationSteps;
 window.clearAllInputs = clearAllInputs;
 
 console.log("Page13 section1 script loaded successfully");
+
 
 

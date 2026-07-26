@@ -38,7 +38,7 @@
     return {
       qasaba: qasaba,
       qabda: qabda,
-      fraction: parseFloat(fraction.toFixed(2))
+      fraction: parseFloat(fraction.toFixed(3))
     };
   }
 

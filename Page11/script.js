@@ -1,4 +1,4 @@
-﻿console.log("Trace: Start of script.js loading");
+console.log("Trace: Start of script.js loading");
 
 /**
  * formatArea(value) — دالة موحدة لعرض المساحات بتنسيق ثابت (رقمان عشريان دائماً)
@@ -4573,11 +4573,14 @@ function updateConversionsTable() {
   const totalAreaM2 = ((l1 + l2) / 2) * ((w1 + w2) / 2);
 
   // helper: render one field input
-  function convFieldHTML(id, value, title, min, max, step) {
+    function convFieldHTML(id, value, title, min, max, step) {
     const minAttr  = min  !== undefined ? `min="${min}"`   : '';
     const maxAttr  = max  !== undefined ? `max="${max}"`   : '';
     const stepAttr = step !== undefined ? `step="${step}"` : '';
-    const displayValue = (id === savedFocusId && savedValue !== null) ? savedValue : value;
+    let displayValue = (id === savedFocusId && savedValue !== null) ? savedValue : value;
+    if (id && id.indexOf("fraction") !== -1 && displayValue !== undefined && displayValue !== null && displayValue !== "" && !isNaN(Number(displayValue))) {
+      displayValue = Number(displayValue).toFixed(3);
+    }
     return `
       <input type="text" inputmode="decimal"
         id="${id}" value="${displayValue}"
@@ -4589,14 +4592,23 @@ function updateConversionsTable() {
         data-idx="${id.split('-').pop()}">`;
   }
 
-  function readonlyFieldHTML(value, title) {
+
+    function readonlyFieldHTML(value, title) {
+    let displayValue = value;
+    if (value !== undefined && value !== null && value !== "" && !isNaN(Number(value))) {
+      const num = Number(value);
+      if ((title && title.indexOf("أقل") !== -1) || !Number.isInteger(num)) {
+        displayValue = num.toFixed(3);
+      }
+    }
     return `
-      <input type="text" inputmode="decimal" value="${value}" class="conv-chip-input" readonly tabindex="-1">`;
+      <input type="text" inputmode="decimal" value="${displayValue}" class="conv-chip-input" readonly tabindex="-1">`;
   }
+
 
   function buildCard({ id, label, meterValue, isEditable, isArea }) {
     const qConv = toQasabaAndQabda(meterValue);
-    const meterLabel = isArea ? `${meterValue.toFixed(2)} م²` : `${meterValue.toFixed(2)} م`;
+    const meterLabel = isArea ? `${meterValue.toFixed(2)} م²` : `${meterValue.toFixed(3)} م`;
 
     const fracHTML = isEditable
       ? convFieldHTML(`conv-fraction-${id}`, qConv.fraction, 'أقل من القبضة', 0, 0.99, 0.01)
